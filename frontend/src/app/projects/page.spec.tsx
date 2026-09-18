@@ -1,39 +1,18 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
+import { createRouterMock, mockFetchSequence, signInAs } from '@/test-utils/mocks';
 import ProjectsPage from './page';
 
-const replace = vi.fn();
-// Le vrai useRouter() de Next.js renvoie une référence stable entre les
-// rendus ; un objet recréé à chaque appel casse les effets qui l'ont en
-// dépendance (re-render → nouvelle référence → effet relancé en boucle).
-const router = { replace };
+const router = createRouterMock();
 vi.mock('next/navigation', () => ({
   useRouter: () => router,
 }));
 
-function signInAs(token: string, user: { id: string; email: string }) {
-  window.localStorage.setItem('ignitux.auth', JSON.stringify({ token, user }));
-}
-
-/** Simule les réponses successives de fetch, dans l'ordre des appels. */
-function mockFetchSequence(...responses: Array<{ status: number; body: unknown }>) {
-  let call = 0;
-  global.fetch = vi.fn().mockImplementation(() => {
-    const { status, body } = responses[Math.min(call, responses.length - 1)];
-    call += 1;
-    return Promise.resolve({
-      ok: status >= 200 && status < 300,
-      status,
-      json: () => Promise.resolve(body),
-    });
-  }) as unknown as typeof fetch;
-}
-
 describe('ProjectsPage', () => {
   beforeEach(() => {
     window.localStorage.clear();
-    replace.mockClear();
+    router.replace.mockClear();
   });
 
   afterEach(() => {
@@ -49,7 +28,7 @@ describe('ProjectsPage', () => {
       </AuthProvider>,
     );
 
-    await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith('/login'));
   });
 
   it('affiche les projets du propriétaire connecté', async () => {

@@ -1,13 +1,10 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
+import { createRouterMock, mockApiRoutes, signInAs } from '@/test-utils/mocks';
 import ProjectDetailPage from './page';
 
-const replace = vi.fn();
-// Le vrai useRouter() de Next.js renvoie une référence stable entre les
-// rendus ; un objet recréé à chaque appel casse les effets qui l'ont en
-// dépendance (re-render → nouvelle référence → effet relancé en boucle).
-const router = { replace };
+const router = createRouterMock();
 vi.mock('next/navigation', () => ({
   useRouter: () => router,
   useParams: () => ({ id: 'p1' }),
@@ -22,32 +19,10 @@ const PROJECT = {
   updated_at: '2026-01-01T00:00:00.000Z',
 };
 
-function signInAs(token: string, user: { id: string; email: string }) {
-  window.localStorage.setItem('ignitux.auth', JSON.stringify({ token, user }));
-}
-
-/**
- * Simule l'API par route (méthode + chemin), avec une liste vide par défaut
- * pour tout endpoint non explicitement décrit — utile car la page déclenche
- * six requêtes en parallèle au montage (le projet + les 5 historiques de plans).
- */
-function mockApiRoutes(routes: Record<string, { status: number; body: unknown }>) {
-  global.fetch = vi.fn().mockImplementation((url: string, options?: RequestInit) => {
-    const path = new URL(url).pathname;
-    const key = `${options?.method ?? 'GET'} ${path}`;
-    const resp = routes[key] ?? { status: 200, body: [] };
-    return Promise.resolve({
-      ok: resp.status >= 200 && resp.status < 300,
-      status: resp.status,
-      json: () => Promise.resolve(resp.body),
-    });
-  }) as unknown as typeof fetch;
-}
-
 describe('ProjectDetailPage', () => {
   beforeEach(() => {
     window.localStorage.clear();
-    replace.mockClear();
+    router.replace.mockClear();
     signInAs('tok123', { id: 'u1', email: 'a@b.com' });
   });
 
@@ -140,6 +115,6 @@ describe('ProjectDetailPage', () => {
     await screen.findByDisplayValue('École motocross');
     fireEvent.click(screen.getByRole('button', { name: /supprimer le projet/i }));
 
-    await waitFor(() => expect(replace).toHaveBeenCalledWith('/projects'));
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith('/projects'));
   });
 });

@@ -10,6 +10,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from 'react';
+import { IginiMention } from '@/components/igini-mention';
 import {
   api,
   ApiError,
@@ -214,43 +215,47 @@ export default function ProjectDetailPage() {
       {loadError && <p className="error">{loadError}</p>}
 
       {project && (
-        <p className="muted" style={{ marginBottom: '1.5rem' }}>
-          <strong style={{ color: 'var(--accent)' }}>Igini</strong>, l&apos;intelligence
-          d&apos;Ignitux, t&apos;accompagne à travers les 5 étapes ci-dessous pour transformer
-          cette idée en réalité.
-        </p>
-      )}
+        <>
+          <IginiMention style={{ marginBottom: '1.5rem' }}>
+            t&apos;accompagne à travers les 5 étapes ci-dessous pour transformer cette idée en
+            réalité.
+          </IginiMention>
 
-      {project && (
-        <form className="card" onSubmit={handleSave}>
-          {formError && <p className="error">{formError}</p>}
-          <div className="field">
-            <label htmlFor="title">Titre</label>
-            <input id="title" required value={title} onChange={(e) => setTitle(e.target.value)} />
-          </div>
-          <div className="field">
-            <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              rows={5}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button className="primary" type="submit" disabled={isSaving}>
-              {isSaving ? 'Sauvegarde…' : 'Sauvegarder'}
-            </button>
-            <button
-              className="secondary"
-              type="button"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? 'Suppression…' : 'Supprimer le projet'}
-            </button>
-          </div>
-        </form>
+          <form className="card" onSubmit={handleSave}>
+            {formError && <p className="error">{formError}</p>}
+            <div className="field">
+              <label htmlFor="title">Titre</label>
+              <input
+                id="title"
+                required
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="description">Description</label>
+              <textarea
+                id="description"
+                rows={5}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button className="primary" type="submit" disabled={isSaving}>
+                {isSaving ? 'Sauvegarde…' : 'Sauvegarder'}
+              </button>
+              <button
+                className="secondary"
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Suppression…' : 'Supprimer le projet'}
+              </button>
+            </div>
+          </form>
+        </>
       )}
 
       {project && (

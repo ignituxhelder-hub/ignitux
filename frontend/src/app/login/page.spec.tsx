@@ -1,28 +1,18 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
+import { createRouterMock, mockFetchOnce } from '@/test-utils/mocks';
 import LoginPage from './page';
 
-const replace = vi.fn();
-// Référence stable, comme le vrai useRouter() de Next.js — évite qu'un objet
-// recréé à chaque appel ne casse un futur effet qui l'aurait en dépendance.
-const router = { replace };
+const router = createRouterMock();
 vi.mock('next/navigation', () => ({
   useRouter: () => router,
 }));
 
-function mockFetchOnce(status: number, body: unknown) {
-  global.fetch = vi.fn().mockResolvedValue({
-    ok: status >= 200 && status < 300,
-    status,
-    json: () => Promise.resolve(body),
-  }) as unknown as typeof fetch;
-}
-
 describe('LoginPage', () => {
   beforeEach(() => {
     window.localStorage.clear();
-    replace.mockClear();
+    router.replace.mockClear();
   });
 
   afterEach(() => {
@@ -42,7 +32,7 @@ describe('LoginPage', () => {
     fireEvent.change(screen.getByLabelText('Mot de passe'), { target: { value: 'motdepasse' } });
     fireEvent.click(screen.getByRole('button', { name: /se connecter/i }));
 
-    await waitFor(() => expect(replace).toHaveBeenCalledWith('/projects'));
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith('/projects'));
   });
 
   it("affiche le message d'erreur du backend en cas d'échec", async () => {
@@ -59,6 +49,6 @@ describe('LoginPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /se connecter/i }));
 
     expect(await screen.findByText('Email ou mot de passe incorrect.')).toBeInTheDocument();
-    expect(replace).not.toHaveBeenCalled();
+    expect(router.replace).not.toHaveBeenCalled();
   });
 });

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { IginiMention } from '@/components/igini-mention';
 import { useAuth } from '@/lib/auth';
 
 export default function HomePage() {
@@ -19,11 +20,10 @@ export default function HomePage() {
     <main className="page">
       <p className="brand">Ignitux</p>
       <h1>Transformer une idée en réalité</h1>
-      <p className="muted">
-        <strong style={{ color: 'var(--accent)' }}>Igini</strong>, l&apos;intelligence
-        d&apos;Ignitux, t&apos;accompagne pour analyser, construire, financer, développer et
-        transmettre ton projet — depuis un seul endroit. La vérité avant tout.
-      </p>
+      <IginiMention>
+        t&apos;accompagne pour analyser, construire, financer, développer et transmettre ton
+        projet — depuis un seul endroit. La vérité avant tout.
+      </IginiMention>
       <div className="card" style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         <Link href="/signup">
           <button className="primary" type="button">
