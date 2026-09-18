@@ -50,7 +50,34 @@ export class ClaudeService {
       return response.parsed_output;
     } catch (error) {
       this.logger.error(request.logContext, error as Error);
-      throw new InternalServerErrorException(request.userErrorMessage);
+      throw new InternalServerErrorException(this.toSafeMessage(error, request.userErrorMessage));
     }
+  }
+
+  /**
+   * Traduit une erreur du SDK Anthropic en message sûr pour le client — assez
+   * précis pour être exploitable (distinguer "pas encore configuré" de
+   * "surchargé" de "en panne"), sans jamais renvoyer le détail brut de
+   * l'erreur (qui pourrait contenir des informations internes).
+   */
+  private toSafeMessage(error: unknown, fallback: string): string {
+    // Deux cas distincts mènent au même message pour l'appelant : soit
+    // ANTHROPIC_API_KEY n'est pas du tout configurée (le SDK refuse alors
+    // l'appel avant même de le faire, avec une Error générique — pas une
+    // AuthenticationError, réservée aux vrais 401 renvoyés par l'API), soit
+    // une clé est présente mais invalide/révoquée (là, une vraie
+    // AuthenticationError).
+    const missingCredentials =
+      error instanceof Error && error.message.includes('Could not resolve authentication method');
+    if (missingCredentials || error instanceof Anthropic.AuthenticationError) {
+      return "IGINI n'est pas encore configuré pour générer du contenu (identifiants manquants ou invalides côté serveur).";
+    }
+    if (error instanceof Anthropic.RateLimitError) {
+      return 'IGINI reçoit trop de demandes pour le moment — réessaie dans quelques minutes.';
+    }
+    if (error instanceof Anthropic.APIConnectionError) {
+      return "Impossible de contacter IGINI pour l'instant — réessaie dans un instant.";
+    }
+    return fallback;
   }
 }
