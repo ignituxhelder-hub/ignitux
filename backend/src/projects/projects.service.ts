@@ -29,4 +29,19 @@ export class ProjectsService {
 
     return project;
   }
+
+  async updateForOwner(ownerId: string, id: string, title?: string, description?: string) {
+    // Vérifie que le projet appartient bien à l'utilisateur avant de le modifier.
+    await this.findOneForOwner(ownerId, id);
+
+    return this.prisma.projects.update({
+      where: { id },
+      data: { title, description },
+    });
+  }
+
+  async deleteForOwner(ownerId: string, id: string) {
+    await this.findOneForOwner(ownerId, id);
+    await this.prisma.projects.delete({ where: { id } });
+  }
 }

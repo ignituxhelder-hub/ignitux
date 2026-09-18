@@ -9,6 +9,8 @@ describe('ProjectsController', () => {
     create: ReturnType<typeof vi.fn>;
     findAllForOwner: ReturnType<typeof vi.fn>;
     findOneForOwner: ReturnType<typeof vi.fn>;
+    updateForOwner: ReturnType<typeof vi.fn>;
+    deleteForOwner: ReturnType<typeof vi.fn>;
   };
   const currentUser = { id: 'u1', email: 'a@b.com' };
 
@@ -17,6 +19,8 @@ describe('ProjectsController', () => {
       create: vi.fn(),
       findAllForOwner: vi.fn(),
       findOneForOwner: vi.fn(),
+      updateForOwner: vi.fn(),
+      deleteForOwner: vi.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -57,5 +61,21 @@ describe('ProjectsController', () => {
     await controller.findOne(currentUser, 'p1');
 
     expect(projectsService.findOneForOwner).toHaveBeenCalledWith('u1', 'p1');
+  });
+
+  it('update délègue au service avec le propriétaire courant', async () => {
+    projectsService.updateForOwner.mockResolvedValue({ id: 'p1', title: 'Nouveau titre' });
+
+    await controller.update(currentUser, 'p1', { title: 'Nouveau titre' });
+
+    expect(projectsService.updateForOwner).toHaveBeenCalledWith('u1', 'p1', 'Nouveau titre', undefined);
+  });
+
+  it('remove délègue au service avec le propriétaire courant', async () => {
+    projectsService.deleteForOwner.mockResolvedValue(undefined);
+
+    await controller.remove(currentUser, 'p1');
+
+    expect(projectsService.deleteForOwner).toHaveBeenCalledWith('u1', 'p1');
   });
 });

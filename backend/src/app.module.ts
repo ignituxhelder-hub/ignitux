@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { AuthModule } from './auth/auth.module.js';
@@ -7,8 +9,17 @@ import { ProjectsModule } from './projects/projects.module.js';
 import { UsersModule } from './users/users.module.js';
 
 @Module({
-  imports: [PrismaModule, UsersModule, AuthModule, ProjectsModule],
+  imports: [
+    // Limite globale par défaut : 20 requêtes / minute / IP.
+    // Les endpoints sensibles (login, signup) ont une limite plus stricte
+    // posée directement sur leur route via @Throttle().
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 20 }]),
+    PrismaModule,
+    UsersModule,
+    AuthModule,
+    ProjectsModule,
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
