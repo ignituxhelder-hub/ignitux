@@ -66,7 +66,7 @@ Le backend autorise déjà les requêtes CORS depuis `http://localhost:3001` (co
 
 **Fiabilité**
 - `GET /health` vérifie la connexion à la base de données
-- Suite de tests (146 tests backend + 33 tests frontend, unitaires et e2e), lint et type-check en CI sur chaque push
+- Suite de tests (146 tests backend + 35 tests frontend, unitaires et e2e), lint et type-check en CI sur chaque push
 
 ## Contact
 
