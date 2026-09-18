@@ -42,8 +42,13 @@ Le backend autorise déjà les requêtes CORS depuis `http://localhost:3001` (co
 
 **Projets**
 - Création, lecture, modification, suppression — chaque projet appartient à un utilisateur
+- Collaboration : le propriétaire peut inviter un collaborateur par email, qui peut alors consulter
+  le projet et son historique de plans générés (lecture seule — pas encore d'interface frontend)
 
-**Générateurs IA** (Claude Opus 5), un par étape de la vision — chacun avec son historique persisté :
+**Générateurs IA** (Claude Opus 5), un par étape de la vision — chacun avec son historique persisté.
+**Sans `ANTHROPIC_API_KEY` configurée, chaque appel échoue avec une erreur 500** (vérifié en conditions
+réelles) : le code est complet et testé unitairement, mais la génération ne fonctionne pas de bout en
+bout tant que la clé n'est pas renseignée.
 - **Analyser** — résumé, score de faisabilité, points forts, risques, prochaines étapes
 - **Construire** — plan de construction : jalons, délai estimé, ressources clés
 - **Financer** — plan de financement : budget estimé, sources, postes de dépense
@@ -66,7 +71,10 @@ Le backend autorise déjà les requêtes CORS depuis `http://localhost:3001` (co
 
 **Fiabilité**
 - `GET /health` vérifie la connexion à la base de données
-- Suite de tests (146 tests backend + 35 tests frontend, unitaires et e2e), lint et type-check en CI sur chaque push
+- Suite de tests (162 tests backend + 37 tests frontend, tous unitaires), lint et type-check en CI
+  sur chaque push. Un fichier `test/app.e2e-spec.ts` existe (squelette par défaut de NestJS, jamais
+  personnalisé) mais n'est pas exécuté en CI — ce n'est pas une vraie suite e2e, seulement le script
+  `npm run test:e2e` en local si besoin.
 
 ## Contact
 
