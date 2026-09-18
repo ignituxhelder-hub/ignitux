@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import helmet from 'helmet';
 import { AppModule } from './app.module.js';
 import { getEnv } from './config/env.js';
 
@@ -11,6 +12,7 @@ const env = getEnv();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(helmet());
   app.enableCors({
     origin: env.FRONTEND_URL,
   });
@@ -21,6 +23,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  // Nécessaire pour que PrismaService.onModuleDestroy() (déconnexion propre
+  // de la base) soit appelé sur SIGTERM/SIGINT.
+  app.enableShutdownHooks();
   await app.listen(env.PORT);
 }
 await bootstrap();
