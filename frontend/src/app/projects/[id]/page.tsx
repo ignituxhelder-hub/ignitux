@@ -2,9 +2,85 @@
 
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState, type FormEvent } from 'react';
-import { api, ApiError, type Analysis, type BuildPlan, type FinancingPlan, type Project } from '@/lib/api';
+import {
+  useEffect,
+  useState,
+  type Dispatch,
+  type FormEvent,
+  type ReactNode,
+  type SetStateAction,
+} from 'react';
+import {
+  api,
+  ApiError,
+  type Analysis,
+  type BuildPlan,
+  type DevelopmentPlan,
+  type FinancingPlan,
+  type Project,
+} from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+
+/** Charge la liste d'un type de plan (analyse, financement, …) pour le projet courant. */
+function usePlanList<T>(
+  token: string | null,
+  id: string,
+  list: (token: string, id: string) => Promise<T[]>,
+) {
+  const [items, setItems] = useState<T[]>([]);
+
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+
+    // Repart de zéro à chaque changement de projet, pour ne pas laisser
+    // apparaître les éléments du projet précédent le temps du nouveau fetch.
+    setItems([]);
+
+    list(token, id)
+      .then((data) => {
+        if (!cancelled) setItems(data);
+      })
+      .catch(() => {
+        // Pas bloquant : l'historique de ce plan est secondaire à la fiche projet.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, id]);
+
+  return [items, setItems] as const;
+}
+
+/** Génère un nouveau plan (bouton "Analyser", "Générer un plan", …) et le préfixe à la liste. */
+function useGeneration<T>(
+  token: string | null,
+  id: string,
+  create: (token: string, id: string) => Promise<T>,
+  setItems: Dispatch<SetStateAction<T[]>>,
+  failureMessage: string,
+) {
+  const [isBusy, setIsBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function generate() {
+    if (!token) return;
+    setError(null);
+    setIsBusy(true);
+    try {
+      const created = await create(token, id);
+      setItems((prev) => [created, ...prev]);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : failureMessage);
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  return { isBusy, error, generate };
+}
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -21,17 +97,33 @@ export default function ProjectDetailPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const [analyses, setAnalyses] = useState<Analysis[]>([]);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [analyses, setAnalyses] = usePlanList<Analysis>(token, id, api.listAnalyses);
+  const analysis = useGeneration(token, id, api.analyzeProject, setAnalyses, "Impossible d'analyser le projet.");
 
-  const [buildPlans, setBuildPlans] = useState<BuildPlan[]>([]);
-  const [isPlanning, setIsPlanning] = useState(false);
-  const [planError, setPlanError] = useState<string | null>(null);
+  const [buildPlans, setBuildPlans] = usePlanList<BuildPlan>(token, id, api.listBuildPlans);
+  const plan = useGeneration(token, id, api.createBuildPlan, setBuildPlans, 'Impossible de générer le plan.');
 
-  const [financingPlans, setFinancingPlans] = useState<FinancingPlan[]>([]);
-  const [isFinancing, setIsFinancing] = useState(false);
-  const [financingError, setFinancingError] = useState<string | null>(null);
+  const [financingPlans, setFinancingPlans] = usePlanList<FinancingPlan>(token, id, api.listFinancingPlans);
+  const financing = useGeneration(
+    token,
+    id,
+    api.createFinancingPlan,
+    setFinancingPlans,
+    'Impossible de générer le plan de financement.',
+  );
+
+  const [developmentPlans, setDevelopmentPlans] = usePlanList<DevelopmentPlan>(
+    token,
+    id,
+    api.listDevelopmentPlans,
+  );
+  const development = useGeneration(
+    token,
+    id,
+    api.createDevelopmentPlan,
+    setDevelopmentPlans,
+    'Impossible de générer le plan de développement.',
+  );
 
   useEffect(() => {
     if (!isReady) return;
@@ -43,9 +135,6 @@ export default function ProjectDetailPage() {
     let cancelled = false;
     setIsLoading(true);
     setLoadError(null);
-    setAnalyses([]);
-    setBuildPlans([]);
-    setFinancingPlans([]);
 
     api
       .getProject(token, id)
@@ -61,36 +150,6 @@ export default function ProjectDetailPage() {
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
-      });
-
-    api
-      .listAnalyses(token, id)
-      .then((data) => {
-        if (cancelled) return;
-        setAnalyses(data);
-      })
-      .catch(() => {
-        // Pas bloquant : l'historique des analyses est secondaire à la fiche projet.
-      });
-
-    api
-      .listBuildPlans(token, id)
-      .then((data) => {
-        if (cancelled) return;
-        setBuildPlans(data);
-      })
-      .catch(() => {
-        // Pas bloquant : l'historique des plans est secondaire à la fiche projet.
-      });
-
-    api
-      .listFinancingPlans(token, id)
-      .then((data) => {
-        if (cancelled) return;
-        setFinancingPlans(data);
-      })
-      .catch(() => {
-        // Pas bloquant : l'historique des plans de financement est secondaire à la fiche projet.
       });
 
     return () => {
@@ -110,50 +169,6 @@ export default function ProjectDetailPage() {
       setFormError(err instanceof ApiError ? err.message : 'Impossible de sauvegarder.');
     } finally {
       setIsSaving(false);
-    }
-  }
-
-  async function handleAnalyze() {
-    if (!token) return;
-    setAnalysisError(null);
-    setIsAnalyzing(true);
-    try {
-      const analysis = await api.analyzeProject(token, id);
-      setAnalyses((prev) => [analysis, ...prev]);
-    } catch (err) {
-      setAnalysisError(err instanceof ApiError ? err.message : "Impossible d'analyser le projet.");
-    } finally {
-      setIsAnalyzing(false);
-    }
-  }
-
-  async function handlePlan() {
-    if (!token) return;
-    setPlanError(null);
-    setIsPlanning(true);
-    try {
-      const plan = await api.createBuildPlan(token, id);
-      setBuildPlans((prev) => [plan, ...prev]);
-    } catch (err) {
-      setPlanError(err instanceof ApiError ? err.message : 'Impossible de générer le plan.');
-    } finally {
-      setIsPlanning(false);
-    }
-  }
-
-  async function handleFinancing() {
-    if (!token) return;
-    setFinancingError(null);
-    setIsFinancing(true);
-    try {
-      const plan = await api.createFinancingPlan(token, id);
-      setFinancingPlans((prev) => [plan, ...prev]);
-    } catch (err) {
-      setFinancingError(
-        err instanceof ApiError ? err.message : 'Impossible de générer le plan de financement.',
-      );
-    } finally {
-      setIsFinancing(false);
     }
   }
 
@@ -217,65 +232,101 @@ export default function ProjectDetailPage() {
       )}
 
       {project && (
-        <div className="card" style={{ marginTop: '1.5rem' }}>
-          <div className="top-bar" style={{ marginBottom: analyses.length ? '1rem' : 0 }}>
-            <h2 style={{ margin: 0 }}>Analyse</h2>
-            <button className="secondary" type="button" onClick={handleAnalyze} disabled={isAnalyzing}>
-              {isAnalyzing ? 'Analyse en cours…' : 'Analyser ce projet'}
-            </button>
-          </div>
-          {analysisError && <p className="error">{analysisError}</p>}
-          {analyses.length === 0 && !isAnalyzing && (
-            <p className="muted">Aucune analyse pour l&apos;instant.</p>
-          )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {analyses.map((analysis) => (
-              <AnalysisCard analysis={analysis} key={analysis.id} />
-            ))}
-          </div>
-        </div>
+        <GenerationSection
+          title="Analyse"
+          buttonLabel="Analyser ce projet"
+          buttonBusyLabel="Analyse en cours…"
+          emptyLabel="Aucune analyse pour l'instant."
+          items={analyses}
+          isBusy={analysis.isBusy}
+          error={analysis.error}
+          onGenerate={analysis.generate}
+          renderItem={(item) => <AnalysisCard analysis={item} key={item.id} />}
+        />
       )}
 
       {project && (
-        <div className="card" style={{ marginTop: '1.5rem' }}>
-          <div className="top-bar" style={{ marginBottom: buildPlans.length ? '1rem' : 0 }}>
-            <h2 style={{ margin: 0 }}>Plan de construction</h2>
-            <button className="secondary" type="button" onClick={handlePlan} disabled={isPlanning}>
-              {isPlanning ? 'Génération…' : 'Générer un plan'}
-            </button>
-          </div>
-          {planError && <p className="error">{planError}</p>}
-          {buildPlans.length === 0 && !isPlanning && (
-            <p className="muted">Aucun plan pour l&apos;instant.</p>
-          )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {buildPlans.map((plan) => (
-              <BuildPlanCard plan={plan} key={plan.id} />
-            ))}
-          </div>
-        </div>
+        <GenerationSection
+          title="Plan de construction"
+          buttonLabel="Générer un plan"
+          buttonBusyLabel="Génération…"
+          emptyLabel="Aucun plan pour l'instant."
+          items={buildPlans}
+          isBusy={plan.isBusy}
+          error={plan.error}
+          onGenerate={plan.generate}
+          renderItem={(item) => <BuildPlanCard plan={item} key={item.id} />}
+        />
       )}
 
       {project && (
-        <div className="card" style={{ marginTop: '1.5rem' }}>
-          <div className="top-bar" style={{ marginBottom: financingPlans.length ? '1rem' : 0 }}>
-            <h2 style={{ margin: 0 }}>Financement</h2>
-            <button className="secondary" type="button" onClick={handleFinancing} disabled={isFinancing}>
-              {isFinancing ? 'Génération…' : 'Générer un plan de financement'}
-            </button>
-          </div>
-          {financingError && <p className="error">{financingError}</p>}
-          {financingPlans.length === 0 && !isFinancing && (
-            <p className="muted">Aucun plan de financement pour l&apos;instant.</p>
-          )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {financingPlans.map((plan) => (
-              <FinancingPlanCard plan={plan} key={plan.id} />
-            ))}
-          </div>
-        </div>
+        <GenerationSection
+          title="Financement"
+          buttonLabel="Générer un plan de financement"
+          buttonBusyLabel="Génération…"
+          emptyLabel="Aucun plan de financement pour l'instant."
+          items={financingPlans}
+          isBusy={financing.isBusy}
+          error={financing.error}
+          onGenerate={financing.generate}
+          renderItem={(item) => <FinancingPlanCard plan={item} key={item.id} />}
+        />
+      )}
+
+      {project && (
+        <GenerationSection
+          title="Développement"
+          buttonLabel="Générer un plan de développement"
+          buttonBusyLabel="Génération…"
+          emptyLabel="Aucun plan de développement pour l'instant."
+          items={developmentPlans}
+          isBusy={development.isBusy}
+          error={development.error}
+          onGenerate={development.generate}
+          renderItem={(item) => <DevelopmentPlanCard plan={item} key={item.id} />}
+        />
       )}
     </main>
+  );
+}
+
+interface GenerationSectionProps<T> {
+  title: string;
+  buttonLabel: string;
+  buttonBusyLabel: string;
+  emptyLabel: string;
+  items: T[];
+  isBusy: boolean;
+  error: string | null;
+  onGenerate: () => void;
+  renderItem: (item: T) => ReactNode;
+}
+
+function GenerationSection<T>({
+  title,
+  buttonLabel,
+  buttonBusyLabel,
+  emptyLabel,
+  items,
+  isBusy,
+  error,
+  onGenerate,
+  renderItem,
+}: GenerationSectionProps<T>) {
+  return (
+    <div className="card" style={{ marginTop: '1.5rem' }}>
+      <div className="top-bar" style={{ marginBottom: items.length ? '1rem' : 0 }}>
+        <h2 style={{ margin: 0 }}>{title}</h2>
+        <button className="secondary" type="button" onClick={onGenerate} disabled={isBusy}>
+          {isBusy ? buttonBusyLabel : buttonLabel}
+        </button>
+      </div>
+      {error && <p className="error">{error}</p>}
+      {items.length === 0 && !isBusy && <p className="muted">{emptyLabel}</p>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {items.map(renderItem)}
+      </div>
+    </div>
   );
 }
 
@@ -287,9 +338,9 @@ function AnalysisCard({ analysis }: { analysis: Analysis }) {
         <span className="muted">{new Date(analysis.created_at).toLocaleString('fr-FR')}</span>
       </div>
       <p>{analysis.summary}</p>
-      <AnalysisList title="Points forts" items={analysis.strengths} />
-      <AnalysisList title="Risques" items={analysis.risks} />
-      <AnalysisList title="Prochaines étapes" items={analysis.next_steps} />
+      <ItemList title="Points forts" items={analysis.strengths} />
+      <ItemList title="Risques" items={analysis.risks} />
+      <ItemList title="Prochaines étapes" items={analysis.next_steps} />
     </div>
   );
 }
@@ -302,8 +353,8 @@ function BuildPlanCard({ plan }: { plan: BuildPlan }) {
         <span className="muted">{new Date(plan.created_at).toLocaleString('fr-FR')}</span>
       </div>
       <p>{plan.summary}</p>
-      <AnalysisList title="Jalons" items={plan.milestones} />
-      <AnalysisList title="Ressources clés" items={plan.key_resources} />
+      <ItemList title="Jalons" items={plan.milestones} />
+      <ItemList title="Ressources clés" items={plan.key_resources} />
     </div>
   );
 }
@@ -316,13 +367,28 @@ function FinancingPlanCard({ plan }: { plan: FinancingPlan }) {
         <span className="muted">{new Date(plan.created_at).toLocaleString('fr-FR')}</span>
       </div>
       <p>{plan.summary}</p>
-      <AnalysisList title="Sources de financement" items={plan.funding_sources} />
-      <AnalysisList title="Postes de dépense" items={plan.budget_breakdown} />
+      <ItemList title="Sources de financement" items={plan.funding_sources} />
+      <ItemList title="Postes de dépense" items={plan.budget_breakdown} />
     </div>
   );
 }
 
-function AnalysisList({ title, items }: { title: string; items: string[] }) {
+function DevelopmentPlanCard({ plan }: { plan: DevelopmentPlan }) {
+  return (
+    <div className="project-item" style={{ cursor: 'default' }}>
+      <div className="top-bar" style={{ marginBottom: '0.5rem' }}>
+        <strong>Plan de croissance</strong>
+        <span className="muted">{new Date(plan.created_at).toLocaleString('fr-FR')}</span>
+      </div>
+      <p>{plan.summary}</p>
+      <ItemList title="Leviers de croissance" items={plan.growth_levers} />
+      <ItemList title="Indicateurs clés" items={plan.key_metrics} />
+      <ItemList title="Risques de passage à l'échelle" items={plan.scaling_risks} />
+    </div>
+  );
+}
+
+function ItemList({ title, items }: { title: string; items: string[] }) {
   if (items.length === 0) return null;
   return (
     <div style={{ marginTop: '0.5rem' }}>

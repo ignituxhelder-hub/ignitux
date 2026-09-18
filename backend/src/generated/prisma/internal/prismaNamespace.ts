@@ -401,6 +401,7 @@ export const ModelName = {
   projects: 'projects',
   analyses: 'analyses',
   financing_plans: 'financing_plans',
+  development_plans: 'development_plans',
   build_plans: 'build_plans'
 } as const
 
@@ -417,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "projects" | "analyses" | "financing_plans" | "build_plans"
+    modelProps: "users" | "projects" | "analyses" | "financing_plans" | "development_plans" | "build_plans"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -717,6 +718,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    development_plans: {
+      payload: Prisma.$development_plansPayload<ExtArgs>
+      fields: Prisma.development_plansFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.development_plansFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$development_plansPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.development_plansFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$development_plansPayload>
+        }
+        findFirst: {
+          args: Prisma.development_plansFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$development_plansPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.development_plansFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$development_plansPayload>
+        }
+        findMany: {
+          args: Prisma.development_plansFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$development_plansPayload>[]
+        }
+        create: {
+          args: Prisma.development_plansCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$development_plansPayload>
+        }
+        createMany: {
+          args: Prisma.development_plansCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.development_plansCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$development_plansPayload>[]
+        }
+        delete: {
+          args: Prisma.development_plansDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$development_plansPayload>
+        }
+        update: {
+          args: Prisma.development_plansUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$development_plansPayload>
+        }
+        deleteMany: {
+          args: Prisma.development_plansDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.development_plansUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.development_plansUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$development_plansPayload>[]
+        }
+        upsert: {
+          args: Prisma.development_plansUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$development_plansPayload>
+        }
+        aggregate: {
+          args: Prisma.Development_plansAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDevelopment_plans>
+        }
+        groupBy: {
+          args: Prisma.development_plansGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Development_plansGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.development_plansCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Development_plansCountAggregateOutputType> | number
+        }
+      }
+    }
     build_plans: {
       payload: Prisma.$build_plansPayload<ExtArgs>
       fields: Prisma.build_plansFieldRefs
@@ -877,6 +952,19 @@ export const Financing_plansScalarFieldEnum = {
 } as const
 
 export type Financing_plansScalarFieldEnum = (typeof Financing_plansScalarFieldEnum)[keyof typeof Financing_plansScalarFieldEnum]
+
+
+export const Development_plansScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  summary: 'summary',
+  growth_levers: 'growth_levers',
+  key_metrics: 'key_metrics',
+  scaling_risks: 'scaling_risks',
+  created_at: 'created_at'
+} as const
+
+export type Development_plansScalarFieldEnum = (typeof Development_plansScalarFieldEnum)[keyof typeof Development_plansScalarFieldEnum]
 
 
 export const Build_plansScalarFieldEnum = {
@@ -1132,6 +1220,7 @@ export type GlobalOmitConfig = {
   projects?: Prisma.projectsOmit
   analyses?: Prisma.analysesOmit
   financing_plans?: Prisma.financing_plansOmit
+  development_plans?: Prisma.development_plansOmit
   build_plans?: Prisma.build_plansOmit
 }
 

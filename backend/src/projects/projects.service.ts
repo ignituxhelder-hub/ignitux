@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AnalysisService } from '../analysis/analysis.service.js';
+import { DevelopmentService } from '../development/development.service.js';
 import { FinancingService } from '../financing/financing.service.js';
 import { PlanningService } from '../planning/planning.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -11,6 +12,7 @@ export class ProjectsService {
     private readonly analysisService: AnalysisService,
     private readonly planningService: PlanningService,
     private readonly financingService: FinancingService,
+    private readonly developmentService: DevelopmentService,
   ) {}
 
   create(ownerId: string, title: string, description?: string) {
@@ -121,6 +123,32 @@ export class ProjectsService {
   async listFinancingPlansForOwner(ownerId: string, id: string) {
     await this.findOneForOwner(ownerId, id);
     return this.prisma.financing_plans.findMany({
+      where: { project_id: id },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  async createDevelopmentPlanForOwner(ownerId: string, id: string) {
+    const project = await this.findOneForOwner(ownerId, id);
+    const result = await this.developmentService.createDevelopmentPlan(
+      project.title,
+      project.description,
+    );
+
+    return this.prisma.development_plans.create({
+      data: {
+        project_id: project.id,
+        summary: result.summary,
+        growth_levers: result.growth_levers,
+        key_metrics: result.key_metrics,
+        scaling_risks: result.scaling_risks,
+      },
+    });
+  }
+
+  async listDevelopmentPlansForOwner(ownerId: string, id: string) {
+    await this.findOneForOwner(ownerId, id);
+    return this.prisma.development_plans.findMany({
       where: { project_id: id },
       orderBy: { created_at: 'desc' },
     });
