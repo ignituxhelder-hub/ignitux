@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -35,14 +36,14 @@ export class ProjectsController {
   }
 
   @Get(':id')
-  findOne(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+  findOne(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.projectsService.findOneForOwner(user.id, id);
   }
 
   @Patch(':id')
   update(
     @CurrentUser() user: AuthenticatedUser,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateProjectDto,
   ) {
     return this.projectsService.updateForOwner(user.id, id, dto.title, dto.description);
@@ -50,7 +51,7 @@ export class ProjectsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+  async remove(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     await this.projectsService.deleteForOwner(user.id, id);
   }
 
@@ -58,12 +59,12 @@ export class ProjectsController {
   @HttpCode(HttpStatus.CREATED)
   // Chaque appel coûte un appel API Claude — limite dédiée contre les abus.
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
-  analyze(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+  analyze(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.projectsService.analyzeForOwner(user.id, id);
   }
 
   @Get(':id/analyses')
-  listAnalyses(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+  listAnalyses(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.projectsService.listAnalysesForOwner(user.id, id);
   }
 
@@ -71,12 +72,12 @@ export class ProjectsController {
   @HttpCode(HttpStatus.CREATED)
   // Chaque appel coûte un appel API Claude — limite dédiée contre les abus.
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
-  createBuildPlan(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+  createBuildPlan(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.projectsService.createBuildPlanForOwner(user.id, id);
   }
 
   @Get(':id/plans')
-  listBuildPlans(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+  listBuildPlans(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.projectsService.listBuildPlansForOwner(user.id, id);
   }
 
@@ -84,12 +85,12 @@ export class ProjectsController {
   @HttpCode(HttpStatus.CREATED)
   // Chaque appel coûte un appel API Claude — limite dédiée contre les abus.
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
-  createFinancingPlan(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+  createFinancingPlan(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.projectsService.createFinancingPlanForOwner(user.id, id);
   }
 
   @Get(':id/financing-plans')
-  listFinancingPlans(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+  listFinancingPlans(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.projectsService.listFinancingPlansForOwner(user.id, id);
   }
 
@@ -97,12 +98,12 @@ export class ProjectsController {
   @HttpCode(HttpStatus.CREATED)
   // Chaque appel coûte un appel API Claude — limite dédiée contre les abus.
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
-  createDevelopmentPlan(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+  createDevelopmentPlan(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.projectsService.createDevelopmentPlanForOwner(user.id, id);
   }
 
   @Get(':id/development-plans')
-  listDevelopmentPlans(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+  listDevelopmentPlans(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.projectsService.listDevelopmentPlansForOwner(user.id, id);
   }
 
@@ -110,12 +111,12 @@ export class ProjectsController {
   @HttpCode(HttpStatus.CREATED)
   // Chaque appel coûte un appel API Claude — limite dédiée contre les abus.
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
-  createTransmissionPlan(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+  createTransmissionPlan(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.projectsService.createTransmissionPlanForOwner(user.id, id);
   }
 
   @Get(':id/transmission-plans')
-  listTransmissionPlans(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+  listTransmissionPlans(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.projectsService.listTransmissionPlansForOwner(user.id, id);
   }
 }
