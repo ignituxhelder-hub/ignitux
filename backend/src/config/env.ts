@@ -2,7 +2,9 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL est requis.'),
-  JWT_SECRET: z.string().min(16, 'JWT_SECRET doit faire au moins 16 caractères.'),
+  // 32 caractères minimum : un secret plus court serait trivialement plus
+  // facile à retrouver par force brute hors ligne sur des tokens signés HS256.
+  JWT_SECRET: z.string().min(32, 'JWT_SECRET doit faire au moins 32 caractères.'),
   JWT_EXPIRES_IN: z.string().default('1d'),
   FRONTEND_URL: z.string().default('http://localhost:3001'),
   PORT: z.string().default('3000'),
