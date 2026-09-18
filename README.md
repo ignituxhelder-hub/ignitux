@@ -48,7 +48,7 @@ Le backend autorise déjà les requêtes CORS depuis `http://localhost:3001` (co
 - **Développer** — plan de croissance : leviers, indicateurs clés, risques de passage à l'échelle
 - **Transmettre** — plan de transmission : options de transfert, documentation requise, check-list
 
-**Moteurs transverses d'IGINI** (backend uniquement, sans interface pour l'instant) :
+**Moteurs transverses d'IGINI**, avec leur section sur la fiche projet du frontend :
 - **Mémoire** — souvenirs (décisions, préférences, apprentissages, faits) liés à un utilisateur/projet
 - **Connaissance** — graphe de concepts (nœuds + relations) alimenté manuellement
 - **Workflow** — tâches suivables, générées automatiquement à partir des suggestions de l'analyse et
@@ -58,7 +58,7 @@ Le backend autorise déjà les requêtes CORS depuis `http://localhost:3001` (co
 
 **Fiabilité**
 - `GET /health` vérifie la connexion à la base de données
-- Suite de tests (130 tests backend + 21 tests frontend, unitaires et e2e), lint et type-check en CI sur chaque push
+- Suite de tests (130 tests backend + 28 tests frontend, unitaires et e2e), lint et type-check en CI sur chaque push
 
 ## Contact
 

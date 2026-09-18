@@ -14,6 +14,8 @@ IGNITUX est l'écosystème (comptes, projets, API) ; IGINI est l'intelligence qu
 - `memory/`, `knowledge/`, `workflow/`, `scoring/` — les quatre moteurs transverses d'IGINI (voir
   ci-dessous). Contrairement aux cinq étapes, ce ne sont pas des générateurs IA : ce sont des
   briques de données et de logique déterministe qui soutiennent la méthode sans appeler Claude.
+  Chacun a maintenant une section dédiée sur la fiche projet du frontend
+  (`frontend/src/app/projects/[id]/engine-sections.tsx`).
 
 ## Les quatre moteurs
 

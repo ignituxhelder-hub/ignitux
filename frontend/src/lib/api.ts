@@ -119,6 +119,63 @@ export interface TransmissionPlan {
   created_at: string;
 }
 
+export type MemoryCategory = 'decision' | 'preference' | 'learning' | 'fact';
+
+export interface Memory {
+  id: string;
+  user_id: string;
+  project_id: string | null;
+  category: MemoryCategory;
+  content: string;
+  created_at: string;
+}
+
+export interface Concept {
+  id: string;
+  user_id: string;
+  project_id: string | null;
+  name: string;
+  description: string | null;
+  category: string | null;
+  created_at: string;
+}
+
+export interface ConceptLink {
+  id: string;
+  from_concept_id: string;
+  to_concept_id: string;
+  relation_type: string;
+  created_at: string;
+}
+
+export interface ConceptGraph {
+  nodes: Concept[];
+  edges: ConceptLink[];
+}
+
+export type TaskStatus = 'pending' | 'in_progress' | 'done' | 'blocked';
+export type TaskAssignee = 'human' | 'igini';
+
+export interface Task {
+  id: string;
+  project_id: string;
+  title: string;
+  description: string | null;
+  status: TaskStatus;
+  assignee: TaskAssignee;
+  source: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ScoreCard {
+  etincelle: number | null;
+  construction: number | null;
+  evolution: number | null;
+  transmission: number | null;
+  confiance: number;
+}
+
 export const api = {
   signup: (email: string, password: string) =>
     request<User>('/users/signup', { method: 'POST', body: JSON.stringify({ email, password }) }),
@@ -212,6 +269,71 @@ export const api = {
 
   listTransmissionPlans: (token: string, id: string) =>
     request<TransmissionPlan[]>(`/projects/${id}/transmission-plans`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  createMemory: (token: string, projectId: string, category: MemoryCategory, content: string) =>
+    request<Memory>('/memory', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ projectId, category, content }),
+    }),
+
+  listMemories: (token: string, projectId: string) =>
+    request<Memory[]>(`/memory?projectId=${projectId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getMemorySummary: (token: string, projectId: string) =>
+    request<{ summary: string }>(`/memory/summary?projectId=${projectId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  createConcept: (token: string, projectId: string, name: string, description?: string) =>
+    request<Concept>('/knowledge/concepts', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ projectId, name, description: description || undefined }),
+    }),
+
+  listConcepts: (token: string, projectId: string) =>
+    request<Concept[]>(`/knowledge/concepts?projectId=${projectId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  linkConcepts: (token: string, fromConceptId: string, toConceptId: string, relationType: string) =>
+    request<ConceptLink>(`/knowledge/concepts/${fromConceptId}/links`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ toConceptId, relationType }),
+    }),
+
+  getConceptGraph: (token: string, projectId: string) =>
+    request<ConceptGraph>(`/knowledge/graph?projectId=${projectId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  createTask: (token: string, projectId: string, title: string) =>
+    request<Task>(`/projects/${projectId}/tasks`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ title }),
+    }),
+
+  listTasks: (token: string, projectId: string) =>
+    request<Task[]>(`/projects/${projectId}/tasks`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  updateTaskStatus: (token: string, taskId: string, status: TaskStatus) =>
+    request<Task>(`/tasks/${taskId}/status`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ status }),
+    }),
+
+  getScoreCard: (token: string, projectId: string) =>
+    request<ScoreCard>(`/projects/${projectId}/scores`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
 };

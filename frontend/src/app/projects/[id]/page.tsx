@@ -22,6 +22,7 @@ import {
   type TransmissionPlan,
 } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { KnowledgeSection, MemorySection, ScoreSection, TasksSection } from './engine-sections';
 
 /** Charge la liste d'un type de plan (analyse, financement, …) pour le projet courant. */
 function usePlanList<T>(
@@ -327,6 +328,11 @@ export default function ProjectDetailPage() {
           renderItem={(item) => <TransmissionPlanCard plan={item} key={item.id} />}
         />
       )}
+
+      {project && <ScoreSection token={token} projectId={id} />}
+      {project && <TasksSection token={token} projectId={id} />}
+      {project && <MemorySection token={token} projectId={id} />}
+      {project && <KnowledgeSection token={token} projectId={id} />}
     </main>
   );
 }

@@ -19,6 +19,21 @@ const PROJECT = {
   updated_at: '2026-01-01T00:00:00.000Z',
 };
 
+// Les 4 moteurs IGINI (score, tâches, mémoire, connaissance) font chacun leur
+// propre appel au montage de la page ; ces routes doivent renvoyer une forme
+// réaliste dans tous les tests, sinon le fallback générique de mockApiRoutes
+// (200 []) casse les composants qui attendent un objet (score, résumé, graphe).
+const ENGINE_ROUTES = {
+  'GET /projects/p1/scores': {
+    status: 200,
+    body: { etincelle: null, construction: null, evolution: null, transmission: null, confiance: 0 },
+  },
+  'GET /projects/p1/tasks': { status: 200, body: [] },
+  'GET /memory': { status: 200, body: [] },
+  'GET /memory/summary': { status: 200, body: { summary: '' } },
+  'GET /knowledge/graph': { status: 200, body: { nodes: [], edges: [] } },
+};
+
 describe('ProjectDetailPage', () => {
   beforeEach(() => {
     window.localStorage.clear();
@@ -31,7 +46,7 @@ describe('ProjectDetailPage', () => {
   });
 
   it('charge le projet et affiche les 5 sections vides', async () => {
-    mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT } });
+    mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
 
     render(
       <AuthProvider>
@@ -63,6 +78,7 @@ describe('ProjectDetailPage', () => {
           created_at: '2026-01-02T00:00:00.000Z',
         },
       },
+      ...ENGINE_ROUTES,
     });
 
     render(
@@ -85,6 +101,7 @@ describe('ProjectDetailPage', () => {
         status: 200,
         body: { ...PROJECT, title: 'École motocross avancée' },
       },
+      ...ENGINE_ROUTES,
     });
 
     render(
@@ -104,6 +121,7 @@ describe('ProjectDetailPage', () => {
     mockApiRoutes({
       'GET /projects/p1': { status: 200, body: PROJECT },
       'DELETE /projects/p1': { status: 204, body: null },
+      ...ENGINE_ROUTES,
     });
 
     render(
