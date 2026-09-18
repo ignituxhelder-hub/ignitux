@@ -407,6 +407,7 @@ export const ModelName = {
   concepts: 'concepts',
   concept_links: 'concept_links',
   tasks: 'tasks',
+  community_comments: 'community_comments',
   build_plans: 'build_plans'
 } as const
 
@@ -423,7 +424,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "build_plans"
+    modelProps: "users" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "build_plans"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1167,6 +1168,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    community_comments: {
+      payload: Prisma.$community_commentsPayload<ExtArgs>
+      fields: Prisma.community_commentsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.community_commentsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$community_commentsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.community_commentsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$community_commentsPayload>
+        }
+        findFirst: {
+          args: Prisma.community_commentsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$community_commentsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.community_commentsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$community_commentsPayload>
+        }
+        findMany: {
+          args: Prisma.community_commentsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$community_commentsPayload>[]
+        }
+        create: {
+          args: Prisma.community_commentsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$community_commentsPayload>
+        }
+        createMany: {
+          args: Prisma.community_commentsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.community_commentsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$community_commentsPayload>[]
+        }
+        delete: {
+          args: Prisma.community_commentsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$community_commentsPayload>
+        }
+        update: {
+          args: Prisma.community_commentsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$community_commentsPayload>
+        }
+        deleteMany: {
+          args: Prisma.community_commentsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.community_commentsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.community_commentsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$community_commentsPayload>[]
+        }
+        upsert: {
+          args: Prisma.community_commentsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$community_commentsPayload>
+        }
+        aggregate: {
+          args: Prisma.Community_commentsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCommunity_comments>
+        }
+        groupBy: {
+          args: Prisma.community_commentsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Community_commentsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.community_commentsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Community_commentsCountAggregateOutputType> | number
+        }
+      }
+    }
     build_plans: {
       payload: Prisma.$build_plansPayload<ExtArgs>
       fields: Prisma.build_plansFieldRefs
@@ -1295,6 +1370,7 @@ export const ProjectsScalarFieldEnum = {
   owner_id: 'owner_id',
   title: 'title',
   description: 'description',
+  is_public: 'is_public',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
@@ -1406,6 +1482,17 @@ export const TasksScalarFieldEnum = {
 export type TasksScalarFieldEnum = (typeof TasksScalarFieldEnum)[keyof typeof TasksScalarFieldEnum]
 
 
+export const Community_commentsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  author_id: 'author_id',
+  content: 'content',
+  created_at: 'created_at'
+} as const
+
+export type Community_commentsScalarFieldEnum = (typeof Community_commentsScalarFieldEnum)[keyof typeof Community_commentsScalarFieldEnum]
+
+
 export const Build_plansScalarFieldEnum = {
   id: 'id',
   project_id: 'project_id',
@@ -1474,6 +1561,13 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -1665,6 +1759,7 @@ export type GlobalOmitConfig = {
   concepts?: Prisma.conceptsOmit
   concept_links?: Prisma.concept_linksOmit
   tasks?: Prisma.tasksOmit
+  community_comments?: Prisma.community_commentsOmit
   build_plans?: Prisma.build_plansOmit
 }
 

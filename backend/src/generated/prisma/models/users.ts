@@ -177,6 +177,7 @@ export type usersWhereInput = {
   projects?: Prisma.ProjectsListRelationFilter
   memories?: Prisma.MemoriesListRelationFilter
   concepts?: Prisma.ConceptsListRelationFilter
+  community_comments?: Prisma.Community_commentsListRelationFilter
 }
 
 export type usersOrderByWithRelationInput = {
@@ -187,6 +188,7 @@ export type usersOrderByWithRelationInput = {
   projects?: Prisma.projectsOrderByRelationAggregateInput
   memories?: Prisma.memoriesOrderByRelationAggregateInput
   concepts?: Prisma.conceptsOrderByRelationAggregateInput
+  community_comments?: Prisma.community_commentsOrderByRelationAggregateInput
 }
 
 export type usersWhereUniqueInput = Prisma.AtLeast<{
@@ -200,6 +202,7 @@ export type usersWhereUniqueInput = Prisma.AtLeast<{
   projects?: Prisma.ProjectsListRelationFilter
   memories?: Prisma.MemoriesListRelationFilter
   concepts?: Prisma.ConceptsListRelationFilter
+  community_comments?: Prisma.Community_commentsListRelationFilter
 }, "id" | "email">
 
 export type usersOrderByWithAggregationInput = {
@@ -230,6 +233,7 @@ export type usersCreateInput = {
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
 }
 
 export type usersUncheckedCreateInput = {
@@ -240,6 +244,7 @@ export type usersUncheckedCreateInput = {
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type usersUpdateInput = {
@@ -250,6 +255,7 @@ export type usersUpdateInput = {
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
 }
 
 export type usersUncheckedUpdateInput = {
@@ -260,6 +266,7 @@ export type usersUncheckedUpdateInput = {
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 export type usersCreateManyInput = {
@@ -359,6 +366,20 @@ export type usersUpdateOneRequiredWithoutConceptsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutConceptsInput, Prisma.usersUpdateWithoutConceptsInput>, Prisma.usersUncheckedUpdateWithoutConceptsInput>
 }
 
+export type usersCreateNestedOneWithoutCommunity_commentsInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutCommunity_commentsInput, Prisma.usersUncheckedCreateWithoutCommunity_commentsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutCommunity_commentsInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutCommunity_commentsNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutCommunity_commentsInput, Prisma.usersUncheckedCreateWithoutCommunity_commentsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutCommunity_commentsInput
+  upsert?: Prisma.usersUpsertWithoutCommunity_commentsInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutCommunity_commentsInput, Prisma.usersUpdateWithoutCommunity_commentsInput>, Prisma.usersUncheckedUpdateWithoutCommunity_commentsInput>
+}
+
 export type usersCreateWithoutProjectsInput = {
   id?: string
   email: string
@@ -366,6 +387,7 @@ export type usersCreateWithoutProjectsInput = {
   created_at?: Date | string | null
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
 }
 
 export type usersUncheckedCreateWithoutProjectsInput = {
@@ -375,6 +397,7 @@ export type usersUncheckedCreateWithoutProjectsInput = {
   created_at?: Date | string | null
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type usersCreateOrConnectWithoutProjectsInput = {
@@ -400,6 +423,7 @@ export type usersUpdateWithoutProjectsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutProjectsInput = {
@@ -409,6 +433,7 @@ export type usersUncheckedUpdateWithoutProjectsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 export type usersCreateWithoutMemoriesInput = {
@@ -418,6 +443,7 @@ export type usersCreateWithoutMemoriesInput = {
   created_at?: Date | string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
 }
 
 export type usersUncheckedCreateWithoutMemoriesInput = {
@@ -427,6 +453,7 @@ export type usersUncheckedCreateWithoutMemoriesInput = {
   created_at?: Date | string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type usersCreateOrConnectWithoutMemoriesInput = {
@@ -452,6 +479,7 @@ export type usersUpdateWithoutMemoriesInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMemoriesInput = {
@@ -461,6 +489,7 @@ export type usersUncheckedUpdateWithoutMemoriesInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 export type usersCreateWithoutConceptsInput = {
@@ -470,6 +499,7 @@ export type usersCreateWithoutConceptsInput = {
   created_at?: Date | string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
 }
 
 export type usersUncheckedCreateWithoutConceptsInput = {
@@ -479,6 +509,7 @@ export type usersUncheckedCreateWithoutConceptsInput = {
   created_at?: Date | string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
 }
 
 export type usersCreateOrConnectWithoutConceptsInput = {
@@ -504,6 +535,7 @@ export type usersUpdateWithoutConceptsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutConceptsInput = {
@@ -513,6 +545,63 @@ export type usersUncheckedUpdateWithoutConceptsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+}
+
+export type usersCreateWithoutCommunity_commentsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  created_at?: Date | string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+}
+
+export type usersUncheckedCreateWithoutCommunity_commentsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  created_at?: Date | string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type usersCreateOrConnectWithoutCommunity_commentsInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutCommunity_commentsInput, Prisma.usersUncheckedCreateWithoutCommunity_commentsInput>
+}
+
+export type usersUpsertWithoutCommunity_commentsInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutCommunity_commentsInput, Prisma.usersUncheckedUpdateWithoutCommunity_commentsInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutCommunity_commentsInput, Prisma.usersUncheckedCreateWithoutCommunity_commentsInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutCommunity_commentsInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutCommunity_commentsInput, Prisma.usersUncheckedUpdateWithoutCommunity_commentsInput>
+}
+
+export type usersUpdateWithoutCommunity_commentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+}
+
+export type usersUncheckedUpdateWithoutCommunity_commentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -524,12 +613,14 @@ export type UsersCountOutputType = {
   projects: number
   memories: number
   concepts: number
+  community_comments: number
 }
 
 export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   projects?: boolean | UsersCountOutputTypeCountProjectsArgs
   memories?: boolean | UsersCountOutputTypeCountMemoriesArgs
   concepts?: boolean | UsersCountOutputTypeCountConceptsArgs
+  community_comments?: boolean | UsersCountOutputTypeCountCommunity_commentsArgs
 }
 
 /**
@@ -563,6 +654,13 @@ export type UsersCountOutputTypeCountConceptsArgs<ExtArgs extends runtime.Types.
   where?: Prisma.conceptsWhereInput
 }
 
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountCommunity_commentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.community_commentsWhereInput
+}
+
 
 export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -572,6 +670,7 @@ export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   projects?: boolean | Prisma.users$projectsArgs<ExtArgs>
   memories?: boolean | Prisma.users$memoriesArgs<ExtArgs>
   concepts?: boolean | Prisma.users$conceptsArgs<ExtArgs>
+  community_comments?: boolean | Prisma.users$community_commentsArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["users"]>
 
@@ -601,6 +700,7 @@ export type usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   projects?: boolean | Prisma.users$projectsArgs<ExtArgs>
   memories?: boolean | Prisma.users$memoriesArgs<ExtArgs>
   concepts?: boolean | Prisma.users$conceptsArgs<ExtArgs>
+  community_comments?: boolean | Prisma.users$community_commentsArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type usersIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -612,6 +712,7 @@ export type $usersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     projects: Prisma.$projectsPayload<ExtArgs>[]
     memories: Prisma.$memoriesPayload<ExtArgs>[]
     concepts: Prisma.$conceptsPayload<ExtArgs>[]
+    community_comments: Prisma.$community_commentsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1015,6 +1116,7 @@ export interface Prisma__usersClient<T, Null = never, ExtArgs extends runtime.Ty
   projects<T extends Prisma.users$projectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$projectsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   memories<T extends Prisma.users$memoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$memoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$memoriesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   concepts<T extends Prisma.users$conceptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$conceptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$conceptsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  community_comments<T extends Prisma.users$community_commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$community_commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$community_commentsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1510,6 +1612,30 @@ export type users$conceptsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.ConceptsScalarFieldEnum | Prisma.ConceptsScalarFieldEnum[]
+}
+
+/**
+ * users.community_comments
+ */
+export type users$community_commentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the community_comments
+   */
+  select?: Prisma.community_commentsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the community_comments
+   */
+  omit?: Prisma.community_commentsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.community_commentsInclude<ExtArgs> | null
+  where?: Prisma.community_commentsWhereInput
+  orderBy?: Prisma.community_commentsOrderByWithRelationInput | Prisma.community_commentsOrderByWithRelationInput[]
+  cursor?: Prisma.community_commentsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Community_commentsScalarFieldEnum | Prisma.Community_commentsScalarFieldEnum[]
 }
 
 /**

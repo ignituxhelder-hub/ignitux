@@ -68,6 +68,11 @@ export type concept_links = Prisma.concept_linksModel
  */
 export type tasks = Prisma.tasksModel
 /**
+ * Model community_comments
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type community_comments = Prisma.community_commentsModel
+/**
  * Model build_plans
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */

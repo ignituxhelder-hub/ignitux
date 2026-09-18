@@ -29,6 +29,7 @@ export type ProjectsMinAggregateOutputType = {
   owner_id: string | null
   title: string | null
   description: string | null
+  is_public: boolean | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -38,6 +39,7 @@ export type ProjectsMaxAggregateOutputType = {
   owner_id: string | null
   title: string | null
   description: string | null
+  is_public: boolean | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -47,6 +49,7 @@ export type ProjectsCountAggregateOutputType = {
   owner_id: number
   title: number
   description: number
+  is_public: number
   created_at: number
   updated_at: number
   _all: number
@@ -58,6 +61,7 @@ export type ProjectsMinAggregateInputType = {
   owner_id?: true
   title?: true
   description?: true
+  is_public?: true
   created_at?: true
   updated_at?: true
 }
@@ -67,6 +71,7 @@ export type ProjectsMaxAggregateInputType = {
   owner_id?: true
   title?: true
   description?: true
+  is_public?: true
   created_at?: true
   updated_at?: true
 }
@@ -76,6 +81,7 @@ export type ProjectsCountAggregateInputType = {
   owner_id?: true
   title?: true
   description?: true
+  is_public?: true
   created_at?: true
   updated_at?: true
   _all?: true
@@ -158,6 +164,7 @@ export type ProjectsGroupByOutputType = {
   owner_id: string
   title: string
   description: string | null
+  is_public: boolean
   created_at: Date | null
   updated_at: Date | null
   _count: ProjectsCountAggregateOutputType | null
@@ -188,6 +195,7 @@ export type projectsWhereInput = {
   owner_id?: Prisma.UuidFilter<"projects"> | string
   title?: Prisma.StringFilter<"projects"> | string
   description?: Prisma.StringNullableFilter<"projects"> | string | null
+  is_public?: Prisma.BoolFilter<"projects"> | boolean
   created_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   owner?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
@@ -199,6 +207,7 @@ export type projectsWhereInput = {
   memories?: Prisma.MemoriesListRelationFilter
   concepts?: Prisma.ConceptsListRelationFilter
   tasks?: Prisma.TasksListRelationFilter
+  community_comments?: Prisma.Community_commentsListRelationFilter
 }
 
 export type projectsOrderByWithRelationInput = {
@@ -206,6 +215,7 @@ export type projectsOrderByWithRelationInput = {
   owner_id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  is_public?: Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
   owner?: Prisma.usersOrderByWithRelationInput
@@ -217,6 +227,7 @@ export type projectsOrderByWithRelationInput = {
   memories?: Prisma.memoriesOrderByRelationAggregateInput
   concepts?: Prisma.conceptsOrderByRelationAggregateInput
   tasks?: Prisma.tasksOrderByRelationAggregateInput
+  community_comments?: Prisma.community_commentsOrderByRelationAggregateInput
 }
 
 export type projectsWhereUniqueInput = Prisma.AtLeast<{
@@ -227,6 +238,7 @@ export type projectsWhereUniqueInput = Prisma.AtLeast<{
   owner_id?: Prisma.UuidFilter<"projects"> | string
   title?: Prisma.StringFilter<"projects"> | string
   description?: Prisma.StringNullableFilter<"projects"> | string | null
+  is_public?: Prisma.BoolFilter<"projects"> | boolean
   created_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   owner?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
@@ -238,6 +250,7 @@ export type projectsWhereUniqueInput = Prisma.AtLeast<{
   memories?: Prisma.MemoriesListRelationFilter
   concepts?: Prisma.ConceptsListRelationFilter
   tasks?: Prisma.TasksListRelationFilter
+  community_comments?: Prisma.Community_commentsListRelationFilter
 }, "id">
 
 export type projectsOrderByWithAggregationInput = {
@@ -245,6 +258,7 @@ export type projectsOrderByWithAggregationInput = {
   owner_id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  is_public?: Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.projectsCountOrderByAggregateInput
@@ -260,6 +274,7 @@ export type projectsScalarWhereWithAggregatesInput = {
   owner_id?: Prisma.UuidWithAggregatesFilter<"projects"> | string
   title?: Prisma.StringWithAggregatesFilter<"projects"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"projects"> | string | null
+  is_public?: Prisma.BoolWithAggregatesFilter<"projects"> | boolean
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"projects"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableWithAggregatesFilter<"projects"> | Date | string | null
 }
@@ -268,6 +283,7 @@ export type projectsCreateInput = {
   id?: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -279,6 +295,7 @@ export type projectsCreateInput = {
   memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateInput = {
@@ -286,6 +303,7 @@ export type projectsUncheckedCreateInput = {
   owner_id: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -296,12 +314,14 @@ export type projectsUncheckedCreateInput = {
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -313,6 +333,7 @@ export type projectsUpdateInput = {
   memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateInput = {
@@ -320,6 +341,7 @@ export type projectsUncheckedUpdateInput = {
   owner_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -330,6 +352,7 @@ export type projectsUncheckedUpdateInput = {
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateManyInput = {
@@ -337,6 +360,7 @@ export type projectsCreateManyInput = {
   owner_id: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
 }
@@ -345,6 +369,7 @@ export type projectsUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -354,6 +379,7 @@ export type projectsUncheckedUpdateManyInput = {
   owner_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -373,6 +399,7 @@ export type projectsCountOrderByAggregateInput = {
   owner_id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  is_public?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -382,6 +409,7 @@ export type projectsMaxOrderByAggregateInput = {
   owner_id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  is_public?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -391,6 +419,7 @@ export type projectsMinOrderByAggregateInput = {
   owner_id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  is_public?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -449,6 +478,10 @@ export type projectsUncheckedUpdateManyWithoutOwnerNestedInput = {
 
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type projectsCreateNestedOneWithoutAnalysesInput = {
@@ -553,6 +586,20 @@ export type projectsUpdateOneRequiredWithoutTasksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutTasksInput, Prisma.projectsUpdateWithoutTasksInput>, Prisma.projectsUncheckedUpdateWithoutTasksInput>
 }
 
+export type projectsCreateNestedOneWithoutCommunity_commentsInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutCommunity_commentsInput, Prisma.projectsUncheckedCreateWithoutCommunity_commentsInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutCommunity_commentsInput
+  connect?: Prisma.projectsWhereUniqueInput
+}
+
+export type projectsUpdateOneRequiredWithoutCommunity_commentsNestedInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutCommunity_commentsInput, Prisma.projectsUncheckedCreateWithoutCommunity_commentsInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutCommunity_commentsInput
+  upsert?: Prisma.projectsUpsertWithoutCommunity_commentsInput
+  connect?: Prisma.projectsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutCommunity_commentsInput, Prisma.projectsUpdateWithoutCommunity_commentsInput>, Prisma.projectsUncheckedUpdateWithoutCommunity_commentsInput>
+}
+
 export type projectsCreateNestedOneWithoutBuild_plansInput = {
   create?: Prisma.XOR<Prisma.projectsCreateWithoutBuild_plansInput, Prisma.projectsUncheckedCreateWithoutBuild_plansInput>
   connectOrCreate?: Prisma.projectsCreateOrConnectWithoutBuild_plansInput
@@ -571,6 +618,7 @@ export type projectsCreateWithoutOwnerInput = {
   id?: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
@@ -581,12 +629,14 @@ export type projectsCreateWithoutOwnerInput = {
   memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutOwnerInput = {
   id?: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -597,6 +647,7 @@ export type projectsUncheckedCreateWithoutOwnerInput = {
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutOwnerInput = {
@@ -633,6 +684,7 @@ export type projectsScalarWhereInput = {
   owner_id?: Prisma.UuidFilter<"projects"> | string
   title?: Prisma.StringFilter<"projects"> | string
   description?: Prisma.StringNullableFilter<"projects"> | string | null
+  is_public?: Prisma.BoolFilter<"projects"> | boolean
   created_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
 }
@@ -641,6 +693,7 @@ export type projectsCreateWithoutAnalysesInput = {
   id?: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -651,6 +704,7 @@ export type projectsCreateWithoutAnalysesInput = {
   memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutAnalysesInput = {
@@ -658,6 +712,7 @@ export type projectsUncheckedCreateWithoutAnalysesInput = {
   owner_id: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -667,6 +722,7 @@ export type projectsUncheckedCreateWithoutAnalysesInput = {
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutAnalysesInput = {
@@ -689,6 +745,7 @@ export type projectsUpdateWithoutAnalysesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -699,6 +756,7 @@ export type projectsUpdateWithoutAnalysesInput = {
   memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutAnalysesInput = {
@@ -706,6 +764,7 @@ export type projectsUncheckedUpdateWithoutAnalysesInput = {
   owner_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -715,12 +774,14 @@ export type projectsUncheckedUpdateWithoutAnalysesInput = {
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutFinancing_plansInput = {
   id?: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -731,6 +792,7 @@ export type projectsCreateWithoutFinancing_plansInput = {
   memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutFinancing_plansInput = {
@@ -738,6 +800,7 @@ export type projectsUncheckedCreateWithoutFinancing_plansInput = {
   owner_id: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -747,6 +810,7 @@ export type projectsUncheckedCreateWithoutFinancing_plansInput = {
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutFinancing_plansInput = {
@@ -769,6 +833,7 @@ export type projectsUpdateWithoutFinancing_plansInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -779,6 +844,7 @@ export type projectsUpdateWithoutFinancing_plansInput = {
   memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
@@ -786,6 +852,7 @@ export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
   owner_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -795,12 +862,14 @@ export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutDevelopment_plansInput = {
   id?: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -811,6 +880,7 @@ export type projectsCreateWithoutDevelopment_plansInput = {
   memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
@@ -818,6 +888,7 @@ export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
   owner_id: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -827,6 +898,7 @@ export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutDevelopment_plansInput = {
@@ -849,6 +921,7 @@ export type projectsUpdateWithoutDevelopment_plansInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -859,6 +932,7 @@ export type projectsUpdateWithoutDevelopment_plansInput = {
   memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
@@ -866,6 +940,7 @@ export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
   owner_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -875,12 +950,14 @@ export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutTransmission_plansInput = {
   id?: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -891,6 +968,7 @@ export type projectsCreateWithoutTransmission_plansInput = {
   memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutTransmission_plansInput = {
@@ -898,6 +976,7 @@ export type projectsUncheckedCreateWithoutTransmission_plansInput = {
   owner_id: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -907,6 +986,7 @@ export type projectsUncheckedCreateWithoutTransmission_plansInput = {
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutTransmission_plansInput = {
@@ -929,6 +1009,7 @@ export type projectsUpdateWithoutTransmission_plansInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -939,6 +1020,7 @@ export type projectsUpdateWithoutTransmission_plansInput = {
   memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
@@ -946,6 +1028,7 @@ export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
   owner_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -955,12 +1038,14 @@ export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutMemoriesInput = {
   id?: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -971,6 +1056,7 @@ export type projectsCreateWithoutMemoriesInput = {
   transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutMemoriesInput = {
@@ -978,6 +1064,7 @@ export type projectsUncheckedCreateWithoutMemoriesInput = {
   owner_id: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -987,6 +1074,7 @@ export type projectsUncheckedCreateWithoutMemoriesInput = {
   transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutMemoriesInput = {
@@ -1009,6 +1097,7 @@ export type projectsUpdateWithoutMemoriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -1019,6 +1108,7 @@ export type projectsUpdateWithoutMemoriesInput = {
   transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutMemoriesInput = {
@@ -1026,6 +1116,7 @@ export type projectsUncheckedUpdateWithoutMemoriesInput = {
   owner_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -1035,12 +1126,14 @@ export type projectsUncheckedUpdateWithoutMemoriesInput = {
   transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutConceptsInput = {
   id?: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -1051,6 +1144,7 @@ export type projectsCreateWithoutConceptsInput = {
   transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
   memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutConceptsInput = {
@@ -1058,6 +1152,7 @@ export type projectsUncheckedCreateWithoutConceptsInput = {
   owner_id: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -1067,6 +1162,7 @@ export type projectsUncheckedCreateWithoutConceptsInput = {
   transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutConceptsInput = {
@@ -1089,6 +1185,7 @@ export type projectsUpdateWithoutConceptsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -1099,6 +1196,7 @@ export type projectsUpdateWithoutConceptsInput = {
   transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutConceptsInput = {
@@ -1106,6 +1204,7 @@ export type projectsUncheckedUpdateWithoutConceptsInput = {
   owner_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -1115,12 +1214,14 @@ export type projectsUncheckedUpdateWithoutConceptsInput = {
   transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutTasksInput = {
   id?: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -1131,6 +1232,7 @@ export type projectsCreateWithoutTasksInput = {
   transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
   memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutTasksInput = {
@@ -1138,6 +1240,7 @@ export type projectsUncheckedCreateWithoutTasksInput = {
   owner_id: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -1147,6 +1250,7 @@ export type projectsUncheckedCreateWithoutTasksInput = {
   transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutTasksInput = {
@@ -1169,6 +1273,7 @@ export type projectsUpdateWithoutTasksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -1179,6 +1284,7 @@ export type projectsUpdateWithoutTasksInput = {
   transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutTasksInput = {
@@ -1186,6 +1292,7 @@ export type projectsUncheckedUpdateWithoutTasksInput = {
   owner_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -1195,12 +1302,102 @@ export type projectsUncheckedUpdateWithoutTasksInput = {
   transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
+}
+
+export type projectsCreateWithoutCommunity_commentsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  owner: Prisma.usersCreateNestedOneWithoutProjectsInput
+  analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+}
+
+export type projectsUncheckedCreateWithoutCommunity_commentsInput = {
+  id?: string
+  owner_id: string
+  title: string
+  description?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+}
+
+export type projectsCreateOrConnectWithoutCommunity_commentsInput = {
+  where: Prisma.projectsWhereUniqueInput
+  create: Prisma.XOR<Prisma.projectsCreateWithoutCommunity_commentsInput, Prisma.projectsUncheckedCreateWithoutCommunity_commentsInput>
+}
+
+export type projectsUpsertWithoutCommunity_commentsInput = {
+  update: Prisma.XOR<Prisma.projectsUpdateWithoutCommunity_commentsInput, Prisma.projectsUncheckedUpdateWithoutCommunity_commentsInput>
+  create: Prisma.XOR<Prisma.projectsCreateWithoutCommunity_commentsInput, Prisma.projectsUncheckedCreateWithoutCommunity_commentsInput>
+  where?: Prisma.projectsWhereInput
+}
+
+export type projectsUpdateToOneWithWhereWithoutCommunity_commentsInput = {
+  where?: Prisma.projectsWhereInput
+  data: Prisma.XOR<Prisma.projectsUpdateWithoutCommunity_commentsInput, Prisma.projectsUncheckedUpdateWithoutCommunity_commentsInput>
+}
+
+export type projectsUpdateWithoutCommunity_commentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
+  analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+}
+
+export type projectsUncheckedUpdateWithoutCommunity_commentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutBuild_plansInput = {
   id?: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -1211,6 +1408,7 @@ export type projectsCreateWithoutBuild_plansInput = {
   memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutBuild_plansInput = {
@@ -1218,6 +1416,7 @@ export type projectsUncheckedCreateWithoutBuild_plansInput = {
   owner_id: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -1227,6 +1426,7 @@ export type projectsUncheckedCreateWithoutBuild_plansInput = {
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
   tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutBuild_plansInput = {
@@ -1249,6 +1449,7 @@ export type projectsUpdateWithoutBuild_plansInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -1259,6 +1460,7 @@ export type projectsUpdateWithoutBuild_plansInput = {
   memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutBuild_plansInput = {
@@ -1266,6 +1468,7 @@ export type projectsUncheckedUpdateWithoutBuild_plansInput = {
   owner_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -1275,12 +1478,14 @@ export type projectsUncheckedUpdateWithoutBuild_plansInput = {
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateManyOwnerInput = {
   id?: string
   title: string
   description?: string | null
+  is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
 }
@@ -1289,6 +1494,7 @@ export type projectsUpdateWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
@@ -1299,12 +1505,14 @@ export type projectsUpdateWithoutOwnerInput = {
   memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -1315,12 +1523,14 @@ export type projectsUncheckedUpdateWithoutOwnerInput = {
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
   tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateManyWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -1339,6 +1549,7 @@ export type ProjectsCountOutputType = {
   memories: number
   concepts: number
   tasks: number
+  community_comments: number
 }
 
 export type ProjectsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1350,6 +1561,7 @@ export type ProjectsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensio
   memories?: boolean | ProjectsCountOutputTypeCountMemoriesArgs
   concepts?: boolean | ProjectsCountOutputTypeCountConceptsArgs
   tasks?: boolean | ProjectsCountOutputTypeCountTasksArgs
+  community_comments?: boolean | ProjectsCountOutputTypeCountCommunity_commentsArgs
 }
 
 /**
@@ -1418,12 +1630,20 @@ export type ProjectsCountOutputTypeCountTasksArgs<ExtArgs extends runtime.Types.
   where?: Prisma.tasksWhereInput
 }
 
+/**
+ * ProjectsCountOutputType without action
+ */
+export type ProjectsCountOutputTypeCountCommunity_commentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.community_commentsWhereInput
+}
+
 
 export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   owner_id?: boolean
   title?: boolean
   description?: boolean
+  is_public?: boolean
   created_at?: boolean
   updated_at?: boolean
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -1435,6 +1655,7 @@ export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   memories?: boolean | Prisma.projects$memoriesArgs<ExtArgs>
   concepts?: boolean | Prisma.projects$conceptsArgs<ExtArgs>
   tasks?: boolean | Prisma.projects$tasksArgs<ExtArgs>
+  community_comments?: boolean | Prisma.projects$community_commentsArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["projects"]>
 
@@ -1443,6 +1664,7 @@ export type projectsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   owner_id?: boolean
   title?: boolean
   description?: boolean
+  is_public?: boolean
   created_at?: boolean
   updated_at?: boolean
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -1453,6 +1675,7 @@ export type projectsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   owner_id?: boolean
   title?: boolean
   description?: boolean
+  is_public?: boolean
   created_at?: boolean
   updated_at?: boolean
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -1463,11 +1686,12 @@ export type projectsSelectScalar = {
   owner_id?: boolean
   title?: boolean
   description?: boolean
+  is_public?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type projectsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_id" | "title" | "description" | "created_at" | "updated_at", ExtArgs["result"]["projects"]>
+export type projectsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_id" | "title" | "description" | "is_public" | "created_at" | "updated_at", ExtArgs["result"]["projects"]>
 export type projectsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   analyses?: boolean | Prisma.projects$analysesArgs<ExtArgs>
@@ -1478,6 +1702,7 @@ export type projectsInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   memories?: boolean | Prisma.projects$memoriesArgs<ExtArgs>
   concepts?: boolean | Prisma.projects$conceptsArgs<ExtArgs>
   tasks?: boolean | Prisma.projects$tasksArgs<ExtArgs>
+  community_comments?: boolean | Prisma.projects$community_commentsArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type projectsIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1499,12 +1724,14 @@ export type $projectsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     memories: Prisma.$memoriesPayload<ExtArgs>[]
     concepts: Prisma.$conceptsPayload<ExtArgs>[]
     tasks: Prisma.$tasksPayload<ExtArgs>[]
+    community_comments: Prisma.$community_commentsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     owner_id: string
     title: string
     description: string | null
+    is_public: boolean
     created_at: Date | null
     updated_at: Date | null
   }, ExtArgs["result"]["projects"]>
@@ -1910,6 +2137,7 @@ export interface Prisma__projectsClient<T, Null = never, ExtArgs extends runtime
   memories<T extends Prisma.projects$memoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$memoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$memoriesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   concepts<T extends Prisma.projects$conceptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$conceptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$conceptsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tasks<T extends Prisma.projects$tasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$tasksPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  community_comments<T extends Prisma.projects$community_commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$community_commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$community_commentsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1943,6 +2171,7 @@ export interface projectsFieldRefs {
   readonly owner_id: Prisma.FieldRef<"projects", 'String'>
   readonly title: Prisma.FieldRef<"projects", 'String'>
   readonly description: Prisma.FieldRef<"projects", 'String'>
+  readonly is_public: Prisma.FieldRef<"projects", 'Boolean'>
   readonly created_at: Prisma.FieldRef<"projects", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"projects", 'DateTime'>
 }
@@ -2535,6 +2764,30 @@ export type projects$tasksArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.TasksScalarFieldEnum | Prisma.TasksScalarFieldEnum[]
+}
+
+/**
+ * projects.community_comments
+ */
+export type projects$community_commentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the community_comments
+   */
+  select?: Prisma.community_commentsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the community_comments
+   */
+  omit?: Prisma.community_commentsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.community_commentsInclude<ExtArgs> | null
+  where?: Prisma.community_commentsWhereInput
+  orderBy?: Prisma.community_commentsOrderByWithRelationInput | Prisma.community_commentsOrderByWithRelationInput[]
+  cursor?: Prisma.community_commentsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Community_commentsScalarFieldEnum | Prisma.Community_commentsScalarFieldEnum[]
 }
 
 /**

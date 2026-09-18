@@ -16,6 +16,7 @@ model users {
   projects      projects[]
   memories      memories[]
   concepts      concepts[]
+  community_comments community_comments[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -25,6 +26,10 @@ model projects {
   owner       users      @relation(fields: [owner_id], references: [id], onDelete: Cascade)
   title       String
   description String?
+  // Un projet public est visible dans la communauté (lecture seule pour les
+  // autres utilisateurs, qui peuvent y laisser des encouragements) — false
+  // par défaut, l'utilisateur décide explicitement de le rendre public.
+  is_public   Boolean    @default(false)
   created_at  DateTime?  @default(now()) @db.Timestamptz(6)
   updated_at  DateTime?  @updatedAt @db.Timestamptz(6)
   analyses           analyses[]
@@ -35,8 +40,10 @@ model projects {
   memories           memories[]
   concepts           concepts[]
   tasks              tasks[]
+  community_comments community_comments[]
 
   @@index([owner_id])
+  @@index([is_public])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -162,6 +169,19 @@ model tasks {
   source      String    @default("manual")
   created_at  DateTime? @default(now()) @db.Timestamptz(6)
   updated_at  DateTime? @updatedAt @db.Timestamptz(6)
+
+  @@index([project_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model community_comments {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id String    @db.Uuid
+  project    projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  author_id  String    @db.Uuid
+  author     users     @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  content    String
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
 }

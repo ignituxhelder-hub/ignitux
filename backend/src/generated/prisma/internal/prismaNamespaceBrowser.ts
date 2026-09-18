@@ -61,6 +61,7 @@ export const ModelName = {
   concepts: 'concepts',
   concept_links: 'concept_links',
   tasks: 'tasks',
+  community_comments: 'community_comments',
   build_plans: 'build_plans'
 } as const
 
@@ -95,6 +96,7 @@ export const ProjectsScalarFieldEnum = {
   owner_id: 'owner_id',
   title: 'title',
   description: 'description',
+  is_public: 'is_public',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
@@ -204,6 +206,17 @@ export const TasksScalarFieldEnum = {
 } as const
 
 export type TasksScalarFieldEnum = (typeof TasksScalarFieldEnum)[keyof typeof TasksScalarFieldEnum]
+
+
+export const Community_commentsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  author_id: 'author_id',
+  content: 'content',
+  created_at: 'created_at'
+} as const
+
+export type Community_commentsScalarFieldEnum = (typeof Community_commentsScalarFieldEnum)[keyof typeof Community_commentsScalarFieldEnum]
 
 
 export const Build_plansScalarFieldEnum = {
