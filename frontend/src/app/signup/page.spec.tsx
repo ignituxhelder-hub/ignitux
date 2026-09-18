@@ -4,8 +4,11 @@ import { AuthProvider } from '@/lib/auth';
 import SignupPage from './page';
 
 const replace = vi.fn();
+// Référence stable, comme le vrai useRouter() de Next.js — évite qu'un objet
+// recréé à chaque appel ne casse un futur effet qui l'aurait en dépendance.
+const router = { replace };
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ replace }),
+  useRouter: () => router,
 }));
 
 /** Simule les réponses successives de fetch, dans l'ordre des appels. */
