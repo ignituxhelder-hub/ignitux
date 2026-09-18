@@ -56,6 +56,7 @@ export const ModelName = {
   analyses: 'analyses',
   financing_plans: 'financing_plans',
   development_plans: 'development_plans',
+  transmission_plans: 'transmission_plans',
   build_plans: 'build_plans'
 } as const
 
@@ -135,6 +136,19 @@ export const Development_plansScalarFieldEnum = {
 } as const
 
 export type Development_plansScalarFieldEnum = (typeof Development_plansScalarFieldEnum)[keyof typeof Development_plansScalarFieldEnum]
+
+
+export const Transmission_plansScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  summary: 'summary',
+  transfer_options: 'transfer_options',
+  key_documentation: 'key_documentation',
+  readiness_checklist: 'readiness_checklist',
+  created_at: 'created_at'
+} as const
+
+export type Transmission_plansScalarFieldEnum = (typeof Transmission_plansScalarFieldEnum)[keyof typeof Transmission_plansScalarFieldEnum]
 
 
 export const Build_plansScalarFieldEnum = {

@@ -5,6 +5,7 @@ import { AuthModule } from '../auth/auth.module.js';
 import { DevelopmentModule } from '../development/development.module.js';
 import { FinancingModule } from '../financing/financing.module.js';
 import { PlanningModule } from '../planning/planning.module.js';
+import { TransmissionModule } from '../transmission/transmission.module.js';
 import { ProjectsController } from './projects.controller.js';
 import { ProjectsService } from './projects.service.js';
 
@@ -21,6 +22,7 @@ import { ProjectsService } from './projects.service.js';
     PlanningModule,
     FinancingModule,
     DevelopmentModule,
+    TransmissionModule,
   ],
   controllers: [ProjectsController],
   providers: [ProjectsService],

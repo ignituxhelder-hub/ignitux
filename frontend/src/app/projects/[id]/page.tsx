@@ -18,6 +18,7 @@ import {
   type DevelopmentPlan,
   type FinancingPlan,
   type Project,
+  type TransmissionPlan,
 } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
@@ -123,6 +124,19 @@ export default function ProjectDetailPage() {
     api.createDevelopmentPlan,
     setDevelopmentPlans,
     'Impossible de générer le plan de développement.',
+  );
+
+  const [transmissionPlans, setTransmissionPlans] = usePlanList<TransmissionPlan>(
+    token,
+    id,
+    api.listTransmissionPlans,
+  );
+  const transmission = useGeneration(
+    token,
+    id,
+    api.createTransmissionPlan,
+    setTransmissionPlans,
+    'Impossible de générer le plan de transmission.',
   );
 
   useEffect(() => {
@@ -286,6 +300,20 @@ export default function ProjectDetailPage() {
           renderItem={(item) => <DevelopmentPlanCard plan={item} key={item.id} />}
         />
       )}
+
+      {project && (
+        <GenerationSection
+          title="Transmission"
+          buttonLabel="Générer un plan de transmission"
+          buttonBusyLabel="Génération…"
+          emptyLabel="Aucun plan de transmission pour l'instant."
+          items={transmissionPlans}
+          isBusy={transmission.isBusy}
+          error={transmission.error}
+          onGenerate={transmission.generate}
+          renderItem={(item) => <TransmissionPlanCard plan={item} key={item.id} />}
+        />
+      )}
     </main>
   );
 }
@@ -384,6 +412,21 @@ function DevelopmentPlanCard({ plan }: { plan: DevelopmentPlan }) {
       <ItemList title="Leviers de croissance" items={plan.growth_levers} />
       <ItemList title="Indicateurs clés" items={plan.key_metrics} />
       <ItemList title="Risques de passage à l'échelle" items={plan.scaling_risks} />
+    </div>
+  );
+}
+
+function TransmissionPlanCard({ plan }: { plan: TransmissionPlan }) {
+  return (
+    <div className="project-item" style={{ cursor: 'default' }}>
+      <div className="top-bar" style={{ marginBottom: '0.5rem' }}>
+        <strong>Plan de transmission</strong>
+        <span className="muted">{new Date(plan.created_at).toLocaleString('fr-FR')}</span>
+      </div>
+      <p>{plan.summary}</p>
+      <ItemList title="Options de transmission" items={plan.transfer_options} />
+      <ItemList title="À documenter" items={plan.key_documentation} />
+      <ItemList title="Check-list de préparation" items={plan.readiness_checklist} />
     </div>
   );
 }

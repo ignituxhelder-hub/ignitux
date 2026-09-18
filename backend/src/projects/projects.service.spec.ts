@@ -5,6 +5,7 @@ import { DevelopmentService } from '../development/development.service.js';
 import { FinancingService } from '../financing/financing.service.js';
 import { PlanningService } from '../planning/planning.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { TransmissionService } from '../transmission/transmission.service.js';
 import { ProjectsService } from './projects.service.js';
 
 describe('ProjectsService', () => {
@@ -33,11 +34,16 @@ describe('ProjectsService', () => {
       create: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
     };
+    transmission_plans: {
+      create: ReturnType<typeof vi.fn>;
+      findMany: ReturnType<typeof vi.fn>;
+    };
   };
   let analysisService: { analyzeProject: ReturnType<typeof vi.fn> };
   let planningService: { createBuildPlan: ReturnType<typeof vi.fn> };
   let financingService: { createFinancingPlan: ReturnType<typeof vi.fn> };
   let developmentService: { createDevelopmentPlan: ReturnType<typeof vi.fn> };
+  let transmissionService: { createTransmissionPlan: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     prisma = {
@@ -52,11 +58,13 @@ describe('ProjectsService', () => {
       build_plans: { create: vi.fn(), findMany: vi.fn() },
       financing_plans: { create: vi.fn(), findMany: vi.fn() },
       development_plans: { create: vi.fn(), findMany: vi.fn() },
+      transmission_plans: { create: vi.fn(), findMany: vi.fn() },
     };
     analysisService = { analyzeProject: vi.fn() };
     planningService = { createBuildPlan: vi.fn() };
     financingService = { createFinancingPlan: vi.fn() };
     developmentService = { createDevelopmentPlan: vi.fn() };
+    transmissionService = { createTransmissionPlan: vi.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -66,6 +74,7 @@ describe('ProjectsService', () => {
         { provide: PlanningService, useValue: planningService },
         { provide: FinancingService, useValue: financingService },
         { provide: DevelopmentService, useValue: developmentService },
+        { provide: TransmissionService, useValue: transmissionService },
       ],
     }).compile();
 
@@ -356,6 +365,61 @@ describe('ProjectsService', () => {
         orderBy: { created_at: 'desc' },
       });
       expect(result).toEqual([{ id: 'dp1' }]);
+    });
+  });
+
+  describe('createTransmissionPlanForOwner', () => {
+    it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.createTransmissionPlanForOwner('u1', 'p1')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(transmissionService.createTransmissionPlan).not.toHaveBeenCalled();
+    });
+
+    it('génère le plan de transmission puis persiste le résultat', async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      const plan = {
+        summary: 'Résumé',
+        transfer_options: ['Association avec un repreneur'],
+        key_documentation: ['Contrats fournisseurs'],
+        readiness_checklist: ['Formaliser les processus clés'],
+      };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      transmissionService.createTransmissionPlan.mockResolvedValue(plan);
+      prisma.transmission_plans.create.mockResolvedValue({ id: 'tp1', project_id: 'p1', ...plan });
+
+      const result = await service.createTransmissionPlanForOwner('u1', 'p1');
+
+      expect(transmissionService.createTransmissionPlan).toHaveBeenCalledWith('Idée', 'Desc');
+      expect(prisma.transmission_plans.create).toHaveBeenCalledWith({
+        data: { project_id: 'p1', ...plan },
+      });
+      expect(result).toEqual({ id: 'tp1', project_id: 'p1', ...plan });
+    });
+  });
+
+  describe('listTransmissionPlansForOwner', () => {
+    it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.listTransmissionPlansForOwner('u1', 'p1')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+    });
+
+    it('liste les plans du projet, les plus récents en premier', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.transmission_plans.findMany.mockResolvedValue([{ id: 'tp1' }]);
+
+      const result = await service.listTransmissionPlansForOwner('u1', 'p1');
+
+      expect(prisma.transmission_plans.findMany).toHaveBeenCalledWith({
+        where: { project_id: 'p1' },
+        orderBy: { created_at: 'desc' },
+      });
+      expect(result).toEqual([{ id: 'tp1' }]);
     });
   });
 });

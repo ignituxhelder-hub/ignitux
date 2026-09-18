@@ -19,6 +19,8 @@ describe('ProjectsController', () => {
     listFinancingPlansForOwner: ReturnType<typeof vi.fn>;
     createDevelopmentPlanForOwner: ReturnType<typeof vi.fn>;
     listDevelopmentPlansForOwner: ReturnType<typeof vi.fn>;
+    createTransmissionPlanForOwner: ReturnType<typeof vi.fn>;
+    listTransmissionPlansForOwner: ReturnType<typeof vi.fn>;
   };
   const currentUser = { id: 'u1', email: 'a@b.com' };
 
@@ -37,6 +39,8 @@ describe('ProjectsController', () => {
       listFinancingPlansForOwner: vi.fn(),
       createDevelopmentPlanForOwner: vi.fn(),
       listDevelopmentPlansForOwner: vi.fn(),
+      createTransmissionPlanForOwner: vi.fn(),
+      listTransmissionPlansForOwner: vi.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -165,5 +169,23 @@ describe('ProjectsController', () => {
 
     expect(projectsService.listDevelopmentPlansForOwner).toHaveBeenCalledWith('u1', 'p1');
     expect(result).toEqual([{ id: 'dp1' }]);
+  });
+
+  it('createTransmissionPlan délègue au service avec le propriétaire courant', async () => {
+    projectsService.createTransmissionPlanForOwner.mockResolvedValue({ id: 'tp1' });
+
+    const result = await controller.createTransmissionPlan(currentUser, 'p1');
+
+    expect(projectsService.createTransmissionPlanForOwner).toHaveBeenCalledWith('u1', 'p1');
+    expect(result).toEqual({ id: 'tp1' });
+  });
+
+  it('listTransmissionPlans délègue au service avec le propriétaire courant', async () => {
+    projectsService.listTransmissionPlansForOwner.mockResolvedValue([{ id: 'tp1' }]);
+
+    const result = await controller.listTransmissionPlans(currentUser, 'p1');
+
+    expect(projectsService.listTransmissionPlansForOwner).toHaveBeenCalledWith('u1', 'p1');
+    expect(result).toEqual([{ id: 'tp1' }]);
   });
 });

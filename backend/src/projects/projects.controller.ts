@@ -105,4 +105,17 @@ export class ProjectsController {
   listDevelopmentPlans(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.projectsService.listDevelopmentPlansForOwner(user.id, id);
   }
+
+  @Post(':id/transmission-plan')
+  @HttpCode(HttpStatus.CREATED)
+  // Chaque appel coûte un appel API Claude — limite dédiée contre les abus.
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  createTransmissionPlan(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.projectsService.createTransmissionPlanForOwner(user.id, id);
+  }
+
+  @Get(':id/transmission-plans')
+  listTransmissionPlans(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.projectsService.listTransmissionPlansForOwner(user.id, id);
+  }
 }

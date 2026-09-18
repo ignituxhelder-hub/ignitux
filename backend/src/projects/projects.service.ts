@@ -4,6 +4,7 @@ import { DevelopmentService } from '../development/development.service.js';
 import { FinancingService } from '../financing/financing.service.js';
 import { PlanningService } from '../planning/planning.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { TransmissionService } from '../transmission/transmission.service.js';
 
 @Injectable()
 export class ProjectsService {
@@ -13,6 +14,7 @@ export class ProjectsService {
     private readonly planningService: PlanningService,
     private readonly financingService: FinancingService,
     private readonly developmentService: DevelopmentService,
+    private readonly transmissionService: TransmissionService,
   ) {}
 
   create(ownerId: string, title: string, description?: string) {
@@ -149,6 +151,32 @@ export class ProjectsService {
   async listDevelopmentPlansForOwner(ownerId: string, id: string) {
     await this.findOneForOwner(ownerId, id);
     return this.prisma.development_plans.findMany({
+      where: { project_id: id },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  async createTransmissionPlanForOwner(ownerId: string, id: string) {
+    const project = await this.findOneForOwner(ownerId, id);
+    const result = await this.transmissionService.createTransmissionPlan(
+      project.title,
+      project.description,
+    );
+
+    return this.prisma.transmission_plans.create({
+      data: {
+        project_id: project.id,
+        summary: result.summary,
+        transfer_options: result.transfer_options,
+        key_documentation: result.key_documentation,
+        readiness_checklist: result.readiness_checklist,
+      },
+    });
+  }
+
+  async listTransmissionPlansForOwner(ownerId: string, id: string) {
+    await this.findOneForOwner(ownerId, id);
+    return this.prisma.transmission_plans.findMany({
       where: { project_id: id },
       orderBy: { created_at: 'desc' },
     });

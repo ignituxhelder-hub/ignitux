@@ -89,6 +89,16 @@ export interface DevelopmentPlan {
   created_at: string;
 }
 
+export interface TransmissionPlan {
+  id: string;
+  project_id: string;
+  summary: string;
+  transfer_options: string[];
+  key_documentation: string[];
+  readiness_checklist: string[];
+  created_at: string;
+}
+
 export const api = {
   signup: (email: string, password: string) =>
     request<User>('/users/signup', { method: 'POST', body: JSON.stringify({ email, password }) }),
@@ -171,6 +181,17 @@ export const api = {
 
   listDevelopmentPlans: (token: string, id: string) =>
     request<DevelopmentPlan[]>(`/projects/${id}/development-plans`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  createTransmissionPlan: (token: string, id: string) =>
+    request<TransmissionPlan>(`/projects/${id}/transmission-plan`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listTransmissionPlans: (token: string, id: string) =>
+    request<TransmissionPlan[]>(`/projects/${id}/transmission-plans`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
 };
