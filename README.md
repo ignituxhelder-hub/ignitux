@@ -1,10 +1,12 @@
 # Ignitux
 
+[![CI](https://github.com/ignituxhelder-hub/ignitux/actions/workflows/ci.yml/badge.svg)](https://github.com/ignituxhelder-hub/ignitux/actions/workflows/ci.yml)
+
 Plateforme pour transformer une idée en réalité : analyser, construire, financer, développer, transmettre.
 
 ## Structure
 
-- [`backend/`](backend) — API NestJS + Prisma (Postgres) : comptes, authentification JWT, projets.
+- [`backend/`](backend) — API NestJS + Prisma (Postgres) : comptes, authentification JWT, projets, générateurs IA (Claude).
 - [`frontend/`](frontend) — App Next.js consommant l'API : inscription, connexion, gestion des projets.
 
 ## Lancer le projet en local
@@ -15,7 +17,7 @@ Deux terminaux, dans cet ordre (le frontend a besoin de l'API pour fonctionner) 
 # 1. Backend — http://localhost:3000
 cd backend
 npm install
-cp .env.example .env   # renseigner DATABASE_URL, générer un JWT_SECRET
+cp .env.example .env   # renseigner DATABASE_URL, générer un JWT_SECRET, ajouter ANTHROPIC_API_KEY
 npm run start:dev
 
 # 2. Frontend — http://localhost:3001
@@ -25,12 +27,26 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-Le backend autorise déjà les requêtes CORS depuis `http://localhost:3001` (configurable via `FRONTEND_URL`).
+Le backend autorise déjà les requêtes CORS depuis `http://localhost:3001` (configurable via `FRONTEND_URL`). La configuration est validée au démarrage : un `.env` incomplet ou invalide fait échouer le serveur immédiatement avec un message clair.
 
 ## Fonctionnalités actuelles
 
-- Inscription / connexion (JWT)
-- Création, lecture, modification, suppression de projets — chaque projet appartient à un utilisateur
+**Comptes**
+- Inscription / connexion (JWT), mots de passe hashés (bcrypt), rate-limiting contre le bruteforce
+
+**Projets**
+- Création, lecture, modification, suppression — chaque projet appartient à un utilisateur
+
+**Générateurs IA** (Claude Opus 5), un par étape de la vision — chacun avec son historique persisté :
+- **Analyser** — résumé, score de faisabilité, points forts, risques, prochaines étapes
+- **Construire** — plan de construction : jalons, délai estimé, ressources clés
+- **Financer** — plan de financement : budget estimé, sources, postes de dépense
+- **Développer** — plan de croissance : leviers, indicateurs clés, risques de passage à l'échelle
+- **Transmettre** — plan de transmission : options de transfert, documentation requise, check-list
+
+**Fiabilité**
+- `GET /health` vérifie la connexion à la base de données
+- Suite de tests (72 tests unitaires + e2e), lint et type-check en CI sur chaque push
 
 ## Vision
 
