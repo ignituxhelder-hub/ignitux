@@ -1,6 +1,7 @@
 {
   "name": "ignitux-frontend",
   "version": "0.0.1",
+  "author": "Ignitux <ignitux@outlook.com>",
   "private": true,
   "type": "module",
   "scripts": {

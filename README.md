@@ -9,7 +9,8 @@ Plateforme pour transformer une idée en réalité : analyser, construire, finan
 IGNITUX est l'écosystème, IGINI est l'intelligence qui l'anime — voir [`backend/src/igini/README.md`](backend/src/igini/README.md).
 
 - [`backend/`](backend) — API NestJS + Prisma (Postgres) : comptes, authentification JWT, projets.
-  - [`backend/src/igini/`](backend/src/igini) — IGINI, le cerveau : les 5 générateurs IA et le moteur Claude partagé.
+  - [`backend/src/igini/`](backend/src/igini) — IGINI, le cerveau : les 5 générateurs IA, le moteur Claude
+    partagé, et les 4 moteurs transverses (mémoire, connaissance, workflow, score).
 - [`frontend/`](frontend) — App Next.js consommant l'API : inscription, connexion, gestion des projets.
 
 ## Lancer le projet en local
@@ -47,9 +48,21 @@ Le backend autorise déjà les requêtes CORS depuis `http://localhost:3001` (co
 - **Développer** — plan de croissance : leviers, indicateurs clés, risques de passage à l'échelle
 - **Transmettre** — plan de transmission : options de transfert, documentation requise, check-list
 
+**Moteurs transverses d'IGINI** (backend uniquement, sans interface pour l'instant) :
+- **Mémoire** — souvenirs (décisions, préférences, apprentissages, faits) liés à un utilisateur/projet
+- **Connaissance** — graphe de concepts (nœuds + relations) alimenté manuellement
+- **Workflow** — tâches suivables, générées automatiquement à partir des suggestions de l'analyse et
+  du plan de construction ; pas de moteur d'automatisation qui les exécute
+- **Score** — tableau de bord dérivé des données existantes ; `null` quand aucun signal réel n'existe,
+  pas de score de confiance/réputation fabriqué
+
 **Fiabilité**
 - `GET /health` vérifie la connexion à la base de données
-- Suite de tests (73 tests backend + 21 tests frontend, unitaires et e2e), lint et type-check en CI sur chaque push
+- Suite de tests (130 tests backend + 21 tests frontend, unitaires et e2e), lint et type-check en CI sur chaque push
+
+## Contact
+
+Ignitux <ignitux@outlook.com>
 
 ## Vision
 
