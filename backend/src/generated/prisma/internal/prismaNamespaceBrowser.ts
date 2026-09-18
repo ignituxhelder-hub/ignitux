@@ -57,6 +57,10 @@ export const ModelName = {
   financing_plans: 'financing_plans',
   development_plans: 'development_plans',
   transmission_plans: 'transmission_plans',
+  memories: 'memories',
+  concepts: 'concepts',
+  concept_links: 'concept_links',
+  tasks: 'tasks',
   build_plans: 'build_plans'
 } as const
 
@@ -149,6 +153,57 @@ export const Transmission_plansScalarFieldEnum = {
 } as const
 
 export type Transmission_plansScalarFieldEnum = (typeof Transmission_plansScalarFieldEnum)[keyof typeof Transmission_plansScalarFieldEnum]
+
+
+export const MemoriesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  project_id: 'project_id',
+  category: 'category',
+  content: 'content',
+  created_at: 'created_at'
+} as const
+
+export type MemoriesScalarFieldEnum = (typeof MemoriesScalarFieldEnum)[keyof typeof MemoriesScalarFieldEnum]
+
+
+export const ConceptsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  project_id: 'project_id',
+  name: 'name',
+  description: 'description',
+  category: 'category',
+  created_at: 'created_at'
+} as const
+
+export type ConceptsScalarFieldEnum = (typeof ConceptsScalarFieldEnum)[keyof typeof ConceptsScalarFieldEnum]
+
+
+export const Concept_linksScalarFieldEnum = {
+  id: 'id',
+  from_concept_id: 'from_concept_id',
+  to_concept_id: 'to_concept_id',
+  relation_type: 'relation_type',
+  created_at: 'created_at'
+} as const
+
+export type Concept_linksScalarFieldEnum = (typeof Concept_linksScalarFieldEnum)[keyof typeof Concept_linksScalarFieldEnum]
+
+
+export const TasksScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  title: 'title',
+  description: 'description',
+  status: 'status',
+  assignee: 'assignee',
+  source: 'source',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type TasksScalarFieldEnum = (typeof TasksScalarFieldEnum)[keyof typeof TasksScalarFieldEnum]
 
 
 export const Build_plansScalarFieldEnum = {

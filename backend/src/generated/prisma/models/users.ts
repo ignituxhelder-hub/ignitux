@@ -175,6 +175,8 @@ export type usersWhereInput = {
   password_hash?: Prisma.StringFilter<"users"> | string
   created_at?: Prisma.DateTimeNullableFilter<"users"> | Date | string | null
   projects?: Prisma.ProjectsListRelationFilter
+  memories?: Prisma.MemoriesListRelationFilter
+  concepts?: Prisma.ConceptsListRelationFilter
 }
 
 export type usersOrderByWithRelationInput = {
@@ -183,6 +185,8 @@ export type usersOrderByWithRelationInput = {
   password_hash?: Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   projects?: Prisma.projectsOrderByRelationAggregateInput
+  memories?: Prisma.memoriesOrderByRelationAggregateInput
+  concepts?: Prisma.conceptsOrderByRelationAggregateInput
 }
 
 export type usersWhereUniqueInput = Prisma.AtLeast<{
@@ -194,6 +198,8 @@ export type usersWhereUniqueInput = Prisma.AtLeast<{
   password_hash?: Prisma.StringFilter<"users"> | string
   created_at?: Prisma.DateTimeNullableFilter<"users"> | Date | string | null
   projects?: Prisma.ProjectsListRelationFilter
+  memories?: Prisma.MemoriesListRelationFilter
+  concepts?: Prisma.ConceptsListRelationFilter
 }, "id" | "email">
 
 export type usersOrderByWithAggregationInput = {
@@ -222,6 +228,8 @@ export type usersCreateInput = {
   password_hash: string
   created_at?: Date | string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
 }
 
 export type usersUncheckedCreateInput = {
@@ -230,6 +238,8 @@ export type usersUncheckedCreateInput = {
   password_hash: string
   created_at?: Date | string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type usersUpdateInput = {
@@ -238,6 +248,8 @@ export type usersUpdateInput = {
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
 }
 
 export type usersUncheckedUpdateInput = {
@@ -246,6 +258,8 @@ export type usersUncheckedUpdateInput = {
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type usersCreateManyInput = {
@@ -317,11 +331,41 @@ export type usersUpdateOneRequiredWithoutProjectsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutProjectsInput, Prisma.usersUpdateWithoutProjectsInput>, Prisma.usersUncheckedUpdateWithoutProjectsInput>
 }
 
+export type usersCreateNestedOneWithoutMemoriesInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutMemoriesInput, Prisma.usersUncheckedCreateWithoutMemoriesInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutMemoriesInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutMemoriesNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutMemoriesInput, Prisma.usersUncheckedCreateWithoutMemoriesInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutMemoriesInput
+  upsert?: Prisma.usersUpsertWithoutMemoriesInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutMemoriesInput, Prisma.usersUpdateWithoutMemoriesInput>, Prisma.usersUncheckedUpdateWithoutMemoriesInput>
+}
+
+export type usersCreateNestedOneWithoutConceptsInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutConceptsInput, Prisma.usersUncheckedCreateWithoutConceptsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutConceptsInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutConceptsNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutConceptsInput, Prisma.usersUncheckedCreateWithoutConceptsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutConceptsInput
+  upsert?: Prisma.usersUpsertWithoutConceptsInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutConceptsInput, Prisma.usersUpdateWithoutConceptsInput>, Prisma.usersUncheckedUpdateWithoutConceptsInput>
+}
+
 export type usersCreateWithoutProjectsInput = {
   id?: string
   email: string
   password_hash: string
   created_at?: Date | string | null
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
 }
 
 export type usersUncheckedCreateWithoutProjectsInput = {
@@ -329,6 +373,8 @@ export type usersUncheckedCreateWithoutProjectsInput = {
   email: string
   password_hash: string
   created_at?: Date | string | null
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type usersCreateOrConnectWithoutProjectsInput = {
@@ -352,6 +398,8 @@ export type usersUpdateWithoutProjectsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
 }
 
 export type usersUncheckedUpdateWithoutProjectsInput = {
@@ -359,6 +407,112 @@ export type usersUncheckedUpdateWithoutProjectsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type usersCreateWithoutMemoriesInput = {
+  id?: string
+  email: string
+  password_hash: string
+  created_at?: Date | string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+}
+
+export type usersUncheckedCreateWithoutMemoriesInput = {
+  id?: string
+  email: string
+  password_hash: string
+  created_at?: Date | string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type usersCreateOrConnectWithoutMemoriesInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutMemoriesInput, Prisma.usersUncheckedCreateWithoutMemoriesInput>
+}
+
+export type usersUpsertWithoutMemoriesInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutMemoriesInput, Prisma.usersUncheckedUpdateWithoutMemoriesInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutMemoriesInput, Prisma.usersUncheckedCreateWithoutMemoriesInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutMemoriesInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutMemoriesInput, Prisma.usersUncheckedUpdateWithoutMemoriesInput>
+}
+
+export type usersUpdateWithoutMemoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+}
+
+export type usersUncheckedUpdateWithoutMemoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type usersCreateWithoutConceptsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  created_at?: Date | string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+}
+
+export type usersUncheckedCreateWithoutConceptsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  created_at?: Date | string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type usersCreateOrConnectWithoutConceptsInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutConceptsInput, Prisma.usersUncheckedCreateWithoutConceptsInput>
+}
+
+export type usersUpsertWithoutConceptsInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutConceptsInput, Prisma.usersUncheckedUpdateWithoutConceptsInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutConceptsInput, Prisma.usersUncheckedCreateWithoutConceptsInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutConceptsInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutConceptsInput, Prisma.usersUncheckedUpdateWithoutConceptsInput>
+}
+
+export type usersUpdateWithoutConceptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+}
+
+export type usersUncheckedUpdateWithoutConceptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -368,10 +522,14 @@ export type usersUncheckedUpdateWithoutProjectsInput = {
 
 export type UsersCountOutputType = {
   projects: number
+  memories: number
+  concepts: number
 }
 
 export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   projects?: boolean | UsersCountOutputTypeCountProjectsArgs
+  memories?: boolean | UsersCountOutputTypeCountMemoriesArgs
+  concepts?: boolean | UsersCountOutputTypeCountConceptsArgs
 }
 
 /**
@@ -391,6 +549,20 @@ export type UsersCountOutputTypeCountProjectsArgs<ExtArgs extends runtime.Types.
   where?: Prisma.projectsWhereInput
 }
 
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountMemoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.memoriesWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountConceptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.conceptsWhereInput
+}
+
 
 export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -398,6 +570,8 @@ export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   password_hash?: boolean
   created_at?: boolean
   projects?: boolean | Prisma.users$projectsArgs<ExtArgs>
+  memories?: boolean | Prisma.users$memoriesArgs<ExtArgs>
+  concepts?: boolean | Prisma.users$conceptsArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["users"]>
 
@@ -425,6 +599,8 @@ export type usersSelectScalar = {
 export type usersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "password_hash" | "created_at", ExtArgs["result"]["users"]>
 export type usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   projects?: boolean | Prisma.users$projectsArgs<ExtArgs>
+  memories?: boolean | Prisma.users$memoriesArgs<ExtArgs>
+  concepts?: boolean | Prisma.users$conceptsArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type usersIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -434,6 +610,8 @@ export type $usersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   name: "users"
   objects: {
     projects: Prisma.$projectsPayload<ExtArgs>[]
+    memories: Prisma.$memoriesPayload<ExtArgs>[]
+    concepts: Prisma.$conceptsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -835,6 +1013,8 @@ readonly fields: usersFieldRefs;
 export interface Prisma__usersClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   projects<T extends Prisma.users$projectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$projectsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  memories<T extends Prisma.users$memoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$memoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$memoriesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  concepts<T extends Prisma.users$conceptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$conceptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$conceptsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1282,6 +1462,54 @@ export type users$projectsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.ProjectsScalarFieldEnum | Prisma.ProjectsScalarFieldEnum[]
+}
+
+/**
+ * users.memories
+ */
+export type users$memoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the memories
+   */
+  select?: Prisma.memoriesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the memories
+   */
+  omit?: Prisma.memoriesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.memoriesInclude<ExtArgs> | null
+  where?: Prisma.memoriesWhereInput
+  orderBy?: Prisma.memoriesOrderByWithRelationInput | Prisma.memoriesOrderByWithRelationInput[]
+  cursor?: Prisma.memoriesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MemoriesScalarFieldEnum | Prisma.MemoriesScalarFieldEnum[]
+}
+
+/**
+ * users.concepts
+ */
+export type users$conceptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the concepts
+   */
+  select?: Prisma.conceptsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the concepts
+   */
+  omit?: Prisma.conceptsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.conceptsInclude<ExtArgs> | null
+  where?: Prisma.conceptsWhereInput
+  orderBy?: Prisma.conceptsOrderByWithRelationInput | Prisma.conceptsOrderByWithRelationInput[]
+  cursor?: Prisma.conceptsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ConceptsScalarFieldEnum | Prisma.ConceptsScalarFieldEnum[]
 }
 
 /**

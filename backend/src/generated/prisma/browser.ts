@@ -48,6 +48,26 @@ export type development_plans = Prisma.development_plansModel
  */
 export type transmission_plans = Prisma.transmission_plansModel
 /**
+ * Model memories
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type memories = Prisma.memoriesModel
+/**
+ * Model concepts
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type concepts = Prisma.conceptsModel
+/**
+ * Model concept_links
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type concept_links = Prisma.concept_linksModel
+/**
+ * Model tasks
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type tasks = Prisma.tasksModel
+/**
  * Model build_plans
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */
