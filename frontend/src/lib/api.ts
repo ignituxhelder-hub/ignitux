@@ -64,8 +64,24 @@ export interface Project {
   owner_id: string;
   title: string;
   description: string | null;
+  is_public: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface PublicProject {
+  id: string;
+  title: string;
+  description: string | null;
+  created_at: string;
+}
+
+export interface CommunityComment {
+  id: string;
+  project_id: string;
+  author_id: string;
+  content: string;
+  created_at: string;
 }
 
 export interface Analysis {
@@ -335,5 +351,34 @@ export const api = {
   getScoreCard: (token: string, projectId: string) =>
     request<ScoreCard>(`/projects/${projectId}/scores`, {
       headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  updateProjectVisibility: (token: string, id: string, isPublic: boolean) =>
+    request<Project>(`/projects/${id}/visibility`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ isPublic }),
+    }),
+
+  listPublicProjects: (token: string) =>
+    request<PublicProject[]>('/community/projects', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getPublicProject: (token: string, id: string) =>
+    request<PublicProject>(`/community/projects/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listCommunityComments: (token: string, id: string) =>
+    request<CommunityComment[]>(`/community/projects/${id}/comments`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  addCommunityComment: (token: string, id: string, content: string) =>
+    request<CommunityComment>(`/community/projects/${id}/comments`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ content }),
     }),
 };

@@ -99,6 +99,7 @@ export default function ProjectDetailPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
 
   const [analyses, setAnalyses] = usePlanList<Analysis>(token, id, api.listAnalyses);
   const analysis = useGeneration(token, id, api.analyzeProject, setAnalyses, "Impossible d'analyser le projet.");
@@ -200,6 +201,20 @@ export default function ProjectDetailPage() {
     }
   }
 
+  async function handleToggleVisibility() {
+    if (!token || !project) return;
+    setFormError(null);
+    setIsTogglingVisibility(true);
+    try {
+      const updated = await api.updateProjectVisibility(token, id, !project.is_public);
+      setProject(updated);
+    } catch (err) {
+      setFormError(err instanceof ApiError ? err.message : 'Impossible de changer la visibilité.');
+    } finally {
+      setIsTogglingVisibility(false);
+    }
+  }
+
   if (!isReady || !token) {
     return null;
   }
@@ -254,7 +269,24 @@ export default function ProjectDetailPage() {
               >
                 {isDeleting ? 'Suppression…' : 'Supprimer le projet'}
               </button>
+              <button
+                className="secondary"
+                type="button"
+                onClick={handleToggleVisibility}
+                disabled={isTogglingVisibility}
+              >
+                {isTogglingVisibility
+                  ? 'Mise à jour…'
+                  : project.is_public
+                    ? 'Rendre privé'
+                    : 'Rendre public'}
+              </button>
             </div>
+            <p className="muted" style={{ marginTop: '0.75rem', marginBottom: 0 }}>
+              {project.is_public
+                ? 'Ce projet est visible dans la communauté.'
+                : "Ce projet n'est visible que par toi."}
+            </p>
           </form>
         </>
       )}

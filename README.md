@@ -11,6 +11,8 @@ IGNITUX est l'écosystème, IGINI est l'intelligence qui l'anime — voir [`back
 - [`backend/`](backend) — API NestJS + Prisma (Postgres) : comptes, authentification JWT, projets.
   - [`backend/src/igini/`](backend/src/igini) — IGINI, le cerveau : les 5 générateurs IA, le moteur Claude
     partagé, et les 4 moteurs transverses (mémoire, connaissance, workflow, score).
+  - [`backend/src/community/`](backend/src/community) — IGNITUX (pas IGINI) : projets publics et
+    encouragements entre porteurs de projet.
 - [`frontend/`](frontend) — App Next.js consommant l'API : inscription, connexion, gestion des projets.
 
 ## Lancer le projet en local
@@ -56,9 +58,15 @@ Le backend autorise déjà les requêtes CORS depuis `http://localhost:3001` (co
 - **Score** — tableau de bord dérivé des données existantes ; `null` quand aucun signal réel n'existe,
   pas de score de confiance/réputation fabriqué
 
+**Communauté**
+- Un projet peut être rendu public par son propriétaire (`/projects/:id/visibility`)
+- Les autres utilisateurs découvrent les projets publics (`/community`) et peuvent y laisser des
+  encouragements — pas de messagerie privée, pas de mise en relation avec des mentors/investisseurs
+  pour l'instant
+
 **Fiabilité**
 - `GET /health` vérifie la connexion à la base de données
-- Suite de tests (130 tests backend + 28 tests frontend, unitaires et e2e), lint et type-check en CI sur chaque push
+- Suite de tests (146 tests backend + 33 tests frontend, unitaires et e2e), lint et type-check en CI sur chaque push
 
 ## Contact
 

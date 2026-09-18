@@ -15,6 +15,7 @@ const PROJECT = {
   owner_id: 'u1',
   title: 'École motocross',
   description: 'École de motocross avec suivi des élèves en compétition',
+  is_public: false,
   created_at: '2026-01-01T00:00:00.000Z',
   updated_at: '2026-01-01T00:00:00.000Z',
 };
@@ -134,5 +135,26 @@ describe('ProjectDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /supprimer le projet/i }));
 
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith('/projects'));
+  });
+
+  it('rend le projet public puis privé', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      'PATCH /projects/p1/visibility': { status: 200, body: { ...PROJECT, is_public: true } },
+      ...ENGINE_ROUTES,
+    });
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    await screen.findByDisplayValue('École motocross');
+    expect(screen.getByText("Ce projet n'est visible que par toi.")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /rendre public/i }));
+
+    expect(await screen.findByText('Ce projet est visible dans la communauté.')).toBeInTheDocument();
   });
 });

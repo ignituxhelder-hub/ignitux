@@ -69,16 +69,19 @@ export default function ProjectsPage() {
           <p className="brand">Ignitux</p>
           <p className="muted">{user?.email}</p>
         </div>
-        <button
-          className="secondary"
-          type="button"
-          onClick={() => {
-            logout();
-            router.replace('/login');
-          }}
-        >
-          Se déconnecter
-        </button>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <Link href="/community">Communauté</Link>
+          <button
+            className="secondary"
+            type="button"
+            onClick={() => {
+              logout();
+              router.replace('/login');
+            }}
+          >
+            Se déconnecter
+          </button>
+        </div>
       </div>
 
       <form className="card" onSubmit={handleCreate}>
