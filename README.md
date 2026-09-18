@@ -6,7 +6,10 @@ Plateforme pour transformer une idée en réalité : analyser, construire, finan
 
 ## Structure
 
-- [`backend/`](backend) — API NestJS + Prisma (Postgres) : comptes, authentification JWT, projets, générateurs IA (Claude).
+IGNITUX est l'écosystème, IGINI est l'intelligence qui l'anime — voir [`backend/src/igini/README.md`](backend/src/igini/README.md).
+
+- [`backend/`](backend) — API NestJS + Prisma (Postgres) : comptes, authentification JWT, projets.
+  - [`backend/src/igini/`](backend/src/igini) — IGINI, le cerveau : les 5 générateurs IA et le moteur Claude partagé.
 - [`frontend/`](frontend) — App Next.js consommant l'API : inscription, connexion, gestion des projets.
 
 ## Lancer le projet en local
@@ -46,7 +49,7 @@ Le backend autorise déjà les requêtes CORS depuis `http://localhost:3001` (co
 
 **Fiabilité**
 - `GET /health` vérifie la connexion à la base de données
-- Suite de tests (72 tests unitaires + e2e), lint et type-check en CI sur chaque push
+- Suite de tests (73 tests backend + 21 tests frontend, unitaires et e2e), lint et type-check en CI sur chaque push
 
 ## Vision
 
