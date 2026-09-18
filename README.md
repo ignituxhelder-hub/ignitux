@@ -6,7 +6,7 @@ Plateforme pour transformer une idée en réalité : analyser, construire, finan
 
 ## Structure
 
-IGNITUX est l'écosystème, IGINI est l'intelligence qui l'anime — voir [`backend/src/igini/README.md`](backend/src/igini/README.md).
+IGNITUX est l'écosystème, IGINI est l'intelligence qui l'anime — voir [`backend/src/igini/README.md`](backend/src/igini/README.md). Documentation complète : [`docs/`](docs/README.md) (architecture, état réel du projet, décisions assumées).
 
 - [`backend/`](backend) — API NestJS + Prisma (Postgres) : comptes, authentification JWT, projets.
   - [`backend/src/igini/`](backend/src/igini) — IGINI, le cerveau : les 5 générateurs IA, le moteur Claude
@@ -71,8 +71,9 @@ bout tant que la clé n'est pas renseignée.
 
 **Fiabilité**
 - `GET /health` vérifie la connexion à la base de données
-- Suite de tests (162 tests backend + 37 tests frontend, tous unitaires), lint et type-check en CI
-  sur chaque push. Un fichier `test/app.e2e-spec.ts` existe (squelette par défaut de NestJS, jamais
+- Suite de tests (167 tests backend + 43 tests frontend, tous unitaires — voir
+  [`docs/status.md`](docs/status.md) pour la commande de vérification), lint et type-check en CI sur
+  chaque push. Un fichier `test/app.e2e-spec.ts` existe (squelette par défaut de NestJS, jamais
   personnalisé) mais n'est pas exécuté en CI — ce n'est pas une vraie suite e2e, seulement le script
   `npm run test:e2e` en local si besoin.
 
