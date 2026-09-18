@@ -1,0 +1,22 @@
+# Fichiers temporaires (ex. patches générés par des outils d'analyse)
+*.tmp
+*.temp
+*_tmp.*
+*.patch
+!.git/**/*.patch
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Éditeurs
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
