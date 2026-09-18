@@ -26,6 +26,13 @@ const SCORE_LABELS: Record<keyof ScoreCard, string> = {
   confiance: 'Confiance',
 };
 
+function scoreColor(value: number | null): string {
+  if (value === null) return 'var(--text-muted)';
+  if (value >= 7) return 'var(--ok)';
+  if (value >= 4) return 'var(--warn)';
+  return 'var(--text-muted)';
+}
+
 export function ScoreSection({ token, projectId }: SectionProps) {
   const [score, setScore] = useState<ScoreCard | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -65,9 +72,25 @@ export function ScoreSection({ token, projectId }: SectionProps) {
           }}
         >
           {(Object.keys(SCORE_LABELS) as Array<keyof ScoreCard>).map((key) => (
-            <div className="project-item" style={{ cursor: 'default', textAlign: 'center' }} key={key}>
+            <div
+              className="project-item"
+              style={{
+                cursor: 'default',
+                textAlign: 'center',
+                borderTop: `2px solid ${scoreColor(score[key])}`,
+              }}
+              key={key}
+            >
               <div className="muted">{SCORE_LABELS[key]}</div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 600 }}>
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontVariantNumeric: 'tabular-nums',
+                  fontSize: '1.75rem',
+                  fontWeight: 600,
+                  color: scoreColor(score[key]),
+                }}
+              >
                 {score[key] === null ? '—' : `${score[key]}/10`}
               </div>
             </div>

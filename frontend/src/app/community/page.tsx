@@ -58,7 +58,7 @@ export default function CommunityPage() {
         publics — libre à toi de les encourager.
       </IginiMention>
 
-      {isLoading && <p className="muted">Chargement…</p>}
+      {isLoading && <p className="loading">Chargement…</p>}
       {error && <p className="error">{error}</p>}
       {!isLoading && !error && projects.length === 0 && (
         <p className="muted">

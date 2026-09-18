@@ -59,11 +59,15 @@ d'erreur brut du SDK au client.
 vrai problème de configuration ; renvoyer le détail brut pourrait exposer des informations internes.
 **Où** — `backend/src/igini/claude/claude.service.ts`.
 
-## Pas de refonte visuelle/UX pour l'instant
+## Pas de refonte de marque/fondations, mais polish visuel oui
 
-**Quoi** — l'identité actuelle (fond sombre `#0b0c10`, accent orange `#ff5a1f`) est conservée telle
-quelle. Aucune refonte de marque ou de design system n'est en cours.
-**Pourquoi** — décision explicite : ce chantier attend que le produit soit validé par de vrais
-utilisateurs, pour ne pas investir dans une identité avant de savoir si le produit répond à un vrai
-besoin.
-**Où** — `frontend/src/app/globals.css` (tokens CSS inchangés).
+**Quoi** — deux niveaux distincts, à ne pas confondre : (1) la marque/identité de base (palette
+fond sombre `#0b0c10` + accent orange `#ff5a1f`) reste inchangée, ce chantier-là attend une
+validation par de vrais utilisateurs avant d'être rouvert ; (2) le **polish visuel** sur cette base
+(typographie réelle — Sora pour les titres, IBM Plex Sans pour le texte, IBM Plex Mono pour les
+données/scores —, échelle de titres, états de survol/chargement soignés) a été fait le 18/09/2026,
+sans changer la palette ni la structure des pages.
+**Pourquoi** — une identité complètement nouvelle avant validation utilisateurs serait un
+investissement risqué ; affiner ce qui existe déjà (accessibilité, hiérarchie, cohérence) est sans
+risque et améliore le produit immédiatement.
+**Où** — `frontend/src/app/globals.css`, `frontend/src/app/layout.tsx` (polices via `next/font/google`).

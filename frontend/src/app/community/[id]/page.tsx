@@ -78,7 +78,7 @@ export default function CommunityProjectPage() {
         </Link>
       </div>
 
-      {isLoading && <p className="muted">Chargement…</p>}
+      {isLoading && <p className="loading">Chargement…</p>}
       {loadError && <p className="error">{loadError}</p>}
 
       {project && (

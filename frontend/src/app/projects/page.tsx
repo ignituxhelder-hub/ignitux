@@ -106,7 +106,7 @@ export default function ProjectsPage() {
       </form>
 
       <div className="project-list">
-        {isLoading && <p className="muted">Chargement…</p>}
+        {isLoading && <p className="loading">Chargement…</p>}
         {listError && <p className="error">{listError}</p>}
         {!isLoading && !listError && projects.length === 0 && (
           <p className="muted">Aucun projet pour l&apos;instant — crée le premier ci-dessus.</p>
