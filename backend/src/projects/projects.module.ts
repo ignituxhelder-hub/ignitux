@@ -6,6 +6,7 @@ import { DevelopmentModule } from '../igini/development/development.module.js';
 import { FinancingModule } from '../igini/financing/financing.module.js';
 import { PlanningModule } from '../igini/planning/planning.module.js';
 import { TransmissionModule } from '../igini/transmission/transmission.module.js';
+import { WorkflowModule } from '../igini/workflow/workflow.module.js';
 import { ProjectsController } from './projects.controller.js';
 import { ProjectsService } from './projects.service.js';
 
@@ -23,6 +24,7 @@ import { ProjectsService } from './projects.service.js';
     FinancingModule,
     DevelopmentModule,
     TransmissionModule,
+    WorkflowModule,
   ],
   controllers: [ProjectsController],
   providers: [ProjectsService],

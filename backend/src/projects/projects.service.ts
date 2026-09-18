@@ -4,6 +4,7 @@ import { DevelopmentService } from '../igini/development/development.service.js'
 import { FinancingService } from '../igini/financing/financing.service.js';
 import { PlanningService } from '../igini/planning/planning.service.js';
 import { TransmissionService } from '../igini/transmission/transmission.service.js';
+import { WorkflowService } from '../igini/workflow/workflow.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class ProjectsService {
     private readonly financingService: FinancingService,
     private readonly developmentService: DevelopmentService,
     private readonly transmissionService: TransmissionService,
+    private readonly workflowService: WorkflowService,
   ) {}
 
   create(ownerId: string, title: string, description?: string) {
@@ -109,7 +111,7 @@ export class ProjectsService {
     const project = await this.findOneForOwner(ownerId, id);
     const result = await this.analysisService.analyzeProject(project.title, project.description);
 
-    return this.prisma.analyses.create({
+    const analysis = await this.prisma.analyses.create({
       data: {
         project_id: project.id,
         summary: result.summary,
@@ -119,6 +121,12 @@ export class ProjectsService {
         next_steps: result.next_steps,
       },
     });
+
+    // Workflow : les prochaines étapes suggérées par l'analyse deviennent des
+    // tâches suivables, pas juste du texte affiché puis oublié.
+    await this.workflowService.createTasksFromSuggestions(project.id, result.next_steps, 'analysis');
+
+    return analysis;
   }
 
   async listAnalysesForOwner(ownerId: string, id: string) {
@@ -138,7 +146,7 @@ export class ProjectsService {
       context,
     );
 
-    return this.prisma.build_plans.create({
+    const buildPlan = await this.prisma.build_plans.create({
       data: {
         project_id: project.id,
         summary: result.summary,
@@ -147,6 +155,12 @@ export class ProjectsService {
         key_resources: result.key_resources,
       },
     });
+
+    // Workflow : les jalons du plan de construction deviennent des tâches
+    // suivables.
+    await this.workflowService.createTasksFromSuggestions(project.id, result.milestones, 'build_plan');
+
+    return buildPlan;
   }
 
   async listBuildPlansForOwner(ownerId: string, id: string) {

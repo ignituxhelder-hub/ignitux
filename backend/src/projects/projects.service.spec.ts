@@ -5,6 +5,7 @@ import { DevelopmentService } from '../igini/development/development.service.js'
 import { FinancingService } from '../igini/financing/financing.service.js';
 import { PlanningService } from '../igini/planning/planning.service.js';
 import { TransmissionService } from '../igini/transmission/transmission.service.js';
+import { WorkflowService } from '../igini/workflow/workflow.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ProjectsService } from './projects.service.js';
 
@@ -48,6 +49,7 @@ describe('ProjectsService', () => {
   let financingService: { createFinancingPlan: ReturnType<typeof vi.fn> };
   let developmentService: { createDevelopmentPlan: ReturnType<typeof vi.fn> };
   let transmissionService: { createTransmissionPlan: ReturnType<typeof vi.fn> };
+  let workflowService: { createTasksFromSuggestions: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     prisma = {
@@ -76,6 +78,7 @@ describe('ProjectsService', () => {
     financingService = { createFinancingPlan: vi.fn() };
     developmentService = { createDevelopmentPlan: vi.fn() };
     transmissionService = { createTransmissionPlan: vi.fn() };
+    workflowService = { createTasksFromSuggestions: vi.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -86,6 +89,7 @@ describe('ProjectsService', () => {
         { provide: FinancingService, useValue: financingService },
         { provide: DevelopmentService, useValue: developmentService },
         { provide: TransmissionService, useValue: transmissionService },
+        { provide: WorkflowService, useValue: workflowService },
       ],
     }).compile();
 
@@ -189,6 +193,28 @@ describe('ProjectsService', () => {
       });
       expect(result).toEqual({ id: 'a1', project_id: 'p1', ...analysis });
     });
+
+    it('crée des tâches suivables à partir des prochaines étapes suggérées', async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      const analysis = {
+        summary: 'Résumé',
+        feasibility_score: 8,
+        strengths: ['Force'],
+        risks: ['Risque'],
+        next_steps: ['Étape 1', 'Étape 2'],
+      };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      analysisService.analyzeProject.mockResolvedValue(analysis);
+      prisma.analyses.create.mockResolvedValue({ id: 'a1', project_id: 'p1', ...analysis });
+
+      await service.analyzeForOwner('u1', 'p1');
+
+      expect(workflowService.createTasksFromSuggestions).toHaveBeenCalledWith(
+        'p1',
+        ['Étape 1', 'Étape 2'],
+        'analysis',
+      );
+    });
   });
 
   describe('listAnalysesForOwner', () => {
@@ -288,6 +314,26 @@ describe('ProjectsService', () => {
 
       const [, , context] = planningService.createBuildPlan.mock.calls[0];
       expect(context).toBeUndefined();
+    });
+
+    it('crée des tâches suivables à partir des jalons du plan', async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      planningService.createBuildPlan.mockResolvedValue({
+        summary: 'Résumé',
+        estimated_timeline: '3 à 6 mois',
+        milestones: ['Jalon 1', 'Jalon 2'],
+        key_resources: ['Ressource 1'],
+      });
+      prisma.build_plans.create.mockResolvedValue({});
+
+      await service.createBuildPlanForOwner('u1', 'p1');
+
+      expect(workflowService.createTasksFromSuggestions).toHaveBeenCalledWith(
+        'p1',
+        ['Jalon 1', 'Jalon 2'],
+        'build_plan',
+      );
     });
   });
 
