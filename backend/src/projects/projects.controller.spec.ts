@@ -11,6 +11,7 @@ describe('ProjectsController', () => {
     findOneForOwner: ReturnType<typeof vi.fn>;
     updateForOwner: ReturnType<typeof vi.fn>;
     deleteForOwner: ReturnType<typeof vi.fn>;
+    setVisibilityForOwner: ReturnType<typeof vi.fn>;
     analyzeForOwner: ReturnType<typeof vi.fn>;
     listAnalysesForOwner: ReturnType<typeof vi.fn>;
     createBuildPlanForOwner: ReturnType<typeof vi.fn>;
@@ -31,6 +32,7 @@ describe('ProjectsController', () => {
       findOneForOwner: vi.fn(),
       updateForOwner: vi.fn(),
       deleteForOwner: vi.fn(),
+      setVisibilityForOwner: vi.fn(),
       analyzeForOwner: vi.fn(),
       listAnalysesForOwner: vi.fn(),
       createBuildPlanForOwner: vi.fn(),
@@ -97,6 +99,15 @@ describe('ProjectsController', () => {
     await controller.remove(currentUser, 'p1');
 
     expect(projectsService.deleteForOwner).toHaveBeenCalledWith('u1', 'p1');
+  });
+
+  it('updateVisibility délègue au service avec le propriétaire courant', async () => {
+    projectsService.setVisibilityForOwner.mockResolvedValue({ id: 'p1', is_public: true });
+
+    const result = await controller.updateVisibility(currentUser, 'p1', { isPublic: true });
+
+    expect(projectsService.setVisibilityForOwner).toHaveBeenCalledWith('u1', 'p1', true);
+    expect(result).toEqual({ id: 'p1', is_public: true });
   });
 
   it('analyze délègue au service avec le propriétaire courant', async () => {

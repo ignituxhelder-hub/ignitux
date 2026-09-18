@@ -18,6 +18,7 @@ import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { CreateProjectDto } from './dto/create-project.dto.js';
 import { UpdateProjectDto } from './dto/update-project.dto.js';
+import { UpdateVisibilityDto } from './dto/update-visibility.dto.js';
 import { ProjectsService } from './projects.service.js';
 
 @ApiTags('projects')
@@ -56,6 +57,15 @@ export class ProjectsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     await this.projectsService.deleteForOwner(user.id, id);
+  }
+
+  @Patch(':id/visibility')
+  updateVisibility(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateVisibilityDto,
+  ) {
+    return this.projectsService.setVisibilityForOwner(user.id, id, dto.isPublic);
   }
 
   @Post(':id/analyze')

@@ -59,6 +59,11 @@ export class ProjectsService {
     await this.prisma.projects.delete({ where: { id } });
   }
 
+  async setVisibilityForOwner(ownerId: string, id: string, isPublic: boolean) {
+    await this.findOneForOwner(ownerId, id);
+    return this.prisma.projects.update({ where: { id }, data: { is_public: isPublic } });
+  }
+
   // Mémoire commune (voir backend/src/igini/README.md) : chaque génération ne
   // doit voir QUE ce que les étapes qui la précèdent logiquement ont déjà
   // établi — jamais ce qui vient après. Chaque étape a donc sa propre

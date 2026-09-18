@@ -164,6 +164,30 @@ describe('ProjectsService', () => {
     });
   });
 
+  describe('setVisibilityForOwner', () => {
+    it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.setVisibilityForOwner('u1', 'p1', true)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(prisma.projects.update).not.toHaveBeenCalled();
+    });
+
+    it('met à jour is_public une fois la propriété vérifiée', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.projects.update.mockResolvedValue({ id: 'p1', is_public: true });
+
+      const result = await service.setVisibilityForOwner('u1', 'p1', true);
+
+      expect(prisma.projects.update).toHaveBeenCalledWith({
+        where: { id: 'p1' },
+        data: { is_public: true },
+      });
+      expect(result).toEqual({ id: 'p1', is_public: true });
+    });
+  });
+
   describe('analyzeForOwner', () => {
     it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
       prisma.projects.findFirst.mockResolvedValue(null);
