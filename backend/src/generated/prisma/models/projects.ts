@@ -191,6 +191,7 @@ export type projectsWhereInput = {
   created_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   owner?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
+  analyses?: Prisma.AnalysesListRelationFilter
 }
 
 export type projectsOrderByWithRelationInput = {
@@ -201,6 +202,7 @@ export type projectsOrderByWithRelationInput = {
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
   owner?: Prisma.usersOrderByWithRelationInput
+  analyses?: Prisma.analysesOrderByRelationAggregateInput
 }
 
 export type projectsWhereUniqueInput = Prisma.AtLeast<{
@@ -214,6 +216,7 @@ export type projectsWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   owner?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
+  analyses?: Prisma.AnalysesListRelationFilter
 }, "id">
 
 export type projectsOrderByWithAggregationInput = {
@@ -247,6 +250,7 @@ export type projectsCreateInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
+  analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateInput = {
@@ -256,6 +260,7 @@ export type projectsUncheckedCreateInput = {
   description?: string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
+  analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUpdateInput = {
@@ -265,6 +270,7 @@ export type projectsUpdateInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
+  analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateInput = {
@@ -274,6 +280,7 @@ export type projectsUncheckedUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateManyInput = {
@@ -339,6 +346,11 @@ export type projectsMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type ProjectsScalarRelationFilter = {
+  is?: Prisma.projectsWhereInput
+  isNot?: Prisma.projectsWhereInput
+}
+
 export type projectsCreateNestedManyWithoutOwnerInput = {
   create?: Prisma.XOR<Prisma.projectsCreateWithoutOwnerInput, Prisma.projectsUncheckedCreateWithoutOwnerInput> | Prisma.projectsCreateWithoutOwnerInput[] | Prisma.projectsUncheckedCreateWithoutOwnerInput[]
   connectOrCreate?: Prisma.projectsCreateOrConnectWithoutOwnerInput | Prisma.projectsCreateOrConnectWithoutOwnerInput[]
@@ -385,12 +397,27 @@ export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
 
+export type projectsCreateNestedOneWithoutAnalysesInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutAnalysesInput, Prisma.projectsUncheckedCreateWithoutAnalysesInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutAnalysesInput
+  connect?: Prisma.projectsWhereUniqueInput
+}
+
+export type projectsUpdateOneRequiredWithoutAnalysesNestedInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutAnalysesInput, Prisma.projectsUncheckedCreateWithoutAnalysesInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutAnalysesInput
+  upsert?: Prisma.projectsUpsertWithoutAnalysesInput
+  connect?: Prisma.projectsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutAnalysesInput, Prisma.projectsUpdateWithoutAnalysesInput>, Prisma.projectsUncheckedUpdateWithoutAnalysesInput>
+}
+
 export type projectsCreateWithoutOwnerInput = {
   id?: string
   title: string
   description?: string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
+  analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutOwnerInput = {
@@ -399,6 +426,7 @@ export type projectsUncheckedCreateWithoutOwnerInput = {
   description?: string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
+  analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutOwnerInput = {
@@ -439,6 +467,58 @@ export type projectsScalarWhereInput = {
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
 }
 
+export type projectsCreateWithoutAnalysesInput = {
+  id?: string
+  title: string
+  description?: string | null
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  owner: Prisma.usersCreateNestedOneWithoutProjectsInput
+}
+
+export type projectsUncheckedCreateWithoutAnalysesInput = {
+  id?: string
+  owner_id: string
+  title: string
+  description?: string | null
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+}
+
+export type projectsCreateOrConnectWithoutAnalysesInput = {
+  where: Prisma.projectsWhereUniqueInput
+  create: Prisma.XOR<Prisma.projectsCreateWithoutAnalysesInput, Prisma.projectsUncheckedCreateWithoutAnalysesInput>
+}
+
+export type projectsUpsertWithoutAnalysesInput = {
+  update: Prisma.XOR<Prisma.projectsUpdateWithoutAnalysesInput, Prisma.projectsUncheckedUpdateWithoutAnalysesInput>
+  create: Prisma.XOR<Prisma.projectsCreateWithoutAnalysesInput, Prisma.projectsUncheckedCreateWithoutAnalysesInput>
+  where?: Prisma.projectsWhereInput
+}
+
+export type projectsUpdateToOneWithWhereWithoutAnalysesInput = {
+  where?: Prisma.projectsWhereInput
+  data: Prisma.XOR<Prisma.projectsUpdateWithoutAnalysesInput, Prisma.projectsUncheckedUpdateWithoutAnalysesInput>
+}
+
+export type projectsUpdateWithoutAnalysesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
+}
+
+export type projectsUncheckedUpdateWithoutAnalysesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
 export type projectsCreateManyOwnerInput = {
   id?: string
   title: string
@@ -453,6 +533,7 @@ export type projectsUpdateWithoutOwnerInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutOwnerInput = {
@@ -461,6 +542,7 @@ export type projectsUncheckedUpdateWithoutOwnerInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateManyWithoutOwnerInput = {
@@ -472,6 +554,35 @@ export type projectsUncheckedUpdateManyWithoutOwnerInput = {
 }
 
 
+/**
+ * Count Type ProjectsCountOutputType
+ */
+
+export type ProjectsCountOutputType = {
+  analyses: number
+}
+
+export type ProjectsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  analyses?: boolean | ProjectsCountOutputTypeCountAnalysesArgs
+}
+
+/**
+ * ProjectsCountOutputType without action
+ */
+export type ProjectsCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProjectsCountOutputType
+   */
+  select?: Prisma.ProjectsCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ProjectsCountOutputType without action
+ */
+export type ProjectsCountOutputTypeCountAnalysesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.analysesWhereInput
+}
+
 
 export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -481,6 +592,8 @@ export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   created_at?: boolean
   updated_at?: boolean
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
+  analyses?: boolean | Prisma.projects$analysesArgs<ExtArgs>
+  _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["projects"]>
 
 export type projectsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -515,6 +628,8 @@ export type projectsSelectScalar = {
 export type projectsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_id" | "title" | "description" | "created_at" | "updated_at", ExtArgs["result"]["projects"]>
 export type projectsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
+  analyses?: boolean | Prisma.projects$analysesArgs<ExtArgs>
+  _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type projectsIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -527,6 +642,7 @@ export type $projectsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   name: "projects"
   objects: {
     owner: Prisma.$usersPayload<ExtArgs>
+    analyses: Prisma.$analysesPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -930,6 +1046,7 @@ readonly fields: projectsFieldRefs;
 export interface Prisma__projectsClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   owner<T extends Prisma.usersDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.usersDefaultArgs<ExtArgs>>): Prisma.Prisma__usersClient<runtime.Types.Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  analyses<T extends Prisma.projects$analysesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$analysesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$analysesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1363,6 +1480,30 @@ export type projectsDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many projects to delete.
    */
   limit?: number
+}
+
+/**
+ * projects.analyses
+ */
+export type projects$analysesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the analyses
+   */
+  select?: Prisma.analysesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the analyses
+   */
+  omit?: Prisma.analysesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.analysesInclude<ExtArgs> | null
+  where?: Prisma.analysesWhereInput
+  orderBy?: Prisma.analysesOrderByWithRelationInput | Prisma.analysesOrderByWithRelationInput[]
+  cursor?: Prisma.analysesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AnalysesScalarFieldEnum | Prisma.AnalysesScalarFieldEnum[]
 }
 
 /**

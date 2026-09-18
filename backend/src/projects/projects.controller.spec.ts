@@ -11,6 +11,8 @@ describe('ProjectsController', () => {
     findOneForOwner: ReturnType<typeof vi.fn>;
     updateForOwner: ReturnType<typeof vi.fn>;
     deleteForOwner: ReturnType<typeof vi.fn>;
+    analyzeForOwner: ReturnType<typeof vi.fn>;
+    listAnalysesForOwner: ReturnType<typeof vi.fn>;
   };
   const currentUser = { id: 'u1', email: 'a@b.com' };
 
@@ -21,6 +23,8 @@ describe('ProjectsController', () => {
       findOneForOwner: vi.fn(),
       updateForOwner: vi.fn(),
       deleteForOwner: vi.fn(),
+      analyzeForOwner: vi.fn(),
+      listAnalysesForOwner: vi.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -77,5 +81,23 @@ describe('ProjectsController', () => {
     await controller.remove(currentUser, 'p1');
 
     expect(projectsService.deleteForOwner).toHaveBeenCalledWith('u1', 'p1');
+  });
+
+  it('analyze délègue au service avec le propriétaire courant', async () => {
+    projectsService.analyzeForOwner.mockResolvedValue({ id: 'a1' });
+
+    const result = await controller.analyze(currentUser, 'p1');
+
+    expect(projectsService.analyzeForOwner).toHaveBeenCalledWith('u1', 'p1');
+    expect(result).toEqual({ id: 'a1' });
+  });
+
+  it('listAnalyses délègue au service avec le propriétaire courant', async () => {
+    projectsService.listAnalysesForOwner.mockResolvedValue([{ id: 'a1' }]);
+
+    const result = await controller.listAnalyses(currentUser, 'p1');
+
+    expect(projectsService.listAnalysesForOwner).toHaveBeenCalledWith('u1', 'p1');
+    expect(result).toEqual([{ id: 'a1' }]);
   });
 });

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
-import { api, ApiError, type Project } from '@/lib/api';
+import { api, ApiError, type Analysis, type Project } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
 export default function ProjectDetailPage() {
@@ -21,6 +21,10 @@ export default function ProjectDetailPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [analyses, setAnalyses] = useState<Analysis[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!isReady) return;
     if (!token) {
@@ -31,6 +35,8 @@ export default function ProjectDetailPage() {
     let cancelled = false;
     setIsLoading(true);
     setLoadError(null);
+    setAnalyses([]);
+
     api
       .getProject(token, id)
       .then((data) => {
@@ -45,6 +51,16 @@ export default function ProjectDetailPage() {
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
+      });
+
+    api
+      .listAnalyses(token, id)
+      .then((data) => {
+        if (cancelled) return;
+        setAnalyses(data);
+      })
+      .catch(() => {
+        // Pas bloquant : l'historique des analyses est secondaire à la fiche projet.
       });
 
     return () => {
@@ -64,6 +80,20 @@ export default function ProjectDetailPage() {
       setFormError(err instanceof ApiError ? err.message : 'Impossible de sauvegarder.');
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function handleAnalyze() {
+    if (!token) return;
+    setAnalysisError(null);
+    setIsAnalyzing(true);
+    try {
+      const analysis = await api.analyzeProject(token, id);
+      setAnalyses((prev) => [analysis, ...prev]);
+    } catch (err) {
+      setAnalysisError(err instanceof ApiError ? err.message : "Impossible d'analyser le projet.");
+    } finally {
+      setIsAnalyzing(false);
     }
   }
 
@@ -125,6 +155,55 @@ export default function ProjectDetailPage() {
           </div>
         </form>
       )}
+
+      {project && (
+        <div className="card" style={{ marginTop: '1.5rem' }}>
+          <div className="top-bar" style={{ marginBottom: analyses.length ? '1rem' : 0 }}>
+            <h2 style={{ margin: 0 }}>Analyse</h2>
+            <button className="secondary" type="button" onClick={handleAnalyze} disabled={isAnalyzing}>
+              {isAnalyzing ? 'Analyse en cours…' : 'Analyser ce projet'}
+            </button>
+          </div>
+          {analysisError && <p className="error">{analysisError}</p>}
+          {analyses.length === 0 && !isAnalyzing && (
+            <p className="muted">Aucune analyse pour l&apos;instant.</p>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {analyses.map((analysis) => (
+              <AnalysisCard analysis={analysis} key={analysis.id} />
+            ))}
+          </div>
+        </div>
+      )}
     </main>
+  );
+}
+
+function AnalysisCard({ analysis }: { analysis: Analysis }) {
+  return (
+    <div className="project-item" style={{ cursor: 'default' }}>
+      <div className="top-bar" style={{ marginBottom: '0.5rem' }}>
+        <strong>Score de faisabilité : {analysis.feasibility_score}/10</strong>
+        <span className="muted">{new Date(analysis.created_at).toLocaleString('fr-FR')}</span>
+      </div>
+      <p>{analysis.summary}</p>
+      <AnalysisList title="Points forts" items={analysis.strengths} />
+      <AnalysisList title="Risques" items={analysis.risks} />
+      <AnalysisList title="Prochaines étapes" items={analysis.next_steps} />
+    </div>
+  );
+}
+
+function AnalysisList({ title, items }: { title: string; items: string[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div style={{ marginTop: '0.5rem' }}>
+      <strong>{title}</strong>
+      <ul style={{ margin: '0.25rem 0 0', paddingLeft: '1.25rem' }}>
+        {items.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
+      </ul>
+    </div>
   );
 }

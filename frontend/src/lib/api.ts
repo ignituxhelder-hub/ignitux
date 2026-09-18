@@ -48,6 +48,17 @@ export interface Project {
   updated_at: string;
 }
 
+export interface Analysis {
+  id: string;
+  project_id: string;
+  summary: string;
+  feasibility_score: number;
+  strengths: string[];
+  risks: string[];
+  next_steps: string[];
+  created_at: string;
+}
+
 export const api = {
   signup: (email: string, password: string) =>
     request<User>('/users/signup', { method: 'POST', body: JSON.stringify({ email, password }) }),
@@ -88,4 +99,15 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     });
   },
+
+  analyzeProject: (token: string, id: string) =>
+    request<Analysis>(`/projects/${id}/analyze`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listAnalyses: (token: string, id: string) =>
+    request<Analysis[]>(`/projects/${id}/analyses`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
 };

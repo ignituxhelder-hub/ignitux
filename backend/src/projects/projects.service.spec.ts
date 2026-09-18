@@ -1,5 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { AnalysisService } from '../analysis/analysis.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ProjectsService } from './projects.service.js';
 
@@ -13,7 +14,12 @@ describe('ProjectsService', () => {
       update: ReturnType<typeof vi.fn>;
       delete: ReturnType<typeof vi.fn>;
     };
+    analyses: {
+      create: ReturnType<typeof vi.fn>;
+      findMany: ReturnType<typeof vi.fn>;
+    };
   };
+  let analysisService: { analyzeProject: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     prisma = {
@@ -24,10 +30,16 @@ describe('ProjectsService', () => {
         update: vi.fn(),
         delete: vi.fn(),
       },
+      analyses: { create: vi.fn(), findMany: vi.fn() },
     };
+    analysisService = { analyzeProject: vi.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProjectsService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        ProjectsService,
+        { provide: PrismaService, useValue: prisma },
+        { provide: AnalysisService, useValue: analysisService },
+      ],
     }).compile();
 
     service = module.get<ProjectsService>(ProjectsService);
@@ -98,6 +110,60 @@ describe('ProjectsService', () => {
       await service.deleteForOwner('u1', 'p1');
 
       expect(prisma.projects.delete).toHaveBeenCalledWith({ where: { id: 'p1' } });
+    });
+  });
+
+  describe('analyzeForOwner', () => {
+    it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.analyzeForOwner('u1', 'p1')).rejects.toBeInstanceOf(NotFoundException);
+      expect(analysisService.analyzeProject).not.toHaveBeenCalled();
+    });
+
+    it('analyse le projet puis persiste le résultat', async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      const analysis = {
+        summary: 'Résumé',
+        feasibility_score: 8,
+        strengths: ['Force'],
+        risks: ['Risque'],
+        next_steps: ['Étape'],
+      };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      analysisService.analyzeProject.mockResolvedValue(analysis);
+      prisma.analyses.create.mockResolvedValue({ id: 'a1', project_id: 'p1', ...analysis });
+
+      const result = await service.analyzeForOwner('u1', 'p1');
+
+      expect(analysisService.analyzeProject).toHaveBeenCalledWith('Idée', 'Desc');
+      expect(prisma.analyses.create).toHaveBeenCalledWith({
+        data: { project_id: 'p1', ...analysis },
+      });
+      expect(result).toEqual({ id: 'a1', project_id: 'p1', ...analysis });
+    });
+  });
+
+  describe('listAnalysesForOwner', () => {
+    it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.listAnalysesForOwner('u1', 'p1')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+    });
+
+    it('liste les analyses du projet, les plus récentes en premier', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.analyses.findMany.mockResolvedValue([{ id: 'a1' }]);
+
+      const result = await service.listAnalysesForOwner('u1', 'p1');
+
+      expect(prisma.analyses.findMany).toHaveBeenCalledWith({
+        where: { project_id: 'p1' },
+        orderBy: { created_at: 'desc' },
+      });
+      expect(result).toEqual([{ id: 'a1' }]);
     });
   });
 });

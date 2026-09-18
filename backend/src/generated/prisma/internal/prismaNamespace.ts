@@ -398,7 +398,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   users: 'users',
-  projects: 'projects'
+  projects: 'projects',
+  analyses: 'analyses'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -414,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "projects"
+    modelProps: "users" | "projects" | "analyses"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -566,6 +567,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    analyses: {
+      payload: Prisma.$analysesPayload<ExtArgs>
+      fields: Prisma.analysesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.analysesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.analysesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysesPayload>
+        }
+        findFirst: {
+          args: Prisma.analysesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.analysesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysesPayload>
+        }
+        findMany: {
+          args: Prisma.analysesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysesPayload>[]
+        }
+        create: {
+          args: Prisma.analysesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysesPayload>
+        }
+        createMany: {
+          args: Prisma.analysesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.analysesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysesPayload>[]
+        }
+        delete: {
+          args: Prisma.analysesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysesPayload>
+        }
+        update: {
+          args: Prisma.analysesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysesPayload>
+        }
+        deleteMany: {
+          args: Prisma.analysesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.analysesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.analysesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysesPayload>[]
+        }
+        upsert: {
+          args: Prisma.analysesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysesPayload>
+        }
+        aggregate: {
+          args: Prisma.AnalysesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAnalyses>
+        }
+        groupBy: {
+          args: Prisma.analysesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AnalysesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.analysesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AnalysesCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -625,6 +700,20 @@ export const ProjectsScalarFieldEnum = {
 } as const
 
 export type ProjectsScalarFieldEnum = (typeof ProjectsScalarFieldEnum)[keyof typeof ProjectsScalarFieldEnum]
+
+
+export const AnalysesScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  summary: 'summary',
+  feasibility_score: 'feasibility_score',
+  strengths: 'strengths',
+  risks: 'risks',
+  next_steps: 'next_steps',
+  created_at: 'created_at'
+} as const
+
+export type AnalysesScalarFieldEnum = (typeof AnalysesScalarFieldEnum)[keyof typeof AnalysesScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -696,6 +785,20 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 /**
@@ -851,6 +954,7 @@ export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaC
 export type GlobalOmitConfig = {
   users?: Prisma.usersOmit
   projects?: Prisma.projectsOmit
+  analyses?: Prisma.analysesOmit
 }
 
 /* Types for Logging */

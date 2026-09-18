@@ -10,6 +10,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
@@ -51,5 +52,18 @@ export class ProjectsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     await this.projectsService.deleteForOwner(user.id, id);
+  }
+
+  @Post(':id/analyze')
+  @HttpCode(HttpStatus.CREATED)
+  // Chaque appel coûte un appel API Claude — limite dédiée contre les abus.
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  analyze(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.projectsService.analyzeForOwner(user.id, id);
+  }
+
+  @Get(':id/analyses')
+  listAnalyses(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.projectsService.listAnalysesForOwner(user.id, id);
   }
 }
