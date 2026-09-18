@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
+import { buildProjectPrompt } from '../claude/build-project-prompt.js';
 import { ClaudeService } from '../claude/claude.service.js';
-import { IGINI_IDENTITY } from '../claude/igini-identity.js';
+import { buildSystemPrompt } from '../claude/igini-identity.js';
 
 const ProjectAnalysisSchema = z.object({
   summary: z.string().describe("Résumé en 2 à 3 phrases de l'idée et de son potentiel"),
@@ -18,12 +19,11 @@ const ProjectAnalysisSchema = z.object({
 
 export type ProjectAnalysisResult = z.infer<typeof ProjectAnalysisSchema>;
 
-const SYSTEM_PROMPT = `${IGINI_IDENTITY}
-
-Ici, tu appliques la première étape de ta méthode : Découvrir. On te donne le titre et la
-description d'une idée de projet. Évalue-la avec honnêteté : sois concret, évite le remplissage
-générique, et adapte le niveau d'exigence à ce qui est décrit (une idée à un stade précoce n'est
-pas jugée comme un business plan complet).`;
+const SYSTEM_PROMPT = buildSystemPrompt(`Ici, tu appliques la première des cinq étapes de ta
+méthode : Découvrir. On te donne le titre et la description d'une idée de projet. Évalue-la avec
+honnêteté et bienveillance : sois concret, évite le remplissage générique, et adapte le niveau
+d'exigence à ce qui est décrit (une idée à un stade précoce n'est pas jugée comme un business plan
+complet).`);
 
 @Injectable()
 export class AnalysisService {
@@ -33,7 +33,7 @@ export class AnalysisService {
     return this.claude.generateStructuredOutput({
       schema: ProjectAnalysisSchema,
       system: SYSTEM_PROMPT,
-      userContent: `Titre : ${title}\nDescription : ${description ?? '(aucune description fournie)'}`,
+      userContent: buildProjectPrompt(title, description),
       logContext: "Échec de l'analyse du projet via Claude",
       userErrorMessage: "L'analyse a échoué, réessaie dans un instant.",
     });

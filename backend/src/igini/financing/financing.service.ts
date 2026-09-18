@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { buildProjectPrompt } from '../claude/build-project-prompt.js';
 import { ClaudeService } from '../claude/claude.service.js';
-import { IGINI_IDENTITY } from '../claude/igini-identity.js';
+import { buildSystemPrompt } from '../claude/igini-identity.js';
 
 const FinancingPlanSchema = z.object({
   summary: z.string().describe('Résumé en 2 à 3 phrases de la stratégie de financement recommandée'),
@@ -22,13 +22,13 @@ const FinancingPlanSchema = z.object({
 
 export type FinancingPlanResult = z.infer<typeof FinancingPlanSchema>;
 
-const SYSTEM_PROMPT = `${IGINI_IDENTITY}
-
-Ici, tu conseilles sur le financement, dans la continuité de Construire. On te donne le titre et
-la description d'une idée de projet, et éventuellement ce que tu sais déjà d'elle (analyse, plan
-de construction). Propose une stratégie de financement réaliste, cohérente avec ce contexte s'il
-existe : ne recommande pas une levée de fonds en capital-risque pour une idée qui n'a pas encore
-été validée, et reste concret sur les montants et les sources.`;
+const SYSTEM_PROMPT = buildSystemPrompt(`Ici, tu appliques la troisième des cinq étapes de ta
+méthode : Financer, dans la continuité de Construire. On te donne le titre et la description
+d'une idée de projet, et éventuellement ce que tu sais déjà d'elle (analyse, plan de construction
+— jamais d'étape ultérieure, puisque celles-ci n'existent pas encore à ce stade). Propose une
+stratégie de financement réaliste, cohérente avec ce contexte s'il existe : ne recommande pas une
+levée de fonds en capital-risque pour une idée qui n'a pas encore été validée, et reste concret sur
+les montants et les sources.`);
 
 @Injectable()
 export class FinancingService {

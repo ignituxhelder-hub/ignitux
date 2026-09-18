@@ -57,51 +57,52 @@ export class ProjectsService {
     await this.prisma.projects.delete({ where: { id } });
   }
 
-  /**
-   * Résume ce qu'IGINI sait déjà d'un projet grâce aux étapes précédentes
-   * (mémoire commune) : la dernière analyse, le dernier plan de
-   * construction et le dernier plan de financement, quand ils existent.
-   * Utilisé pour que chaque nouvelle génération s'appuie sur les
-   * précédentes plutôt que de repartir de zéro.
-   */
-  private async buildProjectContext(projectId: string): Promise<string | undefined> {
-    const [latestAnalysis, latestBuildPlan, latestFinancingPlan, latestDevelopmentPlan] =
-      await Promise.all([
-        this.prisma.analyses.findFirst({
-          where: { project_id: projectId },
-          orderBy: { created_at: 'desc' },
-        }),
-        this.prisma.build_plans.findFirst({
-          where: { project_id: projectId },
-          orderBy: { created_at: 'desc' },
-        }),
-        this.prisma.financing_plans.findFirst({
-          where: { project_id: projectId },
-          orderBy: { created_at: 'desc' },
-        }),
-        this.prisma.development_plans.findFirst({
-          where: { project_id: projectId },
-          orderBy: { created_at: 'desc' },
-        }),
-      ]);
+  // Mémoire commune (voir backend/src/igini/README.md) : chaque génération ne
+  // doit voir QUE ce que les étapes qui la précèdent logiquement ont déjà
+  // établi — jamais ce qui vient après. Chaque étape a donc sa propre
+  // méthode, appelée uniquement par les étapes qui la suivent dans le
+  // pipeline (analyse → construction → financement → développement →
+  // transmission), plutôt qu'une fonction unique qui remonterait tout sans
+  // distinction (ce qui ferait fuir des informations "du futur" en cas de
+  // régénération d'une étape après que des étapes suivantes existent déjà).
 
-    const parts: string[] = [];
-    if (latestAnalysis) {
-      parts.push(
-        `Analyse (score de faisabilité ${latestAnalysis.feasibility_score}/10) : ${latestAnalysis.summary}`,
-      );
-    }
-    if (latestBuildPlan) {
-      parts.push(`Plan de construction : ${latestBuildPlan.summary}`);
-    }
-    if (latestFinancingPlan) {
-      parts.push(`Plan de financement : ${latestFinancingPlan.summary}`);
-    }
-    if (latestDevelopmentPlan) {
-      parts.push(`Plan de développement : ${latestDevelopmentPlan.summary}`);
-    }
+  private async latestAnalysisContext(projectId: string): Promise<string | undefined> {
+    const analysis = await this.prisma.analyses.findFirst({
+      where: { project_id: projectId },
+      orderBy: { created_at: 'desc' },
+    });
+    return analysis
+      ? `Analyse (score de faisabilité ${analysis.feasibility_score}/10) : ${analysis.summary}`
+      : undefined;
+  }
 
-    return parts.length > 0 ? parts.join('\n') : undefined;
+  private async latestBuildPlanContext(projectId: string): Promise<string | undefined> {
+    const plan = await this.prisma.build_plans.findFirst({
+      where: { project_id: projectId },
+      orderBy: { created_at: 'desc' },
+    });
+    return plan ? `Plan de construction : ${plan.summary}` : undefined;
+  }
+
+  private async latestFinancingPlanContext(projectId: string): Promise<string | undefined> {
+    const plan = await this.prisma.financing_plans.findFirst({
+      where: { project_id: projectId },
+      orderBy: { created_at: 'desc' },
+    });
+    return plan ? `Plan de financement : ${plan.summary}` : undefined;
+  }
+
+  private async latestDevelopmentPlanContext(projectId: string): Promise<string | undefined> {
+    const plan = await this.prisma.development_plans.findFirst({
+      where: { project_id: projectId },
+      orderBy: { created_at: 'desc' },
+    });
+    return plan ? `Plan de développement : ${plan.summary}` : undefined;
+  }
+
+  private joinContext(...parts: Array<string | undefined>): string | undefined {
+    const present = parts.filter((part): part is string => Boolean(part));
+    return present.length > 0 ? present.join('\n') : undefined;
   }
 
   async analyzeForOwner(ownerId: string, id: string) {
@@ -130,7 +131,7 @@ export class ProjectsService {
 
   async createBuildPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
-    const context = await this.buildProjectContext(id);
+    const context = this.joinContext(await this.latestAnalysisContext(id));
     const result = await this.planningService.createBuildPlan(
       project.title,
       project.description,
@@ -158,7 +159,11 @@ export class ProjectsService {
 
   async createFinancingPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
-    const context = await this.buildProjectContext(id);
+    const [analysis, buildPlan] = await Promise.all([
+      this.latestAnalysisContext(id),
+      this.latestBuildPlanContext(id),
+    ]);
+    const context = this.joinContext(analysis, buildPlan);
     const result = await this.financingService.createFinancingPlan(
       project.title,
       project.description,
@@ -186,7 +191,12 @@ export class ProjectsService {
 
   async createDevelopmentPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
-    const context = await this.buildProjectContext(id);
+    const [analysis, buildPlan, financingPlan] = await Promise.all([
+      this.latestAnalysisContext(id),
+      this.latestBuildPlanContext(id),
+      this.latestFinancingPlanContext(id),
+    ]);
+    const context = this.joinContext(analysis, buildPlan, financingPlan);
     const result = await this.developmentService.createDevelopmentPlan(
       project.title,
       project.description,
@@ -214,7 +224,13 @@ export class ProjectsService {
 
   async createTransmissionPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
-    const context = await this.buildProjectContext(id);
+    const [analysis, buildPlan, financingPlan, developmentPlan] = await Promise.all([
+      this.latestAnalysisContext(id),
+      this.latestBuildPlanContext(id),
+      this.latestFinancingPlanContext(id),
+      this.latestDevelopmentPlanContext(id),
+    ]);
+    const context = this.joinContext(analysis, buildPlan, financingPlan, developmentPlan);
     const result = await this.transmissionService.createTransmissionPlan(
       project.title,
       project.description,

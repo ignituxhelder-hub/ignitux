@@ -268,6 +268,27 @@ describe('ProjectsService', () => {
         expect.stringContaining('Idée prometteuse.'),
       );
     });
+
+    it("ne transmet jamais le contenu d'étapes ultérieures (financement, développement), même si elles existent déjà", async () => {
+      // Régression : ce test échouerait avec l'ancienne implémentation, qui
+      // remontait sans distinction toutes les tables existantes.
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      prisma.financing_plans.findFirst.mockResolvedValue({ summary: 'Plan de financement futur.' });
+      prisma.development_plans.findFirst.mockResolvedValue({ summary: 'Plan de croissance futur.' });
+      planningService.createBuildPlan.mockResolvedValue({
+        summary: 'Résumé',
+        estimated_timeline: '3 à 6 mois',
+        milestones: ['Jalon 1'],
+        key_resources: ['Ressource 1'],
+      });
+      prisma.build_plans.create.mockResolvedValue({});
+
+      await service.createBuildPlanForOwner('u1', 'p1');
+
+      const [, , context] = planningService.createBuildPlan.mock.calls[0];
+      expect(context).toBeUndefined();
+    });
   });
 
   describe('listBuildPlansForOwner', () => {
@@ -322,6 +343,28 @@ describe('ProjectsService', () => {
         data: { project_id: 'p1', ...plan },
       });
       expect(result).toEqual({ id: 'fp1', project_id: 'p1', ...plan });
+    });
+
+    it("compose le contexte à partir de l'analyse et de la construction, jamais du développement", async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      prisma.analyses.findFirst.mockResolvedValue({ summary: 'Analyse.', feasibility_score: 6 });
+      prisma.build_plans.findFirst.mockResolvedValue({ summary: 'Construction.' });
+      prisma.development_plans.findFirst.mockResolvedValue({ summary: 'Ne doit pas apparaître.' });
+      financingService.createFinancingPlan.mockResolvedValue({
+        summary: 'Résumé',
+        estimated_budget: '5 000 € à 15 000 €',
+        funding_sources: ['Autofinancement'],
+        budget_breakdown: ['Développement'],
+      });
+      prisma.financing_plans.create.mockResolvedValue({});
+
+      await service.createFinancingPlanForOwner('u1', 'p1');
+
+      const [, , context] = financingService.createFinancingPlan.mock.calls[0];
+      expect(context).toContain('Analyse.');
+      expect(context).toContain('Construction.');
+      expect(context).not.toContain('Ne doit pas apparaître.');
     });
   });
 
@@ -378,6 +421,28 @@ describe('ProjectsService', () => {
       });
       expect(result).toEqual({ id: 'dp1', project_id: 'p1', ...plan });
     });
+
+    it("compose le contexte à partir de l'analyse, de la construction et du financement", async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      prisma.analyses.findFirst.mockResolvedValue({ summary: 'Analyse.', feasibility_score: 6 });
+      prisma.build_plans.findFirst.mockResolvedValue({ summary: 'Construction.' });
+      prisma.financing_plans.findFirst.mockResolvedValue({ summary: 'Financement.' });
+      developmentService.createDevelopmentPlan.mockResolvedValue({
+        summary: 'Résumé',
+        growth_levers: ['Bouche-à-oreille'],
+        key_metrics: ['Rétention'],
+        scaling_risks: ['Support non préparé'],
+      });
+      prisma.development_plans.create.mockResolvedValue({});
+
+      await service.createDevelopmentPlanForOwner('u1', 'p1');
+
+      const [, , context] = developmentService.createDevelopmentPlan.mock.calls[0];
+      expect(context).toContain('Analyse.');
+      expect(context).toContain('Construction.');
+      expect(context).toContain('Financement.');
+    });
   });
 
   describe('listDevelopmentPlansForOwner', () => {
@@ -432,6 +497,30 @@ describe('ProjectsService', () => {
         data: { project_id: 'p1', ...plan },
       });
       expect(result).toEqual({ id: 'tp1', project_id: 'p1', ...plan });
+    });
+
+    it('compose le contexte à partir des quatre étapes précédentes', async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      prisma.analyses.findFirst.mockResolvedValue({ summary: 'Analyse.', feasibility_score: 6 });
+      prisma.build_plans.findFirst.mockResolvedValue({ summary: 'Construction.' });
+      prisma.financing_plans.findFirst.mockResolvedValue({ summary: 'Financement.' });
+      prisma.development_plans.findFirst.mockResolvedValue({ summary: 'Développement.' });
+      transmissionService.createTransmissionPlan.mockResolvedValue({
+        summary: 'Résumé',
+        transfer_options: ['Association avec un repreneur'],
+        key_documentation: ['Contrats fournisseurs'],
+        readiness_checklist: ['Formaliser les processus clés'],
+      });
+      prisma.transmission_plans.create.mockResolvedValue({});
+
+      await service.createTransmissionPlanForOwner('u1', 'p1');
+
+      const [, , context] = transmissionService.createTransmissionPlan.mock.calls[0];
+      expect(context).toContain('Analyse.');
+      expect(context).toContain('Construction.');
+      expect(context).toContain('Financement.');
+      expect(context).toContain('Développement.');
     });
   });
 

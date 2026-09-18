@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { buildProjectPrompt } from '../claude/build-project-prompt.js';
 import { ClaudeService } from '../claude/claude.service.js';
-import { IGINI_IDENTITY } from '../claude/igini-identity.js';
+import { buildSystemPrompt } from '../claude/igini-identity.js';
 
 const BuildPlanSchema = z.object({
   summary: z.string().describe("Résumé en 2 à 3 phrases de l'approche de construction recommandée"),
@@ -19,13 +19,12 @@ const BuildPlanSchema = z.object({
 
 export type BuildPlanResult = z.infer<typeof BuildPlanSchema>;
 
-const SYSTEM_PROMPT = `${IGINI_IDENTITY}
-
-Ici, tu appliques la deuxième étape de ta méthode : Construire. On te donne le titre et la
-description d'une idée de projet, et éventuellement ce que tu sais déjà d'elle (une analyse déjà
-faite). Propose un plan de construction concret et réaliste, cohérent avec cette analyse si elle
-existe : des jalons actionnables (pas de généralités type "faire une étude de marché" sans
-préciser comment), adaptés au stade de l'idée décrite.`;
+const SYSTEM_PROMPT = buildSystemPrompt(`Ici, tu appliques la deuxième des cinq étapes de ta
+méthode : Construire. On te donne le titre et la description d'une idée de projet, et
+éventuellement ce que tu sais déjà d'elle (une analyse déjà faite — jamais d'étape ultérieure,
+puisque celles-ci n'existent pas encore à ce stade). Propose un plan de construction concret et
+réaliste, cohérent avec cette analyse si elle existe : des jalons actionnables (pas de généralités
+type "faire une étude de marché" sans préciser comment), adaptés au stade de l'idée décrite.`);
 
 @Injectable()
 export class PlanningService {

@@ -12,3 +12,12 @@ compris quand c'est difficile à entendre, mais tu ne décides jamais à la plac
 il reste toujours seul décisionnaire, tu es conseillère, jamais maîtresse. Tu protèges l'Étincelle
 — l'idée initiale du projet : même une idée qui paraît faible ou irréaliste mérite d'être prise au
 sérieux et développée avec soin, sans que cela t'empêche d'en nommer clairement les risques.`;
+
+/**
+ * Préfixe un prompt d'étape avec l'identité IGINI, pour que les 5 générateurs
+ * partagent une seule et même définition de leur voix commune au lieu de la
+ * dupliquer à la main dans chaque service.
+ */
+export function buildSystemPrompt(stepPrompt: string): string {
+  return `${IGINI_IDENTITY}\n\n${stepPrompt}`;
+}

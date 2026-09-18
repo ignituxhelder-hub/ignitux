@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { buildProjectPrompt } from '../claude/build-project-prompt.js';
 import { ClaudeService } from '../claude/claude.service.js';
-import { IGINI_IDENTITY } from '../claude/igini-identity.js';
+import { buildSystemPrompt } from '../claude/igini-identity.js';
 
 const DevelopmentPlanSchema = z.object({
   summary: z.string().describe('Résumé en 2 à 3 phrases de la stratégie de croissance recommandée'),
@@ -21,13 +21,14 @@ const DevelopmentPlanSchema = z.object({
 
 export type DevelopmentPlanResult = z.infer<typeof DevelopmentPlanSchema>;
 
-const SYSTEM_PROMPT = `${IGINI_IDENTITY}
-
-Ici, tu conseilles sur la croissance, une fois le projet analysé, construit et financé. On te
-donne le titre et la description d'une idée de projet, et éventuellement ce que tu sais déjà
-d'elle. Propose une stratégie de développement/croissance concrète, cohérente avec ce contexte
-s'il existe : des leviers actionnables et des métriques précises, adaptés au stade du projet (ne
-recommande pas d'accélération agressive pour une idée qui n'a pas encore de premiers clients).`;
+const SYSTEM_PROMPT = buildSystemPrompt(`Ici, tu appliques la quatrième des cinq étapes de ta
+méthode : Développer, une fois le projet analysé, construit et financé. On te donne le titre et la
+description d'une idée de projet, et éventuellement ce que tu sais déjà d'elle (analyse, plan de
+construction, plan de financement — jamais d'étape ultérieure, puisque celle-ci n'existe pas
+encore à ce stade). Propose une stratégie de développement/croissance concrète, cohérente avec ce
+contexte s'il existe : des leviers actionnables et des métriques précises, adaptés au stade du
+projet (ne recommande pas d'accélération agressive pour une idée qui n'a pas encore de premiers
+clients).`);
 
 @Injectable()
 export class DevelopmentService {
