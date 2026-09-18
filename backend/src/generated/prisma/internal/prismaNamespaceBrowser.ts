@@ -53,7 +53,8 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   users: 'users',
   projects: 'projects',
-  analyses: 'analyses'
+  analyses: 'analyses',
+  build_plans: 'build_plans'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -106,6 +107,19 @@ export const AnalysesScalarFieldEnum = {
 } as const
 
 export type AnalysesScalarFieldEnum = (typeof AnalysesScalarFieldEnum)[keyof typeof AnalysesScalarFieldEnum]
+
+
+export const Build_plansScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  summary: 'summary',
+  estimated_timeline: 'estimated_timeline',
+  milestones: 'milestones',
+  key_resources: 'key_resources',
+  created_at: 'created_at'
+} as const
+
+export type Build_plansScalarFieldEnum = (typeof Build_plansScalarFieldEnum)[keyof typeof Build_plansScalarFieldEnum]
 
 
 export const SortOrder = {

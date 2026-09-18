@@ -59,6 +59,16 @@ export interface Analysis {
   created_at: string;
 }
 
+export interface BuildPlan {
+  id: string;
+  project_id: string;
+  summary: string;
+  estimated_timeline: string;
+  milestones: string[];
+  key_resources: string[];
+  created_at: string;
+}
+
 export const api = {
   signup: (email: string, password: string) =>
     request<User>('/users/signup', { method: 'POST', body: JSON.stringify({ email, password }) }),
@@ -108,6 +118,17 @@ export const api = {
 
   listAnalyses: (token: string, id: string) =>
     request<Analysis[]>(`/projects/${id}/analyses`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  createBuildPlan: (token: string, id: string) =>
+    request<BuildPlan>(`/projects/${id}/plan`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listBuildPlans: (token: string, id: string) =>
+    request<BuildPlan[]>(`/projects/${id}/plans`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
 };

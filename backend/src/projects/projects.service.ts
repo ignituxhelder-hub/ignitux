@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AnalysisService } from '../analysis/analysis.service.js';
+import { PlanningService } from '../planning/planning.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
@@ -7,6 +8,7 @@ export class ProjectsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly analysisService: AnalysisService,
+    private readonly planningService: PlanningService,
   ) {}
 
   create(ownerId: string, title: string, description?: string) {
@@ -68,6 +70,29 @@ export class ProjectsService {
   async listAnalysesForOwner(ownerId: string, id: string) {
     await this.findOneForOwner(ownerId, id);
     return this.prisma.analyses.findMany({
+      where: { project_id: id },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  async createBuildPlanForOwner(ownerId: string, id: string) {
+    const project = await this.findOneForOwner(ownerId, id);
+    const result = await this.planningService.createBuildPlan(project.title, project.description);
+
+    return this.prisma.build_plans.create({
+      data: {
+        project_id: project.id,
+        summary: result.summary,
+        estimated_timeline: result.estimated_timeline,
+        milestones: result.milestones,
+        key_resources: result.key_resources,
+      },
+    });
+  }
+
+  async listBuildPlansForOwner(ownerId: string, id: string) {
+    await this.findOneForOwner(ownerId, id);
+    return this.prisma.build_plans.findMany({
       where: { project_id: id },
       orderBy: { created_at: 'desc' },
     });

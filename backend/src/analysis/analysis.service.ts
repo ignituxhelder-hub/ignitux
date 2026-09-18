@@ -1,7 +1,6 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import Anthropic from '@anthropic-ai/sdk';
-import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
+import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
+import { ClaudeService } from '../claude/claude.service.js';
 
 const ProjectAnalysisSchema = z.object({
   summary: z.string().describe("Résumé en 2 à 3 phrases de l'idée et de son potentiel"),
@@ -26,41 +25,15 @@ comme un business plan complet).`;
 
 @Injectable()
 export class AnalysisService {
-  private readonly logger = new Logger(AnalysisService.name);
-  private client: Anthropic | undefined;
+  constructor(private readonly claude: ClaudeService) {}
 
-  // Instancié à la première utilisation (et pas comme champ de classe) pour
-  // que l'absence d'identifiants (ANTHROPIC_API_KEY ou autre mécanisme pris
-  // en charge par le SDK) ne fasse pas planter tout le démarrage de Nest,
-  // seulement l'appel qui en a besoin.
-  private getClient(): Anthropic {
-    this.client ??= new Anthropic();
-    return this.client;
-  }
-
-  async analyzeProject(title: string, description: string | null): Promise<ProjectAnalysisResult> {
-    try {
-      const response = await this.getClient().messages.parse({
-        model: 'claude-opus-5',
-        max_tokens: 16000,
-        system: SYSTEM_PROMPT,
-        messages: [
-          {
-            role: 'user',
-            content: `Titre : ${title}\nDescription : ${description ?? '(aucune description fournie)'}`,
-          },
-        ],
-        output_config: { format: zodOutputFormat(ProjectAnalysisSchema) },
-      });
-
-      if (!response.parsed_output) {
-        throw new Error('parsed_output manquant dans la réponse Claude.');
-      }
-
-      return response.parsed_output;
-    } catch (error) {
-      this.logger.error("Échec de l'analyse du projet via Claude", error as Error);
-      throw new InternalServerErrorException("L'analyse a échoué, réessaie dans un instant.");
-    }
+  analyzeProject(title: string, description: string | null): Promise<ProjectAnalysisResult> {
+    return this.claude.generateStructuredOutput({
+      schema: ProjectAnalysisSchema,
+      system: SYSTEM_PROMPT,
+      userContent: `Titre : ${title}\nDescription : ${description ?? '(aucune description fournie)'}`,
+      logContext: "Échec de l'analyse du projet via Claude",
+      userErrorMessage: "L'analyse a échoué, réessaie dans un instant.",
+    });
   }
 }

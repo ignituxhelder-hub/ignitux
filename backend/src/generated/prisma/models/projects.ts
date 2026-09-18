@@ -192,6 +192,7 @@ export type projectsWhereInput = {
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   owner?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
   analyses?: Prisma.AnalysesListRelationFilter
+  build_plans?: Prisma.Build_plansListRelationFilter
 }
 
 export type projectsOrderByWithRelationInput = {
@@ -203,6 +204,7 @@ export type projectsOrderByWithRelationInput = {
   updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
   owner?: Prisma.usersOrderByWithRelationInput
   analyses?: Prisma.analysesOrderByRelationAggregateInput
+  build_plans?: Prisma.build_plansOrderByRelationAggregateInput
 }
 
 export type projectsWhereUniqueInput = Prisma.AtLeast<{
@@ -217,6 +219,7 @@ export type projectsWhereUniqueInput = Prisma.AtLeast<{
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   owner?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
   analyses?: Prisma.AnalysesListRelationFilter
+  build_plans?: Prisma.Build_plansListRelationFilter
 }, "id">
 
 export type projectsOrderByWithAggregationInput = {
@@ -251,6 +254,7 @@ export type projectsCreateInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateInput = {
@@ -261,6 +265,7 @@ export type projectsUncheckedCreateInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUpdateInput = {
@@ -271,6 +276,7 @@ export type projectsUpdateInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateInput = {
@@ -281,6 +287,7 @@ export type projectsUncheckedUpdateInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateManyInput = {
@@ -411,6 +418,20 @@ export type projectsUpdateOneRequiredWithoutAnalysesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutAnalysesInput, Prisma.projectsUpdateWithoutAnalysesInput>, Prisma.projectsUncheckedUpdateWithoutAnalysesInput>
 }
 
+export type projectsCreateNestedOneWithoutBuild_plansInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutBuild_plansInput, Prisma.projectsUncheckedCreateWithoutBuild_plansInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutBuild_plansInput
+  connect?: Prisma.projectsWhereUniqueInput
+}
+
+export type projectsUpdateOneRequiredWithoutBuild_plansNestedInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutBuild_plansInput, Prisma.projectsUncheckedCreateWithoutBuild_plansInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutBuild_plansInput
+  upsert?: Prisma.projectsUpsertWithoutBuild_plansInput
+  connect?: Prisma.projectsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutBuild_plansInput, Prisma.projectsUpdateWithoutBuild_plansInput>, Prisma.projectsUncheckedUpdateWithoutBuild_plansInput>
+}
+
 export type projectsCreateWithoutOwnerInput = {
   id?: string
   title: string
@@ -418,6 +439,7 @@ export type projectsCreateWithoutOwnerInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutOwnerInput = {
@@ -427,6 +449,7 @@ export type projectsUncheckedCreateWithoutOwnerInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutOwnerInput = {
@@ -474,6 +497,7 @@ export type projectsCreateWithoutAnalysesInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
+  build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutAnalysesInput = {
@@ -483,6 +507,7 @@ export type projectsUncheckedCreateWithoutAnalysesInput = {
   description?: string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
+  build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutAnalysesInput = {
@@ -508,6 +533,7 @@ export type projectsUpdateWithoutAnalysesInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
+  build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutAnalysesInput = {
@@ -517,6 +543,63 @@ export type projectsUncheckedUpdateWithoutAnalysesInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
+}
+
+export type projectsCreateWithoutBuild_plansInput = {
+  id?: string
+  title: string
+  description?: string | null
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  owner: Prisma.usersCreateNestedOneWithoutProjectsInput
+  analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+}
+
+export type projectsUncheckedCreateWithoutBuild_plansInput = {
+  id?: string
+  owner_id: string
+  title: string
+  description?: string | null
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+}
+
+export type projectsCreateOrConnectWithoutBuild_plansInput = {
+  where: Prisma.projectsWhereUniqueInput
+  create: Prisma.XOR<Prisma.projectsCreateWithoutBuild_plansInput, Prisma.projectsUncheckedCreateWithoutBuild_plansInput>
+}
+
+export type projectsUpsertWithoutBuild_plansInput = {
+  update: Prisma.XOR<Prisma.projectsUpdateWithoutBuild_plansInput, Prisma.projectsUncheckedUpdateWithoutBuild_plansInput>
+  create: Prisma.XOR<Prisma.projectsCreateWithoutBuild_plansInput, Prisma.projectsUncheckedCreateWithoutBuild_plansInput>
+  where?: Prisma.projectsWhereInput
+}
+
+export type projectsUpdateToOneWithWhereWithoutBuild_plansInput = {
+  where?: Prisma.projectsWhereInput
+  data: Prisma.XOR<Prisma.projectsUpdateWithoutBuild_plansInput, Prisma.projectsUncheckedUpdateWithoutBuild_plansInput>
+}
+
+export type projectsUpdateWithoutBuild_plansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
+  analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+}
+
+export type projectsUncheckedUpdateWithoutBuild_plansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateManyOwnerInput = {
@@ -534,6 +617,7 @@ export type projectsUpdateWithoutOwnerInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutOwnerInput = {
@@ -543,6 +627,7 @@ export type projectsUncheckedUpdateWithoutOwnerInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateManyWithoutOwnerInput = {
@@ -560,10 +645,12 @@ export type projectsUncheckedUpdateManyWithoutOwnerInput = {
 
 export type ProjectsCountOutputType = {
   analyses: number
+  build_plans: number
 }
 
 export type ProjectsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   analyses?: boolean | ProjectsCountOutputTypeCountAnalysesArgs
+  build_plans?: boolean | ProjectsCountOutputTypeCountBuild_plansArgs
 }
 
 /**
@@ -583,6 +670,13 @@ export type ProjectsCountOutputTypeCountAnalysesArgs<ExtArgs extends runtime.Typ
   where?: Prisma.analysesWhereInput
 }
 
+/**
+ * ProjectsCountOutputType without action
+ */
+export type ProjectsCountOutputTypeCountBuild_plansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.build_plansWhereInput
+}
+
 
 export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -593,6 +687,7 @@ export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   updated_at?: boolean
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   analyses?: boolean | Prisma.projects$analysesArgs<ExtArgs>
+  build_plans?: boolean | Prisma.projects$build_plansArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["projects"]>
 
@@ -629,6 +724,7 @@ export type projectsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type projectsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   analyses?: boolean | Prisma.projects$analysesArgs<ExtArgs>
+  build_plans?: boolean | Prisma.projects$build_plansArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type projectsIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -643,6 +739,7 @@ export type $projectsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   objects: {
     owner: Prisma.$usersPayload<ExtArgs>
     analyses: Prisma.$analysesPayload<ExtArgs>[]
+    build_plans: Prisma.$build_plansPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1047,6 +1144,7 @@ export interface Prisma__projectsClient<T, Null = never, ExtArgs extends runtime
   readonly [Symbol.toStringTag]: "PrismaPromise"
   owner<T extends Prisma.usersDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.usersDefaultArgs<ExtArgs>>): Prisma.Prisma__usersClient<runtime.Types.Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   analyses<T extends Prisma.projects$analysesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$analysesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$analysesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  build_plans<T extends Prisma.projects$build_plansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$build_plansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$build_plansPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1504,6 +1602,30 @@ export type projects$analysesArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.AnalysesScalarFieldEnum | Prisma.AnalysesScalarFieldEnum[]
+}
+
+/**
+ * projects.build_plans
+ */
+export type projects$build_plansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the build_plans
+   */
+  select?: Prisma.build_plansSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the build_plans
+   */
+  omit?: Prisma.build_plansOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.build_plansInclude<ExtArgs> | null
+  where?: Prisma.build_plansWhereInput
+  orderBy?: Prisma.build_plansOrderByWithRelationInput | Prisma.build_plansOrderByWithRelationInput[]
+  cursor?: Prisma.build_plansWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Build_plansScalarFieldEnum | Prisma.Build_plansScalarFieldEnum[]
 }
 
 /**

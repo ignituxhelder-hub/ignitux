@@ -66,4 +66,17 @@ export class ProjectsController {
   listAnalyses(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.projectsService.listAnalysesForOwner(user.id, id);
   }
+
+  @Post(':id/plan')
+  @HttpCode(HttpStatus.CREATED)
+  // Chaque appel coûte un appel API Claude — limite dédiée contre les abus.
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  createBuildPlan(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.projectsService.createBuildPlanForOwner(user.id, id);
+  }
+
+  @Get(':id/plans')
+  listBuildPlans(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.projectsService.listBuildPlansForOwner(user.id, id);
+  }
 }

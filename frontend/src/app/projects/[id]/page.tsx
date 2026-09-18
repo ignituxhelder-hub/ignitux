@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
-import { api, ApiError, type Analysis, type Project } from '@/lib/api';
+import { api, ApiError, type Analysis, type BuildPlan, type Project } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
 export default function ProjectDetailPage() {
@@ -25,6 +25,10 @@ export default function ProjectDetailPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
+  const [buildPlans, setBuildPlans] = useState<BuildPlan[]>([]);
+  const [isPlanning, setIsPlanning] = useState(false);
+  const [planError, setPlanError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!isReady) return;
     if (!token) {
@@ -36,6 +40,7 @@ export default function ProjectDetailPage() {
     setIsLoading(true);
     setLoadError(null);
     setAnalyses([]);
+    setBuildPlans([]);
 
     api
       .getProject(token, id)
@@ -61,6 +66,16 @@ export default function ProjectDetailPage() {
       })
       .catch(() => {
         // Pas bloquant : l'historique des analyses est secondaire à la fiche projet.
+      });
+
+    api
+      .listBuildPlans(token, id)
+      .then((data) => {
+        if (cancelled) return;
+        setBuildPlans(data);
+      })
+      .catch(() => {
+        // Pas bloquant : l'historique des plans est secondaire à la fiche projet.
       });
 
     return () => {
@@ -94,6 +109,20 @@ export default function ProjectDetailPage() {
       setAnalysisError(err instanceof ApiError ? err.message : "Impossible d'analyser le projet.");
     } finally {
       setIsAnalyzing(false);
+    }
+  }
+
+  async function handlePlan() {
+    if (!token) return;
+    setPlanError(null);
+    setIsPlanning(true);
+    try {
+      const plan = await api.createBuildPlan(token, id);
+      setBuildPlans((prev) => [plan, ...prev]);
+    } catch (err) {
+      setPlanError(err instanceof ApiError ? err.message : 'Impossible de générer le plan.');
+    } finally {
+      setIsPlanning(false);
     }
   }
 
@@ -175,6 +204,26 @@ export default function ProjectDetailPage() {
           </div>
         </div>
       )}
+
+      {project && (
+        <div className="card" style={{ marginTop: '1.5rem' }}>
+          <div className="top-bar" style={{ marginBottom: buildPlans.length ? '1rem' : 0 }}>
+            <h2 style={{ margin: 0 }}>Plan de construction</h2>
+            <button className="secondary" type="button" onClick={handlePlan} disabled={isPlanning}>
+              {isPlanning ? 'Génération…' : 'Générer un plan'}
+            </button>
+          </div>
+          {planError && <p className="error">{planError}</p>}
+          {buildPlans.length === 0 && !isPlanning && (
+            <p className="muted">Aucun plan pour l&apos;instant.</p>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {buildPlans.map((plan) => (
+              <BuildPlanCard plan={plan} key={plan.id} />
+            ))}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
@@ -190,6 +239,20 @@ function AnalysisCard({ analysis }: { analysis: Analysis }) {
       <AnalysisList title="Points forts" items={analysis.strengths} />
       <AnalysisList title="Risques" items={analysis.risks} />
       <AnalysisList title="Prochaines étapes" items={analysis.next_steps} />
+    </div>
+  );
+}
+
+function BuildPlanCard({ plan }: { plan: BuildPlan }) {
+  return (
+    <div className="project-item" style={{ cursor: 'default' }}>
+      <div className="top-bar" style={{ marginBottom: '0.5rem' }}>
+        <strong>Délai estimé : {plan.estimated_timeline}</strong>
+        <span className="muted">{new Date(plan.created_at).toLocaleString('fr-FR')}</span>
+      </div>
+      <p>{plan.summary}</p>
+      <AnalysisList title="Jalons" items={plan.milestones} />
+      <AnalysisList title="Ressources clés" items={plan.key_resources} />
     </div>
   );
 }

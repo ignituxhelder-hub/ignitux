@@ -26,6 +26,7 @@ model projects {
   created_at  DateTime?  @default(now()) @db.Timestamptz(6)
   updated_at  DateTime?  @updatedAt @db.Timestamptz(6)
   analyses    analyses[]
+  build_plans build_plans[]
 
   @@index([owner_id])
 }
@@ -41,6 +42,20 @@ model analyses {
   risks             String[]
   next_steps        String[]
   created_at        DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([project_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model build_plans {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id          String    @db.Uuid
+  project             projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  summary             String
+  estimated_timeline  String
+  milestones          String[]
+  key_resources       String[]
+  created_at          DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
 }
