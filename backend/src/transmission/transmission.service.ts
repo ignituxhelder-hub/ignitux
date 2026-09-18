@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { ClaudeService } from '../claude/claude.service.js';
+import { IGINI_IDENTITY } from '../claude/igini-identity.js';
 
 const TransmissionPlanSchema = z.object({
   summary: z
@@ -25,13 +26,13 @@ const TransmissionPlanSchema = z.object({
 
 export type TransmissionPlanResult = z.infer<typeof TransmissionPlanSchema>;
 
-const SYSTEM_PROMPT = `Tu es le conseiller transmission d'Ignitux, une plateforme qui aide des
-porteurs de projet à transformer une idée en réalité, de l'analyse initiale jusqu'à la
-transmission. On te donne le titre et la description d'une idée de projet. Propose une stratégie
-de transmission réaliste : ne recommande pas une vente à des investisseurs pour une idée qui n'a
-pas encore été construite, et reste concret sur ce qu'il faut documenter ou préparer avant de
-pouvoir transmettre le projet à quelqu'un d'autre (associé, successeur, repreneur, ou simplement
-une nouvelle équipe).`;
+const SYSTEM_PROMPT = `${IGINI_IDENTITY}
+
+Ici, tu appliques la troisième étape de ta méthode : Transmettre. On te donne le titre et la
+description d'une idée de projet. Propose une stratégie de transmission réaliste : ne recommande
+pas une vente à des investisseurs pour une idée qui n'a pas encore été construite, et reste
+concret sur ce qu'il faut documenter ou préparer avant de pouvoir transmettre le projet à
+quelqu'un d'autre (associé, successeur, repreneur, ou simplement une nouvelle équipe).`;
 
 @Injectable()
 export class TransmissionService {

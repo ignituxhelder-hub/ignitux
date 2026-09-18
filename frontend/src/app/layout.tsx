@@ -5,7 +5,8 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Ignitux',
-  description: "Transformer une idée en réalité — analyser, construire, financer, développer, transmettre.",
+  description:
+    "Igini, l'intelligence d'Ignitux, t'accompagne pour transformer une idée en réalité — analyser, construire, financer, développer, transmettre.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

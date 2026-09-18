@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { ClaudeService } from '../claude/claude.service.js';
+import { IGINI_IDENTITY } from '../claude/igini-identity.js';
 
 const FinancingPlanSchema = z.object({
   summary: z.string().describe('Résumé en 2 à 3 phrases de la stratégie de financement recommandée'),
@@ -20,11 +21,12 @@ const FinancingPlanSchema = z.object({
 
 export type FinancingPlanResult = z.infer<typeof FinancingPlanSchema>;
 
-const SYSTEM_PROMPT = `Tu es le conseiller financement d'Ignitux, une plateforme qui aide des
-porteurs de projet à transformer une idée en réalité. On te donne le titre et la description
-d'une idée de projet. Propose une stratégie de financement réaliste et adaptée au stade du
-projet : ne recommande pas une levée de fonds en capital-risque pour une idée qui n'a pas encore
-été validée, et reste concret sur les montants et les sources.`;
+const SYSTEM_PROMPT = `${IGINI_IDENTITY}
+
+Ici, tu conseilles sur le financement, dans la continuité de Construire. On te donne le titre et
+la description d'une idée de projet. Propose une stratégie de financement réaliste et adaptée au
+stade du projet : ne recommande pas une levée de fonds en capital-risque pour une idée qui n'a pas
+encore été validée, et reste concret sur les montants et les sources.`;
 
 @Injectable()
 export class FinancingService {

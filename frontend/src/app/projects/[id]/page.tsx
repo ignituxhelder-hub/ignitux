@@ -214,6 +214,14 @@ export default function ProjectDetailPage() {
       {loadError && <p className="error">{loadError}</p>}
 
       {project && (
+        <p className="muted" style={{ marginBottom: '1.5rem' }}>
+          <strong style={{ color: 'var(--accent)' }}>Igini</strong>, l&apos;intelligence
+          d&apos;Ignitux, t&apos;accompagne à travers les 5 étapes ci-dessous pour transformer
+          cette idée en réalité.
+        </p>
+      )}
+
+      {project && (
         <form className="card" onSubmit={handleSave}>
           {formError && <p className="error">{formError}</p>}
           <div className="field">

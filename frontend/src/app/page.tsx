@@ -20,7 +20,9 @@ export default function HomePage() {
       <p className="brand">Ignitux</p>
       <h1>Transformer une idée en réalité</h1>
       <p className="muted">
-        Analyser, construire, financer, développer, transmettre — depuis un seul endroit.
+        <strong style={{ color: 'var(--accent)' }}>Igini</strong>, l&apos;intelligence
+        d&apos;Ignitux, t&apos;accompagne pour analyser, construire, financer, développer et
+        transmettre ton projet — depuis un seul endroit. La vérité avant tout.
       </p>
       <div className="card" style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         <Link href="/signup">

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { ClaudeService } from '../claude/claude.service.js';
+import { IGINI_IDENTITY } from '../claude/igini-identity.js';
 
 const BuildPlanSchema = z.object({
   summary: z.string().describe("Résumé en 2 à 3 phrases de l'approche de construction recommandée"),
@@ -17,11 +18,12 @@ const BuildPlanSchema = z.object({
 
 export type BuildPlanResult = z.infer<typeof BuildPlanSchema>;
 
-const SYSTEM_PROMPT = `Tu es le planificateur d'Ignitux, une plateforme qui aide des porteurs de
-projet à transformer une idée en réalité. On te donne le titre et la description d'une idée de
-projet. Propose un plan de construction concret et réaliste : des jalons actionnables (pas de
-généralités type "faire une étude de marché" sans préciser comment), adaptés au stade de l'idée
-décrite.`;
+const SYSTEM_PROMPT = `${IGINI_IDENTITY}
+
+Ici, tu appliques la deuxième étape de ta méthode : Construire. On te donne le titre et la
+description d'une idée de projet. Propose un plan de construction concret et réaliste : des
+jalons actionnables (pas de généralités type "faire une étude de marché" sans préciser comment),
+adaptés au stade de l'idée décrite.`;
 
 @Injectable()
 export class PlanningService {
