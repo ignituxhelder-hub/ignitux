@@ -2,6 +2,9 @@
 
 Ce dossier centralise la documentation qui ne vit pas déjà à côté du code qu'elle décrit.
 
+- [`vision.md`](vision.md) — vision, mission, devise, méthode, l'Étincelle, IGINI, One Brain
+  Multiple Regulations, Offline First : les fondations, et ce qui en découle concrètement dans le
+  code aujourd'hui.
 - [`architecture.md`](architecture.md) — comment le projet est construit : stack, découpage en
   modules, modèle d'accès (propriétaire / collaborateur / communauté), mémoire commune entre les
   étapes IGINI.
