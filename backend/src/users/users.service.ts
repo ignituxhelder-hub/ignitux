@@ -23,4 +23,19 @@ export class UsersService {
 
     return { id: user.id, email: user.email };
   }
+
+  /** Vérifie l'email/mot de passe et renvoie l'utilisateur (sans le hash) s'ils sont valides, sinon null. */
+  async validateCredentials(email: string, password: string) {
+    const user = await this.prisma.users.findUnique({ where: { email } });
+    if (!user) {
+      return null;
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    if (!isPasswordValid) {
+      return null;
+    }
+
+    return { id: user.id, email: user.email };
+  }
 }

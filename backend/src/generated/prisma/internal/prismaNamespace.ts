@@ -397,7 +397,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
-  users: 'users'
+  users: 'users',
+  projects: 'projects'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -413,7 +414,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users"
+    modelProps: "users" | "projects"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -491,6 +492,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    projects: {
+      payload: Prisma.$projectsPayload<ExtArgs>
+      fields: Prisma.projectsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.projectsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$projectsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.projectsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$projectsPayload>
+        }
+        findFirst: {
+          args: Prisma.projectsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$projectsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.projectsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$projectsPayload>
+        }
+        findMany: {
+          args: Prisma.projectsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$projectsPayload>[]
+        }
+        create: {
+          args: Prisma.projectsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$projectsPayload>
+        }
+        createMany: {
+          args: Prisma.projectsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.projectsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$projectsPayload>[]
+        }
+        delete: {
+          args: Prisma.projectsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$projectsPayload>
+        }
+        update: {
+          args: Prisma.projectsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$projectsPayload>
+        }
+        deleteMany: {
+          args: Prisma.projectsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.projectsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.projectsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$projectsPayload>[]
+        }
+        upsert: {
+          args: Prisma.projectsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$projectsPayload>
+        }
+        aggregate: {
+          args: Prisma.ProjectsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProjects>
+        }
+        groupBy: {
+          args: Prisma.projectsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProjectsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.projectsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProjectsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -538,6 +613,18 @@ export const UsersScalarFieldEnum = {
 } as const
 
 export type UsersScalarFieldEnum = (typeof UsersScalarFieldEnum)[keyof typeof UsersScalarFieldEnum]
+
+
+export const ProjectsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  title: 'title',
+  description: 'description',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type ProjectsScalarFieldEnum = (typeof ProjectsScalarFieldEnum)[keyof typeof ProjectsScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -763,6 +850,7 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
   users?: Prisma.usersOmit
+  projects?: Prisma.projectsOmit
 }
 
 /* Types for Logging */
