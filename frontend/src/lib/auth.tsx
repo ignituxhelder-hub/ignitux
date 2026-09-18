@@ -75,7 +75,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setUnauthorizedHandler(logout);
     return () => setUnauthorizedHandler(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
