@@ -57,6 +57,53 @@ export class ProjectsService {
     await this.prisma.projects.delete({ where: { id } });
   }
 
+  /**
+   * Résume ce qu'IGINI sait déjà d'un projet grâce aux étapes précédentes
+   * (mémoire commune) : la dernière analyse, le dernier plan de
+   * construction et le dernier plan de financement, quand ils existent.
+   * Utilisé pour que chaque nouvelle génération s'appuie sur les
+   * précédentes plutôt que de repartir de zéro.
+   */
+  private async buildProjectContext(projectId: string): Promise<string | undefined> {
+    const [latestAnalysis, latestBuildPlan, latestFinancingPlan, latestDevelopmentPlan] =
+      await Promise.all([
+        this.prisma.analyses.findFirst({
+          where: { project_id: projectId },
+          orderBy: { created_at: 'desc' },
+        }),
+        this.prisma.build_plans.findFirst({
+          where: { project_id: projectId },
+          orderBy: { created_at: 'desc' },
+        }),
+        this.prisma.financing_plans.findFirst({
+          where: { project_id: projectId },
+          orderBy: { created_at: 'desc' },
+        }),
+        this.prisma.development_plans.findFirst({
+          where: { project_id: projectId },
+          orderBy: { created_at: 'desc' },
+        }),
+      ]);
+
+    const parts: string[] = [];
+    if (latestAnalysis) {
+      parts.push(
+        `Analyse (score de faisabilité ${latestAnalysis.feasibility_score}/10) : ${latestAnalysis.summary}`,
+      );
+    }
+    if (latestBuildPlan) {
+      parts.push(`Plan de construction : ${latestBuildPlan.summary}`);
+    }
+    if (latestFinancingPlan) {
+      parts.push(`Plan de financement : ${latestFinancingPlan.summary}`);
+    }
+    if (latestDevelopmentPlan) {
+      parts.push(`Plan de développement : ${latestDevelopmentPlan.summary}`);
+    }
+
+    return parts.length > 0 ? parts.join('\n') : undefined;
+  }
+
   async analyzeForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
     const result = await this.analysisService.analyzeProject(project.title, project.description);
@@ -83,7 +130,12 @@ export class ProjectsService {
 
   async createBuildPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
-    const result = await this.planningService.createBuildPlan(project.title, project.description);
+    const context = await this.buildProjectContext(id);
+    const result = await this.planningService.createBuildPlan(
+      project.title,
+      project.description,
+      context,
+    );
 
     return this.prisma.build_plans.create({
       data: {
@@ -106,9 +158,11 @@ export class ProjectsService {
 
   async createFinancingPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
+    const context = await this.buildProjectContext(id);
     const result = await this.financingService.createFinancingPlan(
       project.title,
       project.description,
+      context,
     );
 
     return this.prisma.financing_plans.create({
@@ -132,9 +186,11 @@ export class ProjectsService {
 
   async createDevelopmentPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
+    const context = await this.buildProjectContext(id);
     const result = await this.developmentService.createDevelopmentPlan(
       project.title,
       project.description,
+      context,
     );
 
     return this.prisma.development_plans.create({
@@ -158,9 +214,11 @@ export class ProjectsService {
 
   async createTransmissionPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
+    const context = await this.buildProjectContext(id);
     const result = await this.transmissionService.createTransmissionPlan(
       project.title,
       project.description,
+      context,
     );
 
     return this.prisma.transmission_plans.create({

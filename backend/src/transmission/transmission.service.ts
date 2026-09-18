@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
+import { buildProjectPrompt } from '../claude/build-project-prompt.js';
 import { ClaudeService } from '../claude/claude.service.js';
 import { IGINI_IDENTITY } from '../claude/igini-identity.js';
 
@@ -29,10 +30,11 @@ export type TransmissionPlanResult = z.infer<typeof TransmissionPlanSchema>;
 const SYSTEM_PROMPT = `${IGINI_IDENTITY}
 
 Ici, tu appliques la troisième étape de ta méthode : Transmettre. On te donne le titre et la
-description d'une idée de projet. Propose une stratégie de transmission réaliste : ne recommande
-pas une vente à des investisseurs pour une idée qui n'a pas encore été construite, et reste
-concret sur ce qu'il faut documenter ou préparer avant de pouvoir transmettre le projet à
-quelqu'un d'autre (associé, successeur, repreneur, ou simplement une nouvelle équipe).`;
+description d'une idée de projet, et éventuellement ce que tu sais déjà d'elle (le chemin parcouru
+depuis l'analyse). Propose une stratégie de transmission réaliste, cohérente avec ce contexte s'il
+existe : ne recommande pas une vente à des investisseurs pour une idée qui n'a pas encore été
+construite, et reste concret sur ce qu'il faut documenter ou préparer avant de pouvoir transmettre
+le projet à quelqu'un d'autre (associé, successeur, repreneur, ou simplement une nouvelle équipe).`;
 
 @Injectable()
 export class TransmissionService {
@@ -41,11 +43,12 @@ export class TransmissionService {
   createTransmissionPlan(
     title: string,
     description: string | null,
+    context?: string,
   ): Promise<TransmissionPlanResult> {
     return this.claude.generateStructuredOutput({
       schema: TransmissionPlanSchema,
       system: SYSTEM_PROMPT,
-      userContent: `Titre : ${title}\nDescription : ${description ?? '(aucune description fournie)'}`,
+      userContent: buildProjectPrompt(title, description, context),
       logContext: 'Échec de la génération du plan de transmission via Claude',
       userErrorMessage: 'La génération du plan de transmission a échoué, réessaie dans un instant.',
     });

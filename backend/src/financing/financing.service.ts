@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
+import { buildProjectPrompt } from '../claude/build-project-prompt.js';
 import { ClaudeService } from '../claude/claude.service.js';
 import { IGINI_IDENTITY } from '../claude/igini-identity.js';
 
@@ -24,19 +25,24 @@ export type FinancingPlanResult = z.infer<typeof FinancingPlanSchema>;
 const SYSTEM_PROMPT = `${IGINI_IDENTITY}
 
 Ici, tu conseilles sur le financement, dans la continuité de Construire. On te donne le titre et
-la description d'une idée de projet. Propose une stratégie de financement réaliste et adaptée au
-stade du projet : ne recommande pas une levée de fonds en capital-risque pour une idée qui n'a pas
-encore été validée, et reste concret sur les montants et les sources.`;
+la description d'une idée de projet, et éventuellement ce que tu sais déjà d'elle (analyse, plan
+de construction). Propose une stratégie de financement réaliste, cohérente avec ce contexte s'il
+existe : ne recommande pas une levée de fonds en capital-risque pour une idée qui n'a pas encore
+été validée, et reste concret sur les montants et les sources.`;
 
 @Injectable()
 export class FinancingService {
   constructor(private readonly claude: ClaudeService) {}
 
-  createFinancingPlan(title: string, description: string | null): Promise<FinancingPlanResult> {
+  createFinancingPlan(
+    title: string,
+    description: string | null,
+    context?: string,
+  ): Promise<FinancingPlanResult> {
     return this.claude.generateStructuredOutput({
       schema: FinancingPlanSchema,
       system: SYSTEM_PROMPT,
-      userContent: `Titre : ${title}\nDescription : ${description ?? '(aucune description fournie)'}`,
+      userContent: buildProjectPrompt(title, description, context),
       logContext: 'Échec de la génération du plan de financement via Claude',
       userErrorMessage: 'La génération du plan de financement a échoué, réessaie dans un instant.',
     });

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
+import { buildProjectPrompt } from '../claude/build-project-prompt.js';
 import { ClaudeService } from '../claude/claude.service.js';
 import { IGINI_IDENTITY } from '../claude/igini-identity.js';
 
@@ -21,19 +22,20 @@ export type BuildPlanResult = z.infer<typeof BuildPlanSchema>;
 const SYSTEM_PROMPT = `${IGINI_IDENTITY}
 
 Ici, tu appliques la deuxième étape de ta méthode : Construire. On te donne le titre et la
-description d'une idée de projet. Propose un plan de construction concret et réaliste : des
-jalons actionnables (pas de généralités type "faire une étude de marché" sans préciser comment),
-adaptés au stade de l'idée décrite.`;
+description d'une idée de projet, et éventuellement ce que tu sais déjà d'elle (une analyse déjà
+faite). Propose un plan de construction concret et réaliste, cohérent avec cette analyse si elle
+existe : des jalons actionnables (pas de généralités type "faire une étude de marché" sans
+préciser comment), adaptés au stade de l'idée décrite.`;
 
 @Injectable()
 export class PlanningService {
   constructor(private readonly claude: ClaudeService) {}
 
-  createBuildPlan(title: string, description: string | null): Promise<BuildPlanResult> {
+  createBuildPlan(title: string, description: string | null, context?: string): Promise<BuildPlanResult> {
     return this.claude.generateStructuredOutput({
       schema: BuildPlanSchema,
       system: SYSTEM_PROMPT,
-      userContent: `Titre : ${title}\nDescription : ${description ?? '(aucune description fournie)'}`,
+      userContent: buildProjectPrompt(title, description, context),
       logContext: 'Échec de la génération du plan de construction via Claude',
       userErrorMessage: 'La génération du plan a échoué, réessaie dans un instant.',
     });

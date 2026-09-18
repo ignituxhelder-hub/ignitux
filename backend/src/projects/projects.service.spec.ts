@@ -21,18 +21,22 @@ describe('ProjectsService', () => {
     analyses: {
       create: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
+      findFirst: ReturnType<typeof vi.fn>;
     };
     build_plans: {
       create: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
+      findFirst: ReturnType<typeof vi.fn>;
     };
     financing_plans: {
       create: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
+      findFirst: ReturnType<typeof vi.fn>;
     };
     development_plans: {
       create: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
+      findFirst: ReturnType<typeof vi.fn>;
     };
     transmission_plans: {
       create: ReturnType<typeof vi.fn>;
@@ -54,12 +58,19 @@ describe('ProjectsService', () => {
         update: vi.fn(),
         delete: vi.fn(),
       },
-      analyses: { create: vi.fn(), findMany: vi.fn() },
-      build_plans: { create: vi.fn(), findMany: vi.fn() },
-      financing_plans: { create: vi.fn(), findMany: vi.fn() },
-      development_plans: { create: vi.fn(), findMany: vi.fn() },
+      analyses: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
+      build_plans: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
+      financing_plans: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
+      development_plans: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
       transmission_plans: { create: vi.fn(), findMany: vi.fn() },
     };
+    // Par défaut, aucune étape précédente n'existe encore (buildProjectContext
+    // doit alors renvoyer undefined) ; les tests qui veulent simuler un
+    // contexte existant surchargent ces mocks explicitement.
+    prisma.analyses.findFirst.mockResolvedValue(null);
+    prisma.build_plans.findFirst.mockResolvedValue(null);
+    prisma.financing_plans.findFirst.mockResolvedValue(null);
+    prisma.development_plans.findFirst.mockResolvedValue(null);
     analysisService = { analyzeProject: vi.fn() };
     planningService = { createBuildPlan: vi.fn() };
     financingService = { createFinancingPlan: vi.fn() };
@@ -227,11 +238,35 @@ describe('ProjectsService', () => {
 
       const result = await service.createBuildPlanForOwner('u1', 'p1');
 
-      expect(planningService.createBuildPlan).toHaveBeenCalledWith('Idée', 'Desc');
+      expect(planningService.createBuildPlan).toHaveBeenCalledWith('Idée', 'Desc', undefined);
       expect(prisma.build_plans.create).toHaveBeenCalledWith({
         data: { project_id: 'p1', ...plan },
       });
       expect(result).toEqual({ id: 'bp1', project_id: 'p1', ...plan });
+    });
+
+    it("transmet le contexte de l'analyse existante à la génération du plan", async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      prisma.analyses.findFirst.mockResolvedValue({
+        summary: 'Idée prometteuse.',
+        feasibility_score: 7,
+      });
+      planningService.createBuildPlan.mockResolvedValue({
+        summary: 'Résumé',
+        estimated_timeline: '3 à 6 mois',
+        milestones: ['Jalon 1'],
+        key_resources: ['Ressource 1'],
+      });
+      prisma.build_plans.create.mockResolvedValue({});
+
+      await service.createBuildPlanForOwner('u1', 'p1');
+
+      expect(planningService.createBuildPlan).toHaveBeenCalledWith(
+        'Idée',
+        'Desc',
+        expect.stringContaining('Idée prometteuse.'),
+      );
     });
   });
 
@@ -282,7 +317,7 @@ describe('ProjectsService', () => {
 
       const result = await service.createFinancingPlanForOwner('u1', 'p1');
 
-      expect(financingService.createFinancingPlan).toHaveBeenCalledWith('Idée', 'Desc');
+      expect(financingService.createFinancingPlan).toHaveBeenCalledWith('Idée', 'Desc', undefined);
       expect(prisma.financing_plans.create).toHaveBeenCalledWith({
         data: { project_id: 'p1', ...plan },
       });
@@ -337,7 +372,7 @@ describe('ProjectsService', () => {
 
       const result = await service.createDevelopmentPlanForOwner('u1', 'p1');
 
-      expect(developmentService.createDevelopmentPlan).toHaveBeenCalledWith('Idée', 'Desc');
+      expect(developmentService.createDevelopmentPlan).toHaveBeenCalledWith('Idée', 'Desc', undefined);
       expect(prisma.development_plans.create).toHaveBeenCalledWith({
         data: { project_id: 'p1', ...plan },
       });
@@ -392,7 +427,7 @@ describe('ProjectsService', () => {
 
       const result = await service.createTransmissionPlanForOwner('u1', 'p1');
 
-      expect(transmissionService.createTransmissionPlan).toHaveBeenCalledWith('Idée', 'Desc');
+      expect(transmissionService.createTransmissionPlan).toHaveBeenCalledWith('Idée', 'Desc', undefined);
       expect(prisma.transmission_plans.create).toHaveBeenCalledWith({
         data: { project_id: 'p1', ...plan },
       });
