@@ -160,3 +160,86 @@ button.secondary {
   margin: 0;
   color: var(--text-muted);
 }
+
+.page--home {
+  max-width: 880px;
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.hero h1 {
+  font-size: clamp(1.7rem, 5vw, 2.5rem);
+  margin: 0.5rem 0 1rem;
+  line-height: 1.2;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.section {
+  margin-top: 3rem;
+}
+
+.section-title {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.step-num {
+  font-family: ui-monospace, Menlo, monospace;
+  color: var(--accent);
+  font-size: 0.8rem;
+}
+
+.step-card h3 {
+  margin: 0.35rem 0 0.4rem;
+}
+
+.step-card p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.engine-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.engine-list h3 {
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
+}
+
+.engine-list p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
