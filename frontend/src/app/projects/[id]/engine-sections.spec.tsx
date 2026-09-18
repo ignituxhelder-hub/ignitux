@@ -179,7 +179,9 @@ describe('KnowledgeSection', () => {
     fireEvent.change(screen.getByLabelText('Nom du concept'), { target: { value: 'Client cible' } });
     fireEvent.click(screen.getByRole('button', { name: /^ajouter$/i }));
 
-    expect(await screen.findByText('Client cible')).toBeInTheDocument();
+    // Le nom apparaît deux fois : une fois dans le graphe SVG, une fois dans la liste.
+    const matches = await screen.findAllByText('Client cible');
+    expect(matches.length).toBeGreaterThanOrEqual(2);
   });
 
   it('ne propose de relier des concepts que si au moins deux existent', async () => {
@@ -215,5 +217,61 @@ describe('KnowledgeSection', () => {
     render(<KnowledgeSection token={TOKEN} projectId={PROJECT_ID} />);
 
     expect(await screen.findByLabelText('Concept de départ')).toBeInTheDocument();
+  });
+
+  it('affiche un graphe SVG avec un nœud par concept et une ligne par relation', async () => {
+    mockApiRoutes({
+      'GET /knowledge/graph': {
+        status: 200,
+        body: {
+          nodes: [
+            {
+              id: 'c1',
+              user_id: 'u1',
+              project_id: 'p1',
+              name: 'Client cible',
+              description: null,
+              category: null,
+              created_at: '2026-01-01T00:00:00.000Z',
+            },
+            {
+              id: 'c2',
+              user_id: 'u1',
+              project_id: 'p1',
+              name: 'Offre SaaS',
+              description: null,
+              category: null,
+              created_at: '2026-01-01T00:00:00.000Z',
+            },
+          ],
+          edges: [
+            {
+              id: 'l1',
+              from_concept_id: 'c1',
+              to_concept_id: 'c2',
+              relation_type: 'a_besoin_de',
+              created_at: '2026-01-01T00:00:00.000Z',
+            },
+          ],
+        },
+      },
+    });
+
+    const { container } = render(<KnowledgeSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    const svg = await screen.findByRole('img', { name: 'Graphe des concepts et de leurs relations' });
+    expect(svg.querySelectorAll('circle')).toHaveLength(2);
+    expect(container.querySelectorAll('svg line')).toHaveLength(1);
+  });
+
+  it("n'affiche pas de graphe quand il n'y a aucun concept", async () => {
+    mockApiRoutes({
+      'GET /knowledge/graph': { status: 200, body: { nodes: [], edges: [] } },
+    });
+
+    render(<KnowledgeSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText("Aucun concept pour l'instant.");
+    expect(screen.queryByRole('img', { name: 'Graphe des concepts et de leurs relations' })).not.toBeInTheDocument();
   });
 });

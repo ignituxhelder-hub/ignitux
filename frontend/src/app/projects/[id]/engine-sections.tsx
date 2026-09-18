@@ -296,6 +296,69 @@ export function MemorySection({ token, projectId }: SectionProps) {
   );
 }
 
+function ConceptGraphView({ concepts, edges }: { concepts: Concept[]; edges: ConceptLink[] }) {
+  if (concepts.length === 0) return null;
+
+  const size = 280;
+  const center = size / 2;
+  const radius = concepts.length === 1 ? 0 : center - 44;
+
+  const positions = new Map<string, { x: number; y: number }>();
+  concepts.forEach((concept, index) => {
+    const angle = (index / concepts.length) * 2 * Math.PI - Math.PI / 2;
+    positions.set(concept.id, {
+      x: center + radius * Math.cos(angle),
+      y: center + radius * Math.sin(angle),
+    });
+  });
+
+  function truncate(label: string) {
+    return label.length > 14 ? `${label.slice(0, 13)}…` : label;
+  }
+
+  return (
+    <svg
+      viewBox={`0 0 ${size} ${size}`}
+      role="img"
+      aria-label="Graphe des concepts et de leurs relations"
+      style={{ width: '100%', maxWidth: 340, height: 'auto', display: 'block', margin: '0.75rem auto' }}
+    >
+      {edges.map((edge) => {
+        const from = positions.get(edge.from_concept_id);
+        const to = positions.get(edge.to_concept_id);
+        if (!from || !to) return null;
+        return (
+          <line
+            key={edge.id}
+            x1={from.x}
+            y1={from.y}
+            x2={to.x}
+            y2={to.y}
+            style={{ stroke: 'var(--border)', strokeWidth: 1.5 }}
+          />
+        );
+      })}
+      {concepts.map((concept) => {
+        const pos = positions.get(concept.id);
+        if (!pos) return null;
+        return (
+          <g key={concept.id}>
+            <circle cx={pos.x} cy={pos.y} r={7} style={{ fill: 'var(--accent)' }} />
+            <text
+              x={pos.x}
+              y={pos.y + 18}
+              textAnchor="middle"
+              style={{ fill: 'var(--text)', fontSize: 9 }}
+            >
+              {truncate(concept.name)}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 export function KnowledgeSection({ token, projectId }: SectionProps) {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [edges, setEdges] = useState<ConceptLink[]>([]);
@@ -386,6 +449,7 @@ export function KnowledgeSection({ token, projectId }: SectionProps) {
       </form>
 
       {concepts.length === 0 && <p className="muted">Aucun concept pour l&apos;instant.</p>}
+      <ConceptGraphView concepts={concepts} edges={edges} />
       <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
         {concepts.map((c) => (
           <li key={c.id}>
