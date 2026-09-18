@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module.js';
 import { getEnv } from './config/env.js';
@@ -26,6 +27,16 @@ async function bootstrap() {
   // Nécessaire pour que PrismaService.onModuleDestroy() (déconnexion propre
   // de la base) soit appelé sur SIGTERM/SIGINT.
   app.enableShutdownHooks();
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Ignitux API')
+    .setDescription("API d'Ignitux : comptes, projets, et les 5 générateurs IA d'IGINI.")
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('docs', app, swaggerDocument);
+
   await app.listen(env.PORT);
 }
 await bootstrap();

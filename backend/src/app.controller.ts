@@ -1,7 +1,9 @@
 import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service.js';
 import { PrismaService } from './prisma/prisma.service.js';
 
+@ApiTags('app')
 @Controller()
 export class AppController {
   constructor(
