@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
-import { api, ApiError, type Analysis, type BuildPlan, type Project } from '@/lib/api';
+import { api, ApiError, type Analysis, type BuildPlan, type FinancingPlan, type Project } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
 export default function ProjectDetailPage() {
@@ -29,6 +29,10 @@ export default function ProjectDetailPage() {
   const [isPlanning, setIsPlanning] = useState(false);
   const [planError, setPlanError] = useState<string | null>(null);
 
+  const [financingPlans, setFinancingPlans] = useState<FinancingPlan[]>([]);
+  const [isFinancing, setIsFinancing] = useState(false);
+  const [financingError, setFinancingError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!isReady) return;
     if (!token) {
@@ -41,6 +45,7 @@ export default function ProjectDetailPage() {
     setLoadError(null);
     setAnalyses([]);
     setBuildPlans([]);
+    setFinancingPlans([]);
 
     api
       .getProject(token, id)
@@ -76,6 +81,16 @@ export default function ProjectDetailPage() {
       })
       .catch(() => {
         // Pas bloquant : l'historique des plans est secondaire à la fiche projet.
+      });
+
+    api
+      .listFinancingPlans(token, id)
+      .then((data) => {
+        if (cancelled) return;
+        setFinancingPlans(data);
+      })
+      .catch(() => {
+        // Pas bloquant : l'historique des plans de financement est secondaire à la fiche projet.
       });
 
     return () => {
@@ -123,6 +138,22 @@ export default function ProjectDetailPage() {
       setPlanError(err instanceof ApiError ? err.message : 'Impossible de générer le plan.');
     } finally {
       setIsPlanning(false);
+    }
+  }
+
+  async function handleFinancing() {
+    if (!token) return;
+    setFinancingError(null);
+    setIsFinancing(true);
+    try {
+      const plan = await api.createFinancingPlan(token, id);
+      setFinancingPlans((prev) => [plan, ...prev]);
+    } catch (err) {
+      setFinancingError(
+        err instanceof ApiError ? err.message : 'Impossible de générer le plan de financement.',
+      );
+    } finally {
+      setIsFinancing(false);
     }
   }
 
@@ -224,6 +255,26 @@ export default function ProjectDetailPage() {
           </div>
         </div>
       )}
+
+      {project && (
+        <div className="card" style={{ marginTop: '1.5rem' }}>
+          <div className="top-bar" style={{ marginBottom: financingPlans.length ? '1rem' : 0 }}>
+            <h2 style={{ margin: 0 }}>Financement</h2>
+            <button className="secondary" type="button" onClick={handleFinancing} disabled={isFinancing}>
+              {isFinancing ? 'Génération…' : 'Générer un plan de financement'}
+            </button>
+          </div>
+          {financingError && <p className="error">{financingError}</p>}
+          {financingPlans.length === 0 && !isFinancing && (
+            <p className="muted">Aucun plan de financement pour l&apos;instant.</p>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {financingPlans.map((plan) => (
+              <FinancingPlanCard plan={plan} key={plan.id} />
+            ))}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
@@ -253,6 +304,20 @@ function BuildPlanCard({ plan }: { plan: BuildPlan }) {
       <p>{plan.summary}</p>
       <AnalysisList title="Jalons" items={plan.milestones} />
       <AnalysisList title="Ressources clés" items={plan.key_resources} />
+    </div>
+  );
+}
+
+function FinancingPlanCard({ plan }: { plan: FinancingPlan }) {
+  return (
+    <div className="project-item" style={{ cursor: 'default' }}>
+      <div className="top-bar" style={{ marginBottom: '0.5rem' }}>
+        <strong>Budget estimé : {plan.estimated_budget}</strong>
+        <span className="muted">{new Date(plan.created_at).toLocaleString('fr-FR')}</span>
+      </div>
+      <p>{plan.summary}</p>
+      <AnalysisList title="Sources de financement" items={plan.funding_sources} />
+      <AnalysisList title="Postes de dépense" items={plan.budget_breakdown} />
     </div>
   );
 }

@@ -79,4 +79,17 @@ export class ProjectsController {
   listBuildPlans(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.projectsService.listBuildPlansForOwner(user.id, id);
   }
+
+  @Post(':id/financing-plan')
+  @HttpCode(HttpStatus.CREATED)
+  // Chaque appel coûte un appel API Claude — limite dédiée contre les abus.
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  createFinancingPlan(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.projectsService.createFinancingPlanForOwner(user.id, id);
+  }
+
+  @Get(':id/financing-plans')
+  listFinancingPlans(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.projectsService.listFinancingPlansForOwner(user.id, id);
+  }
 }

@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AnalysisService } from '../analysis/analysis.service.js';
+import { FinancingService } from '../financing/financing.service.js';
 import { PlanningService } from '../planning/planning.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ProjectsService } from './projects.service.js';
@@ -23,9 +24,14 @@ describe('ProjectsService', () => {
       create: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
     };
+    financing_plans: {
+      create: ReturnType<typeof vi.fn>;
+      findMany: ReturnType<typeof vi.fn>;
+    };
   };
   let analysisService: { analyzeProject: ReturnType<typeof vi.fn> };
   let planningService: { createBuildPlan: ReturnType<typeof vi.fn> };
+  let financingService: { createFinancingPlan: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     prisma = {
@@ -38,9 +44,11 @@ describe('ProjectsService', () => {
       },
       analyses: { create: vi.fn(), findMany: vi.fn() },
       build_plans: { create: vi.fn(), findMany: vi.fn() },
+      financing_plans: { create: vi.fn(), findMany: vi.fn() },
     };
     analysisService = { analyzeProject: vi.fn() };
     planningService = { createBuildPlan: vi.fn() };
+    financingService = { createFinancingPlan: vi.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -48,6 +56,7 @@ describe('ProjectsService', () => {
         { provide: PrismaService, useValue: prisma },
         { provide: AnalysisService, useValue: analysisService },
         { provide: PlanningService, useValue: planningService },
+        { provide: FinancingService, useValue: financingService },
       ],
     }).compile();
 
@@ -228,6 +237,61 @@ describe('ProjectsService', () => {
         orderBy: { created_at: 'desc' },
       });
       expect(result).toEqual([{ id: 'bp1' }]);
+    });
+  });
+
+  describe('createFinancingPlanForOwner', () => {
+    it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.createFinancingPlanForOwner('u1', 'p1')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(financingService.createFinancingPlan).not.toHaveBeenCalled();
+    });
+
+    it('génère le plan de financement puis persiste le résultat', async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      const plan = {
+        summary: 'Résumé',
+        estimated_budget: '5 000 € à 15 000 €',
+        funding_sources: ['Autofinancement'],
+        budget_breakdown: ['Développement'],
+      };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      financingService.createFinancingPlan.mockResolvedValue(plan);
+      prisma.financing_plans.create.mockResolvedValue({ id: 'fp1', project_id: 'p1', ...plan });
+
+      const result = await service.createFinancingPlanForOwner('u1', 'p1');
+
+      expect(financingService.createFinancingPlan).toHaveBeenCalledWith('Idée', 'Desc');
+      expect(prisma.financing_plans.create).toHaveBeenCalledWith({
+        data: { project_id: 'p1', ...plan },
+      });
+      expect(result).toEqual({ id: 'fp1', project_id: 'p1', ...plan });
+    });
+  });
+
+  describe('listFinancingPlansForOwner', () => {
+    it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.listFinancingPlansForOwner('u1', 'p1')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+    });
+
+    it('liste les plans du projet, les plus récents en premier', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.financing_plans.findMany.mockResolvedValue([{ id: 'fp1' }]);
+
+      const result = await service.listFinancingPlansForOwner('u1', 'p1');
+
+      expect(prisma.financing_plans.findMany).toHaveBeenCalledWith({
+        where: { project_id: 'p1' },
+        orderBy: { created_at: 'desc' },
+      });
+      expect(result).toEqual([{ id: 'fp1' }]);
     });
   });
 });

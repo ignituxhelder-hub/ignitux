@@ -69,6 +69,16 @@ export interface BuildPlan {
   created_at: string;
 }
 
+export interface FinancingPlan {
+  id: string;
+  project_id: string;
+  summary: string;
+  estimated_budget: string;
+  funding_sources: string[];
+  budget_breakdown: string[];
+  created_at: string;
+}
+
 export const api = {
   signup: (email: string, password: string) =>
     request<User>('/users/signup', { method: 'POST', body: JSON.stringify({ email, password }) }),
@@ -129,6 +139,17 @@ export const api = {
 
   listBuildPlans: (token: string, id: string) =>
     request<BuildPlan[]>(`/projects/${id}/plans`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  createFinancingPlan: (token: string, id: string) =>
+    request<FinancingPlan>(`/projects/${id}/financing-plan`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listFinancingPlans: (token: string, id: string) =>
+    request<FinancingPlan[]>(`/projects/${id}/financing-plans`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
 };

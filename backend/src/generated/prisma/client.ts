@@ -57,6 +57,11 @@ export type projects = Prisma.projectsModel
  */
 export type analyses = Prisma.analysesModel
 /**
+ * Model financing_plans
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type financing_plans = Prisma.financing_plansModel
+/**
  * Model build_plans
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */
