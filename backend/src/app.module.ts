@@ -4,6 +4,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { AuthModule } from './auth/auth.module.js';
+import { CommunityModule } from './community/community.module.js';
 import { KnowledgeModule } from './igini/knowledge/knowledge.module.js';
 import { MemoryModule } from './igini/memory/memory.module.js';
 import { ScoringModule } from './igini/scoring/scoring.module.js';
@@ -26,6 +27,7 @@ import { UsersModule } from './users/users.module.js';
     KnowledgeModule,
     WorkflowModule,
     ScoringModule,
+    CommunityModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
