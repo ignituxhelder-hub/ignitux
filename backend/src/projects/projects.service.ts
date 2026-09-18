@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { AnalysisService } from '../analysis/analysis.service.js';
-import { DevelopmentService } from '../development/development.service.js';
-import { FinancingService } from '../financing/financing.service.js';
-import { PlanningService } from '../planning/planning.service.js';
+import { AnalysisService } from '../igini/analysis/analysis.service.js';
+import { DevelopmentService } from '../igini/development/development.service.js';
+import { FinancingService } from '../igini/financing/financing.service.js';
+import { PlanningService } from '../igini/planning/planning.service.js';
+import { TransmissionService } from '../igini/transmission/transmission.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { TransmissionService } from '../transmission/transmission.service.js';
 
 @Injectable()
 export class ProjectsService {

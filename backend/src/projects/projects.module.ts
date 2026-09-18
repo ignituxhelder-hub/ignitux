@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
-import { AnalysisModule } from '../analysis/analysis.module.js';
 import { AuthModule } from '../auth/auth.module.js';
-import { DevelopmentModule } from '../development/development.module.js';
-import { FinancingModule } from '../financing/financing.module.js';
-import { PlanningModule } from '../planning/planning.module.js';
-import { TransmissionModule } from '../transmission/transmission.module.js';
+import { AnalysisModule } from '../igini/analysis/analysis.module.js';
+import { DevelopmentModule } from '../igini/development/development.module.js';
+import { FinancingModule } from '../igini/financing/financing.module.js';
+import { PlanningModule } from '../igini/planning/planning.module.js';
+import { TransmissionModule } from '../igini/transmission/transmission.module.js';
 import { ProjectsController } from './projects.controller.js';
 import { ProjectsService } from './projects.service.js';
 
