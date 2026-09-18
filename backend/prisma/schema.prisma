@@ -17,6 +17,7 @@ model users {
   memories      memories[]
   concepts      concepts[]
   community_comments community_comments[]
+  collaborations project_collaborators[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -41,6 +42,7 @@ model projects {
   concepts           concepts[]
   tasks              tasks[]
   community_comments community_comments[]
+  collaborators      project_collaborators[]
 
   @@index([owner_id])
   @@index([is_public])
@@ -184,6 +186,20 @@ model community_comments {
   created_at DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model project_collaborators {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id String    @db.Uuid
+  project    projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  user_id    String    @db.Uuid
+  user       users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([project_id, user_id])
+  @@index([project_id])
+  @@index([user_id])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.

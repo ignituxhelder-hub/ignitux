@@ -73,6 +73,11 @@ export type tasks = Prisma.tasksModel
  */
 export type community_comments = Prisma.community_commentsModel
 /**
+ * Model project_collaborators
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type project_collaborators = Prisma.project_collaboratorsModel
+/**
  * Model build_plans
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */

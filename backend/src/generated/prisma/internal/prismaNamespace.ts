@@ -408,6 +408,7 @@ export const ModelName = {
   concept_links: 'concept_links',
   tasks: 'tasks',
   community_comments: 'community_comments',
+  project_collaborators: 'project_collaborators',
   build_plans: 'build_plans'
 } as const
 
@@ -424,7 +425,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "build_plans"
+    modelProps: "users" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1242,6 +1243,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    project_collaborators: {
+      payload: Prisma.$project_collaboratorsPayload<ExtArgs>
+      fields: Prisma.project_collaboratorsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.project_collaboratorsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_collaboratorsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.project_collaboratorsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_collaboratorsPayload>
+        }
+        findFirst: {
+          args: Prisma.project_collaboratorsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_collaboratorsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.project_collaboratorsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_collaboratorsPayload>
+        }
+        findMany: {
+          args: Prisma.project_collaboratorsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_collaboratorsPayload>[]
+        }
+        create: {
+          args: Prisma.project_collaboratorsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_collaboratorsPayload>
+        }
+        createMany: {
+          args: Prisma.project_collaboratorsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.project_collaboratorsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_collaboratorsPayload>[]
+        }
+        delete: {
+          args: Prisma.project_collaboratorsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_collaboratorsPayload>
+        }
+        update: {
+          args: Prisma.project_collaboratorsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_collaboratorsPayload>
+        }
+        deleteMany: {
+          args: Prisma.project_collaboratorsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.project_collaboratorsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.project_collaboratorsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_collaboratorsPayload>[]
+        }
+        upsert: {
+          args: Prisma.project_collaboratorsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_collaboratorsPayload>
+        }
+        aggregate: {
+          args: Prisma.Project_collaboratorsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProject_collaborators>
+        }
+        groupBy: {
+          args: Prisma.project_collaboratorsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Project_collaboratorsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.project_collaboratorsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Project_collaboratorsCountAggregateOutputType> | number
+        }
+      }
+    }
     build_plans: {
       payload: Prisma.$build_plansPayload<ExtArgs>
       fields: Prisma.build_plansFieldRefs
@@ -1491,6 +1566,16 @@ export const Community_commentsScalarFieldEnum = {
 } as const
 
 export type Community_commentsScalarFieldEnum = (typeof Community_commentsScalarFieldEnum)[keyof typeof Community_commentsScalarFieldEnum]
+
+
+export const Project_collaboratorsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  user_id: 'user_id',
+  created_at: 'created_at'
+} as const
+
+export type Project_collaboratorsScalarFieldEnum = (typeof Project_collaboratorsScalarFieldEnum)[keyof typeof Project_collaboratorsScalarFieldEnum]
 
 
 export const Build_plansScalarFieldEnum = {
@@ -1760,6 +1845,7 @@ export type GlobalOmitConfig = {
   concept_links?: Prisma.concept_linksOmit
   tasks?: Prisma.tasksOmit
   community_comments?: Prisma.community_commentsOmit
+  project_collaborators?: Prisma.project_collaboratorsOmit
   build_plans?: Prisma.build_plansOmit
 }
 

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { AnalysisService } from '../igini/analysis/analysis.service.js';
 import { DevelopmentService } from '../igini/development/development.service.js';
 import { FinancingService } from '../igini/financing/financing.service.js';
@@ -27,7 +27,7 @@ export class ProjectsService {
 
   findAllForOwner(ownerId: string) {
     return this.prisma.projects.findMany({
-      where: { owner_id: ownerId },
+      where: { OR: [{ owner_id: ownerId }, { collaborators: { some: { user_id: ownerId } } }] },
       orderBy: { created_at: 'desc' },
     });
   }
@@ -35,6 +35,27 @@ export class ProjectsService {
   async findOneForOwner(ownerId: string, id: string) {
     const project = await this.prisma.projects.findFirst({
       where: { id, owner_id: ownerId },
+    });
+
+    if (!project) {
+      throw new NotFoundException('Projet introuvable.');
+    }
+
+    return project;
+  }
+
+  // Un collaborateur peut consulter le projet et son historique généré par
+  // IGINI, mais pas le modifier, le supprimer, changer sa visibilité, en
+  // ajouter/retirer un collaborateur, ni déclencher une génération — toutes
+  // ces actions restent strictement réservées au propriétaire
+  // (findOneForOwner). Les moteurs mémoire/connaissance/workflow/score ne
+  // sont pas encore partagés avec les collaborateurs.
+  async findOneForViewer(userId: string, id: string) {
+    const project = await this.prisma.projects.findFirst({
+      where: {
+        id,
+        OR: [{ owner_id: userId }, { collaborators: { some: { user_id: userId } } }],
+      },
     });
 
     if (!project) {
@@ -62,6 +83,46 @@ export class ProjectsService {
   async setVisibilityForOwner(ownerId: string, id: string, isPublic: boolean) {
     await this.findOneForOwner(ownerId, id);
     return this.prisma.projects.update({ where: { id }, data: { is_public: isPublic } });
+  }
+
+  async listCollaborators(userId: string, id: string) {
+    await this.findOneForViewer(userId, id);
+    return this.prisma.project_collaborators.findMany({
+      where: { project_id: id },
+      include: { user: { select: { id: true, email: true } } },
+      orderBy: { created_at: 'asc' },
+    });
+  }
+
+  async addCollaborator(ownerId: string, id: string, email: string) {
+    const project = await this.findOneForOwner(ownerId, id);
+
+    const user = await this.prisma.users.findUnique({ where: { email } });
+    if (!user) {
+      throw new NotFoundException('Aucun compte ne correspond à cet email.');
+    }
+    if (user.id === project.owner_id) {
+      throw new BadRequestException('Le propriétaire du projet ne peut pas être ajouté comme collaborateur.');
+    }
+
+    const existing = await this.prisma.project_collaborators.findFirst({
+      where: { project_id: id, user_id: user.id },
+    });
+    if (existing) {
+      throw new BadRequestException('Cette personne collabore déjà sur ce projet.');
+    }
+
+    return this.prisma.project_collaborators.create({
+      data: { project_id: id, user_id: user.id },
+      include: { user: { select: { id: true, email: true } } },
+    });
+  }
+
+  async removeCollaborator(ownerId: string, id: string, collaboratorUserId: string) {
+    await this.findOneForOwner(ownerId, id);
+    await this.prisma.project_collaborators.deleteMany({
+      where: { project_id: id, user_id: collaboratorUserId },
+    });
   }
 
   // Mémoire commune (voir backend/src/igini/README.md) : chaque génération ne
@@ -135,7 +196,7 @@ export class ProjectsService {
   }
 
   async listAnalysesForOwner(ownerId: string, id: string) {
-    await this.findOneForOwner(ownerId, id);
+    await this.findOneForViewer(ownerId, id);
     return this.prisma.analyses.findMany({
       where: { project_id: id },
       orderBy: { created_at: 'desc' },
@@ -169,7 +230,7 @@ export class ProjectsService {
   }
 
   async listBuildPlansForOwner(ownerId: string, id: string) {
-    await this.findOneForOwner(ownerId, id);
+    await this.findOneForViewer(ownerId, id);
     return this.prisma.build_plans.findMany({
       where: { project_id: id },
       orderBy: { created_at: 'desc' },
@@ -201,7 +262,7 @@ export class ProjectsService {
   }
 
   async listFinancingPlansForOwner(ownerId: string, id: string) {
-    await this.findOneForOwner(ownerId, id);
+    await this.findOneForViewer(ownerId, id);
     return this.prisma.financing_plans.findMany({
       where: { project_id: id },
       orderBy: { created_at: 'desc' },
@@ -234,7 +295,7 @@ export class ProjectsService {
   }
 
   async listDevelopmentPlansForOwner(ownerId: string, id: string) {
-    await this.findOneForOwner(ownerId, id);
+    await this.findOneForViewer(ownerId, id);
     return this.prisma.development_plans.findMany({
       where: { project_id: id },
       orderBy: { created_at: 'desc' },
@@ -268,7 +329,7 @@ export class ProjectsService {
   }
 
   async listTransmissionPlansForOwner(ownerId: string, id: string) {
-    await this.findOneForOwner(ownerId, id);
+    await this.findOneForViewer(ownerId, id);
     return this.prisma.transmission_plans.findMany({
       where: { project_id: id },
       orderBy: { created_at: 'desc' },

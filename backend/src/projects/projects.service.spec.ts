@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AnalysisService } from '../igini/analysis/analysis.service.js';
 import { DevelopmentService } from '../igini/development/development.service.js';
@@ -43,6 +43,15 @@ describe('ProjectsService', () => {
       create: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
     };
+    project_collaborators: {
+      findMany: ReturnType<typeof vi.fn>;
+      findFirst: ReturnType<typeof vi.fn>;
+      create: ReturnType<typeof vi.fn>;
+      deleteMany: ReturnType<typeof vi.fn>;
+    };
+    users: {
+      findUnique: ReturnType<typeof vi.fn>;
+    };
   };
   let analysisService: { analyzeProject: ReturnType<typeof vi.fn> };
   let planningService: { createBuildPlan: ReturnType<typeof vi.fn> };
@@ -65,6 +74,13 @@ describe('ProjectsService', () => {
       financing_plans: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
       development_plans: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
       transmission_plans: { create: vi.fn(), findMany: vi.fn() },
+      project_collaborators: {
+        findMany: vi.fn(),
+        findFirst: vi.fn(),
+        create: vi.fn(),
+        deleteMany: vi.fn(),
+      },
+      users: { findUnique: vi.fn() },
     };
     // Par défaut, aucune étape précédente n'existe encore (buildProjectContext
     // doit alors renvoyer undefined) ; les tests qui veulent simuler un
@@ -188,6 +204,133 @@ describe('ProjectsService', () => {
     });
   });
 
+  describe('findOneForViewer', () => {
+    it("lève une NotFoundException si l'utilisateur n'est ni propriétaire ni collaborateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.findOneForViewer('u2', 'p1')).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('renvoie le projet pour le propriétaire', async () => {
+      const project = { id: 'p1', owner_id: 'u1' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+
+      await expect(service.findOneForViewer('u1', 'p1')).resolves.toEqual(project);
+    });
+
+    it('renvoie le projet pour un collaborateur', async () => {
+      const project = { id: 'p1', owner_id: 'u1' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+
+      await expect(service.findOneForViewer('u2', 'p1')).resolves.toEqual(project);
+      expect(prisma.projects.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: 'p1',
+          OR: [{ owner_id: 'u2' }, { collaborators: { some: { user_id: 'u2' } } }],
+        },
+      });
+    });
+  });
+
+  describe('listCollaborators', () => {
+    it("lève une NotFoundException si l'utilisateur n'a pas accès au projet", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.listCollaborators('u2', 'p1')).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('liste les collaborateurs une fois l\'accès vérifié', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.project_collaborators.findMany.mockResolvedValue([{ id: 'pc1' }]);
+
+      const result = await service.listCollaborators('u1', 'p1');
+
+      expect(prisma.project_collaborators.findMany).toHaveBeenCalledWith({
+        where: { project_id: 'p1' },
+        include: { user: { select: { id: true, email: true } } },
+        orderBy: { created_at: 'asc' },
+      });
+      expect(result).toEqual([{ id: 'pc1' }]);
+    });
+  });
+
+  describe('addCollaborator', () => {
+    it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.addCollaborator('u1', 'p1', 'b@b.com')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(prisma.project_collaborators.create).not.toHaveBeenCalled();
+    });
+
+    it("lève une NotFoundException si aucun compte ne correspond à l'email", async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.users.findUnique.mockResolvedValue(null);
+
+      await expect(service.addCollaborator('u1', 'p1', 'inconnu@example.com')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+    });
+
+    it('refuse d\'ajouter le propriétaire comme collaborateur', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.users.findUnique.mockResolvedValue({ id: 'u1', email: 'a@a.com' });
+
+      await expect(service.addCollaborator('u1', 'p1', 'a@a.com')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+      expect(prisma.project_collaborators.create).not.toHaveBeenCalled();
+    });
+
+    it('refuse un doublon si la personne collabore déjà', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.users.findUnique.mockResolvedValue({ id: 'u2', email: 'b@b.com' });
+      prisma.project_collaborators.findFirst.mockResolvedValue({ id: 'pc1' });
+
+      await expect(service.addCollaborator('u1', 'p1', 'b@b.com')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+      expect(prisma.project_collaborators.create).not.toHaveBeenCalled();
+    });
+
+    it('ajoute le collaborateur une fois toutes les vérifications passées', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.users.findUnique.mockResolvedValue({ id: 'u2', email: 'b@b.com' });
+      prisma.project_collaborators.findFirst.mockResolvedValue(null);
+      prisma.project_collaborators.create.mockResolvedValue({ id: 'pc1' });
+
+      const result = await service.addCollaborator('u1', 'p1', 'b@b.com');
+
+      expect(prisma.project_collaborators.create).toHaveBeenCalledWith({
+        data: { project_id: 'p1', user_id: 'u2' },
+        include: { user: { select: { id: true, email: true } } },
+      });
+      expect(result).toEqual({ id: 'pc1' });
+    });
+  });
+
+  describe('removeCollaborator', () => {
+    it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.removeCollaborator('u1', 'p1', 'u2')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(prisma.project_collaborators.deleteMany).not.toHaveBeenCalled();
+    });
+
+    it('supprime le collaborateur une fois la propriété vérifiée', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+
+      await service.removeCollaborator('u1', 'p1', 'u2');
+
+      expect(prisma.project_collaborators.deleteMany).toHaveBeenCalledWith({
+        where: { project_id: 'p1', user_id: 'u2' },
+      });
+    });
+  });
+
   describe('analyzeForOwner', () => {
     it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
       prisma.projects.findFirst.mockResolvedValue(null);
@@ -261,6 +404,21 @@ describe('ProjectsService', () => {
         orderBy: { created_at: 'desc' },
       });
       expect(result).toEqual([{ id: 'a1' }]);
+    });
+
+    it('un collaborateur (pas seulement le propriétaire) peut lister les analyses', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.analyses.findMany.mockResolvedValue([{ id: 'a1' }]);
+
+      await expect(service.listAnalysesForOwner('u2-collaborateur', 'p1')).resolves.toEqual([
+        { id: 'a1' },
+      ]);
+      expect(prisma.projects.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: 'p1',
+          OR: [{ owner_id: 'u2-collaborateur' }, { collaborators: { some: { user_id: 'u2-collaborateur' } } }],
+        },
+      });
     });
   });
 

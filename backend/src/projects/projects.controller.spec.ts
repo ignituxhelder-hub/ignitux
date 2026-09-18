@@ -9,9 +9,13 @@ describe('ProjectsController', () => {
     create: ReturnType<typeof vi.fn>;
     findAllForOwner: ReturnType<typeof vi.fn>;
     findOneForOwner: ReturnType<typeof vi.fn>;
+    findOneForViewer: ReturnType<typeof vi.fn>;
     updateForOwner: ReturnType<typeof vi.fn>;
     deleteForOwner: ReturnType<typeof vi.fn>;
     setVisibilityForOwner: ReturnType<typeof vi.fn>;
+    listCollaborators: ReturnType<typeof vi.fn>;
+    addCollaborator: ReturnType<typeof vi.fn>;
+    removeCollaborator: ReturnType<typeof vi.fn>;
     analyzeForOwner: ReturnType<typeof vi.fn>;
     listAnalysesForOwner: ReturnType<typeof vi.fn>;
     createBuildPlanForOwner: ReturnType<typeof vi.fn>;
@@ -30,9 +34,13 @@ describe('ProjectsController', () => {
       create: vi.fn(),
       findAllForOwner: vi.fn(),
       findOneForOwner: vi.fn(),
+      findOneForViewer: vi.fn(),
       updateForOwner: vi.fn(),
       deleteForOwner: vi.fn(),
       setVisibilityForOwner: vi.fn(),
+      listCollaborators: vi.fn(),
+      addCollaborator: vi.fn(),
+      removeCollaborator: vi.fn(),
       analyzeForOwner: vi.fn(),
       listAnalysesForOwner: vi.fn(),
       createBuildPlanForOwner: vi.fn(),
@@ -77,12 +85,12 @@ describe('ProjectsController', () => {
     expect(result).toEqual([{ id: 'p1' }]);
   });
 
-  it('findOne délègue au service avec le propriétaire courant', async () => {
-    projectsService.findOneForOwner.mockResolvedValue({ id: 'p1' });
+  it('findOne délègue au service (propriétaire ou collaborateur)', async () => {
+    projectsService.findOneForViewer.mockResolvedValue({ id: 'p1' });
 
     await controller.findOne(currentUser, 'p1');
 
-    expect(projectsService.findOneForOwner).toHaveBeenCalledWith('u1', 'p1');
+    expect(projectsService.findOneForViewer).toHaveBeenCalledWith('u1', 'p1');
   });
 
   it('update délègue au service avec le propriétaire courant', async () => {
@@ -108,6 +116,32 @@ describe('ProjectsController', () => {
 
     expect(projectsService.setVisibilityForOwner).toHaveBeenCalledWith('u1', 'p1', true);
     expect(result).toEqual({ id: 'p1', is_public: true });
+  });
+
+  it('listCollaborators délègue au service avec l\'utilisateur courant', async () => {
+    projectsService.listCollaborators.mockResolvedValue([{ id: 'pc1' }]);
+
+    const result = await controller.listCollaborators(currentUser, 'p1');
+
+    expect(projectsService.listCollaborators).toHaveBeenCalledWith('u1', 'p1');
+    expect(result).toEqual([{ id: 'pc1' }]);
+  });
+
+  it('addCollaborator délègue au service avec le propriétaire courant', async () => {
+    projectsService.addCollaborator.mockResolvedValue({ id: 'pc1' });
+
+    const result = await controller.addCollaborator(currentUser, 'p1', { email: 'b@b.com' });
+
+    expect(projectsService.addCollaborator).toHaveBeenCalledWith('u1', 'p1', 'b@b.com');
+    expect(result).toEqual({ id: 'pc1' });
+  });
+
+  it('removeCollaborator délègue au service avec le propriétaire courant', async () => {
+    projectsService.removeCollaborator.mockResolvedValue(undefined);
+
+    await controller.removeCollaborator(currentUser, 'p1', 'u2');
+
+    expect(projectsService.removeCollaborator).toHaveBeenCalledWith('u1', 'p1', 'u2');
   });
 
   it('analyze délègue au service avec le propriétaire courant', async () => {
