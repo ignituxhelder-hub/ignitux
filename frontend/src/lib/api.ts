@@ -10,6 +10,17 @@ export class ApiError extends Error {
   }
 }
 
+// Un token expiré ou invalide renvoie 401 sur n'importe quel endpoint protégé.
+// Plutôt que de laisser chaque page afficher un message d'erreur générique et
+// rester bloquée, on notifie un gestionnaire centralisé (branché par
+// AuthProvider) qui déconnecte l'utilisateur et le renvoie vers /login.
+type UnauthorizedHandler = () => void;
+let onUnauthorized: UnauthorizedHandler | null = null;
+
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | null) {
+  onUnauthorized = handler;
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
@@ -22,6 +33,15 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const body = await res.json().catch(() => null);
 
   if (!res.ok) {
+    // Ne déclenche la déconnexion que pour une requête qui portait un token
+    // (401 = session expirée/invalide) — pas pour un 401 renvoyé par
+    // /auth/login sur un mauvais mot de passe, où il n'y a pas de session à
+    // perdre.
+    const hadAuthHeader = Boolean((options.headers as Record<string, string> | undefined)?.Authorization);
+    if (res.status === 401 && hadAuthHeader) {
+      onUnauthorized?.();
+    }
+
     const message =
       body && typeof body.message === 'string'
         ? body.message

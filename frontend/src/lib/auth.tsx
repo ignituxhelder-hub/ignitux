@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { api, type User } from './api';
+import { api, setUnauthorizedHandler, type User } from './api';
 
 interface AuthState {
   token: string | null;
@@ -67,6 +67,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Rien à faire si le stockage est inaccessible.
     }
   }
+
+  // Branche la déconnexion automatique sur les 401 renvoyés par l'API (token
+  // expiré ou invalide) — voir setUnauthorizedHandler dans lib/api.ts. Les
+  // pages qui dépendent de `token` dans leurs effets redirigent alors
+  // naturellement vers /login.
+  useEffect(() => {
+    setUnauthorizedHandler(logout);
+    return () => setUnauthorizedHandler(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <AuthContext.Provider value={{ token, user, isReady, login, signup, logout }}>
