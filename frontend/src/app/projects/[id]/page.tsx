@@ -22,6 +22,7 @@ import {
   type TransmissionPlan,
 } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { CollaboratorsSection } from './collaborators-section';
 import { KnowledgeSection, MemorySection, ScoreSection, TasksSection } from './engine-sections';
 
 /** Charge la liste d'un type de plan (analyse, financement, …) pour le projet courant. */
@@ -87,7 +88,7 @@ function useGeneration<T>(
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { token, isReady } = useAuth();
+  const { token, user, isReady } = useAuth();
   const router = useRouter();
 
   const [project, setProject] = useState<Project | null>(null);
@@ -219,6 +220,8 @@ export default function ProjectDetailPage() {
     return null;
   }
 
+  const isOwner = project ? project.owner_id === user?.id : false;
+
   return (
     <main className="page page--wide">
       <div className="top-bar">
@@ -237,57 +240,68 @@ export default function ProjectDetailPage() {
             réalité.
           </IginiMention>
 
-          <form className="card" onSubmit={handleSave}>
-            {formError && <p className="error">{formError}</p>}
-            <div className="field">
-              <label htmlFor="title">Titre</label>
-              <input
-                id="title"
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
+          {isOwner ? (
+            <form className="card" onSubmit={handleSave}>
+              {formError && <p className="error">{formError}</p>}
+              <div className="field">
+                <label htmlFor="title">Titre</label>
+                <input
+                  id="title"
+                  required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="description">Description</label>
+                <textarea
+                  id="description"
+                  rows={5}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button className="primary" type="submit" disabled={isSaving}>
+                  {isSaving ? 'Sauvegarde…' : 'Sauvegarder'}
+                </button>
+                <button
+                  className="secondary"
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Suppression…' : 'Supprimer le projet'}
+                </button>
+                <button
+                  className="secondary"
+                  type="button"
+                  onClick={handleToggleVisibility}
+                  disabled={isTogglingVisibility}
+                >
+                  {isTogglingVisibility
+                    ? 'Mise à jour…'
+                    : project.is_public
+                      ? 'Rendre privé'
+                      : 'Rendre public'}
+                </button>
+              </div>
+              <p className="muted" style={{ marginTop: '0.75rem', marginBottom: 0 }}>
+                {project.is_public
+                  ? 'Ce projet est visible dans la communauté.'
+                  : "Ce projet n'est visible que par toi."}
+              </p>
+            </form>
+          ) : (
+            <div className="card">
+              <h1 style={{ marginTop: 0 }}>{project.title}</h1>
+              {project.description && <p style={{ marginBottom: 0 }}>{project.description}</p>}
+              <p className="muted" style={{ marginTop: '0.75rem', marginBottom: 0 }}>
+                Projet partagé avec toi — tu peux consulter son historique, mais seul le
+                propriétaire peut le modifier ou générer de nouveaux plans.
+              </p>
             </div>
-            <div className="field">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                rows={5}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button className="primary" type="submit" disabled={isSaving}>
-                {isSaving ? 'Sauvegarde…' : 'Sauvegarder'}
-              </button>
-              <button
-                className="secondary"
-                type="button"
-                onClick={handleDelete}
-                disabled={isDeleting}
-              >
-                {isDeleting ? 'Suppression…' : 'Supprimer le projet'}
-              </button>
-              <button
-                className="secondary"
-                type="button"
-                onClick={handleToggleVisibility}
-                disabled={isTogglingVisibility}
-              >
-                {isTogglingVisibility
-                  ? 'Mise à jour…'
-                  : project.is_public
-                    ? 'Rendre privé'
-                    : 'Rendre public'}
-              </button>
-            </div>
-            <p className="muted" style={{ marginTop: '0.75rem', marginBottom: 0 }}>
-              {project.is_public
-                ? 'Ce projet est visible dans la communauté.'
-                : "Ce projet n'est visible que par toi."}
-            </p>
-          </form>
+          )}
         </>
       )}
 
@@ -302,6 +316,7 @@ export default function ProjectDetailPage() {
           error={analysis.error}
           onGenerate={analysis.generate}
           renderItem={(item) => <AnalysisCard analysis={item} key={item.id} />}
+          readOnly={!isOwner}
         />
       )}
 
@@ -316,6 +331,7 @@ export default function ProjectDetailPage() {
           error={plan.error}
           onGenerate={plan.generate}
           renderItem={(item) => <BuildPlanCard plan={item} key={item.id} />}
+          readOnly={!isOwner}
         />
       )}
 
@@ -330,6 +346,7 @@ export default function ProjectDetailPage() {
           error={financing.error}
           onGenerate={financing.generate}
           renderItem={(item) => <FinancingPlanCard plan={item} key={item.id} />}
+          readOnly={!isOwner}
         />
       )}
 
@@ -344,6 +361,7 @@ export default function ProjectDetailPage() {
           error={development.error}
           onGenerate={development.generate}
           renderItem={(item) => <DevelopmentPlanCard plan={item} key={item.id} />}
+          readOnly={!isOwner}
         />
       )}
 
@@ -358,13 +376,18 @@ export default function ProjectDetailPage() {
           error={transmission.error}
           onGenerate={transmission.generate}
           renderItem={(item) => <TransmissionPlanCard plan={item} key={item.id} />}
+          readOnly={!isOwner}
         />
       )}
 
-      {project && <ScoreSection token={token} projectId={id} />}
-      {project && <TasksSection token={token} projectId={id} />}
-      {project && <MemorySection token={token} projectId={id} />}
-      {project && <KnowledgeSection token={token} projectId={id} />}
+      {/* Les 4 moteurs IGINI et la gestion des collaborateurs restent réservés
+          au propriétaire pour l'instant — pas encore partagés avec les
+          collaborateurs côté backend (voir projects.service.ts). */}
+      {project && isOwner && <ScoreSection token={token} projectId={id} />}
+      {project && isOwner && <TasksSection token={token} projectId={id} />}
+      {project && isOwner && <MemorySection token={token} projectId={id} />}
+      {project && isOwner && <KnowledgeSection token={token} projectId={id} />}
+      {project && isOwner && <CollaboratorsSection token={token} projectId={id} />}
     </main>
   );
 }
@@ -379,6 +402,8 @@ interface GenerationSectionProps<T> {
   error: string | null;
   onGenerate: () => void;
   renderItem: (item: T) => ReactNode;
+  /** Un collaborateur peut consulter l'historique, mais pas en générer de nouveau. */
+  readOnly?: boolean;
 }
 
 function GenerationSection<T>({
@@ -391,14 +416,17 @@ function GenerationSection<T>({
   error,
   onGenerate,
   renderItem,
+  readOnly = false,
 }: GenerationSectionProps<T>) {
   return (
     <div className="card" style={{ marginTop: '1.5rem' }}>
       <div className="top-bar" style={{ marginBottom: items.length ? '1rem' : 0 }}>
         <h2 style={{ margin: 0 }}>{title}</h2>
-        <button className="secondary" type="button" onClick={onGenerate} disabled={isBusy}>
-          {isBusy ? buttonBusyLabel : buttonLabel}
-        </button>
+        {!readOnly && (
+          <button className="secondary" type="button" onClick={onGenerate} disabled={isBusy}>
+            {isBusy ? buttonBusyLabel : buttonLabel}
+          </button>
+        )}
       </div>
       {error && <p className="error">{error}</p>}
       {items.length === 0 && !isBusy && <p className="muted">{emptyLabel}</p>}

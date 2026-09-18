@@ -33,6 +33,7 @@ const ENGINE_ROUTES = {
   'GET /memory': { status: 200, body: [] },
   'GET /memory/summary': { status: 200, body: { summary: '' } },
   'GET /knowledge/graph': { status: 200, body: { nodes: [], edges: [] } },
+  'GET /projects/p1/collaborators': { status: 200, body: [] },
 };
 
 describe('ProjectDetailPage', () => {
@@ -156,5 +157,44 @@ describe('ProjectDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /rendre public/i }));
 
     expect(await screen.findByText('Ce projet est visible dans la communauté.')).toBeInTheDocument();
+  });
+
+  it('affiche une vue lecture seule pour un collaborateur (pas le propriétaire)', async () => {
+    signInAs('tok456', { id: 'u2', email: 'collaborateur@b.com' });
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      'GET /projects/p1/analyses': {
+        status: 200,
+        body: [
+          {
+            id: 'a1',
+            project_id: 'p1',
+            summary: 'Résumé existant.',
+            feasibility_score: 6,
+            strengths: [],
+            risks: [],
+            next_steps: [],
+            created_at: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+      ...ENGINE_ROUTES,
+    });
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByRole('heading', { name: 'École motocross' })).toBeInTheDocument();
+    expect(screen.getByText(/Projet partagé avec toi/)).toBeInTheDocument();
+    expect(screen.getByText('Résumé existant.')).toBeInTheDocument();
+
+    // Pas de bouton de génération, pas de formulaire d'édition, pas de moteurs IGINI.
+    expect(screen.queryByRole('button', { name: /analyser ce projet/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /supprimer le projet/i })).not.toBeInTheDocument();
+    expect(screen.queryByText('Score IGNITUX')).not.toBeInTheDocument();
+    expect(screen.queryByText('Collaborateurs')).not.toBeInTheDocument();
   });
 });

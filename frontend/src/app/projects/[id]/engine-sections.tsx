@@ -428,20 +428,23 @@ export function KnowledgeSection({ token, projectId }: SectionProps) {
     <div className="card" style={{ marginTop: '1.5rem' }}>
       <h2 style={{ marginTop: 0 }}>Connaissance</h2>
       {error && <p className="error">{error}</p>}
-      <form onSubmit={handleCreateConcept} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
+      <form
+        onSubmit={handleCreateConcept}
+        style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}
+      >
         <input
           aria-label="Nom du concept"
           placeholder="Nouveau concept…"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          style={{ flex: 1 }}
+          style={{ flex: '1 1 160px' }}
         />
         <input
           aria-label="Description du concept"
           placeholder="Description (optionnel)"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          style={{ flex: 1 }}
+          style={{ flex: '1 1 160px' }}
         />
         <button className="secondary" type="submit" disabled={isCreating}>
           {isCreating ? 'Ajout…' : 'Ajouter'}

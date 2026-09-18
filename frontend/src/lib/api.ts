@@ -69,6 +69,14 @@ export interface Project {
   updated_at: string;
 }
 
+export interface Collaborator {
+  id: string;
+  project_id: string;
+  user_id: string;
+  created_at: string;
+  user: { id: string; email: string };
+}
+
 export interface PublicProject {
   id: string;
   title: string;
@@ -359,6 +367,25 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify({ isPublic }),
     }),
+
+  listCollaborators: (token: string, id: string) =>
+    request<Collaborator[]>(`/projects/${id}/collaborators`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  addCollaborator: (token: string, id: string, email: string) =>
+    request<Collaborator>(`/projects/${id}/collaborators`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ email }),
+    }),
+
+  removeCollaborator: async (token: string, id: string, collaboratorUserId: string) => {
+    await request<void>(`/projects/${id}/collaborators/${collaboratorUserId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
 
   listPublicProjects: (token: string) =>
     request<PublicProject[]>('/community/projects', {
