@@ -53,5 +53,8 @@ jobs:
 
       - run: npm ci
 
+      - name: Tests unitaires
+        run: npm run test
+
       - name: Build
         run: npm run build
