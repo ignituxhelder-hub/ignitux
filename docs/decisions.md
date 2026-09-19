@@ -641,3 +641,30 @@ vivra ailleurs que sur cette instance, la question se reposera — d'ici là, il
 main avec `npm run test:e2e` depuis `backend/`.
 
 **Où** — `.github/workflows/ci.yml`, `backend/package.json`.
+
+## Deux dégradés de feu : un pour l'œil, un pour le texte
+
+**Quoi** — `--grad-fire` reste vif (étincelle → flamme → braise) et n'habille que du décoratif :
+la marque découpée, le point de chargement, le liseré d'une carte. Les boutons prennent
+`--grad-fire-solid`, une bande plus profonde dont l'arrêt le plus clair tient 4.5:1 avec du blanc.
+
+**Pourquoi** — le bouton principal portait du texte blanc sur `#ffb347`, soit **1.78:1**.
+Illisible, en haut de chaque bouton d'action du produit, et invisible à la relecture du CSS :
+seul un calcul le révèle. Assombrir `--grad-fire` aurait réglé le bouton en ternissant la marque
+et l'étincelle de chargement, qui ne portent aucun texte et n'avaient pas le problème. D'où la
+séparation. Le feu vif n'est pas perdu pour les boutons : il passe dans le halo
+(`--glow-fire`), qui entoure sans jamais passer sous les lettres.
+**Où** — `frontend/src/app/globals.css`.
+
+## Le contraste est vérifié par un test, pas par l'œil
+
+**Quoi** — `frontend/src/app/contraste.spec.ts` lit `globals.css`, calcule les ratios WCAG et
+échoue sous 4.5:1 pour du texte, 3:1 pour un contour d'élément d'interface.
+
+**Pourquoi** — rien de ce qui a été construit dans les dernières sessions n'a été regardé sur un
+écran réel, et cette limite ne va pas disparaître. La lisibilité, elle, ne dépend pas d'un
+navigateur : elle se déduit des couleurs. Autant la vérifier à chaque exécution de la suite. Le
+test a trouvé trois défauts dès sa première exécution — le dégradé des boutons, le surtitre du
+héros à 4.12:1, et les contours d'interface à 1.80:1 — tous introduits par la refonte graphique,
+tous invisibles à la relecture.
+**Où** — `frontend/src/app/contraste.spec.ts`.
