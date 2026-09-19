@@ -1,6 +1,6 @@
 # État du projet
 
-Dernière vérification : 18/09/2026. Mis à jour à chaque changement notable — pas reconstruit de
+Dernière vérification : 19/09/2026. Mis à jour à chaque changement notable — pas reconstruit de
 mémoire, toujours en relançant les vérifications ci-dessous.
 
 ## Comment vérifier ces chiffres soi-même
@@ -10,12 +10,14 @@ cd backend && npx tsc --noEmit -p tsconfig.build.json && npm run lint && npx vit
 cd frontend && npx tsc --noEmit && npm run lint && npx vitest run && npm run build
 ```
 
-Au 18/09/2026 : **167 tests backend**, **43 tests frontend**, lint et type-check propres des deux
-côtés, build frontend réussi (8 routes).
+Au 19/09/2026 : **196 tests backend**, **52 tests frontend**, lint et type-check propres des deux
+côtés, build frontend réussi (12 routes).
 
 ## Complet et testé
 
-- **Comptes** — inscription/connexion JWT, bcrypt, rate-limiting.
+- **Comptes** — inscription/connexion JWT, bcrypt, rate-limiting, réinitialisation de mot de passe
+  et vérification d'email (voir `docs/decisions.md` pour la limite du `MailService` qui les
+  accompagne — journalisé, pas de vrai envoi tant qu'aucun fournisseur n'est choisi).
 - **Projets** — CRUD, visibilité publique/privée, collaboration multi-comptes (backend + frontend).
 - **5 générateurs IGINI** — code complet (schémas Zod, prompts, persistance, mémoire commune
   correcte). Testés unitairement. **Pas testés en conditions réelles avec succès** — voir la section
@@ -30,6 +32,9 @@ côtés, build frontend réussi (8 routes).
   les 4 moteurs transverses.
 - **Knowledge graph** — vraie visualisation SVG, mais alimentation manuelle uniquement (pas
   d'extraction automatique depuis les plans générés).
+- **Vérification d'email** — le compte reste utilisable sans vérifier son email (aucune route n'est
+  bloquée par `email_verified_at`). Choix délibéré pour ne pas verrouiller l'accès tant que la
+  décision produit ("faut-il l'exiger, et où ?") n'est pas prise — voir `docs/decisions.md`.
 
 ## Bloqué (décision ou ressource externe nécessaire)
 
@@ -44,8 +49,6 @@ côtés, build frontend réussi (8 routes).
 - **Modules pays (One Brain, Multiple Regulations)** — rien n'existe. Nécessite un pays cible et une
   source réglementaire fiable ; inventer du contenu légal serait dangereux à présenter comme fiable.
 - **Communauté avancée** (mentors, investisseurs, mise en relation) — aucune spec.
-- **Réinitialisation de mot de passe / vérification d'email** — nécessite un service d'envoi
-  d'email, même blocage de principe que la clé Claude (décision + configuration externes).
 
 ## Hors scope, par choix assumé (pas un oubli)
 

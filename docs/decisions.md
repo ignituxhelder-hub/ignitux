@@ -3,6 +3,28 @@
 Ce document existe pour qu'une décision prise une fois n'ait pas besoin d'être redécouverte ou
 redébattue plus tard. Chaque entrée : quoi, pourquoi, où c'est appliqué dans le code.
 
+## MailService journalise au lieu d'envoyer
+
+**Quoi** — `MailService.send` ne fait qu'écrire l'email dans les logs (niveau `warn`) : aucun
+fournisseur réel (Resend, SES, SMTP…) n'est branché.
+**Pourquoi** — aucune décision produit sur le fournisseur n'a été prise, et bloquer la
+réinitialisation de mot de passe / vérification d'email indéfiniment en attendant ce choix aurait
+laissé l'auth incomplète. En isolant l'envoi dans cette seule classe, brancher un vrai fournisseur
+plus tard ne touche à rien d'autre (`PasswordResetService`, `EmailVerificationService` ne changent
+pas).
+**Où** — `backend/src/mail/mail.service.ts`.
+
+## Vérification d'email non obligatoire
+
+**Quoi** — un compte peut se connecter et utiliser l'app normalement sans avoir vérifié son email.
+`users.email_verified_at` est renseigné dès que la vérification a lieu, mais rien ne bloque l'accès
+tant qu'il est `null`.
+**Pourquoi** — décider si/où l'exiger (bloquer la connexion ? seulement certaines actions ?) est un
+choix produit, pas technique — l'imposer unilatéralement aurait pu verrouiller des comptes de façon
+non désirée. Le token existe et fonctionne ; ajouter un garde-fou plus tard est un changement
+localisé (un guard sur les routes concernées).
+**Où** — `backend/src/auth-tokens/email-verification.service.ts`, colonne `users.email_verified_at`.
+
 ## Pas de score fabriqué
 
 **Quoi** — `ScoringService.getScoreCard` renvoie `null` pour un indicateur quand aucune donnée
