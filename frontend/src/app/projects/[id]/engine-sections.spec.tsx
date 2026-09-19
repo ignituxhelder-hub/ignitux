@@ -121,6 +121,34 @@ describe('TasksSection', () => {
 
     await waitFor(() => expect((select as HTMLSelectElement).value).toBe('done'));
   });
+
+  it('masque le formulaire d\'ajout et le statut modifiable en lecture seule', async () => {
+    mockApiRoutes({
+      'GET /projects/p1/tasks': {
+        status: 200,
+        body: [
+          {
+            id: 't1',
+            project_id: 'p1',
+            title: 'Valider le pitch',
+            description: null,
+            status: 'pending',
+            assignee: 'human',
+            source: 'manual',
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+    });
+
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} readOnly />);
+
+    expect(await screen.findByText('Valider le pitch')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Nouvelle tâche')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Statut de Valider le pitch')).not.toBeInTheDocument();
+    expect(screen.getByText('À faire')).toBeInTheDocument();
+  });
 });
 
 describe('MemorySection', () => {
@@ -151,6 +179,30 @@ describe('MemorySection', () => {
     fireEvent.click(screen.getByRole('button', { name: /enregistrer/i }));
 
     expect(await screen.findByText('Choisir un MVP simple.')).toBeInTheDocument();
+  });
+
+  it('masque le formulaire d\'enregistrement en lecture seule', async () => {
+    mockApiRoutes({
+      'GET /memory': {
+        status: 200,
+        body: [
+          {
+            id: 'm1',
+            user_id: 'u1',
+            project_id: 'p1',
+            category: 'decision',
+            content: 'Choisir un MVP simple.',
+            created_at: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+      'GET /memory/summary': { status: 200, body: { summary: '' } },
+    });
+
+    render(<MemorySection token={TOKEN} projectId={PROJECT_ID} readOnly />);
+
+    expect(await screen.findByText('Choisir un MVP simple.')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Contenu du souvenir')).not.toBeInTheDocument();
   });
 });
 
@@ -273,5 +325,43 @@ describe('KnowledgeSection', () => {
 
     await screen.findByText("Aucun concept pour l'instant.");
     expect(screen.queryByRole('img', { name: 'Graphe des concepts et de leurs relations' })).not.toBeInTheDocument();
+  });
+
+  it('masque les formulaires de création et de liaison en lecture seule', async () => {
+    mockApiRoutes({
+      'GET /knowledge/graph': {
+        status: 200,
+        body: {
+          nodes: [
+            {
+              id: 'c1',
+              user_id: 'u1',
+              project_id: 'p1',
+              name: 'Client cible',
+              description: null,
+              category: null,
+              created_at: '2026-01-01T00:00:00.000Z',
+            },
+            {
+              id: 'c2',
+              user_id: 'u1',
+              project_id: 'p1',
+              name: 'Offre SaaS',
+              description: null,
+              category: null,
+              created_at: '2026-01-01T00:00:00.000Z',
+            },
+          ],
+          edges: [],
+        },
+      },
+    });
+
+    render(<KnowledgeSection token={TOKEN} projectId={PROJECT_ID} readOnly />);
+
+    const matches = await screen.findAllByText('Client cible');
+    expect(matches.length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByLabelText('Nom du concept')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Concept de départ')).not.toBeInTheDocument();
   });
 });

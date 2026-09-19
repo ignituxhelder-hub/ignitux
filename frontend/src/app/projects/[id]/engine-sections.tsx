@@ -18,6 +18,10 @@ interface SectionProps {
   projectId: string;
 }
 
+interface ReadOnlySectionProps extends SectionProps {
+  readOnly?: boolean;
+}
+
 const SCORE_LABELS: Record<keyof ScoreCard, string> = {
   etincelle: 'Étincelle',
   construction: 'Construction',
@@ -119,7 +123,7 @@ const SOURCE_LABELS: Record<string, string> = {
   build_plan: 'Suggérée par le plan de construction',
 };
 
-export function TasksSection({ token, projectId }: SectionProps) {
+export function TasksSection({ token, projectId, readOnly = false }: ReadOnlySectionProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -177,18 +181,20 @@ export function TasksSection({ token, projectId }: SectionProps) {
     <div className="card" style={{ marginTop: '1.5rem' }}>
       <h2 style={{ marginTop: 0 }}>Tâches</h2>
       {error && <p className="error">{error}</p>}
-      <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
-        <input
-          aria-label="Nouvelle tâche"
-          placeholder="Ajouter une tâche…"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          style={{ flex: 1 }}
-        />
-        <button className="secondary" type="submit" disabled={isCreating}>
-          {isCreating ? 'Ajout…' : 'Ajouter'}
-        </button>
-      </form>
+      {!readOnly && (
+        <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
+          <input
+            aria-label="Nouvelle tâche"
+            placeholder="Ajouter une tâche…"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            style={{ flex: 1 }}
+          />
+          <button className="secondary" type="submit" disabled={isCreating}>
+            {isCreating ? 'Ajout…' : 'Ajouter'}
+          </button>
+        </form>
+      )}
       {isLoading && <p className="loading">Chargement…</p>}
       {!isLoading && tasks.length === 0 && <p className="muted">Aucune tâche pour l&apos;instant.</p>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -196,17 +202,21 @@ export function TasksSection({ token, projectId }: SectionProps) {
           <div className="project-item" style={{ cursor: 'default' }} key={task.id}>
             <div className="top-bar">
               <span>{task.title}</span>
-              <select
-                aria-label={`Statut de ${task.title}`}
-                value={task.status}
-                onChange={(e) => handleStatusChange(task.id, e.target.value as TaskStatus)}
-              >
-                {TASK_STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {STATUS_LABELS[status]}
-                  </option>
-                ))}
-              </select>
+              {readOnly ? (
+                <span className="muted">{STATUS_LABELS[task.status]}</span>
+              ) : (
+                <select
+                  aria-label={`Statut de ${task.title}`}
+                  value={task.status}
+                  onChange={(e) => handleStatusChange(task.id, e.target.value as TaskStatus)}
+                >
+                  {TASK_STATUSES.map((status) => (
+                    <option key={status} value={status}>
+                      {STATUS_LABELS[status]}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
             <span className="muted">{SOURCE_LABELS[task.source] ?? task.source}</span>
           </div>
@@ -224,7 +234,7 @@ const CATEGORY_LABELS: Record<MemoryCategory, string> = {
   fact: 'Fait',
 };
 
-export function MemorySection({ token, projectId }: SectionProps) {
+export function MemorySection({ token, projectId, readOnly = false }: ReadOnlySectionProps) {
   const [memories, setMemories] = useState<Memory[]>([]);
   const [summary, setSummary] = useState<string | null>(null);
   const [category, setCategory] = useState<MemoryCategory>('decision');
@@ -281,32 +291,34 @@ export function MemorySection({ token, projectId }: SectionProps) {
         </p>
       )}
       {error && <p className="error">{error}</p>}
-      <form
-        onSubmit={handleCreate}
-        style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}
-      >
-        <select
-          aria-label="Catégorie du souvenir"
-          value={category}
-          onChange={(e) => setCategory(e.target.value as MemoryCategory)}
+      {!readOnly && (
+        <form
+          onSubmit={handleCreate}
+          style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}
         >
-          {MEMORY_CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {CATEGORY_LABELS[c]}
-            </option>
-          ))}
-        </select>
-        <textarea
-          aria-label="Contenu du souvenir"
-          rows={2}
-          placeholder="Qu'est-ce qu'IGINI doit retenir ?"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-        <button className="secondary" type="submit" disabled={isCreating} style={{ alignSelf: 'flex-start' }}>
-          {isCreating ? 'Enregistrement…' : 'Enregistrer'}
-        </button>
-      </form>
+          <select
+            aria-label="Catégorie du souvenir"
+            value={category}
+            onChange={(e) => setCategory(e.target.value as MemoryCategory)}
+          >
+            {MEMORY_CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {CATEGORY_LABELS[c]}
+              </option>
+            ))}
+          </select>
+          <textarea
+            aria-label="Contenu du souvenir"
+            rows={2}
+            placeholder="Qu'est-ce qu'IGINI doit retenir ?"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+          />
+          <button className="secondary" type="submit" disabled={isCreating} style={{ alignSelf: 'flex-start' }}>
+            {isCreating ? 'Enregistrement…' : 'Enregistrer'}
+          </button>
+        </form>
+      )}
       {isLoading && <p className="loading">Chargement…</p>}
       {!isLoading && memories.length === 0 && <p className="muted">Aucun souvenir pour l&apos;instant.</p>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -387,7 +399,7 @@ function ConceptGraphView({ concepts, edges }: { concepts: Concept[]; edges: Con
   );
 }
 
-export function KnowledgeSection({ token, projectId }: SectionProps) {
+export function KnowledgeSection({ token, projectId, readOnly = false }: ReadOnlySectionProps) {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [edges, setEdges] = useState<ConceptLink[]>([]);
   const [name, setName] = useState('');
@@ -459,28 +471,30 @@ export function KnowledgeSection({ token, projectId }: SectionProps) {
     <div className="card" style={{ marginTop: '1.5rem' }}>
       <h2 style={{ marginTop: 0 }}>Connaissance</h2>
       {error && <p className="error">{error}</p>}
-      <form
-        onSubmit={handleCreateConcept}
-        style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}
-      >
-        <input
-          aria-label="Nom du concept"
-          placeholder="Nouveau concept…"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          style={{ flex: '1 1 160px' }}
-        />
-        <input
-          aria-label="Description du concept"
-          placeholder="Description (optionnel)"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          style={{ flex: '1 1 160px' }}
-        />
-        <button className="secondary" type="submit" disabled={isCreating}>
-          {isCreating ? 'Ajout…' : 'Ajouter'}
-        </button>
-      </form>
+      {!readOnly && (
+        <form
+          onSubmit={handleCreateConcept}
+          style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}
+        >
+          <input
+            aria-label="Nom du concept"
+            placeholder="Nouveau concept…"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            style={{ flex: '1 1 160px' }}
+          />
+          <input
+            aria-label="Description du concept"
+            placeholder="Description (optionnel)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            style={{ flex: '1 1 160px' }}
+          />
+          <button className="secondary" type="submit" disabled={isCreating}>
+            {isCreating ? 'Ajout…' : 'Ajouter'}
+          </button>
+        </form>
+      )}
 
       {isLoading && <p className="loading">Chargement…</p>}
       {!isLoading && concepts.length === 0 && <p className="muted">Aucun concept pour l&apos;instant.</p>}
@@ -494,7 +508,7 @@ export function KnowledgeSection({ token, projectId }: SectionProps) {
         ))}
       </ul>
 
-      {concepts.length >= 2 && (
+      {!readOnly && concepts.length >= 2 && (
         <form
           onSubmit={handleLink}
           style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', flexWrap: 'wrap' }}

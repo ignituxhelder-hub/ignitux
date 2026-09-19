@@ -383,10 +383,10 @@ export default function ProjectDetailPage() {
       {/* Les 4 moteurs IGINI et la gestion des collaborateurs restent réservés
           au propriétaire pour l'instant — pas encore partagés avec les
           collaborateurs côté backend (voir projects.service.ts). */}
-      {project && isOwner && <ScoreSection token={token} projectId={id} />}
-      {project && isOwner && <TasksSection token={token} projectId={id} />}
-      {project && isOwner && <MemorySection token={token} projectId={id} />}
-      {project && isOwner && <KnowledgeSection token={token} projectId={id} />}
+      {project && <ScoreSection token={token} projectId={id} />}
+      {project && <TasksSection token={token} projectId={id} readOnly={!isOwner} />}
+      {project && <MemorySection token={token} projectId={id} readOnly={!isOwner} />}
+      {project && <KnowledgeSection token={token} projectId={id} readOnly={!isOwner} />}
       {project && isOwner && <CollaboratorsSection token={token} projectId={id} />}
     </main>
   );

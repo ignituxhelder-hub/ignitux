@@ -46,10 +46,13 @@ Trois niveaux, tous vérifiés côté backend (jamais seulement côté frontend)
    générer de nouveaux plans, gérer les collaborateurs. Vérifié par
    `ProjectsService.findOneForOwner`.
 2. **Collaborateur** (table `project_collaborators`, invité par email par le propriétaire) — accès
-   en lecture seule au projet et à l'historique des 5 générateurs. Vérifié par
-   `ProjectsService.findOneForViewer` (propriétaire OU collaborateur). **Ne couvre pas encore** les
-   4 moteurs transverses (mémoire/connaissance/workflow/score), qui restent strictement réservés au
-   propriétaire (`assertOwnsProject`) — limitation connue, pas un oubli.
+   en lecture seule au projet, à l'historique des 5 générateurs, et depuis peu aux 4 moteurs
+   transverses (mémoire/connaissance/workflow/score) du projet. Vérifié par
+   `ProjectsService.findOneForViewer` (propriétaire OU collaborateur) côté projet, et par
+   `assertHasProjectAccess` (propriétaire OU collaborateur) côté moteurs — à ne pas confondre avec
+   `assertOwnsProject` (propriétaire uniquement), toujours utilisé pour toutes les écritures
+   (créer une tâche, enregistrer un souvenir, créer un concept, changer un statut, gérer les
+   collaborateurs).
 3. **Communauté** (`is_public = true`) — n'importe quel utilisateur connecté peut consulter le
    projet (champs limités : titre, description, date) et y laisser un encouragement. Un projet privé
    renvoie 404 plutôt que de révéler son existence.

@@ -191,10 +191,19 @@ describe('ProjectDetailPage', () => {
     expect(screen.getByText(/Projet partagé avec toi/)).toBeInTheDocument();
     expect(screen.getByText('Résumé existant.')).toBeInTheDocument();
 
-    // Pas de bouton de génération, pas de formulaire d'édition, pas de moteurs IGINI.
+    // Pas de bouton de génération, pas de formulaire d'édition.
     expect(screen.queryByRole('button', { name: /analyser ce projet/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /supprimer le projet/i })).not.toBeInTheDocument();
-    expect(screen.queryByText('Score IGNITUX')).not.toBeInTheDocument();
+    // La gestion des collaborateurs reste réservée au propriétaire.
     expect(screen.queryByText('Collaborateurs')).not.toBeInTheDocument();
+
+    // Les 4 moteurs transverses sont visibles en lecture seule pour un collaborateur.
+    expect(screen.getByText('Score IGNITUX')).toBeInTheDocument();
+    expect(screen.getByText('Tâches')).toBeInTheDocument();
+    expect(screen.getByText('Mémoire')).toBeInTheDocument();
+    expect(screen.getByText('Connaissance')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Nouvelle tâche')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Contenu du souvenir')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Nom du concept')).not.toBeInTheDocument();
   });
 });

@@ -68,6 +68,40 @@ fichiers. Redémarré proprement (aucune perte de données, la base est indépen
 routes confirmées présentes après redémarrage. **À savoir pour la suite** : après un ajout massif
 de nouveaux fichiers backend, un redémarrage manuel du serveur de dev peut être nécessaire.
 
+### 5. Accès collaborateur étendu aux 4 moteurs transverses (backend + frontend)
+
+Jusqu'ici, un collaborateur invité sur un projet voyait le projet et l'historique des 5
+générateurs, mais pas la mémoire, la connaissance, les tâches ou le score — strictement réservés
+au propriétaire (`assertOwnsProject`). Ce n'était pas cohérent avec le principe de collaboration
+déjà en place ailleurs.
+
+- **Backend** : nouvelle fonction `assertHasProjectAccess` (propriétaire OU collaborateur), à
+  distinguer de `assertOwnsProject` (propriétaire seul, toujours utilisée pour toute écriture :
+  créer une tâche, enregistrer un souvenir, créer un concept, changer un statut, gérer les
+  collaborateurs). Appliquée en lecture seule à `WorkflowService.listTasks`,
+  `ScoringService.getScoreCard`, `MemoryService.search` et `KnowledgeService.listConcepts`
+  (donc aussi `getGraph`/`summarize` qui en dépendent).
+- Détail architectural découvert en le faisant : `memories`/`concepts` sont rattachés à
+  `user_id` avec un `project_id` optionnel (pas purement `project_id` comme `tasks`) — la forme de
+  la requête change donc selon qu'un `projectId` est fourni ou non, pas seulement la fonction de
+  vérification d'accès.
+- Testé unitairement (nouveaux cas "un collaborateur peut lire...") et **en conditions réelles**
+  avec deux comptes réels : un collaborateur invité voit bien les données liées au projet du
+  propriétaire (pas seulement les siennes), et reçoit un 404 avant d'avoir été invité.
+- **Frontend** : les 4 sections (`ScoreSection`, `TasksSection`, `MemorySection`,
+  `KnowledgeSection`) sont maintenant affichées aux collaborateurs, pas seulement au propriétaire
+  (`frontend/src/app/projects/[id]/page.tsx`). Nouvelle prop `readOnly` sur `TasksSection`,
+  `MemorySection`, `KnowledgeSection` (`engine-sections.tsx`) : masque les formulaires de
+  création/liaison et remplace le sélecteur de statut de tâche (modifiable) par un simple libellé
+  pour un non-propriétaire, afin d'éviter qu'un collaborateur soumette une action que le backend
+  refuserait de toute façon (même pattern que celui déjà utilisé pour les 5 générateurs IA). La
+  gestion des collaborateurs elle-même reste réservée au propriétaire.
+- `docs/architecture.md` corrigé : la phrase "ne couvre pas encore les 4 moteurs transverses"
+  était devenue fausse et a été mise à jour.
+- Nouveaux tests frontend (3) vérifiant que les formulaires d'écriture sont bien masqués en lecture
+  seule ; test existant du mode "collaborateur" mis à jour (il affirmait à tort que ces sections
+  étaient invisibles, maintenant qu'elles le sont en lecture seule).
+
 ## Bloqué — pas contourné, car un contournement serait mentir
 
 - **Génération IA réelle (les 5 générateurs IGINI)** — `ANTHROPIC_API_KEY` toujours absente de
@@ -99,10 +133,17 @@ pas été entamé — aucun appel à l'API Claude n'a été fait, la clé n'éta
 
 ## Vérifié à chaque étape
 
-- Backend : 199 tests (+32 depuis le début de session), `tsc --noEmit` propre, `oxlint` propre.
-- Frontend : 54 tests (+11), `tsc --noEmit` propre, `eslint` propre, build de production réussi
+- Backend : 208 tests (+41 depuis le début de session), `tsc --noEmit` propre, `oxlint` propre.
+- Frontend : 57 tests (+14), `tsc --noEmit` propre, `eslint` propre, build de production réussi
   (13 routes).
 - Tout poussé sur `main`, historique de commits clair (voir `git log`).
+
+## Estimation chiffrée demandée en cours de session
+
+Sur demande explicite, une estimation d'avancement (phase par phase) et de coût de développement a
+été écrite dans [`ESTIMATION.md`](ESTIMATION.md) — audit du code réel, pas une extrapolation. Point
+notable qui en ressort : le code des 5 générateurs IA (phase "IGINI") est écrit à ~85% mais vérifié
+à ~0% en conditions réelles, faute de clé API — cohérent avec le blocage documenté ci-dessus.
 
 ## Prochaines étapes recommandées
 
