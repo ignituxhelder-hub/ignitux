@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { buildProjectPrompt } from '../claude/build-project-prompt.js';
 import { ClaudeService } from '../claude/claude.service.js';
+import type { GenerationAttribution } from '../usage/ai-usage.service.js';
 import { buildSystemPrompt } from '../claude/igini-identity.js';
 
 const TransmissionPlanSchema = z.object({
@@ -42,6 +43,7 @@ export class TransmissionService {
   createTransmissionPlan(
     title: string,
     description: string | null,
+    attribution: GenerationAttribution,
     context?: string,
   ): Promise<TransmissionPlanResult> {
     return this.claude.generateStructuredOutput({
@@ -50,6 +52,7 @@ export class TransmissionService {
       userContent: buildProjectPrompt(title, description, context),
       logContext: 'Échec de la génération du plan de transmission via Claude',
       userErrorMessage: 'La génération du plan de transmission a échoué, réessaie dans un instant.',
+      usage: { ...attribution, generator: 'transmettre' },
     });
   }
 }

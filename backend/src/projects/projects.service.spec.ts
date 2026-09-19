@@ -26,6 +26,13 @@ import { ProjectsService } from './projects.service.js';
  */
 const GENERATED_PROVENANCE = { generated_by: 'igini', generated_model: CLAUDE_MODEL };
 
+/**
+ * L'attribution que ProjectsService doit transmettre a chaque generateur :
+ * le proprietaire du projet et le projet lui-meme. Sans elle, l'appel
+ * facture serait anonyme dans le journal des couts.
+ */
+const ATTRIBUTION = { userId: 'u1', projectId: 'p1' };
+
 describe('ProjectsService', () => {
   let service: ProjectsService;
   let prisma: {
@@ -385,7 +392,7 @@ describe('ProjectsService', () => {
 
       const result = await service.analyzeForOwner('u1', 'p1');
 
-      expect(analysisService.analyzeProject).toHaveBeenCalledWith('Idée', 'Desc', undefined);
+      expect(analysisService.analyzeProject).toHaveBeenCalledWith('Idée', 'Desc', ATTRIBUTION, undefined);
       expect(prisma.analyses.create).toHaveBeenCalledWith({
         data: { project_id: 'p1', ...analysis, ...GENERATED_PROVENANCE },
       });
@@ -438,6 +445,7 @@ describe('ProjectsService', () => {
       expect(analysisService.analyzeProject).toHaveBeenCalledWith(
         'Idée',
         'Desc',
+        ATTRIBUTION,
         'Mémoire : ne pas ouvrir le samedi.',
       );
     });
@@ -566,7 +574,7 @@ describe('ProjectsService', () => {
 
       const result = await service.createBuildPlanForOwner('u1', 'p1');
 
-      expect(planningService.createBuildPlan).toHaveBeenCalledWith('Idée', 'Desc', undefined);
+      expect(planningService.createBuildPlan).toHaveBeenCalledWith('Idée', 'Desc', ATTRIBUTION, undefined);
       expect(prisma.build_plans.create).toHaveBeenCalledWith({
         data: { project_id: 'p1', ...plan, ...GENERATED_PROVENANCE },
       });
@@ -593,6 +601,7 @@ describe('ProjectsService', () => {
       expect(planningService.createBuildPlan).toHaveBeenCalledWith(
         'Idée',
         'Desc',
+        ATTRIBUTION,
         expect.stringContaining('Idée prometteuse.'),
       );
     });
@@ -617,7 +626,7 @@ describe('ProjectsService', () => {
 
       await service.createBuildPlanForOwner('u1', 'p1');
 
-      const context = planningService.createBuildPlan.mock.calls[0][2] as string;
+      const context = planningService.createBuildPlan.mock.calls[0][3] as string;
       expect(context.indexOf('SOUVENIRS')).toBeLessThan(context.indexOf('ANALYSE'));
     });
 
@@ -638,7 +647,7 @@ describe('ProjectsService', () => {
 
       await service.createBuildPlanForOwner('u1', 'p1');
 
-      const [, , context] = planningService.createBuildPlan.mock.calls[0];
+      const [, , , context] = planningService.createBuildPlan.mock.calls[0];
       expect(context).toBeUndefined();
     });
 
@@ -726,7 +735,7 @@ describe('ProjectsService', () => {
 
       const result = await service.createFinancingPlanForOwner('u1', 'p1');
 
-      expect(financingService.createFinancingPlan).toHaveBeenCalledWith('Idée', 'Desc', undefined);
+      expect(financingService.createFinancingPlan).toHaveBeenCalledWith('Idée', 'Desc', ATTRIBUTION, undefined);
       expect(prisma.financing_plans.create).toHaveBeenCalledWith({
         data: { project_id: 'p1', ...plan, ...GENERATED_PROVENANCE },
       });
@@ -749,7 +758,7 @@ describe('ProjectsService', () => {
 
       await service.createFinancingPlanForOwner('u1', 'p1');
 
-      const [, , context] = financingService.createFinancingPlan.mock.calls[0];
+      const [, , , context] = financingService.createFinancingPlan.mock.calls[0];
       expect(context).toContain('Analyse.');
       expect(context).toContain('Construction.');
       expect(context).not.toContain('Ne doit pas apparaître.');
@@ -819,7 +828,7 @@ describe('ProjectsService', () => {
 
       const result = await service.createDevelopmentPlanForOwner('u1', 'p1');
 
-      expect(developmentService.createDevelopmentPlan).toHaveBeenCalledWith('Idée', 'Desc', undefined);
+      expect(developmentService.createDevelopmentPlan).toHaveBeenCalledWith('Idée', 'Desc', ATTRIBUTION, undefined);
       expect(prisma.development_plans.create).toHaveBeenCalledWith({
         data: { project_id: 'p1', ...plan, ...GENERATED_PROVENANCE },
       });
@@ -842,7 +851,7 @@ describe('ProjectsService', () => {
 
       await service.createDevelopmentPlanForOwner('u1', 'p1');
 
-      const [, , context] = developmentService.createDevelopmentPlan.mock.calls[0];
+      const [, , , context] = developmentService.createDevelopmentPlan.mock.calls[0];
       expect(context).toContain('Analyse.');
       expect(context).toContain('Construction.');
       expect(context).toContain('Financement.');
@@ -912,7 +921,7 @@ describe('ProjectsService', () => {
 
       const result = await service.createTransmissionPlanForOwner('u1', 'p1');
 
-      expect(transmissionService.createTransmissionPlan).toHaveBeenCalledWith('Idée', 'Desc', undefined);
+      expect(transmissionService.createTransmissionPlan).toHaveBeenCalledWith('Idée', 'Desc', ATTRIBUTION, undefined);
       expect(prisma.transmission_plans.create).toHaveBeenCalledWith({
         data: { project_id: 'p1', ...plan, ...GENERATED_PROVENANCE },
       });
@@ -936,7 +945,7 @@ describe('ProjectsService', () => {
 
       await service.createTransmissionPlanForOwner('u1', 'p1');
 
-      const [, , context] = transmissionService.createTransmissionPlan.mock.calls[0];
+      const [, , , context] = transmissionService.createTransmissionPlan.mock.calls[0];
       expect(context).toContain('Analyse.');
       expect(context).toContain('Construction.');
       expect(context).toContain('Financement.');

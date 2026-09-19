@@ -1,6 +1,7 @@
 import { InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { z } from 'zod';
+import { AiUsageService } from '../usage/ai-usage.service.js';
 import { ClaudeService } from './claude.service.js';
 import { GENERATORS_DISABLED_MESSAGE } from './generators-availability.js';
 
@@ -42,14 +43,32 @@ vi.mock('@anthropic-ai/sdk', () => {
 
 const schema = z.object({ answer: z.string() });
 
+/** L'attribution que toute requête doit désormais porter. */
+const ATTRIBUTION = { userId: 'u1', projectId: 'p1', generator: 'analyser' } as const;
+
+/**
+ * Un bloc `usage` tel que le SDK le renvoie. Les vrais appels en produisent
+ * toujours un ; les anciens mocks n'en avaient aucun, ce qui laissait croire
+ * que le code tenait alors qu'il ne lisait rien.
+ */
+const UTILISATION = {
+  input_tokens: 1200,
+  output_tokens: 900,
+  output_tokens_details: { thinking_tokens: 300 },
+  cache_creation_input_tokens: null,
+  cache_read_input_tokens: null,
+};
+
 describe('ClaudeService', () => {
   let service: ClaudeService;
+  let aiUsage: { record: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     parseMock.mockReset();
     env.current = {};
+    aiUsage = { record: vi.fn().mockResolvedValue(undefined) };
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ClaudeService],
+      providers: [ClaudeService, { provide: AiUsageService, useValue: aiUsage }],
     }).compile();
 
     service = module.get<ClaudeService>(ClaudeService);
@@ -74,6 +93,7 @@ describe('ClaudeService', () => {
           userContent: 'user',
           logContext: 'contexte',
           userErrorMessage: 'échec',
+          usage: ATTRIBUTION,
         }),
       ).rejects.toBeInstanceOf(ServiceUnavailableException);
 
@@ -90,6 +110,7 @@ describe('ClaudeService', () => {
           userContent: 'user',
           logContext: 'contexte',
           userErrorMessage: 'échec',
+          usage: ATTRIBUTION,
         }),
       ).rejects.toMatchObject({ message: GENERATORS_DISABLED_MESSAGE });
     });
@@ -121,12 +142,13 @@ describe('ClaudeService', () => {
           userContent: 'user',
           logContext: 'contexte',
           userErrorMessage: 'échec',
+          usage: ATTRIBUTION,
         }),
       ).rejects.toBeInstanceOf(ServiceUnavailableException);
     });
 
     it('laisse passer les appels quand rien ne les éteint', async () => {
-      parseMock.mockResolvedValue({ parsed_output: { answer: 'ok' } });
+      parseMock.mockResolvedValue({ parsed_output: { answer: 'ok' }, usage: UTILISATION });
 
       await service.generateStructuredOutput({
         schema,
@@ -134,6 +156,7 @@ describe('ClaudeService', () => {
         userContent: 'user',
         logContext: 'contexte',
         userErrorMessage: 'échec',
+        usage: ATTRIBUTION,
       });
 
       expect(parseMock).toHaveBeenCalledTimes(1);
@@ -141,7 +164,7 @@ describe('ClaudeService', () => {
   });
 
   it('renvoie la sortie structurée quand Claude répond correctement', async () => {
-    parseMock.mockResolvedValue({ parsed_output: { answer: '42' } });
+    parseMock.mockResolvedValue({ parsed_output: { answer: '42' }, usage: UTILISATION });
 
     const result = await service.generateStructuredOutput({
       schema,
@@ -149,13 +172,14 @@ describe('ClaudeService', () => {
       userContent: 'user',
       logContext: 'contexte',
       userErrorMessage: 'échec',
+      usage: ATTRIBUTION,
     });
 
     expect(result).toEqual({ answer: '42' });
   });
 
   it("lève une InternalServerErrorException avec le message fourni si parsed_output est manquant", async () => {
-    parseMock.mockResolvedValue({ parsed_output: null });
+    parseMock.mockResolvedValue({ parsed_output: null, usage: UTILISATION });
 
     await expect(
       service.generateStructuredOutput({
@@ -164,6 +188,7 @@ describe('ClaudeService', () => {
         userContent: 'user',
         logContext: 'contexte',
         userErrorMessage: 'échec spécifique',
+        usage: ATTRIBUTION,
       }),
     ).rejects.toMatchObject({ message: 'échec spécifique' });
   });
@@ -178,6 +203,7 @@ describe('ClaudeService', () => {
         userContent: 'user',
         logContext: 'contexte',
         userErrorMessage: 'échec',
+        usage: ATTRIBUTION,
       }),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
   });
@@ -192,6 +218,7 @@ describe('ClaudeService', () => {
         userContent: 'user',
         logContext: 'contexte',
         userErrorMessage: 'échec générique',
+        usage: ATTRIBUTION,
       }),
     ).rejects.toMatchObject({ message: 'échec générique' });
   });
@@ -212,6 +239,7 @@ describe('ClaudeService', () => {
         userContent: 'user',
         logContext: 'contexte',
         userErrorMessage: 'échec générique',
+        usage: ATTRIBUTION,
       }),
     ).rejects.toMatchObject({
       message: expect.stringContaining("n'est pas encore configuré"),
@@ -228,6 +256,7 @@ describe('ClaudeService', () => {
         userContent: 'user',
         logContext: 'contexte',
         userErrorMessage: 'échec générique',
+        usage: ATTRIBUTION,
       }),
     ).rejects.toMatchObject({
       message: expect.stringContaining("n'est pas encore configuré"),
@@ -244,6 +273,7 @@ describe('ClaudeService', () => {
         userContent: 'user',
         logContext: 'contexte',
         userErrorMessage: 'échec générique',
+        usage: ATTRIBUTION,
       }),
     ).rejects.toMatchObject({
       message: expect.stringContaining('trop de demandes'),
@@ -260,9 +290,111 @@ describe('ClaudeService', () => {
         userContent: 'user',
         logContext: 'contexte',
         userErrorMessage: 'échec générique',
+        usage: ATTRIBUTION,
       }),
     ).rejects.toMatchObject({
       message: expect.stringContaining('Impossible de contacter'),
+    });
+  });
+describe('journal des coûts', () => {
+    it("enregistre ce que l'appel a réellement coûté", async () => {
+      // Avant ce dispositif, response.usage était lu par le SDK puis jeté.
+      // Cette seule omission rendait le coût réel inconnaissable, le plafond
+      // impossible et toute statistique invérifiable.
+      parseMock.mockResolvedValue({ parsed_output: { answer: 'ok' }, usage: UTILISATION });
+
+      await service.generateStructuredOutput({
+        schema,
+        system: 'system',
+        userContent: 'user',
+        logContext: 'contexte',
+        userErrorMessage: 'échec',
+        usage: ATTRIBUTION,
+      });
+
+      expect(aiUsage.record).toHaveBeenCalledTimes(1);
+      expect(aiUsage.record).toHaveBeenCalledWith({
+        context: ATTRIBUTION,
+        model: 'claude-opus-5',
+        usage: UTILISATION,
+        durationMs: expect.any(Number),
+      });
+    });
+
+    it('enregistre aussi les appels dont la réponse est inexploitable', async () => {
+      // Le cas le plus facile à oublier, et le plus cher à oublier : une
+      // réponse que le schéma refuse a quand même consommé ses tokens. Ne pas
+      // la compter reviendrait à faire disparaître des totaux précisément les
+      // appels payés sans rien rendre.
+      parseMock.mockResolvedValue({ parsed_output: null, usage: UTILISATION });
+
+      await expect(
+        service.generateStructuredOutput({
+          schema,
+          system: 'system',
+          userContent: 'user',
+          logContext: 'contexte',
+          userErrorMessage: 'échec',
+          usage: ATTRIBUTION,
+        }),
+      ).rejects.toBeInstanceOf(InternalServerErrorException);
+
+      expect(aiUsage.record).toHaveBeenCalledTimes(1);
+    });
+
+    it("n'enregistre rien quand l'interrupteur est éteint", async () => {
+      env.current = { IGINI_AI_ENABLED: 'false' };
+
+      await expect(
+        service.generateStructuredOutput({
+          schema,
+          system: 'system',
+          userContent: 'user',
+          logContext: 'contexte',
+          userErrorMessage: 'échec',
+          usage: ATTRIBUTION,
+        }),
+      ).rejects.toBeInstanceOf(ServiceUnavailableException);
+
+      // Rien n'a été dépensé, donc rien ne doit apparaître au journal : un
+      // zéro inscrit fausserait le compte des appels autant qu'un oubli.
+      expect(aiUsage.record).not.toHaveBeenCalled();
+    });
+
+    it("n'enregistre rien quand l'appel n'a jamais abouti", async () => {
+      parseMock.mockRejectedValue(new APIConnectionError('réseau'));
+
+      await expect(
+        service.generateStructuredOutput({
+          schema,
+          system: 'system',
+          userContent: 'user',
+          logContext: 'contexte',
+          userErrorMessage: 'échec',
+          usage: ATTRIBUTION,
+        }),
+      ).rejects.toBeInstanceOf(InternalServerErrorException);
+
+      expect(aiUsage.record).not.toHaveBeenCalled();
+    });
+
+    it('ne fait pas perdre son résultat à la personne quand le journal tombe en panne', async () => {
+      // La hiérarchie est explicite : entre perdre une ligne de comptabilité
+      // et perdre quarante secondes de travail déjà payées, c'est la ligne
+      // qui saute. Ce test verrouille ce choix.
+      parseMock.mockResolvedValue({ parsed_output: { answer: '42' }, usage: UTILISATION });
+      aiUsage.record.mockRejectedValue(new Error('base injoignable'));
+
+      await expect(
+        service.generateStructuredOutput({
+          schema,
+          system: 'system',
+          userContent: 'user',
+          logContext: 'contexte',
+          userErrorMessage: 'échec',
+          usage: ATTRIBUTION,
+        }),
+      ).resolves.toEqual({ answer: '42' });
     });
   });
 });

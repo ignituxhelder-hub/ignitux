@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { buildProjectPrompt } from '../claude/build-project-prompt.js';
 import { ClaudeService } from '../claude/claude.service.js';
+import type { GenerationAttribution } from '../usage/ai-usage.service.js';
 import { buildSystemPrompt } from '../claude/igini-identity.js';
 
 const DevelopmentPlanSchema = z.object({
@@ -37,6 +38,7 @@ export class DevelopmentService {
   createDevelopmentPlan(
     title: string,
     description: string | null,
+    attribution: GenerationAttribution,
     context?: string,
   ): Promise<DevelopmentPlanResult> {
     return this.claude.generateStructuredOutput({
@@ -45,6 +47,7 @@ export class DevelopmentService {
       userContent: buildProjectPrompt(title, description, context),
       logContext: 'Échec de la génération du plan de développement via Claude',
       userErrorMessage: 'La génération du plan de développement a échoué, réessaie dans un instant.',
+      usage: { ...attribution, generator: 'developper' },
     });
   }
 }

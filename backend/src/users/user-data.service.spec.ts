@@ -6,6 +6,13 @@ import { exportedTables } from './user-data-scope.js';
 import { UserDataService } from './user-data.service.js';
 
 const GOOD_PASSWORD = 'bon-mot-de-passe';
+
+/**
+ * Les tables sans clé étrangère vers `users`, dont l'identifiant doit être
+ * retiré à la main. Y ajouter une table ici et oublier de l'anonymiser dans
+ * le service fait échouer le test de transaction.
+ */
+const ANONYMISEES = ['constitution_violations', 'ai_usage_events'] as const;
 /**
  * Un vrai hash bcrypt, pas un espion : `vi.spyOn(bcrypt, 'compare')` est
  * impossible sur un module ESM, et vérifier la vraie comparaison vaut mieux
@@ -290,13 +297,38 @@ describe('UserDataService', () => {
       });
     });
 
+    it("retire l'identifiant du journal des coûts IA sans effacer la dépense", async () => {
+      // Même situation que les violations, avec un enjeu supplémentaire :
+      // ces tokens ont été facturés et le restent. Effacer la ligne ferait
+      // changer rétroactivement le total d'un mois déjà clos, et deux
+      // relevés du même mois ne diraient plus la même chose.
+      await service.deleteAccount('u1', GOOD_PASSWORD);
+
+      expect(prisma.ai_usage_events.updateMany).toHaveBeenCalledWith({
+        where: { user_id: 'u1' },
+        data: { user_id: null },
+      });
+      expect(prisma.ai_usage_events.delete).not.toHaveBeenCalled();
+    });
+
     it('anonymise et supprime dans la même transaction', async () => {
       // Séparées, un échec entre les deux laisserait soit un journal
       // nominatif sans compte, soit un compte supprimé à moitié.
       await service.deleteAccount('u1', GOOD_PASSWORD);
 
+      // On vérifie la composition de la transaction, pas seulement sa
+      // taille : un simple décompte passerait encore si une anonymisation
+      // en remplaçait une autre, ce qui est exactement l'erreur qu'un
+      // refactor introduit sans le vouloir.
       const operations = prisma.$transaction.mock.calls[0][0] as unknown[];
-      expect(operations).toHaveLength(2);
+      expect(operations).toHaveLength(3);
+      for (const table of ANONYMISEES) {
+        expect(prisma[table].updateMany).toHaveBeenCalledWith({
+          where: { user_id: 'u1' },
+          data: { user_id: null },
+        });
+      }
+      expect(prisma.users.delete).toHaveBeenCalledWith({ where: { id: 'u1' } });
     });
   });
 });

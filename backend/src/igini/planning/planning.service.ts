@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { buildProjectPrompt } from '../claude/build-project-prompt.js';
 import { ClaudeService } from '../claude/claude.service.js';
+import type { GenerationAttribution } from '../usage/ai-usage.service.js';
 import { buildSystemPrompt } from '../claude/igini-identity.js';
 
 const BuildPlanSchema = z.object({
@@ -30,13 +31,17 @@ type "faire une étude de marché" sans préciser comment), adaptés au stade de
 export class PlanningService {
   constructor(private readonly claude: ClaudeService) {}
 
-  createBuildPlan(title: string, description: string | null, context?: string): Promise<BuildPlanResult> {
+  createBuildPlan(title: string, description: string | null,
+    attribution: GenerationAttribution,
+    context?: string,
+  ): Promise<BuildPlanResult> {
     return this.claude.generateStructuredOutput({
       schema: BuildPlanSchema,
       system: SYSTEM_PROMPT,
       userContent: buildProjectPrompt(title, description, context),
       logContext: 'Échec de la génération du plan de construction via Claude',
       userErrorMessage: 'La génération du plan a échoué, réessaie dans un instant.',
+      usage: { ...attribution, generator: 'construire' },
     });
   }
 }

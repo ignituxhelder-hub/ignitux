@@ -103,6 +103,7 @@ export class UserDataService {
       automationRuns,
       complianceChecks,
       violations,
+      appelsIa,
     ] = await Promise.all([
       this.prisma.tasks.findMany({ where: byProject }),
       this.prisma.memories.findMany({ where: { user_id: userId } }),
@@ -133,6 +134,7 @@ export class UserDataService {
       this.prisma.automation_runs.findMany({ where: byProject }),
       this.prisma.project_compliance_checks.findMany({ where: byProject }),
       this.prisma.constitution_violations.findMany({ where: { user_id: userId } }),
+      this.prisma.ai_usage_events.findMany({ where: { user_id: userId } }),
     ]);
 
     return {
@@ -194,6 +196,12 @@ export class UserDataService {
           executions_de_l_automatisation: automationRuns,
           demarches_de_conformite_cochees: complianceChecks,
           violations_constitutionnelles: violations,
+          // Ce que les générateurs IGINI ont réellement consommé pour cette
+          // personne : modèle, tokens, date. C'est une donnée la concernant,
+          // donc elle lui revient — et c'est aussi la seule façon pour elle
+          // de vérifier ce qui lui a été décompté le jour où un quota
+          // existera.
+          appels_aux_generateurs_igini: appelsIa,
         },
       },
       non_inclus: exclusions(),
@@ -329,12 +337,23 @@ export class UserDataService {
       throw new ForbiddenException('Mot de passe incorrect.');
     }
 
-    // `constitution_violations` n'a pas de clé étrangère vers `users` : rien
-    // ne cascade, et l'identifiant survivrait à la suppression du compte.
-    // On garde la ligne — le journal est ce qui rend l'article 8 vérifiable —
-    // mais on en retire la personne. Le fait reste, l'identité part.
+    // `constitution_violations` et `ai_usage_events` n'ont pas de clé
+    // étrangère vers `users` : rien ne cascade, et l'identifiant survivrait à
+    // la suppression du compte. On garde les lignes — le premier journal rend
+    // l'article 8 vérifiable, le second rend la dépense vérifiable — mais on
+    // en retire la personne. Le fait reste, l'identité part.
+    //
+    // Pour le journal des coûts, l'enjeu est comptable autant que juridique :
+    // ces tokens ont été facturés par Anthropic et le sont restés. Si une
+    // suppression de compte les effaçait, le total d'un mois déjà clos
+    // changerait rétroactivement, et deux relevés du même mois ne diraient
+    // plus la même chose.
     await this.prisma.$transaction([
       this.prisma.constitution_violations.updateMany({
+        where: { user_id: userId },
+        data: { user_id: null },
+      }),
+      this.prisma.ai_usage_events.updateMany({
         where: { user_id: userId },
         data: { user_id: null },
       }),

@@ -8,6 +8,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import type { z } from 'zod';
 import { getEnv } from '../../config/env.js';
+import { AiUsageService, type AiUsageContext } from '../usage/ai-usage.service.js';
 import {
   readGeneratorsAvailability,
   type GeneratorsAvailability,
@@ -29,18 +30,31 @@ export interface StructuredOutputRequest<T> {
   logContext: string;
   /** Message renvoyé au client en cas d'échec. */
   userErrorMessage: string;
+  /**
+   * Qui déclenche l'appel, sur quel projet, via quel générateur.
+   *
+   * **Obligatoire, et c'est le point.** Ce champ n'est pas optionnel pour que
+   * TypeScript refuse de compiler un générateur qui ne dirait pas à qui
+   * attribuer sa dépense. Le verrou du budget et celui de l'anonymat sont le
+   * même verrou : un appel facturé sans propriétaire est un appel qu'aucun
+   * plafond ne pourra jamais décompter.
+   */
+  usage: AiUsageContext;
 }
 
 /**
  * Point d'entrée unique vers l'API Claude pour les fonctionnalités IA
  * d'Ignitux (analyse, planification, …). Chaque appelant fournit un schéma
  * Zod et un prompt ; ce service gère le client, le format de sortie
- * structurée et la traduction des erreurs en réponses HTTP propres.
+ * structurée, la traduction des erreurs en réponses HTTP propres, et
+ * l'enregistrement de ce que l'appel a réellement coûté.
  */
 @Injectable()
 export class ClaudeService {
   private readonly logger = new Logger(ClaudeService.name);
   private client: Anthropic | undefined;
+
+  constructor(private readonly aiUsage: AiUsageService) {}
 
   // Instancié à la première utilisation (et pas comme champ de classe) pour
   // que l'absence d'identifiants (ANTHROPIC_API_KEY ou autre mécanisme pris
@@ -70,6 +84,8 @@ export class ClaudeService {
       throw new ServiceUnavailableException(availability.reason);
     }
 
+    const startedAt = Date.now();
+
     try {
       const response = await this.getClient().messages.parse({
         model: CLAUDE_MODEL,
@@ -78,6 +94,35 @@ export class ClaudeService {
         messages: [{ role: 'user', content: request.userContent }],
         output_config: { format: zodOutputFormat(request.schema) },
       });
+
+      // Journalisé AVANT la vérification du contenu, et l'ordre compte : dès
+      // qu'une réponse existe, les tokens sont facturés. Enregistrer après le
+      // contrôle ferait disparaître des totaux exactement les appels qui ont
+      // mal tourné — les plus coûteux à ignorer, puisqu'ils sont payés sans
+      // rien rendre. L'objet `usage` part tel quel : sa lecture appartient au
+      // journal, qui la fait sous protection. La réflexion interne y est
+      // comprise, facturée au tarif de sortie, et jusqu'ici invisible : c'est
+      // le trou que PRICING.md désignait comme le plus important.
+      //
+      // Le `catch` est une redondance assumée. `record` s'engage déjà à ne
+      // jamais échouer vers son appelant, et son propre test le vérifie ; ce
+      // filet-ci protège le jour où quelqu'un modifiera cet engagement sans
+      // voir qu'une génération de quarante secondes, déjà payée, en dépend.
+      // Entre perdre une ligne de comptabilité et perdre le travail de la
+      // personne, le choix n'appartient pas au hasard d'une refonte.
+      await this.aiUsage
+        .record({
+          context: request.usage,
+          model: CLAUDE_MODEL,
+          usage: response.usage,
+          durationMs: Date.now() - startedAt,
+        })
+        .catch((error: unknown) => {
+          this.logger.error(
+            'Coût IA non journalisé : la dépense a eu lieu mais manquera aux totaux.',
+            error as Error,
+          );
+        });
 
       if (!response.parsed_output) {
         throw new Error('parsed_output manquant dans la réponse Claude.');

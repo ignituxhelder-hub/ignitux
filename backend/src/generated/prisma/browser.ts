@@ -290,3 +290,26 @@ export type constitution_violations = Prisma.constitution_violationsModel
  * rester difficile à réinterpréter après coup, c'est sa raison d'être.
  */
 export type buyback_objectives = Prisma.buyback_objectivesModel
+/**
+ * Model ai_usage_events
+ * TÉLÉMÉTRIE IA — un enregistrement par appel facturé à l'API Anthropic.
+ * 
+ * Ce journal existe parce que son absence rendait quatre choses impossibles :
+ * connaître le coût réel, poser un plafond, détecter un abus, et produire une
+ * statistique qui ne soit pas une estimation. PRICING.md a dû chiffrer la
+ * rentabilité en comptant des caractères sur des artefacts, faute de ces
+ * lignes ; c'est ce que ce modèle remplace.
+ * 
+ * Pas de clé étrangère vers `users` ni `projects`, volontairement, et pour la
+ * même raison que `constitution_violations` : la dépense a réellement eu lieu.
+ * Si la suppression d'un compte effaçait ces lignes, le total mensuel déjà
+ * facturé par Anthropic changerait rétroactivement, et la comptabilité
+ * mentirait. À la suppression, `user_id` passe à null : le fait reste,
+ * l'identité part.
+ * 
+ * Aucun montant en euros n'est stocké ici. Les tokens sont des faits mesurés ;
+ * un prix est un calcul dont la grille change (celle de PRICING.md avait déjà
+ * trois mois). Figer un montant reviendrait à sceller une grille périmée dans
+ * la base pour toujours. Le coût se dérive à la lecture, via ai-pricing.ts.
+ */
+export type ai_usage_events = Prisma.ai_usage_eventsModel

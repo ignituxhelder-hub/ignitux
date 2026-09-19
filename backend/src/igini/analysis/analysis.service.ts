@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { buildProjectPrompt } from '../claude/build-project-prompt.js';
 import { ClaudeService } from '../claude/claude.service.js';
+import type { GenerationAttribution } from '../usage/ai-usage.service.js';
 import { buildSystemPrompt } from '../claude/igini-identity.js';
 
 const ProjectAnalysisSchema = z.object({
@@ -39,6 +40,7 @@ export class AnalysisService {
   analyzeProject(
     title: string,
     description: string | null,
+    attribution: GenerationAttribution,
     context?: string,
   ): Promise<ProjectAnalysisResult> {
     return this.claude.generateStructuredOutput({
@@ -47,6 +49,7 @@ export class AnalysisService {
       userContent: buildProjectPrompt(title, description, context),
       logContext: "Échec de l'analyse du projet via Claude",
       userErrorMessage: "L'analyse a échoué, réessaie dans un instant.",
+      usage: { ...attribution, generator: 'analyser' },
     });
   }
 }

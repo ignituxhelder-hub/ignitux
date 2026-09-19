@@ -233,6 +233,7 @@ export class ProjectsService {
     const result = await this.analysisService.analyzeProject(
       project.title,
       project.description,
+      { userId: ownerId, projectId: project.id },
       await this.memoryContext(ownerId, id),
     );
 
@@ -277,6 +278,7 @@ export class ProjectsService {
     const result = await this.planningService.createBuildPlan(
       project.title,
       project.description,
+      { userId: ownerId, projectId: project.id },
       context,
     );
 
@@ -319,6 +321,7 @@ export class ProjectsService {
     const result = await this.financingService.createFinancingPlan(
       project.title,
       project.description,
+      { userId: ownerId, projectId: project.id },
       context,
     );
 
@@ -358,6 +361,7 @@ export class ProjectsService {
     const result = await this.developmentService.createDevelopmentPlan(
       project.title,
       project.description,
+      { userId: ownerId, projectId: project.id },
       context,
     );
 
@@ -404,6 +408,7 @@ export class ProjectsService {
     const result = await this.transmissionService.createTransmissionPlan(
       project.title,
       project.description,
+      { userId: ownerId, projectId: project.id },
       context,
     );
 

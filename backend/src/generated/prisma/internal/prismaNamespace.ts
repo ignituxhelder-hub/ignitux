@@ -432,7 +432,8 @@ export const ModelName = {
   workflow_events: 'workflow_events',
   constitution_articles: 'constitution_articles',
   constitution_violations: 'constitution_violations',
-  buyback_objectives: 'buyback_objectives'
+  buyback_objectives: 'buyback_objectives',
+  ai_usage_events: 'ai_usage_events'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -448,7 +449,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3116,6 +3117,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ai_usage_events: {
+      payload: Prisma.$ai_usage_eventsPayload<ExtArgs>
+      fields: Prisma.ai_usage_eventsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ai_usage_eventsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ai_usage_eventsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ai_usage_eventsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ai_usage_eventsPayload>
+        }
+        findFirst: {
+          args: Prisma.ai_usage_eventsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ai_usage_eventsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ai_usage_eventsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ai_usage_eventsPayload>
+        }
+        findMany: {
+          args: Prisma.ai_usage_eventsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ai_usage_eventsPayload>[]
+        }
+        create: {
+          args: Prisma.ai_usage_eventsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ai_usage_eventsPayload>
+        }
+        createMany: {
+          args: Prisma.ai_usage_eventsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ai_usage_eventsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ai_usage_eventsPayload>[]
+        }
+        delete: {
+          args: Prisma.ai_usage_eventsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ai_usage_eventsPayload>
+        }
+        update: {
+          args: Prisma.ai_usage_eventsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ai_usage_eventsPayload>
+        }
+        deleteMany: {
+          args: Prisma.ai_usage_eventsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ai_usage_eventsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ai_usage_eventsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ai_usage_eventsPayload>[]
+        }
+        upsert: {
+          args: Prisma.ai_usage_eventsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ai_usage_eventsPayload>
+        }
+        aggregate: {
+          args: Prisma.Ai_usage_eventsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAi_usage_events>
+        }
+        groupBy: {
+          args: Prisma.ai_usage_eventsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Ai_usage_eventsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ai_usage_eventsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Ai_usage_eventsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3647,6 +3722,24 @@ export const Buyback_objectivesScalarFieldEnum = {
 export type Buyback_objectivesScalarFieldEnum = (typeof Buyback_objectivesScalarFieldEnum)[keyof typeof Buyback_objectivesScalarFieldEnum]
 
 
+export const Ai_usage_eventsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  project_id: 'project_id',
+  generator: 'generator',
+  model: 'model',
+  input_tokens: 'input_tokens',
+  output_tokens: 'output_tokens',
+  thinking_tokens: 'thinking_tokens',
+  cache_creation_input_tokens: 'cache_creation_input_tokens',
+  cache_read_input_tokens: 'cache_read_input_tokens',
+  duration_ms: 'duration_ms',
+  created_at: 'created_at'
+} as const
+
+export type Ai_usage_eventsScalarFieldEnum = (typeof Ai_usage_eventsScalarFieldEnum)[keyof typeof Ai_usage_eventsScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -3926,6 +4019,7 @@ export type GlobalOmitConfig = {
   constitution_articles?: Prisma.constitution_articlesOmit
   constitution_violations?: Prisma.constitution_violationsOmit
   buyback_objectives?: Prisma.buyback_objectivesOmit
+  ai_usage_events?: Prisma.ai_usage_eventsOmit
 }
 
 /* Types for Logging */

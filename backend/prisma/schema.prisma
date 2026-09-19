@@ -782,3 +782,52 @@ model buyback_objectives {
   @@unique([project_id, kind])
   @@index([project_id])
 }
+
+/// TÉLÉMÉTRIE IA — un enregistrement par appel facturé à l'API Anthropic.
+///
+/// Ce journal existe parce que son absence rendait quatre choses impossibles :
+/// connaître le coût réel, poser un plafond, détecter un abus, et produire une
+/// statistique qui ne soit pas une estimation. PRICING.md a dû chiffrer la
+/// rentabilité en comptant des caractères sur des artefacts, faute de ces
+/// lignes ; c'est ce que ce modèle remplace.
+///
+/// Pas de clé étrangère vers `users` ni `projects`, volontairement, et pour la
+/// même raison que `constitution_violations` : la dépense a réellement eu lieu.
+/// Si la suppression d'un compte effaçait ces lignes, le total mensuel déjà
+/// facturé par Anthropic changerait rétroactivement, et la comptabilité
+/// mentirait. À la suppression, `user_id` passe à null : le fait reste,
+/// l'identité part.
+///
+/// Aucun montant en euros n'est stocké ici. Les tokens sont des faits mesurés ;
+/// un prix est un calcul dont la grille change (celle de PRICING.md avait déjà
+/// trois mois). Figer un montant reviendrait à sceller une grille périmée dans
+/// la base pour toujours. Le coût se dérive à la lecture, via ai-pricing.ts.
+model ai_usage_events {
+  id                          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                     String?   @db.Uuid
+  project_id                  String?   @db.Uuid
+  /// 'analyser' | 'construire' | 'financer' | 'developper' | 'transmettre'
+  generator                   String
+  /// Le modèle réellement appelé, pas une constante recopiée : la grille
+  /// tarifaire dépend de lui, et un changement de modèle doit rester lisible
+  /// dans l'historique.
+  model                       String
+  input_tokens                Int
+  /// Total facturé en sortie, réflexion interne comprise.
+  output_tokens               Int
+  /// Sous-ensemble de output_tokens : la réflexion interne du modèle,
+  /// facturée au tarif de sortie et jusqu'ici totalement invisible. C'est le
+  /// trou que PRICING.md désignait comme le plus important. null quand le
+  /// modèle ne l'expose pas.
+  thinking_tokens             Int?
+  cache_creation_input_tokens Int?
+  cache_read_input_tokens     Int?
+  /// Durée de l'appel côté serveur. Permet de croiser coût et latence, les
+  /// deux seuls arbitrages réels sur le choix d'un modèle.
+  duration_ms                 Int
+  created_at                  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([user_id, created_at])
+  @@index([created_at])
+  @@index([generator])
+}

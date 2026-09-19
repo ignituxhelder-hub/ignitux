@@ -2,6 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ClaudeService } from '../claude/claude.service.js';
 import { FinancingService } from './financing.service.js';
 
+/**
+ * L'attribution que tout appel doit porter. Les identifiants importent peu
+ * ici ; ce qui compte est que le champ existe, parce qu'un appel facturé
+ * sans propriétaire est un appel qu'aucun plafond ne pourra décompter.
+ */
+const ATTRIBUTION = { userId: 'u1', projectId: 'p1' };
+
 describe('FinancingService', () => {
   let service: FinancingService;
   let claude: { generateStructuredOutput: ReturnType<typeof vi.fn> };
@@ -29,12 +36,17 @@ describe('FinancingService', () => {
     };
     claude.generateStructuredOutput.mockResolvedValue(plan);
 
-    const result = await service.createFinancingPlan('Mon idée', 'Une description');
+    const result = await service.createFinancingPlan('Mon idée', 'Une description', ATTRIBUTION);
 
     expect(result).toEqual(plan);
     expect(claude.generateStructuredOutput).toHaveBeenCalledWith(
       expect.objectContaining({
         userContent: expect.stringContaining('Mon idée'),
+        // Le nom du générateur est vérifié ici et pas ailleurs : deux
+        // étiquettes inversées entre générateurs produiraient un journal
+        // de coûts parfaitement cohérent et parfaitement faux, qu'aucun
+        // total ne trahirait.
+        usage: { userId: 'u1', projectId: 'p1', generator: 'financer' },
       }),
     );
   });
