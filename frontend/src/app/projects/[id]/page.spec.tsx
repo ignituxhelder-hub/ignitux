@@ -98,6 +98,83 @@ describe('ProjectDetailPage', () => {
     expect(screen.getByText('Score de faisabilité : 7/10')).toBeInTheDocument();
   });
 
+  it("recharge les tâches et l'automatisation après une génération (régression)", async () => {
+    // Régression : chaque génération déclenche l'automatisation côté backend
+    // (tâches d'étape créées/fermées), mais les sections dérivées ne se
+    // rechargeaient qu'au montage. Résultat visible pour l'utilisateur :
+    // l'automatisation semblait n'avoir rien fait, et un déclenchement manuel
+    // juste après affichait "0 tâche créée" (le travail ayant déjà été fait
+    // automatiquement quelques secondes plus tôt, sans que l'UI le montre).
+    const routes: Record<string, { status: number; body: unknown }> = {
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      'POST /projects/p1/analyze': {
+        status: 201,
+        body: {
+          id: 'a1',
+          project_id: 'p1',
+          summary: 'Analyse générée.',
+          feasibility_score: 7,
+          strengths: [],
+          risks: [],
+          next_steps: [],
+          created_at: '2026-01-02T00:00:00.000Z',
+        },
+      },
+      ...ENGINE_ROUTES,
+    };
+    mockApiRoutes(routes);
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    await screen.findByDisplayValue('École motocross');
+    expect(await screen.findByText("Aucune tâche pour l'instant.")).toBeInTheDocument();
+
+    // Ce que le backend aura fait pendant la génération : l'automatisation a
+    // créé une tâche d'étape et journalisé son exécution.
+    routes['GET /projects/p1/tasks'] = {
+      status: 200,
+      body: [
+        {
+          id: 't1',
+          project_id: 'p1',
+          title: 'Créer le plan de construction (Construction)',
+          description: null,
+          status: 'pending',
+          assignee: 'igini',
+          source: 'automation',
+          created_at: '2026-01-02T00:00:00.000Z',
+          updated_at: '2026-01-02T00:00:00.000Z',
+        },
+      ],
+    };
+    routes['GET /projects/p1/automation/runs'] = {
+      status: 200,
+      body: [
+        {
+          id: 'run1',
+          project_id: 'p1',
+          tasks_created_count: 4,
+          tasks_closed_count: 0,
+          concept_links_created_count: 0,
+          created_at: '2026-01-02T00:00:00.000Z',
+        },
+      ],
+    };
+
+    fireEvent.click(screen.getByRole('button', { name: /analyser ce projet/i }));
+
+    // Sans le signal de rafraîchissement, ces deux assertions échouent : la
+    // liste resterait vide et l'historique d'automatisation aussi.
+    expect(await screen.findByText('Créer le plan de construction (Construction)')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(document.body.textContent).toContain('4 tâche(s) créée(s), 0 fermée(s)'),
+    );
+  });
+
   it('sauvegarde les modifications du projet', async () => {
     mockApiRoutes({
       'GET /projects/p1': { status: 200, body: PROJECT },

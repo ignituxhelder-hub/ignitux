@@ -16,6 +16,13 @@ import {
 interface SectionProps {
   token: string | null;
   projectId: string;
+  /**
+   * Change de valeur après chaque génération réussie côté page projet. Ces
+   * sections sont dérivées de ce que les générateurs produisent (score
+   * recalculé, tâches créées/fermées par l'automatisation, concepts reliés) :
+   * sans ce signal, elles resteraient figées jusqu'au rechargement complet.
+   */
+  refreshSignal?: number;
 }
 
 interface ReadOnlySectionProps extends SectionProps {
@@ -37,7 +44,7 @@ function scoreColor(value: number | null): string {
   return 'var(--text-muted)';
 }
 
-export function ScoreSection({ token, projectId }: SectionProps) {
+export function ScoreSection({ token, projectId, refreshSignal }: SectionProps) {
   const [score, setScore] = useState<ScoreCard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,7 +63,7 @@ export function ScoreSection({ token, projectId }: SectionProps) {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, projectId]);
+  }, [token, projectId, refreshSignal]);
 
   return (
     <div className="card" style={{ marginTop: '1.5rem' }}>
@@ -123,7 +130,7 @@ const SOURCE_LABELS: Record<string, string> = {
   build_plan: 'Suggérée par le plan de construction',
 };
 
-export function TasksSection({ token, projectId, readOnly = false }: ReadOnlySectionProps) {
+export function TasksSection({ token, projectId, readOnly = false, refreshSignal }: ReadOnlySectionProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -148,7 +155,7 @@ export function TasksSection({ token, projectId, readOnly = false }: ReadOnlySec
     return () => {
       cancelled = true;
     };
-  }, [token, projectId]);
+  }, [token, projectId, refreshSignal]);
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
@@ -399,7 +406,12 @@ function ConceptGraphView({ concepts, edges }: { concepts: Concept[]; edges: Con
   );
 }
 
-export function KnowledgeSection({ token, projectId, readOnly = false }: ReadOnlySectionProps) {
+export function KnowledgeSection({
+  token,
+  projectId,
+  readOnly = false,
+  refreshSignal,
+}: ReadOnlySectionProps) {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [edges, setEdges] = useState<ConceptLink[]>([]);
   const [name, setName] = useState('');
@@ -428,7 +440,7 @@ export function KnowledgeSection({ token, projectId, readOnly = false }: ReadOnl
   useEffect(() => {
     loadGraph();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, projectId]);
+  }, [token, projectId, refreshSignal]);
 
   async function handleCreateConcept(e: FormEvent) {
     e.preventDefault();

@@ -60,13 +60,21 @@ function usePlanList<T>(
   return [items, setItems] as const;
 }
 
-/** Génère un nouveau plan (bouton "Analyser", "Générer un plan", …) et le préfixe à la liste. */
+/**
+ * Génère un nouveau plan (bouton "Analyser", "Générer un plan", …) et le préfixe à la liste.
+ *
+ * `onGenerated` est appelé après un succès : côté backend, chaque génération déclenche aussi
+ * l'automatisation (tâches d'étape créées/fermées, concepts reliés) et fait bouger le score.
+ * Sans ce signal, ces sections resteraient figées jusqu'au rechargement de la page, ce qui
+ * donnait l'impression que l'automatisation ne faisait rien.
+ */
 function useGeneration<T>(
   token: string | null,
   id: string,
   create: (token: string, id: string) => Promise<T>,
   setItems: Dispatch<SetStateAction<T[]>>,
   failureMessage: string,
+  onGenerated?: () => void,
 ) {
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,6 +86,7 @@ function useGeneration<T>(
     try {
       const created = await create(token, id);
       setItems((prev) => [created, ...prev]);
+      onGenerated?.();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : failureMessage);
     } finally {
@@ -104,11 +113,30 @@ export default function ProjectDetailPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
 
+  // Incrémenté après chaque génération réussie : signale aux sections dérivées
+  // (score, tâches, automatisation, connaissance) qu'elles doivent se recharger.
+  const [refreshSignal, setRefreshSignal] = useState(0);
+  const onGenerated = () => setRefreshSignal((n) => n + 1);
+
   const [analyses, setAnalyses] = usePlanList<Analysis>(token, id, api.listAnalyses);
-  const analysis = useGeneration(token, id, api.analyzeProject, setAnalyses, "Impossible d'analyser le projet.");
+  const analysis = useGeneration(
+    token,
+    id,
+    api.analyzeProject,
+    setAnalyses,
+    "Impossible d'analyser le projet.",
+    onGenerated,
+  );
 
   const [buildPlans, setBuildPlans] = usePlanList<BuildPlan>(token, id, api.listBuildPlans);
-  const plan = useGeneration(token, id, api.createBuildPlan, setBuildPlans, 'Impossible de générer le plan.');
+  const plan = useGeneration(
+    token,
+    id,
+    api.createBuildPlan,
+    setBuildPlans,
+    'Impossible de générer le plan.',
+    onGenerated,
+  );
 
   const [financingPlans, setFinancingPlans] = usePlanList<FinancingPlan>(token, id, api.listFinancingPlans);
   const financing = useGeneration(
@@ -117,6 +145,7 @@ export default function ProjectDetailPage() {
     api.createFinancingPlan,
     setFinancingPlans,
     'Impossible de générer le plan de financement.',
+    onGenerated,
   );
 
   const [developmentPlans, setDevelopmentPlans] = usePlanList<DevelopmentPlan>(
@@ -130,6 +159,7 @@ export default function ProjectDetailPage() {
     api.createDevelopmentPlan,
     setDevelopmentPlans,
     'Impossible de générer le plan de développement.',
+    onGenerated,
   );
 
   const [transmissionPlans, setTransmissionPlans] = usePlanList<TransmissionPlan>(
@@ -143,6 +173,7 @@ export default function ProjectDetailPage() {
     api.createTransmissionPlan,
     setTransmissionPlans,
     'Impossible de générer le plan de transmission.',
+    onGenerated,
   );
 
   useEffect(() => {
@@ -385,12 +416,18 @@ export default function ProjectDetailPage() {
       {/* Les 4 moteurs transverses sont en lecture seule pour un collaborateur
           (readOnly). La gestion des collaborateurs et le déclenchement manuel
           de l'automatisation restent réservés au propriétaire. */}
-      {project && <ScoreSection token={token} projectId={id} />}
-      {project && <TasksSection token={token} projectId={id} readOnly={!isOwner} />}
+      {project && <ScoreSection token={token} projectId={id} refreshSignal={refreshSignal} />}
+      {project && (
+        <TasksSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
+      )}
       {project && <MemorySection token={token} projectId={id} readOnly={!isOwner} />}
-      {project && <KnowledgeSection token={token} projectId={id} readOnly={!isOwner} />}
+      {project && (
+        <KnowledgeSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
+      )}
       {project && <ComplianceSection token={token} projectId={id} readOnly={!isOwner} />}
-      {project && <AutomationSection token={token} projectId={id} readOnly={!isOwner} />}
+      {project && (
+        <AutomationSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
+      )}
       {project && isOwner && <CollaboratorsSection token={token} projectId={id} />}
     </main>
   );

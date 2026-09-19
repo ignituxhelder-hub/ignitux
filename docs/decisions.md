@@ -3,6 +3,55 @@
 Ce document existe pour qu'une décision prise une fois n'ait pas besoin d'être redécouverte ou
 redébattue plus tard. Chaque entrée : quoi, pourquoi, où c'est appliqué dans le code.
 
+## Piège opérationnel : `npm run build` casse le serveur de dev Next.js en cours
+
+**Quoi** — lancer `npm run build` (build de production) dans `frontend/` pendant qu'un
+`npm run dev` tourne écrase le dossier `.next` partagé par les deux. Le serveur de dev continue de
+répondre mais sert un cache incohérent : toutes les pages renvoient une erreur 500
+(`Cannot find module './XXX.js'`). Rencontré deux fois le 19/09/2026.
+**Pourquoi le noter** — le symptôme (« tout le site est cassé ») ne ressemble pas du tout à la
+cause (« j'ai lancé un build de vérification »), et la réaction naturelle est de chercher un bug
+dans le code applicatif, qui n'existe pas.
+**Quoi faire** — soit vérifier le build quand aucun serveur de dev ne tourne, soit, après un build,
+redémarrer le dev proprement : arrêter le process, `rm -rf .next`, relancer `npm run dev`.
+**Où** — rien à corriger dans le code, c'est le comportement normal de Next.js avec un `.next`
+partagé.
+
+## Règle : jamais de test manuel sur un projet réel — toujours un projet dédié, jetable
+
+**Quoi** — le 19/09/2026, une pollution de données a été trouvée : 3 enregistrements générés
+(plans de financement, développement, transmission) citaient littéralement un titre/description
+absurdes (« sdvxdv » / « xvxvxzvzxcbxc »), utilisés comme entrée de test directement sur un projet
+qui a ensuite été renommé et réutilisé. Investigation : ce n'était **pas** dans le vrai projet du
+compte principal (`heldersimoes.ge@gmail.com`, resté vide et intact), mais dans un projet créé sous
+un compte de test à email jetable — vraisemblablement un test manuel fait directement dans le
+navigateur, pas par un script automatisé (vérifié : aucun script de test de cette session n'a
+utilisé ces chaînes). Les 3 entrées ont été supprimées après identification précise par leur
+contenu (recherche de la chaîne exacte dans toutes les tables), sans toucher à aucune autre donnée.
+**Pourquoi ça n'a pas été nettoyé "comme annoncé"** — l'engagement de nettoyage systématique tenu
+dans ce projet (voir `PROGRESS.md`, section "Rien de destructif" de chaque session) couvre les
+comptes/projets **créés par les scripts de vérification automatisée** de l'assistant, toujours
+supprimés juste après usage et vérifiables dans l'historique de la session. Il ne peut pas couvrir
+un test fait manuellement dans le navigateur, en dehors de toute session assistée — cette pollution-
+là n'a donc jamais été "annoncée comme nettoyée" par erreur, elle n'a simplement jamais été vue.
+**Règle pour la suite, humains et automatisé confondus** — tout test volontairement absurde ou
+exploratoire (titres/descriptions incohérents, données jetables) doit se faire sur un projet créé
+spécifiquement pour ça, jamais sur un projet qui porte déjà un nom qui ressemble à un vrai projet
+(même approximatif). Si un test doit vérifier un comportement précis (ex : comment IGINI réagit à
+une entrée vide), le titre du projet de test doit le dire explicitement (ex : `[TEST] entrée vide —
+à supprimer`), pour rester identifiable et supprimable sans ambiguïté même des mois plus tard.
+**Trou de nettoyage trouvé et corrigé le même jour** — l'audit fait dans la foulée a montré que les
+*projets* de test étaient bien supprimés à chaque fois, mais pas les *comptes* de test : 9 comptes
+`@example.com` créés par des scripts de vérification traînaient encore (tous sans aucun projet).
+Ils ont été supprimés, avec un double garde-fou dans le script : domaine `@example.com` (réservé
+aux tests par la RFC 2606, donc jamais un vrai compte) **et** zéro projet rattaché. Cause du trou :
+il n'existe pas d'endpoint de suppression de compte dans l'API, donc le nettoyage par appels HTTP
+ne pouvait pas les enlever — il faut passer par la base. À refaire à la fin de toute session qui
+crée des comptes de test, tant que cet endpoint n'existe pas.
+**Où** — aucun endroit unique dans le code (c'est une règle de process, pas un mécanisme
+technique) ; documenté ici et rappelé dans `PROGRESS.md` à chaque session qui crée des données de
+test.
+
 ## MailService journalise au lieu d'envoyer
 
 **Quoi** — `MailService.send` ne fait qu'écrire l'email dans les logs (niveau `warn`) : aucun

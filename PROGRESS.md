@@ -195,6 +195,65 @@ session.
 tous confirmés fonctionnels en conditions réelles, pas seulement en tests unitaires avec Claude
 mocké — voir `docs/status.md`.
 
+### 9. Nettoyage des données de test, bug d'affichage de l'automatisation, vérifications ciblées
+
+Session en 5 chantiers demandés explicitement.
+
+**9.1 — Données de test polluées : diagnostic différent de ce qui était annoncé.** Recherche des
+chaînes « sdvxdv » / « xvxvxzvzxcbxc » dans **toutes** les tables de la base. Résultat : elles
+n'étaient **pas** dans le projet « école de motocross » du compte principal
+(`heldersimoes.ge@gmail.com`), qui est resté totalement vide et intact. Il existe en fait trois
+projets « école motocross » sous trois comptes différents ; les entrées polluées étaient sous un
+compte à email jetable (`sd@dd.co`), dans un projet dont le titre était « sdvxdv » au moment des
+générations (19/09, 07:49) puis renommé « ecole de moto cross » cinq minutes après — les résumés
+IA citaient donc encore verbatim l'ancien titre absurde. **3 enregistrements** (plans de
+financement, développement, transmission) supprimés précisément par leur identifiant, après
+vérification qu'aucune autre donnée du projet n'était concernée ; contrôle post-suppression :
+plus aucune occurrence des deux chaînes nulle part.
+**Pourquoi ça n'avait pas été nettoyé "comme annoncé"** : l'engagement de nettoyage tenu jusqu'ici
+couvre les données créées par les scripts de vérification automatisée (toujours supprimées juste
+après, traçable dans l'historique). Cette pollution-là vient d'un test fait manuellement dans le
+navigateur, hors de toute session assistée — elle n'a jamais été vue, donc jamais "annoncée comme
+nettoyée". Règle écrite dans `docs/decisions.md` pour la suite (projet dédié et explicitement
+nommé `[TEST] …` pour tout test jetable, humain ou automatisé).
+**Trou de nettoyage réel trouvé au passage** : les *projets* de test étaient bien supprimés, mais
+pas les *comptes* (aucun endpoint de suppression de compte n'existe dans l'API). 9 comptes
+`@example.com` résiduels supprimés en base, avec double garde-fou (domaine réservé RFC 2606 **et**
+zéro projet rattaché).
+
+**9.2 — Bug d'automatisation : c'était l'affichage, pas le moteur.** Vérifié d'abord dans le code,
+puis en conditions réelles : le déclenchement automatique après génération **fonctionne** côté
+backend (test dédié : une analyse réelle génère 4 tâches `assignee: igini` / `source: automation`
+plus une exécution journalisée, sans le moindre appel manuel). Le vrai bug était côté frontend :
+`TasksSection`, `AutomationSection`, `ScoreSection` et `KnowledgeSection` ne se rechargeaient qu'au
+montage. Après une génération, l'automatisation tournait donc invisiblement, et un clic manuel
+juste après affichait honnêtement « 0 tâche créée » — puisque le travail venait d'être fait
+automatiquement quelques secondes plus tôt. Corrigé par un signal de rafraîchissement propagé après
+chaque génération réussie, avec un **test de régression vérifié comme tel** : temporairement annulé
+le correctif pour confirmer que le test échoue sans lui, puis restauré.
+
+**9.3 — Marketplace de bout en bout** : profil mentor créé, visible dans l'annuaire, correctement
+inclus par le filtre `role=mentor` et correctement **exclu** par `role=investisseur` ; message de
+mise en relation envoyé d'un compte à l'autre, reçu dans la bonne boîte ; cloisonnement vérifié
+(le porteur ne voit pas les messages du mentor) ; auto-contact refusé (400). **Absence de paiement
+confirmée explicitement** par recherche de tous les termes liés au paiement dans l'intégralité du
+code Marketplace : les seules occurrences sont le libellé de rôle « investisseur » et deux
+commentaires qui affirment justement l'absence de paiement. Profil de test supprimé.
+
+**9.4 — Les 4 générateurs, un par un, sur un cas non couvert.** Ces 4 générateurs avaient déjà été
+vérifiés une heure plus tôt (point 8, en pipeline avec contexte). Plutôt que de repayer 4 appels
+pour reprouver la même chose, le test a porté sur un cas **jamais couvert** : chaque générateur
+lancé **sans analyse préalable** (chemin « contexte absent »). Les 4 ont réussi (Construire 45s,
+Financer 38s, Développer 40s, Transmettre 46s), avec une pause de 20s entre chaque. Résultat
+notable : le score final affiche `etincelle: null` — aucune analyse n'existant, le système refuse
+d'inventer un chiffre, ce qui valide en conditions réelles la règle « pas de score fabriqué ».
+Projet de test supprimé.
+
+**9.5 — Piège opérationnel documenté** : `npm run build` lancé pendant qu'un serveur de dev tourne
+casse ce dernier (cache `.next` partagé, toutes les pages en 500). Rencontré deux fois ; procédure
+de récupération notée dans `docs/decisions.md`. Serveurs redémarrés proprement, tous deux vérifiés
+opérationnels en fin de session.
+
 ## Bloqué — pas contourné, car un contournement serait mentir
 
 - **Financement (modèle économique réel)** — inchangé, en attente d'une décision produit/légale sur
@@ -219,23 +278,37 @@ mocké — voir `docs/status.md`.
   un avis juridique.
 - Marketplace : aucune circulation d'argent tant qu'un cadrage légal/produit n'est pas fait.
 
-## Rien de destructif
+## Suppressions faites (les seules de la session) et budget IA
 
 Tous les changements de schéma sont additifs (nouvelles tables `compliance_requirements`,
 `project_compliance_checks`, `marketplace_profiles`, `marketplace_contacts`, `automation_runs` ;
-aucune colonne existante modifiée). Aucune donnée existante modifiée ou supprimée. Au total sur
-cette session : **7 appels réels à l'API Claude**, tous strictement pour vérifier que quelque chose
-fonctionnait (jamais en boucle, jamais répété au-delà du nécessaire) — 2 ont échoué avant génération
-(crédit insuffisant, coût nul), 5 ont réussi (1 pour vérifier la clé, 4 pour le pipeline complet du
-point 8). Le budget IA de 50€/mois a donc été entamé, mais de façon bornée et volontaire, jamais par
-un processus qui tournerait tout seul. Tous les comptes/projets de test créés pour ces vérifications
-ont été supprimés après coup.
+aucune colonne existante modifiée).
+
+**Suppressions volontaires, toutes demandées ou strictement liées à du nettoyage de test** (point 9) :
+- 3 enregistrements générés contenant les chaînes de test « sdvxdv »/« xvxvxzvzxcbxc », identifiés
+  un par un par leur identifiant exact, jamais par un filtre large.
+- 9 comptes de test `@example.com` sans aucun projet rattaché (double garde-fou dans le script).
+- Les projets/profils de test créés pendant les vérifications de cette session.
+**Aucune donnée d'un compte réel n'a été touchée** — le projet « école de motocross » du compte
+principal était et reste vide et intact (vérifié avant et après).
+
+**Budget IA** : **12 appels réels à l'API Claude** au total sur la session, tous pour vérifier que
+quelque chose fonctionnait, jamais en boucle — 2 échecs avant génération (crédit insuffisant, coût
+nul), 10 réussis (1 vérification de clé, 5 pour le pipeline complet du point 8, 1 pour prouver le
+déclenchement automatique du point 9.2, 4 pour les générateurs sans contexte du point 9.4, avec
+20s de pause entre chacun). Durée typique d'un appel : 38 à 46 secondes. Le budget de 50€/mois a
+été entamé de façon bornée et volontaire ; aucun processus automatique ne peut en consommer seul
+(voir la garantie d'`AutomationService`).
 
 ## Vérifié à chaque étape
 
 - Backend : 261 tests (+94 depuis le début de session), `tsc --noEmit` propre, `oxlint` propre.
-- Frontend : 67 tests (+24), `tsc --noEmit` propre, `eslint` propre, build de production réussi
+- Frontend : 68 tests (+25, dont un test de régression dont l'échec sans le correctif a été
+  vérifié explicitement), `tsc --noEmit` propre, `eslint` propre, build de production réussi
   (14 routes).
+- Base de données auditée en fin de session : zéro projet de test résiduel, zéro compte de test
+  résiduel, zéro occurrence des chaînes de test recherchées.
+- Serveurs de dev backend et frontend vérifiés opérationnels en fin de session.
 - Tout poussé sur `main`, historique de commits clair (voir `git log`).
 
 ## Estimation chiffrée demandée en cours de session

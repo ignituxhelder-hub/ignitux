@@ -7,9 +7,21 @@ interface AutomationSectionProps {
   token: string | null;
   projectId: string;
   readOnly?: boolean;
+  /**
+   * Change après chaque génération réussie. Indispensable ici : chaque
+   * génération déclenche une exécution d'automatisation côté serveur, et sans
+   * rechargement cette section affichait encore l'état d'avant — au point de
+   * laisser croire que l'automatisation automatique ne faisait rien.
+   */
+  refreshSignal?: number;
 }
 
-export function AutomationSection({ token, projectId, readOnly = false }: AutomationSectionProps) {
+export function AutomationSection({
+  token,
+  projectId,
+  readOnly = false,
+  refreshSignal,
+}: AutomationSectionProps) {
   const [runs, setRuns] = useState<AutomationRun[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRunning, setIsRunning] = useState(false);
@@ -29,7 +41,7 @@ export function AutomationSection({ token, projectId, readOnly = false }: Automa
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, projectId]);
+  }, [token, projectId, refreshSignal]);
 
   async function handleRun() {
     if (!token || readOnly) return;
