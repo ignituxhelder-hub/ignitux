@@ -1,7 +1,8 @@
 # Estimation IGNITUX — avancement & effort de développement
 
-**Date** : 19/09/2026 (mise à jour — version initiale le même jour, avant l'ajout
-d'Automation/Compliance/Marketplace et la vérification complète des 5 générateurs IA).
+**Date** : 19/09/2026 (troisième version du jour — après la session autonome sur les neuf modules
+du cahier des charges : Constitution, Mémoire, Workflow, Knowledge Graph, Offline First, CRM,
+Facturation, Financement, Modules Pays).
 **Nature de ce document** : estimation technique interne, pour suivre l'avancement du projet.
 **Ce que ce document N'EST PAS** : une valorisation d'entreprise, un chiffre à présenter à des
 investisseurs, ou une évaluation de la valeur de marché du concept IGNITUX. Aucune de ces choses
@@ -12,8 +13,16 @@ routes comptées, modules lus), pas d'une extrapolation de la roadmap. Quand un 
 estimation d'ordre de grandeur plutôt qu'un fait vérifiable, c'est dit explicitement.
 
 Faits vérifiés au moment de l'audit :
-- Backend : 261 tests automatisés (34 fichiers), 56 routes HTTP, 19 modèles Prisma, 12 contrôleurs.
-- Frontend : 67 tests automatisés (18 fichiers), 14 routes Next.js, build de production réussi.
+- Backend : **518** tests automatisés (50 fichiers), **112** routes HTTP, **35** modèles Prisma,
+  16 contrôleurs.
+- Frontend : **147** tests automatisés (26 fichiers), **15** routes Next.js, build de production
+  réussi.
+- **Distinction cruciale pour lire la suite** : les modules livrés lors de la session autonome
+  (Constitution, extension Mémoire, moteur de Workflow, traversée du Knowledge Graph, Offline
+  First, CRM, Facturation, Financement) sont **testés automatiquement mais n'ont jamais été
+  manipulés dans un navigateur**. Ils ne rentrent donc pas dans le périmètre « fonctionnel et
+  vérifié » de la section 2, qui reste volontairement restreint à ce qui a été éprouvé à la main.
+  Voir `RAPPORT-SESSION.md`.
 - Les tests backend/frontend ci-dessus tournent contre des dépendances **mockées** (Prisma, fetch).
   Une partie du parcours a aussi été vérifiée **en conditions réelles** avec des comptes de test sur
   la base Supabase de dev (signup → vérification email → connexion, reset de mot de passe,
@@ -68,15 +77,33 @@ gestion de projet en plus.
 | Périmètre | Effort estimé | Jours-homme (8h/j) |
 |---|---|---|
 | **(A) Version précédente** — fondations, projets, collaboration, 4 moteurs transverses, communauté, 5 générateurs IA (code + désormais vérifiés), frontend correspondant, infra de tests | 340–500 h | ~42–63 j |
-| **(B) + Automation, Compliance, Marketplace** (nouveau cette session, code + tests + vérification en conditions réelles pour les 3) | +140–200 h | +~18–25 j |
-| **Total actuel (A + B)** | 480–700 h | ~60–88 j |
+| **(B) + Automation, Compliance, Marketplace** (code + tests + vérification en conditions réelles pour les 3) | +140–200 h | +~18–25 j |
+| **Total vérifié à la main (A + B)** | 480–700 h | ~60–88 j |
+
+**(C) Ajout de la session autonome — compté séparément et volontairement.** Constitution, extension
+Mémoire, moteur de Workflow, traversée du Knowledge Graph, Offline First, CRM, Facturation,
+Financement : ~12 200 lignes hors client généré, 290 tests ajoutés, 16 nouveaux modèles Prisma,
+3 nouvelles pages. Effort estimé : **+200 à 300 h (~25 à 38 jours-homme)**.
+
+Ce bloc est présenté à part et **non additionné au total ci-dessus**, parce que la section 2 mesure
+ce qui est « fonctionnel et vérifié », et que ce code n'a été validé que par des tests automatisés
+contre des mocks. L'agréger au total donnerait un chiffre plus flatteur et moins vrai. Il rejoindra
+le total une fois les modules éprouvés dans un navigateur — c'est la priorité n°1 de la suite.
+
+| Périmètre | Effort estimé | Jours-homme (8h/j) |
+|---|---|---|
+| **Total si (C) était vérifié** (A + B + C) | 680–1 000 h | ~85–125 j |
 
 Fourchette de coût, tarifs de marché européens (2026, ordre de grandeur, pas un devis) :
 
-| Scénario | Taux horaire | Total actuel (480–700 h) |
-|---|---|---|
-| Freelance indépendant | 40–70 €/h | 19 200 – 49 000 € |
-| Agence | 90–150 €/h | 43 200 – 105 000 € |
+| Scénario | Taux horaire | Vérifié à la main (480–700 h) | Si (C) était vérifié (680–1 000 h) |
+|---|---|---|---|
+| Freelance indépendant | 40–70 €/h | 19 200 – 49 000 € | 27 200 – 70 000 € |
+| Agence | 90–150 €/h | 43 200 – 105 000 € | 61 200 – 150 000 € |
+
+La deuxième colonne de chiffres est **conditionnelle** : elle ne vaut que si les modules de la
+session autonome se révèlent effectivement fonctionnels une fois manipulés. Tant que ce n'est pas
+fait, la première colonne est la seule défendable.
 
 Ces chiffres sont des **ordres de grandeur** issus d'une estimation de la complexité du code
 existant (nombre de modules, de tests, de routes, de tables), pas d'un chronométrage réel du temps
@@ -105,6 +132,18 @@ facturées.
    un concept non validé, et en inventer un serait trompeur.
 
 ---
+
+## Changements depuis la deuxième version (même jour)
+
+- Huit modules construits en session autonome, tous testés automatiquement, **aucun manipulé dans
+  un navigateur**. Comptés dans un bloc (C) séparé, non additionné au total « vérifié », pour ne
+  pas gonfler un chiffre qui doit rester défendable.
+- Tests : 328 → **665** au total (518 backend, 147 frontend).
+- Modèles Prisma : 19 → **35**. Routes HTTP : 56 → **112**. Pages : 14 → **15**.
+- Deux chiffres qui n'ont PAS bougé, et c'est le point important : la phase 8 (lancement public)
+  et tout ce qui dépend d'une décision produit non prise. La session a ajouté du code, pas des
+  décisions — voir `RAPPORT-SESSION.md` §5 pour les trois blocages (texte des 24 articles de la
+  Constitution, barème du modèle économique, second pays pour la conformité).
 
 ## Changements depuis la première version (même jour)
 
