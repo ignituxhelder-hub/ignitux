@@ -1,6 +1,7 @@
 {
   "name": "ignitux-frontend",
   "version": "0.0.1",
+  "description": "App Next.js d'Ignitux : comptes, projets, IGINI et communaute.",
   "author": "Ignitux <ignitux@outlook.com>",
   "private": true,
   "type": "module",

@@ -1,7 +1,7 @@
 {
   "name": "ignitux",
   "version": "0.0.1",
-  "description": "",
+  "description": "API NestJS d'Ignitux : comptes, projets, IGINI (5 generateurs IA + 4 moteurs transverses) et communaute.",
   "author": "Ignitux <ignitux@outlook.com>",
   "private": true,
   "license": "UNLICENSED",
