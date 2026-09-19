@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service.js';
 
@@ -46,5 +46,30 @@ export class UsersService {
     }
 
     return { id: user.id, email: user.email };
+  }
+
+  /**
+   * Changement de mot de passe pour un utilisateur déjà connecté (par
+   * opposition à la réinitialisation par email, pour qui a oublié le sien) —
+   * exige le mot de passe actuel plutôt qu'un token, pour éviter qu'une
+   * session volée (JWT) suffise seule à verrouiller le compte hors de portée
+   * de son propriétaire.
+   *
+   * Lève un 403 (ForbiddenException), pas un 401 : le JWT est valide,
+   * l'utilisateur EST authentifié, il a juste fourni un mauvais mot de passe
+   * actuel. Un 401 ici serait intercepté par le frontend comme "session
+   * expirée" et déconnecterait l'utilisateur à tort — un mauvais mot de passe
+   * actuel ne doit jamais invalider une session par ailleurs valide.
+   */
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    const user = await this.prisma.users.findUniqueOrThrow({ where: { id: userId } });
+
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!isCurrentPasswordValid) {
+      throw new ForbiddenException('Mot de passe actuel incorrect.');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await this.prisma.users.update({ where: { id: userId }, data: { password_hash: passwordHash } });
   }
 }

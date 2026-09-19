@@ -10,7 +10,7 @@ import { JwtStrategy } from './jwt.strategy.js';
 @Module({
   imports: [
     UsersModule,
-    PassportModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     // registerAsync (plutôt que register) pour que getEnv() ne s'exécute
     // qu'à l'instanciation réelle du module par Nest, pas au simple import
     // du fichier — sinon un fichier de test import ant AuthModule sans même
