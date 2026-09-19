@@ -51,4 +51,15 @@ describe('LoginPage', () => {
     expect(await screen.findByText('Email ou mot de passe incorrect.')).toBeInTheDocument();
     expect(router.replace).not.toHaveBeenCalled();
   });
+
+  it('propose un lien vers la réinitialisation du mot de passe', () => {
+    render(
+      <AuthProvider>
+        <LoginPage />
+      </AuthProvider>,
+    );
+
+    const link = screen.getByRole('link', { name: /mot de passe oublié/i });
+    expect(link).toHaveAttribute('href', '/forgot-password');
+  });
 });

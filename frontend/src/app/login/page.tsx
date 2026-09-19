@@ -61,6 +61,9 @@ export default function LoginPage() {
         </button>
       </form>
       <p className="muted" style={{ marginTop: '1rem' }}>
+        <Link href="/forgot-password">Mot de passe oublié ?</Link>
+      </p>
+      <p className="muted" style={{ marginTop: '0.5rem' }}>
         Pas encore de compte ? <Link href="/signup">S&apos;inscrire</Link>
       </p>
     </main>

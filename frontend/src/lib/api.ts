@@ -210,6 +210,34 @@ export const api = {
       body: JSON.stringify({ email, password }),
     }),
 
+  forgotPassword: async (email: string) => {
+    await request<void>('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  resetPassword: async (token: string, newPassword: string) => {
+    await request<{ success: boolean }>('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, newPassword }),
+    });
+  },
+
+  verifyEmail: async (token: string) => {
+    await request<{ success: boolean }>('/auth/verify-email', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  },
+
+  resendVerification: async (email: string) => {
+    await request<void>('/auth/verify-email/resend', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
   listProjects: (token: string) =>
     request<Project[]>('/projects', {
       headers: { Authorization: `Bearer ${token}` },
