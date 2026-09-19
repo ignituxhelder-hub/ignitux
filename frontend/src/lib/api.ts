@@ -465,6 +465,45 @@ export interface AutomationRun {
   created_at: string;
 }
 
+export type FinancingSource = 'ignitux' | 'porteur' | 'pret' | 'subvention' | 'autre';
+
+export interface FinancingRound {
+  id: string;
+  project_id: string;
+  source: FinancingSource;
+  amount_cents: number;
+  occurred_at: string;
+  note: string | null;
+}
+
+export interface EquityHolderShare {
+  holderId: string;
+  name: string;
+  isFounder: boolean;
+  /** null = aucun événement ne fixe sa part ; ce n'est pas zéro. */
+  shareBasisPoints: number | null;
+}
+
+export interface CapTable {
+  notice: string;
+  holders: EquityHolderShare[];
+  totalBasisPoints: number;
+  /** Non nul = la répartition saisie est incomplète. Jamais normalisé. */
+  discrepancyBasisPoints: number;
+  /** null quand la répartition est incomplète : on ne se prononce pas. */
+  founderHasMajority: boolean | null;
+  founderTrajectory: Array<{ occurredAt: string; shareBasisPoints: number }>;
+}
+
+export interface DividendDistribution {
+  id: string;
+  holder_id: string;
+  amount_cents: number;
+  occurred_at: string;
+  note: string | null;
+  holder?: { id: string; name: string };
+}
+
 export type BillingType = 'devis' | 'facture' | 'avoir';
 export type BillingStatus = 'brouillon' | 'emis' | 'paye' | 'annule' | 'refuse';
 export type BillingMethod = 'virement' | 'especes' | 'carte' | 'cheque' | 'autre';
@@ -960,6 +999,52 @@ export const api = {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     }),
+
+  listFinancingRounds: (token: string, projectId: string) =>
+    request<{ rounds: FinancingRound[]; totalCents: number }>(
+      `/projects/${projectId}/financing/rounds`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    ),
+
+  recordFinancingRound: (
+    token: string,
+    projectId: string,
+    round: { source: FinancingSource; amountCents: number; occurredAt: string; note?: string },
+  ) =>
+    request<FinancingRound>(`/projects/${projectId}/financing/rounds`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(round),
+    }),
+
+  getCapTable: (token: string, projectId: string) =>
+    request<CapTable>(`/projects/${projectId}/financing/cap-table`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  addEquityHolder: (token: string, projectId: string, name: string, isFounder: boolean) =>
+    request<{ id: string; name: string }>(`/projects/${projectId}/financing/holders`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ name, isFounder }),
+    }),
+
+  recordEquityChange: (
+    token: string,
+    holderId: string,
+    change: { shareBasisPoints: number; reason: string; occurredAt: string },
+  ) =>
+    request<{ id: string }>(`/financing/holders/${holderId}/equity-events`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(change),
+    }),
+
+  listDividends: (token: string, projectId: string) =>
+    request<{ dividends: DividendDistribution[]; totalCents: number }>(
+      `/projects/${projectId}/financing/dividends`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    ),
 
   getBillingLegalNotice: (token: string) =>
     request<BillingLegalNotice>('/billing/legal-notice', {

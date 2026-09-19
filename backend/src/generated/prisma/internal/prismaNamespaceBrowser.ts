@@ -70,6 +70,10 @@ export const ModelName = {
   marketplace_profiles: 'marketplace_profiles',
   marketplace_contacts: 'marketplace_contacts',
   automation_runs: 'automation_runs',
+  financing_rounds: 'financing_rounds',
+  equity_holders: 'equity_holders',
+  equity_events: 'equity_events',
+  dividend_distributions: 'dividend_distributions',
   billing_documents: 'billing_documents',
   billing_lines: 'billing_lines',
   billing_payments: 'billing_payments',
@@ -346,6 +350,56 @@ export const Automation_runsScalarFieldEnum = {
 } as const
 
 export type Automation_runsScalarFieldEnum = (typeof Automation_runsScalarFieldEnum)[keyof typeof Automation_runsScalarFieldEnum]
+
+
+export const Financing_roundsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  source: 'source',
+  amount_cents: 'amount_cents',
+  occurred_at: 'occurred_at',
+  note: 'note',
+  created_at: 'created_at'
+} as const
+
+export type Financing_roundsScalarFieldEnum = (typeof Financing_roundsScalarFieldEnum)[keyof typeof Financing_roundsScalarFieldEnum]
+
+
+export const Equity_holdersScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  name: 'name',
+  is_founder: 'is_founder',
+  created_at: 'created_at'
+} as const
+
+export type Equity_holdersScalarFieldEnum = (typeof Equity_holdersScalarFieldEnum)[keyof typeof Equity_holdersScalarFieldEnum]
+
+
+export const Equity_eventsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  holder_id: 'holder_id',
+  share_basis_points: 'share_basis_points',
+  reason: 'reason',
+  occurred_at: 'occurred_at',
+  created_at: 'created_at'
+} as const
+
+export type Equity_eventsScalarFieldEnum = (typeof Equity_eventsScalarFieldEnum)[keyof typeof Equity_eventsScalarFieldEnum]
+
+
+export const Dividend_distributionsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  holder_id: 'holder_id',
+  amount_cents: 'amount_cents',
+  occurred_at: 'occurred_at',
+  note: 'note',
+  created_at: 'created_at'
+} as const
+
+export type Dividend_distributionsScalarFieldEnum = (typeof Dividend_distributionsScalarFieldEnum)[keyof typeof Dividend_distributionsScalarFieldEnum]
 
 
 export const Billing_documentsScalarFieldEnum = {

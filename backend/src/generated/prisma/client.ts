@@ -151,6 +151,44 @@ export type marketplace_contacts = Prisma.marketplace_contactsModel
  */
 export type automation_runs = Prisma.automation_runsModel
 /**
+ * Model financing_rounds
+ * FINANCEMENT — un apport de fonds sur un projet, d'où qu'il vienne.
+ * Enregistré quand il a réellement eu lieu, jamais prévu : une promesse
+ * de financement n'est pas un financement.
+ */
+export type financing_rounds = Prisma.financing_roundsModel
+/**
+ * Model equity_holders
+ * FINANCEMENT — un détenteur de parts sur un projet.
+ * `is_founder` distingue le porteur du projet des autres détenteurs :
+ * le modèle Ignitux pose que l'entrepreneur reste propriétaire
+ * principal, et cette qualité doit être lisible en base, pas déduite
+ * d'un pourcentage à un instant donné.
+ */
+export type equity_holders = Prisma.equity_holdersModel
+/**
+ * Model equity_events
+ * FINANCEMENT — un changement de répartition des parts, daté et motivé.
+ * 
+ * La table stocke des ÉVÉNEMENTS, pas un état courant. La répartition
+ * actuelle se lit comme le dernier événement de chaque détenteur. Ce
+ * choix coûte une requête de plus, et il évite exactement ce que le
+ * modèle Ignitux promet de rendre visible : l'évolution progressive vers
+ * l'autonomie du porteur. Un simple champ « part actuelle » écraserait
+ * cette histoire à chaque modification.
+ * 
+ * `share_basis_points` est la part APRÈS l'événement, en points de base
+ * (10000 = 100 %), pour représenter 12,5 % sans flottant.
+ */
+export type equity_events = Prisma.equity_eventsModel
+/**
+ * Model dividend_distributions
+ * FINANCEMENT — un dividende réellement versé.
+ * Il n'existe aucune table de dividende « prévu » : un dividende se
+ * constate, il ne se prédit pas (voir financing-legal.ts).
+ */
+export type dividend_distributions = Prisma.dividend_distributionsModel
+/**
  * Model billing_documents
  * FACTURATION — un document commercial : devis, facture ou avoir.
  * 

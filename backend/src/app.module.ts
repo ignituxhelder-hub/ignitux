@@ -8,6 +8,7 @@ import { BillingModule } from './billing/billing.module.js';
 import { ComplianceModule } from './compliance/compliance.module.js';
 import { ConstitutionModule } from './constitution/constitution.module.js';
 import { CrmModule } from './crm/crm.module.js';
+import { FinancingModule } from './financing/financing.module.js';
 import { CommunityModule } from './community/community.module.js';
 import { KnowledgeModule } from './igini/knowledge/knowledge.module.js';
 import { MemoryModule } from './igini/memory/memory.module.js';
@@ -37,6 +38,7 @@ import { UsersModule } from './users/users.module.js';
     ConstitutionModule,
     CrmModule,
     BillingModule,
+    FinancingModule,
     MarketplaceModule,
   ],
   controllers: [AppController],

@@ -416,6 +416,10 @@ export const ModelName = {
   marketplace_profiles: 'marketplace_profiles',
   marketplace_contacts: 'marketplace_contacts',
   automation_runs: 'automation_runs',
+  financing_rounds: 'financing_rounds',
+  equity_holders: 'equity_holders',
+  equity_events: 'equity_events',
+  dividend_distributions: 'dividend_distributions',
   billing_documents: 'billing_documents',
   billing_lines: 'billing_lines',
   billing_payments: 'billing_payments',
@@ -443,7 +447,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1853,6 +1857,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    financing_rounds: {
+      payload: Prisma.$financing_roundsPayload<ExtArgs>
+      fields: Prisma.financing_roundsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.financing_roundsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_roundsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.financing_roundsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_roundsPayload>
+        }
+        findFirst: {
+          args: Prisma.financing_roundsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_roundsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.financing_roundsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_roundsPayload>
+        }
+        findMany: {
+          args: Prisma.financing_roundsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_roundsPayload>[]
+        }
+        create: {
+          args: Prisma.financing_roundsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_roundsPayload>
+        }
+        createMany: {
+          args: Prisma.financing_roundsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.financing_roundsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_roundsPayload>[]
+        }
+        delete: {
+          args: Prisma.financing_roundsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_roundsPayload>
+        }
+        update: {
+          args: Prisma.financing_roundsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_roundsPayload>
+        }
+        deleteMany: {
+          args: Prisma.financing_roundsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.financing_roundsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.financing_roundsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_roundsPayload>[]
+        }
+        upsert: {
+          args: Prisma.financing_roundsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_roundsPayload>
+        }
+        aggregate: {
+          args: Prisma.Financing_roundsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFinancing_rounds>
+        }
+        groupBy: {
+          args: Prisma.financing_roundsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Financing_roundsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.financing_roundsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Financing_roundsCountAggregateOutputType> | number
+        }
+      }
+    }
+    equity_holders: {
+      payload: Prisma.$equity_holdersPayload<ExtArgs>
+      fields: Prisma.equity_holdersFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.equity_holdersFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_holdersPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.equity_holdersFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_holdersPayload>
+        }
+        findFirst: {
+          args: Prisma.equity_holdersFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_holdersPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.equity_holdersFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_holdersPayload>
+        }
+        findMany: {
+          args: Prisma.equity_holdersFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_holdersPayload>[]
+        }
+        create: {
+          args: Prisma.equity_holdersCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_holdersPayload>
+        }
+        createMany: {
+          args: Prisma.equity_holdersCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.equity_holdersCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_holdersPayload>[]
+        }
+        delete: {
+          args: Prisma.equity_holdersDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_holdersPayload>
+        }
+        update: {
+          args: Prisma.equity_holdersUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_holdersPayload>
+        }
+        deleteMany: {
+          args: Prisma.equity_holdersDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.equity_holdersUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.equity_holdersUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_holdersPayload>[]
+        }
+        upsert: {
+          args: Prisma.equity_holdersUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_holdersPayload>
+        }
+        aggregate: {
+          args: Prisma.Equity_holdersAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEquity_holders>
+        }
+        groupBy: {
+          args: Prisma.equity_holdersGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Equity_holdersGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.equity_holdersCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Equity_holdersCountAggregateOutputType> | number
+        }
+      }
+    }
+    equity_events: {
+      payload: Prisma.$equity_eventsPayload<ExtArgs>
+      fields: Prisma.equity_eventsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.equity_eventsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_eventsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.equity_eventsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_eventsPayload>
+        }
+        findFirst: {
+          args: Prisma.equity_eventsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_eventsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.equity_eventsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_eventsPayload>
+        }
+        findMany: {
+          args: Prisma.equity_eventsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_eventsPayload>[]
+        }
+        create: {
+          args: Prisma.equity_eventsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_eventsPayload>
+        }
+        createMany: {
+          args: Prisma.equity_eventsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.equity_eventsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_eventsPayload>[]
+        }
+        delete: {
+          args: Prisma.equity_eventsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_eventsPayload>
+        }
+        update: {
+          args: Prisma.equity_eventsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_eventsPayload>
+        }
+        deleteMany: {
+          args: Prisma.equity_eventsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.equity_eventsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.equity_eventsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_eventsPayload>[]
+        }
+        upsert: {
+          args: Prisma.equity_eventsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$equity_eventsPayload>
+        }
+        aggregate: {
+          args: Prisma.Equity_eventsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEquity_events>
+        }
+        groupBy: {
+          args: Prisma.equity_eventsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Equity_eventsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.equity_eventsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Equity_eventsCountAggregateOutputType> | number
+        }
+      }
+    }
+    dividend_distributions: {
+      payload: Prisma.$dividend_distributionsPayload<ExtArgs>
+      fields: Prisma.dividend_distributionsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.dividend_distributionsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_distributionsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.dividend_distributionsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_distributionsPayload>
+        }
+        findFirst: {
+          args: Prisma.dividend_distributionsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_distributionsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.dividend_distributionsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_distributionsPayload>
+        }
+        findMany: {
+          args: Prisma.dividend_distributionsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_distributionsPayload>[]
+        }
+        create: {
+          args: Prisma.dividend_distributionsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_distributionsPayload>
+        }
+        createMany: {
+          args: Prisma.dividend_distributionsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.dividend_distributionsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_distributionsPayload>[]
+        }
+        delete: {
+          args: Prisma.dividend_distributionsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_distributionsPayload>
+        }
+        update: {
+          args: Prisma.dividend_distributionsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_distributionsPayload>
+        }
+        deleteMany: {
+          args: Prisma.dividend_distributionsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.dividend_distributionsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.dividend_distributionsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_distributionsPayload>[]
+        }
+        upsert: {
+          args: Prisma.dividend_distributionsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_distributionsPayload>
+        }
+        aggregate: {
+          args: Prisma.Dividend_distributionsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDividend_distributions>
+        }
+        groupBy: {
+          args: Prisma.dividend_distributionsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Dividend_distributionsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.dividend_distributionsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Dividend_distributionsCountAggregateOutputType> | number
+        }
+      }
+    }
     billing_documents: {
       payload: Prisma.$billing_documentsPayload<ExtArgs>
       fields: Prisma.billing_documentsFieldRefs
@@ -3028,6 +3328,56 @@ export const Automation_runsScalarFieldEnum = {
 export type Automation_runsScalarFieldEnum = (typeof Automation_runsScalarFieldEnum)[keyof typeof Automation_runsScalarFieldEnum]
 
 
+export const Financing_roundsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  source: 'source',
+  amount_cents: 'amount_cents',
+  occurred_at: 'occurred_at',
+  note: 'note',
+  created_at: 'created_at'
+} as const
+
+export type Financing_roundsScalarFieldEnum = (typeof Financing_roundsScalarFieldEnum)[keyof typeof Financing_roundsScalarFieldEnum]
+
+
+export const Equity_holdersScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  name: 'name',
+  is_founder: 'is_founder',
+  created_at: 'created_at'
+} as const
+
+export type Equity_holdersScalarFieldEnum = (typeof Equity_holdersScalarFieldEnum)[keyof typeof Equity_holdersScalarFieldEnum]
+
+
+export const Equity_eventsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  holder_id: 'holder_id',
+  share_basis_points: 'share_basis_points',
+  reason: 'reason',
+  occurred_at: 'occurred_at',
+  created_at: 'created_at'
+} as const
+
+export type Equity_eventsScalarFieldEnum = (typeof Equity_eventsScalarFieldEnum)[keyof typeof Equity_eventsScalarFieldEnum]
+
+
+export const Dividend_distributionsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  holder_id: 'holder_id',
+  amount_cents: 'amount_cents',
+  occurred_at: 'occurred_at',
+  note: 'note',
+  created_at: 'created_at'
+} as const
+
+export type Dividend_distributionsScalarFieldEnum = (typeof Dividend_distributionsScalarFieldEnum)[keyof typeof Dividend_distributionsScalarFieldEnum]
+
+
 export const Billing_documentsScalarFieldEnum = {
   id: 'id',
   owner_id: 'owner_id',
@@ -3470,6 +3820,10 @@ export type GlobalOmitConfig = {
   marketplace_profiles?: Prisma.marketplace_profilesOmit
   marketplace_contacts?: Prisma.marketplace_contactsOmit
   automation_runs?: Prisma.automation_runsOmit
+  financing_rounds?: Prisma.financing_roundsOmit
+  equity_holders?: Prisma.equity_holdersOmit
+  equity_events?: Prisma.equity_eventsOmit
+  dividend_distributions?: Prisma.dividend_distributionsOmit
   billing_documents?: Prisma.billing_documentsOmit
   billing_lines?: Prisma.billing_linesOmit
   billing_payments?: Prisma.billing_paymentsOmit

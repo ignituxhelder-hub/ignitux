@@ -32,10 +32,26 @@ const ENGINE_ROUTES = {
   'GET /projects/p1/tasks': { status: 200, body: [] },
   'GET /memory': { status: 200, body: [] },
   'GET /memory/summary': { status: 200, body: { summary: '' } },
-  'GET /knowledge/graph': { status: 200, body: { nodes: [], edges: [] } },
+  'GET /knowledge/graph': { status: 200, body: { nodes: [], edges: [], isolated: [] } },
+  'GET /memory/tags': { status: 200, body: [] },
   'GET /projects/p1/collaborators': { status: 200, body: [] },
   'GET /projects/p1/compliance': { status: 200, body: { disclaimer: 'Info générale.', requirements: [] } },
   'GET /projects/p1/automation/runs': { status: 200, body: [] },
+  'GET /projects/p1/workflows': { status: 200, body: [] },
+  'GET /workflows/templates': { status: 200, body: [] },
+  'GET /projects/p1/financing/rounds': { status: 200, body: { rounds: [], totalCents: 0 } },
+  'GET /projects/p1/financing/cap-table': {
+    status: 200,
+    body: {
+      notice: 'Périmètre.',
+      holders: [],
+      totalBasisPoints: 0,
+      discrepancyBasisPoints: 10000,
+      founderHasMajority: null,
+      founderTrajectory: [],
+    },
+  },
+  'GET /projects/p1/financing/dividends': { status: 200, body: { dividends: [], totalCents: 0 } },
 };
 
 describe('ProjectDetailPage', () => {

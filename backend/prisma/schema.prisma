@@ -75,6 +75,10 @@ model projects {
   workflow_runs        workflow_runs[]
   crm_contacts         crm_contacts[]
   billing_documents    billing_documents[]
+  financing_rounds     financing_rounds[]
+  equity_holders       equity_holders[]
+  equity_events        equity_events[]
+  dividends            dividend_distributions[]
 
   @@index([owner_id])
   @@index([is_public])
@@ -361,6 +365,88 @@ model automation_runs {
   created_at                   DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
+}
+
+/// FINANCEMENT — un apport de fonds sur un projet, d'où qu'il vienne.
+/// Enregistré quand il a réellement eu lieu, jamais prévu : une promesse
+/// de financement n'est pas un financement.
+model financing_rounds {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id  String    @db.Uuid
+  project     projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  /// 'ignitux' | 'porteur' | 'pret' | 'subvention' | 'autre'
+  source      String
+  amount_cents Int
+  occurred_at DateTime  @db.Timestamptz(6)
+  note        String?
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([project_id])
+}
+
+/// FINANCEMENT — un détenteur de parts sur un projet.
+/// `is_founder` distingue le porteur du projet des autres détenteurs :
+/// le modèle Ignitux pose que l'entrepreneur reste propriétaire
+/// principal, et cette qualité doit être lisible en base, pas déduite
+/// d'un pourcentage à un instant donné.
+model equity_holders {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id String    @db.Uuid
+  project    projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  name       String
+  is_founder Boolean   @default(false)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  equity_events equity_events[]
+  dividends     dividend_distributions[]
+
+  @@index([project_id])
+}
+
+/// FINANCEMENT — un changement de répartition des parts, daté et motivé.
+///
+/// La table stocke des ÉVÉNEMENTS, pas un état courant. La répartition
+/// actuelle se lit comme le dernier événement de chaque détenteur. Ce
+/// choix coûte une requête de plus, et il évite exactement ce que le
+/// modèle Ignitux promet de rendre visible : l'évolution progressive vers
+/// l'autonomie du porteur. Un simple champ « part actuelle » écraserait
+/// cette histoire à chaque modification.
+///
+/// `share_basis_points` est la part APRÈS l'événement, en points de base
+/// (10000 = 100 %), pour représenter 12,5 % sans flottant.
+model equity_events {
+  id                 String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id         String         @db.Uuid
+  project            projects       @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  holder_id          String         @db.Uuid
+  holder             equity_holders @relation(fields: [holder_id], references: [id], onDelete: Cascade)
+  share_basis_points Int
+  /// Pourquoi la part change : « rachat par le porteur », « entrée au
+  /// capital »… Saisi par l'humain, jamais déduit.
+  reason             String
+  occurred_at        DateTime       @db.Timestamptz(6)
+  created_at         DateTime?      @default(now()) @db.Timestamptz(6)
+
+  @@index([project_id])
+  @@index([holder_id])
+}
+
+/// FINANCEMENT — un dividende réellement versé.
+/// Il n'existe aucune table de dividende « prévu » : un dividende se
+/// constate, il ne se prédit pas (voir financing-legal.ts).
+model dividend_distributions {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id   String         @db.Uuid
+  project      projects       @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  holder_id    String         @db.Uuid
+  holder       equity_holders @relation(fields: [holder_id], references: [id], onDelete: Cascade)
+  amount_cents Int
+  occurred_at  DateTime       @db.Timestamptz(6)
+  note         String?
+  created_at   DateTime?      @default(now()) @db.Timestamptz(6)
+
+  @@index([project_id])
+  @@index([holder_id])
 }
 
 /// FACTURATION — un document commercial : devis, facture ou avoir.
