@@ -39,7 +39,11 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # dotenv environment variable files
+# Tout fichier .env* est ignore, sauf le modele versionne : un .env.production
+# oublie ici partirait sur GitHub avec la chaine de connexion de production.
 .env
+.env.*
+!.env.example
 .env.development.local
 .env.test.local
 .env.production.local

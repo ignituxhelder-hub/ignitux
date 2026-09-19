@@ -524,3 +524,65 @@ a pas de filet. Le diff de `buyback_objectives` était purement additif (CREATE 
 une clé étrangère), donc sans risque ; c'est parce qu'on l'a lu qu'on le sait. Un diff contenant
 un DROP ou un ALTER sur une table existante doit arrêter l'opération.
 **Où** — `PROGRESS.md` §14.4.
+
+## Séparer la base de développement de celle des vraies personnes
+
+**Quoi** — deux bases distinctes sur l'instance Postgres : `postgres` reste le développement,
+`ignitux_prod` reçoit les sessions avec de vraies personnes. Deux fichiers d'environnement,
+`.env` et `.env.production`, avec des `JWT_SECRET` différents.
+
+**Pourquoi** — jusqu'ici une seule base servait au développement, aux tests automatisés lancés
+contre la vraie base, et aux sessions avec des personnes réelles. Aucun filet : une migration
+malheureuse, un script de nettoyage trop large ou un test qui oublie de supprimer son compte
+touchaient les données de tout le monde. Le compte `testeur1` et son projet cohabitaient avec les
+comptes jetables de mes propres vérifications.
+
+Les secrets JWT sont volontairement différents : un jeton signé en développement ne doit pas
+ouvrir une session sur la base des vraies personnes.
+
+**Ce que cette séparation apporte, et ce qu'elle n'apporte pas** — il faut être précis, parce
+qu'une fausse impression de sécurité est pire que pas de séparation du tout.
+
+- Elle garantit : aucune ligne de développement ne peut apparaître côté production, et
+  inversement. Les catalogues Postgres sont distincts, vérifié par comptage : 36 tables, 0 ligne
+  de personne à la création.
+- Elle ne garantit pas : l'isolation d'infrastructure. Même instance, mêmes identifiants, même
+  projet Supabase. Une panne de l'instance, une saturation disque ou une suppression du projet
+  emporte les deux. **Une vraie séparation demande un second projet Supabase**, ce qui relève de
+  ton compte et de ta facturation — je n'avais ni CLI ni jeton de gestion, et de toute façon
+  créer une ressource sur ton compte n'est pas une décision technique.
+
+**Procédure de bascule**
+
+Le serveur lit `.env` par défaut. Pour viser la production, on passe les variables explicitement
+sur la ligne de commande — elles ont priorité sur dotenv, qui n'écrase jamais une variable déjà
+posée :
+
+    # Développement (comportement par défaut, rien à faire)
+    npm run start:dev
+
+    # Production : charger .env.production plutôt que .env
+    node --env-file=.env.production dist/main.js
+
+Pour une opération Prisma ciblant la production, même principe :
+
+    DATABASE_URL="<url de .env.production>" npx prisma db push
+
+**Vérifier qu'on vise la bonne base avant d'écrire** : Prisma affiche la base visée à chaque
+commande (`Datasource "db": PostgreSQL database "ignitux_prod"`). Cette ligne se lit avant de
+valider, au même titre que le SQL du diff.
+
+**Où** — `backend/.env.example` (le modèle explique les deux fichiers), `backend/.gitignore`
+(durci : `.env.*` est ignoré, seul `.env.example` reste versionné), `PROGRESS.md` §15.1.
+
+## Le `.gitignore` ne couvrait pas `.env.production`
+
+**Quoi** — `.gitignore` listait `.env`, `.env.local` et trois variantes `*.local`, mais pas
+`.env.production`. Il couvre désormais `.env.*` avec une exception explicite pour `.env.example`.
+
+**Pourquoi** — le motif `.env` ne correspond qu'au fichier exactement nommé `.env`. Un fichier
+`.env.production` créé au moment de séparer les bases serait donc parti sur GitHub à la première
+commande `git add -A`, avec la chaîne de connexion et le mot de passe de la base des vraies
+personnes. Le trou n'existait que parce que personne n'avait encore eu besoin de ce fichier :
+c'est en le créant qu'il devenait exploitable, et c'est à ce moment-là qu'il fallait le boucher.
+**Où** — `backend/.gitignore`.
