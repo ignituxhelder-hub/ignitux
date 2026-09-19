@@ -151,6 +151,29 @@ export type marketplace_contacts = Prisma.marketplace_contactsModel
  */
 export type automation_runs = Prisma.automation_runsModel
 /**
+ * Model crm_companies
+ * CRM — une entreprise avec laquelle le porteur est en relation.
+ * Séparée des contacts parce qu'une même entreprise a plusieurs
+ * interlocuteurs, et que perdre l'un ne doit pas perdre l'autre.
+ */
+export type crm_companies = Prisma.crm_companiesModel
+/**
+ * Model crm_contacts
+ * CRM — une personne. `kind` dit ce qu'elle est pour le porteur
+ * (prospect, client…), `stage` où elle en est dans le pipeline
+ * commercial. Les deux sont distincts : un client existant peut être en
+ * cours de négociation sur une nouvelle offre.
+ */
+export type crm_contacts = Prisma.crm_contactsModel
+/**
+ * Model crm_interactions
+ * CRM — historique des échanges avec un contact.
+ * `occurred_at` est distinct de `created_at` : on saisit souvent un appel
+ * après coup, et dater l'échange du jour de la saisie fausserait
+ * l'historique.
+ */
+export type crm_interactions = Prisma.crm_interactionsModel
+/**
  * Model workflow_definitions
  * WORKFLOW — définition d'un processus réutilisable pour un projet.
  * Une définition décrit ce qui DOIT arriver, dans quel ordre ; une

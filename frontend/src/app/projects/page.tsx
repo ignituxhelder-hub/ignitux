@@ -72,6 +72,7 @@ export default function ProjectsPage() {
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <Link href="/community">Communauté</Link>
           <Link href="/marketplace">Mentors &amp; investisseurs</Link>
+          <Link href="/crm">Relations</Link>
           <Link href="/constitution">Constitution</Link>
           <Link href="/account">Mon compte</Link>
           <button

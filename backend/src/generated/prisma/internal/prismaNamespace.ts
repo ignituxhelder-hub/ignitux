@@ -416,6 +416,9 @@ export const ModelName = {
   marketplace_profiles: 'marketplace_profiles',
   marketplace_contacts: 'marketplace_contacts',
   automation_runs: 'automation_runs',
+  crm_companies: 'crm_companies',
+  crm_contacts: 'crm_contacts',
+  crm_interactions: 'crm_interactions',
   workflow_definitions: 'workflow_definitions',
   workflow_steps: 'workflow_steps',
   workflow_runs: 'workflow_runs',
@@ -437,7 +440,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "crm_companies" | "crm_contacts" | "crm_interactions" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1847,6 +1850,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    crm_companies: {
+      payload: Prisma.$crm_companiesPayload<ExtArgs>
+      fields: Prisma.crm_companiesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.crm_companiesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_companiesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.crm_companiesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_companiesPayload>
+        }
+        findFirst: {
+          args: Prisma.crm_companiesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_companiesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.crm_companiesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_companiesPayload>
+        }
+        findMany: {
+          args: Prisma.crm_companiesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_companiesPayload>[]
+        }
+        create: {
+          args: Prisma.crm_companiesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_companiesPayload>
+        }
+        createMany: {
+          args: Prisma.crm_companiesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.crm_companiesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_companiesPayload>[]
+        }
+        delete: {
+          args: Prisma.crm_companiesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_companiesPayload>
+        }
+        update: {
+          args: Prisma.crm_companiesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_companiesPayload>
+        }
+        deleteMany: {
+          args: Prisma.crm_companiesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.crm_companiesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.crm_companiesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_companiesPayload>[]
+        }
+        upsert: {
+          args: Prisma.crm_companiesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_companiesPayload>
+        }
+        aggregate: {
+          args: Prisma.Crm_companiesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCrm_companies>
+        }
+        groupBy: {
+          args: Prisma.crm_companiesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Crm_companiesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.crm_companiesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Crm_companiesCountAggregateOutputType> | number
+        }
+      }
+    }
+    crm_contacts: {
+      payload: Prisma.$crm_contactsPayload<ExtArgs>
+      fields: Prisma.crm_contactsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.crm_contactsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_contactsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.crm_contactsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_contactsPayload>
+        }
+        findFirst: {
+          args: Prisma.crm_contactsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_contactsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.crm_contactsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_contactsPayload>
+        }
+        findMany: {
+          args: Prisma.crm_contactsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_contactsPayload>[]
+        }
+        create: {
+          args: Prisma.crm_contactsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_contactsPayload>
+        }
+        createMany: {
+          args: Prisma.crm_contactsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.crm_contactsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_contactsPayload>[]
+        }
+        delete: {
+          args: Prisma.crm_contactsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_contactsPayload>
+        }
+        update: {
+          args: Prisma.crm_contactsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_contactsPayload>
+        }
+        deleteMany: {
+          args: Prisma.crm_contactsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.crm_contactsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.crm_contactsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_contactsPayload>[]
+        }
+        upsert: {
+          args: Prisma.crm_contactsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_contactsPayload>
+        }
+        aggregate: {
+          args: Prisma.Crm_contactsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCrm_contacts>
+        }
+        groupBy: {
+          args: Prisma.crm_contactsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Crm_contactsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.crm_contactsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Crm_contactsCountAggregateOutputType> | number
+        }
+      }
+    }
+    crm_interactions: {
+      payload: Prisma.$crm_interactionsPayload<ExtArgs>
+      fields: Prisma.crm_interactionsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.crm_interactionsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_interactionsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.crm_interactionsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_interactionsPayload>
+        }
+        findFirst: {
+          args: Prisma.crm_interactionsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_interactionsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.crm_interactionsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_interactionsPayload>
+        }
+        findMany: {
+          args: Prisma.crm_interactionsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_interactionsPayload>[]
+        }
+        create: {
+          args: Prisma.crm_interactionsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_interactionsPayload>
+        }
+        createMany: {
+          args: Prisma.crm_interactionsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.crm_interactionsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_interactionsPayload>[]
+        }
+        delete: {
+          args: Prisma.crm_interactionsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_interactionsPayload>
+        }
+        update: {
+          args: Prisma.crm_interactionsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_interactionsPayload>
+        }
+        deleteMany: {
+          args: Prisma.crm_interactionsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.crm_interactionsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.crm_interactionsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_interactionsPayload>[]
+        }
+        upsert: {
+          args: Prisma.crm_interactionsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$crm_interactionsPayload>
+        }
+        aggregate: {
+          args: Prisma.Crm_interactionsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCrm_interactions>
+        }
+        groupBy: {
+          args: Prisma.crm_interactionsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Crm_interactionsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.crm_interactionsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Crm_interactionsCountAggregateOutputType> | number
+        }
+      }
+    }
     workflow_definitions: {
       payload: Prisma.$workflow_definitionsPayload<ExtArgs>
       fields: Prisma.workflow_definitionsFieldRefs
@@ -2578,6 +2803,52 @@ export const Automation_runsScalarFieldEnum = {
 export type Automation_runsScalarFieldEnum = (typeof Automation_runsScalarFieldEnum)[keyof typeof Automation_runsScalarFieldEnum]
 
 
+export const Crm_companiesScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  name: 'name',
+  sector: 'sector',
+  website: 'website',
+  notes: 'notes',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Crm_companiesScalarFieldEnum = (typeof Crm_companiesScalarFieldEnum)[keyof typeof Crm_companiesScalarFieldEnum]
+
+
+export const Crm_contactsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  company_id: 'company_id',
+  project_id: 'project_id',
+  first_name: 'first_name',
+  last_name: 'last_name',
+  email: 'email',
+  phone: 'phone',
+  role: 'role',
+  kind: 'kind',
+  stage: 'stage',
+  notes: 'notes',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Crm_contactsScalarFieldEnum = (typeof Crm_contactsScalarFieldEnum)[keyof typeof Crm_contactsScalarFieldEnum]
+
+
+export const Crm_interactionsScalarFieldEnum = {
+  id: 'id',
+  contact_id: 'contact_id',
+  channel: 'channel',
+  summary: 'summary',
+  occurred_at: 'occurred_at',
+  created_at: 'created_at'
+} as const
+
+export type Crm_interactionsScalarFieldEnum = (typeof Crm_interactionsScalarFieldEnum)[keyof typeof Crm_interactionsScalarFieldEnum]
+
+
 export const Workflow_definitionsScalarFieldEnum = {
   id: 'id',
   project_id: 'project_id',
@@ -2923,6 +3194,9 @@ export type GlobalOmitConfig = {
   marketplace_profiles?: Prisma.marketplace_profilesOmit
   marketplace_contacts?: Prisma.marketplace_contactsOmit
   automation_runs?: Prisma.automation_runsOmit
+  crm_companies?: Prisma.crm_companiesOmit
+  crm_contacts?: Prisma.crm_contactsOmit
+  crm_interactions?: Prisma.crm_interactionsOmit
   workflow_definitions?: Prisma.workflow_definitionsOmit
   workflow_steps?: Prisma.workflow_stepsOmit
   workflow_runs?: Prisma.workflow_runsOmit

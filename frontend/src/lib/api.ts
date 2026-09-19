@@ -465,6 +465,52 @@ export interface AutomationRun {
   created_at: string;
 }
 
+export type CrmStage = 'nouveau' | 'contacte' | 'qualifie' | 'proposition' | 'gagne' | 'perdu';
+export type CrmKind = 'prospect' | 'client' | 'partenaire' | 'autre';
+export type CrmChannel = 'appel' | 'email' | 'rendez_vous' | 'note';
+
+export interface CrmCompany {
+  id: string;
+  owner_id: string;
+  name: string;
+  sector: string | null;
+  website: string | null;
+  notes: string | null;
+  contacts?: CrmContact[];
+}
+
+export interface CrmContact {
+  id: string;
+  owner_id: string;
+  company_id: string | null;
+  project_id: string | null;
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  role: string | null;
+  kind: CrmKind;
+  stage: CrmStage;
+  notes: string | null;
+  created_at: string;
+  company?: CrmCompany | null;
+  interactions?: CrmInteraction[];
+}
+
+export interface CrmInteraction {
+  id: string;
+  contact_id: string;
+  channel: CrmChannel;
+  summary: string;
+  occurred_at: string;
+  created_at: string;
+}
+
+export interface CrmPipeline {
+  total: number;
+  stages: Array<{ stage: CrmStage; label: string; count: number }>;
+}
+
 export type WorkflowConditionType = 'always' | 'stage_exists' | 'tasks_done' | 'manual';
 export type WorkflowActionType = 'none' | 'create_task';
 
@@ -864,6 +910,77 @@ export const api = {
     request<void>(`/knowledge/links/${linkId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  createCrmContact: (
+    token: string,
+    contact: {
+      firstName: string;
+      lastName: string;
+      email?: string;
+      phone?: string;
+      role?: string;
+      kind?: CrmKind;
+      stage?: CrmStage;
+      companyId?: string;
+      projectId?: string;
+    },
+  ) =>
+    request<CrmContact>('/crm/contacts', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(contact),
+    }),
+
+  listCrmContacts: (
+    token: string,
+    filters: { query?: string; stage?: CrmStage; kind?: CrmKind; projectId?: string } = {},
+  ) => {
+    const params = new URLSearchParams();
+    if (filters.query) params.set('q', filters.query);
+    if (filters.stage) params.set('stage', filters.stage);
+    if (filters.kind) params.set('kind', filters.kind);
+    if (filters.projectId) params.set('projectId', filters.projectId);
+    const suffix = params.toString();
+    return request<CrmContact[]>(`/crm/contacts${suffix ? `?${suffix}` : ''}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+
+  getCrmContact: (token: string, id: string) =>
+    request<CrmContact>(`/crm/contacts/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  updateCrmContact: (token: string, id: string, data: { stage?: CrmStage; kind?: CrmKind }) =>
+    request<CrmContact>(`/crm/contacts/${id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
+    }),
+
+  deleteCrmContact: (token: string, id: string) =>
+    request<void>(`/crm/contacts/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getCrmPipeline: (token: string, projectId?: string) =>
+    request<CrmPipeline>(`/crm/pipeline${projectId ? `?projectId=${projectId}` : ''}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  logCrmInteraction: (
+    token: string,
+    contactId: string,
+    channel: CrmChannel,
+    summary: string,
+    occurredAt?: string,
+  ) =>
+    request<CrmInteraction>(`/crm/contacts/${contactId}/interactions`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ channel, summary, occurredAt }),
     }),
 
   listWorkflowTemplates: (token: string) =>

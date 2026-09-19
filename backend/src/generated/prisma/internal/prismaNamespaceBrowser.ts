@@ -70,6 +70,9 @@ export const ModelName = {
   marketplace_profiles: 'marketplace_profiles',
   marketplace_contacts: 'marketplace_contacts',
   automation_runs: 'automation_runs',
+  crm_companies: 'crm_companies',
+  crm_contacts: 'crm_contacts',
+  crm_interactions: 'crm_interactions',
   workflow_definitions: 'workflow_definitions',
   workflow_steps: 'workflow_steps',
   workflow_runs: 'workflow_runs',
@@ -340,6 +343,52 @@ export const Automation_runsScalarFieldEnum = {
 } as const
 
 export type Automation_runsScalarFieldEnum = (typeof Automation_runsScalarFieldEnum)[keyof typeof Automation_runsScalarFieldEnum]
+
+
+export const Crm_companiesScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  name: 'name',
+  sector: 'sector',
+  website: 'website',
+  notes: 'notes',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Crm_companiesScalarFieldEnum = (typeof Crm_companiesScalarFieldEnum)[keyof typeof Crm_companiesScalarFieldEnum]
+
+
+export const Crm_contactsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  company_id: 'company_id',
+  project_id: 'project_id',
+  first_name: 'first_name',
+  last_name: 'last_name',
+  email: 'email',
+  phone: 'phone',
+  role: 'role',
+  kind: 'kind',
+  stage: 'stage',
+  notes: 'notes',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Crm_contactsScalarFieldEnum = (typeof Crm_contactsScalarFieldEnum)[keyof typeof Crm_contactsScalarFieldEnum]
+
+
+export const Crm_interactionsScalarFieldEnum = {
+  id: 'id',
+  contact_id: 'contact_id',
+  channel: 'channel',
+  summary: 'summary',
+  occurred_at: 'occurred_at',
+  created_at: 'created_at'
+} as const
+
+export type Crm_interactionsScalarFieldEnum = (typeof Crm_interactionsScalarFieldEnum)[keyof typeof Crm_interactionsScalarFieldEnum]
 
 
 export const Workflow_definitionsScalarFieldEnum = {

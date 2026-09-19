@@ -23,6 +23,8 @@ model users {
   auth_tokens   auth_tokens[]
   marketplace_profile   marketplace_profiles?
   marketplace_contacts_sent marketplace_contacts[]
+  crm_companies crm_companies[]
+  crm_contacts  crm_contacts[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -70,6 +72,7 @@ model projects {
   automation_runs    automation_runs[]
   workflow_definitions workflow_definitions[]
   workflow_runs        workflow_runs[]
+  crm_contacts         crm_contacts[]
 
   @@index([owner_id])
   @@index([is_public])
@@ -356,6 +359,77 @@ model automation_runs {
   created_at                   DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
+}
+
+/// CRM — une entreprise avec laquelle le porteur est en relation.
+/// Séparée des contacts parce qu'une même entreprise a plusieurs
+/// interlocuteurs, et que perdre l'un ne doit pas perdre l'autre.
+model crm_companies {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_id   String    @db.Uuid
+  owner      users     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  name       String
+  sector     String?
+  website    String?
+  notes      String?
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @updatedAt @db.Timestamptz(6)
+
+  contacts crm_contacts[]
+
+  @@index([owner_id])
+}
+
+/// CRM — une personne. `kind` dit ce qu'elle est pour le porteur
+/// (prospect, client…), `stage` où elle en est dans le pipeline
+/// commercial. Les deux sont distincts : un client existant peut être en
+/// cours de négociation sur une nouvelle offre.
+model crm_contacts {
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_id    String         @db.Uuid
+  owner       users          @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  company_id  String?        @db.Uuid
+  company     crm_companies? @relation(fields: [company_id], references: [id], onDelete: SetNull)
+  // Rattachement facultatif à un projet : un contact peut concerner
+  // l'activité en général et pas un projet précis.
+  project_id  String?        @db.Uuid
+  project     projects?      @relation(fields: [project_id], references: [id], onDelete: SetNull)
+  first_name  String
+  last_name   String
+  email       String?
+  phone       String?
+  role        String?
+  // 'prospect' | 'client' | 'partenaire' | 'autre'
+  kind        String         @default("prospect")
+  // 'nouveau' | 'contacte' | 'qualifie' | 'proposition' | 'gagne' | 'perdu'
+  stage       String         @default("nouveau")
+  notes       String?
+  created_at  DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime?      @updatedAt @db.Timestamptz(6)
+
+  interactions crm_interactions[]
+
+  @@index([owner_id])
+  @@index([company_id])
+  @@index([project_id])
+  @@index([stage])
+}
+
+/// CRM — historique des échanges avec un contact.
+/// `occurred_at` est distinct de `created_at` : on saisit souvent un appel
+/// après coup, et dater l'échange du jour de la saisie fausserait
+/// l'historique.
+model crm_interactions {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  contact_id  String       @db.Uuid
+  contact     crm_contacts @relation(fields: [contact_id], references: [id], onDelete: Cascade)
+  // 'appel' | 'email' | 'rendez_vous' | 'note'
+  channel     String
+  summary     String
+  occurred_at DateTime     @db.Timestamptz(6)
+  created_at  DateTime?    @default(now()) @db.Timestamptz(6)
+
+  @@index([contact_id])
 }
 
 /// WORKFLOW — définition d'un processus réutilisable pour un projet.
