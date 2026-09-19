@@ -586,3 +586,58 @@ commande `git add -A`, avec la chaîne de connexion et le mot de passe de la bas
 personnes. Le trou n'existait que parce que personne n'avait encore eu besoin de ce fichier :
 c'est en le créant qu'il devenait exploitable, et c'est à ce moment-là qu'il fallait le boucher.
 **Où** — `backend/.gitignore`.
+
+## Une troisième base, pour que les tests ne détruisent rien
+
+**Quoi** — `ignitux_test`, distincte de `postgres` (développement) et d'`ignitux_prod` (vraies
+personnes). Les tests de bout en bout y créent des comptes, des projets, des contacts, puis les
+suppriment. `backend/test/setup-e2e.ts` **refuse de démarrer** si la base visée n'est pas
+`ignitux_test`.
+
+**Pourquoi le refus plutôt qu'un avertissement** — ces tests écrivent puis effacent. Lancés par
+accident sur la base de développement, ils détruiraient du travail réel ; sur celle des vraies
+personnes, ils y créeraient des comptes que personne n'a demandés. Les trois façons d'y arriver
+sont banales : `.env.test` absent, une variable qui traîne dans l'environnement, une ligne copiée
+depuis le mauvais fichier. Une suite de tests capable de détruire des données de production est
+un danger, pas un filet — celle-ci s'arrête net. Le refus a été vérifié en pointant volontairement
+`.env.test` sur la base de développement : la suite ne démarre pas et dit pourquoi.
+
+**Où** — `backend/test/setup-e2e.ts`, `backend/vitest.config.e2e.ts`, `backend/.env.test` (non
+versionné).
+
+## Les tests de bout en bout nettoient par la route du produit, pas en base
+
+**Quoi** — `deleteAccount` appelle `DELETE /users/me` plutôt que de supprimer des lignes
+directement.
+
+**Pourquoi** — un nettoyage qui court-circuite le produit masquerait ses fuites. Si la suppression
+de compte cesse un jour de tout emporter, les tests suivants trouveront des restes — et c'est
+exactement le signal qu'on veut recevoir. Vérifié après une exécution complète : toutes les tables
+de données de personnes reviennent à zéro, et la seule ligne restante est une violation
+constitutionnelle **anonymisée** (`user_id` nul), ce qui prouve l'anonymisation de bout en bout
+contre une vraie base.
+
+**Où** — `backend/test/e2e-app.ts`.
+
+## Un mot de passe différent par compte de test
+
+**Quoi** — `createAccount` génère un mot de passe unique au lieu d'une constante partagée.
+
+**Pourquoi** — trouvé en écrivant le test « on ne supprime pas un compte avec le mot de passe d'un
+autre » : il échouait, non pas parce que le code était faux, mais parce que les deux comptes
+avaient le même mot de passe. C'était donc le bon, et le test n'aurait rien vérifié une fois
+« corrigé ». Une fixture partagée peut rendre muet un test de sécurité tout en le laissant vert.
+
+**Où** — `backend/test/e2e-app.ts`.
+
+## Les tests de bout en bout ne tournent pas en intégration continue
+
+**Quoi** — la CI lance lint, types, tests unitaires et build. Pas `test:e2e`.
+
+**Pourquoi** — ces tests ont besoin d'une vraie base Postgres et de ses identifiants. Les mettre
+en CI demanderait de déposer la chaîne de connexion de l'instance Supabase dans les secrets
+GitHub, donc d'exposer un accès à la même instance que la production. Le jour où une base de test
+vivra ailleurs que sur cette instance, la question se reposera — d'ici là, ils se lancent à la
+main avec `npm run test:e2e` depuis `backend/`.
+
+**Où** — `.github/workflows/ci.yml`, `backend/package.json`.
