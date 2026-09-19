@@ -49,6 +49,12 @@ export class UsersController {
   @Get('me/export')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  // L'endpoint le plus coûteux du produit : il interroge une trentaine de
+  // tables pour reconstituer tout ce qu'une personne a déposé. La limite
+  // globale de 20 par minute autoriserait plusieurs centaines de requêtes
+  // en base depuis une seule adresse. Personne n'exporte légitimement ses
+  // données trois fois par minute.
+  @Throttle({ default: { ttl: 60_000, limit: 3 } })
   exportMyData(@CurrentUser() user: AuthenticatedUser) {
     return this.userDataService.exportUserData(user.id);
   }
@@ -61,6 +67,9 @@ export class UsersController {
   @Get('me/deletion-preview')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  // Treize comptages en base. Moins lourd que l'export, mais on ne
+  // consulte pas dix fois par minute ce qu'on va perdre.
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   previewDeletion(@CurrentUser() user: AuthenticatedUser) {
     return this.userDataService.previewDeletion(user.id);
   }
