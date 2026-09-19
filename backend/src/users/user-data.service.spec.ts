@@ -9,8 +9,8 @@ const GOOD_PASSWORD = 'bon-mot-de-passe';
 /**
  * Un vrai hash bcrypt, pas un espion : `vi.spyOn(bcrypt, 'compare')` est
  * impossible sur un module ESM, et vérifier la vraie comparaison vaut mieux
- * que vérifier qu'on a bien appelé un mock. Calculé une fois (bcrypt à 10
- * tours coûte ~100 ms) et réutilisé par tous les tests.
+ * que vérifier qu'on a bien appelé un mock. Calculé une seule fois et
+ * réutilisé par tous les tests.
  */
 let passwordHash: string;
 
@@ -67,7 +67,15 @@ describe('UserDataService', () => {
   let prisma: ReturnType<typeof buildPrismaMock>;
 
   beforeAll(async () => {
-    passwordHash = await bcrypt.hash(GOOD_PASSWORD, 10);
+    // Coût 4 et non 10 : le facteur de coût est embarqué dans le hash, donc
+    // une fixture moins coûteuse rend aussi ~18x plus rapide chaque
+    // bcrypt.compare qui la vise (71 ms → 4 ms, mesurés). Sous la charge de
+    // la suite complète, ces millisecondes faisaient dépasser le délai des
+    // hooks et rendaient deux fichiers intermittents. Ce qu'on teste ici,
+    // c'est notre logique de comparaison, pas le facteur de coût — celui du
+    // service (bcrypt.hash(password, 10) à l'inscription) reste inchangé, et
+    // c'est users.service.spec.ts qui le vérifie.
+    passwordHash = await bcrypt.hash(GOOD_PASSWORD, 4);
   });
 
   beforeEach(async () => {

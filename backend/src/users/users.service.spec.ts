@@ -75,7 +75,8 @@ describe('UsersService', () => {
 
   describe('changePassword', () => {
     it('rejette si le mot de passe actuel est incorrect', async () => {
-      const hash = await bcrypt.hash('bonmotdepasse', 10);
+      // Fixture à coût 4 : voir la note dans user-data.service.spec.ts.
+      const hash = await bcrypt.hash('bonmotdepasse', 4);
       prisma.users.findUniqueOrThrow.mockResolvedValue({ id: 'u1', password_hash: hash });
 
       await expect(service.changePassword('u1', 'mauvais', 'nouveaumotdepasse')).rejects.toBeInstanceOf(
@@ -85,7 +86,8 @@ describe('UsersService', () => {
     });
 
     it('met à jour le mot de passe si le mot de passe actuel est correct', async () => {
-      const hash = await bcrypt.hash('bonmotdepasse', 10);
+      // Fixture à coût 4 : voir la note dans user-data.service.spec.ts.
+      const hash = await bcrypt.hash('bonmotdepasse', 4);
       prisma.users.findUniqueOrThrow.mockResolvedValue({ id: 'u1', password_hash: hash });
       prisma.users.update.mockResolvedValue({});
 

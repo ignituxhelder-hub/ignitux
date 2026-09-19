@@ -22,6 +22,15 @@ describe('ConstitutionService', () => {
     financing_plans: { count: ReturnType<typeof vi.fn> };
     development_plans: { count: ReturnType<typeof vi.fn> };
     transmission_plans: { count: ReturnType<typeof vi.fn> };
+    workflow_events: { count: ReturnType<typeof vi.fn> };
+    memories: { count: ReturnType<typeof vi.fn> };
+    projects: { count: ReturnType<typeof vi.fn> };
+    compliance_requirements: {
+      count: ReturnType<typeof vi.fn>;
+      groupBy: ReturnType<typeof vi.fn>;
+    };
+    equity_events: { count: ReturnType<typeof vi.fn> };
+    buyback_objectives: { count: ReturnType<typeof vi.fn> };
   };
 
   beforeEach(async () => {
@@ -34,6 +43,12 @@ describe('ConstitutionService', () => {
       financing_plans: { count: vi.fn() },
       development_plans: { count: vi.fn() },
       transmission_plans: { count: vi.fn() },
+      workflow_events: { count: vi.fn() },
+      memories: { count: vi.fn() },
+      projects: { count: vi.fn() },
+      compliance_requirements: { count: vi.fn(), groupBy: vi.fn() },
+      equity_events: { count: vi.fn() },
+      buyback_objectives: { count: vi.fn() },
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -146,6 +161,13 @@ describe('ConstitutionService', () => {
       prisma.constitution_violations.groupBy.mockResolvedValue([]);
       prisma.automation_runs.count.mockResolvedValue(0);
       prisma.analyses.groupBy.mockResolvedValue([]);
+      prisma.workflow_events.count.mockResolvedValue(0);
+      prisma.memories.count.mockResolvedValue(0);
+      prisma.projects.count.mockResolvedValue(0);
+      prisma.compliance_requirements.count.mockResolvedValue(0);
+      prisma.compliance_requirements.groupBy.mockResolvedValue([]);
+      prisma.equity_events.count.mockResolvedValue(0);
+      prisma.buyback_objectives.count.mockResolvedValue(0);
       for (const table of [
         'analyses',
         'build_plans',
@@ -210,6 +232,67 @@ describe('ConstitutionService', () => {
       expect(
         audit.find((entry) => entry.slug === 'v1-01-la-verite')?.violationsLast30Days,
       ).toBe(0);
+    });
+
+    it('mesure la vie privée sur la proportion réelle de projets privés', async () => {
+      prisma.projects.count.mockImplementation((args?: { where?: unknown }) =>
+        Promise.resolve(args?.where ? 7 : 10),
+      );
+
+      const audit = await service.audit();
+      const article = audit.find((entry) => entry.slug === 'v1-13-respect-de-la-vie-privee');
+
+      expect(article?.measured).toContain('7/10');
+    });
+
+    it('mesure les règles locales sur celles qui citent leur source', async () => {
+      prisma.compliance_requirements.count.mockImplementation((args?: { where?: unknown }) =>
+        Promise.resolve(args?.where ? 11 : 12),
+      );
+      prisma.compliance_requirements.groupBy.mockResolvedValue([{ country: 'FR' }]);
+
+      const audit = await service.audit();
+      const article = audit.find(
+        (entry) => entry.slug === 'v1-15-one-brain-multiple-regulations',
+      );
+
+      expect(article?.measured).toContain('11/12');
+      expect(article?.measured).toContain('1 pays');
+    });
+
+    it("mesure l'article 24 sur la couverture réelle du corpus par des règles", async () => {
+      // Le seul article qui se mesure sur le corpus et non sur les données.
+      const audit = await service.audit();
+      const article = audit.find((entry) => entry.slug === 'v1-24-constitution-supreme');
+
+      expect(article?.measured).toMatch(/\d+\/\d+ articles déclarés appliqués/);
+    });
+
+    it("dit qu'il n'y a rien à mesurer plutôt que d'afficher un zéro trompeur", async () => {
+      // Avec une base vide, « 0/0 projets privés » se lirait comme un
+      // échec. La phrase doit dire qu'il n'y a pas de donnée, pas que le
+      // résultat est nul.
+      const audit = await service.audit();
+
+      expect(
+        audit.find((entry) => entry.slug === 'v1-13-respect-de-la-vie-privee')?.measured,
+      ).toBe('Aucun projet en base.');
+      expect(
+        audit.find((entry) => entry.slug === 'v1-12-memoire-responsable')?.measured,
+      ).toBe('Aucun souvenir enregistré.');
+    });
+
+    it('mesure le financement sur ce que les porteurs ont réellement enregistré', async () => {
+      prisma.equity_events.count.mockResolvedValue(4);
+      prisma.buyback_objectives.count.mockResolvedValue(3);
+
+      const audit = await service.audit();
+      const article = audit.find((entry) => entry.slug === 'v1-22-financement-ethique');
+
+      expect(article?.measured).toContain('4 changement(s)');
+      expect(article?.measured).toContain('3 condition(s)');
+      // Aucune valorisation, aucun prix : le code n'en calcule pas.
+      expect(article?.measured).not.toMatch(/€|valorisation|prix/);
     });
   });
 

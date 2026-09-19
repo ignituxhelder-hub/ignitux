@@ -175,18 +175,43 @@ export class ConstitutionService implements OnModuleInit {
   async audit(): Promise<ConstitutionAuditEntry[]> {
     const since = new Date(Date.now() - THIRTY_DAYS_MS);
 
-    const [articles, recentViolations, provenance, automationRuns, analysisProjects] =
-      await Promise.all([
-        this.listArticles(CONSTITUTION_VERSION),
-        this.prisma.constitution_violations.groupBy({
-          by: ['article_slug'],
-          where: { created_at: { gte: since } },
-          _count: { _all: true },
-        }),
-        this.countGeneratedWithoutModel(),
-        this.prisma.automation_runs.count(),
-        this.prisma.analyses.groupBy({ by: ['project_id'], _count: { _all: true } }),
-      ]);
+    const [
+      articles,
+      recentViolations,
+      provenance,
+      automationRuns,
+      analysisProjects,
+      workflowEvents,
+      memories,
+      projects,
+      privateProjects,
+      requirements,
+      sourcedRequirements,
+      coveredCountries,
+      equityEvents,
+      buybackObjectives,
+    ] = await Promise.all([
+      this.listArticles(CONSTITUTION_VERSION),
+      this.prisma.constitution_violations.groupBy({
+        by: ['article_slug'],
+        where: { created_at: { gte: since } },
+        _count: { _all: true },
+      }),
+      this.countGeneratedWithoutModel(),
+      this.prisma.automation_runs.count(),
+      this.prisma.analyses.groupBy({ by: ['project_id'], _count: { _all: true } }),
+      this.prisma.workflow_events.count(),
+      this.prisma.memories.count(),
+      this.prisma.projects.count(),
+      this.prisma.projects.count({ where: { is_public: false } }),
+      this.prisma.compliance_requirements.count(),
+      // `source_url` est requis par le schema : ce comptage verifie qu'aucune
+      // ligne n'a ete semee avec une chaine vide, ce que le type autorise.
+      this.prisma.compliance_requirements.count({ where: { NOT: { source_url: '' } } }),
+      this.prisma.compliance_requirements.groupBy({ by: ['country'] }),
+      this.prisma.equity_events.count(),
+      this.prisma.buyback_objectives.count(),
+    ]);
 
     const violationsBySlug = new Map(
       recentViolations.map((row) => [row.article_slug, row._count._all]),
@@ -206,6 +231,15 @@ export class ConstitutionService implements OnModuleInit {
         automationRuns,
         projectsWithHistory,
         analysedProjects: analysisProjects.length,
+        workflowEvents,
+        memories,
+        projects,
+        privateProjects,
+        requirements,
+        sourcedRequirements,
+        countries: coveredCountries.length,
+        equityEvents,
+        buybackObjectives,
       }),
       violationsLast30Days: violationsBySlug.get(article.slug) ?? 0,
     }));
@@ -218,6 +252,15 @@ export class ConstitutionService implements OnModuleInit {
       automationRuns: number;
       projectsWithHistory: number;
       analysedProjects: number;
+      workflowEvents: number;
+      memories: number;
+      projects: number;
+      privateProjects: number;
+      requirements: number;
+      sourcedRequirements: number;
+      countries: number;
+      equityEvents: number;
+      buybackObjectives: number;
     },
   ): string | null {
     switch (slug) {
@@ -231,6 +274,44 @@ export class ConstitutionService implements OnModuleInit {
       case 'v1-03-protection-de-l-etincelle':
         if (facts.analysedProjects === 0) return 'Aucun projet analysé.';
         return `${facts.projectsWithHistory}/${facts.analysedProjects} projets conservent plusieurs analyses successives (aucune analyse n'est jamais écrasée).`;
+      case 'v1-11-transparence': {
+        // L'article demande que les décisions d'IGINI soient explicables.
+        // Chaque événement de processus porte son motif — la colonne est
+        // requise, et le moteur refuse une transition sans raison énoncée.
+        if (facts.workflowEvents === 0) return 'Aucune transition de processus enregistrée.';
+        return `${facts.workflowEvents} transition(s) de processus enregistrée(s), chacune avec son motif.`;
+      }
+      case 'v1-12-memoire-responsable': {
+        if (facts.memories === 0) return 'Aucun souvenir enregistré.';
+        return `${facts.memories} souvenir(s), tous rattachés à leur auteur — un souvenir sans auteur est refusé à l'écriture.`;
+      }
+      case 'v1-13-respect-de-la-vie-privee': {
+        if (facts.projects === 0) return 'Aucun projet en base.';
+        return `${facts.privateProjects}/${facts.projects} projets sont privés. Un projet naît privé ; seul son porteur peut le rendre public.`;
+      }
+      case 'v1-15-one-brain-multiple-regulations': {
+        if (facts.requirements === 0) return 'Aucune démarche réglementaire en base.';
+        return `${facts.sourcedRequirements}/${facts.requirements} démarches citent leur source officielle, pour ${facts.countries} pays couvert(s).`;
+      }
+      case 'v1-22-financement-ethique': {
+        // Ce qu'on peut constater : ce que les porteurs ont enregistré.
+        // Ni valorisation, ni prix de rachat — le code n'en calcule aucun.
+        if (facts.equityEvents === 0 && facts.buybackObjectives === 0) {
+          return 'Aucune répartition de parts ni condition de rachat enregistrée.';
+        }
+        return `${facts.equityEvents} changement(s) de répartition enregistré(s) et ${facts.buybackObjectives} condition(s) de rachat définie(s) par les porteurs eux-mêmes.`;
+      }
+      case 'v1-24-constitution-supreme': {
+        // Le seul article qui se mesure sur le corpus et non sur les
+        // données : combien d'articles déclarés appliqués sont réellement
+        // couverts par une règle exécutable.
+        const enforced = CONSTITUTION_ARTICLES.filter(
+          (article) => article.enforcement === 'enforced',
+        );
+        const covered = new Set(CONSTITUTION_RULES.map((rule) => rule.articleSlug));
+        const withRule = enforced.filter((article) => covered.has(article.slug)).length;
+        return `${withRule}/${enforced.length} articles déclarés appliqués sont couverts par au moins une règle exécutable (l'article 24 se vérifie par un test du corpus).`;
+      }
       default:
         // Pas de mesure inventée pour les articles qu'aucune donnée
         // n'éclaire : `null` se lit « non mesurable », ce qui est exact.
