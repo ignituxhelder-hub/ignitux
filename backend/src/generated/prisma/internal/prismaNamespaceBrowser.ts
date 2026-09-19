@@ -70,6 +70,10 @@ export const ModelName = {
   marketplace_profiles: 'marketplace_profiles',
   marketplace_contacts: 'marketplace_contacts',
   automation_runs: 'automation_runs',
+  workflow_definitions: 'workflow_definitions',
+  workflow_steps: 'workflow_steps',
+  workflow_runs: 'workflow_runs',
+  workflow_events: 'workflow_events',
   constitution_articles: 'constitution_articles',
   constitution_violations: 'constitution_violations'
 } as const
@@ -336,6 +340,59 @@ export const Automation_runsScalarFieldEnum = {
 } as const
 
 export type Automation_runsScalarFieldEnum = (typeof Automation_runsScalarFieldEnum)[keyof typeof Automation_runsScalarFieldEnum]
+
+
+export const Workflow_definitionsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  name: 'name',
+  description: 'description',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Workflow_definitionsScalarFieldEnum = (typeof Workflow_definitionsScalarFieldEnum)[keyof typeof Workflow_definitionsScalarFieldEnum]
+
+
+export const Workflow_stepsScalarFieldEnum = {
+  id: 'id',
+  workflow_id: 'workflow_id',
+  position: 'position',
+  title: 'title',
+  description: 'description',
+  condition_type: 'condition_type',
+  condition_value: 'condition_value',
+  action_type: 'action_type',
+  action_value: 'action_value',
+  created_at: 'created_at'
+} as const
+
+export type Workflow_stepsScalarFieldEnum = (typeof Workflow_stepsScalarFieldEnum)[keyof typeof Workflow_stepsScalarFieldEnum]
+
+
+export const Workflow_runsScalarFieldEnum = {
+  id: 'id',
+  workflow_id: 'workflow_id',
+  project_id: 'project_id',
+  status: 'status',
+  current_position: 'current_position',
+  started_at: 'started_at',
+  completed_at: 'completed_at'
+} as const
+
+export type Workflow_runsScalarFieldEnum = (typeof Workflow_runsScalarFieldEnum)[keyof typeof Workflow_runsScalarFieldEnum]
+
+
+export const Workflow_eventsScalarFieldEnum = {
+  id: 'id',
+  run_id: 'run_id',
+  step_position: 'step_position',
+  type: 'type',
+  detail: 'detail',
+  created_at: 'created_at'
+} as const
+
+export type Workflow_eventsScalarFieldEnum = (typeof Workflow_eventsScalarFieldEnum)[keyof typeof Workflow_eventsScalarFieldEnum]
 
 
 export const Constitution_articlesScalarFieldEnum = {

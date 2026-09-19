@@ -127,6 +127,38 @@ export type marketplace_contacts = Prisma.marketplace_contactsModel
  */
 export type automation_runs = Prisma.automation_runsModel
 /**
+ * Model workflow_definitions
+ * WORKFLOW — définition d'un processus réutilisable pour un projet.
+ * Une définition décrit ce qui DOIT arriver, dans quel ordre ; une
+ * exécution (workflow_runs) décrit ce qui EST arrivé. Les deux sont
+ * séparés pour qu'éditer un processus ne réécrive jamais l'histoire des
+ * exécutions passées.
+ */
+export type workflow_definitions = Prisma.workflow_definitionsModel
+/**
+ * Model workflow_steps
+ * WORKFLOW — une étape d'un processus.
+ * `condition_*` décrit ce qui doit être vrai pour franchir l'étape ;
+ * `action_*` ce que le moteur fait en y entrant. Les deux sont des
+ * couples (type, valeur) volontairement pauvres : un mini-langage
+ * d'expressions serait plus expressif et beaucoup moins vérifiable, or
+ * une transition qu'on ne sait pas expliquer à l'utilisateur ne devrait
+ * pas exister (voir backend/src/igini/workflow/workflow-conditions.ts).
+ */
+export type workflow_steps = Prisma.workflow_stepsModel
+/**
+ * Model workflow_runs
+ * WORKFLOW — une exécution d'un processus sur un projet.
+ */
+export type workflow_runs = Prisma.workflow_runsModel
+/**
+ * Model workflow_events
+ * WORKFLOW — journal d'une exécution. Comme automation_runs : le moteur
+ * avance parfois sans confirmation, la transparence après coup est la
+ * contrepartie (article 5).
+ */
+export type workflow_events = Prisma.workflow_eventsModel
+/**
  * Model constitution_articles
  * CONSTITUTION — texte de référence (pas par utilisateur), semé au
  * démarrage comme compliance_requirements. Chaque article porte le principe

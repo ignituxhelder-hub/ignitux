@@ -68,6 +68,8 @@ model projects {
   collaborators      project_collaborators[]
   compliance_checks  project_compliance_checks[]
   automation_runs    automation_runs[]
+  workflow_definitions workflow_definitions[]
+  workflow_runs        workflow_runs[]
 
   @@index([owner_id])
   @@index([is_public])
@@ -354,6 +356,89 @@ model automation_runs {
   created_at                   DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
+}
+
+/// WORKFLOW — définition d'un processus réutilisable pour un projet.
+/// Une définition décrit ce qui DOIT arriver, dans quel ordre ; une
+/// exécution (workflow_runs) décrit ce qui EST arrivé. Les deux sont
+/// séparés pour qu'éditer un processus ne réécrive jamais l'histoire des
+/// exécutions passées.
+model workflow_definitions {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id  String    @db.Uuid
+  project     projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime? @updatedAt @db.Timestamptz(6)
+
+  steps workflow_steps[]
+  runs  workflow_runs[]
+
+  @@index([project_id])
+}
+
+/// WORKFLOW — une étape d'un processus.
+/// `condition_*` décrit ce qui doit être vrai pour franchir l'étape ;
+/// `action_*` ce que le moteur fait en y entrant. Les deux sont des
+/// couples (type, valeur) volontairement pauvres : un mini-langage
+/// d'expressions serait plus expressif et beaucoup moins vérifiable, or
+/// une transition qu'on ne sait pas expliquer à l'utilisateur ne devrait
+/// pas exister (voir backend/src/igini/workflow/workflow-conditions.ts).
+model workflow_steps {
+  id              String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflow_id     String               @db.Uuid
+  workflow        workflow_definitions @relation(fields: [workflow_id], references: [id], onDelete: Cascade)
+  position        Int
+  title           String
+  description     String?
+  // 'always' | 'stage_exists' | 'tasks_done' | 'manual'
+  condition_type  String               @default("always")
+  condition_value String?
+  // 'none' | 'create_task'
+  action_type     String               @default("none")
+  action_value    String?
+  created_at      DateTime?            @default(now()) @db.Timestamptz(6)
+
+  @@unique([workflow_id, position])
+  @@index([workflow_id])
+}
+
+/// WORKFLOW — une exécution d'un processus sur un projet.
+model workflow_runs {
+  id           String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflow_id  String               @db.Uuid
+  workflow     workflow_definitions @relation(fields: [workflow_id], references: [id], onDelete: Cascade)
+  project_id   String               @db.Uuid
+  project      projects             @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  // 'running' | 'blocked' | 'completed'
+  status       String               @default("running")
+  // Position de l'étape en attente. Vaut le nombre d'étapes une fois
+  // l'exécution terminée (aucune étape restante).
+  current_position Int              @default(0)
+  started_at   DateTime?            @default(now()) @db.Timestamptz(6)
+  completed_at DateTime?            @db.Timestamptz(6)
+
+  events workflow_events[]
+
+  @@index([workflow_id])
+  @@index([project_id])
+}
+
+/// WORKFLOW — journal d'une exécution. Comme automation_runs : le moteur
+/// avance parfois sans confirmation, la transparence après coup est la
+/// contrepartie (article 5).
+model workflow_events {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  run_id        String        @db.Uuid
+  run           workflow_runs @relation(fields: [run_id], references: [id], onDelete: Cascade)
+  step_position Int
+  // 'step_completed' | 'blocked' | 'run_completed' | 'task_created'
+  type          String
+  detail        String
+  created_at    DateTime?     @default(now()) @db.Timestamptz(6)
+
+  @@index([run_id])
 }
 
 /// CONSTITUTION — texte de référence (pas par utilisateur), semé au

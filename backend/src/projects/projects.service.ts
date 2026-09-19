@@ -8,6 +8,7 @@ import { DevelopmentService } from '../igini/development/development.service.js'
 import { FinancingService } from '../igini/financing/financing.service.js';
 import { PlanningService } from '../igini/planning/planning.service.js';
 import { TransmissionService } from '../igini/transmission/transmission.service.js';
+import { WorkflowEngineService } from '../igini/workflow/workflow-engine.service.js';
 import { WorkflowService } from '../igini/workflow/workflow.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
@@ -24,6 +25,7 @@ export class ProjectsService {
     private readonly automationService: AutomationService,
     private readonly constitutionService: ConstitutionService,
     private readonly memoryService: MemoryService,
+    private readonly workflowEngineService: WorkflowEngineService,
   ) {}
 
   /**
@@ -244,6 +246,7 @@ export class ProjectsService {
     // Automation : sans confirmation, IGINI réévalue les tâches d'étape et
     // les liens de concepts du projet à chaud (voir AutomationService).
     await this.automationService.run(project.id);
+    await this.workflowEngineService.advanceActiveRunsForProject(ownerId, project.id);
 
     return analysis;
   }
@@ -284,6 +287,7 @@ export class ProjectsService {
     // suivables.
     await this.workflowService.createTasksFromSuggestions(project.id, result.milestones, 'build_plan');
     await this.automationService.run(project.id);
+    await this.workflowEngineService.advanceActiveRunsForProject(ownerId, project.id);
 
     return buildPlan;
   }
@@ -321,6 +325,7 @@ export class ProjectsService {
       },
     });
     await this.automationService.run(project.id);
+    await this.workflowEngineService.advanceActiveRunsForProject(ownerId, project.id);
 
     return financingPlan;
   }
@@ -359,6 +364,7 @@ export class ProjectsService {
       },
     });
     await this.automationService.run(project.id);
+    await this.workflowEngineService.advanceActiveRunsForProject(ownerId, project.id);
 
     return developmentPlan;
   }
@@ -404,6 +410,7 @@ export class ProjectsService {
       },
     });
     await this.automationService.run(project.id);
+    await this.workflowEngineService.advanceActiveRunsForProject(ownerId, project.id);
 
     return transmissionPlan;
   }

@@ -289,6 +289,64 @@ export interface AutomationRun {
   created_at: string;
 }
 
+export type WorkflowConditionType = 'always' | 'stage_exists' | 'tasks_done' | 'manual';
+export type WorkflowActionType = 'none' | 'create_task';
+
+export interface WorkflowStep {
+  id: string;
+  workflow_id: string;
+  position: number;
+  title: string;
+  description: string | null;
+  condition_type: WorkflowConditionType;
+  condition_value: string | null;
+  action_type: WorkflowActionType;
+  action_value: string | null;
+}
+
+export interface WorkflowRun {
+  id: string;
+  workflow_id: string;
+  project_id: string;
+  status: 'running' | 'blocked' | 'completed';
+  current_position: number;
+  started_at: string;
+  completed_at: string | null;
+}
+
+export interface WorkflowDefinition {
+  id: string;
+  project_id: string;
+  name: string;
+  description: string | null;
+  created_at: string;
+  steps: WorkflowStep[];
+  runs: WorkflowRun[];
+}
+
+export interface WorkflowTemplate {
+  slug: string;
+  name: string;
+  description: string;
+  stepCount: number;
+}
+
+export interface WorkflowEvent {
+  id: string;
+  run_id: string;
+  step_position: number;
+  type: string;
+  detail: string;
+  created_at: string;
+}
+
+export interface WorkflowAdvanceResult {
+  run: { id: string; status: string; current_position: number };
+  stepsCompleted: Array<{ position: number; title: string; reason: string }>;
+  blockedReason: string | null;
+  tasksCreated: Array<{ id: string; title: string }>;
+}
+
 export interface AutomationRunResult {
   run: AutomationRun;
   tasksCreated: Task[];
@@ -594,6 +652,52 @@ export const api = {
 
   listAutomationRuns: (token: string, projectId: string) =>
     request<AutomationRun[]>(`/projects/${projectId}/automation/runs`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listWorkflowTemplates: (token: string) =>
+    request<WorkflowTemplate[]>('/workflows/templates', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listWorkflows: (token: string, projectId: string) =>
+    request<WorkflowDefinition[]>(`/projects/${projectId}/workflows`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  createWorkflowFromTemplate: (token: string, projectId: string, slug: string) =>
+    request<WorkflowDefinition>(`/projects/${projectId}/workflows/from-template`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ slug }),
+    }),
+
+  deleteWorkflow: (token: string, workflowId: string) =>
+    request<void>(`/workflows/${workflowId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  startWorkflowRun: (token: string, workflowId: string) =>
+    request<WorkflowAdvanceResult>(`/workflows/${workflowId}/runs`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  advanceWorkflowRun: (token: string, runId: string) =>
+    request<WorkflowAdvanceResult>(`/workflow-runs/${runId}/advance`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  confirmWorkflowStep: (token: string, runId: string, position: number) =>
+    request<WorkflowAdvanceResult>(`/workflow-runs/${runId}/steps/${position}/confirm`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listWorkflowEvents: (token: string, runId: string) =>
+    request<WorkflowEvent[]>(`/workflow-runs/${runId}/events`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
 

@@ -211,6 +211,8 @@ export type projectsWhereInput = {
   collaborators?: Prisma.Project_collaboratorsListRelationFilter
   compliance_checks?: Prisma.Project_compliance_checksListRelationFilter
   automation_runs?: Prisma.Automation_runsListRelationFilter
+  workflow_definitions?: Prisma.Workflow_definitionsListRelationFilter
+  workflow_runs?: Prisma.Workflow_runsListRelationFilter
 }
 
 export type projectsOrderByWithRelationInput = {
@@ -234,6 +236,8 @@ export type projectsOrderByWithRelationInput = {
   collaborators?: Prisma.project_collaboratorsOrderByRelationAggregateInput
   compliance_checks?: Prisma.project_compliance_checksOrderByRelationAggregateInput
   automation_runs?: Prisma.automation_runsOrderByRelationAggregateInput
+  workflow_definitions?: Prisma.workflow_definitionsOrderByRelationAggregateInput
+  workflow_runs?: Prisma.workflow_runsOrderByRelationAggregateInput
 }
 
 export type projectsWhereUniqueInput = Prisma.AtLeast<{
@@ -260,6 +264,8 @@ export type projectsWhereUniqueInput = Prisma.AtLeast<{
   collaborators?: Prisma.Project_collaboratorsListRelationFilter
   compliance_checks?: Prisma.Project_compliance_checksListRelationFilter
   automation_runs?: Prisma.Automation_runsListRelationFilter
+  workflow_definitions?: Prisma.Workflow_definitionsListRelationFilter
+  workflow_runs?: Prisma.Workflow_runsListRelationFilter
 }, "id">
 
 export type projectsOrderByWithAggregationInput = {
@@ -308,6 +314,8 @@ export type projectsCreateInput = {
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateInput = {
@@ -330,6 +338,8 @@ export type projectsUncheckedCreateInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUpdateInput = {
@@ -352,6 +362,8 @@ export type projectsUpdateInput = {
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateInput = {
@@ -374,6 +386,8 @@ export type projectsUncheckedUpdateInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateManyInput = {
@@ -677,6 +691,34 @@ export type projectsUpdateOneRequiredWithoutAutomation_runsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutAutomation_runsInput, Prisma.projectsUpdateWithoutAutomation_runsInput>, Prisma.projectsUncheckedUpdateWithoutAutomation_runsInput>
 }
 
+export type projectsCreateNestedOneWithoutWorkflow_definitionsInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutWorkflow_definitionsInput, Prisma.projectsUncheckedCreateWithoutWorkflow_definitionsInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutWorkflow_definitionsInput
+  connect?: Prisma.projectsWhereUniqueInput
+}
+
+export type projectsUpdateOneRequiredWithoutWorkflow_definitionsNestedInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutWorkflow_definitionsInput, Prisma.projectsUncheckedCreateWithoutWorkflow_definitionsInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutWorkflow_definitionsInput
+  upsert?: Prisma.projectsUpsertWithoutWorkflow_definitionsInput
+  connect?: Prisma.projectsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutWorkflow_definitionsInput, Prisma.projectsUpdateWithoutWorkflow_definitionsInput>, Prisma.projectsUncheckedUpdateWithoutWorkflow_definitionsInput>
+}
+
+export type projectsCreateNestedOneWithoutWorkflow_runsInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutWorkflow_runsInput, Prisma.projectsUncheckedCreateWithoutWorkflow_runsInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutWorkflow_runsInput
+  connect?: Prisma.projectsWhereUniqueInput
+}
+
+export type projectsUpdateOneRequiredWithoutWorkflow_runsNestedInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutWorkflow_runsInput, Prisma.projectsUncheckedCreateWithoutWorkflow_runsInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutWorkflow_runsInput
+  upsert?: Prisma.projectsUpsertWithoutWorkflow_runsInput
+  connect?: Prisma.projectsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutWorkflow_runsInput, Prisma.projectsUpdateWithoutWorkflow_runsInput>, Prisma.projectsUncheckedUpdateWithoutWorkflow_runsInput>
+}
+
 export type projectsCreateWithoutOwnerInput = {
   id?: string
   title: string
@@ -696,6 +738,8 @@ export type projectsCreateWithoutOwnerInput = {
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutOwnerInput = {
@@ -717,6 +761,8 @@ export type projectsUncheckedCreateWithoutOwnerInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutOwnerInput = {
@@ -777,6 +823,8 @@ export type projectsCreateWithoutAnalysesInput = {
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutAnalysesInput = {
@@ -798,6 +846,8 @@ export type projectsUncheckedCreateWithoutAnalysesInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutAnalysesInput = {
@@ -835,6 +885,8 @@ export type projectsUpdateWithoutAnalysesInput = {
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutAnalysesInput = {
@@ -856,6 +908,8 @@ export type projectsUncheckedUpdateWithoutAnalysesInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutFinancing_plansInput = {
@@ -877,6 +931,8 @@ export type projectsCreateWithoutFinancing_plansInput = {
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutFinancing_plansInput = {
@@ -898,6 +954,8 @@ export type projectsUncheckedCreateWithoutFinancing_plansInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutFinancing_plansInput = {
@@ -935,6 +993,8 @@ export type projectsUpdateWithoutFinancing_plansInput = {
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
@@ -956,6 +1016,8 @@ export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutDevelopment_plansInput = {
@@ -977,6 +1039,8 @@ export type projectsCreateWithoutDevelopment_plansInput = {
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
@@ -998,6 +1062,8 @@ export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutDevelopment_plansInput = {
@@ -1035,6 +1101,8 @@ export type projectsUpdateWithoutDevelopment_plansInput = {
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
@@ -1056,6 +1124,8 @@ export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutTransmission_plansInput = {
@@ -1077,6 +1147,8 @@ export type projectsCreateWithoutTransmission_plansInput = {
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutTransmission_plansInput = {
@@ -1098,6 +1170,8 @@ export type projectsUncheckedCreateWithoutTransmission_plansInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutTransmission_plansInput = {
@@ -1135,6 +1209,8 @@ export type projectsUpdateWithoutTransmission_plansInput = {
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
@@ -1156,6 +1232,8 @@ export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutMemoriesInput = {
@@ -1177,6 +1255,8 @@ export type projectsCreateWithoutMemoriesInput = {
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutMemoriesInput = {
@@ -1198,6 +1278,8 @@ export type projectsUncheckedCreateWithoutMemoriesInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutMemoriesInput = {
@@ -1235,6 +1317,8 @@ export type projectsUpdateWithoutMemoriesInput = {
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutMemoriesInput = {
@@ -1256,6 +1340,8 @@ export type projectsUncheckedUpdateWithoutMemoriesInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutConceptsInput = {
@@ -1277,6 +1363,8 @@ export type projectsCreateWithoutConceptsInput = {
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutConceptsInput = {
@@ -1298,6 +1386,8 @@ export type projectsUncheckedCreateWithoutConceptsInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutConceptsInput = {
@@ -1335,6 +1425,8 @@ export type projectsUpdateWithoutConceptsInput = {
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutConceptsInput = {
@@ -1356,6 +1448,8 @@ export type projectsUncheckedUpdateWithoutConceptsInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutTasksInput = {
@@ -1377,6 +1471,8 @@ export type projectsCreateWithoutTasksInput = {
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutTasksInput = {
@@ -1398,6 +1494,8 @@ export type projectsUncheckedCreateWithoutTasksInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutTasksInput = {
@@ -1435,6 +1533,8 @@ export type projectsUpdateWithoutTasksInput = {
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutTasksInput = {
@@ -1456,6 +1556,8 @@ export type projectsUncheckedUpdateWithoutTasksInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutCommunity_commentsInput = {
@@ -1477,6 +1579,8 @@ export type projectsCreateWithoutCommunity_commentsInput = {
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutCommunity_commentsInput = {
@@ -1498,6 +1602,8 @@ export type projectsUncheckedCreateWithoutCommunity_commentsInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutCommunity_commentsInput = {
@@ -1535,6 +1641,8 @@ export type projectsUpdateWithoutCommunity_commentsInput = {
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutCommunity_commentsInput = {
@@ -1556,6 +1664,8 @@ export type projectsUncheckedUpdateWithoutCommunity_commentsInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutCollaboratorsInput = {
@@ -1577,6 +1687,8 @@ export type projectsCreateWithoutCollaboratorsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutCollaboratorsInput = {
@@ -1598,6 +1710,8 @@ export type projectsUncheckedCreateWithoutCollaboratorsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutCollaboratorsInput = {
@@ -1635,6 +1749,8 @@ export type projectsUpdateWithoutCollaboratorsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutCollaboratorsInput = {
@@ -1656,6 +1772,8 @@ export type projectsUncheckedUpdateWithoutCollaboratorsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutBuild_plansInput = {
@@ -1677,6 +1795,8 @@ export type projectsCreateWithoutBuild_plansInput = {
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutBuild_plansInput = {
@@ -1698,6 +1818,8 @@ export type projectsUncheckedCreateWithoutBuild_plansInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutBuild_plansInput = {
@@ -1735,6 +1857,8 @@ export type projectsUpdateWithoutBuild_plansInput = {
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutBuild_plansInput = {
@@ -1756,6 +1880,8 @@ export type projectsUncheckedUpdateWithoutBuild_plansInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutCompliance_checksInput = {
@@ -1777,6 +1903,8 @@ export type projectsCreateWithoutCompliance_checksInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutCompliance_checksInput = {
@@ -1798,6 +1926,8 @@ export type projectsUncheckedCreateWithoutCompliance_checksInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutCompliance_checksInput = {
@@ -1835,6 +1965,8 @@ export type projectsUpdateWithoutCompliance_checksInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutCompliance_checksInput = {
@@ -1856,6 +1988,8 @@ export type projectsUncheckedUpdateWithoutCompliance_checksInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutAutomation_runsInput = {
@@ -1877,6 +2011,8 @@ export type projectsCreateWithoutAutomation_runsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutAutomation_runsInput = {
@@ -1898,6 +2034,8 @@ export type projectsUncheckedCreateWithoutAutomation_runsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutAutomation_runsInput = {
@@ -1935,6 +2073,8 @@ export type projectsUpdateWithoutAutomation_runsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutAutomation_runsInput = {
@@ -1956,6 +2096,224 @@ export type projectsUncheckedUpdateWithoutAutomation_runsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
+}
+
+export type projectsCreateWithoutWorkflow_definitionsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  owner: Prisma.usersCreateNestedOneWithoutProjectsInput
+  analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
+}
+
+export type projectsUncheckedCreateWithoutWorkflow_definitionsInput = {
+  id?: string
+  owner_id: string
+  title: string
+  description?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
+}
+
+export type projectsCreateOrConnectWithoutWorkflow_definitionsInput = {
+  where: Prisma.projectsWhereUniqueInput
+  create: Prisma.XOR<Prisma.projectsCreateWithoutWorkflow_definitionsInput, Prisma.projectsUncheckedCreateWithoutWorkflow_definitionsInput>
+}
+
+export type projectsUpsertWithoutWorkflow_definitionsInput = {
+  update: Prisma.XOR<Prisma.projectsUpdateWithoutWorkflow_definitionsInput, Prisma.projectsUncheckedUpdateWithoutWorkflow_definitionsInput>
+  create: Prisma.XOR<Prisma.projectsCreateWithoutWorkflow_definitionsInput, Prisma.projectsUncheckedCreateWithoutWorkflow_definitionsInput>
+  where?: Prisma.projectsWhereInput
+}
+
+export type projectsUpdateToOneWithWhereWithoutWorkflow_definitionsInput = {
+  where?: Prisma.projectsWhereInput
+  data: Prisma.XOR<Prisma.projectsUpdateWithoutWorkflow_definitionsInput, Prisma.projectsUncheckedUpdateWithoutWorkflow_definitionsInput>
+}
+
+export type projectsUpdateWithoutWorkflow_definitionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
+  analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
+}
+
+export type projectsUncheckedUpdateWithoutWorkflow_definitionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
+}
+
+export type projectsCreateWithoutWorkflow_runsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  owner: Prisma.usersCreateNestedOneWithoutProjectsInput
+  analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+}
+
+export type projectsUncheckedCreateWithoutWorkflow_runsInput = {
+  id?: string
+  owner_id: string
+  title: string
+  description?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+}
+
+export type projectsCreateOrConnectWithoutWorkflow_runsInput = {
+  where: Prisma.projectsWhereUniqueInput
+  create: Prisma.XOR<Prisma.projectsCreateWithoutWorkflow_runsInput, Prisma.projectsUncheckedCreateWithoutWorkflow_runsInput>
+}
+
+export type projectsUpsertWithoutWorkflow_runsInput = {
+  update: Prisma.XOR<Prisma.projectsUpdateWithoutWorkflow_runsInput, Prisma.projectsUncheckedUpdateWithoutWorkflow_runsInput>
+  create: Prisma.XOR<Prisma.projectsCreateWithoutWorkflow_runsInput, Prisma.projectsUncheckedCreateWithoutWorkflow_runsInput>
+  where?: Prisma.projectsWhereInput
+}
+
+export type projectsUpdateToOneWithWhereWithoutWorkflow_runsInput = {
+  where?: Prisma.projectsWhereInput
+  data: Prisma.XOR<Prisma.projectsUpdateWithoutWorkflow_runsInput, Prisma.projectsUncheckedUpdateWithoutWorkflow_runsInput>
+}
+
+export type projectsUpdateWithoutWorkflow_runsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
+  analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+}
+
+export type projectsUncheckedUpdateWithoutWorkflow_runsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateManyOwnerInput = {
@@ -1986,6 +2344,8 @@ export type projectsUpdateWithoutOwnerInput = {
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutOwnerInput = {
@@ -2007,6 +2367,8 @@ export type projectsUncheckedUpdateWithoutOwnerInput = {
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateManyWithoutOwnerInput = {
@@ -2036,6 +2398,8 @@ export type ProjectsCountOutputType = {
   collaborators: number
   compliance_checks: number
   automation_runs: number
+  workflow_definitions: number
+  workflow_runs: number
 }
 
 export type ProjectsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2051,6 +2415,8 @@ export type ProjectsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensio
   collaborators?: boolean | ProjectsCountOutputTypeCountCollaboratorsArgs
   compliance_checks?: boolean | ProjectsCountOutputTypeCountCompliance_checksArgs
   automation_runs?: boolean | ProjectsCountOutputTypeCountAutomation_runsArgs
+  workflow_definitions?: boolean | ProjectsCountOutputTypeCountWorkflow_definitionsArgs
+  workflow_runs?: boolean | ProjectsCountOutputTypeCountWorkflow_runsArgs
 }
 
 /**
@@ -2147,6 +2513,20 @@ export type ProjectsCountOutputTypeCountAutomation_runsArgs<ExtArgs extends runt
   where?: Prisma.automation_runsWhereInput
 }
 
+/**
+ * ProjectsCountOutputType without action
+ */
+export type ProjectsCountOutputTypeCountWorkflow_definitionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.workflow_definitionsWhereInput
+}
+
+/**
+ * ProjectsCountOutputType without action
+ */
+export type ProjectsCountOutputTypeCountWorkflow_runsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.workflow_runsWhereInput
+}
+
 
 export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2169,6 +2549,8 @@ export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   collaborators?: boolean | Prisma.projects$collaboratorsArgs<ExtArgs>
   compliance_checks?: boolean | Prisma.projects$compliance_checksArgs<ExtArgs>
   automation_runs?: boolean | Prisma.projects$automation_runsArgs<ExtArgs>
+  workflow_definitions?: boolean | Prisma.projects$workflow_definitionsArgs<ExtArgs>
+  workflow_runs?: boolean | Prisma.projects$workflow_runsArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["projects"]>
 
@@ -2219,6 +2601,8 @@ export type projectsInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   collaborators?: boolean | Prisma.projects$collaboratorsArgs<ExtArgs>
   compliance_checks?: boolean | Prisma.projects$compliance_checksArgs<ExtArgs>
   automation_runs?: boolean | Prisma.projects$automation_runsArgs<ExtArgs>
+  workflow_definitions?: boolean | Prisma.projects$workflow_definitionsArgs<ExtArgs>
+  workflow_runs?: boolean | Prisma.projects$workflow_runsArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type projectsIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2244,6 +2628,8 @@ export type $projectsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     collaborators: Prisma.$project_collaboratorsPayload<ExtArgs>[]
     compliance_checks: Prisma.$project_compliance_checksPayload<ExtArgs>[]
     automation_runs: Prisma.$automation_runsPayload<ExtArgs>[]
+    workflow_definitions: Prisma.$workflow_definitionsPayload<ExtArgs>[]
+    workflow_runs: Prisma.$workflow_runsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2660,6 +3046,8 @@ export interface Prisma__projectsClient<T, Null = never, ExtArgs extends runtime
   collaborators<T extends Prisma.projects$collaboratorsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$collaboratorsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$project_collaboratorsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   compliance_checks<T extends Prisma.projects$compliance_checksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$compliance_checksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$project_compliance_checksPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   automation_runs<T extends Prisma.projects$automation_runsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$automation_runsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$automation_runsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  workflow_definitions<T extends Prisma.projects$workflow_definitionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$workflow_definitionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$workflow_definitionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  workflow_runs<T extends Prisma.projects$workflow_runsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$workflow_runsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$workflow_runsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3382,6 +3770,54 @@ export type projects$automation_runsArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.Automation_runsScalarFieldEnum | Prisma.Automation_runsScalarFieldEnum[]
+}
+
+/**
+ * projects.workflow_definitions
+ */
+export type projects$workflow_definitionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the workflow_definitions
+   */
+  select?: Prisma.workflow_definitionsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the workflow_definitions
+   */
+  omit?: Prisma.workflow_definitionsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.workflow_definitionsInclude<ExtArgs> | null
+  where?: Prisma.workflow_definitionsWhereInput
+  orderBy?: Prisma.workflow_definitionsOrderByWithRelationInput | Prisma.workflow_definitionsOrderByWithRelationInput[]
+  cursor?: Prisma.workflow_definitionsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Workflow_definitionsScalarFieldEnum | Prisma.Workflow_definitionsScalarFieldEnum[]
+}
+
+/**
+ * projects.workflow_runs
+ */
+export type projects$workflow_runsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the workflow_runs
+   */
+  select?: Prisma.workflow_runsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the workflow_runs
+   */
+  omit?: Prisma.workflow_runsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.workflow_runsInclude<ExtArgs> | null
+  where?: Prisma.workflow_runsWhereInput
+  orderBy?: Prisma.workflow_runsOrderByWithRelationInput | Prisma.workflow_runsOrderByWithRelationInput[]
+  cursor?: Prisma.workflow_runsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Workflow_runsScalarFieldEnum | Prisma.Workflow_runsScalarFieldEnum[]
 }
 
 /**

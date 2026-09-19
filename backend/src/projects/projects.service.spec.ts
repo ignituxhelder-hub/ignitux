@@ -12,6 +12,7 @@ import { FinancingService } from '../igini/financing/financing.service.js';
 import { PlanningService } from '../igini/planning/planning.service.js';
 import { TransmissionService } from '../igini/transmission/transmission.service.js';
 import { MemoryService } from '../igini/memory/memory.service.js';
+import { WorkflowEngineService } from '../igini/workflow/workflow-engine.service.js';
 import { WorkflowService } from '../igini/workflow/workflow.service.js';
 import { CLAUDE_MODEL } from '../igini/claude/claude.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -78,6 +79,7 @@ describe('ProjectsService', () => {
   let automationService: { run: ReturnType<typeof vi.fn>; listRuns: ReturnType<typeof vi.fn> };
   let constitutionService: { guard: ReturnType<typeof vi.fn> };
   let memoryService: { recallAsContext: ReturnType<typeof vi.fn> };
+  let workflowEngineService: { advanceActiveRunsForProject: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     prisma = {
@@ -119,6 +121,7 @@ describe('ProjectsService', () => {
     // Par défaut aucun souvenir : les tests de contexte existants vérifient
     // le fil des étapes, pas la mémoire.
     memoryService = { recallAsContext: vi.fn().mockResolvedValue(undefined) };
+    workflowEngineService = { advanceActiveRunsForProject: vi.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -133,6 +136,7 @@ describe('ProjectsService', () => {
         { provide: AutomationService, useValue: automationService },
         { provide: ConstitutionService, useValue: constitutionService },
         { provide: MemoryService, useValue: memoryService },
+        { provide: WorkflowEngineService, useValue: workflowEngineService },
       ],
     }).compile();
 
