@@ -238,6 +238,14 @@ export const api = {
     });
   },
 
+  changePassword: async (token: string, currentPassword: string, newPassword: string) => {
+    await request<void>('/auth/me/password', {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+  },
+
   listProjects: (token: string) =>
     request<Project[]>('/projects', {
       headers: { Authorization: `Bearer ${token}` },

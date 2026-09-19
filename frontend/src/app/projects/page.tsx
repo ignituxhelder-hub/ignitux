@@ -71,6 +71,7 @@ export default function ProjectsPage() {
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <Link href="/community">Communauté</Link>
+          <Link href="/account">Mon compte</Link>
           <button
             className="secondary"
             type="button"
