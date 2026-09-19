@@ -22,7 +22,9 @@ import {
   type TransmissionPlan,
 } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { AutomationSection } from './automation-section';
 import { CollaboratorsSection } from './collaborators-section';
+import { ComplianceSection } from './compliance-section';
 import { KnowledgeSection, MemorySection, ScoreSection, TasksSection } from './engine-sections';
 
 /** Charge la liste d'un type de plan (analyse, financement, …) pour le projet courant. */
@@ -380,13 +382,15 @@ export default function ProjectDetailPage() {
         />
       )}
 
-      {/* Les 4 moteurs IGINI et la gestion des collaborateurs restent réservés
-          au propriétaire pour l'instant — pas encore partagés avec les
-          collaborateurs côté backend (voir projects.service.ts). */}
+      {/* Les 4 moteurs transverses sont en lecture seule pour un collaborateur
+          (readOnly). La gestion des collaborateurs et le déclenchement manuel
+          de l'automatisation restent réservés au propriétaire. */}
       {project && <ScoreSection token={token} projectId={id} />}
       {project && <TasksSection token={token} projectId={id} readOnly={!isOwner} />}
       {project && <MemorySection token={token} projectId={id} readOnly={!isOwner} />}
       {project && <KnowledgeSection token={token} projectId={id} readOnly={!isOwner} />}
+      {project && <ComplianceSection token={token} projectId={id} readOnly={!isOwner} />}
+      {project && <AutomationSection token={token} projectId={id} readOnly={!isOwner} />}
       {project && isOwner && <CollaboratorsSection token={token} projectId={id} />}
     </main>
   );

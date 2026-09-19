@@ -200,6 +200,61 @@ export interface ScoreCard {
   confiance: number;
 }
 
+export interface ComplianceRequirement {
+  id: string;
+  country: string;
+  category: string;
+  title: string;
+  description: string;
+  source_name: string;
+  source_url: string;
+  completed: boolean;
+}
+
+export interface ComplianceChecklist {
+  disclaimer: string;
+  requirements: ComplianceRequirement[];
+}
+
+export type MarketplaceRole = 'mentor' | 'investisseur';
+
+export interface MarketplaceProfile {
+  id: string;
+  user_id: string;
+  role: MarketplaceRole;
+  headline: string;
+  bio: string | null;
+  expertise: string[];
+  created_at: string;
+  updated_at: string;
+  user?: { id: string; email: string };
+}
+
+export interface MarketplaceContact {
+  id: string;
+  from_user_id: string;
+  to_profile_id: string;
+  message: string;
+  created_at: string;
+  from_user?: { id: string; email: string };
+}
+
+export interface AutomationRun {
+  id: string;
+  project_id: string;
+  tasks_created_count: number;
+  tasks_closed_count: number;
+  concept_links_created_count: number;
+  created_at: string;
+}
+
+export interface AutomationRunResult {
+  run: AutomationRun;
+  tasksCreated: Task[];
+  tasksClosed: Task[];
+  conceptLinksCreated: ConceptLink[];
+}
+
 export const api = {
   signup: (email: string, password: string) =>
     request<User>('/users/signup', { method: 'POST', body: JSON.stringify({ email, password }) }),
@@ -443,5 +498,77 @@ export const api = {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify({ content }),
+    }),
+
+  getProjectCompliance: (token: string, projectId: string) =>
+    request<ComplianceChecklist>(`/projects/${projectId}/compliance?country=FR`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  markComplianceChecked: async (token: string, projectId: string, requirementId: string) => {
+    await request<void>(`/projects/${projectId}/compliance/${requirementId}/check`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+
+  unmarkComplianceChecked: async (token: string, projectId: string, requirementId: string) => {
+    await request<void>(`/projects/${projectId}/compliance/${requirementId}/check`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+
+  runAutomation: (token: string, projectId: string) =>
+    request<AutomationRunResult>(`/projects/${projectId}/automation/run`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listAutomationRuns: (token: string, projectId: string) =>
+    request<AutomationRun[]>(`/projects/${projectId}/automation/runs`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listMarketplaceProfiles: (token: string, role?: MarketplaceRole) =>
+    request<MarketplaceProfile[]>(`/marketplace/profiles${role ? `?role=${role}` : ''}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getOwnMarketplaceProfile: (token: string) =>
+    request<MarketplaceProfile | null>('/marketplace/profile', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  upsertMarketplaceProfile: (
+    token: string,
+    role: MarketplaceRole,
+    headline: string,
+    bio: string,
+    expertise: string[],
+  ) =>
+    request<MarketplaceProfile>('/marketplace/profile', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ role, headline, bio: bio || undefined, expertise }),
+    }),
+
+  removeOwnMarketplaceProfile: async (token: string) => {
+    await request<void>('/marketplace/profile', {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+
+  contactMarketplaceProfile: (token: string, profileId: string, message: string) =>
+    request<MarketplaceContact>(`/marketplace/profiles/${profileId}/contact`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ message }),
+    }),
+
+  listReceivedMarketplaceContacts: (token: string) =>
+    request<MarketplaceContact[]>('/marketplace/contacts', {
+      headers: { Authorization: `Bearer ${token}` },
     }),
 };

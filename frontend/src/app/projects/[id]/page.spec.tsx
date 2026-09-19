@@ -34,6 +34,8 @@ const ENGINE_ROUTES = {
   'GET /memory/summary': { status: 200, body: { summary: '' } },
   'GET /knowledge/graph': { status: 200, body: { nodes: [], edges: [] } },
   'GET /projects/p1/collaborators': { status: 200, body: [] },
+  'GET /projects/p1/compliance': { status: 200, body: { disclaimer: 'Info générale.', requirements: [] } },
+  'GET /projects/p1/automation/runs': { status: 200, body: [] },
 };
 
 describe('ProjectDetailPage', () => {
@@ -205,5 +207,10 @@ describe('ProjectDetailPage', () => {
     expect(screen.queryByLabelText('Nouvelle tâche')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Contenu du souvenir')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Nom du concept')).not.toBeInTheDocument();
+
+    // Conformité et automatisation sont aussi visibles en lecture seule.
+    expect(screen.getByText('Conformité (France)')).toBeInTheDocument();
+    expect(screen.getByText('Automatisation')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /lancer l'automatisation/i })).not.toBeInTheDocument();
   });
 });
