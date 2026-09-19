@@ -73,6 +73,7 @@ export default function ProjectsPage() {
           <Link href="/community">Communauté</Link>
           <Link href="/marketplace">Mentors &amp; investisseurs</Link>
           <Link href="/crm">Relations</Link>
+          <Link href="/facturation">Facturation</Link>
           <Link href="/constitution">Constitution</Link>
           <Link href="/account">Mon compte</Link>
           <button

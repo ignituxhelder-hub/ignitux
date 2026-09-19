@@ -192,6 +192,7 @@ export type usersWhereInput = {
   marketplace_contacts_sent?: Prisma.Marketplace_contactsListRelationFilter
   crm_companies?: Prisma.Crm_companiesListRelationFilter
   crm_contacts?: Prisma.Crm_contactsListRelationFilter
+  billing_documents?: Prisma.Billing_documentsListRelationFilter
 }
 
 export type usersOrderByWithRelationInput = {
@@ -210,6 +211,7 @@ export type usersOrderByWithRelationInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsOrderByRelationAggregateInput
   crm_companies?: Prisma.crm_companiesOrderByRelationAggregateInput
   crm_contacts?: Prisma.crm_contactsOrderByRelationAggregateInput
+  billing_documents?: Prisma.billing_documentsOrderByRelationAggregateInput
 }
 
 export type usersWhereUniqueInput = Prisma.AtLeast<{
@@ -231,6 +233,7 @@ export type usersWhereUniqueInput = Prisma.AtLeast<{
   marketplace_contacts_sent?: Prisma.Marketplace_contactsListRelationFilter
   crm_companies?: Prisma.Crm_companiesListRelationFilter
   crm_contacts?: Prisma.Crm_contactsListRelationFilter
+  billing_documents?: Prisma.Billing_documentsListRelationFilter
 }, "id" | "email">
 
 export type usersOrderByWithAggregationInput = {
@@ -271,6 +274,7 @@ export type usersCreateInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateInput = {
@@ -289,6 +293,7 @@ export type usersUncheckedCreateInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUpdateInput = {
@@ -307,6 +312,7 @@ export type usersUpdateInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateInput = {
@@ -325,6 +331,7 @@ export type usersUncheckedUpdateInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateManyInput = {
@@ -500,6 +507,20 @@ export type usersUpdateOneRequiredWithoutMarketplace_contacts_sentNestedInput = 
   update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutMarketplace_contacts_sentInput, Prisma.usersUpdateWithoutMarketplace_contacts_sentInput>, Prisma.usersUncheckedUpdateWithoutMarketplace_contacts_sentInput>
 }
 
+export type usersCreateNestedOneWithoutBilling_documentsInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutBilling_documentsInput, Prisma.usersUncheckedCreateWithoutBilling_documentsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutBilling_documentsInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutBilling_documentsNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutBilling_documentsInput, Prisma.usersUncheckedCreateWithoutBilling_documentsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutBilling_documentsInput
+  upsert?: Prisma.usersUpsertWithoutBilling_documentsInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutBilling_documentsInput, Prisma.usersUpdateWithoutBilling_documentsInput>, Prisma.usersUncheckedUpdateWithoutBilling_documentsInput>
+}
+
 export type usersCreateNestedOneWithoutCrm_companiesInput = {
   create?: Prisma.XOR<Prisma.usersCreateWithoutCrm_companiesInput, Prisma.usersUncheckedCreateWithoutCrm_companiesInput>
   connectOrCreate?: Prisma.usersCreateOrConnectWithoutCrm_companiesInput
@@ -543,6 +564,7 @@ export type usersCreateWithoutAuth_tokensInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutAuth_tokensInput = {
@@ -560,6 +582,7 @@ export type usersUncheckedCreateWithoutAuth_tokensInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutAuth_tokensInput = {
@@ -593,6 +616,7 @@ export type usersUpdateWithoutAuth_tokensInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutAuth_tokensInput = {
@@ -610,6 +634,7 @@ export type usersUncheckedUpdateWithoutAuth_tokensInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutProjectsInput = {
@@ -627,6 +652,7 @@ export type usersCreateWithoutProjectsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutProjectsInput = {
@@ -644,6 +670,7 @@ export type usersUncheckedCreateWithoutProjectsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutProjectsInput = {
@@ -677,6 +704,7 @@ export type usersUpdateWithoutProjectsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutProjectsInput = {
@@ -694,6 +722,7 @@ export type usersUncheckedUpdateWithoutProjectsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutMemoriesInput = {
@@ -711,6 +740,7 @@ export type usersCreateWithoutMemoriesInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutMemoriesInput = {
@@ -728,6 +758,7 @@ export type usersUncheckedCreateWithoutMemoriesInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutMemoriesInput = {
@@ -761,6 +792,7 @@ export type usersUpdateWithoutMemoriesInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMemoriesInput = {
@@ -778,6 +810,7 @@ export type usersUncheckedUpdateWithoutMemoriesInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutConceptsInput = {
@@ -795,6 +828,7 @@ export type usersCreateWithoutConceptsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutConceptsInput = {
@@ -812,6 +846,7 @@ export type usersUncheckedCreateWithoutConceptsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutConceptsInput = {
@@ -845,6 +880,7 @@ export type usersUpdateWithoutConceptsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutConceptsInput = {
@@ -862,6 +898,7 @@ export type usersUncheckedUpdateWithoutConceptsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutCommunity_commentsInput = {
@@ -879,6 +916,7 @@ export type usersCreateWithoutCommunity_commentsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutCommunity_commentsInput = {
@@ -896,6 +934,7 @@ export type usersUncheckedCreateWithoutCommunity_commentsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutCommunity_commentsInput = {
@@ -929,6 +968,7 @@ export type usersUpdateWithoutCommunity_commentsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCommunity_commentsInput = {
@@ -946,6 +986,7 @@ export type usersUncheckedUpdateWithoutCommunity_commentsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutCollaborationsInput = {
@@ -963,6 +1004,7 @@ export type usersCreateWithoutCollaborationsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutCollaborationsInput = {
@@ -980,6 +1022,7 @@ export type usersUncheckedCreateWithoutCollaborationsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutCollaborationsInput = {
@@ -1013,6 +1056,7 @@ export type usersUpdateWithoutCollaborationsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCollaborationsInput = {
@@ -1030,6 +1074,7 @@ export type usersUncheckedUpdateWithoutCollaborationsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutMarketplace_profileInput = {
@@ -1047,6 +1092,7 @@ export type usersCreateWithoutMarketplace_profileInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutMarketplace_profileInput = {
@@ -1064,6 +1110,7 @@ export type usersUncheckedCreateWithoutMarketplace_profileInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutMarketplace_profileInput = {
@@ -1097,6 +1144,7 @@ export type usersUpdateWithoutMarketplace_profileInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMarketplace_profileInput = {
@@ -1114,6 +1162,7 @@ export type usersUncheckedUpdateWithoutMarketplace_profileInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutMarketplace_contacts_sentInput = {
@@ -1131,6 +1180,7 @@ export type usersCreateWithoutMarketplace_contacts_sentInput = {
   marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutMarketplace_contacts_sentInput = {
@@ -1148,6 +1198,7 @@ export type usersUncheckedCreateWithoutMarketplace_contacts_sentInput = {
   marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutMarketplace_contacts_sentInput = {
@@ -1181,6 +1232,7 @@ export type usersUpdateWithoutMarketplace_contacts_sentInput = {
   marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMarketplace_contacts_sentInput = {
@@ -1196,6 +1248,95 @@ export type usersUncheckedUpdateWithoutMarketplace_contacts_sentInput = {
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
   auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
   marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+}
+
+export type usersCreateWithoutBilling_documentsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+}
+
+export type usersUncheckedCreateWithoutBilling_documentsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+}
+
+export type usersCreateOrConnectWithoutBilling_documentsInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutBilling_documentsInput, Prisma.usersUncheckedCreateWithoutBilling_documentsInput>
+}
+
+export type usersUpsertWithoutBilling_documentsInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutBilling_documentsInput, Prisma.usersUncheckedUpdateWithoutBilling_documentsInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutBilling_documentsInput, Prisma.usersUncheckedCreateWithoutBilling_documentsInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutBilling_documentsInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutBilling_documentsInput, Prisma.usersUncheckedUpdateWithoutBilling_documentsInput>
+}
+
+export type usersUpdateWithoutBilling_documentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+}
+
+export type usersUncheckedUpdateWithoutBilling_documentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
 }
@@ -1215,6 +1356,7 @@ export type usersCreateWithoutCrm_companiesInput = {
   marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
   marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutCrm_companiesInput = {
@@ -1232,6 +1374,7 @@ export type usersUncheckedCreateWithoutCrm_companiesInput = {
   marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutCrm_companiesInput = {
@@ -1265,6 +1408,7 @@ export type usersUpdateWithoutCrm_companiesInput = {
   marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
   marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCrm_companiesInput = {
@@ -1282,6 +1426,7 @@ export type usersUncheckedUpdateWithoutCrm_companiesInput = {
   marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutCrm_contactsInput = {
@@ -1299,6 +1444,7 @@ export type usersCreateWithoutCrm_contactsInput = {
   marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
   marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutCrm_contactsInput = {
@@ -1316,6 +1462,7 @@ export type usersUncheckedCreateWithoutCrm_contactsInput = {
   marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutCrm_contactsInput = {
@@ -1349,6 +1496,7 @@ export type usersUpdateWithoutCrm_contactsInput = {
   marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
   marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCrm_contactsInput = {
@@ -1366,6 +1514,7 @@ export type usersUncheckedUpdateWithoutCrm_contactsInput = {
   marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 
@@ -1383,6 +1532,7 @@ export type UsersCountOutputType = {
   marketplace_contacts_sent: number
   crm_companies: number
   crm_contacts: number
+  billing_documents: number
 }
 
 export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1395,6 +1545,7 @@ export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   marketplace_contacts_sent?: boolean | UsersCountOutputTypeCountMarketplace_contacts_sentArgs
   crm_companies?: boolean | UsersCountOutputTypeCountCrm_companiesArgs
   crm_contacts?: boolean | UsersCountOutputTypeCountCrm_contactsArgs
+  billing_documents?: boolean | UsersCountOutputTypeCountBilling_documentsArgs
 }
 
 /**
@@ -1470,6 +1621,13 @@ export type UsersCountOutputTypeCountCrm_contactsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.crm_contactsWhereInput
 }
 
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountBilling_documentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.billing_documentsWhereInput
+}
+
 
 export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1487,6 +1645,7 @@ export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   marketplace_contacts_sent?: boolean | Prisma.users$marketplace_contacts_sentArgs<ExtArgs>
   crm_companies?: boolean | Prisma.users$crm_companiesArgs<ExtArgs>
   crm_contacts?: boolean | Prisma.users$crm_contactsArgs<ExtArgs>
+  billing_documents?: boolean | Prisma.users$billing_documentsArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["users"]>
 
@@ -1526,6 +1685,7 @@ export type usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   marketplace_contacts_sent?: boolean | Prisma.users$marketplace_contacts_sentArgs<ExtArgs>
   crm_companies?: boolean | Prisma.users$crm_companiesArgs<ExtArgs>
   crm_contacts?: boolean | Prisma.users$crm_contactsArgs<ExtArgs>
+  billing_documents?: boolean | Prisma.users$billing_documentsArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type usersIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1544,6 +1704,7 @@ export type $usersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     marketplace_contacts_sent: Prisma.$marketplace_contactsPayload<ExtArgs>[]
     crm_companies: Prisma.$crm_companiesPayload<ExtArgs>[]
     crm_contacts: Prisma.$crm_contactsPayload<ExtArgs>[]
+    billing_documents: Prisma.$billing_documentsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1955,6 +2116,7 @@ export interface Prisma__usersClient<T, Null = never, ExtArgs extends runtime.Ty
   marketplace_contacts_sent<T extends Prisma.users$marketplace_contacts_sentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$marketplace_contacts_sentArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$marketplace_contactsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   crm_companies<T extends Prisma.users$crm_companiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$crm_companiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$crm_companiesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   crm_contacts<T extends Prisma.users$crm_contactsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$crm_contactsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$crm_contactsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  billing_documents<T extends Prisma.users$billing_documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$billing_documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$billing_documentsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2614,6 +2776,30 @@ export type users$crm_contactsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.Crm_contactsScalarFieldEnum | Prisma.Crm_contactsScalarFieldEnum[]
+}
+
+/**
+ * users.billing_documents
+ */
+export type users$billing_documentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the billing_documents
+   */
+  select?: Prisma.billing_documentsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the billing_documents
+   */
+  omit?: Prisma.billing_documentsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.billing_documentsInclude<ExtArgs> | null
+  where?: Prisma.billing_documentsWhereInput
+  orderBy?: Prisma.billing_documentsOrderByWithRelationInput | Prisma.billing_documentsOrderByWithRelationInput[]
+  cursor?: Prisma.billing_documentsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Billing_documentsScalarFieldEnum | Prisma.Billing_documentsScalarFieldEnum[]
 }
 
 /**

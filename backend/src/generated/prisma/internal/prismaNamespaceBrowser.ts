@@ -70,6 +70,9 @@ export const ModelName = {
   marketplace_profiles: 'marketplace_profiles',
   marketplace_contacts: 'marketplace_contacts',
   automation_runs: 'automation_runs',
+  billing_documents: 'billing_documents',
+  billing_lines: 'billing_lines',
+  billing_payments: 'billing_payments',
   crm_companies: 'crm_companies',
   crm_contacts: 'crm_contacts',
   crm_interactions: 'crm_interactions',
@@ -343,6 +346,57 @@ export const Automation_runsScalarFieldEnum = {
 } as const
 
 export type Automation_runsScalarFieldEnum = (typeof Automation_runsScalarFieldEnum)[keyof typeof Automation_runsScalarFieldEnum]
+
+
+export const Billing_documentsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  contact_id: 'contact_id',
+  project_id: 'project_id',
+  type: 'type',
+  year: 'year',
+  sequence: 'sequence',
+  number: 'number',
+  status: 'status',
+  client_name: 'client_name',
+  client_details: 'client_details',
+  currency: 'currency',
+  notes: 'notes',
+  corrects_id: 'corrects_id',
+  issued_at: 'issued_at',
+  due_at: 'due_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Billing_documentsScalarFieldEnum = (typeof Billing_documentsScalarFieldEnum)[keyof typeof Billing_documentsScalarFieldEnum]
+
+
+export const Billing_linesScalarFieldEnum = {
+  id: 'id',
+  document_id: 'document_id',
+  position: 'position',
+  label: 'label',
+  quantity_milli: 'quantity_milli',
+  unit_price_cents: 'unit_price_cents',
+  vat_rate_basis_points: 'vat_rate_basis_points',
+  created_at: 'created_at'
+} as const
+
+export type Billing_linesScalarFieldEnum = (typeof Billing_linesScalarFieldEnum)[keyof typeof Billing_linesScalarFieldEnum]
+
+
+export const Billing_paymentsScalarFieldEnum = {
+  id: 'id',
+  document_id: 'document_id',
+  amount_cents: 'amount_cents',
+  method: 'method',
+  received_at: 'received_at',
+  note: 'note',
+  created_at: 'created_at'
+} as const
+
+export type Billing_paymentsScalarFieldEnum = (typeof Billing_paymentsScalarFieldEnum)[keyof typeof Billing_paymentsScalarFieldEnum]
 
 
 export const Crm_companiesScalarFieldEnum = {

@@ -465,6 +465,55 @@ export interface AutomationRun {
   created_at: string;
 }
 
+export type BillingType = 'devis' | 'facture' | 'avoir';
+export type BillingStatus = 'brouillon' | 'emis' | 'paye' | 'annule' | 'refuse';
+export type BillingMethod = 'virement' | 'especes' | 'carte' | 'cheque' | 'autre';
+
+export interface BillingLine {
+  id: string;
+  position: number;
+  label: string;
+  quantity_milli: number;
+  unit_price_cents: number;
+  /** Points de base : 2000 = 20 %, 550 = 5,5 %. */
+  vat_rate_basis_points: number;
+}
+
+export interface BillingPayment {
+  id: string;
+  amount_cents: number;
+  method: BillingMethod;
+  received_at: string;
+  note: string | null;
+}
+
+export interface BillingDocument {
+  id: string;
+  type: BillingType;
+  number: string;
+  status: BillingStatus;
+  client_name: string;
+  client_details: string | null;
+  notes: string | null;
+  issued_at: string | null;
+  due_at: string | null;
+  corrects_id: string | null;
+  lines: BillingLine[];
+  payments?: BillingPayment[];
+  totals: { subtotalCents: number; vatCents: number; totalCents: number };
+  remainingCents: number;
+}
+
+export interface BillingList {
+  disclaimer: string;
+  documents: BillingDocument[];
+}
+
+export interface BillingLegalNotice {
+  disclaimer: string;
+  enforcedRules: string[];
+}
+
 export type CrmStage = 'nouveau' | 'contacte' | 'qualifie' | 'proposition' | 'gagne' | 'perdu';
 export type CrmKind = 'prospect' | 'client' | 'partenaire' | 'autre';
 export type CrmChannel = 'appel' | 'email' | 'rendez_vous' | 'note';
@@ -910,6 +959,68 @@ export const api = {
     request<void>(`/knowledge/links/${linkId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getBillingLegalNotice: (token: string) =>
+    request<BillingLegalNotice>('/billing/legal-notice', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listBillingDocuments: (token: string, filters: { type?: BillingType; status?: BillingStatus } = {}) => {
+    const params = new URLSearchParams();
+    if (filters.type) params.set('type', filters.type);
+    if (filters.status) params.set('status', filters.status);
+    const suffix = params.toString();
+    return request<BillingList>(`/billing/documents${suffix ? `?${suffix}` : ''}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+
+  createBillingDocument: (
+    token: string,
+    document: {
+      type: BillingType;
+      clientName: string;
+      clientDetails?: string;
+      notes?: string;
+      correctsId?: string;
+      lines: Array<{
+        label: string;
+        quantityMilli: number;
+        unitPriceCents: number;
+        vatRateBasisPoints?: number;
+      }>;
+    },
+  ) =>
+    request<BillingDocument>('/billing/documents', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(document),
+    }),
+
+  changeBillingStatus: (token: string, id: string, status: BillingStatus) =>
+    request<BillingDocument>(`/billing/documents/${id}/status`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ status }),
+    }),
+
+  deleteBillingDraft: (token: string, id: string) =>
+    request<void>(`/billing/documents/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  addBillingPayment: (
+    token: string,
+    id: string,
+    amountCents: number,
+    method: BillingMethod,
+  ) =>
+    request<BillingPayment>(`/billing/documents/${id}/payments`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ amountCents, method }),
     }),
 
   createCrmContact: (

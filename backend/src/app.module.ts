@@ -4,6 +4,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { AuthModule } from './auth/auth.module.js';
+import { BillingModule } from './billing/billing.module.js';
 import { ComplianceModule } from './compliance/compliance.module.js';
 import { ConstitutionModule } from './constitution/constitution.module.js';
 import { CrmModule } from './crm/crm.module.js';
@@ -35,6 +36,7 @@ import { UsersModule } from './users/users.module.js';
     ComplianceModule,
     ConstitutionModule,
     CrmModule,
+    BillingModule,
     MarketplaceModule,
   ],
   controllers: [AppController],

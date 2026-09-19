@@ -25,6 +25,7 @@ model users {
   marketplace_contacts_sent marketplace_contacts[]
   crm_companies crm_companies[]
   crm_contacts  crm_contacts[]
+  billing_documents billing_documents[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -73,6 +74,7 @@ model projects {
   workflow_definitions workflow_definitions[]
   workflow_runs        workflow_runs[]
   crm_contacts         crm_contacts[]
+  billing_documents    billing_documents[]
 
   @@index([owner_id])
   @@index([is_public])
@@ -361,6 +363,104 @@ model automation_runs {
   @@index([project_id])
 }
 
+/// FACTURATION — un document commercial : devis, facture ou avoir.
+///
+/// Trois contraintes structurent ce modèle, et elles viennent du droit
+/// français, pas d'un choix esthétique :
+///   1. la numérotation est séquentielle, chronologique et sans trou, par
+///      type et par année (d'où la clé unique owner/type/year/sequence) ;
+///   2. un document émis ne se modifie ni ne se supprime — une erreur se
+///      corrige par un avoir qui le référence ;
+///   3. les montants sont stockés en centimes entiers, jamais en flottant :
+///      0.1 + 0.2 ≠ 0.3 en virgule flottante, et sur une facture cet écart
+///      n'est pas une curiosité, c'est un litige.
+///
+/// Ce que ce modèle n'est PAS : un logiciel de facturation certifié au sens
+/// de l'article 286-I-3° bis du CGI. Voir backend/src/billing/billing-legal.ts.
+model billing_documents {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_id     String    @db.Uuid
+  owner        users     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  contact_id   String?   @db.Uuid
+  contact      crm_contacts? @relation(fields: [contact_id], references: [id], onDelete: SetNull)
+  project_id   String?   @db.Uuid
+  project      projects? @relation(fields: [project_id], references: [id], onDelete: SetNull)
+
+  // 'devis' | 'facture' | 'avoir'
+  type         String
+  year         Int
+  sequence     Int
+  /// Numéro affiché, dérivé de type/year/sequence — figé à l'émission.
+  number       String
+
+  // 'brouillon' | 'emis' | 'paye' | 'annule' | 'refuse'
+  status       String    @default("brouillon")
+
+  /// Nom et adresse du client recopiés au moment de l'émission : si la
+  /// fiche contact change ensuite, le document émis ne doit pas changer
+  /// avec elle.
+  client_name  String
+  client_details String?
+
+  currency     String    @default("EUR")
+  notes        String?
+
+  /// Pour un avoir : le document qu'il corrige.
+  corrects_id  String?   @db.Uuid
+  corrects     billing_documents? @relation("billing_correction", fields: [corrects_id], references: [id], onDelete: SetNull)
+  corrected_by billing_documents[] @relation("billing_correction")
+
+  issued_at    DateTime? @db.Timestamptz(6)
+  due_at       DateTime? @db.Timestamptz(6)
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @updatedAt @db.Timestamptz(6)
+
+  lines    billing_lines[]
+  payments billing_payments[]
+
+  @@unique([owner_id, type, year, sequence])
+  @@index([owner_id])
+  @@index([contact_id])
+  @@index([project_id])
+  @@index([status])
+}
+
+/// FACTURATION — une ligne de document. `unit_price_cents` et
+/// `vat_rate_basis_points` sont des entiers : voir l'explication sur les
+/// montants dans billing_documents.
+/// Le taux de TVA est saisi par l'utilisateur et jamais présumé : les taux
+/// changent, diffèrent par activité et par pays, et en coder un en dur
+/// reviendrait à fournir un chiffre réglementaire inventé.
+model billing_lines {
+  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  document_id        String            @db.Uuid
+  document           billing_documents @relation(fields: [document_id], references: [id], onDelete: Cascade)
+  position           Int
+  label              String
+  quantity_milli     Int
+  unit_price_cents   Int
+  /// Taux en pour mille (2000 = 20 %), pour représenter 5,5 % sans flottant.
+  vat_rate_basis_points Int               @default(0)
+  created_at         DateTime?         @default(now()) @db.Timestamptz(6)
+
+  @@index([document_id])
+}
+
+/// FACTURATION — un règlement reçu sur un document.
+model billing_payments {
+  id          String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  document_id String            @db.Uuid
+  document    billing_documents @relation(fields: [document_id], references: [id], onDelete: Cascade)
+  amount_cents Int
+  /// 'virement' | 'especes' | 'carte' | 'cheque' | 'autre'
+  method      String
+  received_at DateTime          @db.Timestamptz(6)
+  note        String?
+  created_at  DateTime?         @default(now()) @db.Timestamptz(6)
+
+  @@index([document_id])
+}
+
 /// CRM — une entreprise avec laquelle le porteur est en relation.
 /// Séparée des contacts parce qu'une même entreprise a plusieurs
 /// interlocuteurs, et que perdre l'un ne doit pas perdre l'autre.
@@ -407,7 +507,8 @@ model crm_contacts {
   created_at  DateTime?      @default(now()) @db.Timestamptz(6)
   updated_at  DateTime?      @updatedAt @db.Timestamptz(6)
 
-  interactions crm_interactions[]
+  interactions      crm_interactions[]
+  billing_documents billing_documents[]
 
   @@index([owner_id])
   @@index([company_id])

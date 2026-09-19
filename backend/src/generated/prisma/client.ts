@@ -151,6 +151,39 @@ export type marketplace_contacts = Prisma.marketplace_contactsModel
  */
 export type automation_runs = Prisma.automation_runsModel
 /**
+ * Model billing_documents
+ * FACTURATION — un document commercial : devis, facture ou avoir.
+ * 
+ * Trois contraintes structurent ce modèle, et elles viennent du droit
+ * français, pas d'un choix esthétique :
+ * 1. la numérotation est séquentielle, chronologique et sans trou, par
+ * type et par année (d'où la clé unique owner/type/year/sequence) ;
+ * 2. un document émis ne se modifie ni ne se supprime — une erreur se
+ * corrige par un avoir qui le référence ;
+ * 3. les montants sont stockés en centimes entiers, jamais en flottant :
+ * 0.1 + 0.2 ≠ 0.3 en virgule flottante, et sur une facture cet écart
+ * n'est pas une curiosité, c'est un litige.
+ * 
+ * Ce que ce modèle n'est PAS : un logiciel de facturation certifié au sens
+ * de l'article 286-I-3° bis du CGI. Voir backend/src/billing/billing-legal.ts.
+ */
+export type billing_documents = Prisma.billing_documentsModel
+/**
+ * Model billing_lines
+ * FACTURATION — une ligne de document. `unit_price_cents` et
+ * `vat_rate_basis_points` sont des entiers : voir l'explication sur les
+ * montants dans billing_documents.
+ * Le taux de TVA est saisi par l'utilisateur et jamais présumé : les taux
+ * changent, diffèrent par activité et par pays, et en coder un en dur
+ * reviendrait à fournir un chiffre réglementaire inventé.
+ */
+export type billing_lines = Prisma.billing_linesModel
+/**
+ * Model billing_payments
+ * FACTURATION — un règlement reçu sur un document.
+ */
+export type billing_payments = Prisma.billing_paymentsModel
+/**
  * Model crm_companies
  * CRM — une entreprise avec laquelle le porteur est en relation.
  * Séparée des contacts parce qu'une même entreprise a plusieurs
