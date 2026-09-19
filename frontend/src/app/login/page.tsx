@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
+import { Brand } from '@/components/ignitux-mark';
 import { ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
@@ -30,7 +31,7 @@ export default function LoginPage() {
 
   return (
     <main className="page">
-      <p className="brand">Ignitux</p>
+      <Brand />
       <h1>Se connecter</h1>
       <form className="card" onSubmit={handleSubmit}>
         {error && <p className="error">{error}</p>}

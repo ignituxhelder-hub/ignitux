@@ -12,6 +12,12 @@ const envSchema = z.object({
   // d'autres mécanismes (voir @anthropic-ai/sdk). Son absence ne doit pas
   // empêcher le démarrage du serveur, seulement les endpoints d'IA.
   ANTHROPIC_API_KEY: z.string().optional(),
+  // Interrupteur des 5 générateurs IGINI, les seules fonctionnalités qui
+  // consomment du budget IA. `'false'` les éteint en amont de tout appel
+  // réseau (voir igini/claude/generators-availability.ts). Non validée en
+  // enum à dessein : une valeur inattendue laisse le produit complet plutôt
+  // que d'empêcher le serveur de démarrer.
+  IGINI_AI_ENABLED: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

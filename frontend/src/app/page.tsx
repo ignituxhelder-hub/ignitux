@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { IginiMention } from '@/components/igini-mention';
+import { Brand, IgnituxMark } from '@/components/ignitux-mark';
 import { useAuth } from '@/lib/auth';
 
 const STEPS = [
@@ -66,9 +67,7 @@ export default function HomePage() {
   return (
     <main className="page page--home">
       <div className="nav-bar">
-        <p className="brand" style={{ margin: 0 }}>
-          Ignitux
-        </p>
+        <Brand />
         <div className="nav-links">
           <Link href="/login" className="muted">
             Se connecter
@@ -82,6 +81,11 @@ export default function HomePage() {
       </div>
 
       <div className="hero">
+        {/* La boussole en filigrane : elle donne sa forme à la page sans
+            rien affirmer. Masquée sur mobile, où elle n'aurait plus de
+            place pour respirer. */}
+        <IgnituxMark size={320} className="hero-rose" />
+        <p className="hero-eyebrow">Découvrir · Construire · Transmettre</p>
         <h1>Transformer une idée en réalité</h1>
         <IginiMention>
           t&apos;accompagne pour analyser, construire, financer, développer et transmettre ton

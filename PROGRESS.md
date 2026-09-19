@@ -529,3 +529,125 @@ Ce que le code refuse toujours de calculer, et pourquoi :
 **687 tests verts** (539 backend, 148 frontend), types, lint et builds propres. Semis V1 vérifié
 en base réelle, zéro violation journalisée. Toujours **aucun appel à l'API Claude** sur cette
 session.
+
+---
+
+# 12. Direction artistique et déploiement de test (19 septembre 2026)
+
+## 12.1 « La boussole et le feu »
+
+L'interface avait un accent orange et rien autour. Elle a maintenant une direction artistique
+tenue par deux formes, et une règle qui les sépare.
+
+**Le feu** — l'Étincelle de l'article 3. Chaud, en dégradé, jamais plat. Il ne sert qu'à ce que la
+personne déclenche elle-même : boutons d'action, marque, étincelle de chargement.
+
+**La boussole** — « la vérité avant tout ». Froide, géométrique, discrète : anneaux gradués,
+points cardinaux, filets d'acier. Elle sert à tout ce que le produit *constate*.
+
+La règle entre les deux est une décision de fond, pas un goût : **une donnée mesurée n'est jamais
+en flamme.** Une interface qui mettrait un score en dégradé orange aurait l'air d'affirmer ce
+qu'elle ne fait que rapporter. C'est la raison d'être de la classe `.notice` (encart neutre) et de
+`.pill` (pastille d'état) : elles existent pour que le constat ait une forme à lui.
+
+La marque elle-même dit la même chose : **le Nord de la boussole est la flamme**. Ce qui oriente,
+c'est l'Étincelle de la personne — pas l'outil.
+
+Livré : `frontend/src/components/ignitux-mark.tsx` (marque et bloc de marque, réutilisés sur
+l'accueil, la connexion, l'inscription et la liste des projets), `frontend/src/app/icon.svg`
+(le favicon existant — une étoile à quatre branches orange — devient la boussole complète, même
+idée poussée jusqu'au bout), et une réécriture complète de `globals.css` — jeu de
+jetons élargi, fond d'ambiance en braise, cartes avec filet de lumière, boutons en dégradé,
+titres de section portant une aiguille de boussole, barre de navigation qui passe à la ligne au
+lieu de déborder.
+
+Aucun nom de classe existant n'a été supprimé : les écrans non retouchés héritent du nouveau style
+sans modification. Les 151 tests frontend passent sans avoir eu à être ajustés à l'apparence.
+
+## 12.2 Interrupteur des générateurs IA
+
+Le test à deux personnes se fait **sans budget IA**. Les 5 générateurs (Analyser, Construire,
+Financer, Développer, Transmettre) sont donc éteints — et la façon de les éteindre compte.
+
+**Ce qui a été écarté : retirer la clé API.** Sans clé, l'appel part quand même, échoue côté SDK,
+et le testeur voit une erreur. Une erreur dit « c'est cassé ». Or ce n'est pas cassé, c'est
+volontairement éteint, et ces deux messages ne doivent pas se ressembler.
+
+**Ce qui a été fait** : une variable `IGINI_AI_ENABLED`. À `"false"`, le verrou se déclenche dans
+`ClaudeService.generateStructuredOutput`, **en amont de tout appel réseau**. Les cinq générateurs
+passent par ce point unique : aucun ne peut être oublié, et un sixième serait couvert d'office.
+
+Trois propriétés voulues :
+
+- **la dépense est impossible, pas seulement découragée.** Une interface qui se contenterait de
+  griser un bouton laisserait l'API atteignable pour qui la connaît. Un test vérifie que le mock
+  d'appel réseau n'est **jamais** invoqué quand l'interrupteur est sur `false` ;
+- **l'interface sait avant de proposer.** `GET /igini/status` (public, comme `/health`) permet au
+  frontend d'afficher « Fonctionnalité IA non disponible pour ce test » à la place du bouton,
+  dans un encart neutre — pas un message d'erreur rouge ;
+- **dans le doute, on propose.** Si le statut n'est pas encore arrivé, si la requête échoue, ou si
+  la réponse est malformée, le bouton reste. Annoncer « indisponible » à tort empêcherait
+  quelqu'un d'utiliser une fonctionnalité qui marche. Seule une réponse explicite du serveur
+  éteint l'affichage.
+
+Une valeur mal orthographiée (`False`, `0`, `non`) **ne coupe rien** : l'état par défaut d'Ignitux
+est un produit complet, et éteindre une fonctionnalité doit être une décision écrite, pas le
+résultat d'une variable oubliée.
+
+## 12.3 Déploiement temporaire — réseau local
+
+**Date** : 19 septembre 2026. **Raison** : test unique avec 2 personnes de l'entourage, sur le
+même réseau WiFi. **Nature** : temporaire.
+
+**Mode retenu : réseau local**, pas d'hébergement public. Les testeurs étant sur le même WiFi, une
+URL publique n'apportait rien et aurait exposé l'API — donc la base Supabase — sur Internet pour
+un test d'une heure. Le service tourne depuis le poste du porteur :
+
+| | |
+|---|---|
+| Adresse partagée | `http://192.168.1.12:3001` |
+| Backend | `node dist/main.js`, port 3000, `IGINI_AI_ENABLED=false`, `ANTHROPIC_API_KEY` vidée |
+| Frontend | `next start -H 0.0.0.0 -p 3001`, construit avec `NEXT_PUBLIC_API_URL=http://192.168.1.12:3000` |
+| Base | Supabase existante — **la même qu'en développement** |
+
+**Les secrets ne sont jamais dans le code, les journaux ni l'URL** : `DATABASE_URL` et
+`JWT_SECRET` restent dans `backend/.env`, qui n'est pas versionné. Le `.env` du poste **contient
+une vraie clé Anthropic** — c'est précisément pourquoi le processus de test est lancé avec
+`ANTHROPIC_API_KEY=` vidée en plus de l'interrupteur : deux verrous indépendants plutôt qu'un.
+
+### Auto-test avant ouverture
+
+Parcours complet rejoué avec un compte dédié (ni celui du porteur, ni ceux des testeurs), contre
+le déploiement réel, en envoyant l'`Origin` du frontend pour éprouver aussi CORS : **51
+vérifications, 0 échec**. Inscription, connexion, création de projet (privé par défaut), les 5
+générateurs répondant **503 avec un message lisible** et non 500, les 4 moteurs transverses
+utilisables à la main, Conformité, Marketplace, Constitution, Communauté, CRM, Facturation, et
+les 10 pages du frontend.
+
+Un écart trouvé et corrigé avant ouverture : `.brand-word` reposait sur `background-clip: text`
+avec `color: transparent`. Sur un navigateur sans support, le nom de la marque aurait été
+**invisible**. Replié derrière `@supports`, couleur pleine par défaut.
+
+### Comment arrêter proprement ce déploiement
+
+1. Arrêter les deux processus (`next start` sur 3001, `node dist/main.js` sur 3000).
+2. Reconstruire le frontend **sans** la variable LAN — `npm run build` dans `frontend/` — sinon
+   le prochain démarrage local continuerait d'appeler `http://192.168.1.12:3000`.
+3. Relancer les serveurs de développement habituels (`npm run start:dev`, `npm run dev`).
+   L'interrupteur n'étant passé qu'en ligne de commande, les générateurs redeviennent actifs
+   d'eux-mêmes — **rien à annuler dans `.env`**.
+4. Supprimer les comptes de test s'ils ne servent plus : `testeur1@ignitux.test`,
+   `testeur2@ignitux.test`, et les comptes `autotest.claude.*@ignitux.test`.
+
+### Point RGPD à dire aux testeurs
+
+Le §11.1 (point 5) reste ouvert : la liste des données collectées des CGU **n'inclut pas** les
+contacts CRM de tiers. Tant que le `.docx` n'est pas corrigé, les testeurs doivent être invités à
+**ne pas saisir de vrais contacts** dans le module Relations. Une phrase dans le message
+d'invitation suffit, et c'est ce qui a été retenu.
+
+## 12.4 État après cette étape
+
+**703 tests verts** (552 backend, 151 frontend), types, lint et builds propres des deux côtés.
+Déploiement LAN vérifié par 51 contrôles réels. Toujours **aucun appel à l'API Claude** sur cette
+session — et désormais, sur cet environnement, aucun n'est possible.

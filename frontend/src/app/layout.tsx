@@ -24,7 +24,9 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0b0c10',
+  // Doit suivre --bg : c'est la couleur que le navigateur mobile peint
+  // autour de la page, et un écart se voit immédiatement.
+  themeColor: '#08090d',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -34,8 +36,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <AuthProvider>
           {/* Monté au niveau racine : l'état hors ligne concerne toute
               l'application, pas une page en particulier, et le bandeau ne
-              s'affiche que s'il a réellement quelque chose à dire. */}
-          <OfflineBanner />
+              s'affiche que s'il a réellement quelque chose à dire. Le
+              conteneur l'aligne sur la largeur des pages — sans lui, le
+              bandeau partait en pleine largeur, collé aux bords. */}
+          <div className="offline-slot">
+            <OfflineBanner />
+          </div>
           {children}
         </AuthProvider>
       </body>

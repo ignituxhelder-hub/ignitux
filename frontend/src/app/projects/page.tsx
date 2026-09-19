@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { Brand } from '@/components/ignitux-mark';
 import { api, ApiError, type Project } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
@@ -66,10 +67,10 @@ export default function ProjectsPage() {
     <main className="page page--wide">
       <div className="top-bar">
         <div>
-          <p className="brand">Ignitux</p>
+          <Brand />
           <p className="muted">{user?.email}</p>
         </div>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div className="app-nav">
           <Link href="/community">Communauté</Link>
           <Link href="/marketplace">Mentors &amp; investisseurs</Link>
           <Link href="/crm">Relations</Link>

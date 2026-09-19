@@ -259,6 +259,16 @@ export interface CommunityComment {
   created_at: string;
 }
 
+/**
+ * Disponibilité des 5 générateurs IGINI. Interrogée avant d'afficher les
+ * boutons : une fonctionnalité éteinte doit se dire éteinte, pas échouer.
+ */
+export interface IginiStatus {
+  generatorsEnabled: boolean;
+  /** Texte à afficher quand c'est éteint. `null` quand tout fonctionne. */
+  unavailableReason: string | null;
+}
+
 export interface Analysis {
   id: string;
   project_id: string;
@@ -685,6 +695,9 @@ export interface AutomationRunResult {
 }
 
 export const api = {
+  /** Sans jeton : l'état d'une fonctionnalité n'est pas une donnée personnelle. */
+  getIginiStatus: () => request<IginiStatus>('/igini/status'),
+
   signup: (email: string, password: string) =>
     request<User>('/users/signup', { method: 'POST', body: JSON.stringify({ email, password }) }),
 

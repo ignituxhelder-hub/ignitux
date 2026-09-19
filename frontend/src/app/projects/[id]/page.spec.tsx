@@ -25,6 +25,9 @@ const PROJECT = {
 // réaliste dans tous les tests, sinon le fallback générique de mockApiRoutes
 // (200 []) casse les composants qui attendent un objet (score, résumé, graphe).
 const ENGINE_ROUTES = {
+  // Par défaut, les générateurs sont disponibles : c'est l'état normal du
+  // produit, et les tests existants décrivent ce cas-là.
+  'GET /igini/status': { status: 200, body: { generatorsEnabled: true, unavailableReason: null } },
   'GET /projects/p1/scores': {
     status: 200,
     body: { etincelle: null, construction: null, evolution: null, transmission: null, confiance: 0 },
@@ -80,6 +83,76 @@ describe('ProjectDetailPage', () => {
     expect(screen.getByText("Aucun plan de financement pour l'instant.")).toBeInTheDocument();
     expect(screen.getByText("Aucun plan de développement pour l'instant.")).toBeInTheDocument();
     expect(screen.getByText("Aucun plan de transmission pour l'instant.")).toBeInTheDocument();
+  });
+
+  describe('générateurs IA éteints', () => {
+    const OFF = {
+      'GET /igini/status': {
+        status: 200,
+        body: {
+          generatorsEnabled: false,
+          unavailableReason: 'Fonctionnalité IA non disponible pour ce test.',
+        },
+      },
+    };
+
+    it('remplace les 5 boutons par un message, sans erreur rouge', async () => {
+      // Un bouton qui échoue fait croire que le produit est cassé. Ici la
+      // personne lit « indisponible » avant même de cliquer.
+      mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES, ...OFF });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      await screen.findByDisplayValue('École motocross');
+
+      await waitFor(() =>
+        expect(screen.getAllByText('Fonctionnalité IA non disponible pour ce test.')).toHaveLength(5),
+      );
+      expect(screen.queryByText('Analyser ce projet')).not.toBeInTheDocument();
+      expect(screen.queryByText('Générer un plan de financement')).not.toBeInTheDocument();
+      expect(screen.getAllByText('IA indisponible')).toHaveLength(5);
+    });
+
+    it('laisse les 4 moteurs transverses utilisables', async () => {
+      // Le sens du dispositif : seuls les générateurs sont coupés. Si les
+      // moteurs disparaissaient aussi, il ne resterait plus rien à tester.
+      mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES, ...OFF });
+
+      const { container } = render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      await screen.findByDisplayValue('École motocross');
+
+      await waitFor(() => expect(container.textContent).toContain('Mémoire'));
+      expect(container.textContent).toContain('Connaissance');
+      expect(container.textContent).toContain('Conformité');
+    });
+
+    it('garde les boutons tant que le serveur ne répond pas explicitement', async () => {
+      // Dans le doute, on propose : annoncer « indisponible » à tort
+      // empêcherait quelqu'un d'utiliser une fonctionnalité qui marche.
+      mockApiRoutes({
+        'GET /projects/p1': { status: 200, body: PROJECT },
+        ...ENGINE_ROUTES,
+        'GET /igini/status': { status: 500, body: { message: 'boom' } },
+      });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByText('Analyser ce projet')).toBeInTheDocument();
+      expect(screen.queryByText('IA indisponible')).not.toBeInTheDocument();
+    });
   });
 
   it('génère une analyse et l\'affiche sans appeler la vraie API Claude (tout est simulé)', async () => {

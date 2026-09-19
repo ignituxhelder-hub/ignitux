@@ -1,32 +1,108 @@
+/* ==========================================================================
+   IGNITUX — DIRECTION ARTISTIQUE « LA BOUSSOLE ET LE FEU »
+   --------------------------------------------------------------------------
+   Deux formes gouvernent tout ce fichier.
+
+   LE FEU  — l'Étincelle (article 3). Il est chaud, dégradé, jamais plat :
+             partout où l'interface propose d'agir (boutons, accents, chiffres
+             vivants), la matière est une braise qui monte vers l'étincelle.
+   LA BOUSSOLE — la direction (« la vérité avant tout »). Elle est froide,
+             géométrique, discrète : anneaux, graduations, points cardinaux,
+             lignes fines en acier. Elle indique, elle ne décide pas.
+
+   La règle qui les sépare : le feu ne sert qu'à ce que la personne déclenche
+   elle-même ; l'acier sert à tout ce que le produit constate. Une donnée
+   mesurée n'est jamais en flamme — sinon l'interface aurait l'air d'affirmer
+   ce qu'elle ne fait que rapporter.
+   ========================================================================== */
+
 :root {
   color-scheme: dark;
-  --bg: #0b0c10;
-  --surface: #15171c;
-  --surface-2: #1b1e24;
-  --border: #262a33;
-  --text: #f2f3f5;
-  --text-muted: #9aa0ac;
-  --accent: #ff5a1f;
+
+  /* — La nuit. Le fond sur lequel un feu se voit. — */
+  --bg: #08090d;
+  --bg-deep: #05060a;
+  --surface: #14161c;
+  --surface-2: #1b1e26;
+  --surface-3: #22262f;
+  --border: #272b35;
+  --border-strong: #363c48;
+
+  --text: #f3f4f7;
+  --text-muted: #99a0ae;
+  --text-faint: #6b7280;
+
+  /* — LE FEU — */
+  --ember: #a82c08;
+  --flame: #ff5a1f;
+  --spark: #ffb347;
+  --accent: var(--flame);
   --accent-hover: #ff7440;
-  --accent-soft: #3a2013;
+  --accent-soft: #34180d;
+  --grad-fire: linear-gradient(140deg, var(--spark) 0%, var(--flame) 52%, var(--ember) 100%);
+  --grad-fire-soft: linear-gradient(140deg, rgb(255 179 71 / 14%), rgb(255 90 31 / 8%));
+  --glow-fire: 0 6px 22px -8px rgb(255 90 31 / 55%);
+
+  /* — LA BOUSSOLE — */
+  --steel: #8fa1bd;
+  --north: #9ec9e2;
+  --steel-soft: #161b23;
+
+  /* — Les états. Ils empruntent à l'acier, pas au feu. — */
   --danger: #ff6b6b;
   --ok: #3ddc84;
   --ok-soft: #12251b;
   --warn: #ffc247;
   --warn-soft: #2b2210;
-  --radius-sm: 8px;
-  --radius-md: 12px;
+
+  --radius-sm: 9px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow-md: 0 10px 30px -14px rgb(0 0 0 / 80%);
+  --shadow-lg: 0 24px 60px -24px rgb(0 0 0 / 90%);
+
+  --ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--flame);
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
+  min-height: 100dvh;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-body), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* L'ambiance : une braise basse et une lueur froide en haut. Purement
+   décoratif, fixé au viewport, jamais cliquable — le contenu passe devant. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 34rem at 12% 108%, rgb(255 90 31 / 13%), transparent 62%),
+    radial-gradient(44rem 28rem at 88% -6%, rgb(158 201 226 / 7%), transparent 60%),
+    linear-gradient(180deg, var(--bg-deep) 0%, var(--bg) 42%);
+}
+
+::selection {
+  background: rgb(255 90 31 / 30%);
+  color: var(--text);
 }
 
 h1,
@@ -35,11 +111,12 @@ h3 {
   font-family: var(--font-display), 'Segoe UI', sans-serif;
   text-wrap: balance;
   margin: 0 0 0.5rem;
+  letter-spacing: -0.015em;
 }
 
 h1 {
   font-size: clamp(1.5rem, 4vw, 1.9rem);
-  line-height: 1.25;
+  line-height: 1.22;
 }
 
 h2 {
@@ -54,14 +131,29 @@ h3 {
 
 a {
   color: var(--accent);
+  text-underline-offset: 0.2em;
 }
+
+a:hover {
+  color: var(--spark);
+}
+
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+/* --------------------------------------------------------------------------
+   L'attente : une étincelle qui respire.
+   -------------------------------------------------------------------------- */
 
 .loading {
   color: var(--text-muted);
   font-size: 0.9rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.55rem;
 }
 
 .loading::before {
@@ -69,14 +161,9 @@ a {
   width: 0.55rem;
   height: 0.55rem;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--grad-fire);
+  box-shadow: 0 0 10px rgb(255 90 31 / 70%);
   animation: pulse 1.4s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .loading::before {
-    animation: none;
-  }
 }
 
 @keyframes pulse {
@@ -91,115 +178,222 @@ a {
   }
 }
 
+/* --------------------------------------------------------------------------
+   La page.
+   -------------------------------------------------------------------------- */
+
 .page {
   max-width: 480px;
   margin: 0 auto;
-  padding: 2rem 1.25rem;
+  padding: 2.25rem 1.25rem 4rem;
 }
 
 .page--wide {
-  max-width: 720px;
+  max-width: 760px;
 }
 
+.page--home {
+  max-width: 920px;
+}
+
+/* Le bandeau hors ligne vit hors des pages : ce conteneur lui donne la
+   même gouttière, sinon il se collait aux deux bords de l'écran. */
+.offline-slot:not(:empty) {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 0;
+}
+
+/* --------------------------------------------------------------------------
+   La marque : la boussole, puis le nom.
+   -------------------------------------------------------------------------- */
+
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   font-family: var(--font-display), 'Segoe UI', sans-serif;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.055em;
   text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 1.25rem;
+}
+
+.brand-mark {
+  /* `currentColor` pilote l'acier de la boussole ; le feu vient du dégradé
+     interne du SVG. Ici l'anneau se lit en gris, pas en orange. */
+  color: var(--steel);
+  flex: none;
+}
+
+/* Le nom taillé dans la flamme. La couleur pleine est le cas de base :
+   sans le repli, un navigateur qui ignore `background-clip: text` afficherait
+   du texte transparent — c'est-à-dire une marque invisible. */
+.brand-word {
   color: var(--accent);
 }
 
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .brand-word {
+    background: var(--grad-fire);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Les surfaces. Un filet clair en haut de chaque carte : la lumière tombe
+   d'en haut, comme sur un objet réel.
+   -------------------------------------------------------------------------- */
+
 .card {
-  background: var(--surface);
+  position: relative;
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 1.5rem;
+  box-shadow: var(--shadow-md);
 }
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 10%) 22%,
+    rgb(255 255 255 / 10%) 78%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Les champs.
+   -------------------------------------------------------------------------- */
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: 0.4rem;
   margin-bottom: 1rem;
 }
 
 .field label {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--text-muted);
 }
 
 .field input,
-.field textarea {
-  background: var(--bg);
+.field textarea,
+.field select {
+  background: var(--bg-deep);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 0.625rem 0.75rem;
+  padding: 0.65rem 0.8rem;
   color: var(--text);
   font-size: 1rem;
   font-family: inherit;
-  transition: border-color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.field input:hover,
+.field textarea:hover,
+.field select:hover {
+  border-color: var(--border-strong);
 }
 
 .field input:focus,
-.field textarea:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+.field textarea:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--flame);
+  box-shadow: 0 0 0 3px rgb(255 90 31 / 16%);
 }
+
+/* --------------------------------------------------------------------------
+   Les actions. Le feu ne s'allume que sur ce que la personne déclenche.
+   -------------------------------------------------------------------------- */
 
 button.primary {
   width: 100%;
-  padding: 0.7rem 1rem;
+  padding: 0.72rem 1.15rem;
   border: none;
   border-radius: var(--radius-sm);
-  background: var(--accent);
+  background: var(--grad-fire);
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
+  box-shadow: var(--glow-fire);
   transition:
-    background-color 0.15s ease,
+    filter 0.15s ease,
+    box-shadow 0.15s ease,
     transform 0.1s ease;
 }
 
 button.primary:hover:not(:disabled) {
-  background: var(--accent-hover);
+  filter: brightness(1.08);
+  box-shadow: 0 8px 26px -8px rgb(255 90 31 / 75%);
 }
 
 button.primary:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: scale(0.985);
 }
 
 button.primary:disabled {
-  opacity: 0.6;
+  opacity: 0.45;
+  box-shadow: none;
   cursor: not-allowed;
 }
 
 button.secondary {
-  padding: 0.5rem 0.9rem;
-  border: 1px solid var(--border);
+  padding: 0.5rem 0.95rem;
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  background: transparent;
+  background: var(--surface-3);
   color: var(--text);
+  font-family: inherit;
+  font-size: 0.925rem;
   cursor: pointer;
   transition:
     border-color 0.15s ease,
-    color 0.15s ease;
+    color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 button.secondary:hover:not(:disabled) {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--flame);
+  color: var(--spark);
+  background: var(--accent-soft);
 }
 
 button.secondary:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* --------------------------------------------------------------------------
+   Les messages.
+   -------------------------------------------------------------------------- */
 
 .error {
   color: var(--danger);
   font-size: 0.9rem;
   margin: 0 0 1rem;
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--danger);
 }
 
 .muted {
@@ -207,49 +401,60 @@ button.secondary:disabled {
   font-size: 0.9rem;
 }
 
+/* Un encart neutre : ce que le produit constate, jamais en flamme. */
+.notice {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  background: var(--steel-soft);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--steel);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 0.85rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.notice strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Une pastille d'état, taillée dans l'acier. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.16rem 0.6rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--text-muted);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pill--fire {
+  border-color: rgb(255 90 31 / 45%);
+  background: var(--accent-soft);
+  color: var(--spark);
+}
+
+/* --------------------------------------------------------------------------
+   Les en-têtes et la navigation.
+   -------------------------------------------------------------------------- */
+
 .top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
-.project-list {
-  display: flex;
-  flex-direction: column;
   gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-.project-item {
-  display: block;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 1rem;
-  text-decoration: none;
-  color: inherit;
-  transition:
-    border-color 0.15s ease,
-    transform 0.15s ease;
-}
-
-.project-item:hover {
-  border-color: var(--accent);
-  transform: translateY(-1px);
-}
-
-.project-item h3 {
-  margin: 0 0 0.25rem;
-}
-
-.project-item p {
-  margin: 0;
-  color: var(--text-muted);
-}
-
-.page--home {
-  max-width: 880px;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
 }
 
 .nav-bar {
@@ -261,60 +466,231 @@ button.secondary:disabled {
   margin-bottom: 2.5rem;
 }
 
+.nav-bar .brand {
+  margin: 0;
+}
+
 .nav-links {
   display: flex;
   align-items: center;
   gap: 1.25rem;
 }
 
+/* La barre de navigation applicative. Beaucoup de modules, donc elle doit
+   passer à la ligne proprement plutôt que déborder sur petit écran. */
+.app-nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
+
+.app-nav a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.925rem;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid transparent;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.app-nav a:hover {
+  color: var(--text);
+  border-bottom-color: var(--flame);
+}
+
+/* --------------------------------------------------------------------------
+   La liste des projets.
+   -------------------------------------------------------------------------- */
+
+.project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.project-item {
+  position: relative;
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1rem 1rem 1.15rem;
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    background-color 0.15s ease;
+}
+
+/* La braise sur la tranche : elle ne s'allume qu'au survol d'un élément
+   réellement ouvrable. */
+.project-item::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: var(--grad-fire);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.project-item:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+  transform: translateY(-1px);
+}
+
+.project-item:hover::before {
+  opacity: 1;
+}
+
+.project-item h3 {
+  margin: 0 0 0.25rem;
+}
+
+.project-item p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Le héros.
+   -------------------------------------------------------------------------- */
+
+.hero {
+  position: relative;
+  padding: 1rem 0 0.5rem;
+}
+
 .hero h1 {
-  font-size: clamp(1.7rem, 5vw, 2.5rem);
-  margin: 0.5rem 0 1rem;
-  line-height: 1.2;
+  font-size: clamp(1.9rem, 5.5vw, 3rem);
+  margin: 0.6rem 0 1rem;
+  line-height: 1.1;
+}
+
+/* La boussole géante derrière le titre : assez présente pour donner une
+   forme à la page, assez faible pour ne jamais gêner la lecture. */
+.hero-rose {
+  position: absolute;
+  top: -5.5rem;
+  right: -6rem;
+  color: var(--steel);
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero > *:not(.hero-rose) {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.hero-eyebrow::before {
+  content: '';
+  width: 1.6rem;
+  height: 1px;
+  background: linear-gradient(90deg, var(--flame), transparent);
 }
 
 .hero-actions {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
+  gap: 0.9rem;
+  margin-top: 1.75rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
+/* --------------------------------------------------------------------------
+   Les sections. Le titre porte une aiguille de boussole.
+   -------------------------------------------------------------------------- */
+
 .section {
-  margin-top: 3rem;
+  margin-top: 3.25rem;
 }
 
 .section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   color: var(--text-muted);
-  margin-bottom: 1rem;
+  margin: 0 0 1.15rem;
 }
+
+.section-title::before {
+  content: '';
+  width: 0.4rem;
+  height: 0.4rem;
+  flex: none;
+  background: var(--flame);
+  transform: rotate(45deg);
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-strong), transparent);
+}
+
+/* --------------------------------------------------------------------------
+   La méthode en 5 étapes.
+   -------------------------------------------------------------------------- */
 
 .steps-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 1rem;
 }
 
 .step-card {
-  transition: border-color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .step-card:hover {
-  border-color: var(--accent);
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
 }
 
+/* Le numéro d'étape dans un relèvement de boussole : un cercle gradué. */
 .step-num {
+  display: inline-grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-deep);
   font-family: var(--font-mono), ui-monospace, monospace;
-  color: var(--accent);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  color: var(--spark);
 }
 
 .step-card h3 {
-  margin: 0.35rem 0 0.4rem;
+  margin: 0.7rem 0 0.4rem;
   font-size: 1.05rem;
 }
 
@@ -324,10 +700,28 @@ button.secondary:disabled {
   font-size: 0.9rem;
 }
 
+/* --------------------------------------------------------------------------
+   Les moteurs transverses.
+   -------------------------------------------------------------------------- */
+
 .engine-list {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: 0;
+}
+
+.engine-list > div {
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.engine-list > div:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.engine-list > div:last-child {
+  padding-bottom: 0;
 }
 
 .engine-list h3 {
@@ -341,10 +735,63 @@ button.secondary:disabled {
   font-size: 0.9rem;
 }
 
+/* --------------------------------------------------------------------------
+   Les listes et tableaux hérités des modules (CRM, facturation, moteurs).
+   -------------------------------------------------------------------------- */
+
+ul,
+ol {
+  padding-left: 1.2rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   Accessibilité : rien de tout ce qui précède ne dépend du mouvement.
+   -------------------------------------------------------------------------- */
+
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   * {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
 
+@media (max-width: 480px) {
+  .page {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .card {
+    padding: 1.15rem;
+  }
+
+  .hero-rose {
+    display: none;
+  }
+}

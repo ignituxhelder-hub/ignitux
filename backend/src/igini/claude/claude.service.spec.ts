@@ -1,9 +1,15 @@
-import { InternalServerErrorException } from '@nestjs/common';
+import { InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { z } from 'zod';
 import { ClaudeService } from './claude.service.js';
+import { GENERATORS_DISABLED_MESSAGE } from './generators-availability.js';
 
 const parseMock = vi.fn();
+
+// getEnv() valide process.env avec Zod et appelle process.exit(1) si la
+// configuration est incomplète : inutilisable tel quel dans un test.
+const env = vi.hoisted(() => ({ current: {} as Record<string, string | undefined> }));
+vi.mock('../../config/env.js', () => ({ getEnv: () => env.current }));
 
 // vi.mock est hissé en haut du fichier : les classes qu'il référence doivent
 // être déclarées via vi.hoisted pour être disponibles à ce moment-là, et
@@ -41,6 +47,7 @@ describe('ClaudeService', () => {
 
   beforeEach(async () => {
     parseMock.mockReset();
+    env.current = {};
     const module: TestingModule = await Test.createTestingModule({
       providers: [ClaudeService],
     }).compile();
@@ -50,6 +57,87 @@ describe('ClaudeService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('interrupteur des générateurs', () => {
+    it("n'envoie AUCUNE requête quand les générateurs sont éteints", async () => {
+      // Le test central du dispositif : ce qui compte n'est pas le message
+      // renvoyé, c'est que l'appel réseau n'ait pas lieu. Tant que cette
+      // assertion tient, un environnement éteint ne peut pas dépenser un
+      // centime de budget IA.
+      env.current = { IGINI_AI_ENABLED: 'false' };
+
+      await expect(
+        service.generateStructuredOutput({
+          schema,
+          system: 'system',
+          userContent: 'user',
+          logContext: 'contexte',
+          userErrorMessage: 'échec',
+        }),
+      ).rejects.toBeInstanceOf(ServiceUnavailableException);
+
+      expect(parseMock).not.toHaveBeenCalled();
+    });
+
+    it("explique que c'est éteint volontairement, pas en panne", async () => {
+      env.current = { IGINI_AI_ENABLED: 'false' };
+
+      await expect(
+        service.generateStructuredOutput({
+          schema,
+          system: 'system',
+          userContent: 'user',
+          logContext: 'contexte',
+          userErrorMessage: 'échec',
+        }),
+      ).rejects.toMatchObject({ message: GENERATORS_DISABLED_MESSAGE });
+    });
+
+    it('expose son état pour que le frontend sache avant de proposer', () => {
+      env.current = { IGINI_AI_ENABLED: 'false' };
+      expect(service.availability()).toEqual({
+        enabled: false,
+        reason: GENERATORS_DISABLED_MESSAGE,
+      });
+
+      env.current = {};
+      expect(service.availability()).toEqual({ enabled: true, reason: null });
+    });
+
+    it("relit l'interrupteur à chaque appel plutôt que de le figer", async () => {
+      // Une valeur mémorisée au démarrage survivrait à un changement de
+      // configuration : on croirait le budget coupé alors qu'il ne l'est
+      // plus, ou l'inverse.
+      expect(service.availability().enabled).toBe(true);
+
+      env.current = { IGINI_AI_ENABLED: 'false' };
+
+      expect(service.availability().enabled).toBe(false);
+      await expect(
+        service.generateStructuredOutput({
+          schema,
+          system: 'system',
+          userContent: 'user',
+          logContext: 'contexte',
+          userErrorMessage: 'échec',
+        }),
+      ).rejects.toBeInstanceOf(ServiceUnavailableException);
+    });
+
+    it('laisse passer les appels quand rien ne les éteint', async () => {
+      parseMock.mockResolvedValue({ parsed_output: { answer: 'ok' } });
+
+      await service.generateStructuredOutput({
+        schema,
+        system: 'system',
+        userContent: 'user',
+        logContext: 'contexte',
+        userErrorMessage: 'échec',
+      });
+
+      expect(parseMock).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('renvoie la sortie structurée quand Claude répond correctement', async () => {

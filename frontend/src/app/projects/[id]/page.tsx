@@ -18,6 +18,7 @@ import {
   type BuildPlan,
   type DevelopmentPlan,
   type FinancingPlan,
+  type IginiStatus,
   type Project,
   type TransmissionPlan,
 } from '@/lib/api';
@@ -28,6 +29,42 @@ import { FinancingSection } from './financing-section';
 import { CollaboratorsSection } from './collaborators-section';
 import { ComplianceSection } from './compliance-section';
 import { KnowledgeSection, MemorySection, ScoreSection, TasksSection } from './engine-sections';
+
+/**
+ * Demande au serveur si les 5 générateurs IGINI sont disponibles.
+ *
+ * Tant qu'on n'a pas la réponse — et si la requête échoue — l'état reste
+ * `null`, et l'interface se comporte comme d'habitude. C'est volontaire :
+ * annoncer « indisponible » sans le savoir serait aussi faux qu'annoncer
+ * « disponible » sans le savoir, à ceci près que la première erreur
+ * empêcherait quelqu'un d'utiliser une fonctionnalité qui marche.
+ */
+function useIginiStatus() {
+  const [status, setStatus] = useState<IginiStatus | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    api
+      .getIginiStatus()
+      .then((data) => {
+        if (cancelled) return;
+        // On n'accepte que ce qui est réellement exploitable. Une réponse
+        // inattendue laisse l'état à `null` : elle ne doit pas pouvoir
+        // éteindre une fonctionnalité qui marche.
+        if (typeof data?.generatorsEnabled === 'boolean') setStatus(data);
+      })
+      .catch(() => {
+        // On ne sait pas : on laisse le serveur trancher au clic.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return status;
+}
 
 /** Charge la liste d'un type de plan (analyse, financement, …) pour le projet courant. */
 function usePlanList<T>(
@@ -119,6 +156,8 @@ export default function ProjectDetailPage() {
   // (score, tâches, automatisation, connaissance) qu'elles doivent se recharger.
   const [refreshSignal, setRefreshSignal] = useState(0);
   const onGenerated = () => setRefreshSignal((n) => n + 1);
+
+  const iginiStatus = useIginiStatus();
 
   const [analyses, setAnalyses] = usePlanList<Analysis>(token, id, api.listAnalyses);
   const analysis = useGeneration(
@@ -352,6 +391,7 @@ export default function ProjectDetailPage() {
           onGenerate={analysis.generate}
           renderItem={(item) => <AnalysisCard analysis={item} key={item.id} />}
           readOnly={!isOwner}
+          iginiStatus={iginiStatus}
         />
       )}
 
@@ -367,6 +407,7 @@ export default function ProjectDetailPage() {
           onGenerate={plan.generate}
           renderItem={(item) => <BuildPlanCard plan={item} key={item.id} />}
           readOnly={!isOwner}
+          iginiStatus={iginiStatus}
         />
       )}
 
@@ -382,6 +423,7 @@ export default function ProjectDetailPage() {
           onGenerate={financing.generate}
           renderItem={(item) => <FinancingPlanCard plan={item} key={item.id} />}
           readOnly={!isOwner}
+          iginiStatus={iginiStatus}
         />
       )}
 
@@ -397,6 +439,7 @@ export default function ProjectDetailPage() {
           onGenerate={development.generate}
           renderItem={(item) => <DevelopmentPlanCard plan={item} key={item.id} />}
           readOnly={!isOwner}
+          iginiStatus={iginiStatus}
         />
       )}
 
@@ -412,6 +455,7 @@ export default function ProjectDetailPage() {
           onGenerate={transmission.generate}
           renderItem={(item) => <TransmissionPlanCard plan={item} key={item.id} />}
           readOnly={!isOwner}
+          iginiStatus={iginiStatus}
         />
       )}
 
@@ -451,6 +495,11 @@ interface GenerationSectionProps<T> {
   renderItem: (item: T) => ReactNode;
   /** Un collaborateur peut consulter l'historique, mais pas en générer de nouveau. */
   readOnly?: boolean;
+  /**
+   * Disponibilité des générateurs, ou `null` tant qu'on ne la connaît pas.
+   * Voir `useIginiStatus` : dans le doute, on propose.
+   */
+  iginiStatus?: IginiStatus | null;
 }
 
 function GenerationSection<T>({
@@ -464,19 +513,39 @@ function GenerationSection<T>({
   onGenerate,
   renderItem,
   readOnly = false,
+  iginiStatus = null,
 }: GenerationSectionProps<T>) {
+  // Éteint uniquement sur une réponse explicite du serveur. `null` (pas
+  // encore reçue, ou requête échouée) laisse le bouton en place : le
+  // serveur reste seul juge, et il refusera proprement s'il le faut.
+  const generatorsOff = iginiStatus !== null && !iginiStatus.generatorsEnabled;
+
   return (
     <div className="card" style={{ marginTop: '1.5rem' }}>
       <div className="top-bar" style={{ marginBottom: items.length ? '1rem' : 0 }}>
         <h2 style={{ margin: 0 }}>{title}</h2>
-        {!readOnly && (
+        {!readOnly && !generatorsOff && (
           <button className="secondary" type="button" onClick={onGenerate} disabled={isBusy}>
             {isBusy ? buttonBusyLabel : buttonLabel}
           </button>
         )}
+        {!readOnly && generatorsOff && <span className="pill">IA indisponible</span>}
       </div>
+
+      {/* Un encart neutre, pas un message d'erreur rouge : rien n'est
+          cassé et rien n'a échoué — la fonctionnalité est éteinte. */}
+      {generatorsOff && (
+        <p className="notice" style={{ marginTop: items.length ? 0 : '1rem' }}>
+          <span>
+            {iginiStatus?.unavailableReason ??
+              "Fonctionnalité IA non disponible pour ce test. Rien n'est cassé : les " +
+                'générateurs sont volontairement éteints.'}
+          </span>
+        </p>
+      )}
+
       {error && <p className="error">{error}</p>}
-      {items.length === 0 && !isBusy && <p className="muted">{emptyLabel}</p>}
+      {items.length === 0 && !isBusy && !generatorsOff && <p className="muted">{emptyLabel}</p>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {items.map(renderItem)}
       </div>

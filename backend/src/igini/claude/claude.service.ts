@@ -1,7 +1,17 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import type { z } from 'zod';
+import { getEnv } from '../../config/env.js';
+import {
+  readGeneratorsAvailability,
+  type GeneratorsAvailability,
+} from './generators-availability.js';
 
 /**
  * Modèle utilisé par tous les générateurs. Exporté parce que la provenance
@@ -41,7 +51,25 @@ export class ClaudeService {
     return this.client;
   }
 
+  /**
+   * État de l'interrupteur des générateurs. Lu à chaque appel plutôt que
+   * mémorisé : une valeur figée au démarrage survivrait à un changement de
+   * configuration, et c'est exactement le genre d'écart qui finit par faire
+   * dépenser du budget qu'on croyait coupé.
+   */
+  availability(): GeneratorsAvailability {
+    return readGeneratorsAvailability(getEnv().IGINI_AI_ENABLED);
+  }
+
   async generateStructuredOutput<T>(request: StructuredOutputRequest<T>): Promise<T> {
+    // Le verrou est ici, et pas dans chaque générateur : les cinq passent
+    // par ce point unique, donc aucun d'eux ne peut être oublié le jour où
+    // un sixième arrive.
+    const availability = this.availability();
+    if (!availability.enabled) {
+      throw new ServiceUnavailableException(availability.reason);
+    }
+
     try {
       const response = await this.getClient().messages.parse({
         model: CLAUDE_MODEL,

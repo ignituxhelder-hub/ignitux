@@ -328,3 +328,71 @@ présenterait une lacune de couverture comme une absence d'obligations. Un secon
 sur la même raison qu'à la session précédente : aucune source officielle fiable identifiée, et
 fabriquer du contenu réglementaire serait dangereux.
 **Où** — `backend/src/compliance/compliance.service.ts` (`listCoveredCountries`).
+
+## Direction artistique : le feu pour agir, l'acier pour constater
+
+**Quoi** — deux registres visuels séparés par une règle stricte. Le feu (dégradés chauds, lueur)
+n'habille que ce que la personne déclenche : boutons d'action, marque, indicateur de chargement.
+L'acier (filets, anneaux, pastilles, encarts neutres) habille tout ce que le produit constate :
+scores, mesures, états, avertissements.
+**Pourquoi** — un score affiché en dégradé orange a l'air d'une affirmation. Or Ignitux rapporte,
+il n'affirme pas : les articles 9 et 10 interdisent la donnée inventée et le score sans source, et
+l'interface doit le dire par sa forme avant de le dire par son texte. Sans cette règle, la
+direction artistique aurait contredit la Constitution en la décorant.
+**Où** — `frontend/src/app/globals.css` (en-tête du fichier), classes `.notice` et `.pill`.
+
+## La marque : le Nord de la boussole est la flamme
+
+**Quoi** — un anneau gradué avec quatre points cardinaux, dont le Nord est une flamme ; les trois
+autres restent en acier.
+**Pourquoi** — la boussole dit la devise (« la vérité avant tout ») : elle indique sans décider.
+La flamme dit l'article 3 (protection de l'Étincelle). Les placer l'un dans l'autre était le seul
+moyen d'énoncer visuellement ce qu'Ignitux affirme : ce qui oriente, c'est l'Étincelle de la
+personne, pas l'outil. Une boussole seule aurait dit « nous savons où aller » ; une flamme seule
+n'aurait rien dit de la direction.
+**Où** — `frontend/src/components/ignitux-mark.tsx`, `frontend/src/app/icon.svg`.
+
+## Couper l'IA par un interrupteur, pas en retirant la clé
+
+**Quoi** — `IGINI_AI_ENABLED="false"` bloque les 5 générateurs dans `ClaudeService`, en amont de
+tout appel réseau. Un endpoint public `/igini/status` permet à l'interface d'afficher
+« indisponible » au lieu d'un bouton qui échouerait.
+**Pourquoi** — retirer la clé aurait produit une erreur, et une erreur dit « c'est cassé ». Ce
+n'est pas cassé : c'est volontairement éteint, et les deux messages ne doivent pas se ressembler.
+Le verrou est côté serveur parce qu'une interface qui grise un bouton laisse l'API atteignable
+pour qui la connaît : l'objectif était que la dépense soit impossible, pas découragée. Un test
+vérifie que l'appel réseau n'est jamais émis — c'est cette assertion, et non le message, qui
+garantit le budget.
+**Où** — `backend/src/igini/claude/generators-availability.ts`, `claude.service.ts`,
+`igini-status.controller.ts`.
+
+## Une valeur mal orthographiée n'éteint rien
+
+**Quoi** — seule la chaîne exacte `"false"` coupe les générateurs. `False`, `0`, `non`, une chaîne
+vide : le produit reste complet.
+**Pourquoi** — le sens par défaut d'Ignitux est « toutes les fonctionnalités marchent ». Une
+faute de frappe dans une variable d'environnement ne doit pas pouvoir éteindre silencieusement
+une partie du produit, puis laisser chercher pendant une heure pourquoi les boutons ont disparu.
+Éteindre est une décision : elle s'écrit exactement.
+**Où** — `backend/src/igini/claude/generators-availability.ts`.
+
+## Dans le doute, l'interface propose
+
+**Quoi** — côté frontend, les boutons de génération ne disparaissent que sur une réponse explicite
+du serveur disant `generatorsEnabled: false`. Statut non encore reçu, requête échouée ou réponse
+malformée : les boutons restent.
+**Pourquoi** — les deux erreurs possibles ne coûtent pas la même chose. Afficher un bouton qui
+sera refusé fait perdre un clic et donne un message clair. Cacher un bouton qui marche prive
+quelqu'un d'une fonctionnalité sans qu'il sache qu'elle existe. Le second cas est le plus grave,
+donc l'incertitude penche du côté de proposer.
+**Où** — `frontend/src/app/projects/[id]/page.tsx` (`useIginiStatus`, `GenerationSection`).
+
+## Test à deux personnes : réseau local plutôt qu'hébergement public
+
+**Quoi** — Ignitux est servi depuis le poste du porteur sur `http://192.168.1.12:3001`, accessible
+aux appareils du même WiFi. Aucun hébergeur tiers, aucune URL publique.
+**Pourquoi** — les testeurs sont sur le même réseau : une URL publique n'apportait aucun accès
+supplémentaire, mais aurait exposé l'API — et derrière elle la base Supabase, qui est la même
+qu'en développement — sur Internet pour un test d'une heure. La solution la plus simple était
+aussi la moins risquée, ce qui est rare et méritait d'être saisi.
+**Où** — `PROGRESS.md` §12.3, procédure d'arrêt incluse.
