@@ -113,4 +113,13 @@ describe('ScoringService', () => {
 
     expect(score.confiance).toBe(4); // 2/5 = 40% = 4/10
   });
+
+  it('un collaborateur (pas seulement le propriétaire) peut consulter le score', async () => {
+    prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+    prisma.analyses.findFirst.mockResolvedValue({ feasibility_score: 7 });
+
+    const score = await service.getScoreCard('u2-collaborateur', 'p1');
+
+    expect(score.etincelle).toBe(7);
+  });
 });

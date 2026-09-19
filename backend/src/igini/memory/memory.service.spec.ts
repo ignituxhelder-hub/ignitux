@@ -94,6 +94,41 @@ describe('MemoryService', () => {
     });
   });
 
+  describe('search', () => {
+    it('sans projectId, filtre par utilisateur (souvenirs personnels)', async () => {
+      prisma.memories.findMany.mockResolvedValue([]);
+
+      await service.search('u1');
+
+      expect(prisma.memories.findMany).toHaveBeenCalledWith({
+        where: { user_id: 'u1' },
+        orderBy: { created_at: 'desc' },
+      });
+      expect(prisma.projects.findFirst).not.toHaveBeenCalled();
+    });
+
+    it("avec projectId, leve une NotFoundException si l'utilisateur n'a pas acces au projet", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.search('u2', undefined, 'p1')).rejects.toBeInstanceOf(NotFoundException);
+      expect(prisma.memories.findMany).not.toHaveBeenCalled();
+    });
+
+    it('avec projectId, un collaborateur voit les souvenirs du projet (pas seulement les siens)', async () => {
+      // Le projet appartient à u1, mais u2 (collaborateur) y a accès.
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.memories.findMany.mockResolvedValue([{ id: 'm1', user_id: 'u1' }]);
+
+      const result = await service.search('u2', undefined, 'p1');
+
+      expect(prisma.memories.findMany).toHaveBeenCalledWith({
+        where: { project_id: 'p1' },
+        orderBy: { created_at: 'desc' },
+      });
+      expect(result).toEqual([{ id: 'm1', user_id: 'u1' }]);
+    });
+  });
+
   describe('summarize', () => {
     it("renvoie un message par défaut s'il n'y a aucun souvenir", async () => {
       prisma.memories.findMany.mockResolvedValue([]);

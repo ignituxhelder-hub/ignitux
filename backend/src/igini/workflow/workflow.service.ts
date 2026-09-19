@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { assertHasProjectAccess } from '../../prisma/assert-has-project-access.js';
 import { assertOwnsProject } from '../../prisma/assert-owns-project.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import type { TaskAssignee, TaskStatus } from './task-status.js';
@@ -31,8 +32,10 @@ export class WorkflowService {
     });
   }
 
+  // Lecture seule : un collaborateur peut consulter les tâches, pas en créer
+  // ni changer leur statut (voir createTask/updateStatus, restés owner-only).
   async listTasks(userId: string, projectId: string) {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await assertHasProjectAccess(this.prisma, userId, projectId);
 
     return this.prisma.tasks.findMany({
       where: { project_id: projectId },

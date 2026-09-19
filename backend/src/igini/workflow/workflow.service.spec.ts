@@ -59,6 +59,28 @@ describe('WorkflowService', () => {
     });
   });
 
+  describe('listTasks', () => {
+    it("lève une NotFoundException si l'utilisateur n'a pas accès au projet", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.listTasks('u1', 'p1')).rejects.toBeInstanceOf(NotFoundException);
+      expect(prisma.tasks.findMany).not.toHaveBeenCalled();
+    });
+
+    it('un collaborateur (pas seulement le propriétaire) peut lister les tâches', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.tasks.findMany.mockResolvedValue([{ id: 't1' }]);
+
+      const result = await service.listTasks('u2-collaborateur', 'p1');
+
+      expect(prisma.tasks.findMany).toHaveBeenCalledWith({
+        where: { project_id: 'p1' },
+        orderBy: { created_at: 'asc' },
+      });
+      expect(result).toEqual([{ id: 't1' }]);
+    });
+  });
+
   describe('updateStatus', () => {
     it('lève une NotFoundException si la tâche est introuvable', async () => {
       prisma.tasks.findFirst.mockResolvedValue(null);

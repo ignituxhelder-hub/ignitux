@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { assertHasProjectAccess } from '../../prisma/assert-has-project-access.js';
 import { assertOwnsProject } from '../../prisma/assert-owns-project.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { MEMORY_CATEGORIES, type MemoryCategory } from './memory-category.js';
@@ -28,11 +29,22 @@ export class MemoryService {
     });
   }
 
-  search(userId: string, query?: string, projectId?: string) {
+  /**
+   * Sans projectId : uniquement les souvenirs personnels de l'appelant (rien
+   * à vérifier, c'est intrinsèquement privé). Avec projectId : les souvenirs
+   * de CE projet quel qu'en soit l'auteur, dès lors que l'appelant y a accès
+   * (propriétaire ou collaborateur) — pas seulement les siens, sinon un
+   * collaborateur ne verrait jamais les souvenirs du propriétaire liés au
+   * projet partagé, ce qui viderait le moteur Mémoire de son intérêt pour lui.
+   */
+  async search(userId: string, query?: string, projectId?: string) {
+    if (projectId) {
+      await assertHasProjectAccess(this.prisma, userId, projectId);
+    }
+
     return this.prisma.memories.findMany({
       where: {
-        user_id: userId,
-        ...(projectId ? { project_id: projectId } : {}),
+        ...(projectId ? { project_id: projectId } : { user_id: userId }),
         ...(query ? { content: { contains: query, mode: 'insensitive' } } : {}),
       },
       orderBy: { created_at: 'desc' },

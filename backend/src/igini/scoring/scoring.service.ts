@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { assertOwnsProject } from '../../prisma/assert-owns-project.js';
+import { assertHasProjectAccess } from '../../prisma/assert-has-project-access.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 
 export interface ScoreCard {
@@ -29,8 +29,9 @@ export interface ScoreCard {
 export class ScoringService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // Lecture seule par nature : un collaborateur peut consulter le score.
   async getScoreCard(userId: string, projectId: string): Promise<ScoreCard> {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await assertHasProjectAccess(this.prisma, userId, projectId);
 
     const [analysis, buildPlan, financingPlan, developmentPlan, transmissionPlan, tasks] =
       await Promise.all([

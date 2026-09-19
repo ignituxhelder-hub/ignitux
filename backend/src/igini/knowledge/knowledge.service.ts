@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { assertHasProjectAccess } from '../../prisma/assert-has-project-access.js';
 import { assertOwnsProject } from '../../prisma/assert-owns-project.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 
@@ -33,12 +34,19 @@ export class KnowledgeService {
     });
   }
 
-  listConcepts(userId: string, projectId?: string) {
+  /**
+   * Sans projectId : uniquement les concepts personnels de l'appelant. Avec
+   * projectId : les concepts de CE projet quel qu'en soit l'auteur, dès lors
+   * que l'appelant y a accès (propriétaire ou collaborateur) — même logique
+   * que MemoryService.search, voir son commentaire pour le détail.
+   */
+  async listConcepts(userId: string, projectId?: string) {
+    if (projectId) {
+      await assertHasProjectAccess(this.prisma, userId, projectId);
+    }
+
     return this.prisma.concepts.findMany({
-      where: {
-        user_id: userId,
-        ...(projectId ? { project_id: projectId } : {}),
-      },
+      where: projectId ? { project_id: projectId } : { user_id: userId },
       orderBy: { created_at: 'desc' },
     });
   }
