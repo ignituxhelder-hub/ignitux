@@ -1107,7 +1107,7 @@ Ces cinq points n'ont pas été touchés. Pour chacun, ce dont j'ai besoin pour 
 | Point | La question exacte |
 |---|---|
 | **Fournisseur d'email** | Resend, AWS SES, ou autre ? Une fois le nom donné, le branchement ne touche qu'une classe. Question liée : la vérification d'email devient-elle **obligatoire** pour se connecter, ou reste-t-elle facultative comme aujourd'hui ? |
-| **Budget / modèle IA** | Quel plafond mensuel acceptes-tu, et sur quel modèle ? Rallumer est une variable d'environnement ; c'est le plafond que je ne peux pas fixer à ta place. |
+| **Budget / modèle IA** | **Partiellement tranché le 20/09/2026** : le coût IA peut monter à **10 % du prix**, soit 2,00 € par utilisateur et par mois. Chiffré dans `PRICING.md`, qui clot aussi la question du modèle (`claude-opus-5` tient dix fois dans l'enveloppe). **Reste à trancher** : ce taux relatif et le plafond absolu de 50 €/mois se croisent à **25 utilisateurs payants** — lequel prime au-delà ? Et rallumer reste une décision à part : `IGINI_AI_ENABLED` est toujours à `false`. |
 | **Les Gardiens (art. 17)** | Qui est Gardien — toi seul, un rôle attribuable, un collège ? Et surtout : que peut-il **empêcher** concrètement ? Sans réponse à la seconde question, le rôle n'a pas de traduction en code. |
 | **Montage juridique 51/49** | Le contrat doit-il être un document généré par Ignitux, ou un modèle que tu fais rédiger et que le produit se contente de référencer ? Question préalable : quel juriste valide ? |
 | **Sources Suisse / Portugal** | Quelles sources officielles fais-tu autorité — équivalents de service-public.fr pour ces deux pays ? Sans URL officielle, je ne peux rien semer : le module refuse une règle locale sans source, et c'est volontaire. |
@@ -1299,7 +1299,9 @@ chercher sans que personne ait à y penser.
 
 ## 16.13 Toujours bloqué, toujours la même question
 
-Les cinq points du §15.6 sont inchangés : fournisseur d'email, budget et modèle IA, les Gardiens,
-montage juridique du 51/49, sources Suisse et Portugal. Et la bascule du déploiement vers la base
+Quatre des cinq points du §15.6 sont inchangés : fournisseur d'email, les Gardiens, montage
+juridique du 51/49, sources Suisse et Portugal. Le cinquième — budget et modèle IA — a été
+partiellement tranché depuis : le taux de 10 % est fixé, le modèle est confirmé, mais l'arbitrage
+entre ce taux et le plafond absolu de 50 € reste ouvert, et l'IA n'est pas rallumée. Et la bascule du déploiement vers la base
 de production, qui effacerait le projet de `testeur1` — trois options y sont posées, aucune n'a
 été prise.
