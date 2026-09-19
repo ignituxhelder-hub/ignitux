@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mockApiRoutes } from '@/test-utils/mocks';
 import { KnowledgeSection, MemorySection, ScoreSection, TasksSection } from './engine-sections';
@@ -305,6 +305,136 @@ describe('MemorySection', () => {
     expect(
       await screen.findByText('Aucun souvenir ne correspond à cette recherche.'),
     ).toBeInTheDocument();
+  });
+});
+
+describe('KnowledgeSection — recherche, isolés, suppressions', () => {
+  const CONCEPTS = [
+    {
+      id: 'c1',
+      user_id: 'u1',
+      project_id: PROJECT_ID,
+      name: 'Atelier mobile',
+      description: null,
+      category: null,
+      created_at: '2026-01-01T00:00:00.000Z',
+    },
+    {
+      id: 'c2',
+      user_id: 'u1',
+      project_id: PROJECT_ID,
+      name: 'Budget',
+      description: null,
+      category: null,
+      created_at: '2026-01-01T00:00:00.000Z',
+    },
+  ];
+
+  it('signale les concepts que rien ne relie, sans en faire un défaut', async () => {
+    mockApiRoutes({
+      'GET /knowledge/graph': {
+        status: 200,
+        body: { nodes: CONCEPTS, edges: [], isolated: ['c1', 'c2'] },
+      },
+    });
+
+    render(<KnowledgeSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    expect(await screen.findByText(/2 concept\(s\) ne sont reliés à rien/)).toBeInTheDocument();
+  });
+
+  it('filtre la liste des concepts sur une recherche', async () => {
+    mockApiRoutes({
+      'GET /knowledge/graph': {
+        status: 200,
+        body: { nodes: CONCEPTS, edges: [], isolated: [] },
+      },
+      'GET /knowledge/concepts/search': { status: 200, body: [CONCEPTS[0]] },
+    });
+
+    render(<KnowledgeSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    const list = await screen.findByRole('list', { name: 'Concepts du projet' });
+    await waitFor(() => expect(within(list).getAllByRole("listitem")).toHaveLength(2));
+
+    fireEvent.change(screen.getByLabelText('Rechercher un concept'), {
+      target: { value: 'atelier' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Rechercher' }));
+
+    await waitFor(() => expect(within(list).getAllByRole("listitem")).toHaveLength(1));
+    expect(within(list).getByText(/Atelier mobile/)).toBeInTheDocument();
+  });
+
+  it("dit qu'aucun lien n'existe plutôt que d'en inventer un", async () => {
+    mockApiRoutes({
+      'GET /knowledge/graph': {
+        status: 200,
+        body: { nodes: CONCEPTS, edges: [], isolated: [] },
+      },
+      'GET /knowledge/path': {
+        status: 200,
+        body: { from: CONCEPTS[0], to: CONCEPTS[1], path: null },
+      },
+    });
+
+    render(<KnowledgeSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByLabelText('Concept de départ');
+    fireEvent.change(screen.getByLabelText('Concept de départ'), { target: { value: 'c1' } });
+    fireEvent.change(screen.getByLabelText("Concept d'arrivée"), { target: { value: 'c2' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Chercher un chemin' }));
+
+    expect(await screen.findByText(/Aucun lien connu entre ces deux concepts/)).toBeInTheDocument();
+  });
+
+  it('affiche le chemin trouvé entre deux concepts', async () => {
+    mockApiRoutes({
+      'GET /knowledge/graph': {
+        status: 200,
+        body: { nodes: CONCEPTS, edges: [], isolated: [] },
+      },
+      'GET /knowledge/path': {
+        status: 200,
+        body: { from: CONCEPTS[0], to: CONCEPTS[1], path: CONCEPTS },
+      },
+    });
+
+    render(<KnowledgeSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByLabelText('Concept de départ');
+    fireEvent.change(screen.getByLabelText('Concept de départ'), { target: { value: 'c1' } });
+    fireEvent.change(screen.getByLabelText("Concept d'arrivée"), { target: { value: 'c2' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Chercher un chemin' }));
+
+    expect(await screen.findByText('Chemin : Atelier mobile → Budget')).toBeInTheDocument();
+  });
+
+  it('masque les suppressions en lecture seule', async () => {
+    mockApiRoutes({
+      'GET /knowledge/graph': {
+        status: 200,
+        body: {
+          nodes: CONCEPTS,
+          edges: [
+            {
+              id: 'l1',
+              from_concept_id: 'c1',
+              to_concept_id: 'c2',
+              relation_type: 'dépend de',
+              created_at: '2026-01-01T00:00:00.000Z',
+            },
+          ],
+          isolated: [],
+        },
+      },
+    });
+
+    render(<KnowledgeSection token={TOKEN} projectId={PROJECT_ID} readOnly />);
+
+    await screen.findByRole('list', { name: 'Concepts du projet' });
+    expect(screen.queryByRole('button', { name: 'Supprimer' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Délier' })).not.toBeInTheDocument();
   });
 });
 

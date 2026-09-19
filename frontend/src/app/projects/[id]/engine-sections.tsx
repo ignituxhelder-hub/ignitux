@@ -541,6 +541,7 @@ export function KnowledgeSection({
 }: ReadOnlySectionProps) {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [edges, setEdges] = useState<ConceptLink[]>([]);
+  const [isolated, setIsolated] = useState<string[]>([]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [fromId, setFromId] = useState('');
@@ -551,6 +552,13 @@ export function KnowledgeSection({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Recherche : le graphe complet reste la source des relations affichées,
+  // la recherche ne filtre que la liste des concepts. Filtrer aussi les
+  // arêtes donnerait l'impression que des liens ont disparu.
+  const [conceptQuery, setConceptQuery] = useState('');
+  const [matchedIds, setMatchedIds] = useState<string[] | null>(null);
+  const [pathMessage, setPathMessage] = useState<string | null>(null);
+
   function loadGraph() {
     if (!token) return;
     setIsLoading(true);
@@ -559,6 +567,7 @@ export function KnowledgeSection({
       .then((graph) => {
         setConcepts(Array.isArray(graph?.nodes) ? graph.nodes : []);
         setEdges(Array.isArray(graph?.edges) ? graph.edges : []);
+        setIsolated(Array.isArray(graph?.isolated) ? graph.isolated : []);
       })
       .catch(() => {})
       .finally(() => setIsLoading(false));
@@ -568,6 +577,64 @@ export function KnowledgeSection({
     loadGraph();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, projectId, refreshSignal]);
+
+  async function handleSearch(e: FormEvent) {
+    e.preventDefault();
+    if (!token) return;
+    const query = conceptQuery.trim();
+    if (!query) {
+      setMatchedIds(null);
+      return;
+    }
+    setError(null);
+    try {
+      const found = await api.searchConcepts(token, projectId, { query });
+      setMatchedIds(found.map((concept) => concept.id));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Impossible de chercher parmi les concepts.');
+    }
+  }
+
+  async function handleFindPath() {
+    if (!token || !fromId || !toId) return;
+    setError(null);
+    setPathMessage(null);
+    try {
+      const result = await api.findConceptPath(token, fromId, toId);
+      setPathMessage(
+        result.path
+          ? `Chemin : ${result.path.map((concept) => concept.name).join(' → ')}`
+          : "Aucun lien connu entre ces deux concepts. Ce n'est pas une erreur : rien ne les relie pour l'instant.",
+      );
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Impossible de chercher un chemin.');
+    }
+  }
+
+  async function handleDeleteConcept(conceptId: string) {
+    if (!token) return;
+    setError(null);
+    try {
+      await api.deleteConcept(token, conceptId);
+      loadGraph();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Impossible de supprimer ce concept.');
+    }
+  }
+
+  async function handleUnlink(linkId: string) {
+    if (!token) return;
+    setError(null);
+    try {
+      await api.unlinkConcepts(token, linkId);
+      loadGraph();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Impossible de supprimer ce lien.');
+    }
+  }
+
+  const visibleConcepts =
+    matchedIds === null ? concepts : concepts.filter((concept) => matchedIds.includes(concept.id));
 
   async function handleCreateConcept(e: FormEvent) {
     e.preventDefault();
@@ -635,14 +702,63 @@ export function KnowledgeSection({
         </form>
       )}
 
+      <form
+        onSubmit={handleSearch}
+        style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}
+      >
+        <input
+          aria-label="Rechercher un concept"
+          placeholder="Rechercher (nom ou description)"
+          value={conceptQuery}
+          onChange={(e) => setConceptQuery(e.target.value)}
+        />
+        <button className="secondary" type="submit">
+          Rechercher
+        </button>
+        {matchedIds !== null && (
+          <button
+            className="secondary"
+            type="button"
+            onClick={() => {
+              setConceptQuery('');
+              setMatchedIds(null);
+            }}
+          >
+            Tout afficher
+          </button>
+        )}
+      </form>
+
       {isLoading && <p className="loading">Chargement…</p>}
       {!isLoading && concepts.length === 0 && <p className="muted">Aucun concept pour l&apos;instant.</p>}
+      {!isLoading && concepts.length > 0 && visibleConcepts.length === 0 && (
+        <p className="muted">Aucun concept ne correspond à cette recherche.</p>
+      )}
       <ConceptGraphView concepts={concepts} edges={edges} />
-      <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
-        {concepts.map((c) => (
+      {isolated.length > 0 && (
+        <p className="muted">
+          {isolated.length} concept(s) ne sont reliés à rien pour l&apos;instant. Ce n&apos;est pas
+          un défaut : souvent, ce sont des idées pas encore rattachées au reste.
+        </p>
+      )}
+      {/* Nommée : le même libellé de concept apparaît aussi dans le graphe
+          SVG et dans les listes déroulantes de liaison, donc un test (comme
+          un lecteur d'écran) a besoin de pouvoir désigner cette liste-ci. */}
+      <ul aria-label="Concepts du projet" style={{ margin: 0, paddingLeft: '1.25rem' }}>
+        {visibleConcepts.map((c) => (
           <li key={c.id}>
             {c.name}
             {c.description ? ` — ${c.description}` : ''}
+            {!readOnly && (
+              <button
+                className="secondary"
+                type="button"
+                onClick={() => void handleDeleteConcept(c.id)}
+                style={{ marginLeft: '0.5rem' }}
+              >
+                Supprimer
+              </button>
+            )}
           </li>
         ))}
       </ul>
@@ -677,8 +793,12 @@ export function KnowledgeSection({
           <button className="secondary" type="submit" disabled={isLinking}>
             {isLinking ? 'Liaison…' : 'Relier'}
           </button>
+          <button className="secondary" type="button" onClick={() => void handleFindPath()}>
+            Chercher un chemin
+          </button>
         </form>
       )}
+      {pathMessage && <p className="muted">{pathMessage}</p>}
 
       {edges.length > 0 && (
         <div style={{ marginTop: '1rem' }}>
@@ -687,6 +807,16 @@ export function KnowledgeSection({
             {edges.map((edge) => (
               <li key={edge.id}>
                 {conceptName(edge.from_concept_id)} → {conceptName(edge.to_concept_id)} ({edge.relation_type})
+                {!readOnly && (
+                  <button
+                    className="secondary"
+                    type="button"
+                    onClick={() => void handleUnlink(edge.id)}
+                    style={{ marginLeft: '0.5rem' }}
+                  >
+                    Délier
+                  </button>
+                )}
               </li>
             ))}
           </ul>

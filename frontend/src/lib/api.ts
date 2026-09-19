@@ -176,6 +176,15 @@ export interface ConceptLink {
 export interface ConceptGraph {
   nodes: Concept[];
   edges: ConceptLink[];
+  /** Concepts qu'aucun lien ne relie — pas une anomalie, une information. */
+  isolated: string[];
+}
+
+export interface ConceptPath {
+  from: Concept;
+  to: Concept;
+  /** null = aucun lien connu entre les deux, ce qui est une réponse en soi. */
+  path: Concept[] | null;
 }
 
 export type TaskStatus = 'pending' | 'in_progress' | 'done' | 'blocked';
@@ -652,6 +661,41 @@ export const api = {
 
   listAutomationRuns: (token: string, projectId: string) =>
     request<AutomationRun[]>(`/projects/${projectId}/automation/runs`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  searchConcepts: (
+    token: string,
+    projectId: string,
+    filters: { query?: string; category?: string } = {},
+  ) => {
+    const params = new URLSearchParams({ projectId });
+    if (filters.query) params.set('q', filters.query);
+    if (filters.category) params.set('category', filters.category);
+    return request<Concept[]>(`/knowledge/concepts/search?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+
+  listConceptCategories: (token: string, projectId: string) =>
+    request<string[]>(`/knowledge/categories?projectId=${projectId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  findConceptPath: (token: string, fromId: string, toId: string) =>
+    request<ConceptPath>(`/knowledge/path?from=${fromId}&to=${toId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  deleteConcept: (token: string, conceptId: string) =>
+    request<void>(`/knowledge/concepts/${conceptId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  unlinkConcepts: (token: string, linkId: string) =>
+    request<void>(`/knowledge/links/${linkId}`, {
+      method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     }),
 

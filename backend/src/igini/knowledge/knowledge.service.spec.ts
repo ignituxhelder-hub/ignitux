@@ -6,15 +6,25 @@ import { KnowledgeService } from './knowledge.service.js';
 describe('KnowledgeService', () => {
   let service: KnowledgeService;
   let prisma: {
-    concepts: { create: ReturnType<typeof vi.fn>; findMany: ReturnType<typeof vi.fn>; findFirst: ReturnType<typeof vi.fn> };
-    concept_links: { create: ReturnType<typeof vi.fn>; findMany: ReturnType<typeof vi.fn> };
+    concepts: {
+      create: ReturnType<typeof vi.fn>;
+      findMany: ReturnType<typeof vi.fn>;
+      findFirst: ReturnType<typeof vi.fn>;
+      delete: ReturnType<typeof vi.fn>;
+    };
+    concept_links: {
+      create: ReturnType<typeof vi.fn>;
+      findMany: ReturnType<typeof vi.fn>;
+      findFirst: ReturnType<typeof vi.fn>;
+      delete: ReturnType<typeof vi.fn>;
+    };
     projects: { findFirst: ReturnType<typeof vi.fn> };
   };
 
   beforeEach(async () => {
     prisma = {
-      concepts: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
-      concept_links: { create: vi.fn(), findMany: vi.fn() },
+      concepts: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn(), delete: vi.fn() },
+      concept_links: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn(), delete: vi.fn() },
       projects: { findFirst: vi.fn() },
     };
 
@@ -110,7 +120,7 @@ describe('KnowledgeService', () => {
 
       const result = await service.getGraph('u1');
 
-      expect(result).toEqual({ nodes: [], edges: [] });
+      expect(result).toEqual({ nodes: [], edges: [], isolated: [] });
       expect(prisma.concept_links.findMany).not.toHaveBeenCalled();
     });
 
@@ -128,6 +138,173 @@ describe('KnowledgeService', () => {
       });
       expect(result.nodes).toHaveLength(2);
       expect(result.edges).toHaveLength(1);
+    });
+
+    it('signale les concepts que rien ne relie', async () => {
+      prisma.concepts.findMany.mockResolvedValue([{ id: 'c1' }, { id: 'c2' }, { id: 'c3' }]);
+      prisma.concept_links.findMany.mockResolvedValue([
+        { id: 'l1', from_concept_id: 'c1', to_concept_id: 'c2' },
+      ]);
+
+      const result = await service.getGraph('u1');
+
+      expect(result.isolated).toEqual(['c3']);
+    });
+  });
+
+  describe('searchConcepts', () => {
+    it('exige tous les mots, dans le nom ou la description', async () => {
+      prisma.concepts.findMany.mockResolvedValue([]);
+
+      await service.searchConcepts('u1', { query: 'atelier mobile' });
+
+      const where = prisma.concepts.findMany.mock.calls[0][0].where;
+      expect(where.AND).toHaveLength(2);
+      expect(where.AND[0].OR).toEqual([
+        { name: { contains: 'atelier', mode: 'insensitive' } },
+        { description: { contains: 'atelier', mode: 'insensitive' } },
+      ]);
+    });
+
+    it('filtre par catégorie', async () => {
+      prisma.concepts.findMany.mockResolvedValue([]);
+
+      await service.searchConcepts('u1', { category: 'marché' });
+
+      expect(prisma.concepts.findMany.mock.calls[0][0].where.category).toBe('marché');
+    });
+
+    it("vérifie l'accès au projet avant de chercher dedans", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.searchConcepts('u2', { projectId: 'p1' })).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(prisma.concepts.findMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listCategories', () => {
+    it('renvoie les catégories utilisées, dédupliquées et triées, sans les vides', async () => {
+      prisma.concepts.findMany.mockResolvedValue([
+        { category: 'marché' },
+        { category: 'technique' },
+        { category: 'marché' },
+        { category: null },
+      ]);
+
+      await expect(service.listCategories('u1')).resolves.toEqual(['marché', 'technique']);
+    });
+  });
+
+  describe('getNeighbourhood', () => {
+    beforeEach(() => {
+      prisma.concepts.findFirst.mockResolvedValue({ id: 'c1', user_id: 'u1', project_id: null });
+      prisma.concepts.findMany.mockResolvedValue([
+        { id: 'c1' },
+        { id: 'c2' },
+        { id: 'c3' },
+        { id: 'c4' },
+      ]);
+      prisma.concept_links.findMany.mockResolvedValue([
+        { id: 'l1', from_concept_id: 'c1', to_concept_id: 'c2' },
+        { id: 'l2', from_concept_id: 'c2', to_concept_id: 'c3' },
+      ]);
+    });
+
+    it('ne renvoie que les concepts atteignables à la profondeur demandée', async () => {
+      const result = await service.getNeighbourhood('u1', 'c1', 1);
+
+      expect(result.nodes.map((node) => node.id)).toEqual(['c1', 'c2']);
+      expect(result.edges.map((edge) => edge.id)).toEqual(['l1']);
+    });
+
+    it('élargit le voisinage avec la profondeur', async () => {
+      const result = await service.getNeighbourhood('u1', 'c1', 2);
+
+      expect(result.nodes.map((node) => node.id)).toEqual(['c1', 'c2', 'c3']);
+    });
+
+    it('plafonne la profondeur renvoyée', async () => {
+      const result = await service.getNeighbourhood('u1', 'c1', 50);
+
+      expect(result.depth).toBe(3);
+    });
+
+    it("refuse un concept qui n'appartient pas à l'appelant", async () => {
+      prisma.concepts.findFirst.mockResolvedValue(null);
+
+      await expect(service.getNeighbourhood('u2', 'c1', 1)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('findPath', () => {
+    beforeEach(() => {
+      prisma.concepts.findFirst.mockImplementation(({ where }: { where: { id: string } }) =>
+        Promise.resolve({ id: where.id, user_id: 'u1', project_id: null }),
+      );
+      prisma.concepts.findMany.mockResolvedValue([{ id: 'c1' }, { id: 'c2' }, { id: 'c3' }]);
+    });
+
+    it('renvoie les concepts du chemin dans l\'ordre', async () => {
+      prisma.concept_links.findMany.mockResolvedValue([
+        { id: 'l1', from_concept_id: 'c1', to_concept_id: 'c2' },
+        { id: 'l2', from_concept_id: 'c2', to_concept_id: 'c3' },
+      ]);
+
+      const result = await service.findPath('u1', 'c1', 'c3');
+
+      expect(result.path?.map((concept) => concept?.id)).toEqual(['c1', 'c2', 'c3']);
+    });
+
+    it("renvoie path: null quand aucun lien ne relie les deux concepts", async () => {
+      prisma.concept_links.findMany.mockResolvedValue([]);
+
+      const result = await service.findPath('u1', 'c1', 'c3');
+
+      expect(result.path).toBeNull();
+    });
+  });
+
+  describe('suppressions', () => {
+    it("refuse de supprimer un concept qui n'appartient pas à l'appelant", async () => {
+      prisma.concepts.findFirst.mockResolvedValue(null);
+
+      await expect(service.deleteConcept('u2', 'c1')).rejects.toBeInstanceOf(NotFoundException);
+      expect(prisma.concepts.delete).not.toHaveBeenCalled();
+    });
+
+    it('supprime un concept de son propriétaire', async () => {
+      prisma.concepts.findFirst.mockResolvedValue({ id: 'c1', user_id: 'u1' });
+
+      await service.deleteConcept('u1', 'c1');
+
+      expect(prisma.concepts.delete).toHaveBeenCalledWith({ where: { id: 'c1' } });
+    });
+
+    it('refuse de supprimer un lien introuvable', async () => {
+      prisma.concept_links.findFirst.mockResolvedValue(null);
+
+      await expect(service.unlink('u1', 'l1')).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it("refuse de supprimer le lien d'un autre utilisateur", async () => {
+      prisma.concept_links.findFirst.mockResolvedValue({ id: 'l1', from_concept_id: 'c1' });
+      prisma.concepts.findFirst.mockResolvedValue(null);
+
+      await expect(service.unlink('u2', 'l1')).rejects.toBeInstanceOf(NotFoundException);
+      expect(prisma.concept_links.delete).not.toHaveBeenCalled();
+    });
+
+    it('supprime un lien du propriétaire', async () => {
+      prisma.concept_links.findFirst.mockResolvedValue({ id: 'l1', from_concept_id: 'c1' });
+      prisma.concepts.findFirst.mockResolvedValue({ id: 'c1', user_id: 'u1' });
+
+      await service.unlink('u1', 'l1');
+
+      expect(prisma.concept_links.delete).toHaveBeenCalledWith({ where: { id: 'l1' } });
     });
   });
 });
