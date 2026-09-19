@@ -188,6 +188,8 @@ export type usersWhereInput = {
   community_comments?: Prisma.Community_commentsListRelationFilter
   collaborations?: Prisma.Project_collaboratorsListRelationFilter
   auth_tokens?: Prisma.Auth_tokensListRelationFilter
+  marketplace_profile?: Prisma.XOR<Prisma.Marketplace_profilesNullableScalarRelationFilter, Prisma.marketplace_profilesWhereInput> | null
+  marketplace_contacts_sent?: Prisma.Marketplace_contactsListRelationFilter
 }
 
 export type usersOrderByWithRelationInput = {
@@ -202,6 +204,8 @@ export type usersOrderByWithRelationInput = {
   community_comments?: Prisma.community_commentsOrderByRelationAggregateInput
   collaborations?: Prisma.project_collaboratorsOrderByRelationAggregateInput
   auth_tokens?: Prisma.auth_tokensOrderByRelationAggregateInput
+  marketplace_profile?: Prisma.marketplace_profilesOrderByWithRelationInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsOrderByRelationAggregateInput
 }
 
 export type usersWhereUniqueInput = Prisma.AtLeast<{
@@ -219,6 +223,8 @@ export type usersWhereUniqueInput = Prisma.AtLeast<{
   community_comments?: Prisma.Community_commentsListRelationFilter
   collaborations?: Prisma.Project_collaboratorsListRelationFilter
   auth_tokens?: Prisma.Auth_tokensListRelationFilter
+  marketplace_profile?: Prisma.XOR<Prisma.Marketplace_profilesNullableScalarRelationFilter, Prisma.marketplace_profilesWhereInput> | null
+  marketplace_contacts_sent?: Prisma.Marketplace_contactsListRelationFilter
 }, "id" | "email">
 
 export type usersOrderByWithAggregationInput = {
@@ -255,6 +261,8 @@ export type usersCreateInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
   auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
 }
 
 export type usersUncheckedCreateInput = {
@@ -269,6 +277,8 @@ export type usersUncheckedCreateInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
   auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
 }
 
 export type usersUpdateInput = {
@@ -283,6 +293,8 @@ export type usersUpdateInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
   auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
 }
 
 export type usersUncheckedUpdateInput = {
@@ -297,6 +309,8 @@ export type usersUncheckedUpdateInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
   auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
 }
 
 export type usersCreateManyInput = {
@@ -444,6 +458,34 @@ export type usersUpdateOneRequiredWithoutCollaborationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutCollaborationsInput, Prisma.usersUpdateWithoutCollaborationsInput>, Prisma.usersUncheckedUpdateWithoutCollaborationsInput>
 }
 
+export type usersCreateNestedOneWithoutMarketplace_profileInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutMarketplace_profileInput, Prisma.usersUncheckedCreateWithoutMarketplace_profileInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutMarketplace_profileInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutMarketplace_profileNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutMarketplace_profileInput, Prisma.usersUncheckedCreateWithoutMarketplace_profileInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutMarketplace_profileInput
+  upsert?: Prisma.usersUpsertWithoutMarketplace_profileInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutMarketplace_profileInput, Prisma.usersUpdateWithoutMarketplace_profileInput>, Prisma.usersUncheckedUpdateWithoutMarketplace_profileInput>
+}
+
+export type usersCreateNestedOneWithoutMarketplace_contacts_sentInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutMarketplace_contacts_sentInput, Prisma.usersUncheckedCreateWithoutMarketplace_contacts_sentInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutMarketplace_contacts_sentInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutMarketplace_contacts_sentNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutMarketplace_contacts_sentInput, Prisma.usersUncheckedCreateWithoutMarketplace_contacts_sentInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutMarketplace_contacts_sentInput
+  upsert?: Prisma.usersUpsertWithoutMarketplace_contacts_sentInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutMarketplace_contacts_sentInput, Prisma.usersUpdateWithoutMarketplace_contacts_sentInput>, Prisma.usersUncheckedUpdateWithoutMarketplace_contacts_sentInput>
+}
+
 export type usersCreateWithoutAuth_tokensInput = {
   id?: string
   email: string
@@ -455,6 +497,8 @@ export type usersCreateWithoutAuth_tokensInput = {
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
 }
 
 export type usersUncheckedCreateWithoutAuth_tokensInput = {
@@ -468,6 +512,8 @@ export type usersUncheckedCreateWithoutAuth_tokensInput = {
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
 }
 
 export type usersCreateOrConnectWithoutAuth_tokensInput = {
@@ -497,6 +543,8 @@ export type usersUpdateWithoutAuth_tokensInput = {
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
 }
 
 export type usersUncheckedUpdateWithoutAuth_tokensInput = {
@@ -510,6 +558,8 @@ export type usersUncheckedUpdateWithoutAuth_tokensInput = {
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
 }
 
 export type usersCreateWithoutProjectsInput = {
@@ -523,6 +573,8 @@ export type usersCreateWithoutProjectsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
   auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
 }
 
 export type usersUncheckedCreateWithoutProjectsInput = {
@@ -536,6 +588,8 @@ export type usersUncheckedCreateWithoutProjectsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
   auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
 }
 
 export type usersCreateOrConnectWithoutProjectsInput = {
@@ -565,6 +619,8 @@ export type usersUpdateWithoutProjectsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
   auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
 }
 
 export type usersUncheckedUpdateWithoutProjectsInput = {
@@ -578,6 +634,8 @@ export type usersUncheckedUpdateWithoutProjectsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
   auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
 }
 
 export type usersCreateWithoutMemoriesInput = {
@@ -591,6 +649,8 @@ export type usersCreateWithoutMemoriesInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
   auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
 }
 
 export type usersUncheckedCreateWithoutMemoriesInput = {
@@ -604,6 +664,8 @@ export type usersUncheckedCreateWithoutMemoriesInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
   auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
 }
 
 export type usersCreateOrConnectWithoutMemoriesInput = {
@@ -633,6 +695,8 @@ export type usersUpdateWithoutMemoriesInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
   auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMemoriesInput = {
@@ -646,6 +710,8 @@ export type usersUncheckedUpdateWithoutMemoriesInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
   auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
 }
 
 export type usersCreateWithoutConceptsInput = {
@@ -659,6 +725,8 @@ export type usersCreateWithoutConceptsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
   auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
 }
 
 export type usersUncheckedCreateWithoutConceptsInput = {
@@ -672,6 +740,8 @@ export type usersUncheckedCreateWithoutConceptsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
   auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
 }
 
 export type usersCreateOrConnectWithoutConceptsInput = {
@@ -701,6 +771,8 @@ export type usersUpdateWithoutConceptsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
   auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
 }
 
 export type usersUncheckedUpdateWithoutConceptsInput = {
@@ -714,6 +786,8 @@ export type usersUncheckedUpdateWithoutConceptsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
   auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
 }
 
 export type usersCreateWithoutCommunity_commentsInput = {
@@ -727,6 +801,8 @@ export type usersCreateWithoutCommunity_commentsInput = {
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
   auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
 }
 
 export type usersUncheckedCreateWithoutCommunity_commentsInput = {
@@ -740,6 +816,8 @@ export type usersUncheckedCreateWithoutCommunity_commentsInput = {
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
   auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
 }
 
 export type usersCreateOrConnectWithoutCommunity_commentsInput = {
@@ -769,6 +847,8 @@ export type usersUpdateWithoutCommunity_commentsInput = {
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
   auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCommunity_commentsInput = {
@@ -782,6 +862,8 @@ export type usersUncheckedUpdateWithoutCommunity_commentsInput = {
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
   auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
 }
 
 export type usersCreateWithoutCollaborationsInput = {
@@ -795,6 +877,8 @@ export type usersCreateWithoutCollaborationsInput = {
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
 }
 
 export type usersUncheckedCreateWithoutCollaborationsInput = {
@@ -808,6 +892,8 @@ export type usersUncheckedCreateWithoutCollaborationsInput = {
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
 }
 
 export type usersCreateOrConnectWithoutCollaborationsInput = {
@@ -837,6 +923,8 @@ export type usersUpdateWithoutCollaborationsInput = {
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCollaborationsInput = {
@@ -850,6 +938,160 @@ export type usersUncheckedUpdateWithoutCollaborationsInput = {
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
+}
+
+export type usersCreateWithoutMarketplace_profileInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
+}
+
+export type usersUncheckedCreateWithoutMarketplace_profileInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
+}
+
+export type usersCreateOrConnectWithoutMarketplace_profileInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutMarketplace_profileInput, Prisma.usersUncheckedCreateWithoutMarketplace_profileInput>
+}
+
+export type usersUpsertWithoutMarketplace_profileInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutMarketplace_profileInput, Prisma.usersUncheckedUpdateWithoutMarketplace_profileInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutMarketplace_profileInput, Prisma.usersUncheckedCreateWithoutMarketplace_profileInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutMarketplace_profileInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutMarketplace_profileInput, Prisma.usersUncheckedUpdateWithoutMarketplace_profileInput>
+}
+
+export type usersUpdateWithoutMarketplace_profileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
+}
+
+export type usersUncheckedUpdateWithoutMarketplace_profileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
+}
+
+export type usersCreateWithoutMarketplace_contacts_sentInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+}
+
+export type usersUncheckedCreateWithoutMarketplace_contacts_sentInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type usersCreateOrConnectWithoutMarketplace_contacts_sentInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutMarketplace_contacts_sentInput, Prisma.usersUncheckedCreateWithoutMarketplace_contacts_sentInput>
+}
+
+export type usersUpsertWithoutMarketplace_contacts_sentInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutMarketplace_contacts_sentInput, Prisma.usersUncheckedUpdateWithoutMarketplace_contacts_sentInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutMarketplace_contacts_sentInput, Prisma.usersUncheckedCreateWithoutMarketplace_contacts_sentInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutMarketplace_contacts_sentInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutMarketplace_contacts_sentInput, Prisma.usersUncheckedUpdateWithoutMarketplace_contacts_sentInput>
+}
+
+export type usersUpdateWithoutMarketplace_contacts_sentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+}
+
+export type usersUncheckedUpdateWithoutMarketplace_contacts_sentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
 }
 
 
@@ -864,6 +1106,7 @@ export type UsersCountOutputType = {
   community_comments: number
   collaborations: number
   auth_tokens: number
+  marketplace_contacts_sent: number
 }
 
 export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -873,6 +1116,7 @@ export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   community_comments?: boolean | UsersCountOutputTypeCountCommunity_commentsArgs
   collaborations?: boolean | UsersCountOutputTypeCountCollaborationsArgs
   auth_tokens?: boolean | UsersCountOutputTypeCountAuth_tokensArgs
+  marketplace_contacts_sent?: boolean | UsersCountOutputTypeCountMarketplace_contacts_sentArgs
 }
 
 /**
@@ -927,6 +1171,13 @@ export type UsersCountOutputTypeCountAuth_tokensArgs<ExtArgs extends runtime.Typ
   where?: Prisma.auth_tokensWhereInput
 }
 
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountMarketplace_contacts_sentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.marketplace_contactsWhereInput
+}
+
 
 export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -940,6 +1191,8 @@ export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   community_comments?: boolean | Prisma.users$community_commentsArgs<ExtArgs>
   collaborations?: boolean | Prisma.users$collaborationsArgs<ExtArgs>
   auth_tokens?: boolean | Prisma.users$auth_tokensArgs<ExtArgs>
+  marketplace_profile?: boolean | Prisma.users$marketplace_profileArgs<ExtArgs>
+  marketplace_contacts_sent?: boolean | Prisma.users$marketplace_contacts_sentArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["users"]>
 
@@ -975,6 +1228,8 @@ export type usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   community_comments?: boolean | Prisma.users$community_commentsArgs<ExtArgs>
   collaborations?: boolean | Prisma.users$collaborationsArgs<ExtArgs>
   auth_tokens?: boolean | Prisma.users$auth_tokensArgs<ExtArgs>
+  marketplace_profile?: boolean | Prisma.users$marketplace_profileArgs<ExtArgs>
+  marketplace_contacts_sent?: boolean | Prisma.users$marketplace_contacts_sentArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type usersIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -989,6 +1244,8 @@ export type $usersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     community_comments: Prisma.$community_commentsPayload<ExtArgs>[]
     collaborations: Prisma.$project_collaboratorsPayload<ExtArgs>[]
     auth_tokens: Prisma.$auth_tokensPayload<ExtArgs>[]
+    marketplace_profile: Prisma.$marketplace_profilesPayload<ExtArgs> | null
+    marketplace_contacts_sent: Prisma.$marketplace_contactsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1396,6 +1653,8 @@ export interface Prisma__usersClient<T, Null = never, ExtArgs extends runtime.Ty
   community_comments<T extends Prisma.users$community_commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$community_commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$community_commentsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   collaborations<T extends Prisma.users$collaborationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$collaborationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$project_collaboratorsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auth_tokens<T extends Prisma.users$auth_tokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$auth_tokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$auth_tokensPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  marketplace_profile<T extends Prisma.users$marketplace_profileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$marketplace_profileArgs<ExtArgs>>): Prisma.Prisma__marketplace_profilesClient<runtime.Types.Result.GetResult<Prisma.$marketplace_profilesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  marketplace_contacts_sent<T extends Prisma.users$marketplace_contacts_sentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$marketplace_contacts_sentArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$marketplace_contactsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1964,6 +2223,49 @@ export type users$auth_tokensArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.Auth_tokensScalarFieldEnum | Prisma.Auth_tokensScalarFieldEnum[]
+}
+
+/**
+ * users.marketplace_profile
+ */
+export type users$marketplace_profileArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the marketplace_profiles
+   */
+  select?: Prisma.marketplace_profilesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the marketplace_profiles
+   */
+  omit?: Prisma.marketplace_profilesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.marketplace_profilesInclude<ExtArgs> | null
+  where?: Prisma.marketplace_profilesWhereInput
+}
+
+/**
+ * users.marketplace_contacts_sent
+ */
+export type users$marketplace_contacts_sentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the marketplace_contacts
+   */
+  select?: Prisma.marketplace_contactsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the marketplace_contacts
+   */
+  omit?: Prisma.marketplace_contactsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.marketplace_contactsInclude<ExtArgs> | null
+  where?: Prisma.marketplace_contactsWhereInput
+  orderBy?: Prisma.marketplace_contactsOrderByWithRelationInput | Prisma.marketplace_contactsOrderByWithRelationInput[]
+  cursor?: Prisma.marketplace_contactsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Marketplace_contactsScalarFieldEnum | Prisma.Marketplace_contactsScalarFieldEnum[]
 }
 
 /**

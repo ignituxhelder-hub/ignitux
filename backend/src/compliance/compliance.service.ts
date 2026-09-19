@@ -1,0 +1,104 @@
+import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { assertHasProjectAccess } from '../prisma/assert-has-project-access.js';
+import { assertOwnsProject } from '../prisma/assert-owns-project.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { COMPLIANCE_REQUIREMENTS_FR } from './compliance-requirements.js';
+
+export const COMPLIANCE_DISCLAIMER =
+  "Ces informations sont générales, non exhaustives et rédigées à partir de sources publiques citées pour chaque point. " +
+  "Elles ne remplacent pas un avis d'expert-comptable, d'avocat ou des organismes officiels — à vérifier avant toute décision réelle.";
+
+/**
+ * COMPLIANCE — première brique du chantier réglementaire, volontairement
+ * limitée à la France et à des points génériques (voir
+ * compliance-requirements.ts pour le détail des sources). Rien n'est
+ * spécifique à un secteur d'activité précis pour l'instant : c'est un
+ * point de départ à vérifier, pas un module de conformité complet par pays.
+ */
+@Injectable()
+export class ComplianceService implements OnModuleInit {
+  constructor(private readonly prisma: PrismaService) {}
+
+  // Upsert idempotent sur `slug` : ne duplique rien au redémarrage, et une
+  // modification du contenu dans compliance-requirements.ts se reflète au
+  // prochain démarrage sans script de migration séparé.
+  async onModuleInit(): Promise<void> {
+    for (const requirement of COMPLIANCE_REQUIREMENTS_FR) {
+      await this.prisma.compliance_requirements.upsert({
+        where: { slug: requirement.slug },
+        update: {
+          category: requirement.category,
+          title: requirement.title,
+          description: requirement.description,
+          source_name: requirement.sourceName,
+          source_url: requirement.sourceUrl,
+        },
+        create: {
+          slug: requirement.slug,
+          country: requirement.country,
+          category: requirement.category,
+          title: requirement.title,
+          description: requirement.description,
+          source_name: requirement.sourceName,
+          source_url: requirement.sourceUrl,
+        },
+      });
+    }
+  }
+
+  async listRequirements(country = 'FR') {
+    const requirements = await this.prisma.compliance_requirements.findMany({
+      where: { country },
+      orderBy: [{ category: 'asc' }, { title: 'asc' }],
+    });
+    return { disclaimer: COMPLIANCE_DISCLAIMER, requirements };
+  }
+
+  // Lecture seule : accessible au propriétaire et aux collaborateurs, comme
+  // les 4 moteurs transverses (voir assertHasProjectAccess).
+  async listForProject(userId: string, projectId: string, country = 'FR') {
+    await assertHasProjectAccess(this.prisma, userId, projectId);
+
+    const [requirements, checks] = await Promise.all([
+      this.prisma.compliance_requirements.findMany({
+        where: { country },
+        orderBy: [{ category: 'asc' }, { title: 'asc' }],
+      }),
+      this.prisma.project_compliance_checks.findMany({ where: { project_id: projectId } }),
+    ]);
+
+    const completedRequirementIds = new Set(checks.map((check) => check.requirement_id));
+
+    return {
+      disclaimer: COMPLIANCE_DISCLAIMER,
+      requirements: requirements.map((requirement) => ({
+        ...requirement,
+        completed: completedRequirementIds.has(requirement.id),
+      })),
+    };
+  }
+
+  // Écriture réservée au propriétaire, comme partout ailleurs dans les
+  // moteurs transverses.
+  async markChecked(userId: string, projectId: string, requirementId: string) {
+    await assertOwnsProject(this.prisma, userId, projectId);
+
+    const requirement = await this.prisma.compliance_requirements.findUnique({ where: { id: requirementId } });
+    if (!requirement) {
+      throw new NotFoundException('Exigence de conformité introuvable.');
+    }
+
+    return this.prisma.project_compliance_checks.upsert({
+      where: { project_id_requirement_id: { project_id: projectId, requirement_id: requirementId } },
+      update: {},
+      create: { project_id: projectId, requirement_id: requirementId },
+    });
+  }
+
+  async unmarkChecked(userId: string, projectId: string, requirementId: string) {
+    await assertOwnsProject(this.prisma, userId, projectId);
+    await this.prisma.project_compliance_checks.deleteMany({
+      where: { project_id: projectId, requirement_id: requirementId },
+    });
+  }
+}

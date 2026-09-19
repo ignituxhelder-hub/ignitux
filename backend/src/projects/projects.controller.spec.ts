@@ -26,6 +26,8 @@ describe('ProjectsController', () => {
     listDevelopmentPlansForOwner: ReturnType<typeof vi.fn>;
     createTransmissionPlanForOwner: ReturnType<typeof vi.fn>;
     listTransmissionPlansForOwner: ReturnType<typeof vi.fn>;
+    runAutomationForOwner: ReturnType<typeof vi.fn>;
+    listAutomationRunsForViewer: ReturnType<typeof vi.fn>;
   };
   const currentUser = { id: 'u1', email: 'a@b.com' };
 
@@ -51,6 +53,8 @@ describe('ProjectsController', () => {
       listDevelopmentPlansForOwner: vi.fn(),
       createTransmissionPlanForOwner: vi.fn(),
       listTransmissionPlansForOwner: vi.fn(),
+      runAutomationForOwner: vi.fn(),
+      listAutomationRunsForViewer: vi.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -232,5 +236,23 @@ describe('ProjectsController', () => {
 
     expect(projectsService.listTransmissionPlansForOwner).toHaveBeenCalledWith('u1', 'p1');
     expect(result).toEqual([{ id: 'tp1' }]);
+  });
+
+  it('runAutomation délègue au service avec le propriétaire courant', async () => {
+    projectsService.runAutomationForOwner.mockResolvedValue({ run: { id: 'run1' } });
+
+    const result = await controller.runAutomation(currentUser, 'p1');
+
+    expect(projectsService.runAutomationForOwner).toHaveBeenCalledWith('u1', 'p1');
+    expect(result).toEqual({ run: { id: 'run1' } });
+  });
+
+  it('listAutomationRuns délègue au service avec l\'utilisateur courant', async () => {
+    projectsService.listAutomationRunsForViewer.mockResolvedValue([{ id: 'run1' }]);
+
+    const result = await controller.listAutomationRuns(currentUser, 'p1');
+
+    expect(projectsService.listAutomationRunsForViewer).toHaveBeenCalledWith('u1', 'p1');
+    expect(result).toEqual([{ id: 'run1' }]);
   });
 });

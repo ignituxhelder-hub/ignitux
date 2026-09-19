@@ -21,6 +21,8 @@ model users {
   community_comments community_comments[]
   collaborations project_collaborators[]
   auth_tokens   auth_tokens[]
+  marketplace_profile   marketplace_profiles?
+  marketplace_contacts_sent marketplace_contacts[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -64,6 +66,8 @@ model projects {
   tasks              tasks[]
   community_comments community_comments[]
   collaborators      project_collaborators[]
+  compliance_checks  project_compliance_checks[]
+  automation_runs    automation_runs[]
 
   @@index([owner_id])
   @@index([is_public])
@@ -233,6 +237,97 @@ model build_plans {
   milestones          String[]
   key_resources       String[]
   created_at          DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([project_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+/// COMPLIANCE — liste de référence (pas par utilisateur) des démarches
+/// réglementaires françaises pour créer/faire tourner une petite activité.
+/// Contenu rédigé à partir de sources publiques citées (source_name/
+/// source_url), volontairement générique et non exhaustif : ce n'est pas un
+/// avis juridique, voir backend/src/compliance/compliance-requirements.ts.
+model compliance_requirements {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  // Clé stable pour semer/mettre à jour la liste au démarrage (upsert) sans
+  // dupliquer de lignes — pas un identifiant métier exposé ailleurs.
+  slug        String    @unique
+  country     String
+  category    String
+  title       String
+  description String
+  source_name String
+  source_url  String
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  checks project_compliance_checks[]
+
+  @@index([country])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model project_compliance_checks {
+  id             String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id     String                  @db.Uuid
+  project        projects                @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  requirement_id String                  @db.Uuid
+  requirement    compliance_requirements @relation(fields: [requirement_id], references: [id], onDelete: Cascade)
+  completed_at   DateTime?               @default(now()) @db.Timestamptz(6)
+
+  @@unique([project_id, requirement_id])
+  @@index([project_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+/// MARKETPLACE — annuaire de mentors/investisseurs et mise en relation par
+/// message, volontairement sans aucune circulation d'argent dans l'app (pas
+/// de paiement, pas de gestion de participation) — voir docs/decisions.md.
+model marketplace_profiles {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String    @unique @db.Uuid
+  user       users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  // 'mentor' | 'investisseur'
+  role       String
+  headline   String
+  bio        String?
+  expertise  String[]
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @updatedAt @db.Timestamptz(6)
+
+  contacts_received marketplace_contacts[] @relation("marketplace_contact_profile")
+
+  @@index([role])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model marketplace_contacts {
+  id            String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  from_user_id  String               @db.Uuid
+  from_user     users                @relation(fields: [from_user_id], references: [id], onDelete: Cascade)
+  to_profile_id String               @db.Uuid
+  to_profile    marketplace_profiles @relation("marketplace_contact_profile", fields: [to_profile_id], references: [id], onDelete: Cascade)
+  message       String
+  created_at    DateTime?            @default(now()) @db.Timestamptz(6)
+
+  @@index([to_profile_id])
+  @@index([from_user_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+/// AUTOMATION — le cinquième moteur : contrairement aux 4 autres (mémoire,
+/// connaissance, workflow, score), celui-ci agit sans confirmation humaine
+/// préalable (voir backend/src/igini/automation/automation.service.ts pour
+/// le détail de ce qu'il fait et pourquoi il n'appelle jamais Claude
+/// lui-même). Cette table est la trace de ce qu'il a fait, consultable après
+/// coup — la transparence remplace la confirmation préalable.
+model automation_runs {
+  id                           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id                   String    @db.Uuid
+  project                      projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  tasks_created_count          Int       @default(0)
+  tasks_closed_count           Int       @default(0)
+  concept_links_created_count  Int       @default(0)
+  created_at                   DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
 }

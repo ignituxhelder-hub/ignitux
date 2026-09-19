@@ -410,7 +410,12 @@ export const ModelName = {
   tasks: 'tasks',
   community_comments: 'community_comments',
   project_collaborators: 'project_collaborators',
-  build_plans: 'build_plans'
+  build_plans: 'build_plans',
+  compliance_requirements: 'compliance_requirements',
+  project_compliance_checks: 'project_compliance_checks',
+  marketplace_profiles: 'marketplace_profiles',
+  marketplace_contacts: 'marketplace_contacts',
+  automation_runs: 'automation_runs'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -426,7 +431,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1466,6 +1471,376 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    compliance_requirements: {
+      payload: Prisma.$compliance_requirementsPayload<ExtArgs>
+      fields: Prisma.compliance_requirementsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.compliance_requirementsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$compliance_requirementsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.compliance_requirementsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$compliance_requirementsPayload>
+        }
+        findFirst: {
+          args: Prisma.compliance_requirementsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$compliance_requirementsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.compliance_requirementsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$compliance_requirementsPayload>
+        }
+        findMany: {
+          args: Prisma.compliance_requirementsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$compliance_requirementsPayload>[]
+        }
+        create: {
+          args: Prisma.compliance_requirementsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$compliance_requirementsPayload>
+        }
+        createMany: {
+          args: Prisma.compliance_requirementsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.compliance_requirementsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$compliance_requirementsPayload>[]
+        }
+        delete: {
+          args: Prisma.compliance_requirementsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$compliance_requirementsPayload>
+        }
+        update: {
+          args: Prisma.compliance_requirementsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$compliance_requirementsPayload>
+        }
+        deleteMany: {
+          args: Prisma.compliance_requirementsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.compliance_requirementsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.compliance_requirementsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$compliance_requirementsPayload>[]
+        }
+        upsert: {
+          args: Prisma.compliance_requirementsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$compliance_requirementsPayload>
+        }
+        aggregate: {
+          args: Prisma.Compliance_requirementsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCompliance_requirements>
+        }
+        groupBy: {
+          args: Prisma.compliance_requirementsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Compliance_requirementsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.compliance_requirementsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Compliance_requirementsCountAggregateOutputType> | number
+        }
+      }
+    }
+    project_compliance_checks: {
+      payload: Prisma.$project_compliance_checksPayload<ExtArgs>
+      fields: Prisma.project_compliance_checksFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.project_compliance_checksFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_checksPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.project_compliance_checksFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_checksPayload>
+        }
+        findFirst: {
+          args: Prisma.project_compliance_checksFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_checksPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.project_compliance_checksFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_checksPayload>
+        }
+        findMany: {
+          args: Prisma.project_compliance_checksFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_checksPayload>[]
+        }
+        create: {
+          args: Prisma.project_compliance_checksCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_checksPayload>
+        }
+        createMany: {
+          args: Prisma.project_compliance_checksCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.project_compliance_checksCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_checksPayload>[]
+        }
+        delete: {
+          args: Prisma.project_compliance_checksDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_checksPayload>
+        }
+        update: {
+          args: Prisma.project_compliance_checksUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_checksPayload>
+        }
+        deleteMany: {
+          args: Prisma.project_compliance_checksDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.project_compliance_checksUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.project_compliance_checksUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_checksPayload>[]
+        }
+        upsert: {
+          args: Prisma.project_compliance_checksUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_checksPayload>
+        }
+        aggregate: {
+          args: Prisma.Project_compliance_checksAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProject_compliance_checks>
+        }
+        groupBy: {
+          args: Prisma.project_compliance_checksGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Project_compliance_checksGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.project_compliance_checksCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Project_compliance_checksCountAggregateOutputType> | number
+        }
+      }
+    }
+    marketplace_profiles: {
+      payload: Prisma.$marketplace_profilesPayload<ExtArgs>
+      fields: Prisma.marketplace_profilesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.marketplace_profilesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_profilesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.marketplace_profilesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_profilesPayload>
+        }
+        findFirst: {
+          args: Prisma.marketplace_profilesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_profilesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.marketplace_profilesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_profilesPayload>
+        }
+        findMany: {
+          args: Prisma.marketplace_profilesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_profilesPayload>[]
+        }
+        create: {
+          args: Prisma.marketplace_profilesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_profilesPayload>
+        }
+        createMany: {
+          args: Prisma.marketplace_profilesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.marketplace_profilesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_profilesPayload>[]
+        }
+        delete: {
+          args: Prisma.marketplace_profilesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_profilesPayload>
+        }
+        update: {
+          args: Prisma.marketplace_profilesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_profilesPayload>
+        }
+        deleteMany: {
+          args: Prisma.marketplace_profilesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.marketplace_profilesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.marketplace_profilesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_profilesPayload>[]
+        }
+        upsert: {
+          args: Prisma.marketplace_profilesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_profilesPayload>
+        }
+        aggregate: {
+          args: Prisma.Marketplace_profilesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMarketplace_profiles>
+        }
+        groupBy: {
+          args: Prisma.marketplace_profilesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Marketplace_profilesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.marketplace_profilesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Marketplace_profilesCountAggregateOutputType> | number
+        }
+      }
+    }
+    marketplace_contacts: {
+      payload: Prisma.$marketplace_contactsPayload<ExtArgs>
+      fields: Prisma.marketplace_contactsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.marketplace_contactsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_contactsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.marketplace_contactsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_contactsPayload>
+        }
+        findFirst: {
+          args: Prisma.marketplace_contactsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_contactsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.marketplace_contactsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_contactsPayload>
+        }
+        findMany: {
+          args: Prisma.marketplace_contactsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_contactsPayload>[]
+        }
+        create: {
+          args: Prisma.marketplace_contactsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_contactsPayload>
+        }
+        createMany: {
+          args: Prisma.marketplace_contactsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.marketplace_contactsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_contactsPayload>[]
+        }
+        delete: {
+          args: Prisma.marketplace_contactsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_contactsPayload>
+        }
+        update: {
+          args: Prisma.marketplace_contactsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_contactsPayload>
+        }
+        deleteMany: {
+          args: Prisma.marketplace_contactsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.marketplace_contactsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.marketplace_contactsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_contactsPayload>[]
+        }
+        upsert: {
+          args: Prisma.marketplace_contactsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$marketplace_contactsPayload>
+        }
+        aggregate: {
+          args: Prisma.Marketplace_contactsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMarketplace_contacts>
+        }
+        groupBy: {
+          args: Prisma.marketplace_contactsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Marketplace_contactsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.marketplace_contactsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Marketplace_contactsCountAggregateOutputType> | number
+        }
+      }
+    }
+    automation_runs: {
+      payload: Prisma.$automation_runsPayload<ExtArgs>
+      fields: Prisma.automation_runsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.automation_runsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$automation_runsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.automation_runsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$automation_runsPayload>
+        }
+        findFirst: {
+          args: Prisma.automation_runsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$automation_runsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.automation_runsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$automation_runsPayload>
+        }
+        findMany: {
+          args: Prisma.automation_runsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$automation_runsPayload>[]
+        }
+        create: {
+          args: Prisma.automation_runsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$automation_runsPayload>
+        }
+        createMany: {
+          args: Prisma.automation_runsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.automation_runsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$automation_runsPayload>[]
+        }
+        delete: {
+          args: Prisma.automation_runsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$automation_runsPayload>
+        }
+        update: {
+          args: Prisma.automation_runsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$automation_runsPayload>
+        }
+        deleteMany: {
+          args: Prisma.automation_runsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.automation_runsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.automation_runsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$automation_runsPayload>[]
+        }
+        upsert: {
+          args: Prisma.automation_runsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$automation_runsPayload>
+        }
+        aggregate: {
+          args: Prisma.Automation_runsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAutomation_runs>
+        }
+        groupBy: {
+          args: Prisma.automation_runsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Automation_runsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.automation_runsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Automation_runsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1678,6 +2053,68 @@ export const Build_plansScalarFieldEnum = {
 } as const
 
 export type Build_plansScalarFieldEnum = (typeof Build_plansScalarFieldEnum)[keyof typeof Build_plansScalarFieldEnum]
+
+
+export const Compliance_requirementsScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  country: 'country',
+  category: 'category',
+  title: 'title',
+  description: 'description',
+  source_name: 'source_name',
+  source_url: 'source_url',
+  created_at: 'created_at'
+} as const
+
+export type Compliance_requirementsScalarFieldEnum = (typeof Compliance_requirementsScalarFieldEnum)[keyof typeof Compliance_requirementsScalarFieldEnum]
+
+
+export const Project_compliance_checksScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  requirement_id: 'requirement_id',
+  completed_at: 'completed_at'
+} as const
+
+export type Project_compliance_checksScalarFieldEnum = (typeof Project_compliance_checksScalarFieldEnum)[keyof typeof Project_compliance_checksScalarFieldEnum]
+
+
+export const Marketplace_profilesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  role: 'role',
+  headline: 'headline',
+  bio: 'bio',
+  expertise: 'expertise',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Marketplace_profilesScalarFieldEnum = (typeof Marketplace_profilesScalarFieldEnum)[keyof typeof Marketplace_profilesScalarFieldEnum]
+
+
+export const Marketplace_contactsScalarFieldEnum = {
+  id: 'id',
+  from_user_id: 'from_user_id',
+  to_profile_id: 'to_profile_id',
+  message: 'message',
+  created_at: 'created_at'
+} as const
+
+export type Marketplace_contactsScalarFieldEnum = (typeof Marketplace_contactsScalarFieldEnum)[keyof typeof Marketplace_contactsScalarFieldEnum]
+
+
+export const Automation_runsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  tasks_created_count: 'tasks_created_count',
+  tasks_closed_count: 'tasks_closed_count',
+  concept_links_created_count: 'concept_links_created_count',
+  created_at: 'created_at'
+} as const
+
+export type Automation_runsScalarFieldEnum = (typeof Automation_runsScalarFieldEnum)[keyof typeof Automation_runsScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1937,6 +2374,11 @@ export type GlobalOmitConfig = {
   community_comments?: Prisma.community_commentsOmit
   project_collaborators?: Prisma.project_collaboratorsOmit
   build_plans?: Prisma.build_plansOmit
+  compliance_requirements?: Prisma.compliance_requirementsOmit
+  project_compliance_checks?: Prisma.project_compliance_checksOmit
+  marketplace_profiles?: Prisma.marketplace_profilesOmit
+  marketplace_contacts?: Prisma.marketplace_contactsOmit
+  automation_runs?: Prisma.automation_runsOmit
 }
 
 /* Types for Logging */

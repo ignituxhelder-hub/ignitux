@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { AnalysisService } from '../igini/analysis/analysis.service.js';
+import { AutomationService } from '../igini/automation/automation.service.js';
 import { DevelopmentService } from '../igini/development/development.service.js';
 import { FinancingService } from '../igini/financing/financing.service.js';
 import { PlanningService } from '../igini/planning/planning.service.js';
@@ -17,6 +18,7 @@ export class ProjectsService {
     private readonly developmentService: DevelopmentService,
     private readonly transmissionService: TransmissionService,
     private readonly workflowService: WorkflowService,
+    private readonly automationService: AutomationService,
   ) {}
 
   create(ownerId: string, title: string, description?: string) {
@@ -44,12 +46,12 @@ export class ProjectsService {
     return project;
   }
 
-  // Un collaborateur peut consulter le projet et son historique généré par
-  // IGINI, mais pas le modifier, le supprimer, changer sa visibilité, en
-  // ajouter/retirer un collaborateur, ni déclencher une génération — toutes
-  // ces actions restent strictement réservées au propriétaire
-  // (findOneForOwner). Les moteurs mémoire/connaissance/workflow/score ne
-  // sont pas encore partagés avec les collaborateurs.
+  // Un collaborateur peut consulter le projet, son historique généré par
+  // IGINI, et les 4 moteurs transverses (lecture seule, voir
+  // assertHasProjectAccess), mais pas modifier le projet, le supprimer,
+  // changer sa visibilité, en ajouter/retirer un collaborateur, ni
+  // déclencher une génération ou une automatisation — toutes ces actions
+  // restent strictement réservées au propriétaire (findOneForOwner).
   async findOneForViewer(userId: string, id: string) {
     const project = await this.prisma.projects.findFirst({
       where: {
@@ -191,6 +193,9 @@ export class ProjectsService {
     // Workflow : les prochaines étapes suggérées par l'analyse deviennent des
     // tâches suivables, pas juste du texte affiché puis oublié.
     await this.workflowService.createTasksFromSuggestions(project.id, result.next_steps, 'analysis');
+    // Automation : sans confirmation, IGINI réévalue les tâches d'étape et
+    // les liens de concepts du projet à chaud (voir AutomationService).
+    await this.automationService.run(project.id);
 
     return analysis;
   }
@@ -225,6 +230,7 @@ export class ProjectsService {
     // Workflow : les jalons du plan de construction deviennent des tâches
     // suivables.
     await this.workflowService.createTasksFromSuggestions(project.id, result.milestones, 'build_plan');
+    await this.automationService.run(project.id);
 
     return buildPlan;
   }
@@ -250,7 +256,7 @@ export class ProjectsService {
       context,
     );
 
-    return this.prisma.financing_plans.create({
+    const financingPlan = await this.prisma.financing_plans.create({
       data: {
         project_id: project.id,
         summary: result.summary,
@@ -259,6 +265,9 @@ export class ProjectsService {
         budget_breakdown: result.budget_breakdown,
       },
     });
+    await this.automationService.run(project.id);
+
+    return financingPlan;
   }
 
   async listFinancingPlansForOwner(ownerId: string, id: string) {
@@ -283,7 +292,7 @@ export class ProjectsService {
       context,
     );
 
-    return this.prisma.development_plans.create({
+    const developmentPlan = await this.prisma.development_plans.create({
       data: {
         project_id: project.id,
         summary: result.summary,
@@ -292,6 +301,9 @@ export class ProjectsService {
         scaling_risks: result.scaling_risks,
       },
     });
+    await this.automationService.run(project.id);
+
+    return developmentPlan;
   }
 
   async listDevelopmentPlansForOwner(ownerId: string, id: string) {
@@ -317,7 +329,7 @@ export class ProjectsService {
       context,
     );
 
-    return this.prisma.transmission_plans.create({
+    const transmissionPlan = await this.prisma.transmission_plans.create({
       data: {
         project_id: project.id,
         summary: result.summary,
@@ -326,6 +338,9 @@ export class ProjectsService {
         readiness_checklist: result.readiness_checklist,
       },
     });
+    await this.automationService.run(project.id);
+
+    return transmissionPlan;
   }
 
   async listTransmissionPlansForOwner(ownerId: string, id: string) {
@@ -334,5 +349,20 @@ export class ProjectsService {
       where: { project_id: id },
       orderBy: { created_at: 'desc' },
     });
+  }
+
+  // Déclenchement manuel, pour un projet existant sans nouvelle génération —
+  // exécute exactement la même logique que celle appelée automatiquement
+  // après chaque génération (voir AutomationService).
+  async runAutomationForOwner(ownerId: string, id: string) {
+    await this.findOneForOwner(ownerId, id);
+    return this.automationService.run(id);
+  }
+
+  // Lecture seule : accessible au propriétaire et aux collaborateurs, comme
+  // les autres moteurs transverses.
+  async listAutomationRunsForViewer(userId: string, id: string) {
+    await this.findOneForViewer(userId, id);
+    return this.automationService.listRuns(id);
   }
 }

@@ -111,3 +111,42 @@ export type project_collaborators = Prisma.project_collaboratorsModel
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */
 export type build_plans = Prisma.build_plansModel
+/**
+ * Model compliance_requirements
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ * COMPLIANCE — liste de référence (pas par utilisateur) des démarches
+ * réglementaires françaises pour créer/faire tourner une petite activité.
+ * Contenu rédigé à partir de sources publiques citées (source_name/
+ * source_url), volontairement générique et non exhaustif : ce n'est pas un
+ * avis juridique, voir backend/src/compliance/compliance-requirements.ts.
+ */
+export type compliance_requirements = Prisma.compliance_requirementsModel
+/**
+ * Model project_compliance_checks
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type project_compliance_checks = Prisma.project_compliance_checksModel
+/**
+ * Model marketplace_profiles
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ * MARKETPLACE — annuaire de mentors/investisseurs et mise en relation par
+ * message, volontairement sans aucune circulation d'argent dans l'app (pas
+ * de paiement, pas de gestion de participation) — voir docs/decisions.md.
+ */
+export type marketplace_profiles = Prisma.marketplace_profilesModel
+/**
+ * Model marketplace_contacts
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type marketplace_contacts = Prisma.marketplace_contactsModel
+/**
+ * Model automation_runs
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ * AUTOMATION — le cinquième moteur : contrairement aux 4 autres (mémoire,
+ * connaissance, workflow, score), celui-ci agit sans confirmation humaine
+ * préalable (voir backend/src/igini/automation/automation.service.ts pour
+ * le détail de ce qu'il fait et pourquoi il n'appelle jamais Claude
+ * lui-même). Cette table est la trace de ce qu'il a fait, consultable après
+ * coup — la transparence remplace la confirmation préalable.
+ */
+export type automation_runs = Prisma.automation_runsModel

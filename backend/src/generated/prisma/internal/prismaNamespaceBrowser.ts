@@ -64,7 +64,12 @@ export const ModelName = {
   tasks: 'tasks',
   community_comments: 'community_comments',
   project_collaborators: 'project_collaborators',
-  build_plans: 'build_plans'
+  build_plans: 'build_plans',
+  compliance_requirements: 'compliance_requirements',
+  project_compliance_checks: 'project_compliance_checks',
+  marketplace_profiles: 'marketplace_profiles',
+  marketplace_contacts: 'marketplace_contacts',
+  automation_runs: 'automation_runs'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -256,6 +261,68 @@ export const Build_plansScalarFieldEnum = {
 } as const
 
 export type Build_plansScalarFieldEnum = (typeof Build_plansScalarFieldEnum)[keyof typeof Build_plansScalarFieldEnum]
+
+
+export const Compliance_requirementsScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  country: 'country',
+  category: 'category',
+  title: 'title',
+  description: 'description',
+  source_name: 'source_name',
+  source_url: 'source_url',
+  created_at: 'created_at'
+} as const
+
+export type Compliance_requirementsScalarFieldEnum = (typeof Compliance_requirementsScalarFieldEnum)[keyof typeof Compliance_requirementsScalarFieldEnum]
+
+
+export const Project_compliance_checksScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  requirement_id: 'requirement_id',
+  completed_at: 'completed_at'
+} as const
+
+export type Project_compliance_checksScalarFieldEnum = (typeof Project_compliance_checksScalarFieldEnum)[keyof typeof Project_compliance_checksScalarFieldEnum]
+
+
+export const Marketplace_profilesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  role: 'role',
+  headline: 'headline',
+  bio: 'bio',
+  expertise: 'expertise',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Marketplace_profilesScalarFieldEnum = (typeof Marketplace_profilesScalarFieldEnum)[keyof typeof Marketplace_profilesScalarFieldEnum]
+
+
+export const Marketplace_contactsScalarFieldEnum = {
+  id: 'id',
+  from_user_id: 'from_user_id',
+  to_profile_id: 'to_profile_id',
+  message: 'message',
+  created_at: 'created_at'
+} as const
+
+export type Marketplace_contactsScalarFieldEnum = (typeof Marketplace_contactsScalarFieldEnum)[keyof typeof Marketplace_contactsScalarFieldEnum]
+
+
+export const Automation_runsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  tasks_created_count: 'tasks_created_count',
+  tasks_closed_count: 'tasks_closed_count',
+  concept_links_created_count: 'concept_links_created_count',
+  created_at: 'created_at'
+} as const
+
+export type Automation_runsScalarFieldEnum = (typeof Automation_runsScalarFieldEnum)[keyof typeof Automation_runsScalarFieldEnum]
 
 
 export const SortOrder = {

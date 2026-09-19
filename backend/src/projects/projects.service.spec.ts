@@ -1,6 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AnalysisService } from '../igini/analysis/analysis.service.js';
+import { AutomationService } from '../igini/automation/automation.service.js';
 import { DevelopmentService } from '../igini/development/development.service.js';
 import { FinancingService } from '../igini/financing/financing.service.js';
 import { PlanningService } from '../igini/planning/planning.service.js';
@@ -59,6 +60,7 @@ describe('ProjectsService', () => {
   let developmentService: { createDevelopmentPlan: ReturnType<typeof vi.fn> };
   let transmissionService: { createTransmissionPlan: ReturnType<typeof vi.fn> };
   let workflowService: { createTasksFromSuggestions: ReturnType<typeof vi.fn> };
+  let automationService: { run: ReturnType<typeof vi.fn>; listRuns: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     prisma = {
@@ -95,6 +97,7 @@ describe('ProjectsService', () => {
     developmentService = { createDevelopmentPlan: vi.fn() };
     transmissionService = { createTransmissionPlan: vi.fn() };
     workflowService = { createTasksFromSuggestions: vi.fn() };
+    automationService = { run: vi.fn(), listRuns: vi.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -106,6 +109,7 @@ describe('ProjectsService', () => {
         { provide: DevelopmentService, useValue: developmentService },
         { provide: TransmissionService, useValue: transmissionService },
         { provide: WorkflowService, useValue: workflowService },
+        { provide: AutomationService, useValue: automationService },
       ],
     }).compile();
 
@@ -382,6 +386,23 @@ describe('ProjectsService', () => {
         'analysis',
       );
     });
+
+    it("déclenche l'automatisation après une analyse réussie", async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      analysisService.analyzeProject.mockResolvedValue({
+        summary: 'Résumé',
+        feasibility_score: 8,
+        strengths: [],
+        risks: [],
+        next_steps: [],
+      });
+      prisma.analyses.create.mockResolvedValue({ id: 'a1' });
+
+      await service.analyzeForOwner('u1', 'p1');
+
+      expect(automationService.run).toHaveBeenCalledWith('p1');
+    });
   });
 
   describe('listAnalysesForOwner', () => {
@@ -517,6 +538,22 @@ describe('ProjectsService', () => {
         'build_plan',
       );
     });
+
+    it("déclenche l'automatisation après un plan de construction réussi", async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      planningService.createBuildPlan.mockResolvedValue({
+        summary: 'Résumé',
+        estimated_timeline: '3 à 6 mois',
+        milestones: [],
+        key_resources: [],
+      });
+      prisma.build_plans.create.mockResolvedValue({});
+
+      await service.createBuildPlanForOwner('u1', 'p1');
+
+      expect(automationService.run).toHaveBeenCalledWith('p1');
+    });
   });
 
   describe('listBuildPlansForOwner', () => {
@@ -594,6 +631,22 @@ describe('ProjectsService', () => {
       expect(context).toContain('Construction.');
       expect(context).not.toContain('Ne doit pas apparaître.');
     });
+
+    it("déclenche l'automatisation après un plan de financement réussi", async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      financingService.createFinancingPlan.mockResolvedValue({
+        summary: 'Résumé',
+        estimated_budget: 'N/A',
+        funding_sources: [],
+        budget_breakdown: [],
+      });
+      prisma.financing_plans.create.mockResolvedValue({});
+
+      await service.createFinancingPlanForOwner('u1', 'p1');
+
+      expect(automationService.run).toHaveBeenCalledWith('p1');
+    });
   });
 
   describe('listFinancingPlansForOwner', () => {
@@ -670,6 +723,22 @@ describe('ProjectsService', () => {
       expect(context).toContain('Analyse.');
       expect(context).toContain('Construction.');
       expect(context).toContain('Financement.');
+    });
+
+    it("déclenche l'automatisation après un plan de développement réussi", async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      developmentService.createDevelopmentPlan.mockResolvedValue({
+        summary: 'Résumé',
+        growth_levers: [],
+        key_metrics: [],
+        scaling_risks: [],
+      });
+      prisma.development_plans.create.mockResolvedValue({});
+
+      await service.createDevelopmentPlanForOwner('u1', 'p1');
+
+      expect(automationService.run).toHaveBeenCalledWith('p1');
     });
   });
 
@@ -750,6 +819,22 @@ describe('ProjectsService', () => {
       expect(context).toContain('Financement.');
       expect(context).toContain('Développement.');
     });
+
+    it("déclenche l'automatisation après un plan de transmission réussi", async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      transmissionService.createTransmissionPlan.mockResolvedValue({
+        summary: 'Résumé',
+        transfer_options: [],
+        key_documentation: [],
+        readiness_checklist: [],
+      });
+      prisma.transmission_plans.create.mockResolvedValue({});
+
+      await service.createTransmissionPlanForOwner('u1', 'p1');
+
+      expect(automationService.run).toHaveBeenCalledWith('p1');
+    });
   });
 
   describe('listTransmissionPlansForOwner', () => {
@@ -772,6 +857,43 @@ describe('ProjectsService', () => {
         orderBy: { created_at: 'desc' },
       });
       expect(result).toEqual([{ id: 'tp1' }]);
+    });
+  });
+
+  describe('runAutomationForOwner', () => {
+    it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.runAutomationForOwner('u1', 'p1')).rejects.toBeInstanceOf(NotFoundException);
+      expect(automationService.run).not.toHaveBeenCalled();
+    });
+
+    it('déclenche manuellement une exécution une fois la propriété vérifiée', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      automationService.run.mockResolvedValue({ run: { id: 'run1' }, tasksCreated: [], tasksClosed: [], conceptLinksCreated: [] });
+
+      const result = await service.runAutomationForOwner('u1', 'p1');
+
+      expect(automationService.run).toHaveBeenCalledWith('p1');
+      expect(result).toEqual({ run: { id: 'run1' }, tasksCreated: [], tasksClosed: [], conceptLinksCreated: [] });
+    });
+  });
+
+  describe('listAutomationRunsForViewer', () => {
+    it("lève une NotFoundException si l'utilisateur n'a pas accès au projet", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.listAutomationRunsForViewer('u1', 'p1')).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('un collaborateur (pas seulement le propriétaire) peut consulter l\'historique', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      automationService.listRuns.mockResolvedValue([{ id: 'run1' }]);
+
+      const result = await service.listAutomationRunsForViewer('u2-collaborateur', 'p1');
+
+      expect(automationService.listRuns).toHaveBeenCalledWith('p1');
+      expect(result).toEqual([{ id: 'run1' }]);
     });
   });
 });

@@ -158,4 +158,15 @@ export class ProjectsController {
   listTransmissionPlans(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.projectsService.listTransmissionPlansForOwner(user.id, id);
   }
+
+  @Post(':id/automation/run')
+  @HttpCode(HttpStatus.CREATED)
+  runAutomation(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
+    return this.projectsService.runAutomationForOwner(user.id, id);
+  }
+
+  @Get(':id/automation/runs')
+  listAutomationRuns(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
+    return this.projectsService.listAutomationRunsForViewer(user.id, id);
+  }
 }
