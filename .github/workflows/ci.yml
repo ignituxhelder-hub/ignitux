@@ -27,8 +27,18 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Type-check
+      # Ce que le serveur embarque réellement : `tsconfig.build.json` exclut
+      # les tests et fige `rootDir`, donc il attrape ce qui casserait le
+      # paquet livré.
+      - name: Type-check (code livré)
         run: npx tsc --noEmit -p tsconfig.build.json
+
+      # Et les tests, que la config précédente ignore entièrement : elle
+      # couvre 167 fichiers source et zéro fichier de test. Une erreur de
+      # type dans un mock passait donc la CI sans être vue — c'est arrivé
+      # deux fois en une seule session de développement.
+      - name: Type-check (tests inclus)
+        run: npx tsc --noEmit
 
       - name: Tests unitaires
         run: npm run test
@@ -53,8 +63,23 @@ jobs:
 
       - run: npm ci
 
+      # Absents jusqu'ici : le frontend n'était vérifié que par ses tests et
+      # son build. Une erreur de lint ou de type pouvait donc arriver sur
+      # `main` sans que rien ne s'y oppose.
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
       - name: Tests unitaires
         run: npm run test
 
       - name: Build
         run: npm run build
+
+  # Les tests de bout en bout ne tournent pas ici : ils ont besoin d'une
+  # vraie base Postgres, et la brancher demanderait de déposer la chaîne de
+  # connexion de l'instance Supabase dans les secrets GitHub — donc d'y
+  # exposer un accès à la même instance que la production. Ils se lancent à
+  # la main : `npm run test:e2e` depuis `backend/`. Voir docs/decisions.md.
