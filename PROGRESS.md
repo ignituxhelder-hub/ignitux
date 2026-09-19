@@ -1231,7 +1231,72 @@ Les cinq étapes ont été rejouées localement avant d'être poussées.
   (32 contrôles), générateurs IA toujours éteints.
 - Aucun appel à l'API Claude. Aucun `.docx` touché. Aucune décision comblée.
 
-## 16.8 Toujours bloqué, toujours la même question
+## 16.9 Deux écrans que personne n'avait écrits
+
+Une adresse inconnue affichait **« 404: This page could not be found. »** — en anglais, sans
+style, dans un produit français testé par des francophones. Et aucune page d'erreur : un composant
+qui plante donnait un écran nu. Pour quelqu'un qui teste, un écran nu veut dire « tout est cassé »,
+alors qu'en général une seule page a échoué.
+
+Les deux existent désormais, dans la charte. L'écran d'erreur dit que l'échec vient du produit et
+non de la personne, propose de réessayer sans recharger l'application, et affiche la référence
+technique quand le serveur en fournit une — mais **il ne promet rien sur les données** : on ne
+sait pas d'ici si l'action a abouti côté serveur, donc il demande de vérifier plutôt que de
+rassurer à tort. Un test verrouille cette absence de promesse.
+
+## 16.10 L'endpoint le plus coûteux n'était pas limité
+
+L'export RGPD interroge une trentaine de tables par appel, et n'avait que la limite globale de
+20 par minute — donc plusieurs centaines de requêtes en base possibles depuis une seule adresse.
+Descendu à 3 par minute ; l'aperçu de suppression, treize comptages, à 10.
+
+Un `@Throttle` mal placé ne produit aucune erreur : il ne fait rien. Aucun test unitaire ne s'en
+apercevrait, puisqu'ils appellent le contrôleur directement et court-circuitent les gardes. D'où
+un test de bout en bout qui répète vraiment la requête.
+
+**Deux défauts dans mon propre test**, corrigés : il créait cinq comptes et les laissait derrière
+lui — exactement ce que le principe de nettoyage de cette suite interdit ; et il affirmait à quel
+essai exactement la limite mord, alors que le compte monté en préparation consomme déjà un jeton
+sur cette route.
+
+## 16.11 La facturation éprouvée à travers l'API — et une course trouvée par accident
+
+14 tests de bout en bout sur les règles qui viennent du droit : numérotation séquentielle sans
+trou et par type, impossibilité de modifier ou supprimer un document émis, avoir obligatoirement
+rattaché à un document émis, transitions interdites, reste à payer, export. Elles étaient testées
+sur des fonctions pures ; les voici éprouvées là où une contrainte d'unicité se manifeste
+vraiment.
+
+**Le défaut le plus instructif de la session était dans mon test.** Le helper de création était
+`async`, donc il renvoyait une Promise et non l'objet supertest : `.expect()` n'existait pas
+dessus, et les requêtes partaient **sans être attendues**. Une volée de `UniqueConstraintViolation`
+est apparue dans les journaux, et j'ai d'abord cru à un bug de production.
+
+Ce n'en était pas un — mais le bruit a révélé une vraie faiblesse. Le numéro se calcule depuis le
+maximum existant : deux créations simultanées visent le même, et la base en refuse une. Ce refus
+est **voulu** — mieux vaut échouer que produire deux documents portant le même numéro, et le
+commentaire du code le disait déjà. Mais échouer par une **500 devant un simple double-clic**,
+non.
+
+`createDocument` réessaie donc, borné à quatre essais, chaque essai relisant le maximum pour
+repartir d'un état à jour. Une erreur qui n'est pas un conflit n'est jamais réessayée : marteler
+une base en panne n'aide personne.
+
+## 16.12 État à la fin de cette session
+
+- **918 tests verts** : 614 unitaires backend, 77 de bout en bout, 227 frontend — répartis sur
+  six fichiers e2e qui tournent contre une vraie base.
+- Lint, types et builds propres des deux côtés.
+- Déploiement de test reconstruit et relancé quatre fois, vérifié à chaque fois (32 contrôles),
+  générateurs IA toujours éteints.
+- Aucun appel à l'API Claude, aucun `.docx` touché, aucune décision comblée.
+
+**Ce que cette session a produit de plus durable** n'est pas une fonctionnalité : ce sont quatre
+contrôles qui tournent désormais à chaque exécution — bout en bout, contraste, balisage, limites
+de débit. Chacun a trouvé au moins un défaut réel dès sa première exécution. Ils continueront à
+chercher sans que personne ait à y penser.
+
+## 16.13 Toujours bloqué, toujours la même question
 
 Les cinq points du §15.6 sont inchangés : fournisseur d'email, budget et modèle IA, les Gardiens,
 montage juridique du 51/49, sources Suisse et Portugal. Et la bascule du déploiement vers la base
