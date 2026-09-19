@@ -67,7 +67,25 @@ function isNetworkFailure(error: unknown): boolean {
   return error instanceof TypeError;
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+/**
+ * Options propres à Ignitux, distinctes de celles de `fetch`.
+ *
+ * `skipOfflineCache` existe pour une raison précise : toute réponse GET
+ * réussie est recopiée dans le stockage local pour rester consultable hors
+ * ligne. C'est utile pour une liste de projets ; c'est inacceptable pour
+ * l'export de données personnelles, qui contient l'intégralité du CRM —
+ * donc des coordonnées de tiers — et qui se retrouverait en clair dans le
+ * navigateur, bien après que la personne a fermé l'onglet.
+ */
+interface RequestMeta {
+  skipOfflineCache?: boolean;
+}
+
+async function request<T>(
+  path: string,
+  options: RequestInit = {},
+  meta: RequestMeta = {},
+): Promise<T> {
   let res: Response;
   try {
     res = await fetch(`${API_URL}${path}`, {
@@ -84,7 +102,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   const body = await res.json().catch(() => null);
 
-  if (res.ok && (options.method ?? 'GET') === 'GET' && offlineStorage) {
+  if (res.ok && (options.method ?? 'GET') === 'GET' && offlineStorage && !meta.skipOfflineCache) {
     cacheResponse(offlineStorage, path, body);
   }
 
@@ -257,6 +275,23 @@ export interface CommunityComment {
   author_id: string;
   content: string;
   created_at: string;
+}
+
+/** Export des données personnelles (RGPD art. 15). La forme exacte vient du serveur. */
+export interface UserDataExport {
+  genere_le: string;
+  a_propos_de_ce_fichier: string;
+  avertissement: string;
+  donnees: Record<string, unknown>;
+  non_inclus: Array<{ donnees: string; pourquoi: string }>;
+}
+
+/** Ce que la suppression du compte détruira, consultable avant de la lancer. */
+export interface DeletionPreview {
+  compte_supprime_definitivement: boolean;
+  resume: Record<string, number>;
+  avertissements: string[];
+  journal_constitutionnel: string;
 }
 
 /**
@@ -732,6 +767,33 @@ export const api = {
     await request<void>('/auth/verify-email/resend', {
       method: 'POST',
       body: JSON.stringify({ email }),
+    });
+  },
+
+  /**
+   * Droit d'accès. `skipOfflineCache` est indispensable ici : sans lui, tout
+   * le CRM de la personne — donc des coordonnées de tiers — serait recopié
+   * en clair dans le stockage du navigateur.
+   */
+  exportMyData: (token: string) =>
+    request<UserDataExport>(
+      '/users/me/export',
+      { headers: { Authorization: `Bearer ${token}` } },
+      { skipOfflineCache: true },
+    ),
+
+  getDeletionPreview: (token: string) =>
+    request<DeletionPreview>(
+      '/users/me/deletion-preview',
+      { headers: { Authorization: `Bearer ${token}` } },
+      { skipOfflineCache: true },
+    ),
+
+  deleteMyAccount: async (token: string, password: string) => {
+    await request<void>('/users/me', {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ password }),
     });
   },
 

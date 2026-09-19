@@ -396,3 +396,80 @@ supplémentaire, mais aurait exposé l'API — et derrière elle la base Supabas
 qu'en développement — sur Internet pour un test d'une heure. La solution la plus simple était
 aussi la moins risquée, ce qui est rare et méritait d'être saisi.
 **Où** — `PROGRESS.md` §12.3, procédure d'arrêt incluse.
+
+## Un test qui lit le schéma pour que l'export ne puisse pas se périmer
+
+**Quoi** — `user-data-scope.ts` classe chaque table du schéma : exportée dans un groupe, ou exclue
+avec un motif écrit. Un test lit `prisma/schema.prisma` et échoue si un modèle n'est classé nulle
+part, ou si une table classée n'existe plus.
+**Pourquoi** — les CGU énumèrent dix catégories de données collectées. Un export qui en oublierait
+une rendrait ce document faux, et un document faux sur les données personnelles est pire que pas
+de document : il donne une assurance qui n'existe pas. Aucune relecture humaine ne tiendra sur la
+durée ; une migration qui ajoute une table doit casser le build. Même mécanique que « chaque
+article `enforced` est couvert par une règle », et pour la même raison.
+**Où** — `backend/src/users/user-data-scope.ts` et son spec.
+
+## L'export dit ce qu'il ne contient pas
+
+**Quoi** — le fichier exporté contient un bloc `non_inclus` qui nomme chaque exclusion et la
+motive : jetons d'authentification, démarches de référence, texte de la Constitution.
+**Pourquoi** — un fichier qui se présente comme « toutes tes données » sans lister ses exclusions
+ment par omission. Dire « voici tout » quand ce n'est pas tout est exactement le genre
+d'affirmation non fondée que l'article 9 interdit.
+**Où** — `backend/src/users/user-data.service.ts`.
+
+## L'objet exporté est recomposé, jamais recopié depuis la base
+
+**Quoi** — le service ne renvoie pas la ligne `users` telle que Prisma la rend ; il construit
+explicitement un objet à quatre champs.
+**Pourquoi** — le `select` de Prisma excluait déjà `password_hash`, et ça marchait. Mais il aurait
+suffi qu'on élargisse ce `select` un jour, pour ajouter un champ, pour que le hash du mot de passe
+parte dans un fichier destiné à circuler par email. Sur le champ le plus dangereux du projet, deux
+protections valent mieux qu'une. Un test l'a révélé en refusant de faire confiance au mock.
+**Où** — `backend/src/users/user-data.service.ts` (`exportUserData`).
+
+## La suppression montre d'abord ce qu'elle détruit
+
+**Quoi** — `GET /users/me/deletion-preview` renvoie le décompte et des avertissements ciblés avant
+toute suppression ; l'écran affiche cet aperçu avant de proposer le champ mot de passe.
+**Pourquoi** — l'article 8 interdit d'engager une action irréversible sans validation humaine, et
+une validation suppose de savoir ce qu'on valide. Trois conséquences ne sont pas devinables :
+l'obligation de conserver dix ans une facture émise incombe à la personne et non à Ignitux ; les
+messages envoyés disparaissent aussi chez leurs destinataires ; les projets d'autrui survivent,
+seul l'accès est perdu. Un compte vide ne reçoit aucun avertissement — six alertes sur des données
+inexistantes rendraient les vraies invisibles.
+**Où** — `backend/src/users/user-data.service.ts` (`previewDeletion`),
+`frontend/src/app/account/page.tsx`.
+
+## Le journal constitutionnel est anonymisé, pas effacé
+
+**Quoi** — à la suppression d'un compte, les lignes de `constitution_violations` le concernant
+voient leur `user_id` passé à `null`, dans la même transaction que la suppression.
+**Pourquoi** — c'est la seule table qui référence `users` sans clé étrangère : rien n'y cascade, et
+l'identifiant d'un compte supprimé y survivrait tel quel. Supprimer les lignes serait l'autre
+excès : le journal est ce qui rend l'article 8 vérifiable, et l'amputer à chaque départ le rendrait
+inutile. On garde le fait, on retire la personne. Dans la même transaction, parce que séparées, un
+échec entre les deux laisserait soit un journal nominatif sans compte, soit un compte à moitié
+supprimé.
+**Où** — `backend/src/users/user-data.service.ts` (`deleteAccount`).
+
+## Les données personnelles ne vont jamais dans le cache hors ligne
+
+**Quoi** — `request()` accepte `skipOfflineCache`, appliqué à l'export et à l'aperçu de
+suppression.
+**Pourquoi** — toute réponse GET réussie est recopiée dans le stockage du navigateur pour le mode
+hors ligne. C'est utile pour une liste de projets ; c'est inacceptable pour un export qui contient
+l'intégralité du CRM, donc des coordonnées et des notes libres sur des tiers, et qui serait resté
+en clair dans le navigateur longtemps après la fermeture de l'onglet — sans que personne l'ait
+demandé. Un test vérifie aussi qu'une lecture ordinaire reste mise en cache, sinon le premier
+passerait pour une mauvaise raison.
+**Où** — `frontend/src/lib/api.ts`.
+
+## `NEXT_DIST_DIR` : vérifier un build sans casser ce qui tourne
+
+**Quoi** — `next.config.ts` lit `distDir` depuis `NEXT_DIST_DIR`, par défaut `.next`.
+**Pourquoi** — lancer `next build` pendant qu'un `next dev` ou `next start` sert le même `.next`
+corrompt le répertoire en cours de lecture et fait répondre 500, y compris à quelqu'un en train
+d'utiliser le site. Le piège a déjà coûté une panne sur ce projet. Une variable d'environnement
+d'une ligne suffit à rendre l'erreur impossible pendant une session de test ou une démonstration.
+**Où** — `frontend/next.config.ts`.

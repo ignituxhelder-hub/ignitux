@@ -766,3 +766,110 @@ d'invitation suffit, et c'est ce qui a été retenu.
 **703 tests verts** (552 backend, 151 frontend), types, lint et builds propres des deux côtés.
 Déploiement LAN vérifié par 51 contrôles réels. Toujours **aucun appel à l'API Claude** sur cette
 session — et désormais, sur cet environnement, aucun n'est possible.
+
+---
+
+# 13. Droit d'accès et droit à l'effacement (19 septembre 2026)
+
+## 13.1 Le défaut
+
+En corrigeant la liste RGPD du §11.1, on a écrit noir sur blanc **dix catégories de données
+collectées**. Un audit du code juste après a montré que le seul endpoint du module `users` était
+`POST /users/signup` : aucune route pour récupérer ces données, aucune pour les effacer. Les CGU
+annonçaient des droits que le code ne savait pas exercer.
+
+C'est exactement le même défaut que la traçabilité IA du §11.1 : une promesse tenue à moitié.
+Documenter soigneusement des données qu'on ne sait ni rendre ni supprimer aggrave le problème au
+lieu de le régler — le document donne une assurance qui n'existe pas.
+
+## 13.2 Le garde-fou qui empêche l'export de se périmer
+
+`user-data-scope.ts` classe **chaque table du schéma** : soit exportée dans un groupe, soit exclue
+avec un motif écrit. Il n'y a pas de troisième possibilité.
+
+Le test lit `prisma/schema.prisma` et vérifie qu'aucun modèle n'échappe à cette classification.
+**Ajouter une table sans la classer fait échouer les tests** — au moment où c'est facile à
+corriger, et non le jour où quelqu'un demande ses données. Le test inverse existe aussi : une
+table classée mais supprimée du schéma échoue également, sinon l'export planterait sur une
+requête vers rien. Un troisième test vérifie que la lecture du fichier trouve bien des modèles,
+sans quoi les deux premiers passeraient sur une liste vide.
+
+C'est la même mécanique que « chaque article `enforced` est couvert par une règle » (§11.2), et
+pour la même raison : une promesse qui ne peut pas se périmer silencieusement.
+
+Les 35 modèles sont couverts. Trois exclusions, motivées dans le fichier d'export lui-même :
+jetons d'authentification (matériel de sécurité, sans valeur pour la personne), démarches de
+conformité de référence et texte de la Constitution (identiques pour tout le monde).
+
+## 13.3 Ce que le code fait, et pourquoi
+
+**L'export dit aussi ce qu'il ne contient pas.** Un fichier qui se présente comme « toutes tes
+données » sans lister ses exclusions ment par omission. Le bloc `non_inclus` reprend les motifs.
+
+**L'export avertit sur les tiers.** Il contient l'intégralité du CRM — donc des coordonnées et
+des notes libres sur des personnes qui n'ont rien demandé. Le fichier le dit : « en le
+téléchargeant tu en deviens le gardien ».
+
+**La suppression s'annonce avant de s'exécuter.** L'article 8 interdit d'engager une action
+irréversible sans validation humaine. `GET /users/me/deletion-preview` renvoie le décompte et,
+surtout, les conséquences que la personne ne peut pas deviner :
+
+- **une facture émise doit être conservée dix ans**, et cette obligation lui incombe, pas à
+  Ignitux ;
+- **les messages envoyés disparaissent aussi chez leurs destinataires**, qui les avaient reçus ;
+- **les projets d'autrui ne sont pas supprimés** — seul l'accès est perdu ;
+- l'historique de répartition du capital part avec le reste, et Ignitux n'en garde aucune copie.
+
+Un compte vide ne reçoit aucun de ces avertissements : six alertes sur des données inexistantes
+rendraient les vraies invisibles.
+
+**Le mot de passe est redemandé.** Un jeton volé ou un onglet resté ouvert ne doit pas suffire à
+effacer un compte. Refus en **403 et non 401** : un 401 déclenche la déconnexion automatique
+côté frontend, et un mot de passe mal tapé déconnecterait au lieu d'afficher une erreur — le même
+piège que celui déjà rencontré sur le changement de mot de passe.
+
+**Le journal constitutionnel est anonymisé, pas effacé.** `constitution_violations` est la seule
+table qui référence `users` **sans clé étrangère** : rien n'y cascade, et l'identifiant d'un
+compte supprimé y survivrait. On retire l'identifiant et on garde la ligne, dans la même
+transaction que la suppression. Le fait reste vérifiable, la personne disparaît.
+
+## 13.4 Deux défauts trouvés en écrivant les tests
+
+**Le hash du mot de passe partait dans l'export.** Le service faisait confiance au `select` de
+Prisma pour exclure `password_hash`. Ça marchait, mais il aurait suffi d'élargir ce `select` un
+jour — pour ajouter un champ — pour que le hash se retrouve dans un fichier destiné à circuler
+par email. L'objet exporté est désormais **recomposé explicitement** : seul ce qui est écrit
+sort. Deux protections plutôt qu'une sur le champ le plus dangereux du projet.
+
+**L'export atterrissait dans le `localStorage`.** Côté frontend, `request()` recopie **toute
+réponse GET réussie** dans le stockage local pour le mode hors ligne. Utile pour une liste de
+projets ; inacceptable pour un export qui contient tout le CRM, et qui serait resté en clair dans
+le navigateur longtemps après la fermeture de l'onglet. Ajout d'un `skipOfflineCache`, appliqué à
+l'export et à l'aperçu de suppression, avec un test qui vérifie aussi qu'une lecture ordinaire
+continue d'être mise en cache — sinon le premier test passerait pour une mauvaise raison.
+
+## 13.5 Vérification
+
+- **27 contrôles réels contre la vraie base Postgres** : compte créé avec des données dans chaque
+  module, export relu champ par champ (dont la note libre sur un tiers), aperçu, refus sur
+  mauvais mot de passe, suppression, puis vérification que la reconnexion échoue, que le projet
+  est inaccessible et que l'email est libéré. Le test nettoie ses propres comptes.
+- Lancés sur une **seconde instance backend (port 3100)** pour ne pas perturber le déploiement de
+  test en cours sur le 3000.
+- **745 tests verts** (584 backend, 161 frontend), lint et types propres des deux côtés.
+
+## 13.6 Un piège de build désamorcé
+
+`next build` lancé pendant qu'un `next start` sert le même `.next` corrompt le répertoire en
+cours de lecture, et le site répond 500 — y compris pour quelqu'un en train de l'utiliser. Le
+piège a déjà coûté une panne sur ce projet.
+
+`next.config.ts` accepte désormais `NEXT_DIST_DIR` :
+
+    NEXT_DIST_DIR=.next-verif npm run build
+
+vérifie que tout compile sans toucher à ce qui est servi. C'est ce qui a permis de valider le
+build de ce lot pendant que le déploiement de test tournait.
+
+**Le déploiement de test n'a pas été mis à jour** : il sert toujours la version du §12, cohérente
+et vérifiée. Le rebuild et le redémarrage attendent la fin de la session des testeurs.
