@@ -35,6 +35,36 @@ describe('OfflineBanner', () => {
     vi.restoreAllMocks();
   });
 
+it('prévient quand le stockage ne retient plus ce qui a été envoyé', async () => {
+    // Le pire cas de la file : l'écriture est partie au serveur, mais le
+    // navigateur ne peut plus enregistrer qu'elle est partie — elle risque
+    // donc de repartir une seconde fois. La file produisait déjà ce signal
+    // et personne ne l'écoutait : le message n'existait nulle part.
+    seedQueue([PENDING]);
+    setOnline(true);
+
+    // Le stockage accepte la lecture et avale les écritures, sans lever.
+    const vraiSetItem = window.localStorage.setItem.bind(window.localStorage);
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation((cle, valeur) => {
+      if (cle === 'ignitux.offline') return;
+      vraiSetItem(cle, valeur);
+    });
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({}),
+    }) as unknown as typeof fetch;
+
+    render(
+      <AuthProvider>
+        <OfflineBanner />
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByText(/stockage de ton navigateur est saturé/)).toBeInTheDocument();
+    expect(screen.getByText(/repartir une seconde fois/)).toBeInTheDocument();
+  });
+
   it("ne s'affiche pas quand tout va bien", () => {
     const { container } = render(
       <AuthProvider>

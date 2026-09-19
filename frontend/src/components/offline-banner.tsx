@@ -32,6 +32,14 @@ export function OfflineBanner() {
   const [state, setState] = useState<OfflineState>(EMPTY);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<string | null>(null);
+  /**
+   * Le stockage ne retient plus rien alors qu'une écriture vient de partir.
+   * C'est le pire cas de la file : l'action est peut-être arrivée au
+   * serveur, mais rien ne permet de s'en souvenir — donc elle risque de
+   * repartir au prochain essai. La personne doit le savoir ; la file le
+   * signalait déjà, personne ne l'écoutait.
+   */
+  const [storageStalled, setStorageStalled] = useState(false);
 
   useEffect(() => {
     // Le stockage est injecté ici et pas dans le module API : celui-ci est
@@ -74,6 +82,7 @@ export function OfflineBanner() {
     replayOfflineQueue(token)
       .then((outcome) => {
         setState(readOfflineState());
+        setStorageStalled(outcome.storageStalled === true);
         setLastSync(
           `${outcome.sent} action(s) envoyée(s)` +
             (outcome.rejected > 0 ? `, ${outcome.rejected} refusée(s)` : '') +
@@ -89,7 +98,11 @@ export function OfflineBanner() {
   }, [isOnline, token, state.pending.length]);
 
   const hasSomethingToSay =
-    !isOnline || state.pending.length > 0 || state.rejected.length > 0 || lastSync !== null;
+    !isOnline ||
+    state.pending.length > 0 ||
+    state.rejected.length > 0 ||
+    lastSync !== null ||
+    storageStalled;
   if (!hasSomethingToSay) return null;
 
   return (
@@ -116,6 +129,15 @@ export function OfflineBanner() {
             ))}
           </ul>
         </div>
+      )}
+
+      {storageStalled && (
+        <p className="error" style={{ marginTop: '0.5rem' }}>
+          Le stockage de ton navigateur est saturé : Ignitux n&apos;arrive plus à noter ce
+          qu&apos;il a déjà envoyé. Une action est peut-être arrivée sur le serveur sans qu&apos;on
+          puisse s&apos;en souvenir — elle risque donc de repartir une seconde fois. Libère de
+          l&apos;espace, puis recharge la page.
+        </p>
       )}
 
       {isSyncing && <p className="loading">Envoi en cours…</p>}

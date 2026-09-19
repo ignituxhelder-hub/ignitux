@@ -5,6 +5,7 @@ import {
   readState,
   replay,
   type OfflineState,
+  type ReplayOutcome,
 } from './offline-queue';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
@@ -213,7 +214,9 @@ function describeMutation(method: string, path: string): string {
  * stockage local ne livre pas aussi la session.
  */
 export function replayOfflineQueue(token: string) {
-  if (!offlineStorage) return Promise.resolve({ sent: 0, rejected: 0, remaining: 0 });
+  if (!offlineStorage) {
+    return Promise.resolve({ sent: 0, rejected: 0, remaining: 0 } as ReplayOutcome);
+  }
 
   return replay(offlineStorage, async (mutation) => {
     try {
