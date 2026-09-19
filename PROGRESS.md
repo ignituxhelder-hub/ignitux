@@ -127,12 +127,61 @@ Point de vigilance signalé mais pas tranché : le modèle configuré (`claude-o
 répété pourrait consommer vite le budget de 50€/mois. Rester sobre sur les futurs tests réels tant
 que ce choix n'est pas revu.
 
+### 7. Automation, Compliance, Marketplace — les trois chantiers à 0% de l'estimation
+
+Suite à l'estimation (point précédent), demande explicite de construire ces trois chantiers.
+Chacun avait une raison documentée d'être à 0% (pas juste "pas encore fait") — clarifié par 3
+questions avant de coder plutôt que de fabriquer des décisions produit à ta place :
+
+- **Automation** — tu as choisi l'automatisation complète, sans confirmation humaine (option qui
+  inversait un choix précédemment documenté comme délibéré). Construit avec deux garde-fous non
+  négociables de mon point de vue, pour que ce choix reste sûr : (1) **n'appelle jamais l'API
+  Claude elle-même** — tout ce qu'elle fait est déterministe et gratuit, pour qu'un automatisme sans
+  supervision ne puisse jamais faire déraper le budget IA sans qu'un humain le voie venir ; (2)
+  **chaque exécution est journalisée** (`automation_runs`, visible dans l'UI) — la transparence
+  après coup remplace la validation avant coup. Ce qu'elle fait concrètement : après chaque
+  génération IA (ou manuellement via un bouton) elle crée une tâche `assignee: 'igini'` pour toute
+  étape (analyse/plans) qui manque encore, ferme automatiquement cette tâche dès que l'étape existe,
+  et relie automatiquement les concepts d'un même projet qui partagent un mot significatif. Testé
+  unitairement (17 tests) et **en conditions réelles** : sur un projet vide, 5 tâches créées d'un
+  coup ; après une vraie analyse, la tâche correspondante s'est fermée toute seule, sans un clic.
+- **Compliance** — tu as choisi la France avec du contenu rédigé à partir de sources publiques
+  citées. Livré : 12 démarches (statut juridique, guichet unique, SIREN/SIRET, URSSAF, régime
+  fiscal, TVA, compte bancaire dédié, assurance, activité réglementée, hygiène alimentaire,
+  domaine public, RGPD), chacune avec sa source (nom + URL vers le site officiel), suivies par
+  projet (case à cocher). **Volontairement sans aucun chiffre précis** (seuils de TVA, plafonds…)
+  qui périmerait vite et serait faux au bout de quelques mois — chaque point renvoie plutôt vers la
+  source qui les tient à jour. Un disclaimer explicite ("ne remplace pas un avis d'expert-comptable,
+  d'avocat…") est renvoyé par l'API et affiché en haut de la section, pas caché en petit.
+- **Marketplace** — tu as choisi un simple annuaire, sans argent. Livré : profil (mentor ou
+  investisseur, titre, bio, expertise), annuaire filtrable par rôle, mise en relation par message
+  (pas de messagerie complète, juste un message + une boîte de réception). Aucune logique de
+  paiement ni de gestion de participation, comme demandé.
+
+**Frontend** : nouvelle page `/marketplace` (annuaire + mon profil + messages reçus), lien ajouté
+dans la nav ; deux nouvelles sections sur la fiche projet (`ComplianceSection`,
+`AutomationSection`), visibles par le propriétaire et les collaborateurs comme les 4 moteurs
+transverses (lecture pour tous, le déclenchement manuel de l'automatisation et les cases à cocher
+de conformité restant réservés au propriétaire).
+
+**Testé** : 53 nouveaux tests backend (compliance, marketplace, automation, plus les mises à jour
+de `projects.service`/`projects.controller` pour le déclenchement automatique), 10 nouveaux tests
+frontend. Vérifié en conditions réelles avec un compte de test : création de projet → automatisation
+manuelle (5 tâches créées) → conformité (une exigence cochée) → profil marketplace créé et listé →
+vraie analyse IA → tâche d'automatisation fermée automatiquement. Tout supprimé après coup.
+
+Deux décisions précédentes de `docs/decisions.md` sont explicitement révisées (pas supprimées en
+silence) : "Pas de moteur d'automatisation" et "Collaborateur : lecture seule, pas d'accès aux 4
+moteurs" — les deux entrées expliquent maintenant pourquoi et depuis quand ce n'est plus vrai.
+
 ## Bloqué — pas contourné, car un contournement serait mentir
 
-- **Financement (modèle économique réel)**, **Modules pays**, **Communauté avancée** — inchangés,
-  toujours en attente de décisions/sources externes (voir `docs/status.md`). Je n'ai pas inventé de
-  modèle économique, de contenu réglementaire, ou de spec pour ces trois, car le faire serait
-  fabriquer du contenu présenté comme fiable sans l'être — contraire à la devise du projet.
+- **Financement (modèle économique réel)** — inchangé, en attente d'une décision produit/légale sur
+  un vrai modèle économique (abonnement ? commission ?). Non inventé.
+- **Compliance hors France** — la structure supporte déjà un champ `country`, mais aucune autre
+  source réglementaire fiable n'a été identifiée ; pas de contenu fabriqué pour un pays sans source.
+- **Marketplace avec argent réel** (mentorat payant, prise de participation) — nécessiterait un
+  cadrage légal/fiscal (KYC, DSP2…) non fait ; l'annuaire actuel reste volontairement sans argent.
 
 ## Décisions techniques prises (détail dans `docs/decisions.md`)
 
@@ -143,22 +192,28 @@ que ce choix n'est pas revu.
 - Vérification d'email non bloquante (voir limite ci-dessus).
 - 403 (pas 401) pour un mauvais mot de passe actuel sur `/auth/me/password`, pour ne pas déclencher
   la déconnexion automatique du frontend sur une simple faute de frappe.
+- Automation n'appelle jamais Claude elle-même (protection du budget) et journalise chaque
+  exécution (`automation_runs`) pour rester consultable après coup.
+- Compliance : contenu générique sans chiffres périssables, toujours sourcé, jamais présenté comme
+  un avis juridique.
+- Marketplace : aucune circulation d'argent tant qu'un cadrage légal/produit n'est pas fait.
 
 ## Rien de destructif
 
-Tous les changements de schéma sont additifs (nouvelle table, nouvelle colonne nullable). Aucune
-donnée existante modifiée ou supprimée. Deux appels réels à l'API Claude ont été faits (point 6),
-strictement pour vérifier que la clé fournie en cours de session fonctionnait : le premier a échoué
-avant génération de tokens (crédit insuffisant, coût nul), le second a réussi (une analyse complète
-générée) et **a donc entamé, de façon minime, le budget IA de 50€/mois** — un seul appel Opus, pas
-de boucle ni de répétition. Comptes et projets de test créés pour ces vérifications supprimés après
-coup.
+Tous les changements de schéma sont additifs (nouvelles tables `compliance_requirements`,
+`project_compliance_checks`, `marketplace_profiles`, `marketplace_contacts`, `automation_runs` ;
+aucune colonne existante modifiée). Aucune donnée existante modifiée ou supprimée. Trois appels
+réels à l'API Claude ont été faits au total dans cette session (deux pour vérifier la clé fournie,
+un pour vérifier l'automatisation en conditions réelles) — un seul a réussi et généré des tokens de
+sortie, les deux autres ont échoué avant génération (coût nul). Le budget IA de 50€/mois a donc été
+entamé de façon minime, jamais en boucle. Tous les comptes/projets de test créés pour ces
+vérifications ont été supprimés après coup.
 
 ## Vérifié à chaque étape
 
-- Backend : 208 tests (+41 depuis le début de session), `tsc --noEmit` propre, `oxlint` propre.
-- Frontend : 57 tests (+14), `tsc --noEmit` propre, `eslint` propre, build de production réussi
-  (13 routes).
+- Backend : 261 tests (+94 depuis le début de session), `tsc --noEmit` propre, `oxlint` propre.
+- Frontend : 67 tests (+24), `tsc --noEmit` propre, `eslint` propre, build de production réussi
+  (14 routes).
 - Tout poussé sur `main`, historique de commits clair (voir `git log`).
 
 ## Estimation chiffrée demandée en cours de session
@@ -166,16 +221,22 @@ coup.
 Sur demande explicite, une estimation d'avancement (phase par phase) et de coût de développement a
 été écrite dans [`ESTIMATION.md`](ESTIMATION.md) — audit du code réel, pas une extrapolation. Point
 notable qui en ressort : le code des 5 générateurs IA (phase "IGINI") est écrit à ~85% mais vérifié
-à ~0% en conditions réelles, faute de clé API — cohérent avec le blocage documenté ci-dessus.
+à ~0% en conditions réelles, faute de clé API — cohérent avec le blocage documenté ci-dessus. Cette
+estimation n'a pas été remise à jour après le chantier Automation/Compliance/Marketplace (point 7)
+— à refaire si tu veux un chiffre à jour incluant ces trois nouveaux modules.
 
 ## Prochaines étapes recommandées
 
-1. **Débloquer la clé Claude** — vérifier une dernière fois `backend/.env` toi-même avec
-   `type backend\.env` (ou `Get-Content` en PowerShell) et coller le résultat exact si ça ne
-   correspond toujours pas à ce qui est attendu ; sinon, c'est prêt à tester dès que la clé y est.
-2. **Décider si la vérification d'email doit être obligatoire**, et où (bloquer la connexion ?
+1. **Décider si la vérification d'email doit être obligatoire**, et où (bloquer la connexion ?
    certaines actions seulement ?) — le mécanisme existe, il ne manque que la règle.
-3. **Choisir un fournisseur d'email réel** quand la décision produit sera prise — un seul fichier à
+2. **Choisir un fournisseur d'email réel** quand la décision produit sera prise — un seul fichier à
    changer (`backend/src/mail/mail.service.ts`).
-4. Le reste (financement, modules pays, communauté avancée, refonte visuelle complète) reste en
-   attente de tes décisions, comme documenté dans `docs/status.md`.
+3. **Revoir le modèle Claude utilisé** (`claude-opus-5`, le plus cher de la gamme) si tu comptes
+   tester les 4 autres générateurs (Construire, Financer, Développer, Transmettre) régulièrement —
+   le budget de 50€/mois se consommera plus vite avec Opus qu'avec un modèle plus économique.
+4. **Décider un modèle économique** avant de développer davantage Financement — le texte généré
+   existe, la logique d'abonnement/commission non.
+5. **Trouver une source réglementaire fiable pour un deuxième pays**, si Compliance doit dépasser
+   la France.
+6. Le reste (refonte visuelle complète) reste en attente de validation par de vrais utilisateurs,
+   comme documenté dans `docs/status.md`.

@@ -10,7 +10,7 @@
   `AuthProvider`/`useAuth` (React Context) pour la session, `useState`/`useEffect` partout ailleurs.
   Pas de Tailwind ni de CSS-in-JS : CSS global (`src/app/globals.css`) avec variables CSS pour le
   thème (fond sombre, accent orange).
-- **Tests** — Vitest des deux côtés. 199 tests backend, 54 tests frontend au 19/09/2026 (voir
+- **Tests** — Vitest des deux côtés. 261 tests backend, 67 tests frontend au 19/09/2026 (voir
   [`status.md`](status.md) pour le compte à jour).
 - **CI** — GitHub Actions (`.github/workflows/ci.yml`) : lint + type-check + tests + build sur
   chaque push, pour le backend et le frontend séparément.
@@ -18,11 +18,12 @@
 ## IGNITUX vs IGINI
 
 IGNITUX est l'écosystème (comptes, projets, communauté) ; IGINI est l'intelligence qui l'anime (les
-5 générateurs + les 4 moteurs transverses). Cette distinction se reflète dans le code :
-`backend/src/igini/` contient tout ce qui est IGINI, le reste de `backend/src/` (auth, projects,
-community, users) est IGNITUX.
+5 générateurs + les 5 moteurs transverses, dont Automation — le seul à agir sans confirmation
+humaine préalable). Cette distinction se reflète dans le code : `backend/src/igini/` contient tout
+ce qui est IGINI, le reste de `backend/src/` (auth, projects, community, users, compliance,
+marketplace) est IGNITUX.
 
-## Découpage des modules backend (44 routes au total)
+## Découpage des modules backend (56 routes au total)
 
 | Domaine | Dossier | Rôle |
 |---|---|---|
@@ -36,7 +37,10 @@ community, users) est IGNITUX.
 | IGINI — connaissance | `src/igini/knowledge/` | Graphe de concepts (nœuds + relations) |
 | IGINI — workflow | `src/igini/workflow/` | Tâches suivables, générées depuis les suggestions IA |
 | IGINI — score | `src/igini/scoring/` | Tableau de bord dérivé des données existantes |
+| IGINI — automation | `src/igini/automation/` | 5ᵉ moteur : agit sans confirmation humaine (tâches d'étape, liens de concepts), déclenché après chaque génération ou manuellement. N'appelle jamais Claude — voir le commentaire de classe d'`AutomationService` |
 | Communauté | `src/community/` | Projets publics, encouragements |
+| Compliance | `src/compliance/` | Liste de référence France (contenu sourcé) + suivi par projet |
+| Marketplace | `src/marketplace/` | Annuaire mentors/investisseurs, mise en relation par message (sans argent) |
 
 ## Modèle d'accès à un projet
 
@@ -46,8 +50,9 @@ Trois niveaux, tous vérifiés côté backend (jamais seulement côté frontend)
    générer de nouveaux plans, gérer les collaborateurs. Vérifié par
    `ProjectsService.findOneForOwner`.
 2. **Collaborateur** (table `project_collaborators`, invité par email par le propriétaire) — accès
-   en lecture seule au projet, à l'historique des 5 générateurs, et depuis peu aux 4 moteurs
-   transverses (mémoire/connaissance/workflow/score) du projet. Vérifié par
+   en lecture seule au projet, à l'historique des 5 générateurs, aux 4 moteurs transverses
+   (mémoire/connaissance/workflow/score), à la checklist de conformité et à l'historique
+   d'automatisation du projet. Vérifié par
    `ProjectsService.findOneForViewer` (propriétaire OU collaborateur) côté projet, et par
    `assertHasProjectAccess` (propriétaire OU collaborateur) côté moteurs — à ne pas confondre avec
    `assertOwnsProject` (propriétaire uniquement), toujours utilisé pour toutes les écritures

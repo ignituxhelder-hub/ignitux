@@ -10,8 +10,8 @@ cd backend && npx tsc --noEmit -p tsconfig.build.json && npm run lint && npx vit
 cd frontend && npx tsc --noEmit && npm run lint && npx vitest run && npm run build
 ```
 
-Au 19/09/2026 : **208 tests backend**, **57 tests frontend**, lint et type-check propres des deux
-côtés, build frontend réussi (13 routes).
+Au 19/09/2026 : **261 tests backend**, **67 tests frontend**, lint et type-check propres des deux
+côtés, build frontend réussi (14 routes).
 
 ## Complet et testé
 
@@ -34,11 +34,31 @@ côtés, build frontend réussi (13 routes).
   frontend, accessibles en lecture au propriétaire ET aux collaborateurs du projet (écriture
   réservée au propriétaire).
 - **Communauté** — projets publics, encouragements, confidentialité vérifiée avec deux comptes réels.
+- **Automation (5ᵉ moteur)** — contrairement aux 4 moteurs ci-dessus, celui-ci agit sans confirmation
+  humaine préalable : après chaque génération IA (et manuellement via un bouton), il crée/ferme des
+  tâches d'étape (`assignee: 'igini'`, `source: 'automation'`) et relie automatiquement les concepts
+  qui partagent un mot significatif. Testé unitairement et **vérifié en conditions réelles** (5
+  tâches créées sur un projet vide, tâche fermée automatiquement après une vraie analyse). Deux
+  garde-fous volontaires : il n'appelle jamais l'API Claude lui-même (pour ne jamais consommer le
+  budget IA sans supervision), et chaque exécution est journalisée (`automation_runs`, visible dans
+  l'UI) pour rester consultable après coup — voir `backend/src/igini/automation/automation.service.ts`.
+- **Compliance (France)** — liste de référence de 12 démarches réglementaires (création,
+  fiscalité, social, activités réglementées…), rédigée à partir de sources publiques citées
+  individuellement (service-public.fr, URSSAF, impots.gouv.fr, INSEE, CNIL…), suivie par projet
+  (case à cocher). **Ce n'est pas un avis juridique** — disclaimer explicite renvoyé par l'API et
+  affiché dans l'UI. Volontairement générique et non exhaustif : pas de montants/seuils précis qui
+  périmeraient (TVA, plafonds…), chaque point renvoie vers la source qui les tient à jour. Limité à
+  la France pour l'instant — voir `backend/src/compliance/compliance-requirements.ts`.
+- **Marketplace (annuaire mentors/investisseurs)** — profil (rôle, titre, bio, expertise),
+  annuaire filtrable, mise en relation par message. **Aucune circulation d'argent** (pas de
+  paiement, pas de gestion de participation) — choix assumé, voir `docs/decisions.md`.
 
 ## Partiel
 
 - **Knowledge graph** — vraie visualisation SVG, mais alimentation manuelle uniquement (pas
-  d'extraction automatique depuis les plans générés).
+  d'extraction automatique depuis les plans générés) — l'auto-liaison par mot-clé du moteur
+  Automation est une première brique dans cette direction, mais reste une heuristique simple, pas
+  une extraction sémantique.
 - **Vérification d'email** — le compte reste utilisable sans vérifier son email (aucune route n'est
   bloquée par `email_verified_at`). Choix délibéré pour ne pas verrouiller l'accès tant que la
   décision produit ("faut-il l'exiger, et où ?") n'est pas prise — voir `docs/decisions.md`.
@@ -48,15 +68,17 @@ côtés, build frontend réussi (13 routes).
 - **Financement (modèle économique réel)** — le générateur `igini/financing/` produit un texte de
   plan, mais aucune logique d'abonnement, d'investissement ou d'équité n'existe. Nécessite une
   décision produit/légale.
-- **Modules pays (One Brain, Multiple Regulations)** — rien n'existe. Nécessite un pays cible et une
-  source réglementaire fiable ; inventer du contenu légal serait dangereux à présenter comme fiable.
-- **Communauté avancée** (mentors, investisseurs, mise en relation) — aucune spec.
+- **Compliance hors France** — la structure (table `compliance_requirements`, endpoints, UI) est
+  générique et supporte déjà un champ `country`, mais aucun contenu n'existe pour un autre pays.
+  Nécessite une vraie source réglementaire fiable par pays ciblé.
+- **Marketplace avec transactions financières** — si un jour de l'argent doit circuler (mentorat
+  payant, prise de participation), cela sort du cadre actuel et nécessite un cadrage légal/fiscal
+  (KYC, DSP2…) qui n'a pas été fait.
 
 ## Hors scope, par choix assumé (pas un oubli)
 
 - Architecture offline-first.
 - Scores de confiance/réputation fabriqués — un score renvoie `null` plutôt qu'un chiffre inventé
   quand il n'y a pas de vraie donnée.
-- Moteur d'automatisation qui exécute des tâches sans supervision humaine.
 - Refonte de l'identité visuelle/UX — l'identité actuelle (fond sombre, accent orange) est conservée
   tant que le produit n'est pas validé par de vrais utilisateurs.
