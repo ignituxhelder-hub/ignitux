@@ -174,6 +174,27 @@ Deux décisions précédentes de `docs/decisions.md` sont explicitement révisé
 silence) : "Pas de moteur d'automatisation" et "Collaborateur : lecture seule, pas d'accès aux 4
 moteurs" — les deux entrées expliquent maintenant pourquoi et depuis quand ce n'est plus vrai.
 
+### 8. Pipeline complet des 5 générateurs vérifié en conditions réelles
+
+Suite à "continue et finis tout" : le générateur "Analyser" avait déjà été vérifié en conditions
+réelles (point 6), mais pas les 4 autres. Un projet de test a été créé et les 5 générateurs
+exécutés à la suite, dans l'ordre du pipeline : Analyser → Construire → Financer → Développer →
+Transmettre. Résultat : les 5 ont produit un contenu cohérent, et chacun exploite correctement le
+contexte des étapes précédentes (le plan de construction cite explicitement le score de faisabilité
+de l'analyse, par exemple) — confirme que la mémoire commune entre étapes fonctionne aussi en
+conditions réelles, pas seulement dans les tests avec mocks. Le score final est monté à
+`confiance: 10` (5/5 étapes commencées), et Automation a fermé automatiquement les 4 tâches d'étape
+restantes au fur et à mesure, sans confirmation — vérifie que le 5ᵉ moteur fonctionne aussi sur un
+pipeline complet, pas seulement sur une seule génération isolée. Projet et compte de test créés
+pour cette vérification supprimés après coup. Fait en parallèle, sans toucher aux serveurs de
+dev : tu étais en train de naviguer sur le frontend pendant cette vérification (connexions actives
+détectées avant de commencer), donc tout est passé par l'API directement pour ne pas perturber ta
+session.
+
+**C'est la dernière pièce manquante de la vérification IGINI** : les 5 générateurs sont maintenant
+tous confirmés fonctionnels en conditions réelles, pas seulement en tests unitaires avec Claude
+mocké — voir `docs/status.md`.
+
 ## Bloqué — pas contourné, car un contournement serait mentir
 
 - **Financement (modèle économique réel)** — inchangé, en attente d'une décision produit/légale sur
@@ -202,12 +223,13 @@ moteurs" — les deux entrées expliquent maintenant pourquoi et depuis quand ce
 
 Tous les changements de schéma sont additifs (nouvelles tables `compliance_requirements`,
 `project_compliance_checks`, `marketplace_profiles`, `marketplace_contacts`, `automation_runs` ;
-aucune colonne existante modifiée). Aucune donnée existante modifiée ou supprimée. Trois appels
-réels à l'API Claude ont été faits au total dans cette session (deux pour vérifier la clé fournie,
-un pour vérifier l'automatisation en conditions réelles) — un seul a réussi et généré des tokens de
-sortie, les deux autres ont échoué avant génération (coût nul). Le budget IA de 50€/mois a donc été
-entamé de façon minime, jamais en boucle. Tous les comptes/projets de test créés pour ces
-vérifications ont été supprimés après coup.
+aucune colonne existante modifiée). Aucune donnée existante modifiée ou supprimée. Au total sur
+cette session : **7 appels réels à l'API Claude**, tous strictement pour vérifier que quelque chose
+fonctionnait (jamais en boucle, jamais répété au-delà du nécessaire) — 2 ont échoué avant génération
+(crédit insuffisant, coût nul), 5 ont réussi (1 pour vérifier la clé, 4 pour le pipeline complet du
+point 8). Le budget IA de 50€/mois a donc été entamé, mais de façon bornée et volontaire, jamais par
+un processus qui tournerait tout seul. Tous les comptes/projets de test créés pour ces vérifications
+ont été supprimés après coup.
 
 ## Vérifié à chaque étape
 
@@ -221,9 +243,10 @@ vérifications ont été supprimés après coup.
 Sur demande explicite, une estimation d'avancement (phase par phase) et de coût de développement a
 été écrite dans [`ESTIMATION.md`](ESTIMATION.md) — audit du code réel, pas une extrapolation. Point
 notable qui en ressort : le code des 5 générateurs IA (phase "IGINI") est écrit à ~85% mais vérifié
-à ~0% en conditions réelles, faute de clé API — cohérent avec le blocage documenté ci-dessus. Cette
-estimation n'a pas été remise à jour après le chantier Automation/Compliance/Marketplace (point 7)
-— à refaire si tu veux un chiffre à jour incluant ces trois nouveaux modules.
+à ~0% en conditions réelles, faute de clé API — cohérent avec le blocage documenté ci-dessus.
+**Remise à jour** après les points 7 et 8 (Automation/Compliance/Marketplace, puis vérification
+complète des 5 générateurs) — voir `ESTIMATION.md`, section "Changements depuis la première
+version".
 
 ## Prochaines étapes recommandées
 
@@ -232,8 +255,9 @@ estimation n'a pas été remise à jour après le chantier Automation/Compliance
 2. **Choisir un fournisseur d'email réel** quand la décision produit sera prise — un seul fichier à
    changer (`backend/src/mail/mail.service.ts`).
 3. **Revoir le modèle Claude utilisé** (`claude-opus-5`, le plus cher de la gamme) si tu comptes
-   tester les 4 autres générateurs (Construire, Financer, Développer, Transmettre) régulièrement —
-   le budget de 50€/mois se consommera plus vite avec Opus qu'avec un modèle plus économique.
+   utiliser les générateurs régulièrement — le budget de 50€/mois se consommera plus vite avec Opus
+   qu'avec un modèle plus économique. Les 5 fonctionnent maintenant, c'est une question de coût, pas
+   de fonctionnement.
 4. **Décider un modèle économique** avant de développer davantage Financement — le texte généré
    existe, la logique d'abonnement/commission non.
 5. **Trouver une source réglementaire fiable pour un deuxième pays**, si Compliance doit dépasser

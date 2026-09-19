@@ -21,15 +21,16 @@ côtés, build frontend réussi (14 routes).
   tant qu'aucun fournisseur n'est choisi).
 - **Projets** — CRUD, visibilité publique/privée, collaboration multi-comptes (backend + frontend).
 - **5 générateurs IGINI** — code complet (schémas Zod, prompts, persistance, mémoire commune
-  correcte), testés unitairement, et **désormais vérifiés en conditions réelles** : le générateur
-  "Analyser" a produit une vraie analyse de faisabilité cohérente via `claude-opus-5` le
-  19/09/2026 (clé API configurée, compte crédité). Les 4 autres générateurs (Construire, Financer,
-  Développer, Transmettre) partagent le même `ClaudeService` et la même mécanique de sortie
-  structurée — non re-testés individuellement en conditions réelles à ce stade, mais le point de
-  blocage commun (authentification + crédit) est levé. **À surveiller** : le modèle configuré
-  (`claude-opus-5`, `backend/src/igini/claude/claude.service.ts`) est le plus cher de la gamme —
-  un usage régulier de test peut consommer vite le budget de 50€/mois ; passer à un modèle plus
-  économique pour l'expérimentation est une option à décider, pas encore tranchée.
+  correcte), testés unitairement, et **désormais vérifiés en conditions réelles, les 5, en
+  pipeline complet** le 19/09/2026 (clé API configurée, compte crédité) : Analyser → Construire →
+  Financer → Développer → Transmettre exécutés à la suite sur un même projet de test, chacun
+  produisant un résultat cohérent et exploitant correctement le contexte des étapes précédentes
+  (ex : le plan de construction cite explicitement le score de faisabilité de l'analyse). Le score
+  final (`confiance: 10`) et la fermeture automatique des 4 tâches d'étape par Automation ont aussi
+  été vérifiés dans la foulée. Projet de test supprimé après coup. **À surveiller** : le modèle
+  configuré (`claude-opus-5`, `backend/src/igini/claude/claude.service.ts`) est le plus cher de la
+  gamme — un usage régulier de test peut consommer vite le budget de 50€/mois ; passer à un modèle
+  plus économique pour l'expérimentation est une option à décider, pas encore tranchée.
 - **4 moteurs transverses** (mémoire, connaissance, workflow, score) — CRUD réels, avec interface
   frontend, accessibles en lecture au propriétaire ET aux collaborateurs du projet (écriture
   réservée au propriétaire).
