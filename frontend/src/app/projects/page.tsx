@@ -90,6 +90,8 @@ export default function ProjectsPage() {
         </div>
       </div>
 
+      <h1>Mes projets</h1>
+
       <form className="card" onSubmit={handleCreate}>
         <h2 style={{ marginTop: 0 }}>Nouvelle idée</h2>
         {formError && <p className="error">{formError}</p>}

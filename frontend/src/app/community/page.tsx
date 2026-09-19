@@ -53,6 +53,8 @@ export default function CommunityPage() {
         </Link>
       </div>
 
+      <h1>Communauté</h1>
+
       <IginiMention style={{ margin: '1.5rem 0' }}>
         te montre ici les projets que d&apos;autres porteurs d&apos;idée ont choisi de rendre
         publics — libre à toi de les encourager.

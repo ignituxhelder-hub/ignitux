@@ -136,6 +136,8 @@ export default function MarketplacePage() {
         </Link>
       </div>
 
+      <h1>Mentors et investisseurs</h1>
+
       <IginiMention style={{ margin: '1.5rem 0' }}>
         te met en relation avec des mentors et des investisseurs — un simple annuaire pour l&apos;instant,
         sans paiement ni gestion de participation : juste un profil et un message pour amorcer le contact.

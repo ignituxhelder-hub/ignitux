@@ -668,3 +668,21 @@ test a trouvé trois défauts dès sa première exécution — le dégradé des 
 héros à 4.12:1, et les contours d'interface à 1.80:1 — tous introduits par la refonte graphique,
 tous invisibles à la relecture.
 **Où** — `frontend/src/app/contraste.spec.ts`.
+
+## L'accessibilité vérifiable sans navigateur l'est par un test
+
+**Quoi** — `frontend/src/app/accessibilite.spec.ts` lit les sources et vérifie : exactement un
+`<h1>` par page, une étiquette exploitable pour chaque champ de formulaire, aucun `onClick` sur un
+élément non interactif, un `alt` sur chaque image, la langue déclarée, la marque décorative
+masquée aux lecteurs d'écran.
+
+**Pourquoi** — aucun navigateur n'est disponible dans ces sessions, et cette limite ne va pas
+disparaître. Une partie de l'accessibilité n'en a pourtant pas besoin : elle se lit dans la
+structure du balisage. Ces contrôles ne remplacent pas un essai au lecteur d'écran — ils
+empêchent les fautes qu'on peut trouver sans en avoir un.
+
+Le contrôle des titres a servi immédiatement : Communauté, Marketplace et la liste des projets
+n'avaient **aucun `<h1>`**. Quelqu'un qui navigue de titre en titre arrivait sur une page dont le
+premier titre était un `<h2>` perdu au milieu d'un formulaire. Les 55 champs de formulaire du
+produit, eux, étaient déjà tous correctement étiquetés — le test le fige.
+**Où** — `frontend/src/app/accessibilite.spec.ts`.
