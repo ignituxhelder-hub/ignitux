@@ -10,6 +10,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { BUYBACK_CONDITIONS } from '../buyback-progress.js';
 import { FINANCING_SOURCES, TOTAL_BASIS_POINTS } from '../financing-model.js';
 
 export class RecordRoundDto {
@@ -73,4 +74,36 @@ export class RecordDividendDto {
   @IsString()
   @MaxLength(1000)
   note?: string;
+}
+
+/**
+ * Définition d'une condition de rachat. Le porteur écrit ce que
+ * « rentabilité », « autonomie » ou « stabilité » veut dire pour son
+ * projet — le modèle économique les nomme sans les chiffrer.
+ */
+export class SetBuybackObjectiveDto {
+  @IsIn(BUYBACK_CONDITIONS, {
+    message: `kind doit être l'une de : ${BUYBACK_CONDITIONS.join(', ')}.`,
+  })
+  kind: string;
+
+  // Une définition vide ne poserait aucune condition tout en ayant l'air
+  // d'en poser une : c'est précisément ce qu'il faut empêcher.
+  @IsString()
+  @MinLength(3, { message: 'Écris ce que cette condition veut dire pour ton projet.' })
+  @MaxLength(2000, { message: 'La définition ne doit pas dépasser 2000 caractères.' })
+  definition: string;
+}
+
+/** Déclaration, par le porteur, qu'une condition est atteinte — ou ne l'est plus. */
+export class DeclareBuybackObjectiveDto {
+  /** Date à laquelle la condition a été atteinte. `null` pour revenir en arrière. */
+  @IsOptional()
+  @IsDateString()
+  reachedAt?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000, { message: "La justification ne doit pas dépasser 2000 caractères." })
+  evidence?: string;
 }

@@ -4,6 +4,11 @@ import { assertHasProjectAccess } from '../prisma/assert-has-project-access.js';
 import { assertOwnsProject } from '../prisma/assert-owns-project.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
+  BUYBACK_SCOPE_NOTICE,
+  buybackProgress,
+  type BuybackCondition,
+} from './buyback-progress.js';
+import {
   buildCapTable,
   FINANCING_SCOPE_NOTICE,
   founderTrajectory,
@@ -261,5 +266,85 @@ export class FinancingService {
     }
     await assertOwnsProject(this.prisma, userId, holder.project_id);
     return holder;
+  }
+
+  // ------------------------------------------------- rachat progressif
+
+  /**
+   * Les trois conditions de rachat du modèle économique, telles que le
+   * porteur les a écrites, et où il en est.
+   *
+   * Lecture ouverte aux collaborateurs, comme le reste du financement :
+   * savoir à quelles conditions le porteur reprendra ses parts fait partie
+   * de ce qu'un collaborateur a besoin de comprendre.
+   */
+  async getBuybackProgress(userId: string, projectId: string) {
+    await assertHasProjectAccess(this.prisma, userId, projectId);
+
+    const objectives = await this.prisma.buyback_objectives.findMany({
+      where: { project_id: projectId },
+    });
+
+    return {
+      notice: BUYBACK_SCOPE_NOTICE,
+      ...buybackProgress(objectives),
+    };
+  }
+
+  /**
+   * Écrit — ou réécrit — ce qu'une condition veut dire pour ce projet.
+   *
+   * Réécrire une définition remet la condition à « non atteinte » : une
+   * condition déclarée atteinte puis redéfinie porterait une déclaration
+   * qui ne correspond plus à ce qui a été déclaré. C'est exactement la
+   * réinterprétation après coup que ce dispositif existe pour empêcher.
+   */
+  async setBuybackObjective(
+    userId: string,
+    projectId: string,
+    kind: BuybackCondition,
+    definition: string,
+  ) {
+    await assertOwnsProject(this.prisma, userId, projectId);
+
+    return this.prisma.buyback_objectives.upsert({
+      where: { project_id_kind: { project_id: projectId, kind } },
+      create: { project_id: projectId, kind, definition },
+      update: { definition, reached_at: null, evidence: null },
+    });
+  }
+
+  /**
+   * Le porteur déclare qu'une condition est atteinte — ou revient sur sa
+   * déclaration. Ignitux ne le déduit d'aucune donnée : il n'a aucun moyen
+   * de savoir ce que « rentable » veut dire pour ce projet, puisque c'est
+   * le porteur qui l'a écrit.
+   */
+  async declareBuybackObjective(
+    userId: string,
+    projectId: string,
+    kind: BuybackCondition,
+    reachedAt: string | null | undefined,
+    evidence: string | undefined,
+  ) {
+    await assertOwnsProject(this.prisma, userId, projectId);
+
+    const objective = await this.prisma.buyback_objectives.findUnique({
+      where: { project_id_kind: { project_id: projectId, kind } },
+    });
+    if (!objective) {
+      throw new BadRequestException(
+        "Écris d'abord ce que cette condition veut dire pour ton projet : on ne peut pas " +
+          "déclarer atteinte une condition qui n'a pas été définie.",
+      );
+    }
+
+    return this.prisma.buyback_objectives.update({
+      where: { id: objective.id },
+      data: {
+        reached_at: reachedAt ? new Date(reachedAt) : null,
+        evidence: reachedAt ? (evidence ?? null) : null,
+      },
+    });
   }
 }

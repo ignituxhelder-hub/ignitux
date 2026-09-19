@@ -431,7 +431,8 @@ export const ModelName = {
   workflow_runs: 'workflow_runs',
   workflow_events: 'workflow_events',
   constitution_articles: 'constitution_articles',
-  constitution_violations: 'constitution_violations'
+  constitution_violations: 'constitution_violations',
+  buyback_objectives: 'buyback_objectives'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -447,7 +448,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3041,6 +3042,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    buyback_objectives: {
+      payload: Prisma.$buyback_objectivesPayload<ExtArgs>
+      fields: Prisma.buyback_objectivesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.buyback_objectivesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$buyback_objectivesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.buyback_objectivesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$buyback_objectivesPayload>
+        }
+        findFirst: {
+          args: Prisma.buyback_objectivesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$buyback_objectivesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.buyback_objectivesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$buyback_objectivesPayload>
+        }
+        findMany: {
+          args: Prisma.buyback_objectivesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$buyback_objectivesPayload>[]
+        }
+        create: {
+          args: Prisma.buyback_objectivesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$buyback_objectivesPayload>
+        }
+        createMany: {
+          args: Prisma.buyback_objectivesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.buyback_objectivesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$buyback_objectivesPayload>[]
+        }
+        delete: {
+          args: Prisma.buyback_objectivesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$buyback_objectivesPayload>
+        }
+        update: {
+          args: Prisma.buyback_objectivesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$buyback_objectivesPayload>
+        }
+        deleteMany: {
+          args: Prisma.buyback_objectivesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.buyback_objectivesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.buyback_objectivesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$buyback_objectivesPayload>[]
+        }
+        upsert: {
+          args: Prisma.buyback_objectivesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$buyback_objectivesPayload>
+        }
+        aggregate: {
+          args: Prisma.Buyback_objectivesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBuyback_objectives>
+        }
+        groupBy: {
+          args: Prisma.buyback_objectivesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Buyback_objectivesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.buyback_objectivesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Buyback_objectivesCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3558,6 +3633,20 @@ export const Constitution_violationsScalarFieldEnum = {
 export type Constitution_violationsScalarFieldEnum = (typeof Constitution_violationsScalarFieldEnum)[keyof typeof Constitution_violationsScalarFieldEnum]
 
 
+export const Buyback_objectivesScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  kind: 'kind',
+  definition: 'definition',
+  reached_at: 'reached_at',
+  evidence: 'evidence',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Buyback_objectivesScalarFieldEnum = (typeof Buyback_objectivesScalarFieldEnum)[keyof typeof Buyback_objectivesScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -3836,6 +3925,7 @@ export type GlobalOmitConfig = {
   workflow_events?: Prisma.workflow_eventsOmit
   constitution_articles?: Prisma.constitution_articlesOmit
   constitution_violations?: Prisma.constitution_violationsOmit
+  buyback_objectives?: Prisma.buyback_objectivesOmit
 }
 
 /* Types for Logging */

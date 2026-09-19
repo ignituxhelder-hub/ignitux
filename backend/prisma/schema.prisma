@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-output   = "../src/generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -9,23 +9,23 @@ datasource db {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model users {
-  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email             String    @unique
-  password_hash     String
+  id                        String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                     String                  @unique
+  password_hash             String
   // null tant que l'email n'a pas ete verifie via le lien envoye a l'inscription.
-  email_verified_at DateTime? @db.Timestamptz(6)
-  created_at        DateTime? @default(now()) @db.Timestamptz(6)
-  projects      projects[]
-  memories      memories[]
-  concepts      concepts[]
-  community_comments community_comments[]
-  collaborations project_collaborators[]
-  auth_tokens   auth_tokens[]
-  marketplace_profile   marketplace_profiles?
+  email_verified_at         DateTime?               @db.Timestamptz(6)
+  created_at                DateTime?               @default(now()) @db.Timestamptz(6)
+  projects                  projects[]
+  memories                  memories[]
+  concepts                  concepts[]
+  community_comments        community_comments[]
+  collaborations            project_collaborators[]
+  auth_tokens               auth_tokens[]
+  marketplace_profile       marketplace_profiles?
   marketplace_contacts_sent marketplace_contacts[]
-  crm_companies crm_companies[]
-  crm_contacts  crm_contacts[]
-  billing_documents billing_documents[]
+  crm_companies             crm_companies[]
+  crm_contacts              crm_contacts[]
+  billing_documents         billing_documents[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -48,29 +48,29 @@ model auth_tokens {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model projects {
-  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  owner_id    String     @db.Uuid
-  owner       users      @relation(fields: [owner_id], references: [id], onDelete: Cascade)
-  title       String
-  description String?
+  id                   String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_id             String                      @db.Uuid
+  owner                users                       @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  title                String
+  description          String?
   // Un projet public est visible dans la communauté (lecture seule pour les
   // autres utilisateurs, qui peuvent y laisser des encouragements) — false
   // par défaut, l'utilisateur décide explicitement de le rendre public.
-  is_public   Boolean    @default(false)
-  created_at  DateTime?  @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime?  @updatedAt @db.Timestamptz(6)
-  analyses           analyses[]
-  build_plans        build_plans[]
-  financing_plans    financing_plans[]
-  development_plans  development_plans[]
-  transmission_plans transmission_plans[]
-  memories           memories[]
-  concepts           concepts[]
-  tasks              tasks[]
-  community_comments community_comments[]
-  collaborators      project_collaborators[]
-  compliance_checks  project_compliance_checks[]
-  automation_runs    automation_runs[]
+  is_public            Boolean                     @default(false)
+  created_at           DateTime?                   @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?                   @updatedAt @db.Timestamptz(6)
+  analyses             analyses[]
+  build_plans          build_plans[]
+  financing_plans      financing_plans[]
+  development_plans    development_plans[]
+  transmission_plans   transmission_plans[]
+  memories             memories[]
+  concepts             concepts[]
+  tasks                tasks[]
+  community_comments   community_comments[]
+  collaborators        project_collaborators[]
+  compliance_checks    project_compliance_checks[]
+  automation_runs      automation_runs[]
   workflow_definitions workflow_definitions[]
   workflow_runs        workflow_runs[]
   crm_contacts         crm_contacts[]
@@ -79,6 +79,7 @@ model projects {
   equity_holders       equity_holders[]
   equity_events        equity_events[]
   dividends            dividend_distributions[]
+  buyback_objectives   buyback_objectives[]
 
   @@index([owner_id])
   @@index([is_public])
@@ -108,34 +109,34 @@ model analyses {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model financing_plans {
-  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  project_id        String    @db.Uuid
-  project           projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  summary           String
-  estimated_budget  String
-  funding_sources   String[]
-  budget_breakdown  String[]
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id       String    @db.Uuid
+  project          projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  summary          String
+  estimated_budget String
+  funding_sources  String[]
+  budget_breakdown String[]
   // Provenance — même convention que analyses.generated_by.
-  generated_by      String    @default("igini")
-  generated_model   String?
-  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  generated_by     String    @default("igini")
+  generated_model  String?
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model development_plans {
-  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  project_id     String    @db.Uuid
-  project        projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  summary        String
-  growth_levers  String[]
-  key_metrics    String[]
-  scaling_risks  String[]
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id      String    @db.Uuid
+  project         projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  summary         String
+  growth_levers   String[]
+  key_metrics     String[]
+  scaling_risks   String[]
   // Provenance — même convention que analyses.generated_by.
-  generated_by    String   @default("igini")
+  generated_by    String    @default("igini")
   generated_model String?
-  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
 }
@@ -261,17 +262,17 @@ model project_collaborators {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model build_plans {
-  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  project_id          String    @db.Uuid
-  project             projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  summary             String
-  estimated_timeline  String
-  milestones          String[]
-  key_resources       String[]
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id         String    @db.Uuid
+  project            projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  summary            String
+  estimated_timeline String
+  milestones         String[]
+  key_resources      String[]
   // Provenance — même convention que analyses.generated_by.
-  generated_by        String    @default("igini")
-  generated_model     String?
-  created_at          DateTime? @default(now()) @db.Timestamptz(6)
+  generated_by       String    @default("igini")
+  generated_model    String?
+  created_at         DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
 }
@@ -356,13 +357,13 @@ model marketplace_contacts {
 /// lui-même). Cette table est la trace de ce qu'il a fait, consultable après
 /// coup — la transparence remplace la confirmation préalable.
 model automation_runs {
-  id                           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  project_id                   String    @db.Uuid
-  project                      projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  tasks_created_count          Int       @default(0)
-  tasks_closed_count           Int       @default(0)
-  concept_links_created_count  Int       @default(0)
-  created_at                   DateTime? @default(now()) @db.Timestamptz(6)
+  id                          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id                  String    @db.Uuid
+  project                     projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  tasks_created_count         Int       @default(0)
+  tasks_closed_count          Int       @default(0)
+  concept_links_created_count Int       @default(0)
+  created_at                  DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
 }
@@ -371,15 +372,15 @@ model automation_runs {
 /// Enregistré quand il a réellement eu lieu, jamais prévu : une promesse
 /// de financement n'est pas un financement.
 model financing_rounds {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  project_id  String    @db.Uuid
-  project     projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id   String    @db.Uuid
+  project      projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
   /// 'ignitux' | 'porteur' | 'pret' | 'subvention' | 'autre'
-  source      String
+  source       String
   amount_cents Int
-  occurred_at DateTime  @db.Timestamptz(6)
-  note        String?
-  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  occurred_at  DateTime  @db.Timestamptz(6)
+  note         String?
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
 }
@@ -464,42 +465,42 @@ model dividend_distributions {
 /// Ce que ce modèle n'est PAS : un logiciel de facturation certifié au sens
 /// de l'article 286-I-3° bis du CGI. Voir backend/src/billing/billing-legal.ts.
 model billing_documents {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  owner_id     String    @db.Uuid
-  owner        users     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
-  contact_id   String?   @db.Uuid
-  contact      crm_contacts? @relation(fields: [contact_id], references: [id], onDelete: SetNull)
-  project_id   String?   @db.Uuid
-  project      projects? @relation(fields: [project_id], references: [id], onDelete: SetNull)
+  id         String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_id   String        @db.Uuid
+  owner      users         @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  contact_id String?       @db.Uuid
+  contact    crm_contacts? @relation(fields: [contact_id], references: [id], onDelete: SetNull)
+  project_id String?       @db.Uuid
+  project    projects?     @relation(fields: [project_id], references: [id], onDelete: SetNull)
 
   // 'devis' | 'facture' | 'avoir'
-  type         String
-  year         Int
-  sequence     Int
+  type     String
+  year     Int
+  sequence Int
   /// Numéro affiché, dérivé de type/year/sequence — figé à l'émission.
-  number       String
+  number   String
 
   // 'brouillon' | 'emis' | 'paye' | 'annule' | 'refuse'
-  status       String    @default("brouillon")
+  status String @default("brouillon")
 
   /// Nom et adresse du client recopiés au moment de l'émission : si la
   /// fiche contact change ensuite, le document émis ne doit pas changer
   /// avec elle.
-  client_name  String
+  client_name    String
   client_details String?
 
-  currency     String    @default("EUR")
-  notes        String?
+  currency String  @default("EUR")
+  notes    String?
 
   /// Pour un avoir : le document qu'il corrige.
-  corrects_id  String?   @db.Uuid
-  corrects     billing_documents? @relation("billing_correction", fields: [corrects_id], references: [id], onDelete: SetNull)
+  corrects_id  String?             @db.Uuid
+  corrects     billing_documents?  @relation("billing_correction", fields: [corrects_id], references: [id], onDelete: SetNull)
   corrected_by billing_documents[] @relation("billing_correction")
 
-  issued_at    DateTime? @db.Timestamptz(6)
-  due_at       DateTime? @db.Timestamptz(6)
-  created_at   DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime? @updatedAt @db.Timestamptz(6)
+  issued_at  DateTime? @db.Timestamptz(6)
+  due_at     DateTime? @db.Timestamptz(6)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @updatedAt @db.Timestamptz(6)
 
   lines    billing_lines[]
   payments billing_payments[]
@@ -518,31 +519,31 @@ model billing_documents {
 /// changent, diffèrent par activité et par pays, et en coder un en dur
 /// reviendrait à fournir un chiffre réglementaire inventé.
 model billing_lines {
-  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  document_id        String            @db.Uuid
-  document           billing_documents @relation(fields: [document_id], references: [id], onDelete: Cascade)
-  position           Int
-  label              String
-  quantity_milli     Int
-  unit_price_cents   Int
+  id                    String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  document_id           String            @db.Uuid
+  document              billing_documents @relation(fields: [document_id], references: [id], onDelete: Cascade)
+  position              Int
+  label                 String
+  quantity_milli        Int
+  unit_price_cents      Int
   /// Taux en pour mille (2000 = 20 %), pour représenter 5,5 % sans flottant.
   vat_rate_basis_points Int               @default(0)
-  created_at         DateTime?         @default(now()) @db.Timestamptz(6)
+  created_at            DateTime?         @default(now()) @db.Timestamptz(6)
 
   @@index([document_id])
 }
 
 /// FACTURATION — un règlement reçu sur un document.
 model billing_payments {
-  id          String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  document_id String            @db.Uuid
-  document    billing_documents @relation(fields: [document_id], references: [id], onDelete: Cascade)
+  id           String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  document_id  String            @db.Uuid
+  document     billing_documents @relation(fields: [document_id], references: [id], onDelete: Cascade)
   amount_cents Int
   /// 'virement' | 'especes' | 'carte' | 'cheque' | 'autre'
-  method      String
-  received_at DateTime          @db.Timestamptz(6)
-  note        String?
-  created_at  DateTime?         @default(now()) @db.Timestamptz(6)
+  method       String
+  received_at  DateTime          @db.Timestamptz(6)
+  note         String?
+  created_at   DateTime?         @default(now()) @db.Timestamptz(6)
 
   @@index([document_id])
 }
@@ -571,27 +572,27 @@ model crm_companies {
 /// commercial. Les deux sont distincts : un client existant peut être en
 /// cours de négociation sur une nouvelle offre.
 model crm_contacts {
-  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  owner_id    String         @db.Uuid
-  owner       users          @relation(fields: [owner_id], references: [id], onDelete: Cascade)
-  company_id  String?        @db.Uuid
-  company     crm_companies? @relation(fields: [company_id], references: [id], onDelete: SetNull)
+  id         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_id   String         @db.Uuid
+  owner      users          @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  company_id String?        @db.Uuid
+  company    crm_companies? @relation(fields: [company_id], references: [id], onDelete: SetNull)
   // Rattachement facultatif à un projet : un contact peut concerner
   // l'activité en général et pas un projet précis.
-  project_id  String?        @db.Uuid
-  project     projects?      @relation(fields: [project_id], references: [id], onDelete: SetNull)
-  first_name  String
-  last_name   String
-  email       String?
-  phone       String?
-  role        String?
+  project_id String?        @db.Uuid
+  project    projects?      @relation(fields: [project_id], references: [id], onDelete: SetNull)
+  first_name String
+  last_name  String
+  email      String?
+  phone      String?
+  role       String?
   // 'prospect' | 'client' | 'partenaire' | 'autre'
-  kind        String         @default("prospect")
+  kind       String         @default("prospect")
   // 'nouveau' | 'contacte' | 'qualifie' | 'proposition' | 'gagne' | 'perdu'
-  stage       String         @default("nouveau")
-  notes       String?
-  created_at  DateTime?      @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime?      @updatedAt @db.Timestamptz(6)
+  stage      String         @default("nouveau")
+  notes      String?
+  created_at DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at DateTime?      @updatedAt @db.Timestamptz(6)
 
   interactions      crm_interactions[]
   billing_documents billing_documents[]
@@ -667,18 +668,18 @@ model workflow_steps {
 
 /// WORKFLOW — une exécution d'un processus sur un projet.
 model workflow_runs {
-  id           String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  workflow_id  String               @db.Uuid
-  workflow     workflow_definitions @relation(fields: [workflow_id], references: [id], onDelete: Cascade)
-  project_id   String               @db.Uuid
-  project      projects             @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  id               String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflow_id      String               @db.Uuid
+  workflow         workflow_definitions @relation(fields: [workflow_id], references: [id], onDelete: Cascade)
+  project_id       String               @db.Uuid
+  project          projects             @relation(fields: [project_id], references: [id], onDelete: Cascade)
   // 'running' | 'blocked' | 'completed'
-  status       String               @default("running")
+  status           String               @default("running")
   // Position de l'étape en attente. Vaut le nombre d'étapes une fois
   // l'exécution terminée (aucune étape restante).
-  current_position Int              @default(0)
-  started_at   DateTime?            @default(now()) @db.Timestamptz(6)
-  completed_at DateTime?            @db.Timestamptz(6)
+  current_position Int                  @default(0)
+  started_at       DateTime?            @default(now()) @db.Timestamptz(6)
+  completed_at     DateTime?            @db.Timestamptz(6)
 
   events workflow_events[]
 
@@ -749,4 +750,35 @@ model constitution_violations {
 
   @@index([article_slug])
   @@index([created_at])
+}
+
+/// FINANCEMENT — les objectifs que le porteur se fixe pour racheter les
+/// parts d'Ignitux.
+///
+/// Le modèle économique nomme trois conditions — rentabilité, autonomie,
+/// stabilité — sans les chiffrer. Ignitux ne les invente pas : le porteur
+/// écrit ce que chacune signifie pour SON projet, et c'est lui seul qui
+/// déclare qu'elle est atteinte (`reached_at`). Le code conserve ce qu'il a
+/// écrit, le date, et compte. Voir buyback-progress.ts.
+///
+/// La contrainte d'unicité (projet, condition) évite deux définitions
+/// concurrentes de « rentabilité » sur un même projet : la condition doit
+/// rester difficile à réinterpréter après coup, c'est sa raison d'être.
+model buyback_objectives {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id String    @db.Uuid
+  project    projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  /// 'rentabilite' | 'autonomie' | 'stabilite'
+  kind       String
+  /// Ce que cette condition veut dire pour ce projet. Saisi par l'humain.
+  definition String
+  /// Déclaré atteint par le porteur, jamais déduit par Ignitux.
+  reached_at DateTime? @db.Timestamptz(6)
+  /// Sur quoi il s'appuie pour le dire.
+  evidence   String?
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @updatedAt @db.Timestamptz(6)
+
+  @@unique([project_id, kind])
+  @@index([project_id])
 }

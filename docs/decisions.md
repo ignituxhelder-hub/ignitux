@@ -473,3 +473,54 @@ corrompt le répertoire en cours de lecture et fait répondre 500, y compris à 
 d'utiliser le site. Le piège a déjà coûté une panne sur ce projet. Une variable d'environnement
 d'une ligne suffit à rendre l'erreur impossible pendant une session de test ou une démonstration.
 **Où** — `frontend/next.config.ts`.
+
+## Le rachat : le porteur écrit la règle, Ignitux ne fait que compter
+
+**Quoi** — les trois conditions de rachat (rentabilité, autonomie, stabilité) sont des textes
+libres saisis par le porteur, et c'est lui qui déclare chacune atteinte. Ignitux conserve, date et
+compte ; il ne dérive rien d'aucune donnée.
+**Pourquoi** — le modèle économique nomme ces trois objectifs sans les chiffrer. Fabriquer des
+seuils reviendrait à décider à la place du porteur du moment où il peut racheter ses parts, sur
+des chiffres inventés (article 10). Déplacer la définition vers l'humain n'est pas un pis-aller :
+une condition écrite avant d'être atteinte est beaucoup plus difficile à réinterpréter après coup,
+par le porteur comme par Ignitux — et c'est exactement ce qu'un modèle 51/49 avec rachat
+progressif a besoin de rendre solide.
+**Où** — `backend/src/financing/buyback-progress.ts`.
+
+## Une condition non définie ne peut pas être déclarée atteinte
+
+**Quoi** — `declareBuybackObjective` refuse en 400 si la condition n'a pas de définition ; et côté
+calcul, une définition vide force `reachedAt` à `null`.
+**Pourquoi** — sans cette règle on pourrait cocher « rentabilité atteinte » sans avoir jamais dit
+ce que « rentable » veut dire pour ce projet. La condition redeviendrait réinterprétable après
+coup, ce qui annulerait tout l'intérêt du dispositif. Deux endroits plutôt qu'un : le serveur
+refuse l'action, et le calcul pur ne se laisse pas tromper par une ligne incohérente déjà en base.
+**Où** — `backend/src/financing/financing.service.ts`, `buyback-progress.ts`.
+
+## Réécrire une condition annule la déclaration qui la concernait
+
+**Quoi** — l'`upsert` d'une définition remet `reached_at` et `evidence` à `null`.
+**Pourquoi** — une déclaration ne peut pas survivre au changement de ce qu'elle déclarait. Garder
+« atteinte le 1er mars » à côté d'une définition réécrite en juin produirait une affirmation que
+personne n'a faite. L'écran prévient avant, plutôt que de le faire en silence.
+**Où** — `backend/src/financing/financing.service.ts` (`setBuybackObjective`).
+
+## On ne se prononce pas sur une progression incomplète
+
+**Quoi** — `allReached` vaut `null` tant que les trois conditions ne sont pas écrites, et jamais
+`false`.
+**Pourquoi** — répondre « non, le rachat n'est pas possible » sur des conditions que personne n'a
+encore définies serait une affirmation infondée : on ne sait pas, puisque la règle n'existe pas
+encore. Même raisonnement que `founderHasMajority`, qui reste `null` sur une répartition qui ne
+boucle pas à 100 %.
+**Où** — `backend/src/financing/buyback-progress.ts`.
+
+## Lire le SQL avant de pousser sur la base de production
+
+**Quoi** — avant tout `prisma db push`, inspecter le diff avec
+`prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script`.
+**Pourquoi** — la base Supabase est la même en développement et pour les sessions de test : il n'y
+a pas de filet. Le diff de `buyback_objectives` était purement additif (CREATE TABLE, deux index,
+une clé étrangère), donc sans risque ; c'est parce qu'on l'a lu qu'on le sait. Un diff contenant
+un DROP ou un ALTER sur une table existante doit arrêter l'opération.
+**Où** — `PROGRESS.md` §14.4.

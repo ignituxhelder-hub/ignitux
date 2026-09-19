@@ -873,3 +873,88 @@ build de ce lot pendant que le déploiement de test tournait.
 
 **Le déploiement de test n'a pas été mis à jour** : il sert toujours la version du §12, cohérente
 et vérifiée. Le rebuild et le redémarrage attendent la fin de la session des testeurs.
+
+---
+
+# 14. Rachat progressif des parts (19 septembre 2026)
+
+## 14.1 La pièce qui manquait
+
+Le document du modèle économique listait six transformations possibles : tables SQL, contrats,
+moteur de participation, historique des parts, calcul des dividendes, **workflow de progression**.
+Cinq étaient faites (§11.3). La sixième restait ouverte, et pour une raison précise : le modèle
+conditionne le rachat à trois objectifs — *rentabilité*, *autonomie*, *stabilité* — qu'il **nomme
+sans les chiffrer**.
+
+Le §11.3 avait donc refusé de les calculer, et ce refus reste juste. Mais refuser de calculer
+n'obligeait pas à ne rien construire.
+
+## 14.2 Le déplacement : c'est le porteur qui écrit la règle
+
+Inventer des seuils (« rentable = trois mois de bénéfice ») reviendrait à décider à la place du
+porteur du moment où il peut racheter ses parts, sur des chiffres qu'Ignitux aurait fabriqués —
+exactement ce que l'article 10 interdit.
+
+Alors **le porteur écrit lui-même ce que chaque condition veut dire pour son projet, et c'est lui
+qui déclare qu'elle est atteinte.** Ignitux conserve, date et compte. Rien de plus.
+
+Ce n'est pas un pis-aller. Une condition écrite noir sur blanc *avant* d'être atteinte est
+beaucoup plus difficile à réinterpréter après coup — par le porteur comme par Ignitux. C'est
+précisément ce qu'un modèle 51/49 avec rachat progressif a besoin de rendre solide.
+
+Trois garanties en découlent, chacune testée :
+
+- **une condition non définie ne peut pas être déclarée atteinte.** Sinon on pourrait cocher
+  « rentabilité atteinte » sans avoir jamais dit ce que « rentable » voulait dire. Le serveur
+  répond 400 avec une phrase qui l'explique ;
+- **réécrire une définition remet la condition à « non atteinte ».** Une déclaration ne peut pas
+  survivre au changement de ce qu'elle déclarait ;
+- **on ne se prononce pas sur une progression incomplète.** `allReached` vaut `null` tant que les
+  trois ne sont pas écrites : répondre « non, le rachat n'est pas possible » sur des conditions
+  que personne n'a définies serait une affirmation infondée. Même logique que
+  `founderHasMajority` sur une répartition qui ne boucle pas à 100 %.
+
+Et même quand les trois sont atteintes, l'écran le dit sans avancer de chiffre : « le prix reste à
+négocier, Ignitux ne le calcule pas ». Aucune méthode de valorisation n'a été choisie.
+
+## 14.3 Le garde-fou de la veille a fonctionné
+
+La nouvelle table `buyback_objectives` a été poussée en base. **Le test de couverture du schéma
+écrit au §13.2 a échoué dans la minute** :
+
+    AssertionError: expected [ 'buyback_objectives' ] to deeply equal []
+
+C'est exactement ce pour quoi il avait été écrit : une table ajoutée sans être classée dans le
+périmètre des données personnelles casse le build, au lieu de manquer silencieusement à l'export
+RGPD jusqu'au jour où quelqu'un demande ses données. La table a été classée dans le groupe
+`financement`, et l'export la contient — vérifié en base réelle.
+
+## 14.4 Prudence sur la base de production
+
+La base Supabase est la même en développement et pour la session de test. Avant d'y toucher, le
+SQL a été inspecté :
+
+    npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script
+
+Résultat : un `CREATE TABLE`, deux `CREATE INDEX`, un `ADD FOREIGN KEY`. **Aucun `DROP`, aucun
+`ALTER` sur une table existante.** Purement additif, donc sans risque pour les données en place.
+La règle à garder : sur cette base, on lit le diff avant de pousser.
+
+## 14.5 Vérification
+
+- **32 contrôles réels** contre le déploiement LAN et la vraie base : état initial, définition,
+  refus de déclarer une condition non définie, refus d'une condition hors modèle, les trois
+  atteintes, annulation par réécriture, présence dans l'export RGPD, suppression du compte de
+  test, et les 8 pages du frontend.
+- **769 tests verts** (600 backend, 169 frontend), lint et types propres des deux côtés.
+- Toujours **aucun appel à l'API Claude**.
+
+## 14.6 Déploiement remis en service
+
+Les deux processus du §12.3 s'étaient arrêtés entre-temps. Ils ont été relancés **avec tout le
+travail des §13 et §14** : même adresse `http://192.168.1.12:3001`, générateurs IA toujours
+éteints (vérifié : `generatorsEnabled: false`, et un générateur appelé répond 503 avec son
+message lisible).
+
+Les testeurs disposent donc maintenant, en plus : du bouton « Télécharger mes données », de la
+suppression de compte avec aperçu, et de la section « Rachat progressif des parts ».

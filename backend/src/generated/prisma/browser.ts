@@ -274,3 +274,19 @@ export type constitution_articles = Prisma.constitution_articlesModel
  * assumé est que ces colonnes peuvent pointer vers des lignes disparues.
  */
 export type constitution_violations = Prisma.constitution_violationsModel
+/**
+ * Model buyback_objectives
+ * FINANCEMENT — les objectifs que le porteur se fixe pour racheter les
+ * parts d'Ignitux.
+ * 
+ * Le modèle économique nomme trois conditions — rentabilité, autonomie,
+ * stabilité — sans les chiffrer. Ignitux ne les invente pas : le porteur
+ * écrit ce que chacune signifie pour SON projet, et c'est lui seul qui
+ * déclare qu'elle est atteinte (`reached_at`). Le code conserve ce qu'il a
+ * écrit, le date, et compte. Voir buyback-progress.ts.
+ * 
+ * La contrainte d'unicité (projet, condition) évite deux définitions
+ * concurrentes de « rentabilité » sur un même projet : la condition doit
+ * rester difficile à réinterpréter après coup, c'est sa raison d'être.
+ */
+export type buyback_objectives = Prisma.buyback_objectivesModel

@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import {
   api,
   ApiError,
+  type BuybackProgress,
   type CapTable,
   type DividendDistribution,
   type FinancingRound,
@@ -253,6 +254,207 @@ export function FinancingSection({ token, projectId, readOnly = false }: Financi
             ))}
           </ul>
         </>
+      )}
+    </div>
+  );
+}
+
+/**
+ * LE RACHAT PROGRESSIF — les trois conditions du modèle économique.
+ *
+ * Ignitux n'évalue rien ici. Le modèle nomme « rentabilité », « autonomie »
+ * et « stabilité » sans les chiffrer : c'est le porteur qui écrit ce que
+ * chacune veut dire pour son projet, et lui qui déclare qu'elle est
+ * atteinte. L'écran conserve, date et compte — rien de plus.
+ *
+ * Ce que ça change : une condition écrite noir sur blanc avant d'être
+ * atteinte est beaucoup plus difficile à réinterpréter après coup, par le
+ * porteur comme par Ignitux.
+ */
+export function BuybackSection({ token, projectId, readOnly = false }: FinancingSectionProps) {
+  const [progress, setProgress] = useState<BuybackProgress | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [draft, setDraft] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isBusy, setIsBusy] = useState(false);
+
+  async function load(activeToken: string) {
+    try {
+      setProgress(await api.getBuybackProgress(activeToken, projectId));
+    } catch {
+      // Section secondaire : son échec ne doit pas masquer le financement.
+    }
+  }
+
+  useEffect(() => {
+    if (!token) return;
+    void load(token);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, projectId]);
+
+  async function saveDefinition(kind: string) {
+    if (!token) return;
+    setError(null);
+    setIsBusy(true);
+    try {
+      await api.setBuybackObjective(token, projectId, kind, draft);
+      setEditing(null);
+      setDraft('');
+      await load(token);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Impossible d'enregistrer la condition.");
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  async function toggleReached(kind: string, reached: boolean) {
+    if (!token) return;
+    setError(null);
+    setIsBusy(true);
+    try {
+      await api.declareBuybackObjective(
+        token,
+        projectId,
+        kind,
+        reached ? new Date().toISOString() : null,
+      );
+      await load(token);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Impossible de mettre à jour.');
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  // Le mock de test — et un serveur inattendu — peuvent renvoyer autre chose
+  // qu'un objet de progression. On n'affiche que ce qui est exploitable,
+  // plutôt que de planter sur .map d'un champ absent.
+  if (!progress || !Array.isArray(progress.conditions)) return null;
+
+  return (
+    <div className="card" style={{ marginTop: '1.5rem' }}>
+      <h2 style={{ marginTop: 0 }}>Rachat progressif des parts</h2>
+
+      <p className="notice">
+        <span>{progress.notice}</span>
+      </p>
+
+      <p className="muted">
+        {progress.reachedCount} condition(s) sur {progress.totalCount} déclarée(s) atteinte(s)
+        {progress.definedCount < progress.totalCount &&
+          ` — ${progress.totalCount - progress.definedCount} reste(nt) à définir`}
+        .
+      </p>
+
+      {/* On n'annonce « conditions réunies » que si les trois sont écrites
+          ET déclarées atteintes. Sur une définition manquante le serveur
+          renvoie null, et se prononcer serait une affirmation infondée. */}
+      {progress.allReached === true && (
+        <p className="notice">
+          <span>
+            <strong>Les trois conditions que tu as fixées sont atteintes.</strong> Le modèle
+            prévoit qu&apos;à ce stade tu peux racheter progressivement les parts d&apos;Ignitux.
+            Le prix, lui, reste à négocier : Ignitux ne le calcule pas.
+          </span>
+        </p>
+      )}
+
+      <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+        {progress.conditions.map((condition) => (
+          <li
+            key={condition.kind}
+            style={{ borderTop: '1px solid var(--border)', padding: '0.85rem 0' }}
+          >
+            <div className="top-bar" style={{ marginBottom: '0.35rem' }}>
+              <strong>{condition.label}</strong>
+              {condition.reachedAt ? (
+                <span className="pill pill--fire">
+                  Atteinte le {new Date(condition.reachedAt).toLocaleDateString('fr-FR')}
+                </span>
+              ) : (
+                <span className="pill">{condition.definition ? 'Non atteinte' : 'À définir'}</span>
+              )}
+            </div>
+
+            {condition.definition ? (
+              <p className="muted" style={{ margin: 0 }}>
+                {condition.definition}
+              </p>
+            ) : (
+              <p className="muted" style={{ margin: 0 }}>
+                Tu n&apos;as pas encore écrit ce que « {condition.label.toLowerCase()} » veut dire
+                pour ce projet. Ignitux ne le devinera pas à ta place.
+              </p>
+            )}
+
+            {!readOnly && editing === condition.kind && (
+              <div className="field" style={{ marginTop: '0.6rem', marginBottom: 0 }}>
+                <label htmlFor={`def-${condition.kind}`}>
+                  Ce que « {condition.label.toLowerCase()} » veut dire ici
+                </label>
+                <textarea
+                  id={`def-${condition.kind}`}
+                  rows={2}
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                />
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                  <button
+                    className="secondary"
+                    type="button"
+                    disabled={isBusy}
+                    onClick={() => void saveDefinition(condition.kind)}
+                  >
+                    Enregistrer
+                  </button>
+                  <button className="secondary" type="button" onClick={() => setEditing(null)}>
+                    Annuler
+                  </button>
+                </div>
+                {condition.definition && (
+                  <p className="muted" style={{ marginTop: '0.4rem', marginBottom: 0 }}>
+                    Réécrire cette condition la remettra à « non atteinte » : une déclaration ne
+                    peut pas survivre au changement de ce qu&apos;elle déclarait.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {!readOnly && editing !== condition.kind && (
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.6rem' }}>
+                <button
+                  className="secondary"
+                  type="button"
+                  onClick={() => {
+                    setEditing(condition.kind);
+                    setDraft(condition.definition ?? '');
+                  }}
+                >
+                  {condition.definition ? 'Réécrire' : 'Définir'}
+                </button>
+                {condition.definition && (
+                  <button
+                    className="secondary"
+                    type="button"
+                    disabled={isBusy}
+                    onClick={() => void toggleReached(condition.kind, !condition.reachedAt)}
+                  >
+                    {condition.reachedAt
+                      ? 'Revenir sur ma déclaration'
+                      : 'Je déclare cette condition atteinte'}
+                  </button>
+                )}
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      {error && (
+        <p className="error" style={{ marginTop: '1rem', marginBottom: 0 }}>
+          {error}
+        </p>
       )}
     </div>
   );

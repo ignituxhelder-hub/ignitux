@@ -85,7 +85,8 @@ export const ModelName = {
   workflow_runs: 'workflow_runs',
   workflow_events: 'workflow_events',
   constitution_articles: 'constitution_articles',
-  constitution_violations: 'constitution_violations'
+  constitution_violations: 'constitution_violations',
+  buyback_objectives: 'buyback_objectives'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -580,6 +581,20 @@ export const Constitution_violationsScalarFieldEnum = {
 } as const
 
 export type Constitution_violationsScalarFieldEnum = (typeof Constitution_violationsScalarFieldEnum)[keyof typeof Constitution_violationsScalarFieldEnum]
+
+
+export const Buyback_objectivesScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  kind: 'kind',
+  definition: 'definition',
+  reached_at: 'reached_at',
+  evidence: 'evidence',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Buyback_objectivesScalarFieldEnum = (typeof Buyback_objectivesScalarFieldEnum)[keyof typeof Buyback_objectivesScalarFieldEnum]
 
 
 export const SortOrder = {

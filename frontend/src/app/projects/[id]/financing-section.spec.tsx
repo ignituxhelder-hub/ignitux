@@ -1,7 +1,7 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mockApiRoutes } from '@/test-utils/mocks';
-import { FinancingSection } from './financing-section';
+import { BuybackSection, FinancingSection } from './financing-section';
 
 const TOKEN = 'tok123';
 const PROJECT_ID = 'p1';
@@ -185,5 +185,136 @@ describe('FinancingSection', () => {
 
     await screen.findByText('Porteur');
     expect(screen.queryByLabelText('Montant reçu en euros')).not.toBeInTheDocument();
+  });
+});
+
+describe('BuybackSection', () => {
+  const CONDITIONS = [
+    {
+      kind: 'rentabilite',
+      label: 'Rentabilité',
+      definition: 'Trois mois consécutifs de résultat positif.',
+      reachedAt: '2026-03-01T00:00:00.000Z',
+    },
+    {
+      kind: 'autonomie',
+      label: 'Autonomie',
+      definition: 'Les salaires ne dépendent plus du financement Ignitux.',
+      reachedAt: null,
+    },
+    { kind: 'stabilite', label: 'Stabilité', definition: null, reachedAt: null },
+  ];
+
+  function progress(overrides: Record<string, unknown> = {}) {
+    return {
+      notice:
+        "C'est donc toi qui écris ce que chacun veut dire. Ignitux ne calcule ni la valorisation " +
+        'de ton projet, ni le prix de rachat.',
+      conditions: CONDITIONS,
+      definedCount: 2,
+      reachedCount: 1,
+      totalCount: 3,
+      allReached: null,
+      missingDefinitions: ['stabilite'],
+      ...overrides,
+    };
+  }
+
+  function routes(overrides: Record<string, { status: number; body: unknown }> = {}) {
+    return {
+      'GET /projects/p1/financing/buyback': { status: 200, body: progress() },
+      ...overrides,
+    };
+  }
+
+  it('affiche les trois conditions du modèle, définies ou non', async () => {
+    mockApiRoutes(routes());
+
+    render(<BuybackSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    expect(await screen.findByText('Rentabilité')).toBeInTheDocument();
+    expect(screen.getByText('Autonomie')).toBeInTheDocument();
+    expect(screen.getByText('Stabilité')).toBeInTheDocument();
+  });
+
+  it('dit clairement ce qui reste à définir plutôt que de le masquer', async () => {
+    const { container } = render(<BuybackSection token={TOKEN} projectId={PROJECT_ID} />);
+    mockApiRoutes(routes());
+
+    await waitFor(() => expect(container.textContent).toContain('reste(nt) à définir'));
+    expect(container.textContent).toContain('Ignitux ne le devinera pas à ta place');
+  });
+
+  it("rappelle qu'Ignitux ne calcule pas le prix de rachat", async () => {
+    // Garde volontaire : c'est la limite que le modèle économique impose,
+    // et elle doit rester lisible à l'écran, pas seulement dans le code.
+    mockApiRoutes(routes());
+
+    const { container } = render(<BuybackSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await waitFor(() => expect(container.textContent).toContain('ni le prix de rachat'));
+  });
+
+  it("n'annonce pas que le rachat est possible tant que les trois ne sont pas atteintes", async () => {
+    mockApiRoutes(routes());
+
+    const { container } = render(<BuybackSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText('Rentabilité');
+    expect(container.textContent).not.toContain('sont atteintes.');
+  });
+
+  it('annonce le rachat possible quand le porteur a déclaré les trois', async () => {
+    mockApiRoutes(
+      routes({
+        'GET /projects/p1/financing/buyback': {
+          status: 200,
+          body: progress({ allReached: true, reachedCount: 3, definedCount: 3 }),
+        },
+      }),
+    );
+
+    const { container } = render(<BuybackSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await waitFor(() =>
+      expect(container.textContent).toContain('Les trois conditions que tu as fixées sont atteintes.'),
+    );
+    // Même à ce stade, aucun prix n'est avancé.
+    expect(container.textContent).toContain('Ignitux ne le calcule pas');
+  });
+
+  it("prévient que réécrire une condition annule la déclaration", async () => {
+    mockApiRoutes(routes());
+
+    render(<BuybackSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    const buttons = await screen.findAllByRole('button', { name: 'Réécrire' });
+    fireEvent.click(buttons[0]);
+
+    expect(
+      await screen.findByText(/une déclaration ne peut pas survivre au changement/),
+    ).toBeInTheDocument();
+  });
+
+  it("ne propose ni définition ni déclaration à un collaborateur", async () => {
+    // Savoir à quelles conditions le porteur reprendra ses parts le
+    // regarde ; les fixer, non.
+    mockApiRoutes(routes());
+
+    render(<BuybackSection token={TOKEN} projectId={PROJECT_ID} readOnly />);
+
+    await screen.findByText('Rentabilité');
+    expect(screen.queryByRole('button', { name: 'Définir' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /je déclare cette condition atteinte/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("n'affiche rien plutôt que de planter sur une réponse inattendue", async () => {
+    mockApiRoutes({ 'GET /projects/p1/financing/buyback': { status: 200, body: [] } });
+
+    const { container } = render(<BuybackSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await waitFor(() => expect(container.textContent).not.toContain('Rachat progressif'));
   });
 });

@@ -25,7 +25,7 @@ import {
 import { useAuth } from '@/lib/auth';
 import { AutomationSection } from './automation-section';
 import { WorkflowSection } from './workflow-section';
-import { FinancingSection } from './financing-section';
+import { BuybackSection, FinancingSection } from './financing-section';
 import { CollaboratorsSection } from './collaborators-section';
 import { ComplianceSection } from './compliance-section';
 import { KnowledgeSection, MemorySection, ScoreSection, TasksSection } from './engine-sections';
@@ -478,6 +478,7 @@ export default function ProjectDetailPage() {
         <WorkflowSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
       )}
       {project && <FinancingSection token={token} projectId={id} readOnly={!isOwner} />}
+      {project && <BuybackSection token={token} projectId={id} readOnly={!isOwner} />}
       {project && isOwner && <CollaboratorsSection token={token} projectId={id} />}
     </main>
   );

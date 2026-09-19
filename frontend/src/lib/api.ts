@@ -277,6 +277,27 @@ export interface CommunityComment {
   created_at: string;
 }
 
+
+/** Une des trois conditions de rachat du modèle économique. */
+export interface BuybackCondition {
+  kind: 'rentabilite' | 'autonomie' | 'stabilite';
+  label: string;
+  /** Ce que le porteur a écrit, ou null tant qu'il ne l'a pas fait. */
+  definition: string | null;
+  reachedAt: string | null;
+}
+
+export interface BuybackProgress {
+  notice: string;
+  conditions: BuybackCondition[];
+  definedCount: number;
+  reachedCount: number;
+  totalCount: number;
+  /** null tant que les trois conditions ne sont pas écrites. */
+  allReached: boolean | null;
+  missingDefinitions: string[];
+}
+
 /** Export des données personnelles (RGPD art. 15). La forme exacte vient du serveur. */
 export interface UserDataExport {
   genere_le: string;
@@ -730,6 +751,31 @@ export interface AutomationRunResult {
 }
 
 export const api = {
+  getBuybackProgress: (token: string, projectId: string) =>
+    request<BuybackProgress>(`/projects/${projectId}/financing/buyback`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  setBuybackObjective: (token: string, projectId: string, kind: string, definition: string) =>
+    request<unknown>(`/projects/${projectId}/financing/buyback`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ kind, definition }),
+    }),
+
+  declareBuybackObjective: (
+    token: string,
+    projectId: string,
+    kind: string,
+    reachedAt: string | null,
+    evidence?: string,
+  ) =>
+    request<unknown>(`/projects/${projectId}/financing/buyback/${kind}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ reachedAt, evidence }),
+    }),
+
   /** Sans jeton : l'état d'une fonctionnalité n'est pas une donnée personnelle. */
   getIginiStatus: () => request<IginiStatus>('/igini/status'),
 

@@ -55,6 +55,18 @@ const ENGINE_ROUTES = {
     },
   },
   'GET /projects/p1/financing/dividends': { status: 200, body: { dividends: [], totalCents: 0 } },
+  'GET /projects/p1/financing/buyback': {
+    status: 200,
+    body: {
+      notice: 'Perimetre du rachat.',
+      conditions: [],
+      definedCount: 0,
+      reachedCount: 0,
+      totalCount: 3,
+      allReached: null,
+      missingDefinitions: ['rentabilite', 'autonomie', 'stabilite'],
+    },
+  },
 };
 
 describe('ProjectDetailPage', () => {

@@ -95,6 +95,7 @@ export class UserDataService {
       holders,
       equityEvents,
       dividends,
+      buybackObjectives,
       comments,
       contactsSent,
       contactsReceived,
@@ -122,6 +123,7 @@ export class UserDataService {
       this.prisma.equity_holders.findMany({ where: byProject }),
       this.prisma.equity_events.findMany({ where: byProject }),
       this.prisma.dividend_distributions.findMany({ where: byProject }),
+      this.prisma.buyback_objectives.findMany({ where: byProject }),
       this.prisma.community_comments.findMany({ where: { author_id: userId } }),
       this.prisma.marketplace_contacts.findMany({ where: { from_user_id: userId } }),
       profile
@@ -178,6 +180,7 @@ export class UserDataService {
           detenteurs_de_parts: holders,
           evenements_de_repartition: equityEvents,
           dividendes_verses: dividends,
+          objectifs_de_rachat: buybackObjectives,
         },
         communaute_et_marketplace: {
           commentaires: comments,

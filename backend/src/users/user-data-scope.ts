@@ -72,6 +72,7 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   equity_holders: exported('financement'),
   equity_events: exported('financement'),
   dividend_distributions: exported('financement'),
+  buyback_objectives: exported('financement'),
 
   community_comments: exported('communaute_et_marketplace'),
   marketplace_profiles: exported('communaute_et_marketplace'),

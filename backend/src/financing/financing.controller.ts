@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -7,7 +8,9 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -15,10 +18,17 @@ import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import {
+  BUYBACK_CONDITIONS,
+  isBuybackCondition,
+  type BuybackCondition,
+} from './buyback-progress.js';
+import {
   AddHolderDto,
+  DeclareBuybackObjectiveDto,
   RecordDividendDto,
   RecordEquityChangeDto,
   RecordRoundDto,
+  SetBuybackObjectiveDto,
 } from './dto/financing.dto.js';
 import { isFinancingSource, type FinancingSource } from './financing-model.js';
 import { FinancingService } from './financing.service.js';
@@ -146,5 +156,50 @@ export class FinancingController {
     @Param('projectId', ParseUUIDPipe) projectId: string,
   ) {
     return this.financingService.listDividends(user.id, projectId);
+  }
+
+  // ------------------------------------------------- rachat progressif
+
+  @Get('projects/:projectId/financing/buyback')
+  getBuybackProgress(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+  ) {
+    return this.financingService.getBuybackProgress(user.id, projectId);
+  }
+
+  @Put('projects/:projectId/financing/buyback')
+  setBuybackObjective(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Body() dto: SetBuybackObjectiveDto,
+  ) {
+    return this.financingService.setBuybackObjective(
+      user.id,
+      projectId,
+      dto.kind as BuybackCondition,
+      dto.definition,
+    );
+  }
+
+  @Patch('projects/:projectId/financing/buyback/:kind')
+  declareBuybackObjective(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('kind') kind: string,
+    @Body() dto: DeclareBuybackObjectiveDto,
+  ) {
+    if (!isBuybackCondition(kind)) {
+      throw new BadRequestException(
+        `kind doit être l'une de : ${BUYBACK_CONDITIONS.join(', ')}.`,
+      );
+    }
+    return this.financingService.declareBuybackObjective(
+      user.id,
+      projectId,
+      kind,
+      dto.reachedAt,
+      dto.evidence,
+    );
   }
 }
