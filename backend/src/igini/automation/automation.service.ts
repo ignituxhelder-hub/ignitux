@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConstitutionService } from '../../constitution/constitution.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 
 interface StageDefinition {
@@ -46,7 +47,10 @@ const MAX_CONCEPTS_FOR_AUTO_LINK = 50;
  */
 @Injectable()
 export class AutomationService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly constitutionService: ConstitutionService,
+  ) {}
 
   async run(projectId: string) {
     const [analysis, buildPlan, financingPlan, developmentPlan, transmissionPlan, openAutomationTasks, concepts] =
@@ -100,6 +104,16 @@ export class AutomationService {
         concept_links_created_count: conceptLinksCreated.length,
       },
     });
+
+    // Article 5 (autonomie supervisée) : ce moteur est le seul à agir sans
+    // confirmation, donc le seul dont le journal soit la contrepartie du
+    // pouvoir. On soumet l'exécution au moteur constitutionnel APRÈS avoir
+    // écrit le journal, avec le résultat réel de cette écriture — la
+    // vérifier avant reviendrait à contrôler une intention plutôt qu'un fait.
+    await this.constitutionService.guard(
+      { kind: 'autonomous_act', engine: 'automation', journalled: run !== null },
+      { projectId },
+    );
 
     return { run, tasksCreated, tasksClosed, conceptLinksCreated };
   }

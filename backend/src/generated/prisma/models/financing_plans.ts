@@ -29,6 +29,8 @@ export type Financing_plansMinAggregateOutputType = {
   project_id: string | null
   summary: string | null
   estimated_budget: string | null
+  generated_by: string | null
+  generated_model: string | null
   created_at: Date | null
 }
 
@@ -37,6 +39,8 @@ export type Financing_plansMaxAggregateOutputType = {
   project_id: string | null
   summary: string | null
   estimated_budget: string | null
+  generated_by: string | null
+  generated_model: string | null
   created_at: Date | null
 }
 
@@ -47,6 +51,8 @@ export type Financing_plansCountAggregateOutputType = {
   estimated_budget: number
   funding_sources: number
   budget_breakdown: number
+  generated_by: number
+  generated_model: number
   created_at: number
   _all: number
 }
@@ -57,6 +63,8 @@ export type Financing_plansMinAggregateInputType = {
   project_id?: true
   summary?: true
   estimated_budget?: true
+  generated_by?: true
+  generated_model?: true
   created_at?: true
 }
 
@@ -65,6 +73,8 @@ export type Financing_plansMaxAggregateInputType = {
   project_id?: true
   summary?: true
   estimated_budget?: true
+  generated_by?: true
+  generated_model?: true
   created_at?: true
 }
 
@@ -75,6 +85,8 @@ export type Financing_plansCountAggregateInputType = {
   estimated_budget?: true
   funding_sources?: true
   budget_breakdown?: true
+  generated_by?: true
+  generated_model?: true
   created_at?: true
   _all?: true
 }
@@ -158,6 +170,8 @@ export type Financing_plansGroupByOutputType = {
   estimated_budget: string
   funding_sources: string[]
   budget_breakdown: string[]
+  generated_by: string
+  generated_model: string | null
   created_at: Date | null
   _count: Financing_plansCountAggregateOutputType | null
   _min: Financing_plansMinAggregateOutputType | null
@@ -189,6 +203,8 @@ export type financing_plansWhereInput = {
   estimated_budget?: Prisma.StringFilter<"financing_plans"> | string
   funding_sources?: Prisma.StringNullableListFilter<"financing_plans">
   budget_breakdown?: Prisma.StringNullableListFilter<"financing_plans">
+  generated_by?: Prisma.StringFilter<"financing_plans"> | string
+  generated_model?: Prisma.StringNullableFilter<"financing_plans"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"financing_plans"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
 }
@@ -200,6 +216,8 @@ export type financing_plansOrderByWithRelationInput = {
   estimated_budget?: Prisma.SortOrder
   funding_sources?: Prisma.SortOrder
   budget_breakdown?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   project?: Prisma.projectsOrderByWithRelationInput
 }
@@ -214,6 +232,8 @@ export type financing_plansWhereUniqueInput = Prisma.AtLeast<{
   estimated_budget?: Prisma.StringFilter<"financing_plans"> | string
   funding_sources?: Prisma.StringNullableListFilter<"financing_plans">
   budget_breakdown?: Prisma.StringNullableListFilter<"financing_plans">
+  generated_by?: Prisma.StringFilter<"financing_plans"> | string
+  generated_model?: Prisma.StringNullableFilter<"financing_plans"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"financing_plans"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
 }, "id">
@@ -225,6 +245,8 @@ export type financing_plansOrderByWithAggregationInput = {
   estimated_budget?: Prisma.SortOrder
   funding_sources?: Prisma.SortOrder
   budget_breakdown?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.financing_plansCountOrderByAggregateInput
   _max?: Prisma.financing_plansMaxOrderByAggregateInput
@@ -241,6 +263,8 @@ export type financing_plansScalarWhereWithAggregatesInput = {
   estimated_budget?: Prisma.StringWithAggregatesFilter<"financing_plans"> | string
   funding_sources?: Prisma.StringNullableListFilter<"financing_plans">
   budget_breakdown?: Prisma.StringNullableListFilter<"financing_plans">
+  generated_by?: Prisma.StringWithAggregatesFilter<"financing_plans"> | string
+  generated_model?: Prisma.StringNullableWithAggregatesFilter<"financing_plans"> | string | null
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"financing_plans"> | Date | string | null
 }
 
@@ -250,6 +274,8 @@ export type financing_plansCreateInput = {
   estimated_budget: string
   funding_sources?: Prisma.financing_plansCreatefunding_sourcesInput | string[]
   budget_breakdown?: Prisma.financing_plansCreatebudget_breakdownInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
   project: Prisma.projectsCreateNestedOneWithoutFinancing_plansInput
 }
@@ -261,6 +287,8 @@ export type financing_plansUncheckedCreateInput = {
   estimated_budget: string
   funding_sources?: Prisma.financing_plansCreatefunding_sourcesInput | string[]
   budget_breakdown?: Prisma.financing_plansCreatebudget_breakdownInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -270,6 +298,8 @@ export type financing_plansUpdateInput = {
   estimated_budget?: Prisma.StringFieldUpdateOperationsInput | string
   funding_sources?: Prisma.financing_plansUpdatefunding_sourcesInput | string[]
   budget_breakdown?: Prisma.financing_plansUpdatebudget_breakdownInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   project?: Prisma.projectsUpdateOneRequiredWithoutFinancing_plansNestedInput
 }
@@ -281,6 +311,8 @@ export type financing_plansUncheckedUpdateInput = {
   estimated_budget?: Prisma.StringFieldUpdateOperationsInput | string
   funding_sources?: Prisma.financing_plansUpdatefunding_sourcesInput | string[]
   budget_breakdown?: Prisma.financing_plansUpdatebudget_breakdownInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -291,6 +323,8 @@ export type financing_plansCreateManyInput = {
   estimated_budget: string
   funding_sources?: Prisma.financing_plansCreatefunding_sourcesInput | string[]
   budget_breakdown?: Prisma.financing_plansCreatebudget_breakdownInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -300,6 +334,8 @@ export type financing_plansUpdateManyMutationInput = {
   estimated_budget?: Prisma.StringFieldUpdateOperationsInput | string
   funding_sources?: Prisma.financing_plansUpdatefunding_sourcesInput | string[]
   budget_breakdown?: Prisma.financing_plansUpdatebudget_breakdownInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -310,6 +346,8 @@ export type financing_plansUncheckedUpdateManyInput = {
   estimated_budget?: Prisma.StringFieldUpdateOperationsInput | string
   funding_sources?: Prisma.financing_plansUpdatefunding_sourcesInput | string[]
   budget_breakdown?: Prisma.financing_plansUpdatebudget_breakdownInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -330,6 +368,8 @@ export type financing_plansCountOrderByAggregateInput = {
   estimated_budget?: Prisma.SortOrder
   funding_sources?: Prisma.SortOrder
   budget_breakdown?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -338,6 +378,8 @@ export type financing_plansMaxOrderByAggregateInput = {
   project_id?: Prisma.SortOrder
   summary?: Prisma.SortOrder
   estimated_budget?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -346,6 +388,8 @@ export type financing_plansMinOrderByAggregateInput = {
   project_id?: Prisma.SortOrder
   summary?: Prisma.SortOrder
   estimated_budget?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -415,6 +459,8 @@ export type financing_plansCreateWithoutProjectInput = {
   estimated_budget: string
   funding_sources?: Prisma.financing_plansCreatefunding_sourcesInput | string[]
   budget_breakdown?: Prisma.financing_plansCreatebudget_breakdownInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -424,6 +470,8 @@ export type financing_plansUncheckedCreateWithoutProjectInput = {
   estimated_budget: string
   funding_sources?: Prisma.financing_plansCreatefunding_sourcesInput | string[]
   budget_breakdown?: Prisma.financing_plansCreatebudget_breakdownInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -463,6 +511,8 @@ export type financing_plansScalarWhereInput = {
   estimated_budget?: Prisma.StringFilter<"financing_plans"> | string
   funding_sources?: Prisma.StringNullableListFilter<"financing_plans">
   budget_breakdown?: Prisma.StringNullableListFilter<"financing_plans">
+  generated_by?: Prisma.StringFilter<"financing_plans"> | string
+  generated_model?: Prisma.StringNullableFilter<"financing_plans"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"financing_plans"> | Date | string | null
 }
 
@@ -472,6 +522,8 @@ export type financing_plansCreateManyProjectInput = {
   estimated_budget: string
   funding_sources?: Prisma.financing_plansCreatefunding_sourcesInput | string[]
   budget_breakdown?: Prisma.financing_plansCreatebudget_breakdownInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -481,6 +533,8 @@ export type financing_plansUpdateWithoutProjectInput = {
   estimated_budget?: Prisma.StringFieldUpdateOperationsInput | string
   funding_sources?: Prisma.financing_plansUpdatefunding_sourcesInput | string[]
   budget_breakdown?: Prisma.financing_plansUpdatebudget_breakdownInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -490,6 +544,8 @@ export type financing_plansUncheckedUpdateWithoutProjectInput = {
   estimated_budget?: Prisma.StringFieldUpdateOperationsInput | string
   funding_sources?: Prisma.financing_plansUpdatefunding_sourcesInput | string[]
   budget_breakdown?: Prisma.financing_plansUpdatebudget_breakdownInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -499,6 +555,8 @@ export type financing_plansUncheckedUpdateManyWithoutProjectInput = {
   estimated_budget?: Prisma.StringFieldUpdateOperationsInput | string
   funding_sources?: Prisma.financing_plansUpdatefunding_sourcesInput | string[]
   budget_breakdown?: Prisma.financing_plansUpdatebudget_breakdownInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -511,6 +569,8 @@ export type financing_plansSelect<ExtArgs extends runtime.Types.Extensions.Inter
   estimated_budget?: boolean
   funding_sources?: boolean
   budget_breakdown?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["financing_plans"]>
@@ -522,6 +582,8 @@ export type financing_plansSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   estimated_budget?: boolean
   funding_sources?: boolean
   budget_breakdown?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["financing_plans"]>
@@ -533,6 +595,8 @@ export type financing_plansSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   estimated_budget?: boolean
   funding_sources?: boolean
   budget_breakdown?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["financing_plans"]>
@@ -544,10 +608,12 @@ export type financing_plansSelectScalar = {
   estimated_budget?: boolean
   funding_sources?: boolean
   budget_breakdown?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
 }
 
-export type financing_plansOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "summary" | "estimated_budget" | "funding_sources" | "budget_breakdown" | "created_at", ExtArgs["result"]["financing_plans"]>
+export type financing_plansOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "summary" | "estimated_budget" | "funding_sources" | "budget_breakdown" | "generated_by" | "generated_model" | "created_at", ExtArgs["result"]["financing_plans"]>
 export type financing_plansInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }
@@ -570,6 +636,8 @@ export type $financing_plansPayload<ExtArgs extends runtime.Types.Extensions.Int
     estimated_budget: string
     funding_sources: string[]
     budget_breakdown: string[]
+    generated_by: string
+    generated_model: string | null
     created_at: Date | null
   }, ExtArgs["result"]["financing_plans"]>
   composites: {}
@@ -1001,6 +1069,8 @@ export interface financing_plansFieldRefs {
   readonly estimated_budget: Prisma.FieldRef<"financing_plans", 'String'>
   readonly funding_sources: Prisma.FieldRef<"financing_plans", 'String[]'>
   readonly budget_breakdown: Prisma.FieldRef<"financing_plans", 'String[]'>
+  readonly generated_by: Prisma.FieldRef<"financing_plans", 'String'>
+  readonly generated_model: Prisma.FieldRef<"financing_plans", 'String'>
   readonly created_at: Prisma.FieldRef<"financing_plans", 'DateTime'>
 }
     

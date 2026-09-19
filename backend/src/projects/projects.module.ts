@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { AuthModule } from '../auth/auth.module.js';
+import { ConstitutionModule } from '../constitution/constitution.module.js';
 import { AnalysisModule } from '../igini/analysis/analysis.module.js';
 import { AutomationModule } from '../igini/automation/automation.module.js';
 import { DevelopmentModule } from '../igini/development/development.module.js';
@@ -27,6 +28,7 @@ import { ProjectsService } from './projects.service.js';
     TransmissionModule,
     WorkflowModule,
     AutomationModule,
+    ConstitutionModule,
   ],
   controllers: [ProjectsController],
   providers: [ProjectsService],

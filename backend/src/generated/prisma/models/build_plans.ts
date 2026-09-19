@@ -29,6 +29,8 @@ export type Build_plansMinAggregateOutputType = {
   project_id: string | null
   summary: string | null
   estimated_timeline: string | null
+  generated_by: string | null
+  generated_model: string | null
   created_at: Date | null
 }
 
@@ -37,6 +39,8 @@ export type Build_plansMaxAggregateOutputType = {
   project_id: string | null
   summary: string | null
   estimated_timeline: string | null
+  generated_by: string | null
+  generated_model: string | null
   created_at: Date | null
 }
 
@@ -47,6 +51,8 @@ export type Build_plansCountAggregateOutputType = {
   estimated_timeline: number
   milestones: number
   key_resources: number
+  generated_by: number
+  generated_model: number
   created_at: number
   _all: number
 }
@@ -57,6 +63,8 @@ export type Build_plansMinAggregateInputType = {
   project_id?: true
   summary?: true
   estimated_timeline?: true
+  generated_by?: true
+  generated_model?: true
   created_at?: true
 }
 
@@ -65,6 +73,8 @@ export type Build_plansMaxAggregateInputType = {
   project_id?: true
   summary?: true
   estimated_timeline?: true
+  generated_by?: true
+  generated_model?: true
   created_at?: true
 }
 
@@ -75,6 +85,8 @@ export type Build_plansCountAggregateInputType = {
   estimated_timeline?: true
   milestones?: true
   key_resources?: true
+  generated_by?: true
+  generated_model?: true
   created_at?: true
   _all?: true
 }
@@ -158,6 +170,8 @@ export type Build_plansGroupByOutputType = {
   estimated_timeline: string
   milestones: string[]
   key_resources: string[]
+  generated_by: string
+  generated_model: string | null
   created_at: Date | null
   _count: Build_plansCountAggregateOutputType | null
   _min: Build_plansMinAggregateOutputType | null
@@ -189,6 +203,8 @@ export type build_plansWhereInput = {
   estimated_timeline?: Prisma.StringFilter<"build_plans"> | string
   milestones?: Prisma.StringNullableListFilter<"build_plans">
   key_resources?: Prisma.StringNullableListFilter<"build_plans">
+  generated_by?: Prisma.StringFilter<"build_plans"> | string
+  generated_model?: Prisma.StringNullableFilter<"build_plans"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"build_plans"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
 }
@@ -200,6 +216,8 @@ export type build_plansOrderByWithRelationInput = {
   estimated_timeline?: Prisma.SortOrder
   milestones?: Prisma.SortOrder
   key_resources?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   project?: Prisma.projectsOrderByWithRelationInput
 }
@@ -214,6 +232,8 @@ export type build_plansWhereUniqueInput = Prisma.AtLeast<{
   estimated_timeline?: Prisma.StringFilter<"build_plans"> | string
   milestones?: Prisma.StringNullableListFilter<"build_plans">
   key_resources?: Prisma.StringNullableListFilter<"build_plans">
+  generated_by?: Prisma.StringFilter<"build_plans"> | string
+  generated_model?: Prisma.StringNullableFilter<"build_plans"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"build_plans"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
 }, "id">
@@ -225,6 +245,8 @@ export type build_plansOrderByWithAggregationInput = {
   estimated_timeline?: Prisma.SortOrder
   milestones?: Prisma.SortOrder
   key_resources?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.build_plansCountOrderByAggregateInput
   _max?: Prisma.build_plansMaxOrderByAggregateInput
@@ -241,6 +263,8 @@ export type build_plansScalarWhereWithAggregatesInput = {
   estimated_timeline?: Prisma.StringWithAggregatesFilter<"build_plans"> | string
   milestones?: Prisma.StringNullableListFilter<"build_plans">
   key_resources?: Prisma.StringNullableListFilter<"build_plans">
+  generated_by?: Prisma.StringWithAggregatesFilter<"build_plans"> | string
+  generated_model?: Prisma.StringNullableWithAggregatesFilter<"build_plans"> | string | null
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"build_plans"> | Date | string | null
 }
 
@@ -250,6 +274,8 @@ export type build_plansCreateInput = {
   estimated_timeline: string
   milestones?: Prisma.build_plansCreatemilestonesInput | string[]
   key_resources?: Prisma.build_plansCreatekey_resourcesInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
   project: Prisma.projectsCreateNestedOneWithoutBuild_plansInput
 }
@@ -261,6 +287,8 @@ export type build_plansUncheckedCreateInput = {
   estimated_timeline: string
   milestones?: Prisma.build_plansCreatemilestonesInput | string[]
   key_resources?: Prisma.build_plansCreatekey_resourcesInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -270,6 +298,8 @@ export type build_plansUpdateInput = {
   estimated_timeline?: Prisma.StringFieldUpdateOperationsInput | string
   milestones?: Prisma.build_plansUpdatemilestonesInput | string[]
   key_resources?: Prisma.build_plansUpdatekey_resourcesInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   project?: Prisma.projectsUpdateOneRequiredWithoutBuild_plansNestedInput
 }
@@ -281,6 +311,8 @@ export type build_plansUncheckedUpdateInput = {
   estimated_timeline?: Prisma.StringFieldUpdateOperationsInput | string
   milestones?: Prisma.build_plansUpdatemilestonesInput | string[]
   key_resources?: Prisma.build_plansUpdatekey_resourcesInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -291,6 +323,8 @@ export type build_plansCreateManyInput = {
   estimated_timeline: string
   milestones?: Prisma.build_plansCreatemilestonesInput | string[]
   key_resources?: Prisma.build_plansCreatekey_resourcesInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -300,6 +334,8 @@ export type build_plansUpdateManyMutationInput = {
   estimated_timeline?: Prisma.StringFieldUpdateOperationsInput | string
   milestones?: Prisma.build_plansUpdatemilestonesInput | string[]
   key_resources?: Prisma.build_plansUpdatekey_resourcesInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -310,6 +346,8 @@ export type build_plansUncheckedUpdateManyInput = {
   estimated_timeline?: Prisma.StringFieldUpdateOperationsInput | string
   milestones?: Prisma.build_plansUpdatemilestonesInput | string[]
   key_resources?: Prisma.build_plansUpdatekey_resourcesInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -330,6 +368,8 @@ export type build_plansCountOrderByAggregateInput = {
   estimated_timeline?: Prisma.SortOrder
   milestones?: Prisma.SortOrder
   key_resources?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -338,6 +378,8 @@ export type build_plansMaxOrderByAggregateInput = {
   project_id?: Prisma.SortOrder
   summary?: Prisma.SortOrder
   estimated_timeline?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -346,6 +388,8 @@ export type build_plansMinOrderByAggregateInput = {
   project_id?: Prisma.SortOrder
   summary?: Prisma.SortOrder
   estimated_timeline?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -415,6 +459,8 @@ export type build_plansCreateWithoutProjectInput = {
   estimated_timeline: string
   milestones?: Prisma.build_plansCreatemilestonesInput | string[]
   key_resources?: Prisma.build_plansCreatekey_resourcesInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -424,6 +470,8 @@ export type build_plansUncheckedCreateWithoutProjectInput = {
   estimated_timeline: string
   milestones?: Prisma.build_plansCreatemilestonesInput | string[]
   key_resources?: Prisma.build_plansCreatekey_resourcesInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -463,6 +511,8 @@ export type build_plansScalarWhereInput = {
   estimated_timeline?: Prisma.StringFilter<"build_plans"> | string
   milestones?: Prisma.StringNullableListFilter<"build_plans">
   key_resources?: Prisma.StringNullableListFilter<"build_plans">
+  generated_by?: Prisma.StringFilter<"build_plans"> | string
+  generated_model?: Prisma.StringNullableFilter<"build_plans"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"build_plans"> | Date | string | null
 }
 
@@ -472,6 +522,8 @@ export type build_plansCreateManyProjectInput = {
   estimated_timeline: string
   milestones?: Prisma.build_plansCreatemilestonesInput | string[]
   key_resources?: Prisma.build_plansCreatekey_resourcesInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -481,6 +533,8 @@ export type build_plansUpdateWithoutProjectInput = {
   estimated_timeline?: Prisma.StringFieldUpdateOperationsInput | string
   milestones?: Prisma.build_plansUpdatemilestonesInput | string[]
   key_resources?: Prisma.build_plansUpdatekey_resourcesInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -490,6 +544,8 @@ export type build_plansUncheckedUpdateWithoutProjectInput = {
   estimated_timeline?: Prisma.StringFieldUpdateOperationsInput | string
   milestones?: Prisma.build_plansUpdatemilestonesInput | string[]
   key_resources?: Prisma.build_plansUpdatekey_resourcesInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -499,6 +555,8 @@ export type build_plansUncheckedUpdateManyWithoutProjectInput = {
   estimated_timeline?: Prisma.StringFieldUpdateOperationsInput | string
   milestones?: Prisma.build_plansUpdatemilestonesInput | string[]
   key_resources?: Prisma.build_plansUpdatekey_resourcesInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -511,6 +569,8 @@ export type build_plansSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   estimated_timeline?: boolean
   milestones?: boolean
   key_resources?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["build_plans"]>
@@ -522,6 +582,8 @@ export type build_plansSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   estimated_timeline?: boolean
   milestones?: boolean
   key_resources?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["build_plans"]>
@@ -533,6 +595,8 @@ export type build_plansSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   estimated_timeline?: boolean
   milestones?: boolean
   key_resources?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["build_plans"]>
@@ -544,10 +608,12 @@ export type build_plansSelectScalar = {
   estimated_timeline?: boolean
   milestones?: boolean
   key_resources?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
 }
 
-export type build_plansOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "summary" | "estimated_timeline" | "milestones" | "key_resources" | "created_at", ExtArgs["result"]["build_plans"]>
+export type build_plansOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "summary" | "estimated_timeline" | "milestones" | "key_resources" | "generated_by" | "generated_model" | "created_at", ExtArgs["result"]["build_plans"]>
 export type build_plansInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }
@@ -570,6 +636,8 @@ export type $build_plansPayload<ExtArgs extends runtime.Types.Extensions.Interna
     estimated_timeline: string
     milestones: string[]
     key_resources: string[]
+    generated_by: string
+    generated_model: string | null
     created_at: Date | null
   }, ExtArgs["result"]["build_plans"]>
   composites: {}
@@ -1001,6 +1069,8 @@ export interface build_plansFieldRefs {
   readonly estimated_timeline: Prisma.FieldRef<"build_plans", 'String'>
   readonly milestones: Prisma.FieldRef<"build_plans", 'String[]'>
   readonly key_resources: Prisma.FieldRef<"build_plans", 'String[]'>
+  readonly generated_by: Prisma.FieldRef<"build_plans", 'String'>
+  readonly generated_model: Prisma.FieldRef<"build_plans", 'String'>
   readonly created_at: Prisma.FieldRef<"build_plans", 'DateTime'>
 }
     

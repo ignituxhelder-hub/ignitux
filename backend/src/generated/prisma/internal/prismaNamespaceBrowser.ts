@@ -69,7 +69,9 @@ export const ModelName = {
   project_compliance_checks: 'project_compliance_checks',
   marketplace_profiles: 'marketplace_profiles',
   marketplace_contacts: 'marketplace_contacts',
-  automation_runs: 'automation_runs'
+  automation_runs: 'automation_runs',
+  constitution_articles: 'constitution_articles',
+  constitution_violations: 'constitution_violations'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -133,6 +135,8 @@ export const AnalysesScalarFieldEnum = {
   strengths: 'strengths',
   risks: 'risks',
   next_steps: 'next_steps',
+  generated_by: 'generated_by',
+  generated_model: 'generated_model',
   created_at: 'created_at'
 } as const
 
@@ -146,6 +150,8 @@ export const Financing_plansScalarFieldEnum = {
   estimated_budget: 'estimated_budget',
   funding_sources: 'funding_sources',
   budget_breakdown: 'budget_breakdown',
+  generated_by: 'generated_by',
+  generated_model: 'generated_model',
   created_at: 'created_at'
 } as const
 
@@ -159,6 +165,8 @@ export const Development_plansScalarFieldEnum = {
   growth_levers: 'growth_levers',
   key_metrics: 'key_metrics',
   scaling_risks: 'scaling_risks',
+  generated_by: 'generated_by',
+  generated_model: 'generated_model',
   created_at: 'created_at'
 } as const
 
@@ -172,6 +180,8 @@ export const Transmission_plansScalarFieldEnum = {
   transfer_options: 'transfer_options',
   key_documentation: 'key_documentation',
   readiness_checklist: 'readiness_checklist',
+  generated_by: 'generated_by',
+  generated_model: 'generated_model',
   created_at: 'created_at'
 } as const
 
@@ -257,6 +267,8 @@ export const Build_plansScalarFieldEnum = {
   estimated_timeline: 'estimated_timeline',
   milestones: 'milestones',
   key_resources: 'key_resources',
+  generated_by: 'generated_by',
+  generated_model: 'generated_model',
   created_at: 'created_at'
 } as const
 
@@ -323,6 +335,36 @@ export const Automation_runsScalarFieldEnum = {
 } as const
 
 export type Automation_runsScalarFieldEnum = (typeof Automation_runsScalarFieldEnum)[keyof typeof Automation_runsScalarFieldEnum]
+
+
+export const Constitution_articlesScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  version: 'version',
+  number: 'number',
+  title: 'title',
+  text: 'text',
+  principle: 'principle',
+  enforcement: 'enforcement',
+  created_at: 'created_at'
+} as const
+
+export type Constitution_articlesScalarFieldEnum = (typeof Constitution_articlesScalarFieldEnum)[keyof typeof Constitution_articlesScalarFieldEnum]
+
+
+export const Constitution_violationsScalarFieldEnum = {
+  id: 'id',
+  article_slug: 'article_slug',
+  rule_id: 'rule_id',
+  severity: 'severity',
+  action: 'action',
+  detail: 'detail',
+  user_id: 'user_id',
+  project_id: 'project_id',
+  created_at: 'created_at'
+} as const
+
+export type Constitution_violationsScalarFieldEnum = (typeof Constitution_violationsScalarFieldEnum)[keyof typeof Constitution_violationsScalarFieldEnum]
 
 
 export const SortOrder = {

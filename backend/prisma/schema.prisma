@@ -83,6 +83,13 @@ model analyses {
   strengths         String[]
   risks             String[]
   next_steps        String[]
+  // Provenance — voir constitution_articles, article « pas d'informations
+  // simulées présentées comme réelles » : rien en base ne distinguait un
+  // contenu produit par un modèle d'un contenu saisi par un humain. Les
+  // lignes créées avant cette traçabilité ont generated_model = null, ce qui
+  // se lit « modèle inconnu » et non « rédigé par un humain ».
+  generated_by      String    @default("igini")
+  generated_model   String?
   created_at        DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
@@ -97,6 +104,9 @@ model financing_plans {
   estimated_budget  String
   funding_sources   String[]
   budget_breakdown  String[]
+  // Provenance — même convention que analyses.generated_by.
+  generated_by      String    @default("igini")
+  generated_model   String?
   created_at        DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
@@ -111,6 +121,9 @@ model development_plans {
   growth_levers  String[]
   key_metrics    String[]
   scaling_risks  String[]
+  // Provenance — même convention que analyses.generated_by.
+  generated_by    String   @default("igini")
+  generated_model String?
   created_at     DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
@@ -125,6 +138,9 @@ model transmission_plans {
   transfer_options    String[]
   key_documentation   String[]
   readiness_checklist String[]
+  // Provenance — même convention que analyses.generated_by.
+  generated_by        String    @default("igini")
+  generated_model     String?
   created_at          DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
@@ -236,6 +252,9 @@ model build_plans {
   estimated_timeline  String
   milestones          String[]
   key_resources       String[]
+  // Provenance — même convention que analyses.generated_by.
+  generated_by        String    @default("igini")
+  generated_model     String?
   created_at          DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
@@ -330,4 +349,53 @@ model automation_runs {
   created_at                   DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
+}
+
+/// CONSTITUTION — texte de référence (pas par utilisateur), semé au
+/// démarrage comme compliance_requirements. Chaque article porte le principe
+/// fondateur dont il découle et, surtout, son mode d'application : `enforced`
+/// signifie qu'une règle du moteur le vérifie réellement dans le code,
+/// `declared` qu'il s'agit d'un énoncé de valeur non vérifiable
+/// automatiquement. Cette distinction est volontairement stockée en base :
+/// prétendre qu'un article est appliqué alors qu'aucun code ne le vérifie
+/// serait exactement l'inverse de « la vérité avant tout ».
+/// Voir backend/src/constitution/constitution-articles.ts.
+model constitution_articles {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  // Clé stable de semis (upsert), comme compliance_requirements.slug.
+  slug        String    @unique
+  // Version du texte d'où vient l'article. Permet de remplacer le corpus
+  // actuel par la Constitution V1 officielle sans confondre les deux.
+  version     String
+  number      Int
+  title       String
+  text        String
+  principle   String
+  // 'enforced' | 'declared'
+  enforcement String
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([version])
+}
+
+/// CONSTITUTION — journal des violations relevées par le moteur.
+/// user_id / project_id sont des UUID nus, sans clé étrangère : une trace
+/// d'audit doit survivre à la suppression de ce qu'elle décrit, sinon elle
+/// disparaît précisément dans les cas où elle compte le plus. Le prix
+/// assumé est que ces colonnes peuvent pointer vers des lignes disparues.
+model constitution_violations {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  article_slug String
+  rule_id      String
+  // 'blocking' | 'warning'
+  severity     String
+  // L'action soumise au moteur, ex. 'publish_score' ou 'persist_generated'.
+  action       String
+  detail       String
+  user_id      String?   @db.Uuid
+  project_id   String?   @db.Uuid
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([article_slug])
+  @@index([created_at])
 }

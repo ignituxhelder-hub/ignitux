@@ -5,6 +5,7 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { AuthModule } from './auth/auth.module.js';
 import { ComplianceModule } from './compliance/compliance.module.js';
+import { ConstitutionModule } from './constitution/constitution.module.js';
 import { CommunityModule } from './community/community.module.js';
 import { KnowledgeModule } from './igini/knowledge/knowledge.module.js';
 import { MemoryModule } from './igini/memory/memory.module.js';
@@ -31,6 +32,7 @@ import { UsersModule } from './users/users.module.js';
     ScoringModule,
     CommunityModule,
     ComplianceModule,
+    ConstitutionModule,
     MarketplaceModule,
   ],
   controllers: [AppController],

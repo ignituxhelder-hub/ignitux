@@ -415,7 +415,9 @@ export const ModelName = {
   project_compliance_checks: 'project_compliance_checks',
   marketplace_profiles: 'marketplace_profiles',
   marketplace_contacts: 'marketplace_contacts',
-  automation_runs: 'automation_runs'
+  automation_runs: 'automation_runs',
+  constitution_articles: 'constitution_articles',
+  constitution_violations: 'constitution_violations'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -431,7 +433,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "constitution_articles" | "constitution_violations"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1841,6 +1843,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    constitution_articles: {
+      payload: Prisma.$constitution_articlesPayload<ExtArgs>
+      fields: Prisma.constitution_articlesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.constitution_articlesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_articlesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.constitution_articlesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_articlesPayload>
+        }
+        findFirst: {
+          args: Prisma.constitution_articlesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_articlesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.constitution_articlesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_articlesPayload>
+        }
+        findMany: {
+          args: Prisma.constitution_articlesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_articlesPayload>[]
+        }
+        create: {
+          args: Prisma.constitution_articlesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_articlesPayload>
+        }
+        createMany: {
+          args: Prisma.constitution_articlesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.constitution_articlesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_articlesPayload>[]
+        }
+        delete: {
+          args: Prisma.constitution_articlesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_articlesPayload>
+        }
+        update: {
+          args: Prisma.constitution_articlesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_articlesPayload>
+        }
+        deleteMany: {
+          args: Prisma.constitution_articlesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.constitution_articlesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.constitution_articlesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_articlesPayload>[]
+        }
+        upsert: {
+          args: Prisma.constitution_articlesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_articlesPayload>
+        }
+        aggregate: {
+          args: Prisma.Constitution_articlesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConstitution_articles>
+        }
+        groupBy: {
+          args: Prisma.constitution_articlesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Constitution_articlesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.constitution_articlesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Constitution_articlesCountAggregateOutputType> | number
+        }
+      }
+    }
+    constitution_violations: {
+      payload: Prisma.$constitution_violationsPayload<ExtArgs>
+      fields: Prisma.constitution_violationsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.constitution_violationsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_violationsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.constitution_violationsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_violationsPayload>
+        }
+        findFirst: {
+          args: Prisma.constitution_violationsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_violationsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.constitution_violationsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_violationsPayload>
+        }
+        findMany: {
+          args: Prisma.constitution_violationsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_violationsPayload>[]
+        }
+        create: {
+          args: Prisma.constitution_violationsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_violationsPayload>
+        }
+        createMany: {
+          args: Prisma.constitution_violationsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.constitution_violationsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_violationsPayload>[]
+        }
+        delete: {
+          args: Prisma.constitution_violationsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_violationsPayload>
+        }
+        update: {
+          args: Prisma.constitution_violationsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_violationsPayload>
+        }
+        deleteMany: {
+          args: Prisma.constitution_violationsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.constitution_violationsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.constitution_violationsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_violationsPayload>[]
+        }
+        upsert: {
+          args: Prisma.constitution_violationsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$constitution_violationsPayload>
+        }
+        aggregate: {
+          args: Prisma.Constitution_violationsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConstitution_violations>
+        }
+        groupBy: {
+          args: Prisma.constitution_violationsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Constitution_violationsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.constitution_violationsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Constitution_violationsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1925,6 +2075,8 @@ export const AnalysesScalarFieldEnum = {
   strengths: 'strengths',
   risks: 'risks',
   next_steps: 'next_steps',
+  generated_by: 'generated_by',
+  generated_model: 'generated_model',
   created_at: 'created_at'
 } as const
 
@@ -1938,6 +2090,8 @@ export const Financing_plansScalarFieldEnum = {
   estimated_budget: 'estimated_budget',
   funding_sources: 'funding_sources',
   budget_breakdown: 'budget_breakdown',
+  generated_by: 'generated_by',
+  generated_model: 'generated_model',
   created_at: 'created_at'
 } as const
 
@@ -1951,6 +2105,8 @@ export const Development_plansScalarFieldEnum = {
   growth_levers: 'growth_levers',
   key_metrics: 'key_metrics',
   scaling_risks: 'scaling_risks',
+  generated_by: 'generated_by',
+  generated_model: 'generated_model',
   created_at: 'created_at'
 } as const
 
@@ -1964,6 +2120,8 @@ export const Transmission_plansScalarFieldEnum = {
   transfer_options: 'transfer_options',
   key_documentation: 'key_documentation',
   readiness_checklist: 'readiness_checklist',
+  generated_by: 'generated_by',
+  generated_model: 'generated_model',
   created_at: 'created_at'
 } as const
 
@@ -2049,6 +2207,8 @@ export const Build_plansScalarFieldEnum = {
   estimated_timeline: 'estimated_timeline',
   milestones: 'milestones',
   key_resources: 'key_resources',
+  generated_by: 'generated_by',
+  generated_model: 'generated_model',
   created_at: 'created_at'
 } as const
 
@@ -2115,6 +2275,36 @@ export const Automation_runsScalarFieldEnum = {
 } as const
 
 export type Automation_runsScalarFieldEnum = (typeof Automation_runsScalarFieldEnum)[keyof typeof Automation_runsScalarFieldEnum]
+
+
+export const Constitution_articlesScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  version: 'version',
+  number: 'number',
+  title: 'title',
+  text: 'text',
+  principle: 'principle',
+  enforcement: 'enforcement',
+  created_at: 'created_at'
+} as const
+
+export type Constitution_articlesScalarFieldEnum = (typeof Constitution_articlesScalarFieldEnum)[keyof typeof Constitution_articlesScalarFieldEnum]
+
+
+export const Constitution_violationsScalarFieldEnum = {
+  id: 'id',
+  article_slug: 'article_slug',
+  rule_id: 'rule_id',
+  severity: 'severity',
+  action: 'action',
+  detail: 'detail',
+  user_id: 'user_id',
+  project_id: 'project_id',
+  created_at: 'created_at'
+} as const
+
+export type Constitution_violationsScalarFieldEnum = (typeof Constitution_violationsScalarFieldEnum)[keyof typeof Constitution_violationsScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2379,6 +2569,8 @@ export type GlobalOmitConfig = {
   marketplace_profiles?: Prisma.marketplace_profilesOmit
   marketplace_contacts?: Prisma.marketplace_contactsOmit
   automation_runs?: Prisma.automation_runsOmit
+  constitution_articles?: Prisma.constitution_articlesOmit
+  constitution_violations?: Prisma.constitution_violationsOmit
 }
 
 /* Types for Logging */

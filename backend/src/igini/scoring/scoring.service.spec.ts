@@ -1,10 +1,12 @@
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConstitutionService } from '../../constitution/constitution.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { ScoringService } from './scoring.service.js';
 
 describe('ScoringService', () => {
   let service: ScoringService;
+  let constitution: ConstitutionService;
   let prisma: {
     projects: { findFirst: ReturnType<typeof vi.fn> };
     analyses: { findFirst: ReturnType<typeof vi.fn> };
@@ -13,6 +15,7 @@ describe('ScoringService', () => {
     development_plans: { findFirst: ReturnType<typeof vi.fn> };
     transmission_plans: { findFirst: ReturnType<typeof vi.fn> };
     tasks: { findMany: ReturnType<typeof vi.fn> };
+    constitution_violations: { createMany: ReturnType<typeof vi.fn> };
   };
 
   beforeEach(async () => {
@@ -24,6 +27,7 @@ describe('ScoringService', () => {
       development_plans: { findFirst: vi.fn() },
       transmission_plans: { findFirst: vi.fn() },
       tasks: { findMany: vi.fn() },
+      constitution_violations: { createMany: vi.fn() },
     };
     // Par défaut, rien n'existe encore pour ce projet.
     prisma.analyses.findFirst.mockResolvedValue(null);
@@ -33,11 +37,20 @@ describe('ScoringService', () => {
     prisma.transmission_plans.findFirst.mockResolvedValue(null);
     prisma.tasks.findMany.mockResolvedValue([]);
 
+    // Le vrai ConstitutionService, pas un mock : c'est lui qui garantit
+    // qu'aucun score n'est publié sans source, et un mock permissif ferait
+    // passer silencieusement la régression que ce moteur existe pour
+    // attraper. Seule son écriture de journal est neutralisée.
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ScoringService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        ScoringService,
+        ConstitutionService,
+        { provide: PrismaService, useValue: prisma },
+      ],
     }).compile();
 
     service = module.get<ScoringService>(ScoringService);
+    constitution = module.get<ConstitutionService>(ConstitutionService);
   });
 
   it('should be defined', () => {
@@ -60,7 +73,7 @@ describe('ScoringService', () => {
       construction: null,
       evolution: null,
       transmission: null,
-      confiance: 0,
+      confiance: null,
     });
   });
 
@@ -121,5 +134,44 @@ describe('ScoringService', () => {
     const score = await service.getScoreCard('u2-collaborateur', 'p1');
 
     expect(score.etincelle).toBe(7);
+  });
+
+  describe('contrôle constitutionnel', () => {
+    it('soumet chaque champ de la fiche au moteur avant de la renvoyer', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      const guard = vi.spyOn(constitution, 'guard');
+
+      const score = await service.getScoreCard('u1', 'p1');
+
+      expect(guard).toHaveBeenCalledTimes(Object.keys(score).length);
+      expect(guard).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: 'publish_score', field: 'confiance' }),
+        { userId: 'u1', projectId: 'p1' },
+      );
+    });
+
+    it('refuse de renvoyer une fiche contenant un score sans source', async () => {
+      // On force le cas que le code ne doit plus produire : un score chiffré
+      // alors qu'aucune donnée ne l'appuie. Sans le garde-fou, la fiche
+      // sortirait telle quelle ; avec lui, l'appel échoue bruyamment.
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.tasks.findMany.mockResolvedValue([]);
+      vi.spyOn(
+        service as unknown as {
+          assertScoresHaveSources: (...args: unknown[]) => Promise<void>;
+        },
+        'assertScoresHaveSources',
+      ).mockImplementation(async () => {
+        await constitution.guard(
+          { kind: 'publish_score', field: 'construction', value: 0, hasSource: false },
+          { userId: 'u1', projectId: 'p1' },
+        );
+      });
+
+      await expect(service.getScoreCard('u1', 'p1')).rejects.toBeInstanceOf(
+        UnprocessableEntityException,
+      );
+      expect(prisma.constitution_violations.createMany).toHaveBeenCalled();
+    });
   });
 });

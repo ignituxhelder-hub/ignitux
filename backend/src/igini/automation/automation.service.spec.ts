@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConstitutionService } from '../../constitution/constitution.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { AutomationService } from './automation.service.js';
 
@@ -40,7 +41,14 @@ describe('AutomationService', () => {
     prisma.automation_runs.create.mockResolvedValue({ id: 'run1' });
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AutomationService, { provide: PrismaService, useValue: prisma }],
+      // Vrai ConstitutionService : l'article 5 exige que chaque exécution
+      // autonome soit journalisée, et c'est précisément ce que ce moteur
+      // fait. Un mock permissif viderait la garantie de son sens.
+      providers: [
+        AutomationService,
+        ConstitutionService,
+        { provide: PrismaService, useValue: prisma },
+      ],
     }).compile();
 
     service = module.get<AutomationService>(AutomationService);

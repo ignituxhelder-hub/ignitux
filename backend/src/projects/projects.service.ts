@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConstitutionService } from '../constitution/constitution.service.js';
 import { AnalysisService } from '../igini/analysis/analysis.service.js';
+import { CLAUDE_MODEL } from '../igini/claude/claude.service.js';
 import { AutomationService } from '../igini/automation/automation.service.js';
 import { DevelopmentService } from '../igini/development/development.service.js';
 import { FinancingService } from '../igini/financing/financing.service.js';
@@ -19,7 +21,32 @@ export class ProjectsService {
     private readonly transmissionService: TransmissionService,
     private readonly workflowService: WorkflowService,
     private readonly automationService: AutomationService,
+    private readonly constitutionService: ConstitutionService,
   ) {}
+
+  /**
+   * Provenance commune aux cinq générateurs, soumise au moteur
+   * constitutionnel avant l'écriture. Centralisée ici parce qu'une provenance
+   * recopiée cinq fois finit par diverger, et qu'une divergence silencieuse
+   * sur ce champ précis est exactement ce que l'article 12 interdit.
+   */
+  private async generatedProvenance(
+    entity: string,
+    ownerId: string,
+    projectId: string,
+  ): Promise<{ generated_by: string; generated_model: string }> {
+    await this.constitutionService.guard(
+      {
+        kind: 'persist_generated',
+        entity,
+        generatedBy: 'igini',
+        generatedModel: CLAUDE_MODEL,
+      },
+      { userId: ownerId, projectId },
+    );
+
+    return { generated_by: 'igini', generated_model: CLAUDE_MODEL };
+  }
 
   create(ownerId: string, title: string, description?: string) {
     return this.prisma.projects.create({
@@ -187,6 +214,7 @@ export class ProjectsService {
         strengths: result.strengths,
         risks: result.risks,
         next_steps: result.next_steps,
+        ...(await this.generatedProvenance('analyses', ownerId, project.id)),
       },
     });
 
@@ -224,6 +252,7 @@ export class ProjectsService {
         estimated_timeline: result.estimated_timeline,
         milestones: result.milestones,
         key_resources: result.key_resources,
+        ...(await this.generatedProvenance('build_plans', ownerId, project.id)),
       },
     });
 
@@ -263,6 +292,7 @@ export class ProjectsService {
         estimated_budget: result.estimated_budget,
         funding_sources: result.funding_sources,
         budget_breakdown: result.budget_breakdown,
+        ...(await this.generatedProvenance('financing_plans', ownerId, project.id)),
       },
     });
     await this.automationService.run(project.id);
@@ -299,6 +329,7 @@ export class ProjectsService {
         growth_levers: result.growth_levers,
         key_metrics: result.key_metrics,
         scaling_risks: result.scaling_risks,
+        ...(await this.generatedProvenance('development_plans', ownerId, project.id)),
       },
     });
     await this.automationService.run(project.id);
@@ -336,6 +367,7 @@ export class ProjectsService {
         transfer_options: result.transfer_options,
         key_documentation: result.key_documentation,
         readiness_checklist: result.readiness_checklist,
+        ...(await this.generatedProvenance('transmission_plans', ownerId, project.id)),
       },
     });
     await this.automationService.run(project.id);

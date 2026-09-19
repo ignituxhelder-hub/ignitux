@@ -28,6 +28,8 @@ export type Transmission_plansMinAggregateOutputType = {
   id: string | null
   project_id: string | null
   summary: string | null
+  generated_by: string | null
+  generated_model: string | null
   created_at: Date | null
 }
 
@@ -35,6 +37,8 @@ export type Transmission_plansMaxAggregateOutputType = {
   id: string | null
   project_id: string | null
   summary: string | null
+  generated_by: string | null
+  generated_model: string | null
   created_at: Date | null
 }
 
@@ -45,6 +49,8 @@ export type Transmission_plansCountAggregateOutputType = {
   transfer_options: number
   key_documentation: number
   readiness_checklist: number
+  generated_by: number
+  generated_model: number
   created_at: number
   _all: number
 }
@@ -54,6 +60,8 @@ export type Transmission_plansMinAggregateInputType = {
   id?: true
   project_id?: true
   summary?: true
+  generated_by?: true
+  generated_model?: true
   created_at?: true
 }
 
@@ -61,6 +69,8 @@ export type Transmission_plansMaxAggregateInputType = {
   id?: true
   project_id?: true
   summary?: true
+  generated_by?: true
+  generated_model?: true
   created_at?: true
 }
 
@@ -71,6 +81,8 @@ export type Transmission_plansCountAggregateInputType = {
   transfer_options?: true
   key_documentation?: true
   readiness_checklist?: true
+  generated_by?: true
+  generated_model?: true
   created_at?: true
   _all?: true
 }
@@ -154,6 +166,8 @@ export type Transmission_plansGroupByOutputType = {
   transfer_options: string[]
   key_documentation: string[]
   readiness_checklist: string[]
+  generated_by: string
+  generated_model: string | null
   created_at: Date | null
   _count: Transmission_plansCountAggregateOutputType | null
   _min: Transmission_plansMinAggregateOutputType | null
@@ -185,6 +199,8 @@ export type transmission_plansWhereInput = {
   transfer_options?: Prisma.StringNullableListFilter<"transmission_plans">
   key_documentation?: Prisma.StringNullableListFilter<"transmission_plans">
   readiness_checklist?: Prisma.StringNullableListFilter<"transmission_plans">
+  generated_by?: Prisma.StringFilter<"transmission_plans"> | string
+  generated_model?: Prisma.StringNullableFilter<"transmission_plans"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"transmission_plans"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
 }
@@ -196,6 +212,8 @@ export type transmission_plansOrderByWithRelationInput = {
   transfer_options?: Prisma.SortOrder
   key_documentation?: Prisma.SortOrder
   readiness_checklist?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   project?: Prisma.projectsOrderByWithRelationInput
 }
@@ -210,6 +228,8 @@ export type transmission_plansWhereUniqueInput = Prisma.AtLeast<{
   transfer_options?: Prisma.StringNullableListFilter<"transmission_plans">
   key_documentation?: Prisma.StringNullableListFilter<"transmission_plans">
   readiness_checklist?: Prisma.StringNullableListFilter<"transmission_plans">
+  generated_by?: Prisma.StringFilter<"transmission_plans"> | string
+  generated_model?: Prisma.StringNullableFilter<"transmission_plans"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"transmission_plans"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
 }, "id">
@@ -221,6 +241,8 @@ export type transmission_plansOrderByWithAggregationInput = {
   transfer_options?: Prisma.SortOrder
   key_documentation?: Prisma.SortOrder
   readiness_checklist?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.transmission_plansCountOrderByAggregateInput
   _max?: Prisma.transmission_plansMaxOrderByAggregateInput
@@ -237,6 +259,8 @@ export type transmission_plansScalarWhereWithAggregatesInput = {
   transfer_options?: Prisma.StringNullableListFilter<"transmission_plans">
   key_documentation?: Prisma.StringNullableListFilter<"transmission_plans">
   readiness_checklist?: Prisma.StringNullableListFilter<"transmission_plans">
+  generated_by?: Prisma.StringWithAggregatesFilter<"transmission_plans"> | string
+  generated_model?: Prisma.StringNullableWithAggregatesFilter<"transmission_plans"> | string | null
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"transmission_plans"> | Date | string | null
 }
 
@@ -246,6 +270,8 @@ export type transmission_plansCreateInput = {
   transfer_options?: Prisma.transmission_plansCreatetransfer_optionsInput | string[]
   key_documentation?: Prisma.transmission_plansCreatekey_documentationInput | string[]
   readiness_checklist?: Prisma.transmission_plansCreatereadiness_checklistInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
   project: Prisma.projectsCreateNestedOneWithoutTransmission_plansInput
 }
@@ -257,6 +283,8 @@ export type transmission_plansUncheckedCreateInput = {
   transfer_options?: Prisma.transmission_plansCreatetransfer_optionsInput | string[]
   key_documentation?: Prisma.transmission_plansCreatekey_documentationInput | string[]
   readiness_checklist?: Prisma.transmission_plansCreatereadiness_checklistInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -266,6 +294,8 @@ export type transmission_plansUpdateInput = {
   transfer_options?: Prisma.transmission_plansUpdatetransfer_optionsInput | string[]
   key_documentation?: Prisma.transmission_plansUpdatekey_documentationInput | string[]
   readiness_checklist?: Prisma.transmission_plansUpdatereadiness_checklistInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   project?: Prisma.projectsUpdateOneRequiredWithoutTransmission_plansNestedInput
 }
@@ -277,6 +307,8 @@ export type transmission_plansUncheckedUpdateInput = {
   transfer_options?: Prisma.transmission_plansUpdatetransfer_optionsInput | string[]
   key_documentation?: Prisma.transmission_plansUpdatekey_documentationInput | string[]
   readiness_checklist?: Prisma.transmission_plansUpdatereadiness_checklistInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -287,6 +319,8 @@ export type transmission_plansCreateManyInput = {
   transfer_options?: Prisma.transmission_plansCreatetransfer_optionsInput | string[]
   key_documentation?: Prisma.transmission_plansCreatekey_documentationInput | string[]
   readiness_checklist?: Prisma.transmission_plansCreatereadiness_checklistInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -296,6 +330,8 @@ export type transmission_plansUpdateManyMutationInput = {
   transfer_options?: Prisma.transmission_plansUpdatetransfer_optionsInput | string[]
   key_documentation?: Prisma.transmission_plansUpdatekey_documentationInput | string[]
   readiness_checklist?: Prisma.transmission_plansUpdatereadiness_checklistInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -306,6 +342,8 @@ export type transmission_plansUncheckedUpdateManyInput = {
   transfer_options?: Prisma.transmission_plansUpdatetransfer_optionsInput | string[]
   key_documentation?: Prisma.transmission_plansUpdatekey_documentationInput | string[]
   readiness_checklist?: Prisma.transmission_plansUpdatereadiness_checklistInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -326,6 +364,8 @@ export type transmission_plansCountOrderByAggregateInput = {
   transfer_options?: Prisma.SortOrder
   key_documentation?: Prisma.SortOrder
   readiness_checklist?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -333,6 +373,8 @@ export type transmission_plansMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   project_id?: Prisma.SortOrder
   summary?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -340,6 +382,8 @@ export type transmission_plansMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   project_id?: Prisma.SortOrder
   summary?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -418,6 +462,8 @@ export type transmission_plansCreateWithoutProjectInput = {
   transfer_options?: Prisma.transmission_plansCreatetransfer_optionsInput | string[]
   key_documentation?: Prisma.transmission_plansCreatekey_documentationInput | string[]
   readiness_checklist?: Prisma.transmission_plansCreatereadiness_checklistInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -427,6 +473,8 @@ export type transmission_plansUncheckedCreateWithoutProjectInput = {
   transfer_options?: Prisma.transmission_plansCreatetransfer_optionsInput | string[]
   key_documentation?: Prisma.transmission_plansCreatekey_documentationInput | string[]
   readiness_checklist?: Prisma.transmission_plansCreatereadiness_checklistInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -466,6 +514,8 @@ export type transmission_plansScalarWhereInput = {
   transfer_options?: Prisma.StringNullableListFilter<"transmission_plans">
   key_documentation?: Prisma.StringNullableListFilter<"transmission_plans">
   readiness_checklist?: Prisma.StringNullableListFilter<"transmission_plans">
+  generated_by?: Prisma.StringFilter<"transmission_plans"> | string
+  generated_model?: Prisma.StringNullableFilter<"transmission_plans"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"transmission_plans"> | Date | string | null
 }
 
@@ -475,6 +525,8 @@ export type transmission_plansCreateManyProjectInput = {
   transfer_options?: Prisma.transmission_plansCreatetransfer_optionsInput | string[]
   key_documentation?: Prisma.transmission_plansCreatekey_documentationInput | string[]
   readiness_checklist?: Prisma.transmission_plansCreatereadiness_checklistInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -484,6 +536,8 @@ export type transmission_plansUpdateWithoutProjectInput = {
   transfer_options?: Prisma.transmission_plansUpdatetransfer_optionsInput | string[]
   key_documentation?: Prisma.transmission_plansUpdatekey_documentationInput | string[]
   readiness_checklist?: Prisma.transmission_plansUpdatereadiness_checklistInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -493,6 +547,8 @@ export type transmission_plansUncheckedUpdateWithoutProjectInput = {
   transfer_options?: Prisma.transmission_plansUpdatetransfer_optionsInput | string[]
   key_documentation?: Prisma.transmission_plansUpdatekey_documentationInput | string[]
   readiness_checklist?: Prisma.transmission_plansUpdatereadiness_checklistInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -502,6 +558,8 @@ export type transmission_plansUncheckedUpdateManyWithoutProjectInput = {
   transfer_options?: Prisma.transmission_plansUpdatetransfer_optionsInput | string[]
   key_documentation?: Prisma.transmission_plansUpdatekey_documentationInput | string[]
   readiness_checklist?: Prisma.transmission_plansUpdatereadiness_checklistInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -514,6 +572,8 @@ export type transmission_plansSelect<ExtArgs extends runtime.Types.Extensions.In
   transfer_options?: boolean
   key_documentation?: boolean
   readiness_checklist?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["transmission_plans"]>
@@ -525,6 +585,8 @@ export type transmission_plansSelectCreateManyAndReturn<ExtArgs extends runtime.
   transfer_options?: boolean
   key_documentation?: boolean
   readiness_checklist?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["transmission_plans"]>
@@ -536,6 +598,8 @@ export type transmission_plansSelectUpdateManyAndReturn<ExtArgs extends runtime.
   transfer_options?: boolean
   key_documentation?: boolean
   readiness_checklist?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["transmission_plans"]>
@@ -547,10 +611,12 @@ export type transmission_plansSelectScalar = {
   transfer_options?: boolean
   key_documentation?: boolean
   readiness_checklist?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
 }
 
-export type transmission_plansOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "summary" | "transfer_options" | "key_documentation" | "readiness_checklist" | "created_at", ExtArgs["result"]["transmission_plans"]>
+export type transmission_plansOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "summary" | "transfer_options" | "key_documentation" | "readiness_checklist" | "generated_by" | "generated_model" | "created_at", ExtArgs["result"]["transmission_plans"]>
 export type transmission_plansInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }
@@ -573,6 +639,8 @@ export type $transmission_plansPayload<ExtArgs extends runtime.Types.Extensions.
     transfer_options: string[]
     key_documentation: string[]
     readiness_checklist: string[]
+    generated_by: string
+    generated_model: string | null
     created_at: Date | null
   }, ExtArgs["result"]["transmission_plans"]>
   composites: {}
@@ -1004,6 +1072,8 @@ export interface transmission_plansFieldRefs {
   readonly transfer_options: Prisma.FieldRef<"transmission_plans", 'String[]'>
   readonly key_documentation: Prisma.FieldRef<"transmission_plans", 'String[]'>
   readonly readiness_checklist: Prisma.FieldRef<"transmission_plans", 'String[]'>
+  readonly generated_by: Prisma.FieldRef<"transmission_plans", 'String'>
+  readonly generated_model: Prisma.FieldRef<"transmission_plans", 'String'>
   readonly created_at: Prisma.FieldRef<"transmission_plans", 'DateTime'>
 }
     

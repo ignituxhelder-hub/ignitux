@@ -197,7 +197,47 @@ export interface ScoreCard {
   construction: number | null;
   evolution: number | null;
   transmission: number | null;
-  confiance: number;
+  // null tant qu'aucune étape n'a démarré : un 0 affiché se lirait
+  // « fiabilité nulle » alors qu'il n'y a simplement rien à mesurer.
+  confiance: number | null;
+}
+
+export interface ConstitutionArticle {
+  id: string;
+  slug: string;
+  version: string;
+  number: number;
+  title: string;
+  text: string;
+  principle: string;
+  /** 'enforced' = une règle du moteur le vérifie ; 'declared' = énoncé seul. */
+  enforcement: string;
+}
+
+export interface ConstitutionRule {
+  id: string;
+  articleSlug: string;
+  severity: string;
+  description: string;
+}
+
+export interface ConstitutionAuditEntry {
+  slug: string;
+  title: string;
+  enforcement: string;
+  /** null = rien en base ne permet de se prononcer sur cet article. */
+  measured: string | null;
+  violationsLast30Days: number;
+}
+
+export interface ConstitutionViolation {
+  id: string;
+  article_slug: string;
+  rule_id: string;
+  severity: string;
+  action: string;
+  detail: string;
+  created_at: string;
 }
 
 export interface ComplianceRequirement {
@@ -527,6 +567,26 @@ export const api = {
 
   listAutomationRuns: (token: string, projectId: string) =>
     request<AutomationRun[]>(`/projects/${projectId}/automation/runs`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listConstitutionArticles: (token: string) =>
+    request<ConstitutionArticle[]>('/constitution/articles', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listConstitutionRules: (token: string) =>
+    request<ConstitutionRule[]>('/constitution/rules', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getConstitutionAudit: (token: string) =>
+    request<ConstitutionAuditEntry[]>('/constitution/audit', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listConstitutionViolations: (token: string) =>
+    request<ConstitutionViolation[]>('/constitution/violations', {
       headers: { Authorization: `Bearer ${token}` },
     }),
 

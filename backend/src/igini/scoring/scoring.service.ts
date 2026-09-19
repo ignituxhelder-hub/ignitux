@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConstitutionService } from '../../constitution/constitution.service.js';
 import { assertHasProjectAccess } from '../../prisma/assert-has-project-access.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 
@@ -15,8 +16,13 @@ export interface ScoreCard {
    * Fiabilité du porteur (0-10) — heuristique honnête, pas une vraie mesure
    * de confiance (pas de données de réputation/avis) : proportion des 5
    * étapes de la méthode déjà entamées pour ce projet.
+   *
+   * `null` tant qu'aucune étape n'a démarré. Ce champ valait auparavant 0
+   * dans ce cas : un zéro affiché se lit « fiabilité nulle », alors que la
+   * réalité est « rien à mesurer encore ». Le moteur constitutionnel refuse
+   * désormais cette valeur (article 10, règle score-sans-source).
    */
-  confiance: number;
+  confiance: number | null;
 }
 
 /**
@@ -27,7 +33,10 @@ export interface ScoreCard {
  */
 @Injectable()
 export class ScoringService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly constitutionService: ConstitutionService,
+  ) {}
 
   // Lecture seule par nature : un collaborateur peut consulter le score.
   async getScoreCard(userId: string, projectId: string): Promise<ScoreCard> {
@@ -79,8 +88,41 @@ export class ScoringService {
     const stagesStarted = [analysis, buildPlan, financingPlan, developmentPlan, transmissionPlan].filter(
       Boolean,
     ).length;
-    const confiance = Math.round((stagesStarted / 5) * 10);
+    const confiance = stagesStarted > 0 ? Math.round((stagesStarted / 5) * 10) : null;
 
-    return { etincelle, construction, evolution, transmission, confiance };
+    const scoreCard: ScoreCard = { etincelle, construction, evolution, transmission, confiance };
+
+    // Le moteur constitutionnel relit chaque chiffre avant qu'il ne sorte
+    // d'ici. Ce n'est pas une formalité : c'est ce contrôle qui a révélé que
+    // `confiance` valait 0 en l'absence totale de données, et il attrapera
+    // la prochaine régression du même genre sans qu'on ait à y penser.
+    await this.assertScoresHaveSources(userId, projectId, scoreCard, {
+      etincelle: analysis !== null,
+      construction: tasks.length > 0,
+      evolution: developmentPlan !== null,
+      transmission: transmissionPlan !== null,
+      confiance: stagesStarted > 0,
+    });
+
+    return scoreCard;
+  }
+
+  private async assertScoresHaveSources(
+    userId: string,
+    projectId: string,
+    scoreCard: ScoreCard,
+    sources: Record<keyof ScoreCard, boolean>,
+  ): Promise<void> {
+    for (const field of Object.keys(scoreCard) as Array<keyof ScoreCard>) {
+      await this.constitutionService.guard(
+        {
+          kind: 'publish_score',
+          field,
+          value: scoreCard[field],
+          hasSource: sources[field],
+        },
+        { userId, projectId },
+      );
+    }
   }
 }

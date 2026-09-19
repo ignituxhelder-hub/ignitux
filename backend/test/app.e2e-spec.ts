@@ -2,11 +2,15 @@ import 'dotenv/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { App } from 'supertest/types';
+import type { Server } from 'node:http';
 import { AppModule } from './../src/app.module.js';
 
 describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
+  // Le type venait de 'supertest/types', un sous-chemin que le paquet
+  // n'exporte pas : l'import ne résolvait pas et faisait échouer `tsc` en
+  // permanence, ce qui privait le projet de sa vérification de types.
+  // Server (node:http) est ce que Nest expose réellement ici.
+  let app: INestApplication<Server>;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({

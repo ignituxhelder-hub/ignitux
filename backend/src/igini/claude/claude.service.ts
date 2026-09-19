@@ -3,6 +3,14 @@ import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import type { z } from 'zod';
 
+/**
+ * Modèle utilisé par tous les générateurs. Exporté parce que la provenance
+ * enregistrée en base doit nommer le modèle réellement appelé : une constante
+ * recopiée à la main finirait par mentir le jour où l'on change de modèle ici
+ * sans penser aux colonnes generated_model.
+ */
+export const CLAUDE_MODEL = 'claude-opus-5';
+
 export interface StructuredOutputRequest<T> {
   schema: z.ZodType<T>;
   system: string;
@@ -36,7 +44,7 @@ export class ClaudeService {
   async generateStructuredOutput<T>(request: StructuredOutputRequest<T>): Promise<T> {
     try {
       const response = await this.getClient().messages.parse({
-        model: 'claude-opus-5',
+        model: CLAUDE_MODEL,
         max_tokens: 16000,
         system: request.system,
         messages: [{ role: 'user', content: request.userContent }],

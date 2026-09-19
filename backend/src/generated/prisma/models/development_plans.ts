@@ -28,6 +28,8 @@ export type Development_plansMinAggregateOutputType = {
   id: string | null
   project_id: string | null
   summary: string | null
+  generated_by: string | null
+  generated_model: string | null
   created_at: Date | null
 }
 
@@ -35,6 +37,8 @@ export type Development_plansMaxAggregateOutputType = {
   id: string | null
   project_id: string | null
   summary: string | null
+  generated_by: string | null
+  generated_model: string | null
   created_at: Date | null
 }
 
@@ -45,6 +49,8 @@ export type Development_plansCountAggregateOutputType = {
   growth_levers: number
   key_metrics: number
   scaling_risks: number
+  generated_by: number
+  generated_model: number
   created_at: number
   _all: number
 }
@@ -54,6 +60,8 @@ export type Development_plansMinAggregateInputType = {
   id?: true
   project_id?: true
   summary?: true
+  generated_by?: true
+  generated_model?: true
   created_at?: true
 }
 
@@ -61,6 +69,8 @@ export type Development_plansMaxAggregateInputType = {
   id?: true
   project_id?: true
   summary?: true
+  generated_by?: true
+  generated_model?: true
   created_at?: true
 }
 
@@ -71,6 +81,8 @@ export type Development_plansCountAggregateInputType = {
   growth_levers?: true
   key_metrics?: true
   scaling_risks?: true
+  generated_by?: true
+  generated_model?: true
   created_at?: true
   _all?: true
 }
@@ -154,6 +166,8 @@ export type Development_plansGroupByOutputType = {
   growth_levers: string[]
   key_metrics: string[]
   scaling_risks: string[]
+  generated_by: string
+  generated_model: string | null
   created_at: Date | null
   _count: Development_plansCountAggregateOutputType | null
   _min: Development_plansMinAggregateOutputType | null
@@ -185,6 +199,8 @@ export type development_plansWhereInput = {
   growth_levers?: Prisma.StringNullableListFilter<"development_plans">
   key_metrics?: Prisma.StringNullableListFilter<"development_plans">
   scaling_risks?: Prisma.StringNullableListFilter<"development_plans">
+  generated_by?: Prisma.StringFilter<"development_plans"> | string
+  generated_model?: Prisma.StringNullableFilter<"development_plans"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"development_plans"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
 }
@@ -196,6 +212,8 @@ export type development_plansOrderByWithRelationInput = {
   growth_levers?: Prisma.SortOrder
   key_metrics?: Prisma.SortOrder
   scaling_risks?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   project?: Prisma.projectsOrderByWithRelationInput
 }
@@ -210,6 +228,8 @@ export type development_plansWhereUniqueInput = Prisma.AtLeast<{
   growth_levers?: Prisma.StringNullableListFilter<"development_plans">
   key_metrics?: Prisma.StringNullableListFilter<"development_plans">
   scaling_risks?: Prisma.StringNullableListFilter<"development_plans">
+  generated_by?: Prisma.StringFilter<"development_plans"> | string
+  generated_model?: Prisma.StringNullableFilter<"development_plans"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"development_plans"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
 }, "id">
@@ -221,6 +241,8 @@ export type development_plansOrderByWithAggregationInput = {
   growth_levers?: Prisma.SortOrder
   key_metrics?: Prisma.SortOrder
   scaling_risks?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.development_plansCountOrderByAggregateInput
   _max?: Prisma.development_plansMaxOrderByAggregateInput
@@ -237,6 +259,8 @@ export type development_plansScalarWhereWithAggregatesInput = {
   growth_levers?: Prisma.StringNullableListFilter<"development_plans">
   key_metrics?: Prisma.StringNullableListFilter<"development_plans">
   scaling_risks?: Prisma.StringNullableListFilter<"development_plans">
+  generated_by?: Prisma.StringWithAggregatesFilter<"development_plans"> | string
+  generated_model?: Prisma.StringNullableWithAggregatesFilter<"development_plans"> | string | null
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"development_plans"> | Date | string | null
 }
 
@@ -246,6 +270,8 @@ export type development_plansCreateInput = {
   growth_levers?: Prisma.development_plansCreategrowth_leversInput | string[]
   key_metrics?: Prisma.development_plansCreatekey_metricsInput | string[]
   scaling_risks?: Prisma.development_plansCreatescaling_risksInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
   project: Prisma.projectsCreateNestedOneWithoutDevelopment_plansInput
 }
@@ -257,6 +283,8 @@ export type development_plansUncheckedCreateInput = {
   growth_levers?: Prisma.development_plansCreategrowth_leversInput | string[]
   key_metrics?: Prisma.development_plansCreatekey_metricsInput | string[]
   scaling_risks?: Prisma.development_plansCreatescaling_risksInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -266,6 +294,8 @@ export type development_plansUpdateInput = {
   growth_levers?: Prisma.development_plansUpdategrowth_leversInput | string[]
   key_metrics?: Prisma.development_plansUpdatekey_metricsInput | string[]
   scaling_risks?: Prisma.development_plansUpdatescaling_risksInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   project?: Prisma.projectsUpdateOneRequiredWithoutDevelopment_plansNestedInput
 }
@@ -277,6 +307,8 @@ export type development_plansUncheckedUpdateInput = {
   growth_levers?: Prisma.development_plansUpdategrowth_leversInput | string[]
   key_metrics?: Prisma.development_plansUpdatekey_metricsInput | string[]
   scaling_risks?: Prisma.development_plansUpdatescaling_risksInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -287,6 +319,8 @@ export type development_plansCreateManyInput = {
   growth_levers?: Prisma.development_plansCreategrowth_leversInput | string[]
   key_metrics?: Prisma.development_plansCreatekey_metricsInput | string[]
   scaling_risks?: Prisma.development_plansCreatescaling_risksInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -296,6 +330,8 @@ export type development_plansUpdateManyMutationInput = {
   growth_levers?: Prisma.development_plansUpdategrowth_leversInput | string[]
   key_metrics?: Prisma.development_plansUpdatekey_metricsInput | string[]
   scaling_risks?: Prisma.development_plansUpdatescaling_risksInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -306,6 +342,8 @@ export type development_plansUncheckedUpdateManyInput = {
   growth_levers?: Prisma.development_plansUpdategrowth_leversInput | string[]
   key_metrics?: Prisma.development_plansUpdatekey_metricsInput | string[]
   scaling_risks?: Prisma.development_plansUpdatescaling_risksInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -326,6 +364,8 @@ export type development_plansCountOrderByAggregateInput = {
   growth_levers?: Prisma.SortOrder
   key_metrics?: Prisma.SortOrder
   scaling_risks?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -333,6 +373,8 @@ export type development_plansMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   project_id?: Prisma.SortOrder
   summary?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -340,6 +382,8 @@ export type development_plansMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   project_id?: Prisma.SortOrder
   summary?: Prisma.SortOrder
+  generated_by?: Prisma.SortOrder
+  generated_model?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -418,6 +462,8 @@ export type development_plansCreateWithoutProjectInput = {
   growth_levers?: Prisma.development_plansCreategrowth_leversInput | string[]
   key_metrics?: Prisma.development_plansCreatekey_metricsInput | string[]
   scaling_risks?: Prisma.development_plansCreatescaling_risksInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -427,6 +473,8 @@ export type development_plansUncheckedCreateWithoutProjectInput = {
   growth_levers?: Prisma.development_plansCreategrowth_leversInput | string[]
   key_metrics?: Prisma.development_plansCreatekey_metricsInput | string[]
   scaling_risks?: Prisma.development_plansCreatescaling_risksInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -466,6 +514,8 @@ export type development_plansScalarWhereInput = {
   growth_levers?: Prisma.StringNullableListFilter<"development_plans">
   key_metrics?: Prisma.StringNullableListFilter<"development_plans">
   scaling_risks?: Prisma.StringNullableListFilter<"development_plans">
+  generated_by?: Prisma.StringFilter<"development_plans"> | string
+  generated_model?: Prisma.StringNullableFilter<"development_plans"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"development_plans"> | Date | string | null
 }
 
@@ -475,6 +525,8 @@ export type development_plansCreateManyProjectInput = {
   growth_levers?: Prisma.development_plansCreategrowth_leversInput | string[]
   key_metrics?: Prisma.development_plansCreatekey_metricsInput | string[]
   scaling_risks?: Prisma.development_plansCreatescaling_risksInput | string[]
+  generated_by?: string
+  generated_model?: string | null
   created_at?: Date | string | null
 }
 
@@ -484,6 +536,8 @@ export type development_plansUpdateWithoutProjectInput = {
   growth_levers?: Prisma.development_plansUpdategrowth_leversInput | string[]
   key_metrics?: Prisma.development_plansUpdatekey_metricsInput | string[]
   scaling_risks?: Prisma.development_plansUpdatescaling_risksInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -493,6 +547,8 @@ export type development_plansUncheckedUpdateWithoutProjectInput = {
   growth_levers?: Prisma.development_plansUpdategrowth_leversInput | string[]
   key_metrics?: Prisma.development_plansUpdatekey_metricsInput | string[]
   scaling_risks?: Prisma.development_plansUpdatescaling_risksInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -502,6 +558,8 @@ export type development_plansUncheckedUpdateManyWithoutProjectInput = {
   growth_levers?: Prisma.development_plansUpdategrowth_leversInput | string[]
   key_metrics?: Prisma.development_plansUpdatekey_metricsInput | string[]
   scaling_risks?: Prisma.development_plansUpdatescaling_risksInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -514,6 +572,8 @@ export type development_plansSelect<ExtArgs extends runtime.Types.Extensions.Int
   growth_levers?: boolean
   key_metrics?: boolean
   scaling_risks?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["development_plans"]>
@@ -525,6 +585,8 @@ export type development_plansSelectCreateManyAndReturn<ExtArgs extends runtime.T
   growth_levers?: boolean
   key_metrics?: boolean
   scaling_risks?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["development_plans"]>
@@ -536,6 +598,8 @@ export type development_plansSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   growth_levers?: boolean
   key_metrics?: boolean
   scaling_risks?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["development_plans"]>
@@ -547,10 +611,12 @@ export type development_plansSelectScalar = {
   growth_levers?: boolean
   key_metrics?: boolean
   scaling_risks?: boolean
+  generated_by?: boolean
+  generated_model?: boolean
   created_at?: boolean
 }
 
-export type development_plansOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "summary" | "growth_levers" | "key_metrics" | "scaling_risks" | "created_at", ExtArgs["result"]["development_plans"]>
+export type development_plansOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "summary" | "growth_levers" | "key_metrics" | "scaling_risks" | "generated_by" | "generated_model" | "created_at", ExtArgs["result"]["development_plans"]>
 export type development_plansInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }
@@ -573,6 +639,8 @@ export type $development_plansPayload<ExtArgs extends runtime.Types.Extensions.I
     growth_levers: string[]
     key_metrics: string[]
     scaling_risks: string[]
+    generated_by: string
+    generated_model: string | null
     created_at: Date | null
   }, ExtArgs["result"]["development_plans"]>
   composites: {}
@@ -1004,6 +1072,8 @@ export interface development_plansFieldRefs {
   readonly growth_levers: Prisma.FieldRef<"development_plans", 'String[]'>
   readonly key_metrics: Prisma.FieldRef<"development_plans", 'String[]'>
   readonly scaling_risks: Prisma.FieldRef<"development_plans", 'String[]'>
+  readonly generated_by: Prisma.FieldRef<"development_plans", 'String'>
+  readonly generated_model: Prisma.FieldRef<"development_plans", 'String'>
   readonly created_at: Prisma.FieldRef<"development_plans", 'DateTime'>
 }
     

@@ -150,3 +150,25 @@ export type marketplace_contacts = Prisma.marketplace_contactsModel
  * coup — la transparence remplace la confirmation préalable.
  */
 export type automation_runs = Prisma.automation_runsModel
+/**
+ * Model constitution_articles
+ * CONSTITUTION — texte de référence (pas par utilisateur), semé au
+ * démarrage comme compliance_requirements. Chaque article porte le principe
+ * fondateur dont il découle et, surtout, son mode d'application : `enforced`
+ * signifie qu'une règle du moteur le vérifie réellement dans le code,
+ * `declared` qu'il s'agit d'un énoncé de valeur non vérifiable
+ * automatiquement. Cette distinction est volontairement stockée en base :
+ * prétendre qu'un article est appliqué alors qu'aucun code ne le vérifie
+ * serait exactement l'inverse de « la vérité avant tout ».
+ * Voir backend/src/constitution/constitution-articles.ts.
+ */
+export type constitution_articles = Prisma.constitution_articlesModel
+/**
+ * Model constitution_violations
+ * CONSTITUTION — journal des violations relevées par le moteur.
+ * user_id / project_id sont des UUID nus, sans clé étrangère : une trace
+ * d'audit doit survivre à la suppression de ce qu'elle décrit, sinon elle
+ * disparaît précisément dans les cas où elle compte le plus. Le prix
+ * assumé est que ces colonnes peuvent pointer vers des lignes disparues.
+ */
+export type constitution_violations = Prisma.constitution_violationsModel

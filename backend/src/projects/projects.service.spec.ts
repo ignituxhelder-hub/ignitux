@@ -1,5 +1,10 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConstitutionService } from '../constitution/constitution.service.js';
 import { AnalysisService } from '../igini/analysis/analysis.service.js';
 import { AutomationService } from '../igini/automation/automation.service.js';
 import { DevelopmentService } from '../igini/development/development.service.js';
@@ -7,8 +12,17 @@ import { FinancingService } from '../igini/financing/financing.service.js';
 import { PlanningService } from '../igini/planning/planning.service.js';
 import { TransmissionService } from '../igini/transmission/transmission.service.js';
 import { WorkflowService } from '../igini/workflow/workflow.service.js';
+import { CLAUDE_MODEL } from '../igini/claude/claude.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ProjectsService } from './projects.service.js';
+
+/**
+ * Provenance attendue sur tout contenu généré (article 12 : un contenu
+ * produit par un modèle doit être identifiable comme tel). Constante
+ * partagée plutôt que recopiée dans les cinq assertions : si la provenance
+ * change, les cinq tests doivent bouger ensemble ou aucun.
+ */
+const GENERATED_PROVENANCE = { generated_by: 'igini', generated_model: CLAUDE_MODEL };
 
 describe('ProjectsService', () => {
   let service: ProjectsService;
@@ -61,6 +75,7 @@ describe('ProjectsService', () => {
   let transmissionService: { createTransmissionPlan: ReturnType<typeof vi.fn> };
   let workflowService: { createTasksFromSuggestions: ReturnType<typeof vi.fn> };
   let automationService: { run: ReturnType<typeof vi.fn>; listRuns: ReturnType<typeof vi.fn> };
+  let constitutionService: { guard: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     prisma = {
@@ -98,6 +113,7 @@ describe('ProjectsService', () => {
     transmissionService = { createTransmissionPlan: vi.fn() };
     workflowService = { createTasksFromSuggestions: vi.fn() };
     automationService = { run: vi.fn(), listRuns: vi.fn() };
+    constitutionService = { guard: vi.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -110,6 +126,7 @@ describe('ProjectsService', () => {
         { provide: TransmissionService, useValue: transmissionService },
         { provide: WorkflowService, useValue: workflowService },
         { provide: AutomationService, useValue: automationService },
+        { provide: ConstitutionService, useValue: constitutionService },
       ],
     }).compile();
 
@@ -360,9 +377,56 @@ describe('ProjectsService', () => {
 
       expect(analysisService.analyzeProject).toHaveBeenCalledWith('Idée', 'Desc');
       expect(prisma.analyses.create).toHaveBeenCalledWith({
-        data: { project_id: 'p1', ...analysis },
+        data: { project_id: 'p1', ...analysis, ...GENERATED_PROVENANCE },
       });
       expect(result).toEqual({ id: 'a1', project_id: 'p1', ...analysis });
+    });
+
+    it('soumet la provenance au moteur constitutionnel avant de persister', async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      analysisService.analyzeProject.mockResolvedValue({
+        summary: 'Résumé',
+        feasibility_score: 8,
+        strengths: [],
+        risks: [],
+        next_steps: [],
+      });
+      prisma.analyses.create.mockResolvedValue({ id: 'a1' });
+
+      await service.analyzeForOwner('u1', 'p1');
+
+      expect(constitutionService.guard).toHaveBeenCalledWith(
+        {
+          kind: 'persist_generated',
+          entity: 'analyses',
+          generatedBy: 'igini',
+          generatedModel: CLAUDE_MODEL,
+        },
+        { userId: 'u1', projectId: 'p1' },
+      );
+    });
+
+    it("n'écrit rien si le moteur constitutionnel refuse la provenance", async () => {
+      // Le refus doit intervenir avant l'écriture, pas après : une ligne
+      // enregistrée puis dénoncée reste une ligne enregistrée.
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      analysisService.analyzeProject.mockResolvedValue({
+        summary: 'Résumé',
+        feasibility_score: 8,
+        strengths: [],
+        risks: [],
+        next_steps: [],
+      });
+      constitutionService.guard.mockRejectedValue(
+        new UnprocessableEntityException('Action refusée par la Constitution IGNITUX.'),
+      );
+
+      await expect(service.analyzeForOwner('u1', 'p1')).rejects.toBeInstanceOf(
+        UnprocessableEntityException,
+      );
+      expect(prisma.analyses.create).not.toHaveBeenCalled();
     });
 
     it('crée des tâches suivables à partir des prochaines étapes suggérées', async () => {
@@ -469,7 +533,7 @@ describe('ProjectsService', () => {
 
       expect(planningService.createBuildPlan).toHaveBeenCalledWith('Idée', 'Desc', undefined);
       expect(prisma.build_plans.create).toHaveBeenCalledWith({
-        data: { project_id: 'p1', ...plan },
+        data: { project_id: 'p1', ...plan, ...GENERATED_PROVENANCE },
       });
       expect(result).toEqual({ id: 'bp1', project_id: 'p1', ...plan });
     });
@@ -605,7 +669,7 @@ describe('ProjectsService', () => {
 
       expect(financingService.createFinancingPlan).toHaveBeenCalledWith('Idée', 'Desc', undefined);
       expect(prisma.financing_plans.create).toHaveBeenCalledWith({
-        data: { project_id: 'p1', ...plan },
+        data: { project_id: 'p1', ...plan, ...GENERATED_PROVENANCE },
       });
       expect(result).toEqual({ id: 'fp1', project_id: 'p1', ...plan });
     });
@@ -698,7 +762,7 @@ describe('ProjectsService', () => {
 
       expect(developmentService.createDevelopmentPlan).toHaveBeenCalledWith('Idée', 'Desc', undefined);
       expect(prisma.development_plans.create).toHaveBeenCalledWith({
-        data: { project_id: 'p1', ...plan },
+        data: { project_id: 'p1', ...plan, ...GENERATED_PROVENANCE },
       });
       expect(result).toEqual({ id: 'dp1', project_id: 'p1', ...plan });
     });
@@ -791,7 +855,7 @@ describe('ProjectsService', () => {
 
       expect(transmissionService.createTransmissionPlan).toHaveBeenCalledWith('Idée', 'Desc', undefined);
       expect(prisma.transmission_plans.create).toHaveBeenCalledWith({
-        data: { project_id: 'p1', ...plan },
+        data: { project_id: 'p1', ...plan, ...GENERATED_PROVENANCE },
       });
       expect(result).toEqual({ id: 'tp1', project_id: 'p1', ...plan });
     });
