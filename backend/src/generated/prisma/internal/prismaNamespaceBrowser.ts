@@ -194,6 +194,7 @@ export const MemoriesScalarFieldEnum = {
   project_id: 'project_id',
   category: 'category',
   content: 'content',
+  tags: 'tags',
   created_at: 'created_at'
 } as const
 

@@ -164,6 +164,7 @@ describe('MemorySection', () => {
           project_id: 'p1',
           category: 'decision',
           content: 'Choisir un MVP simple.',
+          tags: [],
           created_at: '2026-01-01T00:00:00.000Z',
         },
       },
@@ -192,6 +193,7 @@ describe('MemorySection', () => {
             project_id: 'p1',
             category: 'decision',
             content: 'Choisir un MVP simple.',
+            tags: ['produit'],
             created_at: '2026-01-01T00:00:00.000Z',
           },
         ],
@@ -203,6 +205,106 @@ describe('MemorySection', () => {
 
     expect(await screen.findByText('Choisir un MVP simple.')).toBeInTheDocument();
     expect(screen.queryByLabelText('Contenu du souvenir')).not.toBeInTheDocument();
+  });
+
+  it("n'offre pas d'oublier un souvenir en lecture seule", async () => {
+    // Article 8 : un collaborateur ne réécrit pas l'histoire du porteur.
+    mockApiRoutes({
+      'GET /memory': {
+        status: 200,
+        body: [
+          {
+            id: 'm1',
+            user_id: 'u1',
+            project_id: 'p1',
+            category: 'decision',
+            content: 'Choisir un MVP simple.',
+            tags: [],
+            created_at: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+      'GET /memory/summary': { status: 200, body: { summary: '' } },
+    });
+
+    render(<MemorySection token={TOKEN} projectId={PROJECT_ID} readOnly />);
+
+    await screen.findByText('Choisir un MVP simple.');
+    expect(screen.queryByRole('button', { name: 'Oublier' })).not.toBeInTheDocument();
+  });
+
+  it('affiche les étiquettes des souvenirs', async () => {
+    mockApiRoutes({
+      'GET /memory': {
+        status: 200,
+        body: [
+          {
+            id: 'm1',
+            user_id: 'u1',
+            project_id: 'p1',
+            category: 'fact',
+            content: 'Local trouvé rue des Lilas.',
+            tags: ['local', 'budget'],
+            created_at: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+      'GET /memory/summary': { status: 200, body: { summary: '' } },
+    });
+
+    render(<MemorySection token={TOKEN} projectId={PROJECT_ID} />);
+
+    expect(await screen.findByText('#local #budget')).toBeInTheDocument();
+  });
+
+  it('transmet la recherche et les filtres à l\'API', async () => {
+    const calls: string[] = [];
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      const parsed = new URL(url);
+      calls.push(parsed.pathname + parsed.search);
+      const body = parsed.pathname === '/memory/summary' ? { summary: '' } : [];
+      return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(body) });
+    }) as unknown as typeof fetch;
+
+    render(<MemorySection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText("Aucun souvenir pour l'instant.");
+
+    fireEvent.change(screen.getByLabelText('Rechercher dans les souvenirs'), {
+      target: { value: 'local budget' },
+    });
+    fireEvent.change(screen.getByLabelText('Filtrer par catégorie'), {
+      target: { value: 'decision' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Rechercher' }));
+
+    await waitFor(() => {
+      const searched = calls.filter((call) => call.startsWith('/memory?') && call.includes('q='));
+      expect(searched.length).toBeGreaterThan(0);
+      expect(searched[searched.length - 1]).toContain('category=decision');
+    });
+  });
+
+  it('distingue « aucun résultat » de « aucun souvenir »', async () => {
+    // Afficher « aucun souvenir » alors qu'un filtre est actif ferait croire
+    // que la mémoire est vide, ce qui est faux.
+    mockApiRoutes({
+      'GET /memory': { status: 200, body: [] },
+      'GET /memory/summary': { status: 200, body: { summary: '' } },
+    });
+
+    render(<MemorySection token={TOKEN} projectId={PROJECT_ID} />);
+
+    expect(await screen.findByText("Aucun souvenir pour l'instant.")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Rechercher dans les souvenirs'), {
+      target: { value: 'introuvable' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Rechercher' }));
+
+    expect(
+      await screen.findByText('Aucun souvenir ne correspond à cette recherche.'),
+    ).toBeInTheDocument();
   });
 });
 

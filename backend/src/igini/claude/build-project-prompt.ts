@@ -9,7 +9,12 @@ export function buildProjectPrompt(title: string, description: string | null, co
   const parts = [`Titre : ${title}`, `Description : ${description ?? '(aucune description fournie)'}`];
 
   if (context) {
-    parts.push(`\nCe qu'IGINI sait déjà de ce projet grâce aux étapes précédentes :\n${context}`);
+    // Le contexte agrège désormais deux sources : la mémoire IGINI (ce que
+    // la personne a déjà dit ou décidé) et les étapes précédentes. Chacune
+    // arrive avec son propre en-tête, donc l'intitulé générique ici ne doit
+    // plus les attribuer aux seules « étapes précédentes » — ce serait
+    // présenter une décision du porteur comme une déduction du système.
+    parts.push(`\nCe qu'IGINI sait déjà :\n${context}`);
   }
 
   return parts.join('\n');

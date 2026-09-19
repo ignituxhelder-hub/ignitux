@@ -48,6 +48,7 @@ export type MemoriesCountAggregateOutputType = {
   project_id: number
   category: number
   content: number
+  tags: number
   created_at: number
   _all: number
 }
@@ -77,6 +78,7 @@ export type MemoriesCountAggregateInputType = {
   project_id?: true
   category?: true
   content?: true
+  tags?: true
   created_at?: true
   _all?: true
 }
@@ -159,6 +161,7 @@ export type MemoriesGroupByOutputType = {
   project_id: string | null
   category: string
   content: string
+  tags: string[]
   created_at: Date | null
   _count: MemoriesCountAggregateOutputType | null
   _min: MemoriesMinAggregateOutputType | null
@@ -189,6 +192,7 @@ export type memoriesWhereInput = {
   project_id?: Prisma.UuidNullableFilter<"memories"> | string | null
   category?: Prisma.StringFilter<"memories"> | string
   content?: Prisma.StringFilter<"memories"> | string
+  tags?: Prisma.StringNullableListFilter<"memories">
   created_at?: Prisma.DateTimeNullableFilter<"memories"> | Date | string | null
   user?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
   project?: Prisma.XOR<Prisma.ProjectsNullableScalarRelationFilter, Prisma.projectsWhereInput> | null
@@ -200,6 +204,7 @@ export type memoriesOrderByWithRelationInput = {
   project_id?: Prisma.SortOrderInput | Prisma.SortOrder
   category?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  tags?: Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.usersOrderByWithRelationInput
   project?: Prisma.projectsOrderByWithRelationInput
@@ -214,6 +219,7 @@ export type memoriesWhereUniqueInput = Prisma.AtLeast<{
   project_id?: Prisma.UuidNullableFilter<"memories"> | string | null
   category?: Prisma.StringFilter<"memories"> | string
   content?: Prisma.StringFilter<"memories"> | string
+  tags?: Prisma.StringNullableListFilter<"memories">
   created_at?: Prisma.DateTimeNullableFilter<"memories"> | Date | string | null
   user?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
   project?: Prisma.XOR<Prisma.ProjectsNullableScalarRelationFilter, Prisma.projectsWhereInput> | null
@@ -225,6 +231,7 @@ export type memoriesOrderByWithAggregationInput = {
   project_id?: Prisma.SortOrderInput | Prisma.SortOrder
   category?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  tags?: Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.memoriesCountOrderByAggregateInput
   _max?: Prisma.memoriesMaxOrderByAggregateInput
@@ -240,6 +247,7 @@ export type memoriesScalarWhereWithAggregatesInput = {
   project_id?: Prisma.UuidNullableWithAggregatesFilter<"memories"> | string | null
   category?: Prisma.StringWithAggregatesFilter<"memories"> | string
   content?: Prisma.StringWithAggregatesFilter<"memories"> | string
+  tags?: Prisma.StringNullableListFilter<"memories">
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"memories"> | Date | string | null
 }
 
@@ -247,6 +255,7 @@ export type memoriesCreateInput = {
   id?: string
   category: string
   content: string
+  tags?: Prisma.memoriesCreatetagsInput | string[]
   created_at?: Date | string | null
   user: Prisma.usersCreateNestedOneWithoutMemoriesInput
   project?: Prisma.projectsCreateNestedOneWithoutMemoriesInput
@@ -258,6 +267,7 @@ export type memoriesUncheckedCreateInput = {
   project_id?: string | null
   category: string
   content: string
+  tags?: Prisma.memoriesCreatetagsInput | string[]
   created_at?: Date | string | null
 }
 
@@ -265,6 +275,7 @@ export type memoriesUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.memoriesUpdatetagsInput | string[]
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.usersUpdateOneRequiredWithoutMemoriesNestedInput
   project?: Prisma.projectsUpdateOneWithoutMemoriesNestedInput
@@ -276,6 +287,7 @@ export type memoriesUncheckedUpdateInput = {
   project_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.memoriesUpdatetagsInput | string[]
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -285,6 +297,7 @@ export type memoriesCreateManyInput = {
   project_id?: string | null
   category: string
   content: string
+  tags?: Prisma.memoriesCreatetagsInput | string[]
   created_at?: Date | string | null
 }
 
@@ -292,6 +305,7 @@ export type memoriesUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.memoriesUpdatetagsInput | string[]
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -301,6 +315,7 @@ export type memoriesUncheckedUpdateManyInput = {
   project_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.memoriesUpdatetagsInput | string[]
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -320,6 +335,7 @@ export type memoriesCountOrderByAggregateInput = {
   project_id?: Prisma.SortOrder
   category?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  tags?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -425,10 +441,20 @@ export type memoriesUncheckedUpdateManyWithoutProjectNestedInput = {
   deleteMany?: Prisma.memoriesScalarWhereInput | Prisma.memoriesScalarWhereInput[]
 }
 
+export type memoriesCreatetagsInput = {
+  set: string[]
+}
+
+export type memoriesUpdatetagsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
 export type memoriesCreateWithoutUserInput = {
   id?: string
   category: string
   content: string
+  tags?: Prisma.memoriesCreatetagsInput | string[]
   created_at?: Date | string | null
   project?: Prisma.projectsCreateNestedOneWithoutMemoriesInput
 }
@@ -438,6 +464,7 @@ export type memoriesUncheckedCreateWithoutUserInput = {
   project_id?: string | null
   category: string
   content: string
+  tags?: Prisma.memoriesCreatetagsInput | string[]
   created_at?: Date | string | null
 }
 
@@ -476,6 +503,7 @@ export type memoriesScalarWhereInput = {
   project_id?: Prisma.UuidNullableFilter<"memories"> | string | null
   category?: Prisma.StringFilter<"memories"> | string
   content?: Prisma.StringFilter<"memories"> | string
+  tags?: Prisma.StringNullableListFilter<"memories">
   created_at?: Prisma.DateTimeNullableFilter<"memories"> | Date | string | null
 }
 
@@ -483,6 +511,7 @@ export type memoriesCreateWithoutProjectInput = {
   id?: string
   category: string
   content: string
+  tags?: Prisma.memoriesCreatetagsInput | string[]
   created_at?: Date | string | null
   user: Prisma.usersCreateNestedOneWithoutMemoriesInput
 }
@@ -492,6 +521,7 @@ export type memoriesUncheckedCreateWithoutProjectInput = {
   user_id: string
   category: string
   content: string
+  tags?: Prisma.memoriesCreatetagsInput | string[]
   created_at?: Date | string | null
 }
 
@@ -526,6 +556,7 @@ export type memoriesCreateManyUserInput = {
   project_id?: string | null
   category: string
   content: string
+  tags?: Prisma.memoriesCreatetagsInput | string[]
   created_at?: Date | string | null
 }
 
@@ -533,6 +564,7 @@ export type memoriesUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.memoriesUpdatetagsInput | string[]
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   project?: Prisma.projectsUpdateOneWithoutMemoriesNestedInput
 }
@@ -542,6 +574,7 @@ export type memoriesUncheckedUpdateWithoutUserInput = {
   project_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.memoriesUpdatetagsInput | string[]
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -550,6 +583,7 @@ export type memoriesUncheckedUpdateManyWithoutUserInput = {
   project_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.memoriesUpdatetagsInput | string[]
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -558,6 +592,7 @@ export type memoriesCreateManyProjectInput = {
   user_id: string
   category: string
   content: string
+  tags?: Prisma.memoriesCreatetagsInput | string[]
   created_at?: Date | string | null
 }
 
@@ -565,6 +600,7 @@ export type memoriesUpdateWithoutProjectInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.memoriesUpdatetagsInput | string[]
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.usersUpdateOneRequiredWithoutMemoriesNestedInput
 }
@@ -574,6 +610,7 @@ export type memoriesUncheckedUpdateWithoutProjectInput = {
   user_id?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.memoriesUpdatetagsInput | string[]
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -582,6 +619,7 @@ export type memoriesUncheckedUpdateManyWithoutProjectInput = {
   user_id?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.memoriesUpdatetagsInput | string[]
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -593,6 +631,7 @@ export type memoriesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   project_id?: boolean
   category?: boolean
   content?: boolean
+  tags?: boolean
   created_at?: boolean
   user?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   project?: boolean | Prisma.memories$projectArgs<ExtArgs>
@@ -604,6 +643,7 @@ export type memoriesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   project_id?: boolean
   category?: boolean
   content?: boolean
+  tags?: boolean
   created_at?: boolean
   user?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   project?: boolean | Prisma.memories$projectArgs<ExtArgs>
@@ -615,6 +655,7 @@ export type memoriesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   project_id?: boolean
   category?: boolean
   content?: boolean
+  tags?: boolean
   created_at?: boolean
   user?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   project?: boolean | Prisma.memories$projectArgs<ExtArgs>
@@ -626,10 +667,11 @@ export type memoriesSelectScalar = {
   project_id?: boolean
   category?: boolean
   content?: boolean
+  tags?: boolean
   created_at?: boolean
 }
 
-export type memoriesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "project_id" | "category" | "content" | "created_at", ExtArgs["result"]["memories"]>
+export type memoriesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "project_id" | "category" | "content" | "tags" | "created_at", ExtArgs["result"]["memories"]>
 export type memoriesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   project?: boolean | Prisma.memories$projectArgs<ExtArgs>
@@ -655,6 +697,7 @@ export type $memoriesPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     project_id: string | null
     category: string
     content: string
+    tags: string[]
     created_at: Date | null
   }, ExtArgs["result"]["memories"]>
   composites: {}
@@ -1086,6 +1129,7 @@ export interface memoriesFieldRefs {
   readonly project_id: Prisma.FieldRef<"memories", 'String'>
   readonly category: Prisma.FieldRef<"memories", 'String'>
   readonly content: Prisma.FieldRef<"memories", 'String'>
+  readonly tags: Prisma.FieldRef<"memories", 'String[]'>
   readonly created_at: Prisma.FieldRef<"memories", 'DateTime'>
 }
     

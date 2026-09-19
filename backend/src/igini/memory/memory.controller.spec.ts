@@ -41,7 +41,7 @@ describe('MemoryController', () => {
 
     await controller.remember(currentUser, { category: 'fact', content: 'Contenu', projectId: 'p1' });
 
-    expect(memoryService.remember).toHaveBeenCalledWith('u1', 'fact', 'Contenu', 'p1');
+    expect(memoryService.remember).toHaveBeenCalledWith('u1', 'fact', 'Contenu', 'p1', undefined);
   });
 
   it('search délègue au service avec les filtres', async () => {
@@ -49,7 +49,12 @@ describe('MemoryController', () => {
 
     const result = await controller.search(currentUser, 'texte', 'p1');
 
-    expect(memoryService.search).toHaveBeenCalledWith('u1', 'texte', 'p1');
+    expect(memoryService.search).toHaveBeenCalledWith('u1', {
+      query: 'texte',
+      projectId: 'p1',
+      category: undefined,
+      tags: undefined,
+    });
     expect(result).toEqual([{ id: 'm1' }]);
   });
 

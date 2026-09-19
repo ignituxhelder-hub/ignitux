@@ -157,10 +157,15 @@ model memories {
   // pas en enum Prisma (convention déjà suivie ailleurs dans ce schéma).
   category   String
   content    String
+  // Étiquettes saisies par l'utilisateur, jamais déduites automatiquement :
+  // inventer des tags à sa place produirait un classement qui a l'air d'être
+  // le sien sans l'être.
+  tags       String[]
   created_at DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([user_id])
   @@index([project_id])
+  @@index([category])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.

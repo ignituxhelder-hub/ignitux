@@ -151,6 +151,7 @@ export interface Memory {
   project_id: string | null;
   category: MemoryCategory;
   content: string;
+  tags: string[];
   created_at: string;
 }
 
@@ -427,15 +428,41 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     }),
 
-  createMemory: (token: string, projectId: string, category: MemoryCategory, content: string) =>
+  createMemory: (
+    token: string,
+    projectId: string,
+    category: MemoryCategory,
+    content: string,
+    tags: string[] = [],
+  ) =>
     request<Memory>('/memory', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ projectId, category, content }),
+      body: JSON.stringify({ projectId, category, content, tags }),
     }),
 
-  listMemories: (token: string, projectId: string) =>
-    request<Memory[]>(`/memory?projectId=${projectId}`, {
+  listMemories: (
+    token: string,
+    projectId: string,
+    filters: { query?: string; category?: MemoryCategory; tags?: string[] } = {},
+  ) => {
+    const params = new URLSearchParams({ projectId });
+    if (filters.query) params.set('q', filters.query);
+    if (filters.category) params.set('category', filters.category);
+    if (filters.tags?.length) params.set('tags', filters.tags.join(','));
+    return request<Memory[]>(`/memory?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+
+  listMemoryTags: (token: string, projectId: string) =>
+    request<string[]>(`/memory/tags?projectId=${projectId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  forgetMemory: (token: string, id: string) =>
+    request<void>(`/memory/${id}`, {
+      method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     }),
 

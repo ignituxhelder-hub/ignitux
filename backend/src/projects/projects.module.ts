@@ -4,6 +4,7 @@ import { AuthModule } from '../auth/auth.module.js';
 import { ConstitutionModule } from '../constitution/constitution.module.js';
 import { AnalysisModule } from '../igini/analysis/analysis.module.js';
 import { AutomationModule } from '../igini/automation/automation.module.js';
+import { MemoryModule } from '../igini/memory/memory.module.js';
 import { DevelopmentModule } from '../igini/development/development.module.js';
 import { FinancingModule } from '../igini/financing/financing.module.js';
 import { PlanningModule } from '../igini/planning/planning.module.js';
@@ -29,6 +30,7 @@ import { ProjectsService } from './projects.service.js';
     WorkflowModule,
     AutomationModule,
     ConstitutionModule,
+    MemoryModule,
   ],
   controllers: [ProjectsController],
   providers: [ProjectsService],

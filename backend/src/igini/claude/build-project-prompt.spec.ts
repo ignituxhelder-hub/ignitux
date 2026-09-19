@@ -23,7 +23,7 @@ describe('buildProjectPrompt', () => {
   it('ajoute le contexte fourni par les étapes précédentes quand il existe', () => {
     const result = buildProjectPrompt('Mon idée', 'Une description', 'Analyse : idée prometteuse.');
 
-    expect(result).toContain("Ce qu'IGINI sait déjà de ce projet grâce aux étapes précédentes :");
+    expect(result).toContain("Ce qu'IGINI sait déjà :");
     expect(result).toContain('Analyse : idée prometteuse.');
   });
 });

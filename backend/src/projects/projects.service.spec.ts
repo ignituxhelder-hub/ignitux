@@ -11,6 +11,7 @@ import { DevelopmentService } from '../igini/development/development.service.js'
 import { FinancingService } from '../igini/financing/financing.service.js';
 import { PlanningService } from '../igini/planning/planning.service.js';
 import { TransmissionService } from '../igini/transmission/transmission.service.js';
+import { MemoryService } from '../igini/memory/memory.service.js';
 import { WorkflowService } from '../igini/workflow/workflow.service.js';
 import { CLAUDE_MODEL } from '../igini/claude/claude.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -76,6 +77,7 @@ describe('ProjectsService', () => {
   let workflowService: { createTasksFromSuggestions: ReturnType<typeof vi.fn> };
   let automationService: { run: ReturnType<typeof vi.fn>; listRuns: ReturnType<typeof vi.fn> };
   let constitutionService: { guard: ReturnType<typeof vi.fn> };
+  let memoryService: { recallAsContext: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     prisma = {
@@ -114,6 +116,9 @@ describe('ProjectsService', () => {
     workflowService = { createTasksFromSuggestions: vi.fn() };
     automationService = { run: vi.fn(), listRuns: vi.fn() };
     constitutionService = { guard: vi.fn() };
+    // Par défaut aucun souvenir : les tests de contexte existants vérifient
+    // le fil des étapes, pas la mémoire.
+    memoryService = { recallAsContext: vi.fn().mockResolvedValue(undefined) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -127,6 +132,7 @@ describe('ProjectsService', () => {
         { provide: WorkflowService, useValue: workflowService },
         { provide: AutomationService, useValue: automationService },
         { provide: ConstitutionService, useValue: constitutionService },
+        { provide: MemoryService, useValue: memoryService },
       ],
     }).compile();
 
@@ -375,7 +381,7 @@ describe('ProjectsService', () => {
 
       const result = await service.analyzeForOwner('u1', 'p1');
 
-      expect(analysisService.analyzeProject).toHaveBeenCalledWith('Idée', 'Desc');
+      expect(analysisService.analyzeProject).toHaveBeenCalledWith('Idée', 'Desc', undefined);
       expect(prisma.analyses.create).toHaveBeenCalledWith({
         data: { project_id: 'p1', ...analysis, ...GENERATED_PROVENANCE },
       });
@@ -404,6 +410,31 @@ describe('ProjectsService', () => {
           generatedModel: CLAUDE_MODEL,
         },
         { userId: 'u1', projectId: 'p1' },
+      );
+    });
+
+    it('injecte la mémoire IGINI dans le contexte, dès la première analyse', async () => {
+      // Le moteur Mémoire n'avait jusqu'ici aucun consommateur : IGINI
+      // enregistrait des souvenirs que rien ne relisait. Ce test est ce qui
+      // garantit que le branchement ne saute pas à la prochaine refonte.
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      memoryService.recallAsContext.mockResolvedValue('Mémoire : ne pas ouvrir le samedi.');
+      analysisService.analyzeProject.mockResolvedValue({
+        summary: 'Résumé',
+        feasibility_score: 8,
+        strengths: [],
+        risks: [],
+        next_steps: [],
+      });
+      prisma.analyses.create.mockResolvedValue({ id: 'a1' });
+
+      await service.analyzeForOwner('u1', 'p1');
+
+      expect(analysisService.analyzeProject).toHaveBeenCalledWith(
+        'Idée',
+        'Desc',
+        'Mémoire : ne pas ouvrir le samedi.',
       );
     });
 
@@ -560,6 +591,30 @@ describe('ProjectsService', () => {
         'Desc',
         expect.stringContaining('Idée prometteuse.'),
       );
+    });
+
+    it('place la mémoire avant les étapes précédentes dans le contexte', async () => {
+      // L'ordre n'est pas cosmétique : ce que la personne a décidé prime
+      // sur ce que le système a déduit, y compris dans un prompt.
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      memoryService.recallAsContext.mockResolvedValue('SOUVENIRS');
+      prisma.analyses.findFirst.mockResolvedValue({
+        summary: 'ANALYSE',
+        feasibility_score: 7,
+      });
+      planningService.createBuildPlan.mockResolvedValue({
+        summary: 'Résumé',
+        estimated_timeline: '3 à 6 mois',
+        milestones: [],
+        key_resources: [],
+      });
+      prisma.build_plans.create.mockResolvedValue({});
+
+      await service.createBuildPlanForOwner('u1', 'p1');
+
+      const context = planningService.createBuildPlan.mock.calls[0][2] as string;
+      expect(context.indexOf('SOUVENIRS')).toBeLessThan(context.indexOf('ANALYSE'));
     });
 
     it("ne transmet jamais le contenu d'étapes ultérieures (financement, développement), même si elles existent déjà", async () => {

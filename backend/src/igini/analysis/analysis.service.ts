@@ -29,11 +29,22 @@ complet).`);
 export class AnalysisService {
   constructor(private readonly claude: ClaudeService) {}
 
-  analyzeProject(title: string, description: string | null): Promise<ProjectAnalysisResult> {
+  /**
+   * `context` porte ici la mémoire IGINI, pas les étapes précédentes : une
+   * analyse est par définition la première étape, mais elle peut très bien
+   * concerner quelqu'un dont IGINI sait déjà des choses (décisions passées,
+   * contraintes personnelles). L'ignorer reviendrait à faire semblant de
+   * découvrir une personne qu'on connaît déjà.
+   */
+  analyzeProject(
+    title: string,
+    description: string | null,
+    context?: string,
+  ): Promise<ProjectAnalysisResult> {
     return this.claude.generateStructuredOutput({
       schema: ProjectAnalysisSchema,
       system: SYSTEM_PROMPT,
-      userContent: buildProjectPrompt(title, description),
+      userContent: buildProjectPrompt(title, description, context),
       logContext: "Échec de l'analyse du projet via Claude",
       userErrorMessage: "L'analyse a échoué, réessaie dans un instant.",
     });

@@ -1,4 +1,13 @@
-import { IsIn, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsIn,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { MEMORY_CATEGORIES, type MemoryCategory } from '../memory-category.js';
 
 export class CreateMemoryDto {
@@ -15,4 +24,11 @@ export class CreateMemoryDto {
   @IsOptional()
   @IsUUID()
   projectId?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10, { message: 'Pas plus de 10 étiquettes par souvenir.' })
+  @IsString({ each: true })
+  @MaxLength(40, { each: true, message: 'Une étiquette ne doit pas dépasser 40 caractères.' })
+  tags?: string[];
 }

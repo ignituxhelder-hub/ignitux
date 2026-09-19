@@ -244,22 +244,41 @@ const CATEGORY_LABELS: Record<MemoryCategory, string> = {
 export function MemorySection({ token, projectId, readOnly = false }: ReadOnlySectionProps) {
   const [memories, setMemories] = useState<Memory[]>([]);
   const [summary, setSummary] = useState<string | null>(null);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [category, setCategory] = useState<MemoryCategory>('decision');
   const [content, setContent] = useState('');
+  const [tagsInput, setTagsInput] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Filtres de recherche. `query` est appliqué à la soumission du formulaire
+  // et non à chaque frappe : une requête par caractère tapé inonderait
+  // l'API pour un confort que personne n'a demandé.
+  const [query, setQuery] = useState('');
+  const [appliedQuery, setAppliedQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState<MemoryCategory | ''>('');
+  const [filterTag, setFilterTag] = useState('');
 
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
     setIsLoading(true);
     Promise.all([
-      api.listMemories(token, projectId).then((data) => {
-        if (!cancelled) setMemories(data);
-      }),
+      api
+        .listMemories(token, projectId, {
+          query: appliedQuery || undefined,
+          category: filterCategory || undefined,
+          tags: filterTag ? [filterTag] : undefined,
+        })
+        .then((data) => {
+          if (!cancelled) setMemories(data);
+        }),
       api.getMemorySummary(token, projectId).then((res) => {
         if (!cancelled) setSummary(res.summary);
+      }),
+      api.listMemoryTags(token, projectId).then((tags) => {
+        if (!cancelled) setAvailableTags(tags);
       }),
     ])
       .catch(() => {})
@@ -269,7 +288,17 @@ export function MemorySection({ token, projectId, readOnly = false }: ReadOnlySe
     return () => {
       cancelled = true;
     };
-  }, [token, projectId]);
+  }, [token, projectId, appliedQuery, filterCategory, filterTag]);
+
+  async function refreshSummaryAndTags() {
+    if (!token) return;
+    const [res, tags] = await Promise.all([
+      api.getMemorySummary(token, projectId),
+      api.listMemoryTags(token, projectId),
+    ]);
+    setSummary(res.summary);
+    setAvailableTags(tags);
+  }
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
@@ -277,11 +306,15 @@ export function MemorySection({ token, projectId, readOnly = false }: ReadOnlySe
     setError(null);
     setIsCreating(true);
     try {
-      const memory = await api.createMemory(token, projectId, category, content.trim());
+      const tags = tagsInput
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+      const memory = await api.createMemory(token, projectId, category, content.trim(), tags);
       setMemories((prev) => [memory, ...prev]);
       setContent('');
-      const res = await api.getMemorySummary(token, projectId);
-      setSummary(res.summary);
+      setTagsInput('');
+      await refreshSummaryAndTags();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Impossible d'enregistrer ce souvenir.");
     } finally {
@@ -289,15 +322,78 @@ export function MemorySection({ token, projectId, readOnly = false }: ReadOnlySe
     }
   }
 
+  async function handleForget(id: string) {
+    if (!token) return;
+    setError(null);
+    try {
+      await api.forgetMemory(token, id);
+      setMemories((prev) => prev.filter((memory) => memory.id !== id));
+      await refreshSummaryAndTags();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Impossible d'oublier ce souvenir.");
+    }
+  }
+
+  const hasFilters = Boolean(appliedQuery || filterCategory || filterTag);
+
   return (
     <div className="card" style={{ marginTop: '1.5rem' }}>
       <h2 style={{ marginTop: 0 }}>Mémoire</h2>
+      <p className="muted" style={{ marginTop: 0 }}>
+        Ce qui est enregistré ici est relu par IGINI avant chaque génération : les décisions
+        d&apos;abord, puis les apprentissages, les faits et les préférences.
+      </p>
       {summary && (
         <p className="muted" style={{ whiteSpace: 'pre-line' }}>
           {summary}
         </p>
       )}
       {error && <p className="error">{error}</p>}
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          setAppliedQuery(query.trim());
+        }}
+        style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}
+      >
+        <input
+          aria-label="Rechercher dans les souvenirs"
+          placeholder="Rechercher (tous les mots)"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <select
+          aria-label="Filtrer par catégorie"
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value as MemoryCategory | '')}
+        >
+          <option value="">Toutes les catégories</option>
+          {MEMORY_CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {CATEGORY_LABELS[c]}
+            </option>
+          ))}
+        </select>
+        {availableTags.length > 0 && (
+          <select
+            aria-label="Filtrer par étiquette"
+            value={filterTag}
+            onChange={(e) => setFilterTag(e.target.value)}
+          >
+            <option value="">Toutes les étiquettes</option>
+            {availableTags.map((tag) => (
+              <option key={tag} value={tag}>
+                {tag}
+              </option>
+            ))}
+          </select>
+        )}
+        <button className="secondary" type="submit">
+          Rechercher
+        </button>
+      </form>
+
       {!readOnly && (
         <form
           onSubmit={handleCreate}
@@ -321,13 +417,25 @@ export function MemorySection({ token, projectId, readOnly = false }: ReadOnlySe
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
+          <input
+            aria-label="Étiquettes du souvenir"
+            placeholder="Étiquettes, séparées par des virgules (facultatif)"
+            value={tagsInput}
+            onChange={(e) => setTagsInput(e.target.value)}
+          />
           <button className="secondary" type="submit" disabled={isCreating} style={{ alignSelf: 'flex-start' }}>
             {isCreating ? 'Enregistrement…' : 'Enregistrer'}
           </button>
         </form>
       )}
       {isLoading && <p className="loading">Chargement…</p>}
-      {!isLoading && memories.length === 0 && <p className="muted">Aucun souvenir pour l&apos;instant.</p>}
+      {!isLoading && memories.length === 0 && (
+        <p className="muted">
+          {hasFilters
+            ? 'Aucun souvenir ne correspond à cette recherche.'
+            : "Aucun souvenir pour l'instant."}
+        </p>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {memories.map((m) => (
           <div className="project-item" style={{ cursor: 'default' }} key={m.id}>
@@ -336,6 +444,25 @@ export function MemorySection({ token, projectId, readOnly = false }: ReadOnlySe
               <span className="muted">{new Date(m.created_at).toLocaleString('fr-FR')}</span>
             </div>
             <p style={{ margin: 0 }}>{m.content}</p>
+            {/* Garde défensive : une réponse mise en cache par un client
+                antérieur aux étiquettes ne porte pas encore ce champ, et
+                une section entière qui plante pour un tableau absent est
+                un prix disproportionné. */}
+            {(m.tags ?? []).length > 0 && (
+              <p className="muted" style={{ margin: '0.25rem 0 0' }}>
+                {(m.tags ?? []).map((tag) => `#${tag}`).join(' ')}
+              </p>
+            )}
+            {!readOnly && (
+              <button
+                className="secondary"
+                type="button"
+                onClick={() => void handleForget(m.id)}
+                style={{ marginTop: '0.5rem' }}
+              >
+                Oublier
+              </button>
+            )}
           </div>
         ))}
       </div>
