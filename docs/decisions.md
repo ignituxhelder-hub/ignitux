@@ -180,3 +180,151 @@ légales réelles apparaissent (KYC, DSP2, droit des sociétés…) qui nécessi
 juridique explicite, jamais fait à ce jour. Construire un simple annuaire est une base utile et sans
 risque ; y ajouter de l'argent sans ce cadrage serait irresponsable.
 **Où** — `backend/src/marketplace/marketplace.service.ts` (commentaire de classe).
+
+## Constitution : corpus de 12 articles, pas les « 24 articles de la V1 »
+
+**Quoi** — le moteur constitutionnel est semé avec 12 articles sous la version
+`principes-fondateurs`, et non `v1`. Le corpus transcrit fidèlement les douze énoncés réellement
+fournis (mission, devise, méthode, neuf principes), sans ajout.
+**Pourquoi** — le cahier des charges annonçait une « Constitution IGNITUX V1 complète avec les 24
+articles » mais l'emplacement prévu portait littéralement la mention « (Insérer ici…) » : le texte
+n'a jamais été transmis. Inventer vingt-quatre articles et les présenter comme le texte officiel
+aurait violé le premier principe que ce moteur est censé faire respecter. Le champ `version` permet
+au texte officiel, le jour où il arrivera, de se semer à côté sans se confondre avec celui-ci.
+**Où** — `backend/src/constitution/constitution-articles.ts` (avertissement en tête de fichier),
+test de garde dans `constitution.service.spec.ts` qui échoue si quelqu'un renomme la version en `v1`.
+
+## Constitution : `enforced` vs `declared`, et aucun score global de conformité
+
+**Quoi** — chaque article porte son mode d'application : `enforced` (une règle du moteur le vérifie
+réellement) ou `declared` (énoncé de valeur non vérifiable par un programme). L'audit ne calcule
+aucun pourcentage global de « conformité constitutionnelle ».
+**Pourquoi** — marquer « appliqué » un article que rien ne vérifie serait exactement le mensonge que
+le texte interdit. Et agréger des articles hétérogènes en un « 87 % constitutionnel » serait le score
+inventé que l'article 10 proscrit. Un test vérifie que tout article `enforced` est couvert par au
+moins une règle, pour que la promesse ne se périme pas en silence.
+**Où** — `constitution-articles.ts`, `constitution-rules.ts`, `constitution.service.ts` (`audit()`).
+
+## Constitution : console d'audit en lecture seule, pas d'éditeur d'articles
+
+**Quoi** — l'écran `/constitution` affiche les articles, les règles exécutables, l'état mesuré et le
+journal des violations. Il ne permet pas de modifier le texte ; la Constitution vit dans le code,
+versionnée et relue avec lui.
+**Pourquoi** — le brief demandait une « interface d'administration ». Un éditeur d'articles à chaud
+ferait du texte fondateur une donnée mutable sans trace de qui l'a changé ni quand — précisément ce
+qu'un texte fondateur ne doit pas être.
+**Où** — `backend/src/constitution/constitution.controller.ts`, `frontend/src/app/constitution/page.tsx`.
+
+## Provenance obligatoire sur tout contenu produit par un modèle
+
+**Quoi** — les cinq tables générées par l'IA portent `generated_by` et `generated_model`. Le moteur
+constitutionnel bloque l'enregistrement d'un contenu de modèle attribué à un humain.
+**Pourquoi** — audit de départ : rien en base ne distinguait un contenu produit par Claude d'une
+saisie humaine. C'est la forme la plus grave de donnée inventée, parce qu'elle est indétectable en
+aval. Les lignes antérieures ont `generated_model = null`, ce qui se lit « modèle inconnu » et non
+« rédigé par un humain ».
+**Où** — `backend/prisma/schema.prisma`, `projects.service.ts` (`generatedProvenance`).
+
+## Score `confiance` : `null` au lieu de `0` quand rien n'a démarré
+
+**Quoi** — le champ `confiance` de la fiche de score vaut `null` tant qu'aucune étape n'existe.
+**Pourquoi** — défaut trouvé par le moteur constitutionnel lui-même dès son branchement : un `0`
+affiché se lit « fiabilité nulle », alors que la réalité est « rien à mesurer encore ». Deux
+affirmations très différentes.
+**Où** — `backend/src/igini/scoring/scoring.service.ts`.
+
+## Mémoire : rappel déterministe, jamais d'embedding ni de pertinence « magique »
+
+**Quoi** — `recall()` classe les souvenirs par priorité de catégorie (décision > apprentissage >
+fait > préférence) puis par récence, et plafonne à 12 entrées injectées dans le contexte des
+générateurs. Aucun appel IA, aucun calcul de similarité.
+**Pourquoi** — un tri explicable se débogue et se discute ; une pertinence vectorielle ne se
+justifie pas auprès de l'utilisateur, et coûterait des appels supplémentaires sur un budget déjà
+plafonné. La mémoire est aussi placée AVANT les étapes précédentes dans le contexte : ce que la
+personne a décidé prime sur ce que le système a déduit.
+**Où** — `backend/src/igini/memory/memory.service.ts`, `projects.service.ts` (`memoryContext`).
+
+## Workflow : conditions en liste fermée, pas de mini-langage d'expressions
+
+**Quoi** — une condition de transition est un couple (type, valeur) pris parmi quatre types
+(`always`, `stage_exists`, `tasks_done`, `manual`), et chaque type sait s'expliquer en français.
+Une condition non évaluable BLOQUE l'exécution au lieu de la laisser passer.
+**Pourquoi** — un moteur d'expressions serait plus expressif et beaucoup moins vérifiable. Une
+transition qu'on ne sait pas expliquer à la personne qui la subit transformerait l'autonomie
+supervisée en boîte noire. Et franchir une étape dont on ne sait pas vérifier la condition
+reviendrait à inventer un fait.
+**Où** — `backend/src/igini/workflow/workflow-conditions.ts`.
+
+## Workflow : aucun processus imposé par défaut
+
+**Quoi** — deux modèles sont proposés à la création (« Méthode Ignitux en 5 étapes », « Lancement
+opérationnel »), aucun n'est instancié automatiquement sur un nouveau projet.
+**Pourquoi** — imposer un workflow reviendrait à décider de la méthode à la place du porteur, ce que
+« conseillère, jamais maîtresse » interdit.
+**Où** — `backend/src/igini/workflow/workflow-templates.ts`.
+
+## Knowledge Graph : liens parcourus dans les deux sens, `null` quand aucun chemin n'existe
+
+**Quoi** — la traversée considère les liens comme bidirectionnels, plafonne la profondeur à 3 sauts,
+et `findShortestPath` renvoie `null` quand rien ne relie deux concepts.
+**Pourquoi** — un lien relie deux idées dans l'esprit de la personne quel que soit le sens de saisie ;
+un voisinage qui ignorerait la moitié des liens donnerait une image fausse. Au-delà de 3 sauts, le
+« voisinage » est le graphe entier. Et fabriquer un chemin approximatif ferait croire à un lien de
+pensée jamais posé.
+**Où** — `backend/src/igini/knowledge/concept-graph.ts`.
+
+## Offline First : jamais de succès optimiste, jamais de cache présenté comme frais
+
+**Quoi** — une écriture hors ligne lève `OfflineQueuedError` (pas un succès) et le bandeau écrit
+que l'action n'est pas encore enregistrée côté serveur. Une lecture servie depuis le cache lève
+`OfflineReadError` et porte sa date de capture. Une écriture refusée au rejeu (4xx) passe en
+« refusée » avec le motif du serveur, jamais supprimée en silence ; un 5xx est retenté.
+**Pourquoi** — c'est le mensonge le plus coûteux qu'une application hors ligne puisse faire :
+afficher un succès puis découvrir trois heures plus tard que le serveur a refusé. Servir une donnée
+d'hier comme fraîche, c'est l'article 12 appliqué au client.
+**Où** — `frontend/src/lib/offline-queue.ts`, `offline-cache.ts`, `components/offline-banner.tsx`.
+
+## CRM : carnet strictement personnel, et aucune prévision de chiffre d'affaires
+
+**Quoi** — contacts, entreprises et interactions sont portés par `owner_id` et ne sont jamais
+partagés avec les collaborateurs d'un projet. Le pipeline affiche des comptages par étape, sans
+probabilité de conversion ni chiffre d'affaires prévisionnel pondéré.
+**Pourquoi** — donner accès au carnet commercial parce qu'on partage un projet serait une fuite, pas
+une fonctionnalité. Et une probabilité par étape supposerait un historique de conversion qu'Ignitux
+n'a pas : l'afficher donnerait à une supposition l'autorité d'une mesure.
+**Où** — `backend/src/crm/crm-pipeline.ts` (avertissement en tête), `crm.service.ts`.
+
+## Facturation : trois règles appliquées, la conformité explicitement non garantie
+
+**Quoi** — le code applique la numérotation séquentielle sans trou (par type et par année, avec
+contrainte unique en base), l'impossibilité de modifier ou supprimer un document émis, et la
+correction uniquement par avoir référençant le document d'origine. L'avertissement « ce n'est pas un
+logiciel de facturation certifié » accompagne chaque liste de documents.
+**Pourquoi** — écrire un module de facturation sans dire ses limites serait la forme la plus
+dangereuse de donnée inventée : l'utilisateur en déduirait qu'il est en règle. Les montants sont en
+centimes entiers (en flottant, 0.1 + 0.2 = 0.30000000000000004 — sur une facture, un litige) et
+aucun taux de TVA n'est codé en dur.
+**Où** — `backend/src/billing/billing-legal.ts`, `billing-rules.ts`.
+
+## Financement : suivi de ce qui a eu lieu, aucun modèle chiffré inventé
+
+**Quoi** — le module enregistre les apports reçus, la répartition des parts (en événements datés et
+motivés) et les dividendes réellement versés. Il ne calcule aucune valorisation, aucun dividende
+prévisionnel, aucune part « cible ». Un écart à 100 % est signalé, jamais normalisé.
+**Pourquoi** — le cahier des charges donne une direction (l'entrepreneur reste propriétaire
+principal, évolution progressive vers l'autonomie) mais aucun barème : ni taux d'entrée, ni règle de
+dilution, ni formule de rachat. Produire ces chiffres sans le modèle reviendrait à engager le projet
+de l'utilisateur sur des montants inventés. Les parts sont stockées en événements et non en état
+courant, parce que c'est précisément l'évolution qu'un champ « part actuelle » écraserait.
+**Où** — `backend/src/financing/financing-model.ts` (avertissement de périmètre en tête).
+
+## Modules Pays : la liste des pays couverts est exposée, pas devinée
+
+**Quoi** — un endpoint renvoie les pays pour lesquels une liste de démarches existe réellement en
+base (aujourd'hui : la France seule).
+**Pourquoi** — « One Brain, Multiple Regulations » signifie que le raisonnement est unique mais que
+les règles dépendent du pays. Laisser l'utilisateur découvrir une liste vide pour un autre pays
+présenterait une lacune de couverture comme une absence d'obligations. Un second pays reste bloqué
+sur la même raison qu'à la session précédente : aucune source officielle fiable identifiée, et
+fabriquer du contenu réglementaire serait dangereux.
+**Où** — `backend/src/compliance/compliance.service.ts` (`listCoveredCountries`).

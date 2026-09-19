@@ -337,3 +337,69 @@ version".
    la France.
 6. Le reste (refonte visuelle complète) reste en attente de validation par de vrais utilisateurs,
    comme documenté dans `docs/status.md`.
+
+---
+
+# 10. Session autonome — les neuf modules du cahier des charges
+
+Session complète en mode autonome, sans validation intermédiaire, sur la liste des neuf modules
+priorisés (Constitution, Mémoire, Workflow, Knowledge Graph, Offline First, CRM, Facturation,
+Financement, Modules Pays).
+
+**Le rapport détaillé de cette session est dans [`RAPPORT-SESSION.md`](RAPPORT-SESSION.md)** :
+état avant/après par module, fichiers produits, décisions, blocages, dette restante, estimation du
+travail restant. Cette section n'en garde que l'essentiel.
+
+## 10.1 Ce qui a été construit
+
+Huit lots livrés, chacun testé, typé, linté et compilé avant d'être commité :
+
+1. **Constitution IGNITUX** — corpus de 12 articles, moteur de 5 règles réellement exécutables,
+   journal des violations, audit sur données réelles, console `/constitution`.
+2. **Mémoire IGINI** — `recall()` injecte enfin les souvenirs dans le contexte des 5 générateurs,
+   recherche multi-termes, étiquettes, oubli réservé à l'auteur.
+3. **Workflow Engine** — définitions, étapes, conditions évaluées sur l'état réel du projet,
+   transitions, exécutions, journal, avancement automatique après génération.
+4. **Knowledge Graph** — voisinage à profondeur bornée, plus court chemin, concepts isolés,
+   recherche, suppressions.
+5. **Offline First** — file d'attente d'écritures, cache de lecture daté, rejeu ordonné, bandeau
+   d'état.
+6. **CRM** — contacts, entreprises, interactions datées, pipeline.
+7. **Facturation** — devis/factures/avoirs, numérotation sans trou, immuabilité après émission,
+   règlements, export CSV.
+8. **Financement IGNITUX** — apports, répartition des parts en événements datés, dividendes versés.
+
+Plus un neuvième point, plus modeste : **Modules Pays** expose désormais la liste des pays
+réellement couverts (la France seule), pour que la lacune soit visible au lieu d'être découverte
+devant une liste vide.
+
+## 10.2 Trois défauts trouvés et corrigés
+
+- Le score `confiance` valait `0` en l'absence totale de données — un chiffre affiché sans donnée
+  derrière. Trouvé par le moteur constitutionnel lui-même, dès son branchement.
+- Aucune table générée par l'IA ne portait de trace de provenance : rien en base ne distinguait un
+  contenu produit par Claude d'une saisie humaine. Deux colonnes ajoutées aux cinq tables.
+- `tsc` échouait en permanence sur un import `supertest/types` non résolvable, ce qui privait le
+  projet de sa vérification de types. Corrigé.
+
+## 10.3 Chiffres de la session
+
+- **290 tests ajoutés** : 375 → **665** (518 backend, 147 frontend), tous verts.
+- 59 fichiers créés, 31 modifiés, ~12 200 lignes ajoutées (hors client Prisma généré).
+- 16 nouveaux modèles Prisma (35 au total), 4 applications de schéma strictement additives.
+- 3 nouvelles pages (`/constitution`, `/crm`, `/facturation`), 2 nouvelles sections projet.
+- **Zéro appel à l'API Claude** : aucun des modules construits n'en avait besoin. Budget intact.
+
+## 10.4 L'écart honnête de cette session
+
+Beaucoup de code testé, **rien de vérifié à la main dans un navigateur**. La session s'est déroulée
+sans supervision directe, et les tests unitaires tournent contre des dépendances mockées. La
+priorité n°1 pour la suite est d'ouvrir l'application et de manipuler réellement les huit modules.
+
+## 10.5 Ce qui reste bloqué sur une décision, pas sur du code
+
+- **Le texte des 24 articles de la Constitution V1** n'a jamais été fourni (le brief porte la
+  mention « (Insérer ici…) »). Le corpus actuel transcrit les 12 énoncés réellement donnés.
+- **Le modèle économique chiffré** n'existe pas : aucun taux d'entrée, aucune règle de dilution,
+  aucune formule de rachat. Financement suit ce qui est décidé, il ne le calcule pas.
+- **Un second pays pour la conformité** demande une source officielle fiable, toujours absente.

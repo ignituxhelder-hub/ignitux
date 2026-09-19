@@ -46,6 +46,20 @@ export class ComplianceService implements OnModuleInit {
     }
   }
 
+  /**
+   * Pays pour lesquels une liste de démarches existe réellement en base.
+   *
+   * Exposé plutôt que déduit côté interface : « One Brain, Multiple
+   * Regulations » veut dire que le raisonnement est unique mais que les
+   * règles dépendent du pays. Laisser croire qu'un autre pays est couvert
+   * — ou laisser l'utilisateur le découvrir devant une liste vide —
+   * présenterait une lacune comme une absence d'obligations.
+   */
+  async listCoveredCountries(): Promise<string[]> {
+    const rows = await this.prisma.compliance_requirements.groupBy({ by: ['country'] });
+    return rows.map((row) => row.country).sort();
+  }
+
   async listRequirements(country = 'FR') {
     const requirements = await this.prisma.compliance_requirements.findMany({
       where: { country },

@@ -10,6 +10,7 @@ describe('ComplianceService', () => {
       upsert: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
       findUnique: ReturnType<typeof vi.fn>;
+      groupBy: ReturnType<typeof vi.fn>;
     };
     project_compliance_checks: {
       findMany: ReturnType<typeof vi.fn>;
@@ -21,7 +22,12 @@ describe('ComplianceService', () => {
 
   beforeEach(async () => {
     prisma = {
-      compliance_requirements: { upsert: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
+      compliance_requirements: {
+        upsert: vi.fn(),
+        findMany: vi.fn(),
+        findUnique: vi.fn(),
+        groupBy: vi.fn(),
+      },
       project_compliance_checks: { findMany: vi.fn(), upsert: vi.fn(), deleteMany: vi.fn() },
       projects: { findFirst: vi.fn() },
     };
@@ -35,6 +41,22 @@ describe('ComplianceService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('listCoveredCountries', () => {
+    it('ne liste que les pays réellement présents en base', async () => {
+      // Laisser croire qu'un autre pays est couvert présenterait une
+      // lacune comme une absence d'obligations.
+      prisma.compliance_requirements.groupBy.mockResolvedValue([{ country: 'FR' }]);
+
+      await expect(service.listCoveredCountries()).resolves.toEqual(['FR']);
+    });
+
+    it("renvoie une liste vide si rien n'est semé", async () => {
+      prisma.compliance_requirements.groupBy.mockResolvedValue([]);
+
+      await expect(service.listCoveredCountries()).resolves.toEqual([]);
+    });
   });
 
   it('onModuleInit sème la liste de référence via upsert (idempotent)', async () => {

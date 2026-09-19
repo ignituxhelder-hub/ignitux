@@ -23,6 +23,11 @@ import { ComplianceService } from './compliance.service.js';
 export class ComplianceController {
   constructor(private readonly complianceService: ComplianceService) {}
 
+  @Get('compliance/countries')
+  listCoveredCountries() {
+    return this.complianceService.listCoveredCountries();
+  }
+
   @Get('compliance/requirements')
   listRequirements(@Query('country') country?: string) {
     return this.complianceService.listRequirements(country);
