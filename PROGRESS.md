@@ -1223,7 +1223,8 @@ Les cinq étapes ont été rejouées localement avant d'être poussées.
 
 ## 16.7 Vérification
 
-- **828 tests verts** : 611 unitaires backend, 60 de bout en bout, 217 frontend.
+- **828 tests verts** à ce stade : 611 unitaires backend, 60 de bout en bout, 217 frontend.
+  (Le chiffre de fin de session, après les lots 16.9 à 16.11, est en 16.12.)
 - Lint, types et builds propres des deux côtés, les cinq étapes de CI rejouées à la main.
 - Chaque correction a été **vérifiée par retour arrière** : retirer le correctif fait échouer son
   test, et lui seul.
