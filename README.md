@@ -58,24 +58,31 @@ bout tant que la clé n'est pas renseignée.
 **Moteurs transverses d'IGINI**, avec leur section sur la fiche projet du frontend :
 - **Mémoire** — souvenirs (décisions, préférences, apprentissages, faits) liés à un utilisateur/projet
 - **Connaissance** — graphe de concepts (nœuds + relations) alimenté manuellement
-- **Workflow** — tâches suivables, générées automatiquement à partir des suggestions de l'analyse et
-  du plan de construction ; pas de moteur d'automatisation qui les exécute
+- **Workflow** — tâches suivables, générées automatiquement à partir des suggestions de l'analyse
+  et du plan de construction. Un cinquième moteur, **Automation**, crée et ferme des tâches d'étape
+  sans confirmation préalable — mais il n'appelle jamais l'IA et journalise chaque exécution
 - **Score** — tableau de bord dérivé des données existantes ; `null` quand aucun signal réel n'existe,
   pas de score de confiance/réputation fabriqué
 
 **Communauté**
 - Un projet peut être rendu public par son propriétaire (`/projects/:id/visibility`)
 - Les autres utilisateurs découvrent les projets publics (`/community`) et peuvent y laisser des
-  encouragements — pas de messagerie privée, pas de mise en relation avec des mentors/investisseurs
-  pour l'instant
+  encouragements — pas de messagerie privée
+- Une **Marketplace** (`/marketplace`) met en relation avec des mentors et des investisseurs :
+  profil, annuaire, message d'amorce. **Aucune circulation d'argent**
 
 **Fiabilité**
 - `GET /health` vérifie la connexion à la base de données
-- Suite de tests (167 tests backend + 43 tests frontend, tous unitaires — voir
-  [`docs/status.md`](docs/status.md) pour la commande de vérification), lint et type-check en CI sur
-  chaque push. Un fichier `test/app.e2e-spec.ts` existe (squelette par défaut de NestJS, jamais
-  personnalisé) mais n'est pas exécuté en CI — ce n'est pas une vraie suite e2e, seulement le script
-  `npm run test:e2e` en local si besoin.
+- Suite de tests unitaires des deux côtés, lint et type-check en CI sur chaque push. Les chiffres
+  à jour et la commande pour les vérifier soi-même sont dans [`docs/status.md`](docs/status.md).
+- **Tests de bout en bout** (`backend/test/*.e2e-spec.ts`) contre une vraie base Postgres :
+  parcours complet, contrôle d'accès avec le jeton de quelqu'un d'autre, garde-fous
+  constitutionnels, droits RGPD. Ils tournent sur une base dédiée et **refusent de démarrer
+  ailleurs** — ils écrivent puis effacent. Lancement : `npm run test:e2e` depuis `backend/`.
+  Pas en CI : cela demanderait d'exposer la base dans les secrets GitHub.
+- **Contraste et accessibilité** vérifiés par test : les ratios WCAG sont calculés depuis le CSS,
+  et la structure du balisage (un `<h1>` par page, chaque champ étiqueté) est contrôlée à chaque
+  exécution. Ce qui demande un vrai navigateur, en revanche, ne l'est pas — voir `ESTIMATION.md`.
 
 ## Contact
 
