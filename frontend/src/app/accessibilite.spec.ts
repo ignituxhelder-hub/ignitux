@@ -30,7 +30,11 @@ function filesUnder(dir: string, keep: (path: string) => boolean): string[] {
   return out;
 }
 
-const pages = filesUnder(APP, (path) => path.endsWith('page.tsx'));
+// Les ecrans de secours (error, not-found) sont des pages que quelqu'un
+// voit : ils sont soumis aux memes exigences que les autres.
+const pages = filesUnder(APP, (path) =>
+  ['page.tsx', 'error.tsx', 'not-found.tsx'].some((name) => path.endsWith(name)),
+);
 const components = filesUnder(SRC, (path) => path.endsWith('.tsx') && !path.endsWith('.spec.tsx'));
 
 /** Extrait une balise ouvrante entière, accolades JSX comprises. */
