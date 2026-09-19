@@ -437,40 +437,155 @@ ce sont deux choses différentes.
 
 ### Corrections à faire dans les `.docx` (à appliquer à la main)
 
-1. **Trame de décision, §1, ligne sur les frais fixes** — « module Facturation, actuellement à
-   0 % » est périmé. Le module existe (devis, factures, avoirs, règlements, export CSV,
-   numérotation sans trou, immuabilité après émission). Remplacer par « module Facturation,
-   désormais fonctionnel côté code ».
-2. **Trame de décision, §2, statut** — « module explicitement mis de côté du développement
-   technique » est périmé. Le suivi des apports, des parts et des dividendes existe.
-   Remplacer par « suivi technique en place ; le modèle économique est désormais défini ».
-3. **Feuille de route, §2, ligne « Conditions de facturation »** — même correction que le point 1.
-4. **Modèles de documents futurs, §2.4** — même correction que le point 1.
-5. **CGU/RGPD, §2.2 « Données collectées »** — **la correction la plus importante.** La liste
-   omet des catégories qui existent maintenant en base et sont accessibles aux testeurs :
-   - **contacts CRM** : nom, prénom, e-mail, téléphone et notes **de tiers** (prospects, clients
-     du testeur). C'est un point RGPD sérieux : le testeur devient lui-même responsable de
-     traitement pour ces personnes, qui n'ont jamais consenti à figurer dans Ignitux ;
-   - **documents de facturation** : nom et coordonnées du client, montants, règlements ;
-   - **données de financement** : apports, répartition des parts, dividendes versés ;
-   - **processus (workflows) et leur journal d'exécution** ;
-   - **collaborateurs de projet**, **jetons d'authentification** (hachés), **journal des
-     violations constitutionnelles** (qui stocke un identifiant utilisateur).
-6. **CGU/RGPD, §2.2, dernière ligne** — « Aucune donnée bancaire ou de paiement n'est collectée »
-   demande une nuance. C'est exact pour les **identifiants** bancaires (aucun IBAN, aucun numéro
-   de carte, aucune route de paiement). Ce n'est plus exact au sens large : le module Facturation
-   enregistre des **montants** et un **moyen de paiement** (virement, espèces, carte, chèque).
-   Formulation proposée : « Aucun identifiant bancaire (IBAN, numéro de carte) n'est collecté et
-   aucun paiement ne transite par l'Application. Le module Facturation enregistre en revanche les
-   montants et le moyen de paiement que tu saisis toi-même. »
-7. **Registre des traitements (Modèles de documents futurs, §4.1)** — ajouter les trois lignes
-   manquantes : CRM (données de tiers), Facturation, Financement.
+**Version du 19 septembre 2026, vérifiée champ par champ contre `prisma/schema.prisma`.** Elle
+remplace la liste de la veille, qui était incomplète sur le CRM (elle ignorait deux tables sur
+trois) et devenue fausse sur le Financement (elle disait qu'aucun calcul n'y était fait, ce qui a
+cessé d'être vrai quand le modèle économique a été encodé). Les textes ci-dessous sont rédigés
+pour être collés tels quels.
+
+#### 1. CGU/RGPD, §2.2 « Données collectées » — la correction la plus importante
+
+Remplacer la liste actuelle par :
+
+> Dans le cadre de cette version de test, les données suivantes peuvent être collectées et
+> stockées :
+>
+> - Adresse email et mot de passe (le mot de passe est stocké sous forme de hachage, jamais en
+>   clair).
+> - Contenus que vous saisissez : titres et descriptions de projets, tâches, éléments de mémoire,
+>   concepts, commentaires, profils Marketplace, messages échangés via la mise en relation,
+>   processus (workflows), collaborateurs invités sur un projet.
+> - Contacts et relations professionnelles que vous saisissez concernant des tiers : nom, prénom,
+>   adresse email, numéro de téléphone, fonction, notes libres, et étape de la relation
+>   commerciale ; l'entreprise rattachée (raison sociale, secteur d'activité, site web, notes
+>   libres) ; ainsi que l'historique des échanges que vous consignez vous-même (canal, résumé de
+>   l'échange, date). Ces personnes n'ont pas donné leur consentement à figurer dans
+>   l'Application — voir l'avertissement spécifique ci-dessous.
+> - Documents de facturation que vous émettez : nom et coordonnées du client recopiés sur le
+>   document, lignes détaillées, montants, taux de TVA que vous saisissez, statut du document, et
+>   règlements enregistrés (montant, moyen de paiement, date).
+> - Données de financement que vous saisissez : apports reçus (source, montant, date), détenteurs
+>   de parts nommés, répartition du capital et son historique daté avec le motif de chaque
+>   changement, et dividendes réellement versés. Les noms des détenteurs de parts peuvent
+>   concerner des tiers.
+> - Contenus générés par l'intelligence artificielle à partir de vos projets (analyses, plans).
+> - Jetons techniques liés à l'authentification (réinitialisation de mot de passe, vérification
+>   d'email) — à usage unique, jamais stockés en clair.
+> - Journaux techniques d'exécution générés par l'Application : exécutions de vos processus,
+>   actions du moteur d'automatisation, et démarches de conformité que vous cochez.
+> - Journal technique des violations éventuelles des règles internes de l'Application (finalité :
+>   sécurité et conformité, pas de profilage).
+> - Horodatages techniques de création et de mise à jour des enregistrements. L'Application
+>   n'enregistre ni votre adresse IP, ni votre navigateur, ni aucun traceur publicitaire ou outil
+>   de mesure d'audience.
+
+Ce que cette liste corrige par rapport à la précédente, et pourquoi :
+
+- **le CRM, c'est trois tables, pas une.** `crm_contacts` (prénom, nom, email, téléphone,
+  fonction, notes, type, étape), `crm_companies` (raison sociale, secteur, site, notes) et
+  `crm_interactions` (canal, résumé, date). Les deux champs `notes` et le résumé d'échange sont
+  du **texte libre sur une personne** : c'est la donnée la plus sensible de l'ensemble, et c'est
+  précisément celle qu'on écrit sans y penser ;
+- **la facturation stocke l'identité du client.** `client_name` et `client_details` sont
+  recopiés et figés sur le document à l'émission. Une liste qui ne parle que de montants passe à
+  côté de la seule donnée personnelle de tiers du module ;
+- **le financement enregistre du constaté, pas du recherché.** Aucune table de « montant
+  recherché » ni de « condition » n'existe. `equity_holders.name` est un nom de personne, qui
+  peut être celui d'un tiers ;
+- **rien n'est dit de l'adresse IP parce que rien n'est stocké.** Vérifié : aucun champ
+  d'adresse IP, aucun user-agent, aucune dépendance de mesure d'audience dans le code. L'écrire
+  est à l'avantage d'Ignitux, à condition que ça reste vrai.
+
+#### 2. CGU/RGPD, §2.2 — avertissement à ajouter juste après la liste
+
+> **Avertissement — contacts de tiers (CRM)** : si vous saisissez des informations concernant une
+> personne tierce (contact professionnel, prospect, partenaire) dans le module CRM, vous devenez
+> vous-même responsable du traitement de ces données au sens du RGPD à l'égard de cette personne.
+> L'Application n'a pas connaissance du consentement de ce tiers. Pendant cette phase de test, il
+> est demandé de ne pas saisir de coordonnées réelles de tiers dans le CRM.
+
+C'est le paragraphe qui protège réellement les testeurs. S'il ne devait y avoir qu'une seule
+correction appliquée avant d'ouvrir l'accès, c'est celle-ci.
+
+#### 3. CGU/RGPD, §2.2, dernière ligne — nuance sur les données bancaires
+
+Remplacer « Aucune donnée bancaire ou de paiement n'est collectée à ce stade… » par :
+
+> Aucun identifiant bancaire ou de paiement (IBAN, numéro de carte) n'est collecté, et aucune
+> transaction de paiement ne transite par l'Application. Le module Facturation vous permet en
+> revanche d'enregistrer vous-même, à titre purement déclaratif, le montant d'un règlement et sa
+> catégorie de moyen de paiement (virement, espèces, carte, chèque, autre). Cette catégorie est
+> un simple libellé : aucune coordonnée bancaire réelle n'est demandée, transmise ni conservée.
+
+Formulation à ne pas retenir : « sans traitement ni stockage sécurisé de moyens de paiement
+réels ». Elle se lit « on les stocke, mais mal ». Dans un document RGPD, c'est le pire
+malentendu possible, et il est involontaire : `billing_payments.method` est une **catégorie**
+(`virement | especes | carte | cheque | autre`), pas un identifiant.
+
+#### 4. Trame de décision, §2 — statut du module Financement
+
+Remplacer « module explicitement mis de côté du développement technique, en attente de cette
+décision » par :
+
+> **Statut actuel** : le code du module existe (apports reçus, détenteurs de parts, historique
+> daté de la répartition du capital, dividendes réellement versés). Depuis la formalisation du
+> modèle économique, le code applique deux règles chiffrées, et uniquement celles-là : la
+> répartition d'entrée 51 % entrepreneur / 49 % IGNITUX, et la part de 5 % prélevée sur les
+> dividendes réellement versés. Il ne calcule ni valorisation du projet, ni prix de rachat, ni
+> seuils de rentabilité, d'autonomie ou de stabilité déclenchant le rachat : le modèle nomme ces
+> objectifs sans les chiffrer, et les fabriquer reviendrait à décider à la place de l'entrepreneur
+> du moment où il peut racheter ses parts. La question de fond — quel rôle juridique IGNITUX
+> joue-t-il dans un financement — reste entière et en attente de cette décision.
+
+Formulation à ne pas retenir : « aucun calcul n'y est fait — ni taux, ni dilution, ni formule de
+rachat ». C'était vrai jusqu'au 19 septembre et ça ne l'est plus : `financing-model.ts` encode le
+51/49 et calcule `perpetualShareCents()`. Écrire « aucun calcul » dans une trame de décision
+ferait décider sur une base fausse.
+
+#### 5. Trame de décision, §1, ligne sur les frais fixes
+
+« module Facturation, actuellement à 0 % » est périmé. Le module existe (devis, factures, avoirs,
+règlements, export CSV, numérotation sans trou, immuabilité après émission). Remplacer par
+« module Facturation, désormais fonctionnel côté code ».
+
+#### 6. Documents-cadres, §5, item CGV
+
+Remplacer l'item actuel par :
+
+> **Conditions Générales de Vente (CGV)** — toujours pas nécessaires : aucun paiement ne transite
+> par l'Application. Le module Facturation existe désormais dans le code (génération de documents
+> déclaratifs) mais ne traite aucune transaction réelle ; la décision d'un modèle payant reste à
+> trancher (voir Trame de décision §1).
+
+#### 7. Feuille de route documentaire, §2, ligne « Conditions de facturation »
+
+> Le module Facturation existe désormais dans le code (génération de documents déclaratifs). Les
+> mentions légales obligatoires sur les factures (numérotation, TVA le cas échéant, mentions de
+> retard) restent à valider avec un expert-comptable avant toute émission de facture réelle.
+
+#### 8. Modèles de documents futurs, §2.4 — Conditions de facturation
+
+> Le module Facturation existe désormais techniquement. Les mentions légales obligatoires
+> (numérotation, TVA le cas échéant, mentions de retard de paiement) restent à valider avec un
+> expert-comptable avant toute émission de facture réelle — le code ne garantit pas à lui seul la
+> conformité fiscale du document produit.
+
+Cette nuance rejoint mot pour mot ce que l'API renvoie déjà avec chaque liste de documents (voir
+`billing-legal.ts` : « ce n'est pas pour autant un logiciel de facturation certifié »).
+
+#### 9. Registre des traitements (Modèles de documents futurs, §4.1) — 3 lignes à ajouter
+
+| Traitement | Finalité | Données concernées | Durée de conservation | Destinataires |
+|---|---|---|---|---|
+| CRM | Suivi de contacts professionnels | Nom, prénom, email, téléphone, fonction, **notes libres** de tiers ; entreprise rattachée ; **résumés d'échanges** | [à définir] | Interne + Supabase |
+| Facturation | Émission de documents déclaratifs | **Nom et coordonnées du client**, montants, TVA saisie, catégorie de moyen de paiement | [à définir] | Interne + Supabase |
+| Financement | Suivi du capital et des dividendes | Apports reçus, **noms des détenteurs de parts**, répartition datée, dividendes versés | [à définir] | Interne + Supabase |
 
 ### Recommandation pour la phase de test à 2 personnes
 
-Le point 5 mérite une décision avant d'ouvrir aux testeurs : soit leur demander de ne pas saisir
-de vrais contacts dans le CRM pendant le test, soit compléter la liste RGPD. La première option
-est la plus simple et se règle en une phrase dans le message d'invitation.
+Le point 2 se règle en une phrase dans le message d'invitation : demander aux testeurs de ne pas
+saisir de vrais contacts dans le module Relations. C'est ce qui a été retenu, et c'est dans le
+message qui leur est envoyé (voir §12.3).
 
 ## 11.2 Constitution IGNITUX V1 — les 24 articles officiels
 
@@ -641,7 +756,7 @@ avec `color: transparent`. Sur un navigateur sans support, le nom de la marque a
 
 ### Point RGPD à dire aux testeurs
 
-Le §11.1 (point 5) reste ouvert : la liste des données collectées des CGU **n'inclut pas** les
+Le §11.1 (points 1 et 2) reste ouvert : la liste des données collectées des CGU **n'inclut pas** les
 contacts CRM de tiers. Tant que le `.docx` n'est pas corrigé, les testeurs doivent être invités à
 **ne pas saisir de vrais contacts** dans le module Relations. Une phrase dans le message
 d'invitation suffit, et c'est ce qui a été retenu.
