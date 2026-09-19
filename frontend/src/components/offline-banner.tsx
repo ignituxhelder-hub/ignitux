@@ -11,7 +11,7 @@ import {
 import type { OfflineState } from '@/lib/offline-queue';
 import { useAuth } from '@/lib/auth';
 
-const EMPTY: OfflineState = { pending: [], rejected: [] };
+const EMPTY: OfflineState = { pending: [], rejected: [], nextId: 1 };
 
 /**
  * Bandeau d'état hors ligne.

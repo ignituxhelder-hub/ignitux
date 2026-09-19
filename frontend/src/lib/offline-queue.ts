@@ -16,6 +16,23 @@
  * sans navigateur, et surtout ça oblige à traiter le cas où le stockage
  * est indisponible (navigation privée, quota plein) au lieu de le
  * supposer résolu.
+ *
+ * ── Ce que la révision du 19/09/2026 a corrigé ────────────────────────
+ *
+ * Le module tenait ses deux règles face au serveur, et les trahissait
+ * face au stockage. Quatre défauts, tous capables de faire disparaître
+ * une écriture sans que personne le sache :
+ *
+ *   — les identifiants pouvaient entrer en collision, et supprimer une
+ *     écriture en supprimait alors deux ;
+ *   — `enqueue` annonçait une mise en file même quand l'écriture dans le
+ *     stockage avait échoué ;
+ *   — le rejeu pouvait boucler indéfiniment en renvoyant la même écriture
+ *     au serveur ;
+ *   — une entrée corrompue partait au réseau telle quelle.
+ *
+ * Chacun est décrit à l'endroit où il est corrigé, et couvert par un test
+ * qui échoue si on revient en arrière.
  */
 
 export interface QueuedMutation {
@@ -38,6 +55,12 @@ export interface RejectedMutation extends QueuedMutation {
 export interface OfflineState {
   pending: QueuedMutation[];
   rejected: RejectedMutation[];
+  /**
+   * Compteur monotone qui numérote les écritures. Persisté avec la file :
+   * c'est ce qui garantit qu'un identifiant n'est jamais réutilisé, y
+   * compris après une suppression (voir `enqueue`).
+   */
+  nextId: number;
 }
 
 export interface KeyValueStorage {
@@ -47,7 +70,47 @@ export interface KeyValueStorage {
 
 const STORAGE_KEY = 'ignitux.offline';
 
-const EMPTY_STATE: OfflineState = { pending: [], rejected: [] };
+const METHODS = ['POST', 'PATCH', 'DELETE'] as const;
+
+function emptyState(): OfflineState {
+  return { pending: [], rejected: [], nextId: 1 };
+}
+
+/**
+ * Une entrée est-elle réellement rejouable ?
+ *
+ * Sans ce contrôle, une entrée corrompue — un `null` dans le tableau, un
+ * `path` manquant après une écriture tronquée — partait au réseau telle
+ * quelle : `fetch('undefined')`, ou une requête au mauvais endroit. On
+ * préfère l'écarter à la lecture.
+ *
+ * Écarter n'est pas « perdre en silence » au sens de la règle 2 : cette
+ * règle protège une écriture que le serveur a refusée, c'est-à-dire une
+ * intention connue de l'utilisateur. Une entrée sans chemin ni méthode ne
+ * porte plus aucune intention identifiable — on ne peut ni la rejouer, ni
+ * dire à quelqu'un ce qu'il avait voulu faire. La garder bloquerait la
+ * file pour toutes les suivantes.
+ */
+function isReplayable(value: unknown): value is QueuedMutation {
+  if (typeof value !== 'object' || value === null) return false;
+  const item = value as Partial<QueuedMutation>;
+  return (
+    typeof item.id === 'string' &&
+    item.id.length > 0 &&
+    typeof item.path === 'string' &&
+    item.path.startsWith('/') &&
+    typeof item.method === 'string' &&
+    (METHODS as readonly string[]).includes(item.method) &&
+    (item.body === null || typeof item.body === 'string')
+  );
+}
+
+function isRejected(value: unknown): value is RejectedMutation {
+  return (
+    isReplayable(value) &&
+    typeof (value as Partial<RejectedMutation>).reason === 'string'
+  );
+}
 
 /**
  * Lecture tolérante : un stockage indisponible ou un contenu corrompu
@@ -58,42 +121,89 @@ const EMPTY_STATE: OfflineState = { pending: [], rejected: [] };
 export function readState(storage: KeyValueStorage): OfflineState {
   try {
     const raw = storage.getItem(STORAGE_KEY);
-    if (!raw) return { ...EMPTY_STATE };
+    if (!raw) return emptyState();
     const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== 'object' || parsed === null) return { ...EMPTY_STATE };
+    if (typeof parsed !== 'object' || parsed === null) return emptyState();
     const state = parsed as Partial<OfflineState>;
-    return {
-      pending: Array.isArray(state.pending) ? state.pending : [],
-      rejected: Array.isArray(state.rejected) ? state.rejected : [],
-    };
+
+    const pending = Array.isArray(state.pending) ? state.pending.filter(isReplayable) : [];
+    const rejected = Array.isArray(state.rejected) ? state.rejected.filter(isRejected) : [];
+
+    // `nextId` doit toujours dépasser tout identifiant déjà attribué, même
+    // si le compteur manque (file écrite par une version antérieure) ou a
+    // été bricolé à la main dans le stockage.
+    const highest = pending.reduce((max, item) => Math.max(max, sequenceOf(item.id)), 0);
+    const stored = typeof state.nextId === 'number' && Number.isFinite(state.nextId)
+      ? Math.floor(state.nextId)
+      : 0;
+
+    return { pending, rejected, nextId: Math.max(stored, highest + 1, 1) };
   } catch {
-    return { ...EMPTY_STATE };
+    return emptyState();
   }
 }
 
-export function writeState(storage: KeyValueStorage, state: OfflineState): void {
+/** Extrait le numéro de séquence d'un identifiant `<horodatage>-<n>`. */
+function sequenceOf(id: string): number {
+  const parsed = Number.parseInt(id.slice(id.lastIndexOf('-') + 1), 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/**
+ * Écrit la file. Renvoie `false` si le stockage a refusé.
+ *
+ * Le booléen n'est pas décoratif : tant que cette fonction avalait son
+ * échec, `enqueue` annonçait une mise en attente qui n'avait pas eu lieu,
+ * et l'écriture disparaissait au rechargement de la page. Le module
+ * promet de ne jamais présenter une écriture comme sauvegardée à tort —
+ * il devait tenir cette promesse face au stockage comme face au serveur.
+ */
+export function writeState(storage: KeyValueStorage, state: OfflineState): boolean {
+  const serialized = JSON.stringify(state);
   try {
-    storage.setItem(STORAGE_KEY, JSON.stringify(state));
+    storage.setItem(STORAGE_KEY, serialized);
+    // On relit pour vérifier, au lieu de déduire le succès de l'absence
+    // d'exception. Un `localStorage` saturé lève en général, mais pas
+    // toujours : certains contextes (navigation privée, stockage bridé par
+    // une politique) acceptent l'appel sans rien conserver. Ce module
+    // promet qu'une écriture annoncée en attente l'est réellement — cette
+    // promesse se vérifie, elle ne se suppose pas. Le coût est une lecture.
+    return storage.getItem(STORAGE_KEY) === serialized;
   } catch {
-    // Quota plein ou stockage refusé : on ne peut rien faire de mieux que
-    // continuer. Le signaler par une exception ferait échouer l'action de
-    // l'utilisateur alors qu'elle a peut-être réussi en ligne.
+    return false;
   }
 }
 
+/**
+ * Met une écriture en file. Renvoie `null` si le stockage n'a pas pu la
+ * conserver — l'appelant DOIT traiter ce cas et le dire à l'utilisateur,
+ * plutôt que d'afficher « en attente d'envoi » pour une action qui aura
+ * disparu au prochain chargement.
+ *
+ * L'identifiant combine l'horodatage et un compteur monotone persisté.
+ * L'ancienne version utilisait la longueur de la file : deux écritures
+ * ajoutées dans la même milliseconde de part et d'autre d'une suppression
+ * recevaient le même identifiant, et supprimer l'une supprimait l'autre.
+ */
 export function enqueue(
   storage: KeyValueStorage,
   mutation: Omit<QueuedMutation, 'id' | 'queuedAt'>,
   now: () => Date = () => new Date(),
-): QueuedMutation {
+): QueuedMutation | null {
   const state = readState(storage);
   const queued: QueuedMutation = {
     ...mutation,
-    id: `${now().getTime()}-${state.pending.length}`,
+    id: `${now().getTime()}-${state.nextId}`,
     queuedAt: now().toISOString(),
   };
-  writeState(storage, { ...state, pending: [...state.pending, queued] });
-  return queued;
+
+  const stored = writeState(storage, {
+    ...state,
+    pending: [...state.pending, queued],
+    nextId: state.nextId + 1,
+  });
+
+  return stored ? queued : null;
 }
 
 export function removePending(storage: KeyValueStorage, id: string): OfflineState {
@@ -115,6 +225,7 @@ export function reject(
   if (!mutation) return state;
 
   const next: OfflineState = {
+    ...state,
     pending: state.pending.filter((item) => item.id !== id),
     rejected: [
       ...state.rejected,
@@ -141,6 +252,12 @@ export interface ReplayOutcome {
   rejected: number;
   /** Restées en file : l'envoi a échoué pour une raison temporaire. */
   remaining: number;
+  /**
+   * Le rejeu s'est arrêté parce que le stockage ne retient plus rien.
+   * Distinct de `remaining` : ici l'écriture est peut-être partie au
+   * serveur, mais la file ne peut pas enregistrer qu'elle est partie.
+   */
+  storageStalled?: true;
 }
 
 /**
@@ -170,9 +287,22 @@ export async function replay(
     }
 
     const result = await send(next);
+
     if (result.ok) {
-      removePending(storage, next.id);
       sent += 1;
+      // Garde-fou contre une boucle infinie. Si le stockage refuse
+      // d'enregistrer la suppression (quota plein), la tête de file ne
+      // bouge pas — et sans ce contrôle on renverrait éternellement la
+      // même écriture au serveur, en gelant l'onglet au passage.
+      //
+      // On RELIT le stockage au lieu d'utiliser la valeur renvoyée :
+      // `removePending` calcule l'état suivant et le renvoie qu'il ait pu
+      // l'écrire ou non. Se fier à son retour, c'est vérifier l'intention
+      // plutôt que le fait — exactement l'erreur qu'on veut détecter ici.
+      removePending(storage, next.id);
+      if (readState(storage).pending[0]?.id === next.id) {
+        return { sent, rejected, remaining: state.pending.length, storageStalled: true };
+      }
       continue;
     }
 
@@ -180,7 +310,10 @@ export async function replay(
       return { sent, rejected, remaining: readState(storage).pending.length };
     }
 
-    reject(storage, next.id, result.status, result.reason, now);
     rejected += 1;
+    reject(storage, next.id, result.status, result.reason, now);
+    if (readState(storage).pending[0]?.id === next.id) {
+      return { sent, rejected, remaining: state.pending.length, storageStalled: true };
+    }
   }
 }

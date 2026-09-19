@@ -177,6 +177,18 @@ function handleOffline<T>(path: string, options: RequestInit): Promise<T> {
     body: typeof options.body === 'string' ? options.body : null,
     label: describeMutation(method, path),
   });
+  if (!queued) {
+    // Le stockage a refusé de conserver l'écriture (quota plein, navigation
+    // privée). Annoncer « en attente d'envoi » serait faux : rien n'attend,
+    // et l'action aurait disparu au prochain chargement. Mieux vaut le dire
+    // tout de suite, tant que la personne peut encore agir.
+    throw new ApiError(
+      "Pas de réseau, et le stockage de ton navigateur n'a pas pu conserver cette action : " +
+        "elle n'est PAS enregistrée. Note-la et refais-la une fois reconnecté.",
+      0,
+    );
+  }
+
   onOfflineChange?.();
   throw new OfflineQueuedError(queued.id);
 }
@@ -229,11 +241,11 @@ export function replayOfflineQueue(token: string) {
 }
 
 export function readOfflineState(): OfflineState {
-  return offlineStorage ? readState(offlineStorage) : { pending: [], rejected: [] };
+  return offlineStorage ? readState(offlineStorage) : { pending: [], rejected: [], nextId: 1 };
 }
 
 export function dismissRejectedMutation(id: string): OfflineState {
-  if (!offlineStorage) return { pending: [], rejected: [] };
+  if (!offlineStorage) return { pending: [], rejected: [], nextId: 1 };
   const next = dismissRejected(offlineStorage, id);
   onOfflineChange?.();
   return next;
