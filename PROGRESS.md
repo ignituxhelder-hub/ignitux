@@ -723,7 +723,7 @@ un test d'une heure. Le service tourne depuis le poste du porteur :
 | Adresse partagée | `http://192.168.1.12:3001` |
 | Backend | `node dist/main.js`, port 3000, `IGINI_AI_ENABLED=false`, `ANTHROPIC_API_KEY` vidée |
 | Frontend | `next start -H 0.0.0.0 -p 3001`, construit avec `NEXT_PUBLIC_API_URL=http://192.168.1.12:3000` |
-| Base | Supabase existante — **la même qu'en développement** |
+| Base | Supabase existante — **la même qu'en développement**. Depuis le §15.1 une base de production distincte existe (`ignitux_prod`), mais ce déploiement n'y a **pas** été basculé : `testeur1` a déjà un projet dans la base de développement. |
 
 **Les secrets ne sont jamais dans le code, les journaux ni l'URL** : `DATABASE_URL` et
 `JWT_SECRET` restent dans `backend/.env`, qui n'est pas versionné. Le `.env` du poste **contient
