@@ -63,6 +63,7 @@ export function ScoreSection({ token, projectId }: SectionProps) {
         </button>
       </div>
       {error && <p className="error">{error}</p>}
+      {isLoading && !score && <p className="loading">Chargement…</p>}
       {score && (
         <div
           style={{
@@ -188,6 +189,7 @@ export function TasksSection({ token, projectId }: SectionProps) {
           {isCreating ? 'Ajout…' : 'Ajouter'}
         </button>
       </form>
+      {isLoading && <p className="loading">Chargement…</p>}
       {!isLoading && tasks.length === 0 && <p className="muted">Aucune tâche pour l&apos;instant.</p>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         {tasks.map((task) => (
@@ -228,23 +230,25 @@ export function MemorySection({ token, projectId }: SectionProps) {
   const [category, setCategory] = useState<MemoryCategory>('decision');
   const [content, setContent] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
-    api
-      .listMemories(token, projectId)
-      .then((data) => {
+    setIsLoading(true);
+    Promise.all([
+      api.listMemories(token, projectId).then((data) => {
         if (!cancelled) setMemories(data);
-      })
-      .catch(() => {});
-    api
-      .getMemorySummary(token, projectId)
-      .then((res) => {
+      }),
+      api.getMemorySummary(token, projectId).then((res) => {
         if (!cancelled) setSummary(res.summary);
-      })
-      .catch(() => {});
+      }),
+    ])
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
     return () => {
       cancelled = true;
     };
@@ -303,7 +307,8 @@ export function MemorySection({ token, projectId }: SectionProps) {
           {isCreating ? 'Enregistrement…' : 'Enregistrer'}
         </button>
       </form>
-      {memories.length === 0 && <p className="muted">Aucun souvenir pour l&apos;instant.</p>}
+      {isLoading && <p className="loading">Chargement…</p>}
+      {!isLoading && memories.length === 0 && <p className="muted">Aucun souvenir pour l&apos;instant.</p>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {memories.map((m) => (
           <div className="project-item" style={{ cursor: 'default' }} key={m.id}>
@@ -392,17 +397,20 @@ export function KnowledgeSection({ token, projectId }: SectionProps) {
   const [relationType, setRelationType] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [isLinking, setIsLinking] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   function loadGraph() {
     if (!token) return;
+    setIsLoading(true);
     api
       .getConceptGraph(token, projectId)
       .then((graph) => {
         setConcepts(Array.isArray(graph?.nodes) ? graph.nodes : []);
         setEdges(Array.isArray(graph?.edges) ? graph.edges : []);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
   }
 
   useEffect(() => {
@@ -474,7 +482,8 @@ export function KnowledgeSection({ token, projectId }: SectionProps) {
         </button>
       </form>
 
-      {concepts.length === 0 && <p className="muted">Aucun concept pour l&apos;instant.</p>}
+      {isLoading && <p className="loading">Chargement…</p>}
+      {!isLoading && concepts.length === 0 && <p className="muted">Aucun concept pour l&apos;instant.</p>}
       <ConceptGraphView concepts={concepts} edges={edges} />
       <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
         {concepts.map((c) => (

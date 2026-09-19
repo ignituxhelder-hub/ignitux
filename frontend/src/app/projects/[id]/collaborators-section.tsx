@@ -85,6 +85,7 @@ export function CollaboratorsSection({ token, projectId }: CollaboratorsSectionP
           {isAdding ? 'Ajout…' : 'Inviter'}
         </button>
       </form>
+      {isLoading && <p className="loading">Chargement…</p>}
       {!isLoading && collaborators.length === 0 && (
         <p className="muted">Aucun collaborateur pour l&apos;instant.</p>
       )}

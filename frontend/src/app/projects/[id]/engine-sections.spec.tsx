@@ -127,7 +127,7 @@ describe('MemorySection', () => {
   it('affiche le résumé et permet d\'enregistrer un souvenir', async () => {
     mockApiRoutes({
       'GET /memory': { status: 200, body: [] },
-      'GET /memory/summary': { status: 200, body: { summary: 'Aucun souvenir pour l\'instant.' } },
+      'GET /memory/summary': { status: 200, body: { summary: "Aucun souvenir enregistré pour l'instant." } },
       'POST /memory': {
         status: 201,
         body: {
