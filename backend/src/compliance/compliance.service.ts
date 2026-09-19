@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { assertHasProjectAccess } from '../prisma/assert-has-project-access.js';
 import { assertOwnsProject } from '../prisma/assert-owns-project.js';
+import { ConstitutionService } from '../constitution/constitution.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { COMPLIANCE_REQUIREMENTS_FR } from './compliance-requirements.js';
 
@@ -17,13 +18,26 @@ export const COMPLIANCE_DISCLAIMER =
  */
 @Injectable()
 export class ComplianceService implements OnModuleInit {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly constitutionService: ConstitutionService,
+  ) {}
 
   // Upsert idempotent sur `slug` : ne duplique rien au redémarrage, et une
   // modification du contenu dans compliance-requirements.ts se reflète au
   // prochain démarrage sans script de migration séparé.
   async onModuleInit(): Promise<void> {
     for (const requirement of COMPLIANCE_REQUIREMENTS_FR) {
+      // Article 15 (One Brain Multiple Regulations) : une règle propre à un
+      // pays doit citer sa source officielle, sinon elle n'est ni
+      // vérifiable ni maintenable quand la réglementation bouge.
+      await this.constitutionService.guard({
+        kind: 'publish_local_rule',
+        country: requirement.country,
+        slug: requirement.slug,
+        sourceUrl: requirement.sourceUrl,
+      });
+
       await this.prisma.compliance_requirements.upsert({
         where: { slug: requirement.slug },
         update: {

@@ -52,7 +52,15 @@ export class ProjectsService {
     return { generated_by: 'igini', generated_model: CLAUDE_MODEL };
   }
 
-  create(ownerId: string, title: string, description?: string) {
+  async create(ownerId: string, title: string, description?: string) {
+    // Article 13 (Respect de la Vie Privée) : un projet naît privé. La
+    // règle attrape une régression où `is_public` prendrait `true` par
+    // défaut — un basculement silencieux que personne ne remarquerait.
+    await this.constitutionService.guard(
+      { kind: 'create_project', isPublic: false },
+      { userId: ownerId },
+    );
+
     return this.prisma.projects.create({
       data: { owner_id: ownerId, title, description },
     });

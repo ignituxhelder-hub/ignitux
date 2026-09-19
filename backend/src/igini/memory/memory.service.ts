@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConstitutionService } from '../../constitution/constitution.service.js';
 import { assertHasProjectAccess } from '../../prisma/assert-has-project-access.js';
 import { assertOwnsProject } from '../../prisma/assert-owns-project.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
@@ -48,7 +49,10 @@ export const DEFAULT_RECALL_LIMIT = 12;
  */
 @Injectable()
 export class MemoryService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly constitutionService: ConstitutionService,
+  ) {}
 
   async remember(
     userId: string,
@@ -60,6 +64,13 @@ export class MemoryService {
     if (projectId) {
       await assertOwnsProject(this.prisma, userId, projectId);
     }
+
+    // Article 12 (Mémoire Responsable) : un souvenir sans auteur est un
+    // souvenir non traçable.
+    await this.constitutionService.guard(
+      { kind: 'persist_memory', hasAuthor: Boolean(userId) },
+      { userId, projectId },
+    );
 
     return this.prisma.memories.create({
       data: {

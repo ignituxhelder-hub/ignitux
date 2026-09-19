@@ -212,6 +212,14 @@ export class WorkflowEngineService {
         break;
       }
 
+      // Article 11 (Transparence) : IGINI ne franchit une étape que s'il
+      // peut en énoncer la raison. Une raison vide signalerait une
+      // condition dont l'explication s'est perdue en route.
+      await this.constitutionService.guard(
+        { kind: 'explain_decision', engine: 'workflow', reason: verdict.reason },
+        { userId, projectId: run.project_id },
+      );
+
       const created = await this.runStepAction(run.id, run.project_id, step);
       if (created) {
         tasksCreated.push(created);

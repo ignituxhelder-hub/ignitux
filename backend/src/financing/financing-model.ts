@@ -1,36 +1,60 @@
 /**
- * FINANCEMENT IGNITUX — ce que le modèle sait, et ce qu'il ignore.
+ * FINANCEMENT IGNITUX — le modèle économique, tel qu'il a été défini.
  *
- * AVERTISSEMENT DE PÉRIMÈTRE, à lire avant toute évolution de ce module.
+ * Le modèle a été transmis par le porteur du projet le 19 septembre 2026 et
+ * remplace l'avertissement de périmètre qui disait, honnêtement à l'époque,
+ * qu'aucun barème n'existait. Il tient en quatre règles :
  *
- * Le cahier des charges décrit le modèle économique en quatre phrases :
- * l'entrepreneur reste propriétaire principal, Ignitux accompagne et
- * finance, l'évolution se fait progressivement vers l'autonomie, et les
- * règles définies dans le projet sont conservées. C'est une direction,
- * pas un barème : aucun taux d'entrée au capital, aucune règle de
- * dilution, aucune formule de rachat, aucune clé de répartition des
- * dividendes n'a jamais été fournie.
+ *   1. À l'entrée, l'entrepreneur garde 51 % et IGNITUX reçoit 49 %.
+ *   2. IGNITUX apporte analyse, accompagnement, IA, outils, financement et
+ *      réseau.
+ *   3. En atteignant ses objectifs (rentabilité, autonomie, stabilité),
+ *      l'entrepreneur rachète progressivement les parts d'IGNITUX jusqu'à
+ *      100 %.
+ *   4. Même à 100 %, il reverse 5 % des dividendes RÉELLEMENT VERSÉS —
+ *      pas du chiffre d'affaires, pas du bénéfice brut.
  *
- * Ce module ne les invente donc pas. Il enregistre ce qui a réellement
- * été décidé et versé, avec des montants et des parts saisis par des
- * humains, et il rend l'histoire lisible. Concrètement :
+ * Ce que ce module calcule et ce qu'il ne calcule toujours pas :
  *
- * — pas de valorisation du projet : elle supposerait une méthode
- *   (multiple de CA, actualisation…) que personne n'a choisie ;
- * — pas de dividende prévisionnel : un dividende se constate après coup,
- *   le prédire reviendrait à promettre un revenu ;
- * — pas de part « cible » calculée automatiquement : chaque changement de
- *   répartition est un événement saisi, daté et motivé.
- *
- * Le jour où le modèle chiffré existera, il s'ajoutera par-dessus ces
- * enregistrements sans avoir à les réécrire.
+ * — il calcule la part perpétuelle de 5 %, parce que la règle est exacte
+ *   et s'applique à un montant déjà versé ;
+ * — il n'invente pas les seuils de « rentabilité », « autonomie » et
+ *   « stabilité » qui déclenchent le rachat : le modèle nomme ces objectifs
+ *   sans les chiffrer, et fabriquer des seuils reviendrait à décider à la
+ *   place du porteur à quel moment il peut racheter ses parts ;
+ * — il ne valorise pas le projet : aucune méthode de valorisation n'a été
+ *   choisie, donc aucun prix de rachat ne peut être déduit ;
+ * — il n'annonce aucun dividende prévisionnel : un dividende se constate.
  */
 export const FINANCING_SCOPE_NOTICE =
-  "Ignitux enregistre ici les financements reçus, la répartition des parts et les dividendes " +
-  'réellement versés, à partir de montants que tu saisis. Il ne calcule aucune valorisation du ' +
-  "projet, aucun dividende prévisionnel et aucune part « cible » : le modèle économique chiffré " +
-  "d'Ignitux (taux d'entrée, règles de dilution et de rachat) n'est pas défini à ce jour, et " +
-  'produire ces chiffres sans lui reviendrait à inventer des montants qui engagent ton projet.';
+  "Le modèle IGNITUX est appliqué ici : 51 % pour l'entrepreneur et 49 % pour Ignitux à " +
+  "l'entrée, rachat progressif jusqu'à 100 % lorsque les objectifs sont atteints, puis 5 % " +
+  'des dividendes réellement versés reversés à Ignitux à vie. Ignitux calcule cette part de ' +
+  "5 % sur les dividendes que tu enregistres, et rien d'autre : ni valorisation du projet, ni " +
+  'prix de rachat, ni dividende prévisionnel. Les seuils qui déclenchent le rachat ' +
+  '(rentabilité, autonomie, stabilité) ne sont pas chiffrés dans le modèle — ils restent ta ' +
+  'décision.';
+
+/** Répartition à l'entrée, en points de base (10000 = 100 %). */
+export const FOUNDER_ENTRY_BASIS_POINTS = 5100;
+export const IGNITUX_ENTRY_BASIS_POINTS = 4900;
+
+/**
+ * Part des dividendes reversée à Ignitux à perpétuité : 5 %, soit 500
+ * points de base. Elle porte sur les dividendes RÉELLEMENT VERSÉS, jamais
+ * sur le chiffre d'affaires ni sur le bénéfice brut — la distinction est
+ * dans le modèle et elle change tout.
+ */
+export const PERPETUAL_DIVIDEND_BASIS_POINTS = 500;
+
+/**
+ * Part revenant à Ignitux sur un dividende versé. Arrondi au centime
+ * supérieur écarté volontairement : on arrondit au plus proche, comme
+ * partout ailleurs dans le code monétaire de ce projet.
+ */
+export function perpetualShareCents(distributedCents: number): number {
+  return Math.round((distributedCents * PERPETUAL_DIVIDEND_BASIS_POINTS) / 10000);
+}
 
 export const FINANCING_SOURCES = ['ignitux', 'porteur', 'pret', 'subvention', 'autre'] as const;
 export type FinancingSource = (typeof FINANCING_SOURCES)[number];

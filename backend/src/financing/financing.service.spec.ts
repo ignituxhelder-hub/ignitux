@@ -1,5 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConstitutionService } from '../constitution/constitution.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { FinancingService } from './financing.service.js';
 
@@ -14,6 +15,7 @@ describe('FinancingService', () => {
     equity_holders: { create: Mock; findMany: Mock; findFirst: Mock; delete: Mock };
     equity_events: { create: Mock; findMany: Mock };
     dividend_distributions: { create: Mock; findMany: Mock };
+    constitution_violations: { createMany: Mock };
   };
 
   const OWNED = { id: 'p1', owner_id: 'u1' };
@@ -35,6 +37,7 @@ describe('FinancingService', () => {
         delete: vi.fn(),
       },
       equity_events: { create: vi.fn().mockResolvedValue({ id: 'e1' }), findMany: vi.fn().mockResolvedValue([]) },
+      constitution_violations: { createMany: vi.fn() },
       dividend_distributions: {
         create: vi.fn().mockResolvedValue({ id: 'd1' }),
         findMany: vi.fn().mockResolvedValue([]),
@@ -42,7 +45,11 @@ describe('FinancingService', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [FinancingService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        FinancingService,
+        ConstitutionService,
+        { provide: PrismaService, useValue: prisma },
+      ],
     }).compile();
 
     service = module.get<FinancingService>(FinancingService);
@@ -130,10 +137,11 @@ describe('FinancingService', () => {
   });
 
   describe('getCapTable', () => {
-    it("joint l'avertissement de périmètre à la répartition", async () => {
+    it('joint le rappel du modèle économique à la répartition', async () => {
       const table = await service.getCapTable('u1', 'p1');
 
-      expect(table.notice).toContain("n'est pas défini à ce jour");
+      expect(table.notice).toContain('51 %');
+      expect(table.notice).toContain('ni valorisation du projet');
     });
 
     it('construit la répartition à partir des événements', async () => {

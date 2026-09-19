@@ -26,9 +26,10 @@ describe('moteur de règles constitutionnel', () => {
       );
 
       for (const article of enforced) {
-        // L'article 9 est vérifié par ce test lui-même, pas par une règle
-        // d'exécution : il porte sur le corpus, pas sur une action.
-        if (article.slug === 'respect-de-la-constitution') continue;
+        // L'article 24 (Constitution Suprême) est vérifié par ce test
+        // lui-même, pas par une règle d'exécution : il porte sur le
+        // corpus, pas sur une action.
+        if (article.slug === 'v1-24-constitution-supreme') continue;
         expect(covered.has(article.slug)).toBe(true);
       }
     });
@@ -161,6 +162,157 @@ describe('moteur de règles constitutionnel', () => {
     });
   });
 
+  describe('transparence (article 11)', () => {
+    it('bloque une décision que le moteur ne sait pas expliquer', () => {
+      const violations = reviewAction({
+        kind: 'explain_decision',
+        engine: 'workflow',
+        reason: '   ',
+      });
+
+      expect(violations[0].ruleId).toBe('transition-inexplicable');
+      expect(hasBlockingViolation(violations)).toBe(true);
+    });
+
+    it('accepte une décision motivée', () => {
+      expect(
+        reviewAction({
+          kind: 'explain_decision',
+          engine: 'workflow',
+          reason: "L'étape « Analyse » existe pour ce projet.",
+        }),
+      ).toEqual([]);
+    });
+  });
+
+  describe('mémoire responsable (article 12)', () => {
+    it('bloque un souvenir sans auteur', () => {
+      const violations = reviewAction({ kind: 'persist_memory', hasAuthor: false });
+
+      expect(violations[0].ruleId).toBe('memoire-sans-auteur');
+    });
+
+    it('accepte un souvenir rattaché à son auteur', () => {
+      expect(reviewAction({ kind: 'persist_memory', hasAuthor: true })).toEqual([]);
+    });
+  });
+
+  describe('vie privée (article 13)', () => {
+    it('bloque la création directe d\'un projet public', () => {
+      // Attrape une régression où `is_public` prendrait `true` par défaut :
+      // un basculement silencieux que personne ne remarquerait.
+      const violations = reviewAction({ kind: 'create_project', isPublic: true });
+
+      expect(violations[0].ruleId).toBe('partage-par-defaut');
+    });
+
+    it('accepte un projet créé privé', () => {
+      expect(reviewAction({ kind: 'create_project', isPublic: false })).toEqual([]);
+    });
+  });
+
+  describe('règles locales (article 15)', () => {
+    it('bloque une règle de pays sans source officielle', () => {
+      const violations = reviewAction({
+        kind: 'publish_local_rule',
+        country: 'FR',
+        slug: 'statut-juridique',
+        sourceUrl: null,
+      });
+
+      expect(violations[0].ruleId).toBe('regle-locale-sans-source');
+    });
+
+    it('bloque aussi une source vide', () => {
+      expect(
+        reviewAction({
+          kind: 'publish_local_rule',
+          country: 'FR',
+          slug: 'x',
+          sourceUrl: '   ',
+        }),
+      ).toHaveLength(1);
+    });
+
+    it('accepte une règle qui cite sa source', () => {
+      expect(
+        reviewAction({
+          kind: 'publish_local_rule',
+          country: 'FR',
+          slug: 'statut-juridique',
+          sourceUrl: 'https://entreprendre.service-public.fr/vosdroits/N31676',
+        }),
+      ).toEqual([]);
+    });
+  });
+
+  describe('financement éthique (article 22)', () => {
+    it('refuse une répartition qui ferait perdre la majorité au porteur', () => {
+      // Modèle IGNITUX : l'entrepreneur reste propriétaire principal.
+      const violations = reviewAction({
+        kind: 'set_equity',
+        holderName: 'Ignitux',
+        isFounder: false,
+        founderBasisPointsAfter: 4900,
+        totalBasisPointsAfter: 10000,
+      });
+
+      expect(violations[0].ruleId).toBe('majorite-du-porteur');
+      expect(violations[0].detail).toContain('49.00 %');
+    });
+
+    it('refuse aussi une répartition exactement à 50 %', () => {
+      // 50/50 n'est pas la majorité : le porteur ne serait plus principal.
+      expect(
+        reviewAction({
+          kind: 'set_equity',
+          holderName: 'Ignitux',
+          isFounder: false,
+          founderBasisPointsAfter: 5000,
+          totalBasisPointsAfter: 10000,
+        }),
+      ).toHaveLength(1);
+    });
+
+    it('accepte la répartition 51/49 du modèle IGNITUX', () => {
+      expect(
+        reviewAction({
+          kind: 'set_equity',
+          holderName: 'Porteur',
+          isFounder: true,
+          founderBasisPointsAfter: 5100,
+          totalBasisPointsAfter: 10000,
+        }),
+      ).toEqual([]);
+    });
+
+    it('accepte le porteur remonté à 100 % (objectif du modèle)', () => {
+      expect(
+        reviewAction({
+          kind: 'set_equity',
+          holderName: 'Porteur',
+          isFounder: true,
+          founderBasisPointsAfter: 10000,
+          totalBasisPointsAfter: 10000,
+        }),
+      ).toEqual([]);
+    });
+
+    it("ne se prononce pas tant que la répartition ne boucle pas à 100 %", () => {
+      // Bloquer sur une donnée partielle empêcherait de saisir la
+      // répartition détenteur par détenteur, ce qui est le cas normal.
+      expect(
+        reviewAction({
+          kind: 'set_equity',
+          holderName: 'Porteur',
+          isFounder: true,
+          founderBasisPointsAfter: 3000,
+          totalBasisPointsAfter: 3000,
+        }),
+      ).toEqual([]);
+    });
+  });
+
   it('une règle ne se prononce que sur le type d\'action qui la concerne', () => {
     // Garde-fou contre une régression classique : oublier le early-return
     // sur action.kind fait qu'une règle se déclenche sur n'importe quoi.
@@ -174,6 +326,17 @@ describe('moteur de règles constitutionnel', () => {
       },
       { kind: 'autonomous_act', engine: 'automation', journalled: true },
       { kind: 'overwrite_spark', entity: 'analyses', mode: 'append' },
+      { kind: 'explain_decision', engine: 'workflow', reason: 'Motif clair.' },
+      { kind: 'persist_memory', hasAuthor: true },
+      { kind: 'create_project', isPublic: false },
+      { kind: 'publish_local_rule', country: 'FR', slug: 'x', sourceUrl: 'https://exemple.gouv.fr' },
+      {
+        kind: 'set_equity',
+        holderName: 'Porteur',
+        isFounder: true,
+        founderBasisPointsAfter: 5100,
+        totalBasisPointsAfter: 10000,
+      },
     ];
 
     for (const action of actions) {

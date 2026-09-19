@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { AuthModule } from '../auth/auth.module.js';
+import { ConstitutionModule } from '../constitution/constitution.module.js';
 import { FinancingController } from './financing.controller.js';
 import { FinancingService } from './financing.service.js';
 
@@ -10,7 +11,7 @@ import { FinancingService } from './financing.service.js';
  * financement. Celui-ci suit l'argent réel ; l'autre rédige un plan.
  */
 @Module({
-  imports: [AuthModule, PassportModule.register({ defaultStrategy: 'jwt' })],
+  imports: [AuthModule, PassportModule.register({ defaultStrategy: 'jwt' }), ConstitutionModule],
   controllers: [FinancingController],
   providers: [FinancingService],
   exports: [FinancingService],

@@ -403,3 +403,129 @@ priorité n°1 pour la suite est d'ouvrir l'application et de manipuler réellem
 - **Le modèle économique chiffré** n'existe pas : aucun taux d'entrée, aucune règle de dilution,
   aucune formule de rachat. Financement suit ce qui est décidé, il ne le calcule pas.
 - **Un second pays pour la conformité** demande une source officielle fiable, toujours absente.
+
+---
+
+# 11. Vérification des documents-cadres, Constitution V1 et modèle économique
+
+## 11.1 Vérification des 5 documents-cadres contre le code réel
+
+Les cinq `.docx` du dossier « ignitux document pratiques » ont été extraits et confrontés au
+code, affirmation par affirmation. **Aucun `.docx` n'a été modifié** — les corrections à faire
+sont listées ci-dessous pour être appliquées à la main.
+
+### Ce qui est exact, vérifié dans le code
+
+| Affirmation | Vérification |
+|---|---|
+| Mot de passe stocké haché, jamais en clair | `bcrypt.hash(password, 10)`, et un hash factice comparé quand l'email n'existe pas (protection contre l'attaque temporelle) |
+| Sous-traitants = Supabase + Anthropic uniquement | Dépendances backend : seuls `@anthropic-ai/sdk` et `pg`/`@prisma/adapter-pg` sortent du serveur. Frontend : `next`, `react`, `react-dom`, rien d'autre. Aucun outil de mesure d'audience |
+| Marketplace sans transaction financière | Aucune route de paiement, aucun champ bancaire. Le profil ne stocke que rôle, titre, bio, expertise ; le contact, un message |
+| Automatisation : crée/ferme des tâches, n'appelle jamais l'IA | La seule occurrence de « Claude » dans `automation.service.ts` est le commentaire qui l'interdit. Actions réelles : `tasks.create`, `tasks.update`, `concept_links.create`, `automation_runs.create` |
+| Score vide plutôt qu'un chiffre inventé | Les 5 champs de la fiche sont `number \| null` ; `etincelle` et `confiance` valent `null` sans donnée |
+| Aucune action irréversible sans validation humaine | Les 4 suppressions présentes dans les moteurs sont toutes déclenchées par une action utilisateur explicite et gardées par une vérification de propriété. Aucun moteur ne supprime de lui-même |
+| Le nom exact du modèle n'est pas cité | Les documents disent « Claude, développé par Anthropic » — le fournisseur, jamais `claude-opus-5`. Rien à corriger, c'est le bon niveau |
+
+### Écart trouvé et corrigé dans le code
+
+**La traçabilité IA existait en base mais n'était affichée nulle part.** La Charte affirme que
+« chaque contenu produit par un générateur IGINI reste identifiable comme tel dans l'historique du
+projet ». C'était vrai des colonnes `generated_by`/`generated_model`, et faux à l'écran : aucune
+vue n'affichait la provenance. Un marqueur `ProvenanceBadge` a été ajouté sur les cinq cartes de
+contenu généré. Un modèle inconnu s'y lit « modèle non tracé » et non « écrit par un humain » —
+ce sont deux choses différentes.
+
+### Corrections à faire dans les `.docx` (à appliquer à la main)
+
+1. **Trame de décision, §1, ligne sur les frais fixes** — « module Facturation, actuellement à
+   0 % » est périmé. Le module existe (devis, factures, avoirs, règlements, export CSV,
+   numérotation sans trou, immuabilité après émission). Remplacer par « module Facturation,
+   désormais fonctionnel côté code ».
+2. **Trame de décision, §2, statut** — « module explicitement mis de côté du développement
+   technique » est périmé. Le suivi des apports, des parts et des dividendes existe.
+   Remplacer par « suivi technique en place ; le modèle économique est désormais défini ».
+3. **Feuille de route, §2, ligne « Conditions de facturation »** — même correction que le point 1.
+4. **Modèles de documents futurs, §2.4** — même correction que le point 1.
+5. **CGU/RGPD, §2.2 « Données collectées »** — **la correction la plus importante.** La liste
+   omet des catégories qui existent maintenant en base et sont accessibles aux testeurs :
+   - **contacts CRM** : nom, prénom, e-mail, téléphone et notes **de tiers** (prospects, clients
+     du testeur). C'est un point RGPD sérieux : le testeur devient lui-même responsable de
+     traitement pour ces personnes, qui n'ont jamais consenti à figurer dans Ignitux ;
+   - **documents de facturation** : nom et coordonnées du client, montants, règlements ;
+   - **données de financement** : apports, répartition des parts, dividendes versés ;
+   - **processus (workflows) et leur journal d'exécution** ;
+   - **collaborateurs de projet**, **jetons d'authentification** (hachés), **journal des
+     violations constitutionnelles** (qui stocke un identifiant utilisateur).
+6. **CGU/RGPD, §2.2, dernière ligne** — « Aucune donnée bancaire ou de paiement n'est collectée »
+   demande une nuance. C'est exact pour les **identifiants** bancaires (aucun IBAN, aucun numéro
+   de carte, aucune route de paiement). Ce n'est plus exact au sens large : le module Facturation
+   enregistre des **montants** et un **moyen de paiement** (virement, espèces, carte, chèque).
+   Formulation proposée : « Aucun identifiant bancaire (IBAN, numéro de carte) n'est collecté et
+   aucun paiement ne transite par l'Application. Le module Facturation enregistre en revanche les
+   montants et le moyen de paiement que tu saisis toi-même. »
+7. **Registre des traitements (Modèles de documents futurs, §4.1)** — ajouter les trois lignes
+   manquantes : CRM (données de tiers), Facturation, Financement.
+
+### Recommandation pour la phase de test à 2 personnes
+
+Le point 5 mérite une décision avant d'ouvrir aux testeurs : soit leur demander de ne pas saisir
+de vrais contacts dans le CRM pendant le test, soit compléter la liste RGPD. La première option
+est la plus simple et se règle en une phrase dans le message d'invitation.
+
+## 11.2 Constitution IGNITUX V1 — les 24 articles officiels
+
+Le texte officiel a été transmis. Il remplace le corpus provisoire `principes-fondateurs`, qui
+disait explicitement ne pas être la V1 : les deux coexistent en base sous des versions distinctes,
+ce que le champ `version` avait été conçu pour permettre.
+
+- **24 articles semés**, vérifié en base : 14 `declared`, 10 `enforced`.
+- **Cinq nouvelles règles exécutables**, chacune branchée sur un point d'appel réel :
+  - `transition-inexplicable` (art. 11) — le moteur de workflow refuse de franchir une étape dont
+    il ne sait pas énoncer la raison ;
+  - `memoire-sans-auteur` (art. 12) — un souvenir sans auteur est refusé ;
+  - `partage-par-defaut` (art. 13) — un projet naît privé ; la règle attrape une régression où
+    `is_public` passerait à `true` par défaut ;
+  - `regle-locale-sans-source` (art. 15) — une démarche réglementaire sans source officielle est
+    refusée au semis ;
+  - `majorite-du-porteur` (art. 22) — une répartition qui ferait passer le porteur sous la
+    majorité est refusée, y compris à sa propre demande.
+- **Le préambule** (mission, devise, méthode) est exposé et affiché en tête de `/constitution`.
+- Un article marqué `enforced` sans règle qui le couvre fait échouer un test — c'est l'article 24
+  (Constitution Suprême) qui se vérifie lui-même.
+
+**Note d'honnêteté conservée** : la colonne « Vérifié par le code » n'est pas dans la
+Constitution. C'est un constat technique sur ce que notre moteur contrôle, et l'interface le dit
+désormais explicitement. Marquer `declared` l'article 16 (Offline First) alors que le module
+existe est volontaire : les données déjà chargées restent consultables et les écritures sont mises
+en file, mais l'application ne démarre pas hors ligne. Idem pour l'article 17 (Les Gardiens) :
+aucun rôle « Gardien » n'existe dans le produit, le marquer `enforced` annoncerait un dispositif
+inexistant.
+
+## 11.3 Modèle économique — 51/49, rachat progressif, 5 % perpétuels
+
+Le modèle est désormais défini et encodé. L'avertissement qui disait « le modèle économique
+chiffré n'est pas défini à ce jour » était vrai hier et est devenu faux : il a été remplacé.
+
+Ce que le code applique :
+
+- répartition d'entrée **51 % porteur / 49 % Ignitux**, avec un test qui vérifie que 51 % suffit
+  à satisfaire la règle de majorité dès le premier jour ;
+- **part perpétuelle de 5 %** calculée sur les dividendes réellement versés — la règle est exacte,
+  donc calculable, contrairement à tout le reste ;
+- **la majorité du porteur est protégée par le moteur constitutionnel** : une écriture qui la
+  ferait tomber est refusée.
+
+Ce que le code refuse toujours de calculer, et pourquoi :
+
+- **les seuils de rachat** (rentabilité, autonomie, stabilité) : le modèle les nomme sans les
+  chiffrer. Fabriquer des seuils reviendrait à décider à la place du porteur du moment où il peut
+  racheter ses parts ;
+- **la valorisation du projet** : aucune méthode n'a été choisie, donc aucun prix de rachat ne
+  peut en être déduit ;
+- **les dividendes prévisionnels** : un dividende se constate après coup.
+
+## 11.4 État après cette étape
+
+**687 tests verts** (539 backend, 148 frontend), types, lint et builds propres. Semis V1 vérifié
+en base réelle, zéro violation journalisée. Toujours **aucun appel à l'API Claude** sur cette
+session.

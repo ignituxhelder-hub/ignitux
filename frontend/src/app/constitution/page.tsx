@@ -28,6 +28,7 @@ export default function ConstitutionPage() {
   const router = useRouter();
 
   const [articles, setArticles] = useState<ConstitutionArticle[]>([]);
+  const [preamble, setPreamble] = useState<string | null>(null);
   const [rules, setRules] = useState<ConstitutionRule[]>([]);
   const [audit, setAudit] = useState<ConstitutionAuditEntry[]>([]);
   const [violations, setViolations] = useState<ConstitutionViolation[]>([]);
@@ -44,12 +45,14 @@ export default function ConstitutionPage() {
     setIsLoading(true);
     setError(null);
     Promise.all([
+      api.getConstitutionPreamble(token),
       api.listConstitutionArticles(token),
       api.listConstitutionRules(token),
       api.getConstitutionAudit(token),
       api.listConstitutionViolations(token),
     ])
-      .then(([articleList, ruleList, auditList, violationList]) => {
+      .then(([preambleResult, articleList, ruleList, auditList, violationList]) => {
+        setPreamble(preambleResult?.preamble ?? null);
         setArticles(articleList);
         setRules(ruleList);
         setAudit(auditList);
@@ -89,13 +92,14 @@ export default function ConstitutionPage() {
           Le texte fondateur d&apos;Ignitux et, en face de chaque article, ce que le système
           vérifie <strong>réellement</strong> dans le code.
         </p>
+        {preamble && (
+          <p style={{ marginBottom: '0.75rem', fontStyle: 'italic' }}>{preamble}</p>
+        )}
         <p className="muted" style={{ marginBottom: 0 }}>
-          Provenance : la « Constitution V1 à 24 articles » n&apos;a jamais été transmise. Ce
-          corpus est une transcription fidèle des douze énoncés effectivement fournis (mission,
-          devise, méthode et les neuf principes fondateurs), sans ajout. Il porte la version
-          <code> principes-fondateurs</code> et non <code> v1</code> : le jour où le texte
-          officiel arrivera, il se sèmera sous sa propre version sans se confondre avec
-          celui-ci.
+          Texte officiel de la Constitution IGNITUX V1, 24 articles. La mention
+          <strong> « Vérifié par le code »</strong> n&apos;est pas dans la Constitution :
+          c&apos;est un constat technique sur ce que le moteur contrôle réellement, et le dire
+          honnêtement est ce qu&apos;exige l&apos;article 11 (Transparence).
         </p>
       </div>
 

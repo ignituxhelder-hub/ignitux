@@ -3,6 +3,7 @@ import type { OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   CONSTITUTION_ARTICLES,
+  CONSTITUTION_PREAMBLE,
   CONSTITUTION_VERSION,
 } from './constitution-articles.js';
 import {
@@ -80,9 +81,18 @@ export class ConstitutionService implements OnModuleInit {
     }
   }
 
-  listArticles(version?: string) {
+  /** Préambule de la Constitution, affiché en tête de la console d'audit. */
+  getPreamble() {
+    return { version: CONSTITUTION_VERSION, preamble: CONSTITUTION_PREAMBLE };
+  }
+
+  listArticles(version = CONSTITUTION_VERSION) {
+    // Filtre sur la version courante par défaut : le corpus provisoire
+    // antérieur reste en base pour que les violations journalisées avant
+    // la V1 gardent leur article d'origine, mais il ne doit plus
+    // apparaître comme s'il faisait toujours autorité.
     return this.prisma.constitution_articles.findMany({
-      where: version ? { version } : undefined,
+      where: { version },
       orderBy: { number: 'asc' },
     });
   }
@@ -211,14 +221,14 @@ export class ConstitutionService implements OnModuleInit {
     },
   ): string | null {
     switch (slug) {
-      case 'pas-de-simulation-presentee-comme-reelle': {
+      case 'v1-09-pas-de-donnees-inventees': {
         const { total, withoutModel } = facts.provenance;
         if (total === 0) return 'Aucun contenu généré en base.';
         return `${total - withoutModel}/${total} contenus générés nomment le modèle qui les a produits (${withoutModel} antérieurs à la traçabilité).`;
       }
-      case 'autonomie-supervisee':
+      case 'v1-08-autonomie-supervisee':
         return `${facts.automationRuns} exécution(s) automatique(s) journalisée(s).`;
-      case 'protection-de-l-etincelle':
+      case 'v1-03-protection-de-l-etincelle':
         if (facts.analysedProjects === 0) return 'Aucun projet analysé.';
         return `${facts.projectsWithHistory}/${facts.analysedProjects} projets conservent plusieurs analyses successives (aucune analyse n'est jamais écrasée).`;
       default:

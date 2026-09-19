@@ -267,6 +267,10 @@ export interface Analysis {
   strengths: string[];
   risks: string[];
   next_steps: string[];
+  /** 'igini' | 'human' — voir Charte IGINI, article 12 de la Constitution. */
+  generated_by?: string;
+  /** null = modele inconnu (ligne anterieure a la tracabilite), PAS « ecrit par un humain ». */
+  generated_model?: string | null;
   created_at: string;
 }
 
@@ -277,6 +281,10 @@ export interface BuildPlan {
   estimated_timeline: string;
   milestones: string[];
   key_resources: string[];
+  /** 'igini' | 'human' — voir Charte IGINI, article 12 de la Constitution. */
+  generated_by?: string;
+  /** null = modele inconnu (ligne anterieure a la tracabilite), PAS « ecrit par un humain ». */
+  generated_model?: string | null;
   created_at: string;
 }
 
@@ -287,6 +295,10 @@ export interface FinancingPlan {
   estimated_budget: string;
   funding_sources: string[];
   budget_breakdown: string[];
+  /** 'igini' | 'human' — voir Charte IGINI, article 12 de la Constitution. */
+  generated_by?: string;
+  /** null = modele inconnu (ligne anterieure a la tracabilite), PAS « ecrit par un humain ». */
+  generated_model?: string | null;
   created_at: string;
 }
 
@@ -297,6 +309,10 @@ export interface DevelopmentPlan {
   growth_levers: string[];
   key_metrics: string[];
   scaling_risks: string[];
+  /** 'igini' | 'human' — voir Charte IGINI, article 12 de la Constitution. */
+  generated_by?: string;
+  /** null = modele inconnu (ligne anterieure a la tracabilite), PAS « ecrit par un humain ». */
+  generated_model?: string | null;
   created_at: string;
 }
 
@@ -307,6 +323,10 @@ export interface TransmissionPlan {
   transfer_options: string[];
   key_documentation: string[];
   readiness_checklist: string[];
+  /** 'igini' | 'human' — voir Charte IGINI, article 12 de la Constitution. */
+  generated_by?: string;
+  /** null = modele inconnu (ligne anterieure a la tracabilite), PAS « ecrit par un humain ». */
+  generated_model?: string | null;
   created_at: string;
 }
 
@@ -1222,6 +1242,11 @@ export const api = {
 
   listWorkflowEvents: (token: string, runId: string) =>
     request<WorkflowEvent[]>(`/workflow-runs/${runId}/events`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getConstitutionPreamble: (token: string) =>
+    request<{ version: string; preamble: string }>('/constitution/preamble', {
       headers: { Authorization: `Bearer ${token}` },
     }),
 

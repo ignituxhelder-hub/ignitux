@@ -1,5 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConstitutionService } from '../constitution/constitution.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ComplianceService } from './compliance.service.js';
 
@@ -18,6 +19,7 @@ describe('ComplianceService', () => {
       deleteMany: ReturnType<typeof vi.fn>;
     };
     projects: { findFirst: ReturnType<typeof vi.fn> };
+    constitution_violations: { createMany: ReturnType<typeof vi.fn> };
   };
 
   beforeEach(async () => {
@@ -30,10 +32,13 @@ describe('ComplianceService', () => {
       },
       project_compliance_checks: { findMany: vi.fn(), upsert: vi.fn(), deleteMany: vi.fn() },
       projects: { findFirst: vi.fn() },
+      constitution_violations: { createMany: vi.fn() },
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ComplianceService, { provide: PrismaService, useValue: prisma }],
+      providers: [ComplianceService,
+        ConstitutionService,
+        { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get<ComplianceService>(ComplianceService);

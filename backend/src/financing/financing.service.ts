@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConstitutionService } from '../constitution/constitution.service.js';
 import { assertHasProjectAccess } from '../prisma/assert-has-project-access.js';
 import { assertOwnsProject } from '../prisma/assert-owns-project.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -24,7 +25,10 @@ import {
  */
 @Injectable()
 export class FinancingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly constitutionService: ConstitutionService,
+  ) {}
 
   getScopeNotice() {
     return { notice: FINANCING_SCOPE_NOTICE };
@@ -110,6 +114,23 @@ export class FinancingService {
     if (shareBasisPoints < 0 || shareBasisPoints > TOTAL_BASIS_POINTS) {
       throw new BadRequestException('Une part doit être comprise entre 0 et 100 %.');
     }
+
+    // Article 22 (Financement Éthique) : on simule la répartition APRÈS ce
+    // changement et on la soumet au moteur constitutionnel. Le modèle
+    // IGNITUX pose que l'entrepreneur reste propriétaire principal — une
+    // écriture qui le ferait passer sous la majorité est refusée, y compris
+    // à la demande du porteur lui-même.
+    const projection = await this.projectShares(holder.project_id, holderId, shareBasisPoints);
+    await this.constitutionService.guard(
+      {
+        kind: 'set_equity',
+        holderName: holder.name,
+        isFounder: holder.is_founder,
+        founderBasisPointsAfter: projection.founderBasisPoints,
+        totalBasisPointsAfter: projection.totalBasisPoints,
+      },
+      { userId, projectId: holder.project_id },
+    );
 
     return this.prisma.equity_events.create({
       data: {
@@ -199,6 +220,38 @@ export class FinancingService {
       dividends,
       totalCents: dividends.reduce((total, dividend) => total + dividend.amount_cents, 0),
     };
+  }
+
+  /**
+   * Répartition telle qu'elle serait si `holderId` passait à
+   * `newShareBasisPoints`. Sert uniquement au contrôle constitutionnel :
+   * on vérifie le résultat de l'écriture avant de l'écrire, pas après.
+   */
+  private async projectShares(
+    projectId: string,
+    holderId: string,
+    newShareBasisPoints: number,
+  ): Promise<{ founderBasisPoints: number; totalBasisPoints: number }> {
+    const [holders, events] = await Promise.all([
+      this.prisma.equity_holders.findMany({ where: { project_id: projectId } }),
+      this.prisma.equity_events.findMany({
+        where: { project_id: projectId },
+        orderBy: { occurred_at: 'asc' },
+      }),
+    ]);
+
+    const table = buildCapTable(holders, events);
+    let founderBasisPoints = 0;
+    let totalBasisPoints = 0;
+
+    for (const share of table.holders) {
+      const value =
+        share.holderId === holderId ? newShareBasisPoints : (share.shareBasisPoints ?? 0);
+      totalBasisPoints += value;
+      if (share.isFounder) founderBasisPoints += value;
+    }
+
+    return { founderBasisPoints, totalBasisPoints };
   }
 
   private async findHolderForOwner(userId: string, holderId: string) {

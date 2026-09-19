@@ -1,31 +1,50 @@
 /**
- * Moteur de règles constitutionnel — la partie exécutable de la Constitution.
+ * Moteur de règles constitutionnel — la partie exécutable de la
+ * Constitution IGNITUX V1.
  *
- * Principe de conception : une règle n'existe ici que si elle vérifie quelque
- * chose de concret sur une action réelle. On ne crée pas de règle pour faire
- * nombre en face d'un article ; les articles sans règle sont marqués
- * `declared` dans constitution-articles.ts et c'est tout.
+ * Principe de conception : une règle n'existe ici que si elle vérifie
+ * quelque chose de concret sur une action réelle, branchée sur un vrai
+ * point d'appel. On ne crée pas de règle pour faire nombre en face d'un
+ * article ; les articles sans règle sont marqués `declared` dans
+ * constitution-articles.ts, et un test échoue si un article prétend être
+ * `enforced` sans règle qui le couvre (article 24).
  *
- * Le moteur est volontairement pur (aucune dépendance Nest, aucun accès base)
- * pour rester testable ligne à ligne et réutilisable partout — y compris,
- * plus tard, côté client en mode hors ligne.
+ * Le moteur est volontairement pur (aucune dépendance Nest, aucun accès
+ * base) pour rester testable ligne à ligne.
  */
 
 /**
- * Les actions que le reste du code soumet au moteur avant de les accomplir.
- * Chaque variante correspond à un point d'appel réel : si une variante n'est
- * appelée nulle part, elle doit être retirée plutôt que conservée « au cas
- * où » (code mort déguisé en architecture).
+ * Les actions que le reste du code soumet au moteur avant de les
+ * accomplir. Chaque variante correspond à un point d'appel réel : une
+ * variante appelée nulle part doit être retirée plutôt que conservée
+ * « au cas où » (code mort déguisé en architecture).
  */
 export type ConstitutionAction =
-  /** Un moteur s'apprête à exposer un indicateur chiffré. */
+  /** Un moteur s'apprête à exposer un indicateur chiffré. (art. 10) */
   | { kind: 'publish_score'; field: string; value: number | null; hasSource: boolean }
-  /** Un contenu produit par un modèle s'apprête à être enregistré. */
+  /** Un contenu produit par un modèle s'apprête à être enregistré. (art. 9) */
   | { kind: 'persist_generated'; entity: string; generatedBy: string; generatedModel: string | null }
-  /** Un moteur agit sans confirmation humaine préalable. */
+  /** Un moteur agit sans confirmation humaine préalable. (art. 8) */
   | { kind: 'autonomous_act'; engine: string; journalled: boolean }
-  /** Une écriture s'apprête à remplacer une trace existante de l'Étincelle. */
-  | { kind: 'overwrite_spark'; entity: string; mode: 'append' | 'replace' };
+  /** Une écriture s'apprête à remplacer une trace existante. (art. 3) */
+  | { kind: 'overwrite_spark'; entity: string; mode: 'append' | 'replace' }
+  /** IGINI franchit une étape et doit pouvoir dire pourquoi. (art. 11) */
+  | { kind: 'explain_decision'; engine: string; reason: string }
+  /** Un souvenir s'apprête à être enregistré. (art. 12) */
+  | { kind: 'persist_memory'; hasAuthor: boolean }
+  /** Un projet est créé : il doit naître privé. (art. 13) */
+  | { kind: 'create_project'; isPublic: boolean }
+  /** Une règle propre à un pays s'apprête à être semée. (art. 15) */
+  | { kind: 'publish_local_rule'; country: string; slug: string; sourceUrl: string | null }
+  /** La répartition du capital s'apprête à changer. (art. 22) */
+  | {
+      kind: 'set_equity';
+      holderName: string;
+      isFounder: boolean;
+      founderBasisPointsAfter: number;
+      /** null quand la répartition ne totalise pas 100 % : on ne tranche pas. */
+      totalBasisPointsAfter: number | null;
+    };
 
 export type ConstitutionSeverity = 'blocking' | 'warning';
 
@@ -46,18 +65,15 @@ export interface ConstitutionRule {
   check(action: ConstitutionAction): string | null;
 }
 
-/**
- * Les contenus générés doivent nommer un modèle. `igini` sans modèle est
- * toléré en avertissement et non en blocage : les lignes créées avant que la
- * traçabilité n'existe sont dans ce cas, et refuser de les lire serait pire
- * que de signaler qu'on ignore leur modèle.
- */
 const PROVENANCE_SOURCES = ['igini', 'human'] as const;
+
+/** 10000 points de base = 100 %. */
+const TOTAL_BASIS_POINTS = 10000;
 
 export const CONSTITUTION_RULES: readonly ConstitutionRule[] = [
   {
     id: 'score-sans-source',
-    articleSlug: 'pas-de-score-invente',
+    articleSlug: 'v1-10-pas-de-score-invente',
     severity: 'blocking',
     description:
       "Un indicateur chiffré ne peut être publié que si la donnée dont il est tiré existe " +
@@ -72,7 +88,7 @@ export const CONSTITUTION_RULES: readonly ConstitutionRule[] = [
   },
   {
     id: 'provenance-inconnue',
-    articleSlug: 'pas-de-simulation-presentee-comme-reelle',
+    articleSlug: 'v1-09-pas-de-donnees-inventees',
     severity: 'warning',
     description:
       "Un contenu enregistré comme produit par IGINI devrait nommer le modèle qui l'a produit.",
@@ -86,7 +102,7 @@ export const CONSTITUTION_RULES: readonly ConstitutionRule[] = [
   },
   {
     id: 'provenance-usurpee',
-    articleSlug: 'pas-de-simulation-presentee-comme-reelle',
+    articleSlug: 'v1-09-pas-de-donnees-inventees',
     severity: 'blocking',
     description:
       "Un contenu produit par un modèle ne peut pas être enregistré comme saisi par un humain.",
@@ -103,7 +119,7 @@ export const CONSTITUTION_RULES: readonly ConstitutionRule[] = [
   },
   {
     id: 'automatisation-non-journalisee',
-    articleSlug: 'autonomie-supervisee',
+    articleSlug: 'v1-08-autonomie-supervisee',
     severity: 'blocking',
     description:
       "Une action menée sans confirmation humaine doit être journalisée : sans journal, " +
@@ -118,7 +134,7 @@ export const CONSTITUTION_RULES: readonly ConstitutionRule[] = [
   },
   {
     id: 'etincelle-remplacee',
-    articleSlug: 'protection-de-l-etincelle',
+    articleSlug: 'v1-03-protection-de-l-etincelle',
     severity: 'blocking',
     description:
       "Les traces de la pensée du porteur (analyses, plans) s'ajoutent et ne se remplacent " +
@@ -131,12 +147,94 @@ export const CONSTITUTION_RULES: readonly ConstitutionRule[] = [
       return null;
     },
   },
+  {
+    id: 'transition-inexplicable',
+    articleSlug: 'v1-11-transparence',
+    severity: 'blocking',
+    description:
+      "IGINI ne franchit une étape que s'il peut en énoncer la raison : une décision qu'on " +
+      'ne sait pas expliquer ne doit pas être prise.',
+    check(action) {
+      if (action.kind !== 'explain_decision') return null;
+      if (action.reason.trim().length === 0) {
+        return `Le moteur « ${action.engine} » a pris une décision sans pouvoir l'expliquer.`;
+      }
+      return null;
+    },
+  },
+  {
+    id: 'memoire-sans-auteur',
+    articleSlug: 'v1-12-memoire-responsable',
+    severity: 'blocking',
+    description:
+      "Un souvenir doit être rattaché à la personne qui l'a enregistré : une mémoire " +
+      'anonyme est une mémoire non traçable.',
+    check(action) {
+      if (action.kind !== 'persist_memory') return null;
+      if (!action.hasAuthor) {
+        return "Un souvenir s'apprête à être enregistré sans auteur identifié.";
+      }
+      return null;
+    },
+  },
+  {
+    id: 'partage-par-defaut',
+    articleSlug: 'v1-13-respect-de-la-vie-privee',
+    severity: 'blocking',
+    description:
+      'Un projet naît privé. Le rendre public est une décision explicite de son porteur, ' +
+      'jamais un défaut de configuration.',
+    check(action) {
+      if (action.kind !== 'create_project') return null;
+      if (action.isPublic) {
+        return "Un projet est créé directement public : la visibilité par défaut doit être privée.";
+      }
+      return null;
+    },
+  },
+  {
+    id: 'regle-locale-sans-source',
+    articleSlug: 'v1-15-one-brain-multiple-regulations',
+    severity: 'blocking',
+    description:
+      "Une règle propre à un pays doit citer sa source officielle : sans source, on ne peut " +
+      'ni la vérifier ni la mettre à jour.',
+    check(action) {
+      if (action.kind !== 'publish_local_rule') return null;
+      if (!action.sourceUrl || action.sourceUrl.trim().length === 0) {
+        return `La règle « ${action.slug} » (${action.country}) ne cite aucune source officielle.`;
+      }
+      return null;
+    },
+  },
+  {
+    id: 'majorite-du-porteur',
+    articleSlug: 'v1-22-financement-ethique',
+    severity: 'blocking',
+    description:
+      "Le porteur de projet reste propriétaire principal : une répartition qui le ferait " +
+      'passer sous la majorité est refusée.',
+    check(action) {
+      if (action.kind !== 'set_equity') return null;
+      // Sur une répartition qui ne boucle pas à 100 %, on ne se prononce
+      // pas : bloquer sur une donnée partielle empêcherait de saisir la
+      // répartition ligne par ligne, ce qui est le cas normal.
+      if (action.totalBasisPointsAfter !== TOTAL_BASIS_POINTS) return null;
+      if (action.founderBasisPointsAfter * 2 <= TOTAL_BASIS_POINTS) {
+        return (
+          `Cette répartition laisserait le porteur à ${(action.founderBasisPointsAfter / 100).toFixed(2)} %, ` +
+          "soit sans majorité. Le modèle IGNITUX pose que l'entrepreneur reste propriétaire principal."
+        );
+      }
+      return null;
+    },
+  },
 ];
 
 /**
  * Soumet une action au corpus de règles. Retourne toutes les violations
- * relevées — on ne s'arrête pas à la première : un appelant qui journalise a
- * besoin du tableau complet, pas d'un échantillon.
+ * relevées — on ne s'arrête pas à la première : un appelant qui journalise
+ * a besoin du tableau complet, pas d'un échantillon.
  */
 export function reviewAction(action: ConstitutionAction): ConstitutionViolation[] {
   const violations: ConstitutionViolation[] = [];

@@ -18,6 +18,11 @@ import { ConstitutionService } from './constitution.service.js';
 export class ConstitutionController {
   constructor(private readonly constitutionService: ConstitutionService) {}
 
+  @Get('preamble')
+  getPreamble() {
+    return this.constitutionService.getPreamble();
+  }
+
   @Get('articles')
   listArticles(@Query('version') version?: string) {
     return this.constitutionService.listArticles(version);

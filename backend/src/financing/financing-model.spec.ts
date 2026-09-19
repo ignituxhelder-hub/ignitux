@@ -1,8 +1,11 @@
 import {
   buildCapTable,
   FINANCING_SCOPE_NOTICE,
+  FOUNDER_ENTRY_BASIS_POINTS,
   founderTrajectory,
+  IGNITUX_ENTRY_BASIS_POINTS,
   isFinancingSource,
+  perpetualShareCents,
   TOTAL_BASIS_POINTS,
 } from './financing-model.js';
 
@@ -132,13 +135,46 @@ describe('trajectoire du porteur', () => {
   });
 });
 
-describe('périmètre annoncé', () => {
-  it('dit explicitement que le modèle chiffré n\'existe pas', () => {
-    // Garde volontaire : si quelqu'un ajoute un calcul de valorisation,
-    // cette phrase deviendra fausse et ce test rappellera pourquoi elle
-    // était là.
-    expect(FINANCING_SCOPE_NOTICE).toContain("n'est pas défini à ce jour");
-    expect(FINANCING_SCOPE_NOTICE).toContain('aucune valorisation');
+describe('modèle économique IGNITUX', () => {
+  it("annonce la répartition d'entrée et la part perpétuelle", () => {
+    expect(FINANCING_SCOPE_NOTICE).toContain('51 %');
+    expect(FINANCING_SCOPE_NOTICE).toContain('49 %');
+    expect(FINANCING_SCOPE_NOTICE).toContain('5 %');
+  });
+
+  it('continue de dire ce qui reste non calculé', () => {
+    // Garde volontaire : si quelqu'un ajoute un calcul de valorisation ou
+    // de prix de rachat, cette phrase deviendra fausse et ce test
+    // rappellera pourquoi elle était là.
+    expect(FINANCING_SCOPE_NOTICE).toContain('ni valorisation du projet');
+    expect(FINANCING_SCOPE_NOTICE).toContain('ni dividende prévisionnel');
+  });
+
+  it("fixe la répartition d'entrée à 51/49", () => {
+    expect(FOUNDER_ENTRY_BASIS_POINTS).toBe(5100);
+    expect(IGNITUX_ENTRY_BASIS_POINTS).toBe(4900);
+    expect(FOUNDER_ENTRY_BASIS_POINTS + IGNITUX_ENTRY_BASIS_POINTS).toBe(TOTAL_BASIS_POINTS);
+  });
+
+  it("laisse le porteur majoritaire dès l'entrée", () => {
+    // 51 % n'est pas un chiffre décoratif : c'est ce qui rend la règle
+    // `majorite-du-porteur` satisfaite dès le premier jour.
+    expect(FOUNDER_ENTRY_BASIS_POINTS * 2).toBeGreaterThan(TOTAL_BASIS_POINTS);
+  });
+
+  describe('part perpétuelle de 5 %', () => {
+    it("calcule 5 % d'un dividende versé", () => {
+      expect(perpetualShareCents(100000)).toBe(5000);
+    });
+
+    it('arrondit au centime le plus proche', () => {
+      // 5 % de 1,23 € = 0,0615 € → 0,06 €.
+      expect(perpetualShareCents(123)).toBe(6);
+    });
+
+    it('vaut zéro sur un dividende nul', () => {
+      expect(perpetualShareCents(0)).toBe(0);
+    });
   });
 
   it('reconnaît les sources de financement valides', () => {

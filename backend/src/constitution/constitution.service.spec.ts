@@ -61,12 +61,20 @@ describe('ConstitutionService', () => {
       expect(firstCall.create.version).toBe(CONSTITUTION_VERSION);
     });
 
-    it("n'annonce pas être la V1 officielle, qui n'a jamais été fournie", () => {
-      // Test de garde volontaire : si quelqu'un renomme la version en 'v1'
-      // sans disposer du texte officiel, ce test échoue. Le corpus actuel
-      // est une transcription des principes fournis, rien d'autre.
-      expect(CONSTITUTION_VERSION).not.toBe('v1');
-      expect(CONSTITUTION_ARTICLES).toHaveLength(12);
+    it('sème les 24 articles de la Constitution V1', () => {
+      // Le texte officiel a été transmis le 19/09/2026 et remplace le
+      // corpus provisoire `principes-fondateurs`. Ce test fige le compte :
+      // un article perdu lors d'une refonte se verrait immédiatement.
+      expect(CONSTITUTION_VERSION).toBe('v1');
+      expect(CONSTITUTION_ARTICLES).toHaveLength(24);
+    });
+
+    it('conserve le préambule avec la mission, la devise et la méthode', () => {
+      const { preamble } = service.getPreamble();
+
+      expect(preamble).toContain('nous servir');
+      expect(preamble).toContain('la vérité avant tout');
+      expect(preamble).toContain('Découvrir');
     });
   });
 
@@ -95,7 +103,7 @@ describe('ConstitutionService', () => {
       expect(prisma.constitution_violations.createMany).toHaveBeenCalledWith({
         data: [
           expect.objectContaining({
-            article_slug: 'pas-de-score-invente',
+            article_slug: 'v1-10-pas-de-score-invente',
             rule_id: 'score-sans-source',
             severity: 'blocking',
             action: 'publish_score',
@@ -159,7 +167,7 @@ describe('ConstitutionService', () => {
     it('laisse measured à null pour les articles qu\'aucune donnée n\'éclaire', async () => {
       const audit = await service.audit();
 
-      const mission = audit.find((entry) => entry.slug === 'mission-nous-servir');
+      const mission = audit.find((entry) => entry.slug === 'v1-01-la-verite');
       expect(mission?.measured).toBeNull();
     });
 
@@ -170,7 +178,7 @@ describe('ConstitutionService', () => {
 
       const audit = await service.audit();
       const article = audit.find(
-        (entry) => entry.slug === 'pas-de-simulation-presentee-comme-reelle',
+        (entry) => entry.slug === 'v1-09-pas-de-donnees-inventees',
       );
 
       // 10 analyses au total dont 2 sans modèle connu, les 4 autres tables vides.
@@ -184,23 +192,23 @@ describe('ConstitutionService', () => {
       ]);
 
       const audit = await service.audit();
-      const article = audit.find((entry) => entry.slug === 'protection-de-l-etincelle');
+      const article = audit.find((entry) => entry.slug === 'v1-03-protection-de-l-etincelle');
 
       expect(article?.measured).toContain('1/2');
     });
 
     it('remonte le nombre de violations récentes par article', async () => {
       prisma.constitution_violations.groupBy.mockResolvedValue([
-        { article_slug: 'pas-de-score-invente', _count: { _all: 4 } },
+        { article_slug: 'v1-10-pas-de-score-invente', _count: { _all: 4 } },
       ]);
 
       const audit = await service.audit();
 
       expect(
-        audit.find((entry) => entry.slug === 'pas-de-score-invente')?.violationsLast30Days,
+        audit.find((entry) => entry.slug === 'v1-10-pas-de-score-invente')?.violationsLast30Days,
       ).toBe(4);
       expect(
-        audit.find((entry) => entry.slug === 'mission-nous-servir')?.violationsLast30Days,
+        audit.find((entry) => entry.slug === 'v1-01-la-verite')?.violationsLast30Days,
       ).toBe(0);
     });
   });

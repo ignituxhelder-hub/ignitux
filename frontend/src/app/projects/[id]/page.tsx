@@ -484,6 +484,38 @@ function GenerationSection<T>({
   );
 }
 
+/**
+ * Marqueur de provenance affiché sur chaque contenu produit par un
+ * générateur IGINI.
+ *
+ * La Charte IGINI promet qu'« aucun contenu généré ne soit présenté comme
+ * une donnée vérifiée » et qu'il reste « identifiable comme tel dans
+ * l'historique du projet ». La provenance existait en base depuis que les
+ * colonnes generated_by/generated_model ont été ajoutées, mais rien ne
+ * l'affichait : la promesse n'était donc tenue qu'à moitié. Ce marqueur
+ * la rend vraie à l'écran.
+ *
+ * Un modèle inconnu se dit « modèle non tracé » et non « écrit par un
+ * humain » : ce sont deux choses différentes, et confondre les deux serait
+ * exactement l'erreur que l'article 12 interdit.
+ */
+function ProvenanceBadge({
+  generatedBy,
+  generatedModel,
+}: {
+  generatedBy?: string;
+  generatedModel?: string | null;
+}) {
+  if (generatedBy === 'human') {
+    return <span className="muted">Saisi par un humain</span>;
+  }
+  return (
+    <span className="muted" title={generatedModel ?? 'Modèle non tracé'}>
+      Généré par IGINI{generatedModel ? '' : ' (modèle non tracé)'}
+    </span>
+  );
+}
+
 function AnalysisCard({ analysis }: { analysis: Analysis }) {
   return (
     <div className="project-item" style={{ cursor: 'default' }}>
@@ -491,6 +523,12 @@ function AnalysisCard({ analysis }: { analysis: Analysis }) {
         <strong>Score de faisabilité : {analysis.feasibility_score}/10</strong>
         <span className="muted">{new Date(analysis.created_at).toLocaleString('fr-FR')}</span>
       </div>
+      <p style={{ margin: '0 0 0.5rem' }}>
+        <ProvenanceBadge
+          generatedBy={analysis.generated_by}
+          generatedModel={analysis.generated_model}
+        />
+      </p>
       <p>{analysis.summary}</p>
       <ItemList title="Points forts" items={analysis.strengths} />
       <ItemList title="Risques" items={analysis.risks} />
@@ -506,6 +544,9 @@ function BuildPlanCard({ plan }: { plan: BuildPlan }) {
         <strong>Délai estimé : {plan.estimated_timeline}</strong>
         <span className="muted">{new Date(plan.created_at).toLocaleString('fr-FR')}</span>
       </div>
+      <p style={{ margin: '0 0 0.5rem' }}>
+        <ProvenanceBadge generatedBy={plan.generated_by} generatedModel={plan.generated_model} />
+      </p>
       <p>{plan.summary}</p>
       <ItemList title="Jalons" items={plan.milestones} />
       <ItemList title="Ressources clés" items={plan.key_resources} />
@@ -520,6 +561,9 @@ function FinancingPlanCard({ plan }: { plan: FinancingPlan }) {
         <strong>Budget estimé : {plan.estimated_budget}</strong>
         <span className="muted">{new Date(plan.created_at).toLocaleString('fr-FR')}</span>
       </div>
+      <p style={{ margin: '0 0 0.5rem' }}>
+        <ProvenanceBadge generatedBy={plan.generated_by} generatedModel={plan.generated_model} />
+      </p>
       <p>{plan.summary}</p>
       <ItemList title="Sources de financement" items={plan.funding_sources} />
       <ItemList title="Postes de dépense" items={plan.budget_breakdown} />
@@ -534,6 +578,9 @@ function DevelopmentPlanCard({ plan }: { plan: DevelopmentPlan }) {
         <strong>Plan de croissance</strong>
         <span className="muted">{new Date(plan.created_at).toLocaleString('fr-FR')}</span>
       </div>
+      <p style={{ margin: '0 0 0.5rem' }}>
+        <ProvenanceBadge generatedBy={plan.generated_by} generatedModel={plan.generated_model} />
+      </p>
       <p>{plan.summary}</p>
       <ItemList title="Leviers de croissance" items={plan.growth_levers} />
       <ItemList title="Indicateurs clés" items={plan.key_metrics} />
@@ -549,6 +596,9 @@ function TransmissionPlanCard({ plan }: { plan: TransmissionPlan }) {
         <strong>Plan de transmission</strong>
         <span className="muted">{new Date(plan.created_at).toLocaleString('fr-FR')}</span>
       </div>
+      <p style={{ margin: '0 0 0.5rem' }}>
+        <ProvenanceBadge generatedBy={plan.generated_by} generatedModel={plan.generated_model} />
+      </p>
       <p>{plan.summary}</p>
       <ItemList title="Options de transmission" items={plan.transfer_options} />
       <ItemList title="À documenter" items={plan.key_documentation} />

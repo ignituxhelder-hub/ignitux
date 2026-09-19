@@ -33,6 +33,7 @@ const DECLARED_ARTICLE = {
 
 function routes(overrides: Record<string, { status: number; body: unknown }> = {}) {
   return {
+    'GET /constitution/preamble': { status: 200, body: { version: 'v1', preamble: 'Préambule.' } },
     'GET /constitution/articles': { status: 200, body: [DECLARED_ARTICLE, ENFORCED_ARTICLE] },
     'GET /constitution/rules': { status: 200, body: [] },
     'GET /constitution/audit': { status: 200, body: [] },
@@ -141,7 +142,35 @@ describe('ConstitutionPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('énonce la provenance du corpus au lieu de le faire passer pour la V1 officielle', async () => {
+  it('affiche le préambule de la Constitution V1', async () => {
+    mockApiRoutes(
+      routes({
+        'GET /constitution/preamble': {
+          status: 200,
+          body: {
+            version: 'v1',
+            preamble:
+              'IGNITUX existe pour aider chaque être humain à découvrir, construire et transmettre son potentiel.',
+          },
+        },
+      }),
+    );
+
+    const { container } = render(
+      <AuthProvider>
+        <ConstitutionPage />
+      </AuthProvider>,
+    );
+
+    await waitFor(() =>
+      expect(container.textContent).toContain('découvrir, construire et transmettre'),
+    );
+  });
+
+  it("distingue le constat technique du texte constitutionnel lui-même", async () => {
+    // « Vérifié par le code » n'est pas dans la Constitution : c'est ce
+    // que notre moteur contrôle réellement. Confondre les deux ferait
+    // passer une limite d'implémentation pour une règle fondatrice.
     mockApiRoutes(routes());
 
     const { container } = render(
@@ -151,9 +180,7 @@ describe('ConstitutionPage', () => {
     );
 
     await waitFor(() =>
-      expect(container.textContent).toContain(
-        "la « Constitution V1 à 24 articles » n'a jamais été transmise",
-      ),
+      expect(container.textContent).toContain("n'est pas dans la Constitution"),
     );
   });
 
