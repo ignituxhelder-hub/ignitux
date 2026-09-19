@@ -48,6 +48,68 @@ describe('BillingService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('course sur la numérotation', () => {
+    /** Ce que Prisma lève quand la contrainte unique est violée. */
+    function conflit() {
+      return Object.assign(new Error('Unique constraint failed'), { code: 'P2002' });
+    }
+
+    it('réessaie après un conflit, au lieu de renvoyer une erreur serveur', async () => {
+      // Le numéro est calculé depuis le maximum existant : deux créations
+      // parties dans la même poignée de millisecondes visent le même. La
+      // base en refuse une — c'est voulu, mieux vaut échouer que
+      // dupliquer. Mais un double-clic ne doit pas produire une 500.
+      prisma.billing_documents.findFirst.mockResolvedValue({ sequence: 4 });
+      prisma.billing_documents.create
+        .mockRejectedValueOnce(conflit())
+        .mockResolvedValueOnce({ id: 'd2' });
+
+      const document = await service.createDocument('u1', {
+        type: 'facture',
+        clientName: 'Client',
+        lines: [{ label: 'X', quantityMilli: 1000, unitPriceCents: 100 }],
+      });
+
+      expect(document).toEqual({ id: 'd2' });
+      expect(prisma.billing_documents.create).toHaveBeenCalledTimes(2);
+      // Chaque tentative relit le maximum : sans cela on réessaierait avec
+      // le même numéro, et indéfiniment.
+      expect(prisma.billing_documents.findFirst).toHaveBeenCalledTimes(2);
+    });
+
+    it('abandonne au bout de quatre essais plutôt que de boucler', async () => {
+      prisma.billing_documents.findFirst.mockResolvedValue({ sequence: 4 });
+      prisma.billing_documents.create.mockRejectedValue(conflit());
+
+      await expect(
+        service.createDocument('u1', {
+          type: 'facture',
+          clientName: 'Client',
+          lines: [{ label: 'X', quantityMilli: 1000, unitPriceCents: 100 }],
+        }),
+      ).rejects.toMatchObject({ code: 'P2002' });
+
+      expect(prisma.billing_documents.create).toHaveBeenCalledTimes(4);
+    });
+
+    it("ne réessaie pas sur une erreur qui n'est pas un conflit", async () => {
+      // Réessayer une panne de base ne ferait que la marteler.
+      prisma.billing_documents.findFirst.mockResolvedValue({ sequence: 4 });
+      prisma.billing_documents.create.mockRejectedValue(new Error('base injoignable'));
+
+      await expect(
+        service.createDocument('u1', {
+          type: 'facture',
+          clientName: 'Client',
+          lines: [{ label: 'X', quantityMilli: 1000, unitPriceCents: 100 }],
+        }),
+      ).rejects.toThrow('base injoignable');
+
+      expect(prisma.billing_documents.create).toHaveBeenCalledTimes(1);
+    });
+  });
+
+
   describe("article 7 — l'avertissement accompagne toujours l'indication", () => {
     it("soumet l'avertissement au moteur constitutionnel avant de rendre la liste", async () => {
       // RÉGRESSION. Le module rend des documents à quelqu'un qui va décider

@@ -42,6 +42,28 @@ export interface CreateDocumentInput {
  * émission, correction par avoir uniquement. Voir billing-legal.ts pour ce
  * que cela ne garantit pas.
  */
+/**
+ * Nombre d'essais de numérotation avant d'abandonner. Quatre suffisent
+ * largement : la course ne se produit qu'entre deux requêtes parties dans
+ * la même poignée de millisecondes, pour le même propriétaire, le même
+ * type et la même année.
+ */
+const MAX_NUMBERING_ATTEMPTS = 4;
+
+/**
+ * Prisma signale une contrainte unique violée par le code `P2002`. On le
+ * teste sur la forme plutôt qu'en important la classe d'erreur : le
+ * client est généré, et se lier à sa hiérarchie de classes rendrait ce
+ * fichier sensible à une régénération.
+ */
+function isUniqueViolation(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    (error as { code?: unknown }).code === 'P2002'
+  );
+}
+
 @Injectable()
 export class BillingService {
   constructor(
@@ -78,34 +100,50 @@ export class BillingService {
     }
 
     const year = new Date().getFullYear();
-    const sequence = await this.nextSequence(ownerId, input.type, year);
 
-    return this.prisma.billing_documents.create({
-      data: {
-        owner_id: ownerId,
-        contact_id: input.contactId ?? null,
-        project_id: input.projectId ?? null,
-        type: input.type,
-        year,
-        sequence,
-        number: formatDocumentNumber(input.type, year, sequence),
-        client_name: input.clientName,
-        client_details: input.clientDetails,
-        notes: input.notes,
-        due_at: input.dueAt,
-        corrects_id: input.correctsId ?? null,
-        lines: {
-          create: input.lines.map((line, index) => ({
-            position: index,
-            label: line.label,
-            quantity_milli: line.quantityMilli,
-            unit_price_cents: line.unitPriceCents,
-            vat_rate_basis_points: line.vatRateBasisPoints ?? 0,
-          })),
-        },
-      },
-      include: { lines: { orderBy: { position: 'asc' } } },
-    });
+    // Le numéro se calcule depuis le maximum existant : deux créations
+    // simultanées visent donc le même, et la contrainte unique en base en
+    // refuse une. Ce refus est voulu — mieux vaut échouer que produire
+    // deux documents portant le même numéro.
+    //
+    // Mais échouer par une 500 devant un simple double-clic ne l'est pas.
+    // On réessaie : chaque tentative relit le maximum, donc repart d'un
+    // état à jour. Le nombre d'essais est borné pour qu'une contrainte
+    // violée pour une AUTRE raison ne tourne pas en boucle.
+    for (let attempt = 0; ; attempt += 1) {
+      const sequence = await this.nextSequence(ownerId, input.type, year);
+
+      try {
+        return await this.prisma.billing_documents.create({
+          data: {
+            owner_id: ownerId,
+            contact_id: input.contactId ?? null,
+            project_id: input.projectId ?? null,
+            type: input.type,
+            year,
+            sequence,
+            number: formatDocumentNumber(input.type, year, sequence),
+            client_name: input.clientName,
+            client_details: input.clientDetails,
+            notes: input.notes,
+            due_at: input.dueAt,
+            corrects_id: input.correctsId ?? null,
+            lines: {
+              create: input.lines.map((line, index) => ({
+                position: index,
+                label: line.label,
+                quantity_milli: line.quantityMilli,
+                unit_price_cents: line.unitPriceCents,
+                vat_rate_basis_points: line.vatRateBasisPoints ?? 0,
+              })),
+            },
+          },
+          include: { lines: { orderBy: { position: 'asc' } } },
+        });
+      } catch (error) {
+        if (attempt >= MAX_NUMBERING_ATTEMPTS - 1 || !isUniqueViolation(error)) throw error;
+      }
+    }
   }
 
   async listDocuments(ownerId: string, filters: { type?: DocumentType; status?: DocumentStatus } = {}) {
