@@ -43,12 +43,23 @@ faute de service d'envoi d'email. Plutôt que de rester bloqué (règle 6), j'ai
 obligatoire — un compte non vérifié peut quand même se connecter et tout utiliser. Décider de
 l'imposer (et où) est un choix produit que je n'ai pas pris à ta place.
 
-### 2. Documentation tenue à jour en continu
+### 2. Changement de mot de passe pour un utilisateur connecté
+
+Troisième pièce manquante de l'auth, indépendante des deux premières (pas besoin d'email) :
+`PATCH /auth/me/password`, exige le mot de passe actuel. **Bug attrapé avant de committer** : la
+première version renvoyait 401 en cas de mauvais mot de passe actuel, ce que le frontend interprète
+partout ailleurs comme "session expirée" et déconnecte l'utilisateur — un simple mot de passe
+actuel mal tapé aurait donc déconnecté la personne au lieu de simplement afficher une erreur. Le
+test frontend a détecté le problème avant tout commit ; corrigé en renvoyant 403 à la place (voir
+`docs/decisions.md`). Testé en conditions réelles (mauvais mot de passe rejeté, bon accepté,
+connexion avec le nouveau mot de passe confirmée). Page `/account` ajoutée côté frontend.
+
+### 3. Documentation tenue à jour en continu
 
 `docs/status.md`, `docs/architecture.md`, `docs/decisions.md` mis à jour au fil de l'eau plutôt
 qu'en une seule fois à la fin, pour rester exploitables même si la session s'arrête en cours.
 
-### 3. Incident opérationnel rencontré et résolu
+### 4. Incident opérationnel rencontré et résolu
 
 En ajoutant ~15 nouveaux fichiers d'un coup, le serveur de dev (`nest start --watch`) n'a pas
 détecté les nouvelles routes (404 sur les nouveaux endpoints alors que `tsc`/tests passaient).
@@ -77,6 +88,8 @@ de nouveaux fichiers backend, un redémarrage manuel du serveur de dev peut êtr
 - `MailService` isolé dans son propre module pour que brancher un vrai fournisseur plus tard soit
   un changement d'une seule classe.
 - Vérification d'email non bloquante (voir limite ci-dessus).
+- 403 (pas 401) pour un mauvais mot de passe actuel sur `/auth/me/password`, pour ne pas déclencher
+  la déconnexion automatique du frontend sur une simple faute de frappe.
 
 ## Rien de destructif
 
@@ -86,9 +99,9 @@ pas été entamé — aucun appel à l'API Claude n'a été fait, la clé n'éta
 
 ## Vérifié à chaque étape
 
-- Backend : 196 tests (+29), `tsc --noEmit` propre, `oxlint` propre.
-- Frontend : 52 tests (+9), `tsc --noEmit` propre, `eslint` propre, build de production réussi
-  (12 routes).
+- Backend : 199 tests (+32 depuis le début de session), `tsc --noEmit` propre, `oxlint` propre.
+- Frontend : 54 tests (+11), `tsc --noEmit` propre, `eslint` propre, build de production réussi
+  (13 routes).
 - Tout poussé sur `main`, historique de commits clair (voir `git log`).
 
 ## Prochaines étapes recommandées
