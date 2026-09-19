@@ -1118,3 +1118,122 @@ déjà créé par `testeur1`**. Trois options : basculer et prévenir les testeu
 zéro ; attendre la fin de leur session ; ou recopier leurs deux comptes vers la nouvelle base.
 Cette dernière option demande un script de migration que je peux écrire, mais qui n'a de sens que
 si tu veux garder leurs données.
+
+---
+
+# 16. Session autonome : ce qui se vérifie sans navigateur
+
+Consigne : construire l'écosystème sans le porteur, et sans combler par une supposition ce qui
+dépend d'une de ses décisions. Les cinq points bloqués (§15.6) le sont restés, la bascule de base
+aussi — `testeur1` a un projet dans la base de développement, et l'effacer sans accord n'était pas
+envisageable.
+
+Le fil de cette session : **tout ce qui peut être vérifié sans écran réel doit l'être par un test
+qui tourne à chaque exécution.** Trois contrôles de cette nature ont été créés. Les trois ont
+trouvé un défaut dès leur première exécution.
+
+## 16.1 Une vraie suite de bout en bout, et une troisième base
+
+Je vérifiais « en conditions réelles » avec des scripts jetables, réécrits à chaque session puis
+perdus. **60 tests de bout en bout** les remplacent, contre une vraie base Postgres :
+
+- parcours complet (comptes, projet privé par défaut, moteurs transverses, les 5 générateurs
+  répondant 503 et non 500) ;
+- **contrôle d'accès** : l'application entière attaquée avec le jeton de quelqu'un d'autre. Les
+  tests unitaires vérifient qu'`assertOwnsProject` est appelé ; ils ne disent rien des routes qui
+  l'oublieraient. Aucune fuite sur les 20 routes éprouvées ;
+- Constitution : corpus semé, articles appliqués tous couverts, refus 422 sur une répartition qui
+  ferait perdre la majorité au porteur, et le refus journalisé ;
+- droits RGPD.
+
+**Troisième base, `ignitux_test`**, et un garde-fou qui **refuse de démarrer ailleurs**. Ces tests
+écrivent puis effacent : lancés par accident sur la base de développement ils détruiraient du
+travail réel, sur celle des vraies personnes ils y créeraient des comptes que personne n'a
+demandés. Le refus a été vérifié en pointant volontairement sur la mauvaise base.
+
+Le nettoyage passe par `DELETE /users/me`, pas par des suppressions en base : un nettoyage qui
+court-circuite le produit masquerait ses fuites. Après une exécution complète, toutes les tables
+de données de personnes reviennent à zéro — la seule ligne restante est une violation
+constitutionnelle **anonymisée**, ce qui prouve l'anonymisation contre une vraie base.
+
+**Un défaut trouvé en écrivant ces tests** : `createAccount` donnait le même mot de passe à tous
+les comptes. Le test « on ne supprime pas un compte avec le mot de passe d'un autre » n'aurait
+donc rien vérifié — le mot de passe de l'autre était le bon. Une fixture partagée peut rendre muet
+un test de sécurité tout en le laissant vert.
+
+## 16.2 Le contraste, calculé plutôt que regardé
+
+Le contraste ne demande pas de navigateur : il se déduit des couleurs. Mis en test, il a trouvé
+**trois défauts, tous introduits par la refonte graphique et tous invisibles à la relecture** :
+
+1. **Le bouton principal.** Du texte blanc sur l'étincelle du dégradé, à **1.78:1**. Illisible, en
+   haut de chaque bouton d'action du produit. Assombrir le dégradé aurait terni la marque et le
+   point de chargement, qui ne portent aucun texte : d'où deux dégradés, l'un vif pour le
+   décoratif, l'autre assez profond pour porter du blanc. Le feu vif passe dans le halo, qui
+   entoure le bouton sans jamais passer sous ses lettres.
+2. Le surtitre du héros à 4.12:1 — en petites capitales espacées, c'est-à-dire le texte le plus
+   difficile à lire de la page.
+3. Les contours d'éléments d'interface à 1.80:1 là où WCAG en exige 3. Ni le fond des champs ni
+   celui des boutons secondaires ne rattrapait l'écart.
+
+## 16.3 L'accessibilité du balisage
+
+Même logique. Le test exige un `<h1>` par page, une étiquette exploitable par champ, aucun clic
+sur un élément non interactif, un `alt` par image, la langue déclarée.
+
+**Trois pages n'avaient aucun `<h1>`** : Communauté, Marketplace et la liste des projets. Quelqu'un
+qui navigue au lecteur d'écran saute de titre en titre ; arriver sur une page dont le premier
+titre est un `<h2>` perdu au milieu d'un formulaire, c'est arriver nulle part.
+
+Les 55 champs de formulaire, eux, étaient déjà tous correctement étiquetés. Le test les fige.
+
+## 16.4 La file hors ligne : un signal qui n'atteignait personne
+
+En durcissant la file au §15.2, j'avais ajouté `storageStalled` — le stockage ne retient plus ce
+qui vient d'être envoyé, donc l'écriture est peut-être arrivée au serveur sans qu'on puisse s'en
+souvenir, et elle risque de repartir une seconde fois. **La file produisait ce signal ; rien ne
+l'écoutait.**
+
+C'est exactement le demi-signal que ce module refuse : une information calculée, correcte, et
+jamais dite. Le bandeau l'affiche désormais, avec la conséquence concrète plutôt qu'un code.
+
+## 16.5 Trois trous dans l'intégration continue
+
+La CI validait moins qu'on ne le croyait.
+
+- Le type-check backend tournait sur `tsconfig.build.json`, qui **exclut les tests** : 167 fichiers
+  source couverts, **zéro fichier de test**. Une erreur de type dans un mock passait sans être vue
+  — c'est arrivé deux fois en une seule session.
+- Le frontend n'avait **ni lint ni type-check** en CI.
+
+Les cinq étapes ont été rejouées localement avant d'être poussées.
+
+## 16.6 Trois documents qui disaient le faux
+
+`status.md`, `architecture.md` et `README.md` sont ce qu'on lit pour savoir où en est le projet.
+
+- `status.md` annonçait **261 tests backend** (611), classait le **Financement en « bloqué, aucune
+  logique d'équité n'existe »** alors que le modèle 51/49 est encodé et le rachat construit, et
+  rangeait l'**offline-first en « hors scope par choix »** alors que la file et le cache existent.
+- `architecture.md` annonçait **56 routes** pour 120 réelles et omettait la moitié des modules.
+  Les chiffres de tests en ont été retirés : ils vivaient en double avec `status.md`, donc l'un
+  des deux était toujours faux.
+- `README.md` disait qu'il n'y a « pas de mise en relation avec des mentors/investisseurs » — la
+  Marketplace existe — et que le fichier e2e « n'est pas une vraie suite ».
+
+## 16.7 Vérification
+
+- **828 tests verts** : 611 unitaires backend, 60 de bout en bout, 217 frontend.
+- Lint, types et builds propres des deux côtés, les cinq étapes de CI rejouées à la main.
+- Chaque correction a été **vérifiée par retour arrière** : retirer le correctif fait échouer son
+  test, et lui seul.
+- Déploiement de test reconstruit et relancé deux fois pendant la session, vérifié à chaque fois
+  (32 contrôles), générateurs IA toujours éteints.
+- Aucun appel à l'API Claude. Aucun `.docx` touché. Aucune décision comblée.
+
+## 16.8 Toujours bloqué, toujours la même question
+
+Les cinq points du §15.6 sont inchangés : fournisseur d'email, budget et modèle IA, les Gardiens,
+montage juridique du 51/49, sources Suisse et Portugal. Et la bascule du déploiement vers la base
+de production, qui effacerait le projet de `testeur1` — trois options y sont posées, aucune n'a
+été prise.
