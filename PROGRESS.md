@@ -102,14 +102,30 @@ déjà en place ailleurs.
   seule ; test existant du mode "collaborateur" mis à jour (il affirmait à tort que ces sections
   étaient invisibles, maintenant qu'elles le sont en lecture seule).
 
+### 6. `ANTHROPIC_API_KEY` enfin configurée — nouveau blocage identifié (crédit, pas la clé)
+
+L'utilisateur a fourni une clé API en cours de session. Ajoutée à `backend/.env` (fichier
+gitignoré, rien commité), confirmée présente sur disque (le blocage précédent — le fichier restait
+inchangé malgré plusieurs tentatives — ne se reproduit pas cette fois). Serveur de dev redémarré
+pour charger la nouvelle variable.
+
+**Testé en conditions réelles**, une seule fois pour rester sobre sur le budget : compte de test
+créé, projet de test créé, `POST /projects/:id/analyze` appelé. Résultat : la clé est **valide et
+acceptée** par Anthropic (organisation/workspace reconnus dans la réponse), mais l'appel échoue
+avec `invalid_request_error` — **« Your credit balance is too low to access the Anthropic API »**.
+Le blocage n'est donc plus technique : c'est un compte Anthropic sans crédit disponible. Projet de
+test supprimé après coup, aucune donnée laissée derrière. **Aucun coût engagé** (l'appel a échoué
+avant toute génération de tokens de sortie — voir `docs/status.md` pour le détail et une remarque
+sur le coût du modèle configuré, `claude-opus-5`, le plus cher de la gamme, à surveiller une fois
+le crédit ajouté vu le budget de 50€/mois).
+
 ## Bloqué — pas contourné, car un contournement serait mentir
 
-- **Génération IA réelle (les 5 générateurs IGINI)** — `ANTHROPIC_API_KEY` toujours absente de
-  `backend/.env` au moment de clore cette session (vérifié directement, fichier inchangé). Ce point
-  a déjà fait l'objet d'un long diagnostic dans une session précédente (l'utilisateur pensait
-  l'avoir ajoutée à plusieurs reprises, sans que ça se reflète dans le fichier réel) — je n'ai pas
-  de nouvelle piste à essayer sans une information supplémentaire de la part de l'utilisateur, donc
-  je n'ai pas retenté à l'aveugle une énième fois.
+- **Génération IA réelle (les 5 générateurs IGINI)** — la clé est maintenant configurée et valide
+  (voir point 6 ci-dessus), donc ce n'est plus un blocage de configuration. Reste bloqué sur
+  **le crédit du compte Anthropic** (« credit balance too low »), une action côté facturation que
+  seul l'utilisateur peut faire (console.anthropic.com → Plans & Billing), dans la limite du budget
+  de 50€/mois déjà fixé.
 - **Financement (modèle économique réel)**, **Modules pays**, **Communauté avancée** — inchangés,
   toujours en attente de décisions/sources externes (voir `docs/status.md`). Je n'ai pas inventé de
   modèle économique, de contenu réglementaire, ou de spec pour ces trois, car le faire serait
@@ -128,8 +144,10 @@ déjà en place ailleurs.
 ## Rien de destructif
 
 Tous les changements de schéma sont additifs (nouvelle table, nouvelle colonne nullable). Aucune
-donnée existante modifiée ou supprimée. Aucun appel payant déclenché (le budget IA de 50€/mois n'a
-pas été entamé — aucun appel à l'API Claude n'a été fait, la clé n'étant toujours pas configurée).
+donnée existante modifiée ou supprimée. Un seul appel réel à l'API Claude a été tenté (point 6),
+pour vérifier la clé fournie en cours de session — il a échoué avant génération de tokens (crédit
+insuffisant), donc **le budget IA de 50€/mois n'a pas été entamé**. Compte et projet de test créés
+pour cette vérification supprimés après coup.
 
 ## Vérifié à chaque étape
 

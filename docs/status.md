@@ -21,16 +21,16 @@ côtés, build frontend réussi (13 routes).
   tant qu'aucun fournisseur n'est choisi).
 - **Projets** — CRUD, visibilité publique/privée, collaboration multi-comptes (backend + frontend).
 - **5 générateurs IGINI** — code complet (schémas Zod, prompts, persistance, mémoire commune
-  correcte). Testés unitairement. **Pas testés en conditions réelles avec succès** — voir la section
-  Bloqué ci-dessous.
+  correcte). Testés unitairement. **Pas encore testés en conditions réelles avec succès** — la clé
+  API est désormais configurée et acceptée par Anthropic, mais le compte n'a pas de crédit
+  disponible ; voir la section Bloqué ci-dessous.
 - **4 moteurs transverses** (mémoire, connaissance, workflow, score) — CRUD réels, avec interface
-  frontend, strictement réservés au propriétaire du projet (pas encore aux collaborateurs).
+  frontend, accessibles en lecture au propriétaire ET aux collaborateurs du projet (écriture
+  réservée au propriétaire).
 - **Communauté** — projets publics, encouragements, confidentialité vérifiée avec deux comptes réels.
 
 ## Partiel
 
-- **Collaboration** — le collaborateur voit le projet et l'historique des 5 générateurs, mais pas
-  les 4 moteurs transverses.
 - **Knowledge graph** — vraie visualisation SVG, mais alimentation manuelle uniquement (pas
   d'extraction automatique depuis les plans générés).
 - **Vérification d'email** — le compte reste utilisable sans vérifier son email (aucune route n'est
@@ -39,13 +39,18 @@ côtés, build frontend réussi (13 routes).
 
 ## Bloqué (décision ou ressource externe nécessaire)
 
-- **Génération IA réelle** — `ANTHROPIC_API_KEY` doit être configurée dans `backend/.env` pour que
-  les 5 générateurs fonctionnent de bout en bout. Sans elle, chaque appel échoue avec une erreur 500
-  (message désormais spécifique — voir `docs/decisions.md`). **Statut au 19/09/2026 : toujours
-  absente de `backend/.env`** (vérifié directement, fichier inchangé depuis plusieurs vérifications)
-  — malgré plusieurs tentatives de configuration côté utilisateur qui ne se sont pas reflétées dans
-  le fichier réel. Voir `PROGRESS.md` pour le détail du diagnostic déjà fait ; pas de nouvelle piste
-  à tenter sans information supplémentaire.
+- **Génération IA réelle** — `ANTHROPIC_API_KEY` est configurée dans `backend/.env` depuis le
+  19/09/2026 (le blocage précédent, où le fichier restait inchangé malgré plusieurs tentatives, est
+  résolu). **Testé en conditions réelles** : `POST /projects/:id/analyze` contacte bien l'API
+  Anthropic et la clé est acceptée (organisation/workspace reconnus), mais la requête échoue avec
+  `invalid_request_error` : **« Your credit balance is too low to access the Anthropic API »**.
+  Autrement dit, ce n'est plus un problème de code ni de configuration — c'est un compte Anthropic
+  sans crédit. Il faut ajouter des crédits (Plans & Billing sur console.anthropic.com), dans la
+  limite du budget de 50€/mois déjà fixé, avant que les 5 générateurs puissent produire un résultat.
+  Point d'attention une fois débloqué : le modèle configuré (`claude-opus-5`,
+  `backend/src/igini/claude/claude.service.ts`) est le plus cher de la gamme — à surveiller de près
+  vu le budget serré, un modèle plus économique pourrait être préférable pour un usage
+  d'expérimentation régulier (décision produit, pas prise unilatéralement ici).
 - **Financement (modèle économique réel)** — le générateur `igini/financing/` produit un texte de
   plan, mais aucune logique d'abonnement, d'investissement ou d'équité n'existe. Nécessite une
   décision produit/légale.
