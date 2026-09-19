@@ -1,3 +1,12 @@
+import { cacheResponse, readCached, type IterableStorage } from './offline-cache';
+import {
+  dismissRejected,
+  enqueue,
+  readState,
+  replay,
+  type OfflineState,
+} from './offline-queue';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 
 export class ApiError extends Error {
@@ -21,16 +30,63 @@ export function setUnauthorizedHandler(handler: UnauthorizedHandler | null) {
   onUnauthorized = handler;
 }
 
+/**
+ * Levée quand une lecture n'a pu être servie que depuis le cache local.
+ * C'est volontairement une erreur distincte et non un succès silencieux :
+ * l'appelant doit décider quoi afficher, et surtout signaler la date de la
+ * donnée. Servir du cache comme si c'était frais serait présenter comme
+ * réelle une information périmée.
+ */
+export class OfflineReadError extends Error {
+  constructor(
+    public readonly data: unknown,
+    public readonly cachedAt: string,
+  ) {
+    super('Données hors ligne.');
+    this.name = 'OfflineReadError';
+  }
+}
+
+/**
+ * Levée quand une écriture a été mise en file d'attente faute de réseau.
+ * Ce n'est PAS un succès : rien ne garantit que le serveur l'acceptera.
+ */
+export class OfflineQueuedError extends Error {
+  constructor(public readonly mutationId: string) {
+    super("Pas de réseau : l'action est enregistrée et sera envoyée à la reconnexion.");
+    this.name = 'OfflineQueuedError';
+  }
+}
+
+/**
+ * Une panne réseau (fetch qui rejette) n'est pas une réponse HTTP d'erreur.
+ * La distinction est tout l'intérêt du mode hors ligne : un 422 doit être
+ * montré à l'utilisateur, une coupure doit déclencher la mise en file.
+ */
+function isNetworkFailure(error: unknown): boolean {
+  return error instanceof TypeError;
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    });
+  } catch (error) {
+    if (!isNetworkFailure(error)) throw error;
+    return handleOffline<T>(path, options);
+  }
 
   const body = await res.json().catch(() => null);
+
+  if (res.ok && (options.method ?? 'GET') === 'GET' && offlineStorage) {
+    cacheResponse(offlineStorage, path, body);
+  }
 
   if (!res.ok) {
     // Ne déclenche la déconnexion que pour une requête qui portait un token
@@ -52,6 +108,117 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 
   return body as T;
+}
+
+/**
+ * Le stockage utilisé pour le cache et la file d'attente. Injecté par
+ * AuthProvider au montage plutôt que lu depuis `window` : ce module est
+ * importé côté serveur par Next.js, où `localStorage` n'existe pas.
+ */
+let offlineStorage: IterableStorage | null = null;
+
+export function setOfflineStorage(storage: IterableStorage | null) {
+  offlineStorage = storage;
+}
+
+/**
+ * Notifie l'interface qu'une écriture vient d'être mise en file, pour que
+ * le bandeau hors ligne se mette à jour sans attendre un rechargement.
+ */
+type OfflineChangeHandler = () => void;
+let onOfflineChange: OfflineChangeHandler | null = null;
+
+export function setOfflineChangeHandler(handler: OfflineChangeHandler | null) {
+  onOfflineChange = handler;
+}
+
+function handleOffline<T>(path: string, options: RequestInit): Promise<T> {
+  const method = (options.method ?? 'GET').toUpperCase();
+
+  if (!offlineStorage) {
+    // Sans stockage, on ne peut ni servir du cache ni mettre en file. Dire
+    // « hors ligne » sans rien avoir conservé serait trompeur.
+    throw new ApiError('Pas de réseau, et aucun stockage local disponible.', 0);
+  }
+
+  if (method === 'GET') {
+    const cached = readCached<T>(offlineStorage, path);
+    if (!cached) {
+      throw new ApiError("Pas de réseau, et cette donnée n'a jamais été chargée ici.", 0);
+    }
+    throw new OfflineReadError(cached.data, cached.cachedAt);
+  }
+
+  if (method !== 'POST' && method !== 'PATCH' && method !== 'DELETE') {
+    throw new ApiError('Pas de réseau.', 0);
+  }
+
+  const queued = enqueue(offlineStorage, {
+    path,
+    method,
+    body: typeof options.body === 'string' ? options.body : null,
+    label: describeMutation(method, path),
+  });
+  onOfflineChange?.();
+  throw new OfflineQueuedError(queued.id);
+}
+
+/**
+ * Libellé lisible d'une écriture en attente. Volontairement grossier :
+ * mieux vaut « Écriture sur /projects/p1/tasks » qu'une phrase élégante
+ * qui se désynchroniserait des routes réelles.
+ */
+function describeMutation(method: string, path: string): string {
+  const verbs: Record<string, string> = {
+    POST: 'Création',
+    PATCH: 'Modification',
+    DELETE: 'Suppression',
+  };
+  return `${verbs[method] ?? method} sur ${path}`;
+}
+
+/**
+ * Rejoue la file d'attente. Le jeton est passé par l'appelant : la file ne
+ * stocke jamais d'identifiant d'authentification, pour qu'un vol du
+ * stockage local ne livre pas aussi la session.
+ */
+export function replayOfflineQueue(token: string) {
+  if (!offlineStorage) return Promise.resolve({ sent: 0, rejected: 0, remaining: 0 });
+
+  return replay(offlineStorage, async (mutation) => {
+    try {
+      const res = await fetch(`${API_URL}${mutation.path}`, {
+        method: mutation.method,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: mutation.body ?? undefined,
+      });
+      if (res.ok) return { ok: true as const };
+
+      const body: unknown = await res.json().catch(() => null);
+      const reason =
+        body && typeof (body as { message?: unknown }).message === 'string'
+          ? ((body as { message: string }).message)
+          : 'Refusée par le serveur.';
+
+      // 5xx : le serveur a un problème, l'écriture reste valable et sera
+      // retentée. 4xx : le serveur l'a jugée invalide, la retenter en
+      // boucle ne ferait que bloquer tout ce qui suit dans la file.
+      return { ok: false as const, retryable: res.status >= 500, status: res.status, reason };
+    } catch {
+      return { ok: false as const, retryable: true, status: 0, reason: 'Réseau indisponible.' };
+    }
+  });
+}
+
+export function readOfflineState(): OfflineState {
+  return offlineStorage ? readState(offlineStorage) : { pending: [], rejected: [] };
+}
+
+export function dismissRejectedMutation(id: string): OfflineState {
+  if (!offlineStorage) return { pending: [], rejected: [] };
+  const next = dismissRejected(offlineStorage, id);
+  onOfflineChange?.();
+  return next;
 }
 
 export interface User {

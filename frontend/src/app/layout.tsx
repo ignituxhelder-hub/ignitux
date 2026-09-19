@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { IBM_Plex_Mono, IBM_Plex_Sans, Sora } from 'next/font/google';
 import type { ReactNode } from 'react';
+import { OfflineBanner } from '@/components/offline-banner';
 import { AuthProvider } from '@/lib/auth';
 import './globals.css';
 
@@ -30,7 +31,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="fr" className={`${sora.variable} ${plexSans.variable} ${plexMono.variable}`}>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {/* Monté au niveau racine : l'état hors ligne concerne toute
+              l'application, pas une page en particulier, et le bandeau ne
+              s'affiche que s'il a réellement quelque chose à dire. */}
+          <OfflineBanner />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
