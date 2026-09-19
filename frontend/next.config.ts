@@ -14,6 +14,12 @@ const nextConfig: NextConfig = {
    *
    * vérifie alors que tout compile sans toucher à ce qui est servi. À
    * utiliser dès qu'une instance tourne (session de test, démonstration).
+   *
+   * Un effet de bord à connaître : Next réécrit `tsconfig.json` à chaque
+   * build pour y déclarer `<distDir>/types`, et il le reformate au passage.
+   * Après un build de vérification, remettre le fichier en état :
+   *
+   *   git checkout frontend/tsconfig.json
    */
   distDir: process.env.NEXT_DIST_DIR ?? '.next',
 };
