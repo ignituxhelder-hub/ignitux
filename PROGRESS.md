@@ -102,30 +102,33 @@ déjà en place ailleurs.
   seule ; test existant du mode "collaborateur" mis à jour (il affirmait à tort que ces sections
   étaient invisibles, maintenant qu'elles le sont en lecture seule).
 
-### 6. `ANTHROPIC_API_KEY` enfin configurée — nouveau blocage identifié (crédit, pas la clé)
+### 6. `ANTHROPIC_API_KEY` enfin configurée et débloquée — premier test IA réel réussi
 
 L'utilisateur a fourni une clé API en cours de session. Ajoutée à `backend/.env` (fichier
 gitignoré, rien commité), confirmée présente sur disque (le blocage précédent — le fichier restait
 inchangé malgré plusieurs tentatives — ne se reproduit pas cette fois). Serveur de dev redémarré
 pour charger la nouvelle variable.
 
-**Testé en conditions réelles**, une seule fois pour rester sobre sur le budget : compte de test
-créé, projet de test créé, `POST /projects/:id/analyze` appelé. Résultat : la clé est **valide et
-acceptée** par Anthropic (organisation/workspace reconnus dans la réponse), mais l'appel échoue
-avec `invalid_request_error` — **« Your credit balance is too low to access the Anthropic API »**.
-Le blocage n'est donc plus technique : c'est un compte Anthropic sans crédit disponible. Projet de
-test supprimé après coup, aucune donnée laissée derrière. **Aucun coût engagé** (l'appel a échoué
-avant toute génération de tokens de sortie — voir `docs/status.md` pour le détail et une remarque
-sur le coût du modèle configuré, `claude-opus-5`, le plus cher de la gamme, à surveiller une fois
-le crédit ajouté vu le budget de 50€/mois).
+**Premier essai** : compte + projet de test créés, `POST /projects/:id/analyze` appelé. La clé
+était valide et acceptée par Anthropic, mais l'appel a échoué avec `invalid_request_error` —
+« Your credit balance is too low to access the Anthropic API ». Aucun coût engagé (échec avant
+génération de tokens). Projet de test supprimé.
+
+**Après que l'utilisateur a ajouté du crédit au compte, deuxième essai (même procédure, nouveau
+compte/projet de test)** : succès complet. Le générateur "Analyser" a produit une vraie analyse de
+faisabilité via `claude-opus-5` (résumé, score de faisabilité, forces, risques, prochaines étapes),
+cohérente et exploitable, sur un cas fictif (food-truck de crêpes) en ~31 secondes. **C'est le
+premier appel IA réel réussi de tout le projet** — jusqu'ici, les 5 générateurs n'avaient été
+vérifiés que par des tests unitaires avec Claude mocké. Projet et compte de test supprimés/nettoyés
+après coup.
+
+Point de vigilance signalé mais pas tranché : le modèle configuré (`claude-opus-5`,
+`backend/src/igini/claude/claude.service.ts`) est le plus cher de la gamme — un usage de test
+répété pourrait consommer vite le budget de 50€/mois. Rester sobre sur les futurs tests réels tant
+que ce choix n'est pas revu.
 
 ## Bloqué — pas contourné, car un contournement serait mentir
 
-- **Génération IA réelle (les 5 générateurs IGINI)** — la clé est maintenant configurée et valide
-  (voir point 6 ci-dessus), donc ce n'est plus un blocage de configuration. Reste bloqué sur
-  **le crédit du compte Anthropic** (« credit balance too low »), une action côté facturation que
-  seul l'utilisateur peut faire (console.anthropic.com → Plans & Billing), dans la limite du budget
-  de 50€/mois déjà fixé.
 - **Financement (modèle économique réel)**, **Modules pays**, **Communauté avancée** — inchangés,
   toujours en attente de décisions/sources externes (voir `docs/status.md`). Je n'ai pas inventé de
   modèle économique, de contenu réglementaire, ou de spec pour ces trois, car le faire serait
@@ -144,10 +147,12 @@ le crédit ajouté vu le budget de 50€/mois).
 ## Rien de destructif
 
 Tous les changements de schéma sont additifs (nouvelle table, nouvelle colonne nullable). Aucune
-donnée existante modifiée ou supprimée. Un seul appel réel à l'API Claude a été tenté (point 6),
-pour vérifier la clé fournie en cours de session — il a échoué avant génération de tokens (crédit
-insuffisant), donc **le budget IA de 50€/mois n'a pas été entamé**. Compte et projet de test créés
-pour cette vérification supprimés après coup.
+donnée existante modifiée ou supprimée. Deux appels réels à l'API Claude ont été faits (point 6),
+strictement pour vérifier que la clé fournie en cours de session fonctionnait : le premier a échoué
+avant génération de tokens (crédit insuffisant, coût nul), le second a réussi (une analyse complète
+générée) et **a donc entamé, de façon minime, le budget IA de 50€/mois** — un seul appel Opus, pas
+de boucle ni de répétition. Comptes et projets de test créés pour ces vérifications supprimés après
+coup.
 
 ## Vérifié à chaque étape
 
