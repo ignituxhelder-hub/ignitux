@@ -44,7 +44,9 @@ export type ConstitutionAction =
       founderBasisPointsAfter: number;
       /** null quand la répartition ne totalise pas 100 % : on ne tranche pas. */
       totalBasisPointsAfter: number | null;
-    };
+    }
+  /** Un module s'apprête à rendre une indication sur laquelle quelqu'un va décider. (art. 7) */
+  | { kind: 'publish_guidance'; module: string; notice: string | null };
 
 export type ConstitutionSeverity = 'blocking' | 'warning';
 
@@ -227,6 +229,23 @@ export const CONSTITUTION_RULES: readonly ConstitutionRule[] = [
         );
       }
       return null;
+    },
+  },
+  {
+    id: 'conseil-sans-avertissement',
+    articleSlug: 'v1-07-responsabilite',
+    severity: 'blocking',
+    description:
+      "Un module qui rend une indication doit dire ce qu'Ignitux ne décide pas à la place de " +
+      'la personne. Une réponse sans son avertissement est refusée.',
+    check(action) {
+      if (action.kind !== 'publish_guidance') return null;
+      if (action.notice !== null && action.notice.trim().length > 0) return null;
+      return (
+        `Le module « ${action.module} » s'apprête à rendre une indication sans l'avertissement ` +
+        "qui dit ce qu'Ignitux ne décide pas. La personne reste responsable de sa décision, " +
+        "encore faut-il qu'elle sache sur quoi elle décide seule."
+      );
     },
   },
 ];

@@ -79,6 +79,14 @@ export class ComplianceService implements OnModuleInit {
       where: { country },
       orderBy: [{ category: 'asc' }, { title: 'asc' }],
     });
+    // Article 7 : on ne rend pas une indication sans dire ce qu'Ignitux
+    // ne décide pas. Retirer l'avertissement fait échouer l'appel.
+    await this.constitutionService.guard({
+      kind: 'publish_guidance',
+      module: 'conformité',
+      notice: COMPLIANCE_DISCLAIMER,
+    });
+
     return { disclaimer: COMPLIANCE_DISCLAIMER, requirements };
   }
 
@@ -96,6 +104,14 @@ export class ComplianceService implements OnModuleInit {
     ]);
 
     const completedRequirementIds = new Set(checks.map((check) => check.requirement_id));
+
+    // Article 7 : on ne rend pas une indication sans dire ce qu'Ignitux
+    // ne décide pas. Retirer l'avertissement fait échouer l'appel.
+    await this.constitutionService.guard({
+      kind: 'publish_guidance',
+      module: 'conformité',
+      notice: COMPLIANCE_DISCLAIMER,
+    });
 
     return {
       disclaimer: COMPLIANCE_DISCLAIMER,

@@ -98,6 +98,33 @@ describe('UserDataService', () => {
       expect(exported.donnees.compte).not.toHaveProperty('password_hash');
     });
 
+    it("n'exporte que les quatre champs de compte prévus, quoi que renvoie la base", async () => {
+      // Le test précédent ne surveille qu'un champ connu. Celui-ci
+      // surveille la forme : le jour où quelqu'un ajoute une colonne
+      // sensible à `users` — codes de secours, jeton de session, adresse
+      // postale — elle ne doit pas pouvoir se glisser dans un fichier
+      // destiné à circuler par email, même si le `select` de Prisma est
+      // élargi au passage.
+      prisma.users.findUniqueOrThrow.mockResolvedValue({
+        id: 'u1',
+        email: 'a@b.com',
+        email_verified_at: null,
+        created_at: new Date('2026-01-01'),
+        password_hash: passwordHash,
+        codes_de_secours: 'SECRET-A-NE-JAMAIS-DIFFUSER',
+      });
+
+      const exported = await service.exportUserData('u1');
+
+      expect(Object.keys(exported.donnees.compte).sort()).toEqual([
+        'compte_cree_le',
+        'email',
+        'email_verifie_le',
+        'id',
+      ]);
+      expect(JSON.stringify(exported)).not.toContain('SECRET-A-NE-JAMAIS-DIFFUSER');
+    });
+
     it('expose les huit catégories annoncées par les CGU', async () => {
       const exported = await service.exportUserData('u1');
 

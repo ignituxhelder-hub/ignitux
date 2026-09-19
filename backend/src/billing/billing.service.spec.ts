@@ -1,5 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConstitutionService } from '../constitution/constitution.service.js';
+import { BILLING_DISCLAIMER } from './billing-legal.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BillingService } from './billing.service.js';
 
@@ -7,9 +9,11 @@ type Mock = ReturnType<typeof vi.fn>;
 
 describe('BillingService', () => {
   let service: BillingService;
+  let module: TestingModule;
   let prisma: {
     billing_documents: { create: Mock; findFirst: Mock; findMany: Mock; update: Mock; delete: Mock };
     billing_payments: { create: Mock };
+    constitution_violations: { createMany: Mock };
     crm_contacts: { findFirst: Mock };
   };
 
@@ -26,10 +30,15 @@ describe('BillingService', () => {
       },
       billing_payments: { create: vi.fn().mockResolvedValue({ id: 'p1' }) },
       crm_contacts: { findFirst: vi.fn() },
+      constitution_violations: { createMany: vi.fn() },
     };
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [BillingService, { provide: PrismaService, useValue: prisma }],
+    module = await Test.createTestingModule({
+      providers: [
+        BillingService,
+        ConstitutionService,
+        { provide: PrismaService, useValue: prisma },
+      ],
     }).compile();
 
     service = module.get<BillingService>(BillingService);
@@ -37,6 +46,29 @@ describe('BillingService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe("article 7 — l'avertissement accompagne toujours l'indication", () => {
+    it("soumet l'avertissement au moteur constitutionnel avant de rendre la liste", async () => {
+      // RÉGRESSION. Le module rend des documents à quelqu'un qui va décider
+      // d'émettre une facture réelle. Si l'avertissement disparaissait un
+      // jour d'un refactoring, plus rien ne dirait qu'Ignitux ne vérifie
+      // ni le régime de TVA ni les mentions obligatoires — et le silence
+      // se lirait comme une validation.
+      const guard = vi.spyOn(
+        module.get(ConstitutionService),
+        'guard',
+      );
+
+      await service.listDocuments('u1');
+
+      const guidance = guard.mock.calls
+        .map(([action]) => action as { kind: string; notice?: string | null })
+        .filter((action) => action.kind === 'publish_guidance');
+
+      expect(guidance).toHaveLength(1);
+      expect(guidance[0].notice).toBe(BILLING_DISCLAIMER);
+    });
   });
 
   describe('numérotation', () => {

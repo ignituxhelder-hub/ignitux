@@ -104,7 +104,7 @@ describe('FinancingController', () => {
   });
 
   it('les lectures et suppressions délèguent au service', async () => {
-    controller.getScopeNotice();
+    await controller.getScopeNotice();
     await controller.listRounds(currentUser, 'p1');
     await controller.getCapTable(currentUser, 'p1');
     await controller.listEquityEvents(currentUser, 'p1');

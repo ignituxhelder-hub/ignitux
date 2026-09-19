@@ -84,7 +84,7 @@ describe('BillingController', () => {
   });
 
   it('expose la notice légale et l\'export', async () => {
-    controller.getLegalNotice();
+    await controller.getLegalNotice();
     await controller.exportCsv(currentUser);
 
     expect(billingService.getLegalNotice).toHaveBeenCalled();

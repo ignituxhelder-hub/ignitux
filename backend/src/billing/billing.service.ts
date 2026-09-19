@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConstitutionService } from '../constitution/constitution.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BILLING_DISCLAIMER, BILLING_ENFORCED_RULES } from './billing-legal.js';
 import {
@@ -43,9 +44,20 @@ export interface CreateDocumentInput {
  */
 @Injectable()
 export class BillingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly constitutionService: ConstitutionService,
+  ) {}
 
-  getLegalNotice() {
+  async getLegalNotice() {
+    // Article 7 : on ne rend pas une indication sans dire ce qu'Ignitux
+    // ne décide pas. Retirer l'avertissement fait échouer l'appel.
+    await this.constitutionService.guard({
+      kind: 'publish_guidance',
+      module: 'facturation',
+      notice: BILLING_DISCLAIMER,
+    });
+
     return { disclaimer: BILLING_DISCLAIMER, enforcedRules: BILLING_ENFORCED_RULES };
   }
 
@@ -105,6 +117,14 @@ export class BillingService {
       },
       orderBy: [{ year: 'desc' }, { sequence: 'desc' }],
       include: { lines: true, payments: true },
+    });
+
+    // Article 7 : on ne rend pas une indication sans dire ce qu'Ignitux
+    // ne décide pas. Retirer l'avertissement fait échouer l'appel.
+    await this.constitutionService.guard({
+      kind: 'publish_guidance',
+      module: 'facturation',
+      notice: BILLING_DISCLAIMER,
     });
 
     return {

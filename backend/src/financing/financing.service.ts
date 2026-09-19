@@ -35,7 +35,15 @@ export class FinancingService {
     private readonly constitutionService: ConstitutionService,
   ) {}
 
-  getScopeNotice() {
+  async getScopeNotice() {
+    // Article 7 : on ne rend pas une indication sans dire ce qu'Ignitux
+    // ne décide pas. Retirer l'avertissement fait échouer l'appel.
+    await this.constitutionService.guard({
+      kind: 'publish_guidance',
+      module: 'financement',
+      notice: FINANCING_SCOPE_NOTICE,
+    });
+
     return { notice: FINANCING_SCOPE_NOTICE };
   }
 
@@ -170,6 +178,14 @@ export class FinancingService {
       holders.filter((holder) => holder.is_founder).map((holder) => holder.id),
     );
 
+    // Article 7 : on ne rend pas une indication sans dire ce qu'Ignitux
+    // ne décide pas. Retirer l'avertissement fait échouer l'appel.
+    await this.constitutionService.guard({
+      kind: 'publish_guidance',
+      module: 'financement',
+      notice: FINANCING_SCOPE_NOTICE,
+    });
+
     return {
       notice: FINANCING_SCOPE_NOTICE,
       ...buildCapTable(holders, events),
@@ -283,6 +299,14 @@ export class FinancingService {
 
     const objectives = await this.prisma.buyback_objectives.findMany({
       where: { project_id: projectId },
+    });
+
+    // Article 7 : on ne rend pas une indication sans dire ce qu'Ignitux
+    // ne décide pas. Retirer l'avertissement fait échouer l'appel.
+    await this.constitutionService.guard({
+      kind: 'publish_guidance',
+      module: 'rachat progressif',
+      notice: BUYBACK_SCOPE_NOTICE,
     });
 
     return {

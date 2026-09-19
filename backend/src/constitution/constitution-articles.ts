@@ -98,7 +98,14 @@ export const CONSTITUTION_ARTICLES: readonly ConstitutionArticleSeed[] = [
     title: 'Responsabilité',
     text: 'Chaque utilisateur reste responsable de ses décisions.',
     principle: 'responsabilite',
-    enforcement: 'declared',
+    // Passé de 'declared' à 'enforced' le 19/09/2026, sans rien ajouter au
+    // produit : le dispositif existait déjà. Quatre modules donnent des
+    // indications à quelqu'un qui va décider — facturation, conformité,
+    // financement, rachat — et chacun accompagne sa réponse d'un
+    // avertissement qui dit ce qu'Ignitux ne décide PAS à sa place. La
+    // règle 'conseil-sans-avertissement' rend ce dispositif obligatoire :
+    // retirer un de ces avertissements fait désormais échouer l'appel.
+    enforcement: 'enforced',
   },
   {
     slug: 'v1-08-autonomie-supervisee',

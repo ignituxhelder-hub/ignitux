@@ -958,3 +958,163 @@ message lisible).
 
 Les testeurs disposent donc maintenant, en plus : du bouton « Télécharger mes données », de la
 suppression de compte avec aperçu, et de la section « Rachat progressif des parts ».
+
+---
+
+# 15. Session technique : bases séparées, file hors ligne, article 7
+
+> Le rapport était demandé en « section 13 ». Les sections 13 et 14 existent déjà (droits RGPD
+> et rachat progressif) : renuméroter aurait cassé les renvois. Ce rapport prend donc la suite.
+
+Cette session ne traite **que** ce qui est purement technique. Les cinq points qui dépendent
+d'une décision du porteur sont listés en 15.6, avec pour chacun la question exacte à trancher —
+aucun n'a été comblé par une supposition.
+
+## 15.1 Séparer la base de développement de celle des vraies personnes
+
+**Ce qui a été fait.** Une base `ignitux_prod` distincte sur l'instance Postgres, schéma poussé
+(36 tables), **vérifiée vide de toute donnée de personne** (0 ligne, comptée table par table).
+Démarrage réel du serveur contre elle : seul le référentiel se sème — 24 articles V1 et
+12 démarches françaises — et aucune donnée de personne n'apparaît. Effet de bord appréciable :
+le corpus hérité `principes-fondateurs` n'y est pas répliqué, la base de production ne contient
+que la Constitution V1.
+
+**Ce que je n'ai pas pu faire, et pourquoi.** Créer un **second projet Supabase** demande le
+compte du porteur : ni CLI ni jeton de gestion ici, et de toute façon créer une ressource
+facturable sur un compte n'est pas une décision technique. La séparation obtenue est donc réelle
+au niveau des données — catalogues Postgres distincts — mais pas au niveau de l'infrastructure :
+même instance, mêmes identifiants, même projet. Une panne de l'instance emporte les deux. C'est
+écrit tel quel dans `docs/decisions.md`, parce qu'une fausse impression de sécurité serait pire
+que pas de séparation du tout.
+
+**Un trou de sécurité trouvé en chemin.** `.gitignore` listait `.env` mais pas `.env.production`,
+et le motif `.env` ne couvre que le fichier exactement nommé ainsi. Le fichier de production
+serait donc parti sur GitHub avec sa chaîne de connexion dès le premier `git add -A`. Le trou
+n'était exploitable qu'à partir du moment où ce fichier existait : il a été bouché avant de le
+créer. Les secrets JWT des deux environnements sont volontairement différents, pour qu'un jeton
+signé en développement n'ouvre pas de session côté vraies personnes.
+
+**Ce qui n'a pas été basculé, à dessein.** Le déploiement de test tourne toujours sur la base de
+développement. `testeur1` y a déjà créé un projet : basculer maintenant effacerait son travail.
+Voir la question en 15.6.
+
+## 15.2 Offline First — ce qui a été durci, et ce qui reste hors scope
+
+**Le service worker reste hors scope.** La contrainte n'a pas changé : aucun navigateur n'est
+disponible ici pour vérifier son comportement réel, et un service worker mal réglé sert du code
+périmé indéfiniment — il casse l'application pour tout le monde, y compris pour quelqu'un en
+train de s'en servir. Tant qu'une vérification navigateur réelle est impossible dans la session,
+l'article 16 reste marqué « énoncé ». C'est la formulation honnête : l'application ne démarre pas
+hors ligne.
+
+**Ce qui a été durci** : la file d'écriture, entièrement vérifiable par test. Le module tenait ses
+deux règles face au serveur et les trahissait face au stockage. Quatre défauts, tous capables de
+faire disparaître une écriture sans que personne le sache.
+
+1. **Collision d'identifiants.** L'identifiant valait `<horodatage>-<longueur de la file>`. Deux
+   écritures ajoutées dans la même milliseconde, de part et d'autre d'une suppression, recevaient
+   le **même** identifiant — et supprimer l'une supprimait les deux. Remplacé par un compteur
+   monotone persisté, qui se reconstruit au-dessus du plus grand numéro déjà attribué pour les
+   files écrites par une version antérieure.
+2. **Mise en file annoncée à tort.** `writeState` avalait l'échec du stockage, et `enqueue`
+   renvoyait quand même l'écriture : l'interface affichait « en attente d'envoi » pour une action
+   qui n'était nulle part et qui avait disparu au rechargement. `writeState` **vérifie désormais
+   par relecture** au lieu de déduire le succès de l'absence d'exception, et `enqueue` renvoie
+   `null`. Le type force chaque appelant à traiter le cas : l'API dit maintenant clairement que
+   l'action n'est pas enregistrée.
+3. **Boucle infinie au rejeu.** Si le stockage refusait d'enregistrer la suppression, la tête de
+   file ne bougeait pas et la même écriture repartait indéfiniment au serveur, en gelant l'onglet.
+   Garde-fou sur les deux branches. Il **relit le stockage** : se fier au retour de
+   `removePending`, c'est vérifier l'intention et non le fait — ma première version faisait
+   exactement cette erreur, et c'est le test qui l'a montrée.
+4. **Entrées corrompues rejouées.** Un `null` ou un `path` manquant partait en `fetch('undefined')`,
+   et une entrée irréparable en tête bloquait toute la file. Filtrées à la lecture, avec la raison
+   écrite sur place pour laquelle ce n'est pas une perte silencieuse au sens de la règle 2.
+
+Le cache de lecture daté a été relu et laissé tel quel : sa règle — toute donnée servie porte sa
+date de capture — est respectée, l'éviction est bornée, et les échecs de stockage y sont sans
+conséquence puisque le cache est un confort.
+
+**Vérification** : `git stash` du seul module, puis exécution de la suite. Les quatre tests de
+régression échouent bien sans le correctif.
+
+## 15.3 Les deux fuites RGPD : régression vérifiée, et une garde renforcée
+
+Vérifié en retirant chaque correctif et en relançant la suite :
+
+- **hash du mot de passe dans l'export** : le correctif retiré (`compte: row` au lieu de l'objet
+  recomposé), un seul test échoue — le bon ;
+- **export entier dans le `localStorage`** : `skipOfflineCache` retiré, un seul test échoue — le
+  bon.
+
+**Garde renforcée.** L'ancien test ne surveillait qu'un champ connu. Un second test surveille
+désormais la **forme** : l'objet de compte exporté doit porter exactement quatre clés, quoi que
+renvoie la base. Le jour où quelqu'un ajoute une colonne sensible à `users` — codes de secours,
+jeton de session, adresse — elle ne pourra pas se glisser dans un fichier destiné à circuler par
+email, même si le `select` de Prisma est élargi au passage.
+
+## 15.4 Article 7 promu à « appliqué », sans rien ajouter au produit
+
+Revue des 14 articles énoncés, en cherchant ceux qui pourraient passer à « appliqué » **sans
+inventer de dispositif absent**. Un seul candidat tient : l'**article 7 — Responsabilité**,
+« chaque utilisateur reste responsable de ses décisions ».
+
+Le dispositif existait déjà et il est systématique : quatre modules rendent des indications à
+quelqu'un qui va décider — facturation, conformité, financement, rachat — et **chacun accompagne
+sa réponse d'un avertissement disant ce qu'Ignitux ne décide pas**. Ce n'était garanti par rien :
+un refactoring pouvait le retirer en silence, et le silence se serait lu comme une validation.
+
+La règle `conseil-sans-avertissement` rend ce dispositif obligatoire, branchée aux sept points
+d'appel réels. Retirer un avertissement fait désormais échouer l'appel.
+
+**Les treize autres restent énoncés, et c'est justifié** :
+
+- **art. 16 (Offline First)** et **art. 17 (Les Gardiens)** : voir 15.2 et 15.6 ;
+- **art. 4, 5, 6 (Découvrir, Construire, Transmettre)** décrivent ce que le produit fait, pas une
+  contrainte sur une action : il n'y a rien à refuser ;
+- **art. 1 (La Vérité)**, **2 (L'Humain avant le profit)**, **18, 19, 20** sont des principes que
+  les autres règles servent indirectement. Les marquer « appliqué » reviendrait à prétendre qu'une
+  règle vérifie la vérité ou la confiance, ce qu'aucun code ne fait ;
+- **art. 14 (Intégrer avant remplacer)** et **art. 23 (Indépendance du fondateur)** n'ont aucun
+  mécanisme dans le produit. Les marquer « appliqué » annoncerait un dispositif inexistant ;
+- **art. 21 (Protection des idées)** est déjà servi par la provenance (art. 9) et l'auteur des
+  souvenirs (art. 12). Lui ajouter une règle serait du remplissage : la même vérification
+  comptée deux fois.
+
+Bilan : **11 articles appliqués sur 24**, couverts par **14 règles exécutables**.
+
+## 15.5 Vérification
+
+- **787 tests verts** : 611 backend (55 fichiers), 176 frontend (26 fichiers).
+- Lint, types et builds propres des deux côtés. Trois problèmes de lint introduits par mes
+  propres changements ont été corrigés (deux promesses non attendues après le passage de deux
+  méthodes en asynchrone, un chaînage optionnel risqué dans un test).
+- **18 contrôles en conditions réelles** contre la nouvelle base de production et un serveur qui
+  tourne : parcours complet, les six réponses d'indication portant réellement leur avertissement,
+  verrou IA (503 sur un générateur), rachat progressif, export sans hash, suppression de compte
+  puis reconnexion impossible. Compte de vérification supprimé par le test lui-même — base
+  reconfirmée vierge après coup.
+- Le build frontend a été lancé dans un répertoire séparé (`NEXT_DIST_DIR`) pour ne pas corrompre
+  ce que sert le déploiement de test, qui est resté debout pendant toute la session.
+- Toujours **aucun appel à l'API Claude**. `IGINI_AI_ENABLED` reste à `false`, et la base de
+  production n'a aucune clé.
+- **Aucun `.docx` touché.**
+
+## 15.6 Ce qui reste bloqué sur une décision — et la question exacte
+
+Ces cinq points n'ont pas été touchés. Pour chacun, ce dont j'ai besoin pour avancer.
+
+| Point | La question exacte |
+|---|---|
+| **Fournisseur d'email** | Resend, AWS SES, ou autre ? Une fois le nom donné, le branchement ne touche qu'une classe. Question liée : la vérification d'email devient-elle **obligatoire** pour se connecter, ou reste-t-elle facultative comme aujourd'hui ? |
+| **Budget / modèle IA** | Quel plafond mensuel acceptes-tu, et sur quel modèle ? Rallumer est une variable d'environnement ; c'est le plafond que je ne peux pas fixer à ta place. |
+| **Les Gardiens (art. 17)** | Qui est Gardien — toi seul, un rôle attribuable, un collège ? Et surtout : que peut-il **empêcher** concrètement ? Sans réponse à la seconde question, le rôle n'a pas de traduction en code. |
+| **Montage juridique 51/49** | Le contrat doit-il être un document généré par Ignitux, ou un modèle que tu fais rédiger et que le produit se contente de référencer ? Question préalable : quel juriste valide ? |
+| **Sources Suisse / Portugal** | Quelles sources officielles fais-tu autorité — équivalents de service-public.fr pour ces deux pays ? Sans URL officielle, je ne peux rien semer : le module refuse une règle locale sans source, et c'est volontaire. |
+
+**Une sixième question, née de cette session** : le déploiement de test doit-il basculer sur la
+nouvelle base de production ? Basculer maintenant repart d'une base vierge et **efface le projet
+déjà créé par `testeur1`**. Trois options : basculer et prévenir les testeurs qu'ils repartent de
+zéro ; attendre la fin de leur session ; ou recopier leurs deux comptes vers la nouvelle base.
+Cette dernière option demande un script de migration que je peux écrire, mais qui n'a de sens que
+si tu veux garder leurs données.

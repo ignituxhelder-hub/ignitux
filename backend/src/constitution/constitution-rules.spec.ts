@@ -313,6 +313,51 @@ describe('moteur de règles constitutionnel', () => {
     });
   });
 
+  describe('responsabilité (article 7)', () => {
+    it("refuse de rendre une indication sans son avertissement", () => {
+      // L'article dit que la personne reste responsable de ses décisions.
+      // Encore faut-il qu'elle sache sur quoi elle décide seule : c'est
+      // exactement ce que porte l'avertissement de chaque module.
+      const violations = reviewAction({
+        kind: 'publish_guidance',
+        module: 'facturation',
+        notice: null,
+      });
+
+      expect(violations[0].ruleId).toBe('conseil-sans-avertissement');
+      expect(violations[0].articleSlug).toBe('v1-07-responsabilite');
+      expect(hasBlockingViolation(violations)).toBe(true);
+    });
+
+    it('refuse aussi un avertissement vide', () => {
+      // Une chaîne blanche passerait un simple test de présence tout en
+      // n'avertissant de rien.
+      expect(
+        reviewAction({ kind: 'publish_guidance', module: 'conformité', notice: '   ' }),
+      ).toHaveLength(1);
+    });
+
+    it('nomme le module fautif dans le motif', () => {
+      const violations = reviewAction({
+        kind: 'publish_guidance',
+        module: 'rachat progressif',
+        notice: null,
+      });
+
+      expect(violations[0].detail).toContain('rachat progressif');
+    });
+
+    it('accepte une indication accompagnée de son avertissement', () => {
+      expect(
+        reviewAction({
+          kind: 'publish_guidance',
+          module: 'conformité',
+          notice: "Ignitux ne vérifie pas ta situation : confirme auprès d'une source officielle.",
+        }),
+      ).toEqual([]);
+    });
+  });
+
   it('une règle ne se prononce que sur le type d\'action qui la concerne', () => {
     // Garde-fou contre une régression classique : oublier le early-return
     // sur action.kind fait qu'une règle se déclenche sur n'importe quoi.
@@ -337,6 +382,7 @@ describe('moteur de règles constitutionnel', () => {
         founderBasisPointsAfter: 5100,
         totalBasisPointsAfter: 10000,
       },
+      { kind: 'publish_guidance', module: 'facturation', notice: 'Avertissement réel.' },
     ];
 
     for (const action of actions) {
