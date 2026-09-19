@@ -10,7 +10,7 @@
   `AuthProvider`/`useAuth` (React Context) pour la session, `useState`/`useEffect` partout ailleurs.
   Pas de Tailwind ni de CSS-in-JS : CSS global (`src/app/globals.css`) avec variables CSS pour le
   thème (fond sombre, accent orange).
-- **Tests** — Vitest des deux côtés. 196 tests backend, 52 tests frontend au 19/09/2026 (voir
+- **Tests** — Vitest des deux côtés. 199 tests backend, 54 tests frontend au 19/09/2026 (voir
   [`status.md`](status.md) pour le compte à jour).
 - **CI** — GitHub Actions (`.github/workflows/ci.yml`) : lint + type-check + tests + build sur
   chaque push, pour le backend et le frontend séparément.
@@ -22,7 +22,7 @@ IGNITUX est l'écosystème (comptes, projets, communauté) ; IGINI est l'intelli
 `backend/src/igini/` contient tout ce qui est IGINI, le reste de `backend/src/` (auth, projects,
 community, users) est IGNITUX.
 
-## Découpage des modules backend (43 routes au total)
+## Découpage des modules backend (44 routes au total)
 
 | Domaine | Dossier | Rôle |
 |---|---|---|

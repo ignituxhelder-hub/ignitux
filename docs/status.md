@@ -10,14 +10,15 @@ cd backend && npx tsc --noEmit -p tsconfig.build.json && npm run lint && npx vit
 cd frontend && npx tsc --noEmit && npm run lint && npx vitest run && npm run build
 ```
 
-Au 19/09/2026 : **196 tests backend**, **52 tests frontend**, lint et type-check propres des deux
-côtés, build frontend réussi (12 routes).
+Au 19/09/2026 : **199 tests backend**, **54 tests frontend**, lint et type-check propres des deux
+côtés, build frontend réussi (13 routes).
 
 ## Complet et testé
 
-- **Comptes** — inscription/connexion JWT, bcrypt, rate-limiting, réinitialisation de mot de passe
-  et vérification d'email (voir `docs/decisions.md` pour la limite du `MailService` qui les
-  accompagne — journalisé, pas de vrai envoi tant qu'aucun fournisseur n'est choisi).
+- **Comptes** — inscription/connexion JWT, bcrypt, rate-limiting, réinitialisation de mot de passe,
+  vérification d'email, et changement de mot de passe une fois connecté (voir `docs/decisions.md`
+  pour la limite du `MailService` qui accompagne les deux premiers — journalisé, pas de vrai envoi
+  tant qu'aucun fournisseur n'est choisi).
 - **Projets** — CRUD, visibilité publique/privée, collaboration multi-comptes (backend + frontend).
 - **5 générateurs IGINI** — code complet (schémas Zod, prompts, persistance, mémoire commune
   correcte). Testés unitairement. **Pas testés en conditions réelles avec succès** — voir la section
@@ -40,9 +41,11 @@ côtés, build frontend réussi (12 routes).
 
 - **Génération IA réelle** — `ANTHROPIC_API_KEY` doit être configurée dans `backend/.env` pour que
   les 5 générateurs fonctionnent de bout en bout. Sans elle, chaque appel échoue avec une erreur 500
-  (message désormais spécifique — voir `docs/decisions.md`). **Statut au 18/09/2026 (soir) : en
-  cours de configuration, pas encore confirmé fonctionnel avec une preuve réelle (diagnostic en
-  cours sur pourquoi `backend/.env` n'affichait pas la clé lors des dernières vérifications).**
+  (message désormais spécifique — voir `docs/decisions.md`). **Statut au 19/09/2026 : toujours
+  absente de `backend/.env`** (vérifié directement, fichier inchangé depuis plusieurs vérifications)
+  — malgré plusieurs tentatives de configuration côté utilisateur qui ne se sont pas reflétées dans
+  le fichier réel. Voir `PROGRESS.md` pour le détail du diagnostic déjà fait ; pas de nouvelle piste
+  à tenter sans information supplémentaire.
 - **Financement (modèle économique réel)** — le générateur `igini/financing/` produit un texte de
   plan, mais aucune logique d'abonnement, d'investissement ou d'équité n'existe. Nécessite une
   décision produit/légale.
