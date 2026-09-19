@@ -28,6 +28,7 @@ export type UsersMinAggregateOutputType = {
   id: string | null
   email: string | null
   password_hash: string | null
+  email_verified_at: Date | null
   created_at: Date | null
 }
 
@@ -35,6 +36,7 @@ export type UsersMaxAggregateOutputType = {
   id: string | null
   email: string | null
   password_hash: string | null
+  email_verified_at: Date | null
   created_at: Date | null
 }
 
@@ -42,6 +44,7 @@ export type UsersCountAggregateOutputType = {
   id: number
   email: number
   password_hash: number
+  email_verified_at: number
   created_at: number
   _all: number
 }
@@ -51,6 +54,7 @@ export type UsersMinAggregateInputType = {
   id?: true
   email?: true
   password_hash?: true
+  email_verified_at?: true
   created_at?: true
 }
 
@@ -58,6 +62,7 @@ export type UsersMaxAggregateInputType = {
   id?: true
   email?: true
   password_hash?: true
+  email_verified_at?: true
   created_at?: true
 }
 
@@ -65,6 +70,7 @@ export type UsersCountAggregateInputType = {
   id?: true
   email?: true
   password_hash?: true
+  email_verified_at?: true
   created_at?: true
   _all?: true
 }
@@ -145,6 +151,7 @@ export type UsersGroupByOutputType = {
   id: string
   email: string
   password_hash: string
+  email_verified_at: Date | null
   created_at: Date | null
   _count: UsersCountAggregateOutputType | null
   _min: UsersMinAggregateOutputType | null
@@ -173,24 +180,28 @@ export type usersWhereInput = {
   id?: Prisma.UuidFilter<"users"> | string
   email?: Prisma.StringFilter<"users"> | string
   password_hash?: Prisma.StringFilter<"users"> | string
+  email_verified_at?: Prisma.DateTimeNullableFilter<"users"> | Date | string | null
   created_at?: Prisma.DateTimeNullableFilter<"users"> | Date | string | null
   projects?: Prisma.ProjectsListRelationFilter
   memories?: Prisma.MemoriesListRelationFilter
   concepts?: Prisma.ConceptsListRelationFilter
   community_comments?: Prisma.Community_commentsListRelationFilter
   collaborations?: Prisma.Project_collaboratorsListRelationFilter
+  auth_tokens?: Prisma.Auth_tokensListRelationFilter
 }
 
 export type usersOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   password_hash?: Prisma.SortOrder
+  email_verified_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   projects?: Prisma.projectsOrderByRelationAggregateInput
   memories?: Prisma.memoriesOrderByRelationAggregateInput
   concepts?: Prisma.conceptsOrderByRelationAggregateInput
   community_comments?: Prisma.community_commentsOrderByRelationAggregateInput
   collaborations?: Prisma.project_collaboratorsOrderByRelationAggregateInput
+  auth_tokens?: Prisma.auth_tokensOrderByRelationAggregateInput
 }
 
 export type usersWhereUniqueInput = Prisma.AtLeast<{
@@ -200,18 +211,21 @@ export type usersWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.usersWhereInput[]
   NOT?: Prisma.usersWhereInput | Prisma.usersWhereInput[]
   password_hash?: Prisma.StringFilter<"users"> | string
+  email_verified_at?: Prisma.DateTimeNullableFilter<"users"> | Date | string | null
   created_at?: Prisma.DateTimeNullableFilter<"users"> | Date | string | null
   projects?: Prisma.ProjectsListRelationFilter
   memories?: Prisma.MemoriesListRelationFilter
   concepts?: Prisma.ConceptsListRelationFilter
   community_comments?: Prisma.Community_commentsListRelationFilter
   collaborations?: Prisma.Project_collaboratorsListRelationFilter
+  auth_tokens?: Prisma.Auth_tokensListRelationFilter
 }, "id" | "email">
 
 export type usersOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   password_hash?: Prisma.SortOrder
+  email_verified_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.usersCountOrderByAggregateInput
   _max?: Prisma.usersMaxOrderByAggregateInput
@@ -225,6 +239,7 @@ export type usersScalarWhereWithAggregatesInput = {
   id?: Prisma.UuidWithAggregatesFilter<"users"> | string
   email?: Prisma.StringWithAggregatesFilter<"users"> | string
   password_hash?: Prisma.StringWithAggregatesFilter<"users"> | string
+  email_verified_at?: Prisma.DateTimeNullableWithAggregatesFilter<"users"> | Date | string | null
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"users"> | Date | string | null
 }
 
@@ -232,54 +247,63 @@ export type usersCreateInput = {
   id?: string
   email: string
   password_hash: string
+  email_verified_at?: Date | string | null
   created_at?: Date | string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
 }
 
 export type usersUncheckedCreateInput = {
   id?: string
   email: string
   password_hash: string
+  email_verified_at?: Date | string | null
   created_at?: Date | string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type usersUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
 }
 
 export type usersUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type usersCreateManyInput = {
   id?: string
   email: string
   password_hash: string
+  email_verified_at?: Date | string | null
   created_at?: Date | string | null
 }
 
@@ -287,6 +311,7 @@ export type usersUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -294,6 +319,7 @@ export type usersUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -301,6 +327,7 @@ export type usersCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   password_hash?: Prisma.SortOrder
+  email_verified_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -308,6 +335,7 @@ export type usersMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   password_hash?: Prisma.SortOrder
+  email_verified_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -315,6 +343,7 @@ export type usersMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   password_hash?: Prisma.SortOrder
+  email_verified_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -329,6 +358,20 @@ export type StringFieldUpdateOperationsInput = {
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
+}
+
+export type usersCreateNestedOneWithoutAuth_tokensInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutAuth_tokensInput, Prisma.usersUncheckedCreateWithoutAuth_tokensInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutAuth_tokensInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutAuth_tokensNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutAuth_tokensInput, Prisma.usersUncheckedCreateWithoutAuth_tokensInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutAuth_tokensInput
+  upsert?: Prisma.usersUpsertWithoutAuth_tokensInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutAuth_tokensInput, Prisma.usersUpdateWithoutAuth_tokensInput>, Prisma.usersUncheckedUpdateWithoutAuth_tokensInput>
 }
 
 export type usersCreateNestedOneWithoutProjectsInput = {
@@ -401,26 +444,98 @@ export type usersUpdateOneRequiredWithoutCollaborationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutCollaborationsInput, Prisma.usersUpdateWithoutCollaborationsInput>, Prisma.usersUncheckedUpdateWithoutCollaborationsInput>
 }
 
-export type usersCreateWithoutProjectsInput = {
+export type usersCreateWithoutAuth_tokensInput = {
   id?: string
   email: string
   password_hash: string
+  email_verified_at?: Date | string | null
   created_at?: Date | string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
 }
 
+export type usersUncheckedCreateWithoutAuth_tokensInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type usersCreateOrConnectWithoutAuth_tokensInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutAuth_tokensInput, Prisma.usersUncheckedCreateWithoutAuth_tokensInput>
+}
+
+export type usersUpsertWithoutAuth_tokensInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutAuth_tokensInput, Prisma.usersUncheckedUpdateWithoutAuth_tokensInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutAuth_tokensInput, Prisma.usersUncheckedCreateWithoutAuth_tokensInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutAuth_tokensInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutAuth_tokensInput, Prisma.usersUncheckedUpdateWithoutAuth_tokensInput>
+}
+
+export type usersUpdateWithoutAuth_tokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+}
+
+export type usersUncheckedUpdateWithoutAuth_tokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type usersCreateWithoutProjectsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+}
+
 export type usersUncheckedCreateWithoutProjectsInput = {
   id?: string
   email: string
   password_hash: string
+  email_verified_at?: Date | string | null
   created_at?: Date | string | null
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type usersCreateOrConnectWithoutProjectsInput = {
@@ -443,44 +558,52 @@ export type usersUpdateWithoutProjectsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
 }
 
 export type usersUncheckedUpdateWithoutProjectsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type usersCreateWithoutMemoriesInput = {
   id?: string
   email: string
   password_hash: string
+  email_verified_at?: Date | string | null
   created_at?: Date | string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
 }
 
 export type usersUncheckedCreateWithoutMemoriesInput = {
   id?: string
   email: string
   password_hash: string
+  email_verified_at?: Date | string | null
   created_at?: Date | string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type usersCreateOrConnectWithoutMemoriesInput = {
@@ -503,44 +626,52 @@ export type usersUpdateWithoutMemoriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMemoriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type usersCreateWithoutConceptsInput = {
   id?: string
   email: string
   password_hash: string
+  email_verified_at?: Date | string | null
   created_at?: Date | string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
 }
 
 export type usersUncheckedCreateWithoutConceptsInput = {
   id?: string
   email: string
   password_hash: string
+  email_verified_at?: Date | string | null
   created_at?: Date | string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type usersCreateOrConnectWithoutConceptsInput = {
@@ -563,44 +694,52 @@ export type usersUpdateWithoutConceptsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
 }
 
 export type usersUncheckedUpdateWithoutConceptsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type usersCreateWithoutCommunity_commentsInput = {
   id?: string
   email: string
   password_hash: string
+  email_verified_at?: Date | string | null
   created_at?: Date | string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
 }
 
 export type usersUncheckedCreateWithoutCommunity_commentsInput = {
   id?: string
   email: string
   password_hash: string
+  email_verified_at?: Date | string | null
   created_at?: Date | string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type usersCreateOrConnectWithoutCommunity_commentsInput = {
@@ -623,44 +762,52 @@ export type usersUpdateWithoutCommunity_commentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCommunity_commentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type usersCreateWithoutCollaborationsInput = {
   id?: string
   email: string
   password_hash: string
+  email_verified_at?: Date | string | null
   created_at?: Date | string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
 }
 
 export type usersUncheckedCreateWithoutCollaborationsInput = {
   id?: string
   email: string
   password_hash: string
+  email_verified_at?: Date | string | null
   created_at?: Date | string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type usersCreateOrConnectWithoutCollaborationsInput = {
@@ -683,22 +830,26 @@ export type usersUpdateWithoutCollaborationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCollaborationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -712,6 +863,7 @@ export type UsersCountOutputType = {
   concepts: number
   community_comments: number
   collaborations: number
+  auth_tokens: number
 }
 
 export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -720,6 +872,7 @@ export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   concepts?: boolean | UsersCountOutputTypeCountConceptsArgs
   community_comments?: boolean | UsersCountOutputTypeCountCommunity_commentsArgs
   collaborations?: boolean | UsersCountOutputTypeCountCollaborationsArgs
+  auth_tokens?: boolean | UsersCountOutputTypeCountAuth_tokensArgs
 }
 
 /**
@@ -767,17 +920,26 @@ export type UsersCountOutputTypeCountCollaborationsArgs<ExtArgs extends runtime.
   where?: Prisma.project_collaboratorsWhereInput
 }
 
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountAuth_tokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.auth_tokensWhereInput
+}
+
 
 export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   email?: boolean
   password_hash?: boolean
+  email_verified_at?: boolean
   created_at?: boolean
   projects?: boolean | Prisma.users$projectsArgs<ExtArgs>
   memories?: boolean | Prisma.users$memoriesArgs<ExtArgs>
   concepts?: boolean | Prisma.users$conceptsArgs<ExtArgs>
   community_comments?: boolean | Prisma.users$community_commentsArgs<ExtArgs>
   collaborations?: boolean | Prisma.users$collaborationsArgs<ExtArgs>
+  auth_tokens?: boolean | Prisma.users$auth_tokensArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["users"]>
 
@@ -785,6 +947,7 @@ export type usersSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   id?: boolean
   email?: boolean
   password_hash?: boolean
+  email_verified_at?: boolean
   created_at?: boolean
 }, ExtArgs["result"]["users"]>
 
@@ -792,6 +955,7 @@ export type usersSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   id?: boolean
   email?: boolean
   password_hash?: boolean
+  email_verified_at?: boolean
   created_at?: boolean
 }, ExtArgs["result"]["users"]>
 
@@ -799,16 +963,18 @@ export type usersSelectScalar = {
   id?: boolean
   email?: boolean
   password_hash?: boolean
+  email_verified_at?: boolean
   created_at?: boolean
 }
 
-export type usersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "password_hash" | "created_at", ExtArgs["result"]["users"]>
+export type usersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "password_hash" | "email_verified_at" | "created_at", ExtArgs["result"]["users"]>
 export type usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   projects?: boolean | Prisma.users$projectsArgs<ExtArgs>
   memories?: boolean | Prisma.users$memoriesArgs<ExtArgs>
   concepts?: boolean | Prisma.users$conceptsArgs<ExtArgs>
   community_comments?: boolean | Prisma.users$community_commentsArgs<ExtArgs>
   collaborations?: boolean | Prisma.users$collaborationsArgs<ExtArgs>
+  auth_tokens?: boolean | Prisma.users$auth_tokensArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type usersIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -822,11 +988,13 @@ export type $usersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     concepts: Prisma.$conceptsPayload<ExtArgs>[]
     community_comments: Prisma.$community_commentsPayload<ExtArgs>[]
     collaborations: Prisma.$project_collaboratorsPayload<ExtArgs>[]
+    auth_tokens: Prisma.$auth_tokensPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     email: string
     password_hash: string
+    email_verified_at: Date | null
     created_at: Date | null
   }, ExtArgs["result"]["users"]>
   composites: {}
@@ -1227,6 +1395,7 @@ export interface Prisma__usersClient<T, Null = never, ExtArgs extends runtime.Ty
   concepts<T extends Prisma.users$conceptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$conceptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$conceptsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   community_comments<T extends Prisma.users$community_commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$community_commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$community_commentsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   collaborations<T extends Prisma.users$collaborationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$collaborationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$project_collaboratorsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  auth_tokens<T extends Prisma.users$auth_tokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$auth_tokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$auth_tokensPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1259,6 +1428,7 @@ export interface usersFieldRefs {
   readonly id: Prisma.FieldRef<"users", 'String'>
   readonly email: Prisma.FieldRef<"users", 'String'>
   readonly password_hash: Prisma.FieldRef<"users", 'String'>
+  readonly email_verified_at: Prisma.FieldRef<"users", 'DateTime'>
   readonly created_at: Prisma.FieldRef<"users", 'DateTime'>
 }
     
@@ -1770,6 +1940,30 @@ export type users$collaborationsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.Project_collaboratorsScalarFieldEnum | Prisma.Project_collaboratorsScalarFieldEnum[]
+}
+
+/**
+ * users.auth_tokens
+ */
+export type users$auth_tokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the auth_tokens
+   */
+  select?: Prisma.auth_tokensSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the auth_tokens
+   */
+  omit?: Prisma.auth_tokensOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.auth_tokensInclude<ExtArgs> | null
+  where?: Prisma.auth_tokensWhereInput
+  orderBy?: Prisma.auth_tokensOrderByWithRelationInput | Prisma.auth_tokensOrderByWithRelationInput[]
+  cursor?: Prisma.auth_tokensWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Auth_tokensScalarFieldEnum | Prisma.Auth_tokensScalarFieldEnum[]
 }
 
 /**

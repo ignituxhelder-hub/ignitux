@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   users: 'users',
+  auth_tokens: 'auth_tokens',
   projects: 'projects',
   analyses: 'analyses',
   financing_plans: 'financing_plans',
@@ -86,10 +87,24 @@ export const UsersScalarFieldEnum = {
   id: 'id',
   email: 'email',
   password_hash: 'password_hash',
+  email_verified_at: 'email_verified_at',
   created_at: 'created_at'
 } as const
 
 export type UsersScalarFieldEnum = (typeof UsersScalarFieldEnum)[keyof typeof UsersScalarFieldEnum]
+
+
+export const Auth_tokensScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  token_hash: 'token_hash',
+  purpose: 'purpose',
+  expires_at: 'expires_at',
+  used_at: 'used_at',
+  created_at: 'created_at'
+} as const
+
+export type Auth_tokensScalarFieldEnum = (typeof Auth_tokensScalarFieldEnum)[keyof typeof Auth_tokensScalarFieldEnum]
 
 
 export const ProjectsScalarFieldEnum = {

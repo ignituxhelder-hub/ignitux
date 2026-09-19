@@ -47,6 +47,11 @@ export { Prisma }
  */
 export type users = Prisma.usersModel
 /**
+ * Model auth_tokens
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type auth_tokens = Prisma.auth_tokensModel
+/**
  * Model projects
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */
