@@ -242,6 +242,7 @@ export class ProjectsService {
         project_id: project.id,
         summary: result.summary,
         feasibility_score: result.feasibility_score,
+        score_rationale: result.score_rationale,
         strengths: result.strengths,
         risks: result.risks,
         next_steps: result.next_steps,

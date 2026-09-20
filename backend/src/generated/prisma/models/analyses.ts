@@ -39,6 +39,7 @@ export type AnalysesMinAggregateOutputType = {
   project_id: string | null
   summary: string | null
   feasibility_score: number | null
+  score_rationale: string | null
   generated_by: string | null
   generated_model: string | null
   created_at: Date | null
@@ -49,6 +50,7 @@ export type AnalysesMaxAggregateOutputType = {
   project_id: string | null
   summary: string | null
   feasibility_score: number | null
+  score_rationale: string | null
   generated_by: string | null
   generated_model: string | null
   created_at: Date | null
@@ -59,6 +61,7 @@ export type AnalysesCountAggregateOutputType = {
   project_id: number
   summary: number
   feasibility_score: number
+  score_rationale: number
   strengths: number
   risks: number
   next_steps: number
@@ -82,6 +85,7 @@ export type AnalysesMinAggregateInputType = {
   project_id?: true
   summary?: true
   feasibility_score?: true
+  score_rationale?: true
   generated_by?: true
   generated_model?: true
   created_at?: true
@@ -92,6 +96,7 @@ export type AnalysesMaxAggregateInputType = {
   project_id?: true
   summary?: true
   feasibility_score?: true
+  score_rationale?: true
   generated_by?: true
   generated_model?: true
   created_at?: true
@@ -102,6 +107,7 @@ export type AnalysesCountAggregateInputType = {
   project_id?: true
   summary?: true
   feasibility_score?: true
+  score_rationale?: true
   strengths?: true
   risks?: true
   next_steps?: true
@@ -202,6 +208,7 @@ export type AnalysesGroupByOutputType = {
   project_id: string
   summary: string
   feasibility_score: number
+  score_rationale: string | null
   strengths: string[]
   risks: string[]
   next_steps: string[]
@@ -238,6 +245,7 @@ export type analysesWhereInput = {
   project_id?: Prisma.UuidFilter<"analyses"> | string
   summary?: Prisma.StringFilter<"analyses"> | string
   feasibility_score?: Prisma.IntFilter<"analyses"> | number
+  score_rationale?: Prisma.StringNullableFilter<"analyses"> | string | null
   strengths?: Prisma.StringNullableListFilter<"analyses">
   risks?: Prisma.StringNullableListFilter<"analyses">
   next_steps?: Prisma.StringNullableListFilter<"analyses">
@@ -252,6 +260,7 @@ export type analysesOrderByWithRelationInput = {
   project_id?: Prisma.SortOrder
   summary?: Prisma.SortOrder
   feasibility_score?: Prisma.SortOrder
+  score_rationale?: Prisma.SortOrderInput | Prisma.SortOrder
   strengths?: Prisma.SortOrder
   risks?: Prisma.SortOrder
   next_steps?: Prisma.SortOrder
@@ -269,6 +278,7 @@ export type analysesWhereUniqueInput = Prisma.AtLeast<{
   project_id?: Prisma.UuidFilter<"analyses"> | string
   summary?: Prisma.StringFilter<"analyses"> | string
   feasibility_score?: Prisma.IntFilter<"analyses"> | number
+  score_rationale?: Prisma.StringNullableFilter<"analyses"> | string | null
   strengths?: Prisma.StringNullableListFilter<"analyses">
   risks?: Prisma.StringNullableListFilter<"analyses">
   next_steps?: Prisma.StringNullableListFilter<"analyses">
@@ -283,6 +293,7 @@ export type analysesOrderByWithAggregationInput = {
   project_id?: Prisma.SortOrder
   summary?: Prisma.SortOrder
   feasibility_score?: Prisma.SortOrder
+  score_rationale?: Prisma.SortOrderInput | Prisma.SortOrder
   strengths?: Prisma.SortOrder
   risks?: Prisma.SortOrder
   next_steps?: Prisma.SortOrder
@@ -304,6 +315,7 @@ export type analysesScalarWhereWithAggregatesInput = {
   project_id?: Prisma.UuidWithAggregatesFilter<"analyses"> | string
   summary?: Prisma.StringWithAggregatesFilter<"analyses"> | string
   feasibility_score?: Prisma.IntWithAggregatesFilter<"analyses"> | number
+  score_rationale?: Prisma.StringNullableWithAggregatesFilter<"analyses"> | string | null
   strengths?: Prisma.StringNullableListFilter<"analyses">
   risks?: Prisma.StringNullableListFilter<"analyses">
   next_steps?: Prisma.StringNullableListFilter<"analyses">
@@ -316,6 +328,7 @@ export type analysesCreateInput = {
   id?: string
   summary: string
   feasibility_score: number
+  score_rationale?: string | null
   strengths?: Prisma.analysesCreatestrengthsInput | string[]
   risks?: Prisma.analysesCreaterisksInput | string[]
   next_steps?: Prisma.analysesCreatenext_stepsInput | string[]
@@ -330,6 +343,7 @@ export type analysesUncheckedCreateInput = {
   project_id: string
   summary: string
   feasibility_score: number
+  score_rationale?: string | null
   strengths?: Prisma.analysesCreatestrengthsInput | string[]
   risks?: Prisma.analysesCreaterisksInput | string[]
   next_steps?: Prisma.analysesCreatenext_stepsInput | string[]
@@ -342,6 +356,7 @@ export type analysesUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   summary?: Prisma.StringFieldUpdateOperationsInput | string
   feasibility_score?: Prisma.IntFieldUpdateOperationsInput | number
+  score_rationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   strengths?: Prisma.analysesUpdatestrengthsInput | string[]
   risks?: Prisma.analysesUpdaterisksInput | string[]
   next_steps?: Prisma.analysesUpdatenext_stepsInput | string[]
@@ -356,6 +371,7 @@ export type analysesUncheckedUpdateInput = {
   project_id?: Prisma.StringFieldUpdateOperationsInput | string
   summary?: Prisma.StringFieldUpdateOperationsInput | string
   feasibility_score?: Prisma.IntFieldUpdateOperationsInput | number
+  score_rationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   strengths?: Prisma.analysesUpdatestrengthsInput | string[]
   risks?: Prisma.analysesUpdaterisksInput | string[]
   next_steps?: Prisma.analysesUpdatenext_stepsInput | string[]
@@ -369,6 +385,7 @@ export type analysesCreateManyInput = {
   project_id: string
   summary: string
   feasibility_score: number
+  score_rationale?: string | null
   strengths?: Prisma.analysesCreatestrengthsInput | string[]
   risks?: Prisma.analysesCreaterisksInput | string[]
   next_steps?: Prisma.analysesCreatenext_stepsInput | string[]
@@ -381,6 +398,7 @@ export type analysesUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   summary?: Prisma.StringFieldUpdateOperationsInput | string
   feasibility_score?: Prisma.IntFieldUpdateOperationsInput | number
+  score_rationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   strengths?: Prisma.analysesUpdatestrengthsInput | string[]
   risks?: Prisma.analysesUpdaterisksInput | string[]
   next_steps?: Prisma.analysesUpdatenext_stepsInput | string[]
@@ -394,6 +412,7 @@ export type analysesUncheckedUpdateManyInput = {
   project_id?: Prisma.StringFieldUpdateOperationsInput | string
   summary?: Prisma.StringFieldUpdateOperationsInput | string
   feasibility_score?: Prisma.IntFieldUpdateOperationsInput | number
+  score_rationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   strengths?: Prisma.analysesUpdatestrengthsInput | string[]
   risks?: Prisma.analysesUpdaterisksInput | string[]
   next_steps?: Prisma.analysesUpdatenext_stepsInput | string[]
@@ -425,6 +444,7 @@ export type analysesCountOrderByAggregateInput = {
   project_id?: Prisma.SortOrder
   summary?: Prisma.SortOrder
   feasibility_score?: Prisma.SortOrder
+  score_rationale?: Prisma.SortOrder
   strengths?: Prisma.SortOrder
   risks?: Prisma.SortOrder
   next_steps?: Prisma.SortOrder
@@ -442,6 +462,7 @@ export type analysesMaxOrderByAggregateInput = {
   project_id?: Prisma.SortOrder
   summary?: Prisma.SortOrder
   feasibility_score?: Prisma.SortOrder
+  score_rationale?: Prisma.SortOrder
   generated_by?: Prisma.SortOrder
   generated_model?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -452,6 +473,7 @@ export type analysesMinOrderByAggregateInput = {
   project_id?: Prisma.SortOrder
   summary?: Prisma.SortOrder
   feasibility_score?: Prisma.SortOrder
+  score_rationale?: Prisma.SortOrder
   generated_by?: Prisma.SortOrder
   generated_model?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -542,6 +564,7 @@ export type analysesCreateWithoutProjectInput = {
   id?: string
   summary: string
   feasibility_score: number
+  score_rationale?: string | null
   strengths?: Prisma.analysesCreatestrengthsInput | string[]
   risks?: Prisma.analysesCreaterisksInput | string[]
   next_steps?: Prisma.analysesCreatenext_stepsInput | string[]
@@ -554,6 +577,7 @@ export type analysesUncheckedCreateWithoutProjectInput = {
   id?: string
   summary: string
   feasibility_score: number
+  score_rationale?: string | null
   strengths?: Prisma.analysesCreatestrengthsInput | string[]
   risks?: Prisma.analysesCreaterisksInput | string[]
   next_steps?: Prisma.analysesCreatenext_stepsInput | string[]
@@ -596,6 +620,7 @@ export type analysesScalarWhereInput = {
   project_id?: Prisma.UuidFilter<"analyses"> | string
   summary?: Prisma.StringFilter<"analyses"> | string
   feasibility_score?: Prisma.IntFilter<"analyses"> | number
+  score_rationale?: Prisma.StringNullableFilter<"analyses"> | string | null
   strengths?: Prisma.StringNullableListFilter<"analyses">
   risks?: Prisma.StringNullableListFilter<"analyses">
   next_steps?: Prisma.StringNullableListFilter<"analyses">
@@ -608,6 +633,7 @@ export type analysesCreateManyProjectInput = {
   id?: string
   summary: string
   feasibility_score: number
+  score_rationale?: string | null
   strengths?: Prisma.analysesCreatestrengthsInput | string[]
   risks?: Prisma.analysesCreaterisksInput | string[]
   next_steps?: Prisma.analysesCreatenext_stepsInput | string[]
@@ -620,6 +646,7 @@ export type analysesUpdateWithoutProjectInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   summary?: Prisma.StringFieldUpdateOperationsInput | string
   feasibility_score?: Prisma.IntFieldUpdateOperationsInput | number
+  score_rationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   strengths?: Prisma.analysesUpdatestrengthsInput | string[]
   risks?: Prisma.analysesUpdaterisksInput | string[]
   next_steps?: Prisma.analysesUpdatenext_stepsInput | string[]
@@ -632,6 +659,7 @@ export type analysesUncheckedUpdateWithoutProjectInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   summary?: Prisma.StringFieldUpdateOperationsInput | string
   feasibility_score?: Prisma.IntFieldUpdateOperationsInput | number
+  score_rationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   strengths?: Prisma.analysesUpdatestrengthsInput | string[]
   risks?: Prisma.analysesUpdaterisksInput | string[]
   next_steps?: Prisma.analysesUpdatenext_stepsInput | string[]
@@ -644,6 +672,7 @@ export type analysesUncheckedUpdateManyWithoutProjectInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   summary?: Prisma.StringFieldUpdateOperationsInput | string
   feasibility_score?: Prisma.IntFieldUpdateOperationsInput | number
+  score_rationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   strengths?: Prisma.analysesUpdatestrengthsInput | string[]
   risks?: Prisma.analysesUpdaterisksInput | string[]
   next_steps?: Prisma.analysesUpdatenext_stepsInput | string[]
@@ -659,6 +688,7 @@ export type analysesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   project_id?: boolean
   summary?: boolean
   feasibility_score?: boolean
+  score_rationale?: boolean
   strengths?: boolean
   risks?: boolean
   next_steps?: boolean
@@ -673,6 +703,7 @@ export type analysesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   project_id?: boolean
   summary?: boolean
   feasibility_score?: boolean
+  score_rationale?: boolean
   strengths?: boolean
   risks?: boolean
   next_steps?: boolean
@@ -687,6 +718,7 @@ export type analysesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   project_id?: boolean
   summary?: boolean
   feasibility_score?: boolean
+  score_rationale?: boolean
   strengths?: boolean
   risks?: boolean
   next_steps?: boolean
@@ -701,6 +733,7 @@ export type analysesSelectScalar = {
   project_id?: boolean
   summary?: boolean
   feasibility_score?: boolean
+  score_rationale?: boolean
   strengths?: boolean
   risks?: boolean
   next_steps?: boolean
@@ -709,7 +742,7 @@ export type analysesSelectScalar = {
   created_at?: boolean
 }
 
-export type analysesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "summary" | "feasibility_score" | "strengths" | "risks" | "next_steps" | "generated_by" | "generated_model" | "created_at", ExtArgs["result"]["analyses"]>
+export type analysesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "summary" | "feasibility_score" | "score_rationale" | "strengths" | "risks" | "next_steps" | "generated_by" | "generated_model" | "created_at", ExtArgs["result"]["analyses"]>
 export type analysesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }
@@ -730,6 +763,19 @@ export type $analysesPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     project_id: string
     summary: string
     feasibility_score: number
+    /**
+     * Pourquoi ce score, dans les mots du modèle qui l'a donné.
+     * 
+     * Un chiffre sans sa raison est invérifiable : on ne peut ni le
+     * contester, ni savoir ce qu'il faudrait corriger pour le faire monter.
+     * C'est l'esprit de l'article 10 applique non a l'existence de la source
+     * mais a sa lisibilite.
+     * 
+     * Nullable : les analyses produites avant ce champ n'en ont pas, et
+     * leur en fabriquer un apres coup serait exactement l'invention que le
+     * champ cherche a eviter.
+     */
+    score_rationale: string | null
     strengths: string[]
     risks: string[]
     next_steps: string[]
@@ -1164,6 +1210,7 @@ export interface analysesFieldRefs {
   readonly project_id: Prisma.FieldRef<"analyses", 'String'>
   readonly summary: Prisma.FieldRef<"analyses", 'String'>
   readonly feasibility_score: Prisma.FieldRef<"analyses", 'Int'>
+  readonly score_rationale: Prisma.FieldRef<"analyses", 'String'>
   readonly strengths: Prisma.FieldRef<"analyses", 'String[]'>
   readonly risks: Prisma.FieldRef<"analyses", 'String[]'>
   readonly next_steps: Prisma.FieldRef<"analyses", 'String[]'>

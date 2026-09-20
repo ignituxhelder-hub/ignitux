@@ -12,6 +12,7 @@ import {
 } from 'react';
 import { IginiMention } from '@/components/igini-mention';
 import { ProchaineEtape, Progression, SectionsFermees } from '@/components/parcours';
+import { AnalyseEnCours, AnalyseResultat } from './analyse-resultat';
 import {
   api,
   ApiError,
@@ -452,7 +453,33 @@ export default function ProjectDetailPage() {
           isBusy={analysis.isBusy}
           error={analysis.error}
           onGenerate={analysis.generate}
-          renderItem={(item) => <AnalysisCard analysis={item} key={item.id} />}
+          /* La plus récente est présentée comme un verdict qu'on peut
+             discuter ; les précédentes restent en carte, pour comparer une
+             idée retravaillée à ce qu'elle était. */
+          renderItem={(item) =>
+            item.id === analyses[0]?.id ? (
+              <AnalyseResultat
+                analyse={item}
+                key={item.id}
+                onCorriger={() => {
+                  const champ = window.document.getElementById('description');
+                  champ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  (champ as HTMLTextAreaElement | null)?.focus();
+                }}
+                onContinuer={() => {
+                  window.document
+                    .getElementById('section-construction')
+                    ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+              />
+            ) : (
+              <AnalysisCard analysis={item} key={item.id} />
+            )
+          }
+          /* Quarante à quatre-vingt-dix secondes de silence font croire que
+             quelque chose a cassé. On dit ce qui est en cours, sans feindre
+             une progression que le modèle ne fournit pas. */
+          busyContent={<AnalyseEnCours />}
           readOnly={!isOwner}
           iginiStatus={iginiStatus}
         />
@@ -460,6 +487,7 @@ export default function ProjectDetailPage() {
 
       {montrer('construction') && (
         <GenerationSection
+          anchorId="section-construction"
           title="Plan de construction"
           buttonLabel="Générer un plan"
           buttonBusyLabel="Génération…"
@@ -553,6 +581,10 @@ export default function ProjectDetailPage() {
 }
 
 interface GenerationSectionProps<T> {
+  /** Pose un identifiant sur la section, pour qu'on puisse y mener. */
+  anchorId?: string;
+  /** Ce qui s'affiche pendant la génération, à la place du vide. */
+  busyContent?: ReactNode;
   title: string;
   buttonLabel: string;
   buttonBusyLabel: string;
@@ -572,6 +604,8 @@ interface GenerationSectionProps<T> {
 }
 
 function GenerationSection<T>({
+  anchorId,
+  busyContent,
   title,
   buttonLabel,
   buttonBusyLabel,
@@ -590,7 +624,7 @@ function GenerationSection<T>({
   const generatorsOff = iginiStatus !== null && !iginiStatus.generatorsEnabled;
 
   return (
-    <div className="card" style={{ marginTop: '1.5rem' }}>
+    <div className="card" id={anchorId} style={{ marginTop: '1.5rem' }}>
       <div className="top-bar" style={{ marginBottom: items.length ? '1rem' : 0 }}>
         <h2 style={{ margin: 0 }}>{title}</h2>
         {!readOnly && !generatorsOff && (
@@ -614,6 +648,9 @@ function GenerationSection<T>({
       )}
 
       {error && <p className="error">{error}</p>}
+      {/* Pendant la génération : ce qui est en cours, plutôt que rien. Un
+          écran muet pendant une minute fait croire à une panne. */}
+      {isBusy && busyContent}
       {items.length === 0 && !isBusy && !generatorsOff && <p className="muted">{emptyLabel}</p>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {items.map(renderItem)}

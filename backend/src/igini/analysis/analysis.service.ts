@@ -13,6 +13,13 @@ const ProjectAnalysisSchema = z.object({
     .min(1)
     .max(10)
     .describe('Score de faisabilité de 1 (très risqué) à 10 (très solide)'),
+  score_rationale: z
+    .string()
+    .describe(
+      "En 2 à 3 phrases : pourquoi ce score et pas un autre. Nomme ce qui le tire vers le " +
+        "haut et ce qui le retient, et dis ce qu'il faudrait lever pour qu'il monte. " +
+        "Pas de généralités : la personne doit savoir quoi corriger.",
+    ),
   strengths: z.array(z.string()).describe('3 à 5 points forts du projet'),
   risks: z.array(z.string()).describe('3 à 5 risques ou angles morts'),
   next_steps: z.array(z.string()).describe('3 à 5 prochaines actions concrètes recommandées'),

@@ -98,6 +98,17 @@ model analyses {
   project           projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
   summary           String
   feasibility_score Int
+  /// Pourquoi ce score, dans les mots du modèle qui l'a donné.
+  ///
+  /// Un chiffre sans sa raison est invérifiable : on ne peut ni le
+  /// contester, ni savoir ce qu'il faudrait corriger pour le faire monter.
+  /// C'est l'esprit de l'article 10 applique non a l'existence de la source
+  /// mais a sa lisibilite.
+  ///
+  /// Nullable : les analyses produites avant ce champ n'en ont pas, et
+  /// leur en fabriquer un apres coup serait exactement l'invention que le
+  /// champ cherche a eviter.
+  score_rationale   String?
   strengths         String[]
   risks             String[]
   next_steps        String[]

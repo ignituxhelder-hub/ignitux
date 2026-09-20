@@ -4023,6 +4023,7 @@ export const AnalysesScalarFieldEnum = {
   project_id: 'project_id',
   summary: 'summary',
   feasibility_score: 'feasibility_score',
+  score_rationale: 'score_rationale',
   strengths: 'strengths',
   risks: 'risks',
   next_steps: 'next_steps',

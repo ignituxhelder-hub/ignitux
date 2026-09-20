@@ -345,6 +345,14 @@ export interface Analysis {
   project_id: string;
   summary: string;
   feasibility_score: number;
+  /**
+   * Pourquoi ce score, dans les mots du modele qui l a donne.
+   *
+   * null pour les analyses anterieures a ce champ. L ecran le dit au lieu
+   * d en fabriquer une : inventer le raisonnement du modele serait pire
+   * que de reconnaitre qu il manque.
+   */
+  score_rationale?: string | null;
   strengths: string[];
   risks: string[];
   next_steps: string[];

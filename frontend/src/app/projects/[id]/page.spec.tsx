@@ -242,7 +242,109 @@ describe('ProjectDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /analyser ce projet/i }));
 
     expect(await screen.findByText('Idée solide pour un premier lancement local.')).toBeInTheDocument();
-    expect(screen.getByText('Score de faisabilité : 7/10')).toBeInTheDocument();
+    // La plus récente n'est plus une carte parmi d'autres : c'est un verdict
+    // présenté, et la note se lit sur 100.
+    expect(screen.getByText('70 / 100')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: "Ce qu'IGINI a compris" })).toBeInTheDocument();
+  });
+
+  describe('résultat d’analyse', () => {
+    const ANALYSE = {
+      id: 'a1',
+      project_id: 'p1',
+      summary: 'Résumé du projet.',
+      feasibility_score: 6,
+      score_rationale: 'La technique est simple, mais le cycle de vente est long.',
+      strengths: ['Le cœur technique est modeste.'],
+      risks: ['La précision GPS est insuffisante.'],
+      next_steps: ['Mener dix entretiens.'],
+      generated_by: 'igini',
+      generated_model: 'claude-opus-5',
+      created_at: '2026-09-20T20:44:17.000Z',
+    };
+
+    function avecAnalyse(overrides = {}) {
+      return {
+        'GET /projects/p1': { status: 200, body: PROJECT },
+        ...ENGINE_ROUTES,
+        'GET /projects/p1/analyses': { status: 200, body: [{ ...ANALYSE, ...overrides }] },
+      };
+    }
+
+    // Un chiffre sans sa raison ne se conteste pas et ne dit pas quoi corriger.
+    it('montre pourquoi le score est ce qu’il est', async () => {
+      mockApiRoutes(avecAnalyse());
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByRole('heading', { name: 'Pourquoi ce score ?' })).toBeInTheDocument();
+      expect(screen.getByText(/cycle de vente est long/)).toBeInTheDocument();
+    });
+
+    // Fabriquer une justification apres coup serait inventer le raisonnement
+    // du modele — exactement ce que le champ cherche a eviter.
+    it("dit que l'explication manque au lieu d'en inventer une", async () => {
+      mockApiRoutes(avecAnalyse({ score_rationale: null }));
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByText(/serait inventer son raisonnement/)).toBeInTheDocument();
+    });
+
+    // Ignitux recommande, il ne decide pas : les deux portes restent ouvertes.
+    it('propose les deux décisions sous le seuil', async () => {
+      mockApiRoutes(avecAnalyse());
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByText('60 / 100')).toBeInTheDocument();
+      expect(screen.getByText(/en dessous du seuil de 75/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Corriger mon idée' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Continuer malgré tout' })).toBeInTheDocument();
+    });
+
+    it('invite à construire au-dessus du seuil', async () => {
+      mockApiRoutes(avecAnalyse({ feasibility_score: 8 }));
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByText('80 / 100')).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Passer à la construction' }),
+      ).toBeInTheDocument();
+      // Corriger reste possible : un bon score n'interdit pas de retravailler.
+      expect(screen.getByRole('button', { name: 'Corriger mon idée' })).toBeInTheDocument();
+    });
+
+    // Afficher « /100 » sans le dire laisserait croire a une precision que
+    // la source — un entier sur dix — n'a pas.
+    it('avoue la granularité de la note', async () => {
+      mockApiRoutes(avecAnalyse());
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByText(/jamais un chiffre intermédiaire/)).toBeInTheDocument();
+    });
   });
 
   it("recharge les tâches et l'automatisation après une génération (régression)", async () => {
