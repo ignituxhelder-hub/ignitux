@@ -4,6 +4,12 @@
 **Décision de l'entrepreneur** : le coût IA peut monter jusqu'à **10 % du prix de vente**.
 **Traduction** : **2,00 € d'IA par utilisateur payant et par mois**.
 
+> **Mise à jour, même jour.** Le point 1 de la section 7 — enregistrer `response.usage` — a été
+> construit. Les prochains appels journaliseront leurs tokens réels, réflexion interne comprise.
+> Les chiffres de ce document restent des estimations tant qu'aucun appel n'a tourné avec les
+> générateurs rallumés, mais ils cesseront de l'être d'eux-mêmes, sans qu'il faille refaire ce
+> travail.
+
 Ce document ne demande plus « est-ce rentable ? » — la question précédente, à laquelle la réponse
 était oui à 1 % du prix. Il demande **comment dépenser les 2,00 € désormais autorisés**, et ce que
 le passage de 1 % à 10 % rend possible, obligatoire, ou définitivement clos.
@@ -22,17 +28,22 @@ le passage de 1 % à 10 % rend possible, obligatoire, ou définitivement clos.
 
 ## 1. Ce que je n'ai pas pu mesurer, et pourquoi
 
-**Les tokens ne sont journalisés nulle part.** Vérifié dans les trois endroits où ils pourraient
-l'être :
+**Au moment où ce calcul a été fait, les tokens n'étaient journalisés nulle part.** Vérifié dans
+les trois endroits où ils auraient pu l'être :
 
-- `ClaudeService.generateStructuredOutput` lit `response.parsed_output` et **jette
+- `ClaudeService.generateStructuredOutput` lisait `response.parsed_output` et **jetait
   `response.usage`**, qui contient pourtant `input_tokens` et `output_tokens` ;
 - aucune colonne de token ni de coût dans `prisma/schema.prisma` (36 tables) ;
 - le rapport des 12 appels réels (PROGRESS.md, « Budget IA ») note leur nombre, leur nature et
   leur durée — 38 à 46 secondes — mais aucun décompte de tokens.
 
-**Il n'existe donc aucun coût facturé à calculer.** Tout chiffre présenté ici est une estimation
-construite sur des artefacts réels, pas une facture.
+**Il n'existait donc aucun coût facturé à calculer**, et tout chiffre présenté ici reste une
+estimation construite sur des artefacts réels, pas une facture.
+
+> **Le premier point est corrigé depuis** (section 12) : le journal existe, la table aussi. Mais
+> il est vide, puisque aucun appel n'a eu lieu depuis — les générateurs restent éteints. Cette
+> section décrit donc toujours fidèlement la base des chiffres ci-dessous. Elle cessera d'être
+> nécessaire au premier appel réel, pas avant.
 
 ### Ce que j'ai mesuré à la place
 
@@ -63,6 +74,12 @@ Les chiffres de la section 2 sont donc un **plancher**, pas une estimation centr
 précisément ce que le passage à 10 % permet d'absorber : **la première chose qu'achète le
 plafond, c'est de la sécurité sur un nombre qu'on ne mesure pas.** À 1 %, une réflexion quatre
 fois plus lourde que prévu aurait fait mentir le document ; à 10 %, elle rentre.
+
+**Ce trou est désormais bouché pour les appels à venir.** Le SDK expose cette valeur dans
+`output_tokens_details.thinking_tokens` ; le code ne la lisait pas, il la lit maintenant et
+l'enregistre. Le tableau de sensibilité de la section 5 deviendra une observation au lieu d'une
+hypothèse dès les premiers appels réels — mais il reste une hypothèse aujourd'hui, puisque
+aucun appel n'a encore eu lieu depuis.
 
 ---
 
@@ -100,9 +117,11 @@ générateur. Un projet richement décrit coûtera plus qu'un projet en trois li
 | Part du prix consommée | **0,97 %** |
 | Marge de manœuvre | **× 10,3** |
 
-L'enveloppe est remplie à un dixième. Les sections suivantes disent ce qu'on peut faire des neuf
-dixièmes restants — **sans rien construire dans cette session**, uniquement pour chiffrer les
-options.
+L'enveloppe est remplie à un dixième. Les sections 4 à 6 disent ce qu'on peut faire des neuf
+dixièmes restants : elles **chiffrent des options, elles n'en engagent aucune**. Rien de ce qui y
+est décrit — réflexion déclarée, passe de révision, sorties plus longues — n'a été mis en œuvre.
+La seule chose construite est l'instrument qui permettra de vérifier ces chiffres : la télémétrie
+de la section 12.
 
 ---
 
@@ -247,10 +266,15 @@ fait tenir le taux décidé**.
 
 ### Ce qu'il faut construire pour que 10 % soit une règle et non un vœu
 
-Dans cet ordre, et **rien n'a été construit dans cette session** :
+Dans cet ordre :
 
-1. **Enregistrer `response.usage`.** Sans cela, aucun des chiffres de ce document n'est vérifiable
-   et le taux ne peut pas être constaté. C'est le prérequis de tout le reste.
+1. ~~**Enregistrer `response.usage`.**~~ **Fait.** Chaque appel écrit désormais une ligne dans
+   `ai_usage_events` : modèle, tokens d'entrée, tokens de sortie, **part de réflexion interne**,
+   tokens de cache, durée, personne, projet, générateur. Le journal se pose au même endroit que
+   l'interrupteur des générateurs — le point de passage unique — et l'attribution est un champ
+   **obligatoire** du contrat : un sixième générateur ne compilera pas tant qu'il n'aura pas dit à
+   qui attribuer sa dépense. La consommation se lit sur `GET /igini/usage/mois-en-cours`, pour la
+   personne connectée uniquement. Détails et arbitrages en section 12.
 2. **Un compteur par utilisateur et par mois.** Compte des appels, ou mieux, des tokens — si l'on
    compte des tokens, le plafond devient « 2,00 € », littéralement la décision prise, plutôt qu'un
    nombre d'analyses qui n'en est qu'une approximation.
@@ -260,8 +284,9 @@ Dans cet ordre, et **rien n'a été construit dans cette session** :
 4. **Une alerte avant le plafond**, pour l'exploitant : le taux réel constaté, par utilisateur et
    global, comparé aux 10 %.
 
-Les points 1 et 2 sont le même compteur. C'est aussi celui qui permettrait de facturer un
-dépassement (section 9).
+Les points 1 et 2 sont le même compteur, et la moitié en est écrite : la table et son service
+existent, il manque la lecture qui décide et le refus qui s'ensuit. C'est aussi ce compteur qui
+permettrait de facturer un dépassement (section 9).
 
 ---
 
@@ -343,7 +368,7 @@ utilisateur et par mois coûte davantage que l'enveloppe IA entière.
 | Modèle | question ouverte, économie négligeable | **close : opus-5 confirmé** |
 | Profondeur de génération | une seule passe, par défaut | **révision + réflexion déclarée, chiffrées** |
 | Plafond de 5 analyses | « pas une urgence financière » | **nécessaire : 7 appels percent l'enveloppe** |
-| Journal des tokens | souhaitable | **prérequis : sans lui, le taux n'est pas constatable** |
+| Journal des tokens | souhaitable | **prérequis, et construit le jour même** (section 12) |
 
 **La ligne qui compte est l'avant-dernière.** Elle inverse la conclusion de l'analyse précédente,
 et ce n'est pas une correction : c'est la conséquence directe d'avoir transformé un constat en
@@ -351,3 +376,53 @@ engagement. Un taux qu'on ne peut pas faire respecter n'est pas un taux.
 
 Et tant que `response.usage` n'est pas enregistré, **ce document reste une estimation** — y
 compris sa conclusion rassurante selon laquelle l'enveloppe est large.
+
+---
+
+## 12. La télémétrie, telle qu'elle a été construite
+
+`ClaudeService` lisait `response.parsed_output` et jetait `response.usage`. Cette seule omission
+est ce qui a obligé tout ce document à compter des caractères. Elle est corrigée.
+
+### Ce qui est enregistré
+
+Une ligne par appel facturé, dans `ai_usage_events` : `model`, `input_tokens`, `output_tokens`,
+`thinking_tokens`, les deux colonnes de cache, `duration_ms`, `user_id`, `project_id`,
+`generator`, `created_at`.
+
+### Quatre arbitrages, à connaître avant de lire les chiffres
+
+1. **Aucun montant en euros n'est stocké.** Les tokens sont des faits mesurés et définitifs ; un
+   prix est un calcul dont la grille change — celle de ce document avait déjà trois mois. Figer
+   l'euro en base scellerait une grille périmée dans l'historique pour toujours. Le coût se dérive
+   à la lecture, dans `ai-pricing.ts`. La contrepartie est assumée : le jour où un prix bougera,
+   ce module devra porter une grille **datée** plutôt qu'une seule.
+2. **Un modèle absent de la grille vaut `null`, jamais zéro.** Zéro se confondrait avec
+   « gratuit » et disparaîtrait d'un total sans que rien ne le signale. Un total qui contient un
+   modèle non tarifé est rendu `null` en entier plutôt que partiel : un total partiel présenté
+   comme complet est faux, et faux dans le sens rassurant.
+3. **L'écriture précède la vérification du contenu.** Dès qu'une réponse existe, les tokens sont
+   facturés. Enregistrer après le contrôle ferait disparaître des totaux exactement les appels qui
+   ont mal tourné — les plus coûteux à ignorer, puisqu'ils sont payés sans rien rendre.
+4. **Le journal ne fait jamais échouer une génération.** Entre perdre une ligne de comptabilité et
+   perdre quarante secondes de travail déjà payées, c'est la ligne qui saute. **Conséquence à
+   retenir pour le plafond** : ce journal est fiable mais **pas transactionnel**. Une écriture
+   perdue sera un appel non décompté. Le jour où le plafond s'appuiera dessus, il faudra soit
+   rendre l'écriture bloquante, soit assumer qu'il s'agit d'un plafond haut et non d'un compteur
+   comptable.
+
+### Ce qui n'est pas encore éprouvé
+
+Le trajet depuis un **vrai appel** à l'API Anthropic. `IGINI_AI_ENABLED` reste à `false` et rien
+n'a été rallumé. L'extraction des champs depuis la réponse du SDK est couverte par des tests
+unitaires ; l'écriture en base et la lecture par l'API le sont de bout en bout sur la vraie base
+Postgres. Le seul maillon non éprouvé en conditions réelles est celui qui exige de rallumer les
+générateurs — et il le restera tant qu'ils seront éteints.
+
+### Une étape d'exploitation qui reste à faire
+
+Le schéma a été poussé sur la base de développement et sur la base de test. **Il ne l'a pas été
+sur `ignitux_prod`** : l'opération a été refusée comme touchant la production, et c'est le bon
+comportement. Tant qu'elle n'est pas faite, une bascule du déploiement vers la base de production
+échouerait sur une table manquante. C'est une commande à lancer sciemment, pas un effet de bord à
+subir.

@@ -1305,3 +1305,197 @@ partiellement tranché depuis : le taux de 10 % est fixé, le modèle est confir
 entre ce taux et le plafond absolu de 50 € reste ouvert, et l'IA n'est pas rallumée. Et la bascule du déploiement vers la base
 de production, qui effacerait le projet de `testeur1` — trois options y sont posées, aucune n'a
 été prise.
+
+---
+
+# 17. Le coût de l'IA : d'abord chiffré, puis rendu mesurable (20 septembre 2026)
+
+Deux demandes successives, dans cet ordre : **« 20 € pour cinq analyses, est-ce rentable ? »**,
+puis, la réponse reçue, **« le coût IA peut monter à 10 %, organise pour ce taux »**, et enfin
+**« implémente le suivi des coûts IA »**. Les trois se tiennent, et la troisième est la
+conséquence logique de ce que les deux premières ont révélé.
+
+## 17.1 La question posée, et la réponse qui ne pouvait pas être donnée
+
+La consigne exigeait des données réelles, pas une estimation. Elle prévoyait le cas où les tokens
+ne seraient pas journalisés : « dis-le clairement et propose d'ajouter ce journal ».
+
+C'était le cas. Vérifié dans les trois endroits possibles :
+
+- `ClaudeService.generateStructuredOutput` lisait `response.parsed_output` et **jetait
+  `response.usage`** ;
+- aucune colonne de token dans les 36 tables ;
+- le rapport des 12 appels réels notait leur nombre, leur nature et leur durée — 38 à 46
+  secondes — mais aucun décompte de tokens.
+
+Plutôt que de deviner, j'ai mesuré des artefacts réels : les prompts (déterministes, dans le code)
+et les **7 générations encore présentes en base**, produites par les vrais appels du 19/09.
+Résultat dans `PRICING.md` : un pipeline complet coûte de l'ordre de **0,1938 €**, soit **0,97 %
+du prix de vente**.
+
+## 17.2 Le taux porté à 10 %, et la conclusion qui s'inverse
+
+Le porteur a décidé que le coût IA pouvait atteindre **10 % du prix**, soit **2,00 € par
+utilisateur payant et par mois**. `PRICING.md` a été réorganisé autour de cette enveloppe.
+
+Trois résultats, dont un qui contredit la version précédente du document :
+
+1. **La question du modèle est close.** `claude-opus-5` tient dix fois dans l'enveloppe. À 1 %,
+   l'argument contre un modèle moins cher était que l'économie — 0,12 €/utilisateur/mois — était
+   inférieure au prix d'un timbre. À 10 %, il n'y a plus de discussion à avoir.
+2. **La profondeur maximale compatible avec le taux** est « révision + réflexion déclarée à
+   +2 000 tokens », à 8,82 % en provisionnant cinq reprises. La ligne du dessous, à +4 000,
+   sort du cadre à 13,42 %.
+3. **Le plafond de 5 analyses change de nature.** À 1 %, il aurait fallu 103 pipelines dans le
+   mois pour qu'un utilisateur dépasse ce qu'il a payé : le compteur était cosmétique. À la
+   profondeur que 10 % autorise, **sept appels suffisent à percer l'enveloppe**. Ce n'est plus un
+   confort d'affichage, c'est le seul mécanisme qui fait tenir le taux décidé.
+
+Un seuil à noter, parce qu'il arrivera sans prévenir : le taux relatif de 10 % et le plafond
+absolu de 50 €/mois **coïncident exactement à 25 utilisateurs payants** (500 € de chiffre
+d'affaires). En dessous, c'est le plafond absolu qui protège ; au-dessus, il devient un frein
+arbitraire. Le jour où le 26ᵉ client paie, une règle écrite pour l'expérimentation commencera à
+contredire une règle écrite pour le produit.
+
+## 17.3 La télémétrie construite
+
+La demande suivante nommait précisément le minimum : modèle, `input_tokens`, `output_tokens`,
+horodatage, utilisateur, projet, type de génération. Tout y est, plus trois colonnes qui ne
+figuraient pas dans la liste et qui la complètent.
+
+**Le journal se pose au même endroit que l'interrupteur des générateurs** — le point de passage
+unique — et pour la même raison : les cinq générateurs y passent, donc aucun ne peut être oublié
+le jour où un sixième arrive.
+
+**L'attribution est un champ obligatoire, pas optionnel.** `StructuredOutputRequest.usage` est
+requis : TypeScript refuse de compiler un générateur qui ne dirait pas à qui attribuer sa dépense.
+Le verrou du budget et celui de l'anonymat sont le même verrou — un appel facturé sans
+propriétaire est un appel qu'aucun plafond ne pourra jamais décompter. À la première compilation,
+le compilateur a trouvé d'un coup les cinq générateurs, les cinq sites d'appel et douze tests.
+
+Chaque générateur **se nomme lui-même** ; l'appelant ne fournit que le « qui ». Un appelant ne
+peut donc pas étiqueter une analyse comme un plan de financement — une erreur qui produirait un
+journal parfaitement cohérent et parfaitement faux, qu'aucun total ne trahirait.
+
+### Ce que le journal enregistre
+
+Une ligne par appel facturé dans `ai_usage_events` : `model`, `input_tokens`, `output_tokens`,
+`thinking_tokens`, les deux colonnes de cache, `duration_ms`, `user_id`, `project_id`,
+`generator`, `created_at`.
+
+**`thinking_tokens` est l'ajout qui compte le plus.** `PRICING.md` désignait la réflexion interne
+comme « le trou le plus important » : elle est facturée au tarif de sortie et n'apparaît nulle
+part dans le résultat stocké. Le SDK l'expose pourtant dans `output_tokens_details`. Personne ne
+la lisait ; elle est désormais enregistrée.
+
+### Quatre arbitrages, chacun pris dans le même sens
+
+1. **Aucun montant en euros n'est stocké.** Les tokens sont des faits mesurés et définitifs ; un
+   prix est un calcul dont la grille change — celle de `PRICING.md` avait déjà trois mois. Figer
+   l'euro en base scellerait une grille périmée dans l'historique pour toujours. Le coût se dérive
+   à la lecture, dans `ai-pricing.ts`. La contrepartie est écrite dans le module : le jour où un
+   prix bougera, il faudra une grille **datée** plutôt qu'une seule.
+2. **L'écriture précède la vérification du contenu.** Dès qu'une réponse existe, les tokens sont
+   facturés. Enregistrer après le contrôle ferait disparaître des totaux exactement les appels qui
+   ont mal tourné — les plus coûteux à ignorer, puisqu'ils sont payés sans rien rendre.
+3. **Le journal ne fait jamais échouer une génération.** Entre perdre une ligne de comptabilité et
+   perdre quarante secondes de travail déjà payées, c'est la ligne qui saute. La lecture des
+   champs se fait à l'intérieur du `try`, et non au point d'appel, pour que même un bloc `usage`
+   malformé ne coûte pas son résultat à la personne.
+4. **Un modèle absent de la grille vaut `null`, jamais zéro.** Zéro se confondrait avec
+   « gratuit » et disparaîtrait d'un total sans que rien ne le signale. Un total contenant un
+   modèle non tarifé est rendu `null` en entier plutôt que partiel : un total partiel présenté
+   comme complet est faux, et faux dans le sens rassurant.
+
+**Conséquence à retenir pour le plafond** : ce journal est fiable mais **pas transactionnel**. Une
+écriture perdue sera un appel non décompté. Le jour où le plafond s'appuiera dessus, il faudra
+soit rendre l'écriture bloquante, soit assumer qu'il s'agit d'un plafond haut et non d'un compteur
+comptable.
+
+## 17.4 Un défaut de précision trouvé en écrivant les tests
+
+Le calcul de coût enchaînait quatre multiplications flottantes avant un arrondi au supérieur.
+`0,92` n'étant pas représentable exactement en binaire, l'erreur suffisait à faire basculer
+l'arrondi : **2,6 % de divergence sur un balayage de 300 000 tirages**, d'un micro-euro à chaque
+fois.
+
+Sans conséquence sur un total. Mais l'arrondi au supérieur est une décision — « sur un coût, ne
+pas flatter le total » — et il était en fait déclenché par le bruit de calcul. Corrigé : le taux
+s'écrit en fraction, le numérateur reste entier, et un seul arrondi intervient à la fin. Un test
+compare désormais à la référence arithmétique exacte sur un balayage.
+
+## 17.5 RGPD : le fait reste, l'identité part
+
+`ai_usage_events` n'a **pas** de clé étrangère vers `users` ni `projects`, comme
+`constitution_violations`, et pour une raison supplémentaire : **la dépense a réellement eu lieu**.
+Si la suppression d'un compte effaçait ces lignes, le total d'un mois déjà clos changerait
+rétroactivement, et deux relevés du même mois ne diraient plus la même chose.
+
+À la suppression du compte, `user_id` passe donc à `null` dans la même transaction. La table est
+classée `journaux_techniques` et figure dans l'export : c'est une donnée concernant la personne,
+et c'est aussi la seule façon pour elle de vérifier ce qui lui aura été décompté le jour où un
+quota existera.
+
+**Le garde-fou de `user-data-scope.spec.ts` a attrapé la nouvelle table dès sa création**, comme
+il avait attrapé `buyback_objectives` à la session précédente. Il fonctionne.
+
+Le test de la transaction de suppression a été renforcé au passage : il comptait les opérations
+(`toHaveLength(2)`), ce qui serait encore passé si une anonymisation en avait remplacé une autre.
+Il vérifie maintenant lesquelles.
+
+## 17.6 La lecture
+
+`GET /igini/usage/mois-en-cours` rend la consommation de la personne connectée : appels, tokens
+d'entrée, de sortie, **dont réflexion**, coût dérivé, et ventilation par générateur dans l'ordre
+des cinq étapes de la méthode.
+
+Le montant ne sort jamais sans la **date de sa grille** et sans le drapeau `estimation: true` : il
+est dérivé, pas facturé, et un chiffre pareil sans sa source est invérifiable.
+
+**Aucune route ne donne la vue de tout le monde.** `monthlyTotal` existe côté service mais n'est
+pas exposé : le publier derrière une simple authentification laisserait n'importe quel compte lire
+le chiffre d'affaires en creux. Tant qu'un rôle d'exploitant n'existe pas, cette vue se consulte
+en base.
+
+## 17.7 Vérification
+
+| Contrôle | Résultat |
+|---|---|
+| Types (`tsc --noEmit`) | **0 erreur** |
+| Lint (`oxlint --type-aware`) | **0 avertissement** |
+| Tests unitaires | **642 passent** (57 fichiers) |
+| Tests de bout en bout | **82 passent** (7 fichiers) |
+| Build (`nest build`) | propre |
+
+Les 5 tests de bout en bout ajoutés tournent **sur la vraie base Postgres**, pas sur des mocks :
+ils écrivent une ligne, la relisent telle que la base la contient, vérifient le total rendu par
+HTTP, vérifient qu'une personne ne voit jamais la dépense d'une autre, et vérifient qu'après
+suppression du compte la ligne subsiste sans son `user_id`.
+
+**Ce qui n'est pas éprouvé en conditions réelles, et il faut le dire** : le trajet depuis un vrai
+appel à l'API Anthropic. `IGINI_AI_ENABLED` reste à `false` et rien dans cette session ne l'a
+changé. L'extraction des champs depuis la réponse du SDK est couverte par des tests unitaires
+seulement. C'est le seul maillon du parcours dans ce cas, et il le restera tant que les
+générateurs seront éteints.
+
+## 17.8 Une étape d'exploitation qui n'a pas pu être faite
+
+Le schéma a été poussé sur la **base de développement** et sur la **base de test**. Il ne l'a
+**pas** été sur `ignitux_prod` : l'opération a été refusée comme touchant la production, et c'est
+le comportement correct.
+
+**Tant qu'elle n'est pas faite, une bascule du déploiement vers la base de production échouerait
+sur une table manquante.** C'est une commande à lancer sciemment :
+
+```
+cd backend && npx prisma db push --url "<DATABASE_URL de .env.production>"
+```
+
+## 17.9 Ce qui n'a pas été construit, et pourquoi
+
+- **Le plafond de 5 analyses.** La consigne précédente disait explicitement de ne pas le
+  construire. Le compteur qui le porterait est maintenant à moitié écrit : la table et le service
+  existent, il manque la lecture qui décide et le refus qui s'ensuit.
+- **Le refus lisible au dépassement** et **l'alerte avant plafond** pour l'exploitant.
+- **La passe de révision** et **le budget de réflexion déclaré** chiffrés dans `PRICING.md` : ce
+  sont des options chiffrées, pas des décisions prises.
