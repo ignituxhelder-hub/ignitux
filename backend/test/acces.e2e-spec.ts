@@ -47,8 +47,12 @@ describe('contrôle d\'accès (e2e)', () => {
       ['GET', '/billing/documents'],
       ['GET', '/users/me/export'],
       ['GET', '/users/me/deletion-preview'],
-      ['GET', '/constitution/articles'],
+      ['GET', '/constitution/violations'],
+      ['GET', '/constitution/audit'],
       ['GET', '/marketplace/profiles'],
+      ['GET', '/comptabilite/comptes'],
+      ['GET', '/banque/comptes'],
+      ['GET', '/igini/usage/mois-en-cours'],
     ] as const;
 
     it.each(routes)('%s %s est refusé', async (method, route) => {
@@ -176,6 +180,66 @@ describe('contrôle d\'accès (e2e)', () => {
         .set(...auth(intrus))
         .send({ password: porteur.password })
         .expect(403);
+    });
+  });
+
+  describe("le jeton d'un compte supprimé", () => {
+    it('cesse immédiatement de valoir quoi que ce soit', async () => {
+      // Un JWT est sans état : il reste cryptographiquement valide jusqu'à
+      // son expiration, vingt-quatre heures plus tard. Le garde se contentait
+      // du contenu du jeton, si bien qu'un compte supprimé continuait
+      // d'ouvrir les portes toute la journée.
+      //
+      // Trouvé en jouant le parcours d'un porteur jusqu'au bout, pas par les
+      // tests unitaires : aucun d'eux ne pouvait le voir, puisque chacun
+      // vérifiait une pièce qui, isolément, fonctionnait.
+      const partant = await createAccount(app);
+      const sonJeton = partant.token;
+
+      await api(app)
+        .delete('/users/me')
+        .set(...auth(partant))
+        .send({ password: partant.password })
+        .expect(204);
+
+      await api(app).get('/projects').set('Authorization', `Bearer ${sonJeton}`).expect(401);
+      await api(app).get('/users/me/export').set('Authorization', `Bearer ${sonJeton}`).expect(401);
+    });
+
+    it("ne peut plus rien écrire, même là où aucune clé étrangère ne l'arrête", async () => {
+      // Le cas le plus commode à manquer. Les tables qui portent une clé
+      // étrangère vers `users` échouaient bruyamment — en 500, ce qui est
+      // laid mais visible. Celles qui n'en portent pas, et c'est volontaire
+      // pour des raisons comptables, **acceptaient l'écriture** : des lignes
+      // créées au nom de quelqu'un après qu'il a exercé son droit à
+      // l'effacement.
+      const partant = await createAccount(app);
+      const sonJeton = partant.token;
+
+      await api(app)
+        .delete('/users/me')
+        .set(...auth(partant))
+        .send({ password: partant.password })
+        .expect(204);
+
+      await api(app)
+        .post('/comptabilite/comptes')
+        .set('Authorization', `Bearer ${sonJeton}`)
+        .send({ code: '512', label: 'Compte fantôme', kind: 'actif' })
+        .expect(401);
+
+      await api(app)
+        .post('/banque/comptes')
+        .set('Authorization', `Bearer ${sonJeton}`)
+        .send({ label: 'Banque fantôme', kind: 'courant' })
+        .expect(401);
+
+      // Et rien n'a été écrit sous son identifiant.
+      const restes = await api(app)
+        .get('/comptabilite/comptes')
+        .set('Authorization', `Bearer ${sonJeton}`)
+        .expect(401);
+      expect(restes.body.statusCode).toBe(401);
     });
   });
 });

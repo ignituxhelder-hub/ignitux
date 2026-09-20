@@ -147,6 +147,49 @@ describe('Constitution et données personnelles (e2e)', () => {
       expect(violation).toBeDefined();
       expect(violation.severity).toBe('blocking');
     });
+
+    it("ne montre ce refus à personne d'autre", async () => {
+      // Trouvé en jouant le parcours d'un vrai porteur : le journal n'avait
+      // aucun filtre sur la personne. Un second compte, sans le moindre lien
+      // avec le projet, lisait le refus du premier — avec son identifiant,
+      // son projet, et le détail de ce qu'il avait tenté.
+      //
+      // Le journal qui sert à prouver que la Constitution est respectée était
+      // précisément l'endroit où l'article 13 ne l'était pas.
+      const inconnu = await createAccount(app);
+
+      const vu = await api(app)
+        .get('/constitution/violations')
+        .set(...auth(inconnu))
+        .expect(200);
+
+      expect(vu.body).toEqual([]);
+
+      await deleteAccount(app, inconnu);
+    });
+  });
+
+  describe('le texte est public, le journal ne l\'est pas', () => {
+    it('se lit sans compte — préambule, articles, règles', async () => {
+      // `user-data-scope.ts` exclut la Constitution de l'export RGPD au motif
+      // que c'est un « document public, identique pour tout le monde ». Elle
+      // exigeait pourtant un compte : quelqu'un qui hésitait à s'inscrire ne
+      // pouvait pas lire le texte du produit auquel il allait confier son
+      // projet. L'écart entre ce qui est dit et ce qui est fait est
+      // exactement ce que la devise interdit.
+      await api(app).get('/constitution/preamble').expect(200);
+      await api(app).get('/constitution/rules').expect(200);
+
+      const articles = await api(app).get('/constitution/articles').expect(200);
+      expect(articles.body).toHaveLength(24);
+    });
+
+    it("garde l'audit et le journal derrière l'authentification", async () => {
+      // L'audit compte sur toute la base : aucune donnée personnelle, mais le
+      // volume d'activité d'Ignitux n'est pas à rendre à qui passe.
+      await api(app).get('/constitution/audit').expect(401);
+      await api(app).get('/constitution/violations').expect(401);
+    });
   });
 
   describe('rachat progressif', () => {

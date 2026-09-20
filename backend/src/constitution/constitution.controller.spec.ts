@@ -51,12 +51,15 @@ describe('ConstitutionController', () => {
     expect(constitutionService.audit).toHaveBeenCalled();
   });
 
-  it('listViolations délègue au service', () => {
+  it('listViolations ne rend que les refus de la personne connectee', () => {
+    // Le filtre etait absent : n importe quel compte lisait le journal
+    // entier, avec l identifiant et le projet de tous les autres. Ce test
+    // echoue si quelqu un retire l argument en refactorant.
     constitutionService.listViolations.mockReturnValue([]);
 
-    void controller.listViolations();
+    void controller.listViolations({ id: 'u1', email: 'a@b.com' });
 
-    expect(constitutionService.listViolations).toHaveBeenCalled();
+    expect(constitutionService.listViolations).toHaveBeenCalledWith('u1');
   });
 
   it('listRules délègue au service', () => {

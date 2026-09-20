@@ -1670,3 +1670,133 @@ Les étapes 4 et 5 — **rallumer `IGINI_AI_ENABLED` pour un appel réel** — n
 délibérément. La consigne tenue jusqu'ici est que l'IA reste éteinte, et rallumer dépense de
 l'argent réel : c'est une décision, pas une étape technique. Tout est prêt pour la prendre, et
 c'est bien le seul maillon du parcours de télémétrie qui n'a jamais vu de trafic réel.
+
+---
+
+# 19. Test fonctionnel complet, joué comme un vrai porteur (20 septembre 2026)
+
+Consigne : « on va dire qu'Ignitux est prêt à être lancé. Fais un test complet du fonctionnement,
+tu peux même inscrire une personne fictive. Fais comme si tu avais besoin d'Ignitux pour
+développer ton projet. »
+
+Deux comptes fictifs — **Camille Rousseau**, qui monte un atelier itinérant d'aide à la
+comptabilité pour artisans, et **Bruno Martel**, qui reprend une menuiserie familiale — joués
+contre le **déploiement réellement en ligne**, pas contre des mocks. **101 étapes**, de
+l'inscription à la suppression du compte.
+
+## 19.1 Trois défauts trouvés, tous corrigés
+
+Aucun n'était visible depuis les tests unitaires, et c'est le point : chacun vérifiait une pièce
+qui, isolément, fonctionnait.
+
+### Défaut 1 — le journal des refus constitutionnels était lisible par tout le monde
+
+`GET /constitution/violations` ne portait **aucun filtre** sur la personne. Démontré plutôt
+qu'allégué : Bruno, sans le moindre lien avec le projet de Camille, lisait son refus avec son
+`user_id`, son `project_id`, et le détail de ce qu'elle avait tenté.
+
+Le journal qui sert à prouver que la Constitution est respectée était précisément l'endroit où
+l'article 13 ne l'était pas.
+
+**Corrigé** : `listViolations(userId)` filtre sur la personne. Conséquence assumée — personne ne
+voit le journal global ; le rendre à un exploitant demanderait un rôle qui n'existe pas encore,
+même réponse que pour les coûts IA et les livres d'Ignitux.
+
+### Défaut 2 — le texte de la Constitution exigeait un compte
+
+`user-data-scope.ts` l'exclut de l'export RGPD au motif que c'est un « document public, identique
+pour tout le monde ». Il n'était pas public : préambule, articles et règles répondaient **401**.
+Quelqu'un qui hésitait à s'inscrire ne pouvait pas lire ce qui gouverne le produit auquel il
+allait confier son projet.
+
+**Corrigé** : le texte se lit sans compte. L'audit et le journal restent authentifiés — l'audit
+compte sur toute la base, ce qui dit indirectement le volume d'activité d'Ignitux.
+
+### Défaut 3 — le jeton d'un compte supprimé continuait d'ouvrir les portes
+
+Le plus grave, et trouvé seulement parce que le parcours allait **jusqu'au bout**. Un JWT est sans
+état : `JwtStrategy.validate()` se contentait du contenu du jeton, sans vérifier que la personne
+existe encore. Un compte supprimé restait donc authentifié **vingt-quatre heures**.
+
+Les conséquences, mesurées et non supposées :
+
+| Ce qu'on tente avec le jeton d'un compte supprimé | Avant | Après |
+|---|---|---|
+| Lire ses projets | **200** (liste vide) | 401 |
+| Créer un projet (clé étrangère vers `users`) | **500** brut | 401 |
+| Écrire un souvenir, publier un profil | **500** brut | 401 |
+| **Ouvrir un compte comptable** (aucune clé étrangère) | **201 — ligne créée** | 401 |
+| **Déclarer un compte bancaire** (idem) | **201 — ligne créée** | 401 |
+
+Les deux dernières lignes sont le vrai dommage : des données écrites au nom de quelqu'un **après
+qu'il a exercé son droit à l'effacement**. L'audit de la base après le test a retrouvé exactement
+ces deux lignes orphelines.
+
+Ironie utile : c'est l'absence de clé étrangère — un choix délibéré de la section 18, pour que la
+comptabilité survive à une suppression — qui a laissé passer l'écriture. Le choix reste bon ; il
+déplaçait simplement la responsabilité vers le garde, qui ne la tenait pas.
+
+**Corrigé** : `JwtStrategy.validate()` interroge la base. Coût : une requête par appel
+authentifié, assumé et documenté. L'alternative est un produit qui écrit au nom de gens
+supprimés, ce qu'aucune optimisation ne rachète.
+
+## 19.2 Ce qui a fonctionné sans rien signaler
+
+Tout le reste — et plusieurs comportements méritent d'être notés parce qu'ils sont **justes**
+plutôt que simplement fonctionnels :
+
+- **les cinq générateurs IA refusent en 503** avec un message qui dit que c'est volontaire, pas
+  une panne ;
+- **le projet naît privé** sans que la personne ait rien à faire ;
+- **la facturation** numérote sans trou (`DEV-2026-0001`, `FAC-2026-0001`), calcule HT/TVA/TTC
+  juste (900,00 € / 180,00 € / 1 080,00 €), et **refuse de modifier un document émis** ;
+- **la garantie des 51 %** refuse en 422 une répartition qui bouclerait à 100 % avec le porteur en
+  minorité — et, sur une répartition incomplète (89 %), le produit répond
+  `founderHasMajority: null` avec `discrepancyBasisPoints: 1100` au lieu d'affirmer quoi que ce
+  soit. C'est l'article 10 tenu à la lettre ;
+- **le moteur de processus s'arrête** et attend une confirmation humaine (article 8) ;
+- **l'automatisation journalise** chaque exécution ;
+- **un collaborateur peut lire mais pas écrire** ;
+- **la séparation des caisses** tient : écriture déséquilibrée refusée en 400, IBAN entier refusé,
+  compte bancaire d'autrui en 403, comptes d'Ignitux invisibles ;
+- **l'export RGPD** contient souvenirs, factures, comptabilité et comptes bancaires, **sans aucun
+  hash de mot de passe**, avec les exclusions motivées et l'avertissement sur les données de
+  tiers ;
+- **la limite de débit s'est déclenchée sur moi** — cinq connexions par minute sur `/auth/login`.
+  Ce n'est pas un défaut, c'est la protection qui fonctionne en conditions réelles.
+
+## 19.3 Ce que ce test ne dit pas
+
+**Aucune génération IA réelle n'a eu lieu.** `IGINI_AI_ENABLED` reste à `false` et aucune clé n'est
+configurée. Ce qui est vérifié, c'est que le refus est propre et lisible — pas ce que produisent
+les générateurs. C'est le seul pan du produit qui n'a jamais tourné en conditions réelles depuis
+les 12 appels du 19/09.
+
+**Aucun écran n'a été ouvert.** Le parcours passe par l'API. Le frontend sert (200), son contraste
+et son balisage sont testés, mais personne n'a cliqué.
+
+## 19.4 Vérification
+
+| Contrôle | Résultat |
+|---|---|
+| Types (`tsc --noEmit`) | **0 erreur** |
+| Lint (`oxlint --type-aware`) | **0 avertissement** |
+| Tests unitaires | **681 passent** (60 fichiers) |
+| Tests de bout en bout | **109 passent** (8 fichiers) |
+| Build (`nest build`) | propre |
+
+Les trois défauts sont verrouillés par **10 tests nouveaux** : 5 unitaires sur `JwtStrategy`
+(aucun n'existait), 3 de bout en bout sur l'isolation du journal et le texte public, 2 sur le
+jeton fantôme — dont un qui vérifie explicitement qu'aucune écriture ne passe là où aucune clé
+étrangère ne l'arrête.
+
+## 19.5 Données de test effacées
+
+Les deux comptes fictifs ont été supprimés **par la route du produit** (`DELETE /users/me`), pas
+en base : si elle cesse de tout nettoyer, on veut le savoir. L'audit qui a suivi confirme :
+
+- 0 compte `@test-fonctionnel.invalid` restant ;
+- 0 ligne orpheline dans `ledger_accounts`, `ledger_entries`, `bank_accounts` (les 2 créées par le
+  défaut 3 ont été retirées à la main, puisque rien ne les emportait) ;
+- la trace de refus laissée par le parcours, effacée ;
+- **10 comptes sans rapport avec le test, intacts** — dont ceux des testeurs.

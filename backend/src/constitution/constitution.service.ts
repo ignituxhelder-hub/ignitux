@@ -160,8 +160,27 @@ export class ConstitutionService implements OnModuleInit {
     }
   }
 
-  listViolations(limit = 50) {
+  /**
+   * Les refus constitutionnels **de cette personne**, et d'elle seule.
+   *
+   * Le filtre sur `user_id` n'était pas là, et son absence était une vraie
+   * fuite : n'importe quel compte lisait le journal entier, avec
+   * l'identifiant et le projet de tous les autres, plus le détail de ce
+   * qu'ils avaient tenté. Trouvé en jouant le parcours d'un porteur : un
+   * second compte, sans aucun lien, voyait le refus du premier.
+   *
+   * L'article 13 (Respect de la Vie Privée) interdit exactement cela, et le
+   * journal qui sert à prouver que la Constitution est respectée ne pouvait
+   * pas être l'endroit où elle ne l'était pas.
+   *
+   * Conséquence assumée : personne ne voit le journal global. Le rendre à un
+   * exploitant demanderait un rôle qui n'existe pas encore — même réponse
+   * que pour le total des coûts IA et les livres d'Ignitux. En attendant, il
+   * se consulte en base.
+   */
+  listViolations(userId: string, limit = 50) {
     return this.prisma.constitution_violations.findMany({
+      where: { user_id: userId },
       orderBy: { created_at: 'desc' },
       take: limit,
     });
