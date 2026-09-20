@@ -1,6 +1,28 @@
 import { z } from 'zod';
+import { productionProblems } from './production-preflight.js';
 
 const envSchema = z.object({
+  // 'production' déclenche les exigences de production-preflight.ts. Toute
+  // autre valeur, absence comprise, laisse le mode développement.
+  NODE_ENV: z.string().optional(),
+  /**
+   * Le nombre de proxys entre Internet et ce serveur, ou 'false'.
+   *
+   * Express ne peut pas le deviner, et les deux erreurs sont silencieuses :
+   * ne rien déclarer derrière un proxy met tout le monde dans le même seau
+   * de limitation ; tout déclarer sans proxy laisse un client forger son
+   * en-tête `X-Forwarded-For` et se rendre invisible du limiteur.
+   */
+  TRUST_PROXY: z.string().optional(),
+  /** 'smtp' | 'log'. Voir production-preflight.ts — 'log' doit être écrit. */
+  MAIL_TRANSPORT: z.string().optional(),
+  MAIL_FROM: z.string().optional(),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.string().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
+  /** 'true' sert /docs en production. Éteint par défaut. */
+  ENABLE_API_DOCS: z.string().optional(),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL est requis.'),
   // 32 caractères minimum : un secret plus court serait trivialement plus
   // facile à retrouver par force brute hors ligne sur des tokens signés HS256.
@@ -36,6 +58,22 @@ export type Env = z.infer<typeof envSchema>;
 let cachedEnv: Env | undefined;
 
 /**
+ * Oublie la configuration lue.
+ *
+ * Existe pour les tests, et l'assume : un cache de portée module survit
+ * d'un test à l'autre, si bien qu'un test qui change une variable mesurerait
+ * en réalité la configuration lue par le premier d'entre eux. L'alternative
+ * — recharger le module — casse les jetons d'injection de Nest, puisque la
+ * classe rechargée n'est plus celle que le conteneur connaît.
+ *
+ * Rien en production n'appelle cette fonction : l'environnement d'un
+ * processus ne change pas sous ses pieds.
+ */
+export function forgetEnv(): void {
+  cachedEnv = undefined;
+}
+
+/**
  * Valide et met en cache les variables d'environnement requises. À appeler le
  * plus tôt possible (avant `NestFactory.create`) pour échouer immédiatement
  * avec un message clair plutôt que par une erreur obscure plus tard (ex. un
@@ -54,6 +92,21 @@ export function getEnv(): Env {
       .join('\n');
     // eslint-disable-next-line no-console
     console.error(`Configuration invalide (voir backend/.env.example) :\n${issues}`);
+    process.exit(1);
+  }
+
+  // Les exigences propres à la production ne portent pas sur la FORME des
+  // variables — zod s'en charge — mais sur leur CONTENU : un secret resté à
+  // sa valeur d'exemple est une chaîne parfaitement valide, et une faille.
+  const problemes = productionProblems(result.data);
+  if (problemes.length > 0) {
+    const liste = problemes.map((p) => `  - ${p.setting} : ${p.detail}`).join('\n');
+    // eslint-disable-next-line no-console
+    console.error(
+      `Refus de démarrer en production — ${problemes.length} réglage(s) à corriger :\n${liste}\n\n` +
+        'Ces fautes ne provoqueraient aucune erreur visible : le serveur démarrerait et\n' +
+        'se comporterait mal en silence. Voir docs/mise-en-production.md.',
+    );
     process.exit(1);
   }
 

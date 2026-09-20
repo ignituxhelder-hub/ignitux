@@ -13,6 +13,7 @@ import { FinancingModule } from './financing/financing.module.js';
 import { FinanceAuditModule } from './finance-audit/finance-audit.module.js';
 import { InvestorsModule } from './investors/investors.module.js';
 import { RolesModule } from './roles/roles.module.js';
+import { ObservabilityModule } from './observability/observability.module.js';
 import { LedgerModule } from './ledger/ledger.module.js';
 import { CommunityModule } from './community/community.module.js';
 import { KnowledgeModule } from './igini/knowledge/knowledge.module.js';
@@ -48,6 +49,7 @@ import { UsersModule } from './users/users.module.js';
     BankingModule,
     InvestorsModule,
     RolesModule,
+    ObservabilityModule,
     FinanceAuditModule,
     MarketplaceModule,
   ],
