@@ -1943,3 +1943,116 @@ donner une seconde réponse.
   nouvelle, par investisseur). Elles répondent à deux questions différentes, mais la première
   pourrait devenir une projection de la seconde. Les consolider changerait une surface existante
   du produit : c'est une décision, elle est posée en §15.6.
+
+---
+
+# 21. Cinq parcours complets (20 septembre 2026)
+
+Consigne : « tester des parcours complets et non des composants isolés ».
+
+## 21.1 Pourquoi les suites existantes ne suffisaient pas
+
+Neuf suites de bout en bout existaient, une par domaine. Chacune vérifie son morceau : la
+facturation numérote juste, le journal des refus enregistre, la suppression efface les tables
+qu'elle connaît. **Toutes passent** — et pourtant la question « est-ce que ça tient d'un bout à
+l'autre ? » restait sans réponse, parce que personne ne la posait.
+
+Un exemple concret du trou : rien ne vérifiait que le journal des refus et l'audit constitutionnel
+comptent la **même** chose. Le journal pouvait très bien enregistrer sans que l'audit bouge, ou
+l'audit compter autre chose, sans qu'aucune suite ne bronche. Chacune regardait sa moitié.
+
+Les cinq fichiers de `test/scenarios/` suivent des chaînes où **chaque étape consomme ce que la
+précédente a produit**.
+
+## 21.2 Les cinq parcours
+
+| Parcours | Ce qu'il éprouve, et que rien d'autre n'éprouve |
+|---|---|
+| **cycle-de-vie** | Inscription → projet → analyse refusée → facturation → suppression. Le bilan final relit **chaque identifiant ramassé en chemin** et vérifie ce qu'il est devenu |
+| **investissement** | La même personne est **porteuse chez elle et investisseuse chez l'autre**. Si les rôles se confondaient, son rendement serait faux — et faux dans le sens flatteur |
+| **collaboration** | Un collaborateur **légitime** : 15 lectures autorisées, 16 écritures refusées, énumérées comme garde-fous |
+| **constitution** | La chaîne action refusée → journal → audit, vérifiée **au chiffre près** |
+| **igini** | Mémoire → graphe → processus → automatisation → tableau de bord, reliés |
+
+## 21.3 Ce que chaque parcours vérifie de nouveau
+
+### Le bilan de suppression (cycle-de-vie)
+
+Le test qui justifie le fichier. Il relit les dix identifiants collectés — projet, souvenir,
+concept, tâche, entreprise, contact, facture, compte comptable, compte bancaire — et vérifie que
+chacun a disparu. Puis il vérifie que ce qui **devait** survivre a survécu, sans nom.
+
+Aucune suite par domaine ne peut faire ça : aucune ne connaît les autres. Le jour où une table
+s'ajoute et échappe à la suppression, c'est ici qu'on l'apprendra.
+
+### Les deux rôles d'une même personne (investissement)
+
+Camille porte son projet et investit chez Bruno ; Bruno fait l'inverse. Le parcours vérifie que le
+portefeuille d'investisseuse de Camille ne parle **que** du projet de Bruno, et que son registre
+de porteuse ne parle **que** de ce que Bruno a mis chez elle.
+
+### Deux listes qui sont des garde-fous (collaboration)
+
+`acces.e2e-spec.ts` attaque avec le jeton d'un **intrus** : le cas facile, où tout doit être
+refusé. Le cas difficile est le collaborateur légitime, où « oui » est la réponse normale.
+
+Les deux listes énumérées — lectures autorisées, écritures refusées — attraperont une route
+ajoutée demain sans autorisation de lecture (il deviendrait aveugle) ou sans contrôle de propriété
+(il prendrait la main sur le projet d'un autre).
+
+**Un détail que le test a révélé** : un corps générique envoyé à toutes les routes déclenche la
+validation (`forbidNonWhitelisted`) **avant** le contrôle de propriété. Le test aurait alors
+mesuré la validation du corps, pas la permission — en passant, et en vérifiant autre chose que ce
+qu'il annonçait. Chaque entrée porte donc son corps valide.
+
+### Le chiffre de l'audit (constitution)
+
+Deux refus provoqués, de deux règles différentes sur le même article, et l'audit doit bouger
+**d'exactement deux**. Puis le compte est supprimé : les refus restent comptés, anonymisés. Une
+Constitution dont on peut effacer l'historique en fermant son compte ne prouve rien.
+
+### Deux arrêts, tous deux justes (igini)
+
+Le parcours a d'abord échoué sur une assertion — et l'enquête a montré que **le produit avait
+raison**. La première étape du modèle « Méthode Ignitux » attend qu'une analyse existe ; l'IA
+étant éteinte, aucune n'existe, donc le processus ne bouge pas. Il refuse de faire semblant qu'une
+étape a eu lieu.
+
+Le parcours dit donc les deux vérités : confirmer **ne suffit pas** à lever une condition de
+réalité, mais lève bien une attente humaine — démontré sur un processus dont l'étape attend une
+personne, qui passe à `completed` dès la confirmation.
+
+## 21.4 Trois comportements corrects confirmés par des échecs de test
+
+Trois assertions ont échoué, et aucune n'était un défaut du produit :
+
+1. **`v1-24-constitution-supreme` est `enforced` sans règle d'exécution.** Exception assumée et
+   commentée dans le code : l'article porte sur le corpus, pas sur une action — il n'y a rien à
+   intercepter. C'est le test de couverture qui le vérifie.
+2. **Un second lancement du même processus est refusé.** Le moteur n'autorise qu'une exécution
+   active à la fois, et il a raison : deux exécutions concurrentes se marcheraient dessus.
+3. **Le refus venu de la comptabilité n'a pas de projet.** Le grand livre appartient à une
+   personne, pas à un projet. Le parcours retient donc les identifiants des refus **avant** la
+   suppression, puisqu'après elle plus rien ne permettrait de les retrouver.
+
+## 21.5 Vérification
+
+| Contrôle | Résultat |
+|---|---|
+| Types (`tsc --noEmit`) | **0 erreur** |
+| Lint (`oxlint --type-aware`) | **0 avertissement** |
+| Tests unitaires | **711 passent** |
+| Tests de bout en bout | **235 passent** (14 fichiers) |
+
+Les parcours ajoutent **101 tests**, tous contre la vraie base Postgres. La base est laissée vide
+après la suite complète — à une exception près, voulue : les violations constitutionnelles
+anonymisées, que le produit conserve délibérément. Les assertions d'audit sont écrites **en
+relatif** pour cette raison, et ne cassent donc pas quand elles s'accumulent.
+
+## 21.6 Ce que ces parcours ne couvrent toujours pas
+
+- **Aucune génération IA réelle.** Les cinq parcours fonctionnent l'IA éteinte, ce qui est en soi
+  une information — mais le trajet depuis un vrai appel reste non éprouvé.
+- **Aucun écran.** Tout passe par l'API.
+- **Aucun parcours à forte charge.** Les scénarios manipulent quelques lignes ; rien ne dit ce que
+  devient une répartition entre mille investisseurs.
