@@ -24,7 +24,53 @@ const PROJECT = {
 // propre appel au montage de la page ; ces routes doivent renvoyer une forme
 // réaliste dans tous les tests, sinon le fallback générique de mockApiRoutes
 // (200 []) casse les composants qui attendent un objet (score, résumé, graphe).
+/**
+ * Un parcours où tout est ouvert.
+ *
+ * Les tests existants décrivaient une fiche qui montrait tout : ils restent
+ * valides à condition de dire POURQUOI tout s'affiche. Ce gabarit rend
+ * l'hypothèse explicite, et les tests de parcours plus bas éprouvent le cas
+ * inverse — celui qui compte pour le refactor.
+ */
+const TOUTES_SECTIONS = [
+  'analyse',
+  'construction',
+  'taches',
+  'memoire',
+  'connaissances',
+  'score',
+  'conformite',
+  'developpement',
+  'financement',
+  'processus',
+  'automatisation',
+  'capital',
+  'transmission',
+  'collaborateurs',
+];
+
+function parcours(overrides = {}) {
+  return {
+    phase: 'construire',
+    phaseLabel: 'Construire',
+    nextStep: {
+      id: 'premieres-taches',
+      titre: 'Transformer le plan en premières tâches',
+      pourquoi: 'Un plan qui ne descend pas en tâches reste une intention.',
+      section: 'taches',
+    },
+    visible: TOUTES_SECTIONS.map((section) => ({
+      section,
+      label: section,
+      phase: 'construire',
+    })),
+    locked: [],
+    ...overrides,
+  };
+}
+
 const ENGINE_ROUTES = {
+  'GET /projects/p1/parcours': { status: 200, body: parcours() },
   // Par défaut, les générateurs sont disponibles : c'est l'état normal du
   // produit, et les tests existants décrivent ce cas-là.
   'GET /igini/status': { status: 200, body: { generatorsEnabled: true, unavailableReason: null } },
@@ -390,5 +436,263 @@ describe('ProjectDetailPage', () => {
     expect(screen.getByText('Conformité (France)')).toBeInTheDocument();
     expect(screen.getByText('Automatisation')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /lancer l'automatisation/i })).not.toBeInTheDocument();
+  });
+
+  describe('parcours guidé', () => {
+    // Le cœur du refactor : on arrive, on voit UNE chose à faire.
+    it("montre la prochaine étape et dit pourquoi, sans demander « que veux-tu faire ? »", async () => {
+      mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByText('PROCHAINE ÉTAPE')).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: 'Transformer le plan en premières tâches' }),
+      ).toBeInTheDocument();
+      expect(screen.getByText(/reste une intention/)).toBeInTheDocument();
+    });
+
+    it('affiche la progression Découvrir → Construire → Transmettre', async () => {
+      mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      const progression = await screen.findByRole('list', { name: 'Progression du projet' });
+      expect(progression).toHaveTextContent('Découvrir');
+      expect(progression).toHaveTextContent('Construire');
+      expect(progression).toHaveTextContent('Transmettre');
+    });
+
+    // Un projet qui vient de naître ne doit montrer qu'une porte.
+    it("n'affiche qu'une section sur un projet vierge", async () => {
+      mockApiRoutes({
+        ...{ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES },
+        'GET /projects/p1/parcours': {
+          status: 200,
+          body: parcours({
+            phase: 'decouvrir',
+            phaseLabel: 'Découvrir',
+            nextStep: {
+              id: 'analyser',
+              titre: 'Analyser ton idée',
+              pourquoi: 'IGINI lit ton projet et en dégage forces, risques et concepts.',
+              section: 'analyse',
+            },
+            visible: [{ section: 'analyse', label: 'Analyse', phase: 'decouvrir' }],
+            locked: [
+              {
+                section: 'memoire',
+                label: 'Mémoire',
+                phase: 'decouvrir',
+                condition: "S'ouvre dès qu'un premier souvenir est enregistré.",
+              },
+            ],
+          }),
+        },
+      });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByRole('heading', { name: 'Analyse' })).toBeInTheDocument();
+      expect(screen.queryByRole('heading', { name: /Conformité/ })).toBeNull();
+      expect(screen.queryByRole('heading', { name: /Souvenirs|Mémoire/ })).toBeNull();
+    });
+
+    // Cacher sans dire ferait croire que la fonction n'existe pas.
+    it('révèle les sections fermées et leur condition en vue avancée', async () => {
+      mockApiRoutes({
+        ...{ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES },
+        'GET /projects/p1/parcours': {
+          status: 200,
+          body: parcours({
+            visible: [{ section: 'analyse', label: 'Analyse', phase: 'decouvrir' }],
+            locked: [
+              {
+                section: 'memoire',
+                label: 'Mémoire',
+                phase: 'decouvrir',
+                condition: "S'ouvre dès qu'un premier souvenir est enregistré.",
+              },
+            ],
+          }),
+        },
+      });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Vue avancée' }));
+
+      expect(await screen.findByRole('heading', { name: 'Pas encore ouvert' })).toBeInTheDocument();
+      expect(screen.getByText(/premier souvenir est enregistré/)).toBeInTheDocument();
+    });
+
+    // La vue simple est l'état par défaut : quelqu'un qui arrive ne doit pas
+    // avoir à comprendre Ignitux avant de s'en servir.
+    it('revient au parcours simple depuis la vue avancée', async () => {
+      mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      const bascule = await screen.findByRole('button', { name: 'Vue avancée' });
+      expect(bascule).toHaveAttribute('aria-pressed', 'false');
+
+      fireEvent.click(bascule);
+      expect(await screen.findByRole('button', { name: 'Revenir au parcours' })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
+    });
+
+    // Inventer une direction pour remplir l'encart serait un conseil sans
+    // fondement.
+    it("dit qu'il n'a plus d'étape à proposer plutôt que d'en inventer une", async () => {
+      mockApiRoutes({
+        ...{ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES },
+        'GET /projects/p1/parcours': { status: 200, body: parcours({ nextStep: null }) },
+      });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByRole('heading', { name: 'Tu as fait le tour' })).toBeInTheDocument();
+      expect(screen.getByText(/n'en inventera pas/)).toBeInTheDocument();
+    });
+
+    // Le parcours est un confort, pas une dépendance : s'il tombe, la fiche
+    // doit rester utilisable.
+    it('reste utilisable quand le parcours ne répond pas', async () => {
+      mockApiRoutes({
+        ...{ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES },
+        'GET /projects/p1/parcours': { status: 500, body: {} },
+      });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByRole('heading', { name: 'Analyse' })).toBeInTheDocument();
+    });
+  });
+});
+
+/**
+ * Un guide qui désigne une porte close cesse d'être un guide.
+ *
+ * Le cas se produit vraiment aujourd'hui : les générateurs sont éteints, et
+ * la première étape du parcours est « Analyser ton idée ». Sans ce
+ * traitement, l'écran conseille une action que la section juste en dessous
+ * annonce comme indisponible.
+ */
+describe('ProjectDetailPage — conduite quand les générateurs sont éteints', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    router.replace.mockClear();
+    signInAs('tok123', { id: 'u1', email: 'a@b.com' });
+  });
+
+  const PARCOURS_ANALYSE = {
+    'GET /projects/p1/parcours': {
+      status: 200,
+      body: parcours({
+        phase: 'decouvrir',
+        phaseLabel: 'Découvrir',
+        nextStep: {
+          id: 'analyser',
+          titre: 'Analyser ton idée',
+          pourquoi: 'IGINI lit ton projet et en dégage forces, risques et concepts.',
+          section: 'analyse',
+        },
+        visible: [{ section: 'analyse', label: 'Analyse', phase: 'decouvrir' }],
+        locked: [],
+      }),
+    },
+  };
+
+  it("propose le chemin manuel quand l'étape conseillée exige l'IA", async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      ...ENGINE_ROUTES,
+      ...PARCOURS_ANALYSE,
+      'GET /igini/status': {
+        status: 200,
+        body: { generatorsEnabled: false, unavailableReason: 'Générateurs éteints.' },
+      },
+    });
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByText(/générateurs sont éteints/)).toBeInTheDocument();
+    // « L'IA accélère, elle ne conditionne pas » : le parcours continue.
+    expect(screen.getByText(/l'IA accélère, elle ne décide pas/i)).toBeInTheDocument();
+    expect(screen.getByText(/avancer à la main/)).toBeInTheDocument();
+  });
+
+  it("ne dit rien de tel quand les générateurs répondent", async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      ...ENGINE_ROUTES,
+      ...PARCOURS_ANALYSE,
+    });
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    await screen.findByRole('heading', { name: 'Analyser ton idée' });
+    expect(screen.queryByText(/avancer à la main/)).toBeNull();
+  });
+
+  // Une étape qui ne dépend pas des générateurs ne doit pas hériter de
+  // l'avertissement : il deviendrait un décor qu'on n'aperçoit plus.
+  it("n'avertit pas sur une étape que l'IA ne conditionne pas", async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      ...ENGINE_ROUTES,
+      'GET /igini/status': {
+        status: 200,
+        body: { generatorsEnabled: false, unavailableReason: 'Générateurs éteints.' },
+      },
+    });
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    // Le parcours par défaut conseille « premieres-taches », qui se fait à la main.
+    await screen.findByRole('heading', { name: 'Transformer le plan en premières tâches' });
+    expect(screen.queryByText(/avancer à la main/)).toBeNull();
   });
 });

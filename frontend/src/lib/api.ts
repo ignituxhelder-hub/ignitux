@@ -969,6 +969,50 @@ export interface AiUsageHistory {
   }>;
 }
 
+// ── LE PARCOURS : DÉCOUVRIR → CONSTRUIRE → TRANSMETTRE ──────────────────────
+
+export type JourneyPhase = 'decouvrir' | 'construire' | 'transmettre';
+
+export type JourneySection =
+  | 'analyse'
+  | 'construction'
+  | 'taches'
+  | 'memoire'
+  | 'connaissances'
+  | 'score'
+  | 'conformite'
+  | 'developpement'
+  | 'financement'
+  | 'processus'
+  | 'automatisation'
+  | 'capital'
+  | 'transmission'
+  | 'collaborateurs';
+
+export interface JourneyStep {
+  id: string;
+  /** L'action, à l'impératif. */
+  titre: string;
+  /** Pourquoi celle-ci, et pas une autre. */
+  pourquoi: string;
+  section: JourneySection;
+}
+
+export interface JourneyView {
+  phase: JourneyPhase;
+  phaseLabel: string;
+  /** null = rien ne se déduit. Le produit le dit au lieu d'inventer. */
+  nextStep: JourneyStep | null;
+  visible: Array<{ section: JourneySection; label: string; phase: JourneyPhase }>;
+  locked: Array<{
+    section: JourneySection;
+    label: string;
+    phase: JourneyPhase;
+    /** Ce qui l'ouvrira. Jamais « bientôt ». */
+    condition: string;
+  }>;
+}
+
 export const api = {
   getBuybackProgress: (token: string, projectId: string) =>
     request<BuybackProgress>(`/projects/${projectId}/financing/buyback`, {
@@ -1785,6 +1829,15 @@ export const api = {
   // ── UN DOCUMENT DE FACTURATION, POUR L'IMPRIMER ───────────────────────────
   getBillingDocument: (token: string, id: string) =>
     request<BillingDocument>(`/billing/documents/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  // ── LE PARCOURS ───────────────────────────────────────────────────────────
+  // Une seule route : la règle de déblocage ne doit exister qu'à un endroit.
+  // Recopiée côté écran, elle finirait par diverger du serveur — et c'est
+  // alors l'écran qui déciderait de la méthode Ignitux.
+  getProjectJourney: (token: string, projectId: string) =>
+    request<JourneyView>(`/projects/${projectId}/parcours`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
 };

@@ -11,6 +11,7 @@ import {
   type SetStateAction,
 } from 'react';
 import { IginiMention } from '@/components/igini-mention';
+import { ProchaineEtape, Progression, SectionsFermees } from '@/components/parcours';
 import {
   api,
   ApiError,
@@ -19,6 +20,7 @@ import {
   type DevelopmentPlan,
   type FinancingPlan,
   type IginiStatus,
+  type JourneyView,
   type Project,
   type TransmissionPlan,
 } from '@/lib/api';
@@ -155,6 +157,8 @@ export default function ProjectDetailPage() {
   // Incrémenté après chaque génération réussie : signale aux sections dérivées
   // (score, tâches, automatisation, connaissance) qu'elles doivent se recharger.
   const [refreshSignal, setRefreshSignal] = useState(0);
+  const [parcours, setParcours] = useState<JourneyView | null>(null);
+  const [vueAvancee, setVueAvancee] = useState(false);
   const onGenerated = () => setRefreshSignal((n) => n + 1);
 
   const iginiStatus = useIginiStatus();
@@ -290,11 +294,39 @@ export default function ProjectDetailPage() {
     }
   }
 
+  /**
+   * Le parcours se relit à chaque signal de rafraîchissement : créer une
+   * tâche ou lancer une analyse ouvre des sections, et l'écran doit le
+   * refléter tout de suite. Un échec est silencieux — sans parcours, la
+   * vue reste utilisable au minimum plutôt que de casser.
+   */
+  useEffect(() => {
+    if (!token || !id) return;
+    api
+      .getProjectJourney(token, id)
+      .then(setParcours)
+      .catch(() => setParcours(null));
+  }, [token, id, refreshSignal]);
+
   if (!isReady || !token) {
     return null;
   }
 
   const isOwner = project ? project.owner_id === user?.id : false;
+
+  /**
+   * Une section s'affiche si le parcours l'a ouverte, ou si la vue avancée
+   * est demandée. Tant que le parcours n'est pas chargé, on s'en tient à
+   * l'essentiel : mieux vaut un écran qui se remplit qu'un écran qui montre
+   * tout avant de se replier — ce dernier donnerait exactement la surcharge
+   * qu'on cherche à retirer.
+   */
+  const montrer = (section: string): boolean => {
+    if (!project) return false;
+    if (vueAvancee) return true;
+    if (!parcours) return section === 'analyse';
+    return parcours.visible.some((s) => s.section === section);
+  };
 
   return (
     <main className="page page--wide">
@@ -304,7 +336,20 @@ export default function ProjectDetailPage() {
         </Link>
         {/* L'argent a son propre écran : la fiche projet faisait déjà sept
             mille pixels, et le financement s'y perdait tout en bas. */}
-        <Link href={`/projects/${id}/finances`}>Financement et investisseurs</Link>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <Link href={`/projects/${id}/finances`}>Financement et investisseurs</Link>
+          {/* Le mode par défaut reste simple. La vue avancée est un choix,
+              jamais l'état initial : quelqu'un qui arrive ne devrait pas
+              avoir à comprendre Ignitux avant de s'en servir. */}
+          <button
+            className="secondary"
+            type="button"
+            aria-pressed={vueAvancee}
+            onClick={() => setVueAvancee((v) => !v)}
+          >
+            {vueAvancee ? 'Revenir au parcours' : 'Vue avancée'}
+          </button>
+        </div>
       </div>
 
       {isLoading && <p className="loading">Chargement…</p>}
@@ -314,10 +359,22 @@ export default function ProjectDetailPage() {
         <>
           <h1 style={{ marginBottom: '0.75rem' }}>{project.title}</h1>
 
-          <IginiMention style={{ marginBottom: '1.5rem' }}>
-            t&apos;accompagne à travers les 5 étapes ci-dessous pour transformer cette idée en
-            réalité.
-          </IginiMention>
+          {/* Le bandeau disait « les 5 étapes ci-dessous » en montrant quinze
+              sections. La progression et la prochaine étape le remplacent :
+              elles disent où on en est et quoi faire, ce que la phrase
+              générique ne faisait ni l'un ni l'autre. */}
+          {parcours && <Progression phase={parcours.phase} />}
+          {parcours && isOwner && (
+            <ProchaineEtape
+              parcours={parcours}
+              iaDisponible={iginiStatus?.generatorsEnabled ?? true}
+            />
+          )}
+          {!parcours && (
+            <IginiMention style={{ marginBottom: '1.5rem' }}>
+              prépare ton parcours…
+            </IginiMention>
+          )}
 
           {isOwner ? (
             <form className="card" onSubmit={handleSave}>
@@ -385,7 +442,7 @@ export default function ProjectDetailPage() {
         </>
       )}
 
-      {project && (
+      {montrer('analyse') && (
         <GenerationSection
           title="Analyse"
           buttonLabel="Analyser ce projet"
@@ -401,7 +458,7 @@ export default function ProjectDetailPage() {
         />
       )}
 
-      {project && (
+      {montrer('construction') && (
         <GenerationSection
           title="Plan de construction"
           buttonLabel="Générer un plan"
@@ -420,7 +477,7 @@ export default function ProjectDetailPage() {
       {/* Deux sections portaient le même nom : celle-ci, où IGINI rédige un plan,
           et celle du bas, où figure l'argent réellement reçu. En faisant défiler,
           on ne pouvait pas les distinguer. */}
-      {project && (
+      {montrer('financement') && (
         <GenerationSection
           title="Plan de financement"
           buttonLabel="Générer un plan de financement"
@@ -436,7 +493,7 @@ export default function ProjectDetailPage() {
         />
       )}
 
-      {project && (
+      {montrer('developpement') && (
         <GenerationSection
           title="Développement"
           buttonLabel="Générer un plan de développement"
@@ -452,7 +509,7 @@ export default function ProjectDetailPage() {
         />
       )}
 
-      {project && (
+      {montrer('transmission') && (
         <GenerationSection
           title="Transmission"
           buttonLabel="Générer un plan de transmission"
@@ -471,24 +528,26 @@ export default function ProjectDetailPage() {
       {/* Les 4 moteurs transverses sont en lecture seule pour un collaborateur
           (readOnly). La gestion des collaborateurs et le déclenchement manuel
           de l'automatisation restent réservés au propriétaire. */}
-      {project && <ScoreSection token={token} projectId={id} refreshSignal={refreshSignal} />}
-      {project && (
+      {montrer('score') && <ScoreSection token={token} projectId={id} refreshSignal={refreshSignal} />}
+      {montrer('taches') && (
         <TasksSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
       )}
-      {project && <MemorySection token={token} projectId={id} readOnly={!isOwner} />}
-      {project && (
+      {montrer('memoire') && <MemorySection token={token} projectId={id} readOnly={!isOwner} />}
+      {montrer('connaissances') && (
         <KnowledgeSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
       )}
-      {project && <ComplianceSection token={token} projectId={id} readOnly={!isOwner} />}
-      {project && (
+      {montrer('conformite') && <ComplianceSection token={token} projectId={id} readOnly={!isOwner} />}
+      {montrer('automatisation') && (
         <AutomationSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
       )}
-      {project && (
+      {montrer('processus') && (
         <WorkflowSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
       )}
-      {project && <FinancingSection token={token} projectId={id} readOnly={!isOwner} />}
-      {project && <BuybackSection token={token} projectId={id} readOnly={!isOwner} />}
-      {project && isOwner && <CollaboratorsSection token={token} projectId={id} />}
+      {montrer('financement') && <FinancingSection token={token} projectId={id} readOnly={!isOwner} />}
+      {montrer('capital') && <BuybackSection token={token} projectId={id} readOnly={!isOwner} />}
+      {montrer('collaborateurs') && isOwner && <CollaboratorsSection token={token} projectId={id} />}
+
+      {vueAvancee && parcours && <SectionsFermees parcours={parcours} />}
     </main>
   );
 }
