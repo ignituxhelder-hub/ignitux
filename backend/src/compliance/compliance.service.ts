@@ -4,6 +4,7 @@ import { assertOwnsProject } from '../prisma/assert-owns-project.js';
 import { ConstitutionService } from '../constitution/constitution.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { COMPLIANCE_REQUIREMENTS_FR } from './compliance-requirements.js';
+import { countryCode } from '../profile/profile-fields.js';
 
 export const COMPLIANCE_DISCLAIMER =
   "Ces informations sont générales, non exhaustives et rédigées à partir de sources publiques citées pour chaque point. " +
@@ -90,14 +91,43 @@ export class ComplianceService implements OnModuleInit {
     return { disclaimer: COMPLIANCE_DISCLAIMER, requirements };
   }
 
+  /**
+   * Le pays déclaré au profil, ou null s'il ne l'est pas.
+   *
+   * Lu directement plutôt qu'à travers ProfileService : une seule colonne,
+   * et cela évite une arête de module entre conformité et profil pour un
+   * besoin qui restera toujours cette lecture-là.
+   */
+  private async paysDeclare(userId: string): Promise<string | null> {
+    const profil = await this.prisma.user_profiles.findUnique({
+      where: { user_id: userId },
+      select: { activity_country: true },
+    });
+    return countryCode(profil?.activity_country);
+  }
+
   // Lecture seule : accessible au propriétaire et aux collaborateurs, comme
   // les 4 moteurs transverses (voir assertHasProjectAccess).
-  async listForProject(userId: string, projectId: string, country = 'FR') {
+  /**
+   * Les démarches du projet, pour le pays qui le concerne.
+   *
+   * Trois sources, dans cet ordre : le pays demandé explicitement, le pays
+   * déclaré au profil, puis la France par défaut. Le dernier cas est le seul
+   * qui puisse tromper — quelqu'un dont l'activité se monte ailleurs voyait
+   * jusqu'ici des démarches françaises sans que rien ne l'indique. On ne
+   * peut pas afficher mieux (le référentiel ne connaît que la France), donc
+   * on le dit : `countryDeclared` à false signifie « supposé », et
+   * l'interface doit le présenter comme tel.
+   */
+  async listForProject(userId: string, projectId: string, country?: string) {
     await assertHasProjectAccess(this.prisma, userId, projectId);
+
+    const declare = country ?? (await this.paysDeclare(userId));
+    const pays = declare ?? 'FR';
 
     const [requirements, checks] = await Promise.all([
       this.prisma.compliance_requirements.findMany({
-        where: { country },
+        where: { country: pays },
         orderBy: [{ category: 'asc' }, { title: 'asc' }],
       }),
       this.prisma.project_compliance_checks.findMany({ where: { project_id: projectId } }),
@@ -115,6 +145,8 @@ export class ComplianceService implements OnModuleInit {
 
     return {
       disclaimer: COMPLIANCE_DISCLAIMER,
+      country: pays,
+      countryDeclared: declare !== null,
       requirements: requirements.map((requirement) => ({
         ...requirement,
         completed: completedRequirementIds.has(requirement.id),

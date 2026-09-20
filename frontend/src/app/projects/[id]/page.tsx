@@ -11,7 +11,7 @@ import {
   type SetStateAction,
 } from 'react';
 import { IginiMention } from '@/components/igini-mention';
-import { ProchaineEtape, Progression, SectionsFermees } from '@/components/parcours';
+import { ProchaineEtape, Progression, SectionsFermees, TableauDeBord } from '@/components/parcours';
 import { AnalyseEnCours, AnalyseResultat } from './analyse-resultat';
 import { ChampsADemander } from '@/components/champs-profil';
 import {
@@ -382,6 +382,9 @@ export default function ProjectDetailPage() {
               sections. La progression et la prochaine étape le remplacent :
               elles disent où on en est et quoi faire, ce que la phrase
               générique ne faisait ni l'un ni l'autre. */}
+          {/* Les chiffres d'abord : « où en est ce projet ? » se lisait
+              jusqu'ici en faisant défiler jusqu'au score, tout en bas. */}
+          {parcours && <TableauDeBord reperes={parcours.reperes} />}
           {parcours && <Progression phase={parcours.phase} />}
           {parcours && isOwner && (
             <ProchaineEtape
@@ -591,11 +594,27 @@ export default function ProjectDetailPage() {
           de l'automatisation restent réservés au propriétaire. */}
       {montrer('score') && <ScoreSection token={token} projectId={id} refreshSignal={refreshSignal} />}
       {montrer('taches') && (
-        <TasksSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
+        <TasksSection
+          token={token}
+          projectId={id}
+          readOnly={!isOwner}
+          refreshSignal={refreshSignal}
+          /* Même signal que les générateurs : une tâche cochée à la main
+             doit rafraîchir le score et le parcours exactement comme une
+             analyse le ferait. Ce qui compte est le changement, pas ce qui
+             l'a provoqué. */
+          onChanged={onGenerated}
+        />
       )}
       {montrer('memoire') && <MemorySection token={token} projectId={id} readOnly={!isOwner} />}
       {montrer('connaissances') && (
-        <KnowledgeSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
+        <KnowledgeSection
+          token={token}
+          projectId={id}
+          readOnly={!isOwner}
+          refreshSignal={refreshSignal}
+          onChanged={onGenerated}
+        />
       )}
       {montrer('conformite') && <ComplianceSection token={token} projectId={id} readOnly={!isOwner} />}
       {montrer('automatisation') && (

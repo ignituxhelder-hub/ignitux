@@ -19,6 +19,7 @@ describe('ComplianceService', () => {
       deleteMany: ReturnType<typeof vi.fn>;
     };
     projects: { findFirst: ReturnType<typeof vi.fn> };
+    user_profiles: { findUnique: ReturnType<typeof vi.fn> };
     constitution_violations: { createMany: ReturnType<typeof vi.fn> };
   };
 
@@ -32,6 +33,7 @@ describe('ComplianceService', () => {
       },
       project_compliance_checks: { findMany: vi.fn(), upsert: vi.fn(), deleteMany: vi.fn() },
       projects: { findFirst: vi.fn() },
+      user_profiles: { findUnique: vi.fn().mockResolvedValue(null) },
       constitution_violations: { createMany: vi.fn() },
     };
 
@@ -109,6 +111,66 @@ describe('ComplianceService', () => {
         { id: 'r1', title: 'A', completed: true },
         { id: 'r2', title: 'B', completed: false },
       ]);
+    });
+
+    // Le champ « Pays d'activité » promet d'ouvrir la section Conformité.
+    // Tant que la requête forçait FR, cette promesse n'était pas tenue.
+    it('liste les démarches du pays déclaré au profil', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.user_profiles.findUnique.mockResolvedValue({ activity_country: 'France' });
+      prisma.compliance_requirements.findMany.mockResolvedValue([]);
+      prisma.project_compliance_checks.findMany.mockResolvedValue([]);
+
+      const result = await service.listForProject('u1', 'p1');
+
+      expect(prisma.compliance_requirements.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { country: 'FR' } }),
+      );
+      expect(result.country).toBe('FR');
+      expect(result.countryDeclared).toBe(true);
+    });
+
+    // Sans déclaration, on affiche quand même quelque chose — mais on dit
+    // que c'est une supposition. Présenter les obligations d'un pays comme
+    // celles du projet serait une erreur qu'aucun avertissement général ne
+    // rattrape.
+    it('signale que la France est une supposition quand rien n’est déclaré', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.user_profiles.findUnique.mockResolvedValue(null);
+      prisma.compliance_requirements.findMany.mockResolvedValue([]);
+      prisma.project_compliance_checks.findMany.mockResolvedValue([]);
+
+      const result = await service.listForProject('u1', 'p1');
+
+      expect(result.country).toBe('FR');
+      expect(result.countryDeclared).toBe(false);
+    });
+
+    // Un libellé que le référentiel ne connaît pas ne doit pas se traduire
+    // au hasard : on retombe sur le défaut, et on le dit.
+    it('traite un pays inconnu du référentiel comme non déclaré', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.user_profiles.findUnique.mockResolvedValue({ activity_country: 'Belgique' });
+      prisma.compliance_requirements.findMany.mockResolvedValue([]);
+      prisma.project_compliance_checks.findMany.mockResolvedValue([]);
+
+      const result = await service.listForProject('u1', 'p1');
+
+      expect(result.countryDeclared).toBe(false);
+    });
+
+    it('un pays demandé explicitement prime sur le profil', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.user_profiles.findUnique.mockResolvedValue({ activity_country: 'France' });
+      prisma.compliance_requirements.findMany.mockResolvedValue([]);
+      prisma.project_compliance_checks.findMany.mockResolvedValue([]);
+
+      const result = await service.listForProject('u1', 'p1', 'BE');
+
+      expect(prisma.compliance_requirements.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { country: 'BE' } }),
+      );
+      expect(result.country).toBe('BE');
     });
   });
 

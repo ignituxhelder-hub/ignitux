@@ -1,6 +1,6 @@
 'use client';
 
-import type { JourneyPhase, JourneyView } from '@/lib/api';
+import type { JourneyPhase, JourneyRepere, JourneyView } from '@/lib/api';
 
 const PHASES: Array<{ id: JourneyPhase; label: string }> = [
   { id: 'decouvrir', label: 'Découvrir' },
@@ -61,6 +61,71 @@ export function Progression({ phase }: { phase: JourneyPhase }) {
         );
       })}
     </ol>
+  );
+}
+
+/**
+ * OÙ EN EST LE PROJET, EN CHIFFRES.
+ *
+ * Trois ou quatre repères, en haut, avant tout le reste : la question
+ * « où en est ce projet ? » se posait jusqu'ici en faisant défiler la page
+ * jusqu'au score, tout en bas.
+ *
+ * Un repère sans source affiche un tiret, pas un zéro, et dit pourquoi.
+ * C'est la même règle que pour les scores : un projet sans analyse n'a pas
+ * une étincelle nulle, il n'en a pas.
+ */
+export function TableauDeBord({ reperes }: { reperes: JourneyRepere[] | undefined }) {
+  // Un serveur qui précède ce champ renvoie un parcours sans repères : la
+  // fiche doit s'afficher quand même, sans tableau de bord.
+  if (!reperes || reperes.length === 0) return null;
+
+  return (
+    <section
+      aria-label="Où en est le projet"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(8.5rem, 1fr))',
+        gap: '0.75rem',
+        margin: '0 0 1.5rem',
+      }}
+    >
+      {reperes.map((repere) => (
+        <dl
+          key={repere.cle}
+          style={{
+            margin: 0,
+            padding: '0.75rem',
+            borderRadius: 'var(--radius-sm)',
+            border: '1px solid var(--border)',
+          }}
+        >
+          <dt
+            className="muted"
+            style={{ fontSize: '0.7rem', letterSpacing: '0.04em', margin: 0 }}
+          >
+            {repere.label}
+          </dt>
+          <dd style={{ margin: '0.15rem 0 0' }}>
+            <strong
+              style={{
+                fontSize: '1.35rem',
+                fontVariantNumeric: 'tabular-nums',
+                color: repere.valeur === null ? 'var(--text-muted)' : undefined,
+              }}
+            >
+              {repere.valeur ?? '—'}
+            </strong>
+            <span
+              className="muted"
+              style={{ display: 'block', fontSize: '0.75rem', marginTop: '0.15rem' }}
+            >
+              {repere.precision}
+            </span>
+          </dd>
+        </dl>
+      ))}
+    </section>
   );
 }
 

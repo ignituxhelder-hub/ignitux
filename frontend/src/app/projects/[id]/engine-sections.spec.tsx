@@ -597,3 +597,113 @@ describe('KnowledgeSection', () => {
     expect(screen.queryByLabelText('Concept de départ')).not.toBeInTheDocument();
   });
 });
+
+// Le serveur relance l'orchestration à chaque mutation manuelle et calcule
+// les scores à la lecture : sans ce rappel, l'écran affichait une tâche
+// terminée au-dessus d'un score Construction inchangé, et c'est le score
+// qu'on finissait par croire faux.
+describe('les modifications manuelles préviennent la page', () => {
+  it('prévient après la création d’une tâche', async () => {
+    mockApiRoutes({
+      'GET /projects/p1/tasks': { status: 200, body: [] },
+      'POST /projects/p1/tasks': {
+        status: 201,
+        body: {
+            id: 't1',
+            project_id: 'p1',
+            title: 'Valider le pitch',
+            description: null,
+            status: 'pending',
+            assignee: 'human',
+            source: 'manual',
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+          },
+      },
+    });
+    const onChanged = vi.fn();
+
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} onChanged={onChanged} />);
+
+    fireEvent.change(await screen.findByLabelText('Nouvelle tâche'), {
+      target: { value: 'Valider le pitch' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /^ajouter$/i }));
+
+    await waitFor(() => expect(onChanged).toHaveBeenCalled());
+  });
+
+  it('prévient après un changement de statut', async () => {
+    mockApiRoutes({
+      'GET /projects/p1/tasks': { status: 200, body: [{
+            id: 't1',
+            project_id: 'p1',
+            title: 'Valider le pitch',
+            description: null,
+            status: 'pending',
+            assignee: 'human',
+            source: 'manual',
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+          }] },
+      'PATCH /tasks/t1/status': { status: 200, body: {
+            id: 't1',
+            project_id: 'p1',
+            title: 'Valider le pitch',
+            description: null,
+            status: 'done',
+            assignee: 'human',
+            source: 'manual',
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+          } },
+    });
+    const onChanged = vi.fn();
+
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} onChanged={onChanged} />);
+
+    fireEvent.change(await screen.findByLabelText('Statut de Valider le pitch'), {
+      target: { value: 'done' },
+    });
+
+    await waitFor(() => expect(onChanged).toHaveBeenCalled());
+  });
+
+  it('ne prévient pas quand rien n’a changé', async () => {
+    mockApiRoutes({ 'GET /projects/p1/tasks': { status: 200, body: [{
+            id: 't1',
+            project_id: 'p1',
+            title: 'Valider le pitch',
+            description: null,
+            status: 'pending',
+            assignee: 'human',
+            source: 'manual',
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+          }] } });
+    const onChanged = vi.fn();
+
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} onChanged={onChanged} />);
+
+    await screen.findByText('Valider le pitch');
+    expect(onChanged).not.toHaveBeenCalled();
+  });
+
+  it('ne prévient pas si la création échoue', async () => {
+    mockApiRoutes({
+      'GET /projects/p1/tasks': { status: 200, body: [] },
+      'POST /projects/p1/tasks': { status: 500, body: { message: 'Oups.' } },
+    });
+    const onChanged = vi.fn();
+
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} onChanged={onChanged} />);
+
+    fireEvent.change(await screen.findByLabelText('Nouvelle tâche'), {
+      target: { value: 'Valider le pitch' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /^ajouter$/i }));
+
+    expect(await screen.findByText('Oups.')).toBeInTheDocument();
+    expect(onChanged).not.toHaveBeenCalled();
+  });
+});

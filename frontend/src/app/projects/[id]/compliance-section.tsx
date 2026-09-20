@@ -3,6 +3,14 @@
 import { useEffect, useState } from 'react';
 import { api, ApiError, type ComplianceRequirement } from '@/lib/api';
 
+/**
+ * Le code du référentiel vers un nom lisible.
+ *
+ * Court parce que la couverture l'est : un code inconnu s'affiche tel quel
+ * plutôt que d'être traduit au hasard — mieux vaut « BE » qu'un pays faux.
+ */
+const NOMS_DE_PAYS: Record<string, string> = { FR: 'France' };
+
 interface ComplianceSectionProps {
   token: string | null;
   projectId: string;
@@ -11,6 +19,7 @@ interface ComplianceSectionProps {
 
 export function ComplianceSection({ token, projectId, readOnly = false }: ComplianceSectionProps) {
   const [disclaimer, setDisclaimer] = useState<string | null>(null);
+  const [pays, setPays] = useState<{ code: string; declare: boolean } | null>(null);
   const [requirements, setRequirements] = useState<ComplianceRequirement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +32,11 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
       .getProjectCompliance(token, projectId)
       .then((checklist) => {
         setDisclaimer(checklist?.disclaimer ?? null);
+        setPays(
+          checklist?.country
+            ? { code: checklist.country, declare: checklist.countryDeclared === true }
+            : null,
+        );
         setRequirements(Array.isArray(checklist?.requirements) ? checklist.requirements : []);
       })
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Impossible de charger la conformité.'))
@@ -54,6 +68,8 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
     }
   }
 
+  const nomDuPays = pays ? (NOMS_DE_PAYS[pays.code] ?? pays.code) : null;
+
   const grouped = requirements.reduce<Record<string, ComplianceRequirement[]>>((acc, req) => {
     (acc[req.category] ??= []).push(req);
     return acc;
@@ -61,7 +77,21 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
 
   return (
     <div className="card" style={{ marginTop: '1.5rem' }}>
-      <h2 style={{ marginTop: 0 }}>Conformité (France)</h2>
+      {/* Le pays vit sous le titre, pas dedans : il arrive avec la réponse
+          du serveur, et un titre qui change après le chargement clignote. */}
+      <h2 style={{ marginTop: 0 }}>Conformité</h2>
+      {pays &&
+        (pays.declare ? (
+          <p className="muted" style={{ fontSize: '0.85rem' }}>
+            Démarches pour : {nomDuPays}.
+          </p>
+        ) : (
+          <p className="muted" style={{ fontSize: '0.85rem' }}>
+            Tu n’as pas indiqué où ton activité se déroulera : ces démarches sont celles de la
+            France, par défaut. Renseigne le pays d’activité dans ton profil pour que cette
+            liste soit la bonne.
+          </p>
+        ))}
       {disclaimer && (
         <p className="muted" style={{ fontSize: '0.85rem' }}>
           ⚠️ {disclaimer}

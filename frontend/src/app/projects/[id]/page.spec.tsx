@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
 import { createRouterMock, mockApiRoutes, signInAs } from '@/test-utils/mocks';
@@ -59,6 +59,11 @@ function parcours(overrides = {}) {
       pourquoi: 'Un plan qui ne descend pas en tâches reste une intention.',
       section: 'taches',
     },
+    reperes: [
+      { cle: 'etincelle', label: 'Étincelle', valeur: '80/100', precision: 'Dernière analyse.' },
+      { cle: 'taches', label: 'Tâches', valeur: '3/5', precision: '2 en cours.' },
+      { cle: 'etapes', label: 'Étapes', valeur: '2/5', precision: 'Cinq étapes.' },
+    ],
     visible: TOUTES_SECTIONS.map((section) => ({
       section,
       label: section,
@@ -84,7 +89,15 @@ const ENGINE_ROUTES = {
   'GET /knowledge/graph': { status: 200, body: { nodes: [], edges: [], isolated: [] } },
   'GET /memory/tags': { status: 200, body: [] },
   'GET /projects/p1/collaborators': { status: 200, body: [] },
-  'GET /projects/p1/compliance': { status: 200, body: { disclaimer: 'Info générale.', requirements: [] } },
+  'GET /projects/p1/compliance': {
+    status: 200,
+    body: {
+      disclaimer: 'Info générale.',
+      country: 'FR',
+      countryDeclared: true,
+      requirements: [],
+    },
+  },
   'GET /projects/p1/automation/runs': { status: 200, body: [] },
   'GET /projects/p1/workflows': { status: 200, body: [] },
   'GET /workflows/templates': { status: 200, body: [] },
@@ -526,18 +539,89 @@ describe('ProjectDetailPage', () => {
     expect(screen.queryByText('Collaborateurs')).not.toBeInTheDocument();
 
     // Les 4 moteurs transverses sont visibles en lecture seule pour un collaborateur.
-    expect(screen.getByText('Score IGNITUX')).toBeInTheDocument();
-    expect(screen.getByText('Tâches')).toBeInTheDocument();
-    expect(screen.getByText('Mémoire')).toBeInTheDocument();
-    expect(screen.getByText('Connaissance')).toBeInTheDocument();
+    // Par leur titre : « Tâches » est aussi le libellé d'un repère du
+    // tableau de bord, et getByText en trouverait deux.
+    expect(screen.getByRole('heading', { name: 'Score IGNITUX' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Tâches' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Mémoire' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Connaissance' })).toBeInTheDocument();
     expect(screen.queryByLabelText('Nouvelle tâche')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Contenu du souvenir')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Nom du concept')).not.toBeInTheDocument();
 
     // Conformité et automatisation sont aussi visibles en lecture seule.
-    expect(screen.getByText('Conformité (France)')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Conformité' })).toBeInTheDocument();
     expect(screen.getByText('Automatisation')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /lancer l'automatisation/i })).not.toBeInTheDocument();
+  });
+
+  // « Où en est ce projet ? » se lisait jusqu'ici en faisant défiler la
+  // page jusqu'au score, tout en bas. Les chiffres remontent en tête.
+  describe('tableau de bord du projet', () => {
+    it('affiche les repères en haut de la fiche', async () => {
+      mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      const tableau = await screen.findByLabelText('Où en est le projet');
+      expect(within(tableau).getByText('80/100')).toBeInTheDocument();
+      expect(within(tableau).getByText('3/5')).toBeInTheDocument();
+    });
+
+    // Un repère sans source affiche un tiret, jamais zéro : le produit ne
+    // rend pas un verdict que rien ne fonde.
+    it('affiche un tiret, pas un zéro, quand la source manque', async () => {
+      mockApiRoutes({
+        'GET /projects/p1': { status: 200, body: PROJECT },
+        ...ENGINE_ROUTES,
+        'GET /projects/p1/parcours': {
+          status: 200,
+          body: parcours({
+            reperes: [
+              {
+                cle: 'etincelle',
+                label: 'Étincelle',
+                valeur: null,
+                precision: "Aucune analyse pour l'instant.",
+              },
+            ],
+          }),
+        },
+      });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      const tableau = await screen.findByLabelText('Où en est le projet');
+      expect(within(tableau).getByText('—')).toBeInTheDocument();
+      expect(within(tableau).getByText(/Aucune analyse/)).toBeInTheDocument();
+    });
+
+    // Le tableau de bord est un confort : un serveur qui ne l'envoie pas
+    // ne doit pas emporter la fiche avec lui.
+    it('se tait si le serveur ne renvoie pas de repères', async () => {
+      mockApiRoutes({
+        'GET /projects/p1': { status: 200, body: PROJECT },
+        ...ENGINE_ROUTES,
+        'GET /projects/p1/parcours': { status: 200, body: parcours({ reperes: undefined }) },
+      });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByRole('heading', { level: 1 })).toBeInTheDocument();
+      expect(screen.queryByLabelText('Où en est le projet')).not.toBeInTheDocument();
+    });
   });
 
   describe('parcours guidé', () => {

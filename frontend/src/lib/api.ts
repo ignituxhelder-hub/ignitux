@@ -539,6 +539,16 @@ export interface ComplianceRequirement {
 
 export interface ComplianceChecklist {
   disclaimer: string;
+  /** Le pays dont les démarches sont listées. */
+  country: string;
+  /**
+   * L'utilisateur a-t-il déclaré ce pays, ou est-ce une supposition ?
+   *
+   * À false, la liste est celle de la France par défaut : l'écran doit le
+   * dire au lieu de présenter des obligations d'un pays comme étant
+   * celles du projet.
+   */
+  countryDeclared: boolean;
   requirements: ComplianceRequirement[];
 }
 
@@ -1006,9 +1016,24 @@ export interface JourneyStep {
   section: JourneySection;
 }
 
+/**
+ * Un chiffre du tableau de bord.
+ *
+ * `valeur` à null veut dire « pas de source », jamais zéro : l'écran
+ * affiche un tiret et la précision dit pourquoi.
+ */
+export interface JourneyRepere {
+  cle: 'etincelle' | 'taches' | 'etapes' | 'financement';
+  label: string;
+  valeur: string | null;
+  precision: string;
+}
+
 export interface JourneyView {
   phase: JourneyPhase;
   phaseLabel: string;
+  /** Les quelques chiffres du haut de page. Quatre au maximum. */
+  reperes: JourneyRepere[];
   /** null = rien ne se déduit. Le produit le dit au lieu d'inventer. */
   nextStep: JourneyStep | null;
   visible: Array<{ section: JourneySection; label: string; phase: JourneyPhase }>;
@@ -1393,8 +1418,10 @@ export const api = {
       body: JSON.stringify({ content }),
     }),
 
+  // Sans paramètre `country` : le serveur lit le pays déclaré au profil.
+  // Le forcer à FR ici rendait le champ « Pays d'activité » décoratif.
   getProjectCompliance: (token: string, projectId: string) =>
-    request<ComplianceChecklist>(`/projects/${projectId}/compliance?country=FR`, {
+    request<ComplianceChecklist>(`/projects/${projectId}/compliance`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
 

@@ -2,6 +2,7 @@ import {
   journeyView,
   nextStep,
   phaseOf,
+  reperes,
   SECTION_RULES,
   SEUIL_ETINCELLE,
   type ProjectFacts,
@@ -268,5 +269,76 @@ describe('parcours — la prochaine étape', () => {
         `étape « ${vue.nextStep.id} » vers une section fermée`,
       ).toContain(vue.nextStep.section);
     }
+  });
+});
+
+describe('tableau de bord — les chiffres du haut de page', () => {
+  const par = (f: ProjectFacts) => Object.fromEntries(reperes(f).map((r) => [r.cle, r]));
+
+  // La règle qui gouverne tout le reste : une absence de source n'est pas
+  // un zéro. Un projet sans analyse n'a pas une étincelle nulle, il n'en a
+  // pas — et afficher 0/100 serait un verdict qu'aucune analyse n'a rendu.
+  it("laisse l'étincelle vide plutôt que d'afficher zéro", () => {
+    const r = par(vierge()).etincelle;
+
+    expect(r.valeur).toBeNull();
+    expect(r.precision).toContain('Aucune analyse');
+  });
+
+  it("affiche l'étincelle de la dernière analyse", () => {
+    expect(par(vierge({ analyses: 1, etincelle: 80 })).etincelle.valeur).toBe('80/100');
+  });
+
+  it('compte les tâches terminées sur le total', () => {
+    const r = par(vierge({ tasks: 5, openTasks: 2 })).taches;
+
+    expect(r.valeur).toBe('3/5');
+    expect(r.precision).toContain('2 en cours');
+  });
+
+  it('ne montre pas 0/0 quand aucune tâche n’existe', () => {
+    expect(par(vierge()).taches.valeur).toBeNull();
+  });
+
+  it('compte les étapes franchies sur cinq', () => {
+    expect(par(vierge()).etapes.valeur).toBe('0/5');
+    expect(par(vierge({ analyses: 1, buildPlans: 1 })).etapes.valeur).toBe('2/5');
+  });
+
+  // Le financement est une branche facultative : une tuile « Financement :
+  // 0 » sur un projet qui n'en cherche pas est une case vide à remplir,
+  // c'est-à-dire exactement la pression qu'on a décidé de ne pas mettre.
+  it("n'affiche le financement que si le projet l'a ouvert", () => {
+    expect(par(vierge()).financement).toBeUndefined();
+    expect(par(vierge({ financingOpened: true })).financement.valeur).toBe('0');
+  });
+
+  // Quatre tuiles au maximum : au-delà, le tableau de bord redevient le mur
+  // de menus qu'on a retiré.
+  it('ne dépasse jamais quatre repères', () => {
+    const plein = vierge({
+      hasDescription: true,
+      analyses: 1,
+      etincelle: 80,
+      buildPlans: 1,
+      financingPlans: 1,
+      developmentPlans: 1,
+      transmissionPlans: 1,
+      tasks: 9,
+      openTasks: 1,
+      financingOpened: true,
+      financingRounds: 2,
+      equityHolders: 3,
+    });
+
+    expect(reperes(plein).length).toBeLessThanOrEqual(4);
+  });
+
+  it('est rendu par journeyView, pour que la page n’ait pas un appel de plus', () => {
+    expect(journeyView(vierge()).reperes.map((r) => r.cle)).toEqual([
+      'etincelle',
+      'taches',
+      'etapes',
+    ]);
   });
 });

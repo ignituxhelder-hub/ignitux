@@ -12,9 +12,8 @@ import { api, ApiError, type ProfileField, type ProfileValues } from '@/lib/api'
  * mal, ou part.
  *
  * Quand le champ ouvre quelque chose, c'est dit aussi. « Ton pays
- * d'activité » ne motive personne ; « la section Conformité affiche
- * aujourd'hui des démarches françaises à tout le monde sans le demander »
- * donne une raison de répondre.
+ * d'activité » ne motive personne ; « la section Conformité cesse de
+ * supposer la France » donne une raison de répondre.
  */
 function Champ({
   champ,

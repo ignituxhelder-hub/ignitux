@@ -23,6 +23,16 @@ interface SectionProps {
    * sans ce signal, elles resteraient figées jusqu'au rechargement complet.
    */
   refreshSignal?: number;
+  /**
+   * Appelé après une modification faite à la main dans cette section.
+   *
+   * Le serveur relance l'orchestration à chaque mutation manuelle, et les
+   * scores sont calculés à la lecture : une tâche cochée change le score
+   * Construction immédiatement côté serveur, mais l'écran ne le redemandait
+   * pas. On voyait donc une tâche terminée au-dessus d'un score inchangé —
+   * et c'est le score qu'on finissait par croire faux.
+   */
+  onChanged?: () => void;
 }
 
 interface ReadOnlySectionProps extends SectionProps {
@@ -130,7 +140,13 @@ const SOURCE_LABELS: Record<string, string> = {
   build_plan: 'Suggérée par le plan de construction',
 };
 
-export function TasksSection({ token, projectId, readOnly = false, refreshSignal }: ReadOnlySectionProps) {
+export function TasksSection({
+  token,
+  projectId,
+  readOnly = false,
+  refreshSignal,
+  onChanged,
+}: ReadOnlySectionProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -166,6 +182,7 @@ export function TasksSection({ token, projectId, readOnly = false, refreshSignal
       const task = await api.createTask(token, projectId, title.trim());
       setTasks((prev) => [task, ...prev]);
       setTitle('');
+      onChanged?.();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de créer la tâche.');
     } finally {
@@ -179,6 +196,7 @@ export function TasksSection({ token, projectId, readOnly = false, refreshSignal
     try {
       const updated = await api.updateTaskStatus(token, taskId, status);
       setTasks((prev) => prev.map((t) => (t.id === taskId ? updated : t)));
+      onChanged?.();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de mettre à jour la tâche.');
     }
@@ -538,6 +556,7 @@ export function KnowledgeSection({
   projectId,
   readOnly = false,
   refreshSignal,
+  onChanged,
 }: ReadOnlySectionProps) {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [edges, setEdges] = useState<ConceptLink[]>([]);
@@ -617,6 +636,7 @@ export function KnowledgeSection({
     try {
       await api.deleteConcept(token, conceptId);
       loadGraph();
+      onChanged?.();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de supprimer ce concept.');
     }
@@ -628,6 +648,7 @@ export function KnowledgeSection({
     try {
       await api.unlinkConcepts(token, linkId);
       loadGraph();
+      onChanged?.();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de supprimer ce lien.');
     }
@@ -646,6 +667,7 @@ export function KnowledgeSection({
       setConcepts((prev) => [concept, ...prev]);
       setName('');
       setDescription('');
+      onChanged?.();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de créer ce concept.');
     } finally {
@@ -662,6 +684,7 @@ export function KnowledgeSection({
       const link = await api.linkConcepts(token, fromId, toId, relationType.trim());
       setEdges((prev) => [link, ...prev]);
       setRelationType('');
+      onChanged?.();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de relier ces concepts.');
     } finally {

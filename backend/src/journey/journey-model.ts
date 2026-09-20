@@ -365,10 +365,85 @@ export function nextStep(f: ProjectFacts): NextStep | null {
   return null;
 }
 
+/**
+ * Un repère du tableau de bord : un chiffre, et ce qu'il vaut.
+ *
+ * `valeur` à null veut dire « pas de source », jamais zéro. La distinction
+ * est la même que pour les scores : un projet sans analyse n'a pas une
+ * étincelle de 0, il n'en a pas. Afficher 0 serait un jugement inventé.
+ */
+export interface Repere {
+  cle: 'etincelle' | 'taches' | 'etapes' | 'financement';
+  label: string;
+  valeur: string | null;
+  /** Ce que le chiffre ne dit pas, ou pourquoi il n'y en a pas. */
+  precision: string;
+}
+
+/**
+ * Les quelques chiffres qui répondent à « où en est ce projet ? ».
+ *
+ * Quatre au maximum, et seulement ceux qui ont un sens pour ce projet-là :
+ * un tableau de bord qui affiche douze tuiles redevient le mur de menus
+ * qu'on a retiré. Le financement n'apparaît que s'il a été ouvert — c'est
+ * une branche facultative, pas une case vide à remplir.
+ */
+export function reperes(f: ProjectFacts): Repere[] {
+  const etapesFaites = [
+    f.analyses > 0,
+    f.buildPlans > 0,
+    f.financingPlans > 0,
+    f.developmentPlans > 0,
+    f.transmissionPlans > 0,
+  ].filter(Boolean).length;
+
+  const termines = f.tasks - f.openTasks;
+
+  const liste: Repere[] = [
+    {
+      cle: 'etincelle',
+      label: 'Étincelle',
+      valeur: f.etincelle === null ? null : `${f.etincelle}/100`,
+      precision:
+        f.etincelle === null
+          ? "Aucune analyse pour l'instant."
+          : 'Faisabilité de la dernière analyse, arrondie à la dizaine.',
+    },
+    {
+      cle: 'taches',
+      label: 'Tâches',
+      valeur: f.tasks === 0 ? null : `${termines}/${f.tasks}`,
+      precision: f.tasks === 0 ? 'Aucune tâche encore.' : `${f.openTasks} en cours.`,
+    },
+    {
+      cle: 'etapes',
+      label: 'Étapes',
+      valeur: `${etapesFaites}/5`,
+      precision: 'Analyse, construction, financement, développement, transmission.',
+    },
+  ];
+
+  if (f.financingOpened) {
+    liste.push({
+      cle: 'financement',
+      label: 'Financement',
+      valeur: `${f.financingRounds}`,
+      precision:
+        f.financingRounds === 0
+          ? 'Projet ouvert, aucun tour enregistré.'
+          : `${f.equityHolders} détenteur(s) au capital.`,
+    });
+  }
+
+  return liste;
+}
+
 export interface JourneyView {
   phase: Phase;
   phaseLabel: string;
   nextStep: NextStep | null;
+  /** Les chiffres du haut de page. */
+  reperes: Repere[];
   /** Les sections à afficher, dans l'ordre du parcours. */
   visible: Array<{ section: Section; label: string; phase: Phase }>;
   /** Celles qui restent fermées, avec ce qui les ouvrira. */
@@ -386,5 +461,12 @@ export function journeyView(f: ProjectFacts): JourneyView {
   }
 
   const phase = phaseOf(f);
-  return { phase, phaseLabel: PHASE_LABELS[phase], nextStep: nextStep(f), visible, locked };
+  return {
+    phase,
+    phaseLabel: PHASE_LABELS[phase],
+    nextStep: nextStep(f),
+    reperes: reperes(f),
+    visible,
+    locked,
+  };
 }

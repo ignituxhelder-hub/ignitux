@@ -112,6 +112,22 @@ export const COMPETENCES = [
  */
 export const PAYS_COUVERTS = [{ code: 'FR', label: 'France' }] as const;
 
+/**
+ * Le libellé choisi dans le profil vers le code du référentiel.
+ *
+ * Le profil stocke « France » parce que c'est ce qu'on affiche ; la
+ * conformité indexe sur « FR ». Traduire ici, une fois, évite que chaque
+ * appelant bricole sa propre correspondance — et que l'une d'elles se
+ * trompe en silence, ce qui afficherait les obligations d'un autre pays.
+ *
+ * Rend null pour un libellé inconnu : mieux vaut ne pas savoir que deviner
+ * un pays, parce que la réponse décide d'obligations légales.
+ */
+export function countryCode(label: string | null | undefined): string | null {
+  if (!label) return null;
+  return PAYS_COUVERTS.find((p) => p.label === label)?.code ?? null;
+}
+
 export const PROFILE_FIELDS: readonly ProfileField[] = [
   {
     id: 'display_name',
@@ -133,8 +149,8 @@ export const PROFILE_FIELDS: readonly ProfileField[] = [
     purpose:
       'Les obligations légales dépendent du pays, pas de ta nationalité ni de ton lieu de vie.',
     unlocks:
-      "La section Conformité, qui affiche aujourd'hui des démarches françaises à tout le " +
-      'monde sans le demander.',
+      'La section Conformité cesse de supposer la France : elle liste les démarches de ton ' +
+      'pays, et le dit.',
     roles: ['entrepreneur'],
     moment: 'premier-projet',
     kind: 'choix',

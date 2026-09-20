@@ -80,7 +80,11 @@ describe('allocatePro', () => {
       expect(allocations.every((a) => a.amountCents >= 0)).toBe(true);
       expect(allocations).toHaveLength(nombre);
     }
-  });
+    // 20 000 tirages tiennent en 2,5 s seuls, mais dépassaient les 5 s par
+    // défaut quand la suite complète tourne en parallèle. Le test échouait
+    // alors sans qu une seule propriété soit violée : une fausse alerte use
+    // la confiance dans la suite plus vite qu un vrai échec.
+  }, 30000);
 
   it('donne tout à un investisseur unique', () => {
     expect(allocatePro(777, [part('seul', 42)])).toEqual([
