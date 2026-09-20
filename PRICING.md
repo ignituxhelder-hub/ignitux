@@ -96,6 +96,39 @@ Tarif : 5 $/M en entrée, 25 $/M en sortie.
 | Transmettre | 1 | 1 505 | 1 788 | 0,0480 € |
 | **Pipeline complet** | | | | **0,1938 €** |
 
+### Remesuré le 20/09/2026, générateurs rallumés
+
+Les cinq générateurs ont tourné une fois chacun, sur un même projet, avec la télémétrie en
+place. Les chiffres ci-dessous ne sont plus estimés : ils sortent de `ai_usage_events`.
+
+| Générateur | Estimé ci-dessus | **Mesuré** | Écart |
+|---|---|---|---|
+| Analyser | 0,0226 € | **0,0565 €** | ×2,5 |
+| Construire | 0,0342 € | **0,0914 €** | ×2,7 |
+| Financer | 0,0392 € | **0,0653 €** | ×1,7 |
+| Développer | 0,0497 € | **0,0728 €** | ×1,5 |
+| Transmettre | 0,0480 € | **0,0670 €** | ×1,4 |
+| **Pipeline complet** | 0,1938 € | **0,3530 €** | **×1,82** |
+
+**Le pipeline coûte 82 % de plus que la table ci-dessus ne l'annonçait.** Deux causes
+probables, et il faut dire qu'elles ne sont pas départagées : la réflexion interne du modèle
+— 1 699 tokens sur les 10 003 de sortie, facturés au tarif de sortie — et une description de
+projet plus fournie que celles des premières mesures. Un échantillon d'un projet ne tranche
+pas entre les deux.
+
+**Ce que cela change, et ce que cela ne change pas.** À 0,3530 € le pipeline contre 20 € de
+prix, on est à **1,77 %** — loin des 10 % que le plafond autorise. L'ordre de grandeur tient,
+l'estimation était seulement optimiste. Ce qu'il faut retenir est ailleurs : une estimation
+faite avant la télémétrie s'est révélée fausse d'un facteur deux, ce qui est précisément la
+raison pour laquelle la télémétrie a été construite.
+
+**Le plafond qui mord n'est pas celui qu'on croit.** Les deux limites sont 5 analyses et
+2,00 € par personne et par mois. Un pipeline complet consomme **5 appels pour 0,3530 €** :
+c'est le compteur d'appels qui bloque, à 18 % seulement du budget en euros. Autrement dit,
+l'offre actuelle donne **exactement une passe complète de la méthode par mois**, et pas une
+de plus — y compris pour quelqu'un qui voudrait relancer un seul générateur après l'avoir
+corrigé. Le plafond en euros, lui, ne sera jamais atteint.
+
 L'entrée grossit d'une étape à l'autre parce que chaque étape reçoit le résumé des précédentes.
 Cela reste marginal : l'entrée est cinq fois moins chère que la sortie, et c'est la **sortie qui
 porte tout le coût**. Toute décision de dépense ci-dessous est donc une décision sur la sortie.
