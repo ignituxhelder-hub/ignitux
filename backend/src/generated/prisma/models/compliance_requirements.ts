@@ -38,6 +38,7 @@ export type Compliance_requirementsMinAggregateOutputType = {
   description: string | null
   source_name: string | null
   source_url: string | null
+  verified_on: Date | null
   created_at: Date | null
 }
 
@@ -50,6 +51,7 @@ export type Compliance_requirementsMaxAggregateOutputType = {
   description: string | null
   source_name: string | null
   source_url: string | null
+  verified_on: Date | null
   created_at: Date | null
 }
 
@@ -62,6 +64,8 @@ export type Compliance_requirementsCountAggregateOutputType = {
   description: number
   source_name: number
   source_url: number
+  sectors: number
+  verified_on: number
   created_at: number
   _all: number
 }
@@ -76,6 +80,7 @@ export type Compliance_requirementsMinAggregateInputType = {
   description?: true
   source_name?: true
   source_url?: true
+  verified_on?: true
   created_at?: true
 }
 
@@ -88,6 +93,7 @@ export type Compliance_requirementsMaxAggregateInputType = {
   description?: true
   source_name?: true
   source_url?: true
+  verified_on?: true
   created_at?: true
 }
 
@@ -100,6 +106,8 @@ export type Compliance_requirementsCountAggregateInputType = {
   description?: true
   source_name?: true
   source_url?: true
+  sectors?: true
+  verified_on?: true
   created_at?: true
   _all?: true
 }
@@ -185,6 +193,8 @@ export type Compliance_requirementsGroupByOutputType = {
   description: string
   source_name: string
   source_url: string
+  sectors: string[]
+  verified_on: Date | null
   created_at: Date | null
   _count: Compliance_requirementsCountAggregateOutputType | null
   _min: Compliance_requirementsMinAggregateOutputType | null
@@ -218,6 +228,8 @@ export type compliance_requirementsWhereInput = {
   description?: Prisma.StringFilter<"compliance_requirements"> | string
   source_name?: Prisma.StringFilter<"compliance_requirements"> | string
   source_url?: Prisma.StringFilter<"compliance_requirements"> | string
+  sectors?: Prisma.StringNullableListFilter<"compliance_requirements">
+  verified_on?: Prisma.DateTimeNullableFilter<"compliance_requirements"> | Date | string | null
   created_at?: Prisma.DateTimeNullableFilter<"compliance_requirements"> | Date | string | null
   checks?: Prisma.Project_compliance_checksListRelationFilter
 }
@@ -231,6 +243,8 @@ export type compliance_requirementsOrderByWithRelationInput = {
   description?: Prisma.SortOrder
   source_name?: Prisma.SortOrder
   source_url?: Prisma.SortOrder
+  sectors?: Prisma.SortOrder
+  verified_on?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   checks?: Prisma.project_compliance_checksOrderByRelationAggregateInput
 }
@@ -247,6 +261,8 @@ export type compliance_requirementsWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringFilter<"compliance_requirements"> | string
   source_name?: Prisma.StringFilter<"compliance_requirements"> | string
   source_url?: Prisma.StringFilter<"compliance_requirements"> | string
+  sectors?: Prisma.StringNullableListFilter<"compliance_requirements">
+  verified_on?: Prisma.DateTimeNullableFilter<"compliance_requirements"> | Date | string | null
   created_at?: Prisma.DateTimeNullableFilter<"compliance_requirements"> | Date | string | null
   checks?: Prisma.Project_compliance_checksListRelationFilter
 }, "id" | "slug">
@@ -260,6 +276,8 @@ export type compliance_requirementsOrderByWithAggregationInput = {
   description?: Prisma.SortOrder
   source_name?: Prisma.SortOrder
   source_url?: Prisma.SortOrder
+  sectors?: Prisma.SortOrder
+  verified_on?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.compliance_requirementsCountOrderByAggregateInput
   _max?: Prisma.compliance_requirementsMaxOrderByAggregateInput
@@ -278,6 +296,8 @@ export type compliance_requirementsScalarWhereWithAggregatesInput = {
   description?: Prisma.StringWithAggregatesFilter<"compliance_requirements"> | string
   source_name?: Prisma.StringWithAggregatesFilter<"compliance_requirements"> | string
   source_url?: Prisma.StringWithAggregatesFilter<"compliance_requirements"> | string
+  sectors?: Prisma.StringNullableListFilter<"compliance_requirements">
+  verified_on?: Prisma.DateTimeNullableWithAggregatesFilter<"compliance_requirements"> | Date | string | null
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"compliance_requirements"> | Date | string | null
 }
 
@@ -290,6 +310,8 @@ export type compliance_requirementsCreateInput = {
   description: string
   source_name: string
   source_url: string
+  sectors?: Prisma.compliance_requirementsCreatesectorsInput | string[]
+  verified_on?: Date | string | null
   created_at?: Date | string | null
   checks?: Prisma.project_compliance_checksCreateNestedManyWithoutRequirementInput
 }
@@ -303,6 +325,8 @@ export type compliance_requirementsUncheckedCreateInput = {
   description: string
   source_name: string
   source_url: string
+  sectors?: Prisma.compliance_requirementsCreatesectorsInput | string[]
+  verified_on?: Date | string | null
   created_at?: Date | string | null
   checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutRequirementInput
 }
@@ -316,6 +340,8 @@ export type compliance_requirementsUpdateInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   source_name?: Prisma.StringFieldUpdateOperationsInput | string
   source_url?: Prisma.StringFieldUpdateOperationsInput | string
+  sectors?: Prisma.compliance_requirementsUpdatesectorsInput | string[]
+  verified_on?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checks?: Prisma.project_compliance_checksUpdateManyWithoutRequirementNestedInput
 }
@@ -329,6 +355,8 @@ export type compliance_requirementsUncheckedUpdateInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   source_name?: Prisma.StringFieldUpdateOperationsInput | string
   source_url?: Prisma.StringFieldUpdateOperationsInput | string
+  sectors?: Prisma.compliance_requirementsUpdatesectorsInput | string[]
+  verified_on?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutRequirementNestedInput
 }
@@ -342,6 +370,8 @@ export type compliance_requirementsCreateManyInput = {
   description: string
   source_name: string
   source_url: string
+  sectors?: Prisma.compliance_requirementsCreatesectorsInput | string[]
+  verified_on?: Date | string | null
   created_at?: Date | string | null
 }
 
@@ -354,6 +384,8 @@ export type compliance_requirementsUpdateManyMutationInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   source_name?: Prisma.StringFieldUpdateOperationsInput | string
   source_url?: Prisma.StringFieldUpdateOperationsInput | string
+  sectors?: Prisma.compliance_requirementsUpdatesectorsInput | string[]
+  verified_on?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -366,6 +398,8 @@ export type compliance_requirementsUncheckedUpdateManyInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   source_name?: Prisma.StringFieldUpdateOperationsInput | string
   source_url?: Prisma.StringFieldUpdateOperationsInput | string
+  sectors?: Prisma.compliance_requirementsUpdatesectorsInput | string[]
+  verified_on?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -378,6 +412,8 @@ export type compliance_requirementsCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   source_name?: Prisma.SortOrder
   source_url?: Prisma.SortOrder
+  sectors?: Prisma.SortOrder
+  verified_on?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -390,6 +426,7 @@ export type compliance_requirementsMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   source_name?: Prisma.SortOrder
   source_url?: Prisma.SortOrder
+  verified_on?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -402,12 +439,22 @@ export type compliance_requirementsMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   source_name?: Prisma.SortOrder
   source_url?: Prisma.SortOrder
+  verified_on?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
 export type Compliance_requirementsScalarRelationFilter = {
   is?: Prisma.compliance_requirementsWhereInput
   isNot?: Prisma.compliance_requirementsWhereInput
+}
+
+export type compliance_requirementsCreatesectorsInput = {
+  set: string[]
+}
+
+export type compliance_requirementsUpdatesectorsInput = {
+  set?: string[]
+  push?: string | string[]
 }
 
 export type compliance_requirementsCreateNestedOneWithoutChecksInput = {
@@ -433,6 +480,8 @@ export type compliance_requirementsCreateWithoutChecksInput = {
   description: string
   source_name: string
   source_url: string
+  sectors?: Prisma.compliance_requirementsCreatesectorsInput | string[]
+  verified_on?: Date | string | null
   created_at?: Date | string | null
 }
 
@@ -445,6 +494,8 @@ export type compliance_requirementsUncheckedCreateWithoutChecksInput = {
   description: string
   source_name: string
   source_url: string
+  sectors?: Prisma.compliance_requirementsCreatesectorsInput | string[]
+  verified_on?: Date | string | null
   created_at?: Date | string | null
 }
 
@@ -473,6 +524,8 @@ export type compliance_requirementsUpdateWithoutChecksInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   source_name?: Prisma.StringFieldUpdateOperationsInput | string
   source_url?: Prisma.StringFieldUpdateOperationsInput | string
+  sectors?: Prisma.compliance_requirementsUpdatesectorsInput | string[]
+  verified_on?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -485,6 +538,8 @@ export type compliance_requirementsUncheckedUpdateWithoutChecksInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   source_name?: Prisma.StringFieldUpdateOperationsInput | string
   source_url?: Prisma.StringFieldUpdateOperationsInput | string
+  sectors?: Prisma.compliance_requirementsUpdatesectorsInput | string[]
+  verified_on?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -528,6 +583,8 @@ export type compliance_requirementsSelect<ExtArgs extends runtime.Types.Extensio
   description?: boolean
   source_name?: boolean
   source_url?: boolean
+  sectors?: boolean
+  verified_on?: boolean
   created_at?: boolean
   checks?: boolean | Prisma.compliance_requirements$checksArgs<ExtArgs>
   _count?: boolean | Prisma.Compliance_requirementsCountOutputTypeDefaultArgs<ExtArgs>
@@ -542,6 +599,8 @@ export type compliance_requirementsSelectCreateManyAndReturn<ExtArgs extends run
   description?: boolean
   source_name?: boolean
   source_url?: boolean
+  sectors?: boolean
+  verified_on?: boolean
   created_at?: boolean
 }, ExtArgs["result"]["compliance_requirements"]>
 
@@ -554,6 +613,8 @@ export type compliance_requirementsSelectUpdateManyAndReturn<ExtArgs extends run
   description?: boolean
   source_name?: boolean
   source_url?: boolean
+  sectors?: boolean
+  verified_on?: boolean
   created_at?: boolean
 }, ExtArgs["result"]["compliance_requirements"]>
 
@@ -566,10 +627,12 @@ export type compliance_requirementsSelectScalar = {
   description?: boolean
   source_name?: boolean
   source_url?: boolean
+  sectors?: boolean
+  verified_on?: boolean
   created_at?: boolean
 }
 
-export type compliance_requirementsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "country" | "category" | "title" | "description" | "source_name" | "source_url" | "created_at", ExtArgs["result"]["compliance_requirements"]>
+export type compliance_requirementsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "country" | "category" | "title" | "description" | "source_name" | "source_url" | "sectors" | "verified_on" | "created_at", ExtArgs["result"]["compliance_requirements"]>
 export type compliance_requirementsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   checks?: boolean | Prisma.compliance_requirements$checksArgs<ExtArgs>
   _count?: boolean | Prisma.Compliance_requirementsCountOutputTypeDefaultArgs<ExtArgs>
@@ -591,6 +654,8 @@ export type $compliance_requirementsPayload<ExtArgs extends runtime.Types.Extens
     description: string
     source_name: string
     source_url: string
+    sectors: string[]
+    verified_on: Date | null
     created_at: Date | null
   }, ExtArgs["result"]["compliance_requirements"]>
   composites: {}
@@ -1024,6 +1089,8 @@ export interface compliance_requirementsFieldRefs {
   readonly description: Prisma.FieldRef<"compliance_requirements", 'String'>
   readonly source_name: Prisma.FieldRef<"compliance_requirements", 'String'>
   readonly source_url: Prisma.FieldRef<"compliance_requirements", 'String'>
+  readonly sectors: Prisma.FieldRef<"compliance_requirements", 'String[]'>
+  readonly verified_on: Prisma.FieldRef<"compliance_requirements", 'DateTime'>
   readonly created_at: Prisma.FieldRef<"compliance_requirements", 'DateTime'>
 }
     

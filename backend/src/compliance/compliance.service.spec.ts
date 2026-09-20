@@ -18,7 +18,7 @@ describe('ComplianceService', () => {
       upsert: ReturnType<typeof vi.fn>;
       deleteMany: ReturnType<typeof vi.fn>;
     };
-    projects: { findFirst: ReturnType<typeof vi.fn> };
+    projects: { findFirst: ReturnType<typeof vi.fn>; findUnique: ReturnType<typeof vi.fn> };
     user_profiles: { findUnique: ReturnType<typeof vi.fn> };
     constitution_violations: { createMany: ReturnType<typeof vi.fn> };
   };
@@ -32,7 +32,7 @@ describe('ComplianceService', () => {
         groupBy: vi.fn(),
       },
       project_compliance_checks: { findMany: vi.fn(), upsert: vi.fn(), deleteMany: vi.fn() },
-      projects: { findFirst: vi.fn() },
+      projects: { findFirst: vi.fn(), findUnique: vi.fn().mockResolvedValue(null) },
       user_profiles: { findUnique: vi.fn().mockResolvedValue(null) },
       constitution_violations: { createMany: vi.fn() },
     };
@@ -157,6 +157,47 @@ describe('ComplianceService', () => {
       const result = await service.listForProject('u1', 'p1');
 
       expect(result.countryDeclared).toBe(false);
+    });
+
+    // Le tri par secteur ne doit jamais devenir un filtre : une
+    // obligation qu'on ne voit pas est une obligation qu'on croit ne pas
+    // avoir, et c'est Ignitux qui aurait produit ce silence.
+    it('groupe par secteur sans jamais retirer une démarche', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.projects.findUnique.mockResolvedValue({ sector: 'Restauration' });
+      prisma.compliance_requirements.findMany.mockResolvedValue([
+        { id: 'r1', title: 'Hygiène', sectors: ['Restauration'] },
+        { id: 'r2', title: 'Statut juridique', sectors: [] },
+        { id: 'r3', title: 'Carte de transport', sectors: ['Transport'] },
+      ]);
+      prisma.project_compliance_checks.findMany.mockResolvedValue([]);
+
+      const result = await service.listForProject('u1', 'p1');
+
+      expect(result.requirements).toHaveLength(3);
+      const idsGroupes = result.groupes.flatMap((g) => g.requirementIds);
+      expect(idsGroupes.sort()).toEqual(['r1', 'r2', 'r3']);
+      expect(result.groupes.map((g) => g.cle)).toEqual([
+        'secteur',
+        'toute-activite',
+        'autres-secteurs',
+      ]);
+      expect(result.sector).toBe('Restauration');
+    });
+
+    it('ne relègue rien tant que le projet n’a pas de secteur', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.projects.findUnique.mockResolvedValue({ sector: null });
+      prisma.compliance_requirements.findMany.mockResolvedValue([
+        { id: 'r1', title: 'Hygiène', sectors: ['Restauration'] },
+        { id: 'r2', title: 'Statut juridique', sectors: [] },
+      ]);
+      prisma.project_compliance_checks.findMany.mockResolvedValue([]);
+
+      const result = await service.listForProject('u1', 'p1');
+
+      expect(result.sector).toBeNull();
+      expect(result.groupes.map((g) => g.cle)).toEqual(['toute-activite']);
     });
 
     it('un pays demandé explicitement prime sur le profil', async () => {

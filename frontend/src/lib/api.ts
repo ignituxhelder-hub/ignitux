@@ -264,6 +264,8 @@ export interface Project {
   owner_id: string;
   title: string;
   description: string | null;
+  /** Le secteur du projet. null tant qu il n a pas ete demande. */
+  sector: string | null;
   is_public: boolean;
   created_at: string;
   updated_at: string;
@@ -537,6 +539,43 @@ export interface ComplianceRequirement {
   completed: boolean;
 }
 
+/**
+ * Les secteurs proposés, dans l'ordre du référentiel serveur.
+ *
+ * Dupliqué ici volontairement : le frontend a besoin de la liste pour
+ * poser la question, et un appel de plus pour douze chaînes constantes
+ * coûterait plus cher que cette duplication. Le serveur reste l'autorité —
+ * il refuse une valeur hors liste.
+ */
+export const SECTEURS_PROJET = [
+  'Agriculture',
+  'Artisanat',
+  'Commerce',
+  'Éducation',
+  'Énergie',
+  'Immobilier',
+  'Industrie',
+  'Logiciel',
+  'Restauration',
+  'Santé',
+  'Services',
+  'Transport',
+] as const;
+
+/**
+ * Un groupe de démarches, trié par pertinence.
+ *
+ * Trie, ne filtre pas : la réunion des `requirementIds` de tous les
+ * groupes vaut exactement `requirements`. L'écran doit le rendre visible,
+ * pas le corriger.
+ */
+export interface ComplianceGroupe {
+  cle: 'secteur' | 'toute-activite' | 'autres-secteurs';
+  titre: string;
+  precision: string;
+  requirementIds: string[];
+}
+
 export interface ComplianceChecklist {
   disclaimer: string;
   /** Le pays dont les démarches sont listées. */
@@ -549,7 +588,10 @@ export interface ComplianceChecklist {
    * celles du projet.
    */
   countryDeclared: boolean;
+  /** Le secteur du projet, ou null s'il n'a pas été déclaré. */
+  sector: string | null;
   requirements: ComplianceRequirement[];
+  groupes: ComplianceGroupe[];
 }
 
 export type MarketplaceRole = 'mentor' | 'investisseur';
@@ -1368,6 +1410,16 @@ export const api = {
   getScoreCard: (token: string, projectId: string) =>
     request<ScoreCard>(`/projects/${projectId}/scores`, {
       headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  // Le secteur DU PROJET — pas celui du profil, qui dit où la personne a
+  // déjà travaillé. Les deux ne sont pas interchangeables : venir du
+  // logiciel et ouvrir une friterie est une situation ordinaire.
+  updateProjectSector: (token: string, id: string, sector: string | null) =>
+    request<Project>(`/projects/${id}/secteur`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ sector }),
     }),
 
   updateProjectVisibility: (token: string, id: string, isPublic: boolean) =>

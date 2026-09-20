@@ -5,6 +5,7 @@ import { ConstitutionService } from '../constitution/constitution.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { COMPLIANCE_REQUIREMENTS_FR } from './compliance-requirements.js';
 import { countryCode } from '../profile/profile-fields.js';
+import { grouperParPertinence } from './compliance-pertinence.js';
 
 export const COMPLIANCE_DISCLAIMER =
   "Ces informations sont générales, non exhaustives et rédigées à partir de sources publiques citées pour chaque point. " +
@@ -47,6 +48,8 @@ export class ComplianceService implements OnModuleInit {
           description: requirement.description,
           source_name: requirement.sourceName,
           source_url: requirement.sourceUrl,
+          sectors: [...requirement.sectors],
+          verified_on: new Date(requirement.verifiedOn),
         },
         create: {
           slug: requirement.slug,
@@ -56,6 +59,8 @@ export class ComplianceService implements OnModuleInit {
           description: requirement.description,
           source_name: requirement.sourceName,
           source_url: requirement.sourceUrl,
+          sectors: [...requirement.sectors],
+          verified_on: new Date(requirement.verifiedOn),
         },
       });
     }
@@ -125,13 +130,18 @@ export class ComplianceService implements OnModuleInit {
     const declare = country ?? (await this.paysDeclare(userId));
     const pays = declare ?? 'FR';
 
-    const [requirements, checks] = await Promise.all([
+    const [requirements, checks, projet] = await Promise.all([
       this.prisma.compliance_requirements.findMany({
         where: { country: pays },
         orderBy: [{ category: 'asc' }, { title: 'asc' }],
       }),
       this.prisma.project_compliance_checks.findMany({ where: { project_id: projectId } }),
+      this.prisma.projects.findUnique({
+        where: { id: projectId },
+        select: { sector: true },
+      }),
     ]);
+    const secteur = projet?.sector ?? null;
 
     const completedRequirementIds = new Set(checks.map((check) => check.requirement_id));
 
@@ -143,13 +153,25 @@ export class ComplianceService implements OnModuleInit {
       notice: COMPLIANCE_DISCLAIMER,
     });
 
+    const avecEtat = requirements.map((requirement) => ({
+      ...requirement,
+      completed: completedRequirementIds.has(requirement.id),
+    }));
+
     return {
       disclaimer: COMPLIANCE_DISCLAIMER,
       country: pays,
       countryDeclared: declare !== null,
-      requirements: requirements.map((requirement) => ({
-        ...requirement,
-        completed: completedRequirementIds.has(requirement.id),
+      sector: secteur,
+      // Groupé, jamais filtré : `requirements` reste la liste entière, et
+      // `groupes` ne fait que dire dans quel ordre la lire. Un appelant qui
+      // ignorerait les groupes verrait donc toujours tout.
+      requirements: avecEtat,
+      groupes: grouperParPertinence(avecEtat, secteur).map((g) => ({
+        cle: g.groupe.cle,
+        titre: g.groupe.titre,
+        precision: g.groupe.precision,
+        requirementIds: g.exigences.map((e) => e.id),
       })),
     };
   }

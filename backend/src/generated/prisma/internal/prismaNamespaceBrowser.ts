@@ -147,6 +147,7 @@ export const ProjectsScalarFieldEnum = {
   owner_id: 'owner_id',
   title: 'title',
   description: 'description',
+  sector: 'sector',
   is_public: 'is_public',
   created_at: 'created_at',
   updated_at: 'updated_at'
@@ -314,6 +315,8 @@ export const Compliance_requirementsScalarFieldEnum = {
   description: 'description',
   source_name: 'source_name',
   source_url: 'source_url',
+  sectors: 'sectors',
+  verified_on: 'verified_on',
   created_at: 'created_at'
 } as const
 

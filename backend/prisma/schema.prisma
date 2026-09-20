@@ -59,6 +59,16 @@ model projects {
   owner                users                       @relation(fields: [owner_id], references: [id], onDelete: Cascade)
   title                String
   description          String?
+  // Le secteur DU PROJET, pas celui de la personne.
+  //
+  // user_profiles.sectors dit « où tu as déjà travaillé » : c'est une
+  // expérience. Quelqu'un venu du logiciel peut ouvrir une friterie, et
+  // trier ses obligations légales sur son passé lui cacherait l'hygiène
+  // alimentaire. Les deux champs ne sont donc pas interchangeables.
+  //
+  // Nullable, et il le restera : la conformité s'affiche entière sans lui,
+  // simplement pas triée.
+  sector               String?
   // Un projet public est visible dans la communauté (lecture seule pour les
   // autres utilisateurs, qui peuvent y laisser des encouragements) — false
   // par défaut, l'utilisateur décide explicitement de le rendre public.
@@ -312,6 +322,21 @@ model compliance_requirements {
   description String
   source_name String
   source_url  String
+  // Les secteurs que la démarche vise explicitement.
+  //
+  // Liste vide = elle concerne toute activité. Elle sert à TRIER, jamais à
+  // filtrer : une démarche rattachée à un autre secteur descend en bas de
+  // liste, elle ne disparaît pas. Masquer une obligation légale produirait
+  // un faux négatif, et un faux négatif ici coûte bien plus cher que du
+  // bruit (voir compliance-pertinence.ts).
+  sectors     String[]  @default([])
+  // Le jour où la source a été ouverte et lue pour la dernière fois.
+  //
+  // Une source morte est pire qu'absente : elle a l'air vérifiée. Le
+  // domaine service-public.fr a migré, des fiches ont changé d'identifiant,
+  // et sept des treize liens d'origine renvoyaient un 404 sans que rien ne
+  // le signale. Cette date rend la péremption visible.
+  verified_on DateTime? @db.Date
   created_at  DateTime? @default(now()) @db.Timestamptz(6)
 
   checks project_compliance_checks[]

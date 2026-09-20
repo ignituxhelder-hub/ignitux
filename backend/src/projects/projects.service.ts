@@ -121,6 +121,18 @@ export class ProjectsService {
     await this.prisma.projects.delete({ where: { id } });
   }
 
+  /**
+   * Le secteur d'activité du projet.
+   *
+   * Sert à trier les démarches de conformité — jamais à en masquer. Un
+   * secteur absent n'est pas une lacune à combler : la conformité s'affiche
+   * entière sans lui, simplement dans l'ordre par défaut.
+   */
+  async setSectorForOwner(ownerId: string, id: string, sector: string | null) {
+    await this.findOneForOwner(ownerId, id);
+    return this.prisma.projects.update({ where: { id }, data: { sector } });
+  }
+
   async setVisibilityForOwner(ownerId: string, id: string, isPublic: boolean) {
     await this.findOneForOwner(ownerId, id);
     return this.prisma.projects.update({ where: { id }, data: { is_public: isPublic } });

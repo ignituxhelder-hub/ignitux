@@ -19,6 +19,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { AddCollaboratorDto } from './dto/add-collaborator.dto.js';
 import { CreateProjectDto } from './dto/create-project.dto.js';
 import { UpdateProjectDto } from './dto/update-project.dto.js';
+import { UpdateSectorDto } from './dto/update-sector.dto.js';
 import { UpdateVisibilityDto } from './dto/update-visibility.dto.js';
 import { ProjectsService } from './projects.service.js';
 
@@ -58,6 +59,15 @@ export class ProjectsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     await this.projectsService.deleteForOwner(user.id, id);
+  }
+
+  @Patch(':id/secteur')
+  updateSector(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateSectorDto,
+  ) {
+    return this.projectsService.setSectorForOwner(user.id, id, dto.sector ?? null);
   }
 
   @Patch(':id/visibility')
