@@ -1654,6 +1654,16 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     }),
 
+  // Rattache un mouvement bancaire a l ecriture qui le constate. Le
+  // moteur constitutionnel refuse un rapprochement entre deux
+  // proprietaires differents : la verification n est pas ici.
+  reconcileBankTransaction: (token: string, transactionId: string, entryId: string) =>
+    request<BankTransaction>(`/banque/mouvements/${transactionId}/rapprochement`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ entryId }),
+    }),
+
   importBankTransaction: (
     token: string,
     accountId: string,

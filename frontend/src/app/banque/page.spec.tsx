@@ -83,14 +83,77 @@ describe('BanquePage', () => {
     expect(await screen.findByText(/ne se connecte à aucune banque/)).toBeInTheDocument();
   });
 
-  // Le compteur « à rapprocher » n'est pas un reproche : le rapprochement
-  // n'a pas encore d'écran, et il faut le dire plutôt que de le masquer.
-  it('explique pourquoi le rapprochement n’est pas possible ici', async () => {
+  // Un menu déroulant vide ne dit rien. Sans écriture, l'écran envoie vers
+  // l'endroit où on en crée.
+  it('renvoie vers la comptabilité quand il n’y a aucune écriture à rattacher', async () => {
     mockApiRoutes(AVEC_COMPTE);
 
     afficher();
 
-    expect(await screen.findByText(/la comptabilité n.a pas encore d.écran/)).toBeInTheDocument();
+    expect(await screen.findByText(/aucune écriture comptable à y rattacher/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Tenir la comptabilité' })).toHaveAttribute(
+      'href',
+      '/comptabilite',
+    );
+  });
+
+  it('propose les écritures existantes et rapproche le mouvement choisi', async () => {
+    mockApiRoutes({
+      ...AVEC_COMPTE,
+      'GET /comptabilite/ecritures': {
+        status: 200,
+        body: [
+          {
+            id: 'e1',
+            occurred_on: '2026-02-03T00:00:00.000Z',
+            label: 'Achat de matériel',
+            reference: null,
+            currency: 'EUR',
+            lines: [],
+          },
+        ],
+      },
+      'POST /banque/mouvements/m1/rapprochement': { status: 201, body: MOUVEMENT },
+    });
+
+    afficher();
+
+    const choix = await screen.findByLabelText('Écriture à rapprocher de Achat de matériel');
+    fireEvent.change(choix, { target: { value: 'e1' } });
+    fireEvent.click(screen.getByRole('button', { name: /^rapprocher$/i }));
+
+    await waitFor(() => {
+      const appels = (global.fetch as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+      const envoi = appels.find((a) => String(a[0]).includes('/rapprochement'));
+      expect(envoi).toBeTruthy();
+      expect(JSON.parse(String((envoi?.[1] as RequestInit)?.body))).toEqual({ entryId: 'e1' });
+    });
+  });
+
+  // Rapprocher sans choisir rattacherait le mouvement à n'importe quoi.
+  it('refuse de rapprocher sans écriture choisie', async () => {
+    mockApiRoutes({
+      ...AVEC_COMPTE,
+      'GET /comptabilite/ecritures': {
+        status: 200,
+        body: [
+          {
+            id: 'e1',
+            occurred_on: '2026-02-03T00:00:00.000Z',
+            label: 'Achat de matériel',
+            reference: null,
+            currency: 'EUR',
+            lines: [],
+          },
+        ],
+      },
+    });
+
+    afficher();
+
+    fireEvent.click(await screen.findByRole('button', { name: /^rapprocher$/i }));
+
+    expect(await screen.findByText(/Choisis l’écriture/)).toBeInTheDocument();
   });
 
   it('propose de déclarer un compte quand il n’y en a aucun', async () => {

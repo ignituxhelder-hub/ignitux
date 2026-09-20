@@ -11,6 +11,7 @@ import {
   type BankAccount,
   type BankBalance,
   type BankTransaction,
+  type LedgerEntry,
 } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { centimesDepuisEuros, euros, jour } from '@/lib/montants';
@@ -38,11 +39,10 @@ const NATURES: Record<string, string> = {
  *   colonne `provider` existe en base pour le jour où une synchronisation
  *   arrivera ; laisser croire qu'elle est là ferait attendre des lignes
  *   qui ne viendront jamais.
- * — **Aucun rapprochement.** Rattacher un mouvement à son écriture
- *   comptable suppose de pouvoir choisir cette écriture, et la
- *   comptabilité n'a pas encore d'écran. Le compteur « à rapprocher »
- *   s'affiche quand même : c'est un fait, et le cacher donnerait
- *   l'impression que tout est rapproché.
+ * — **Le rapprochement demande des écritures.** Rattacher un mouvement à
+ *   l'écriture qui le constate suppose d'avoir des écritures à choisir.
+ *   Tant que la comptabilité est vide, la liste l'est aussi, et l'écran
+ *   le dit plutôt que d'afficher un menu déroulant vide.
  * — **Jamais l'IBAN entier.** Quatre caractères suffisent à reconnaître un
  *   compte ; stocker le reste serait garder une donnée bancaire complète
  *   pour un besoin qui n'existe pas.
@@ -55,6 +55,9 @@ export default function BanquePage() {
   const [choisi, setChoisi] = useState<string | null>(null);
   const [mouvements, setMouvements] = useState<BankTransaction[]>([]);
   const [solde, setSolde] = useState<BankBalance | null>(null);
+  // Les ecritures servent au rapprochement. Chargees une fois, avec les
+  // comptes : un appel par mouvement serait absurde.
+  const [ecritures, setEcritures] = useState<LedgerEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -63,7 +66,13 @@ export default function BanquePage() {
     if (!token) return;
     setIsLoading(true);
     try {
-      const liste = await api.listBankAccounts(token);
+      const [liste, journal] = await Promise.all([
+        api.listBankAccounts(token),
+        // Un echec ici ne doit pas priver de la banque : sans ecritures,
+        // le rapprochement se tait, le reste fonctionne.
+        api.listLedgerEntries(token).catch(() => []),
+      ]);
+      setEcritures(journal);
       setComptes(liste);
       setChoisi((actuel) => actuel ?? liste[0]?.id ?? null);
       setError(null);
@@ -174,9 +183,8 @@ export default function BanquePage() {
           {solde && solde.unreconciledCount > 0 && (
             <p className="muted" style={{ marginBottom: 0, marginTop: '1rem' }}>
               Rapprocher un mouvement, c&apos;est le rattacher à l&apos;écriture comptable qui
-              le constate. Cela demande de pouvoir choisir cette écriture, et la comptabilité
-              n&apos;a pas encore d&apos;écran — ce compteur dit donc où en est le travail, pas
-              qu&apos;il est en retard.
+              le constate. Un solde juste avec des mouvements non rapprochés veut dire que la
+              comptabilité ne dit pas encore ce que la banque dit.
             </p>
           )}
         </div>
@@ -193,7 +201,16 @@ export default function BanquePage() {
             }}
             onErreur={setError}
           />
-          <Mouvements mouvements={mouvements} />
+          <Mouvements
+            mouvements={mouvements}
+            ecritures={ecritures}
+            token={token}
+            onFait={async (m) => {
+              setMessage(m);
+              await chargerCompte();
+            }}
+            onErreur={setError}
+          />
         </>
       )}
 
@@ -222,7 +239,19 @@ function Chiffre({ libelle, valeur }: { libelle: string; valeur: string }) {
   );
 }
 
-function Mouvements({ mouvements }: { mouvements: BankTransaction[] }) {
+function Mouvements({
+  mouvements,
+  ecritures,
+  token,
+  onFait,
+  onErreur,
+}: {
+  mouvements: BankTransaction[];
+  ecritures: LedgerEntry[];
+  token: string;
+  onFait: (message: string) => Promise<void>;
+  onErreur: (message: string) => void;
+}) {
   return (
     <div className="card" style={{ marginTop: '1.5rem' }}>
       <h2 style={{ marginTop: 0 }}>Mouvements</h2>
@@ -245,11 +274,92 @@ function Mouvements({ mouvements }: { mouvements: BankTransaction[] }) {
             <span className="muted" style={{ fontSize: '0.8rem' }}>
               {jour(m.occurred_on)}
               {m.external_ref ? ` · réf. ${m.external_ref}` : ''}
-              {m.reconciled_entry_id ? ' · rapproché' : ' · à rapprocher'}
+              {m.reconciled_entry_id ? ' · rapproché' : ''}
             </span>
+            {!m.reconciled_entry_id && (
+              <Rapprocher
+                mouvement={m}
+                ecritures={ecritures}
+                token={token}
+                onFait={onFait}
+                onErreur={onErreur}
+              />
+            )}
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Rattacher un mouvement à l'écriture qui le constate.
+ *
+ * Aucun rapprochement automatique par montant : deux achats du même jour
+ * au même prix ne sont pas interchangeables, et deviner lequel va avec
+ * quoi produirait une comptabilité fausse que personne ne relirait.
+ */
+function Rapprocher({
+  mouvement,
+  ecritures,
+  token,
+  onFait,
+  onErreur,
+}: {
+  mouvement: BankTransaction;
+  ecritures: LedgerEntry[];
+  token: string;
+  onFait: (message: string) => Promise<void>;
+  onErreur: (message: string) => void;
+}) {
+  const [choix, setChoix] = useState('');
+  const [enCours, setEnCours] = useState(false);
+
+  if (ecritures.length === 0) {
+    return (
+      <p className="muted" style={{ margin: '0.35rem 0 0', fontSize: '0.8rem' }}>
+        À rapprocher — aucune écriture comptable à y rattacher pour l&apos;instant.{' '}
+        <Link href="/comptabilite">Tenir la comptabilité</Link>.
+      </p>
+    );
+  }
+
+  async function rapprocher() {
+    if (!choix) {
+      onErreur('Choisis l’écriture que ce mouvement constate.');
+      return;
+    }
+    setEnCours(true);
+    try {
+      await api.reconcileBankTransaction(token, mouvement.id, choix);
+      await onFait('Mouvement rapproché.');
+    } catch (err) {
+      onErreur(err instanceof ApiError ? err.message : 'Impossible de rapprocher ce mouvement.');
+    } finally {
+      setEnCours(false);
+    }
+  }
+
+  return (
+    <div
+      style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem', flexWrap: 'wrap' }}
+    >
+      <select
+        aria-label={`Écriture à rapprocher de ${mouvement.label}`}
+        value={choix}
+        onChange={(e) => setChoix(e.target.value)}
+        style={{ flex: '1 1 14rem' }}
+      >
+        <option value="">— à rapprocher —</option>
+        {ecritures.map((e) => (
+          <option key={e.id} value={e.id}>
+            {jour(e.occurred_on)} — {e.label}
+          </option>
+        ))}
+      </select>
+      <button className="secondary" type="button" disabled={enCours} onClick={rapprocher}>
+        {enCours ? 'Rapprochement…' : 'Rapprocher'}
+      </button>
     </div>
   );
 }
