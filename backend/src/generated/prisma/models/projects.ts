@@ -567,10 +567,6 @@ export type projectsUncheckedUpdateManyWithoutOwnerNestedInput = {
   deleteMany?: Prisma.projectsScalarWhereInput | Prisma.projectsScalarWhereInput[]
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }

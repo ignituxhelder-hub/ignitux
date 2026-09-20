@@ -790,6 +790,12 @@ export type $dividend_distributionsPayload<ExtArgs extends runtime.Types.Extensi
      * pose ce lien. null = ligne saisie a la main, pour un detenteur qui n
      * est pas un investisseur enregistre. Unique, pour qu un mouvement ne
      * puisse pas produire deux projections.
+     * Pas de contrainte d unicite en base, et c est un choix contraint : la
+     * poser exigerait le drapeau --accept-data-loss, que les consignes du
+     * depot reservent a un consentement explicite du porteur. L unicite est
+     * donc tenue par le service — qui ecrit les deux lignes dans la meme
+     * transaction — et verifiee apres coup par l audit financier. A poser en
+     * index le jour d une vraie migration.
      */
     investor_movement_id: string | null
     created_at: Date | null

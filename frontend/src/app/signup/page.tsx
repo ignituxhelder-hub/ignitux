@@ -21,7 +21,7 @@ export default function SignupPage() {
     setIsSubmitting(true);
     try {
       await signup(email, password);
-      router.replace('/projects');
+      router.replace('/roles');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de créer le compte.');
     } finally {

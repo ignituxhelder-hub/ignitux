@@ -771,6 +771,86 @@ function enTeteFacultatif(token: string | null): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+// ── RÔLES ET ESPACES ────────────────────────────────────────────────────────
+
+export type RoleId =
+  | 'entrepreneur'
+  | 'investisseur'
+  | 'mentor'
+  | 'expert'
+  | 'partenaire'
+  | 'administrateur';
+
+export interface RoleDefinition {
+  id: RoleId;
+  label: string;
+  summary: string;
+  /** false = le rôle est prévu par l'architecture mais ne mène nulle part. */
+  available: boolean;
+  home: string | null;
+  domains: string[];
+  held: boolean;
+}
+
+/** Un rôle non pris pour lequel des données existent déjà. */
+export interface RoleSuggestion {
+  role: RoleId;
+  detail: string;
+  count: number;
+}
+
+export interface MyRoles {
+  roles: RoleId[];
+  activeRole: RoleId | null;
+  suggestions: RoleSuggestion[];
+  catalogue: RoleDefinition[];
+}
+
+export interface InvestorSpaceLine {
+  financedProjectId: string;
+  projectId: string | null;
+  projectTitle: string;
+  status: string;
+  investedCents: number;
+  repaidCents: number;
+  dividendsCents: number;
+  gainsCents: number;
+  netCents: number;
+  /** Part détenue aujourd'hui, en points de base. null = aucune part. */
+  shareBasisPoints: number | null;
+  shareNotice: string | null;
+  participations: number;
+}
+
+export interface InvestorSpace {
+  role: 'investisseur';
+  investorId: string | null;
+  displayName: string | null;
+  global: {
+    investedCents: number;
+    repaidCents: number;
+    dividendsCents: number;
+    gainsCents: number;
+    netCents: number;
+    projectCount: number;
+  };
+  lines: InvestorSpaceLine[];
+  notice: string;
+}
+
+export interface EntrepreneurSpace {
+  role: 'entrepreneur';
+  projects: Array<{
+    id: string;
+    title: string;
+    description: string | null;
+    isPublic: boolean;
+    updatedAt: string | null;
+  }>;
+  counts: { projects: number; publicProjects: number; contacts: number; issuedDocuments: number };
+  notice: string;
+}
+
 export const api = {
   getBuybackProgress: (token: string, projectId: string) =>
     request<BuybackProgress>(`/projects/${projectId}/financing/buyback`, {
@@ -1454,6 +1534,38 @@ export const api = {
 
   listReceivedMarketplaceContacts: (token: string) =>
     request<MarketplaceContact[]>('/marketplace/contacts', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  // ── RÔLES ET ESPACES ──────────────────────────────────────────────────────
+  // Le catalogue est public : savoir ce qu'on peut devenir dans Ignitux ne
+  // demande pas de compte.
+  getRoleCatalogue: () => request<{ roles: RoleDefinition[]; notice: string }>('/roles'),
+
+  getMyRoles: (token: string) =>
+    request<MyRoles>('/roles/moi', { headers: { Authorization: `Bearer ${token}` } }),
+
+  setMyRoles: (token: string, roles: string[]) =>
+    request<MyRoles>('/roles/moi', {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ roles }),
+    }),
+
+  setActiveRole: (token: string, role: string) =>
+    request<MyRoles>('/roles/moi/actif', {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ role }),
+    }),
+
+  getEntrepreneurSpace: (token: string) =>
+    request<EntrepreneurSpace>('/espaces/entrepreneur', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getInvestorSpace: (token: string) =>
+    request<InvestorSpace>('/espaces/investisseur', {
       headers: { Authorization: `Bearer ${token}` },
     }),
 };

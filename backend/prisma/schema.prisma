@@ -26,6 +26,11 @@ model users {
   crm_companies             crm_companies[]
   crm_contacts              crm_contacts[]
   billing_documents         billing_documents[]
+  roles                     user_roles[]
+  /// Le rôle sous lequel la personne travaille en ce moment. Rangé ici et
+  /// non dans le navigateur pour que le mode suive la personne d une
+  /// machine à l autre. null tant qu elle n a pas choisi.
+  active_role               String?
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -1178,4 +1183,30 @@ model investor_movements {
   @@index([participation_id])
   @@index([distribution_id])
   @@index([corrects_movement_id])
+}
+
+/// RÔLES — ce qu'une personne est dans Ignitux, et qui décide de ce qu'elle voit.
+///
+/// Un rôle est une **vue**, jamais un conteneur. Aucune donnée ne lui
+/// appartient : les projets restent à `users`, les investissements restent
+/// dans `investors`/`participations`, la facturation reste où elle est.
+/// C'est ce qui évite la duplication que l'on paierait autrement deux fois —
+/// en stockage, puis en divergence le jour où les deux copies ne diraient
+/// plus la même chose.
+///
+/// Conséquence voulue : retirer un rôle ne supprime rien. Cela ferme une
+/// porte, cela n'efface pas une pièce.
+model user_roles {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String    @db.Uuid
+  user       users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  /// 'entrepreneur' | 'investisseur' | 'mentor' | 'expert' | 'partenaire' | 'administrateur'
+  ///
+  /// Le vocabulaire vit dans le code (`roles-catalogue.ts`), pas en base :
+  /// un rôle est une brique de produit, pas une donnée que l'on saisit.
+  role       String
+  granted_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([user_id, role])
+  @@index([user_id])
 }

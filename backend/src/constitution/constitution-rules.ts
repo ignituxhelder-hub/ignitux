@@ -1,3 +1,5 @@
+import { foreignDomains } from '../roles/roles-catalogue.js';
+
 /**
  * Moteur de règles constitutionnel — la partie exécutable de la
  * Constitution IGNITUX V1.
@@ -61,6 +63,14 @@ export type ConstitutionAction =
       bankAccountOwner: string;
       entryOwner: string;
     }
+  /** Un espace s'apprête à servir des données sous un rôle donné. (art. 13) */
+  | {
+      kind: 'serve_role_view';
+      /** Le rôle sous lequel la lecture se fait. */
+      role: string;
+      /** Les domaines de données que cette vue s'apprête à rendre. */
+      domains: readonly string[];
+    }
   /** Un mouvement d'investisseur s'apprête à être enregistré. (art. 22) */
   | {
       kind: 'record_investor_movement';
@@ -98,6 +108,34 @@ const PROVENANCE_SOURCES = ['igini', 'human'] as const;
 const TOTAL_BASIS_POINTS = 10000;
 
 export const CONSTITUTION_RULES: readonly ConstitutionRule[] = [
+  {
+    // SÉPARATION DES RÔLES.
+    //
+    // Une même personne peut être entrepreneur et investisseur. Les deux
+    // casquettes ne regardent pas les mêmes choses, et mélanger leurs
+    // données produirait exactement le tableau de bord que personne ne peut
+    // lire : ses propres projets et l'argent qu'elle a placé chez d'autres
+    // additionnés dans le même total.
+    //
+    // La règle ne se contente pas de le recommander : elle refuse la vue.
+    // Le catalogue (roles-catalogue.ts) dit quels domaines relèvent de quel
+    // rôle, et deux rôles ouverts n'en partagent aucun.
+    id: 'roles-separes',
+    articleSlug: 'v1-13-respect-de-la-vie-privee',
+    severity: 'blocking',
+    description:
+      "Une vue servie sous un rôle ne peut contenir que les domaines de données de ce " +
+      "rôle : les données d'un rôle ne se mélangent jamais à celles d'un autre.",
+    check(action) {
+      if (action.kind !== 'serve_role_view') return null;
+      const etrangers = foreignDomains(action.role, action.domains);
+      if (etrangers.length === 0) return null;
+      return (
+        `L'espace « ${action.role} » s'apprête à servir ${etrangers.length} domaine(s) qui ` +
+        `ne relèvent pas de ce rôle : ${etrangers.join(', ')}.`
+      );
+    },
+  },
   {
     id: 'score-sans-source',
     articleSlug: 'v1-10-pas-de-score-invente',

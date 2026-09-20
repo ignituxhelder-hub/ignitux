@@ -125,7 +125,7 @@ describe('UserDataService', () => {
       expect(exported.donnees.compte).not.toHaveProperty('password_hash');
     });
 
-    it("n'exporte que les quatre champs de compte prévus, quoi que renvoie la base", async () => {
+    it("n'exporte que les champs de compte prévus, quoi que renvoie la base", async () => {
       // Le test précédent ne surveille qu'un champ connu. Celui-ci
       // surveille la forme : le jour où quelqu'un ajoute une colonne
       // sensible à `users` — codes de secours, jeton de session, adresse
@@ -143,11 +143,16 @@ describe('UserDataService', () => {
 
       const exported = await service.exportUserData('u1');
 
+      // L'egalite est exacte : ajouter une cle connue ne relache rien, mais
+      // une colonne inattendue de `users` fait toujours echouer le test.
+      // `roles_tenus` ne vient pas de `users` — c'est la table user_roles,
+      // qui ne contient ni secret ni donnee de tiers.
       expect(Object.keys(exported.donnees.compte).sort()).toEqual([
         'compte_cree_le',
         'email',
         'email_verifie_le',
         'id',
+        'roles_tenus',
       ]);
       expect(JSON.stringify(exported)).not.toContain('SECRET-A-NE-JAMAIS-DIFFUSER');
     });

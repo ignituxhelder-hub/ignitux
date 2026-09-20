@@ -96,7 +96,8 @@ export const ModelName = {
   investors: 'investors',
   financed_projects: 'financed_projects',
   participations: 'participations',
-  investor_movements: 'investor_movements'
+  investor_movements: 'investor_movements',
+  user_roles: 'user_roles'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -120,7 +121,8 @@ export const UsersScalarFieldEnum = {
   email: 'email',
   password_hash: 'password_hash',
   email_verified_at: 'email_verified_at',
-  created_at: 'created_at'
+  created_at: 'created_at',
+  active_role: 'active_role'
 } as const
 
 export type UsersScalarFieldEnum = (typeof UsersScalarFieldEnum)[keyof typeof UsersScalarFieldEnum]
@@ -757,6 +759,16 @@ export const Investor_movementsScalarFieldEnum = {
 } as const
 
 export type Investor_movementsScalarFieldEnum = (typeof Investor_movementsScalarFieldEnum)[keyof typeof Investor_movementsScalarFieldEnum]
+
+
+export const User_rolesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  role: 'role',
+  granted_at: 'granted_at'
+} as const
+
+export type User_rolesScalarFieldEnum = (typeof User_rolesScalarFieldEnum)[keyof typeof User_rolesScalarFieldEnum]
 
 
 export const SortOrder = {

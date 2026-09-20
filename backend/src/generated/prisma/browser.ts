@@ -394,3 +394,18 @@ export type participations = Prisma.participationsModel
  * a deux côtés, ici un mouvement n'en a qu'un.
  */
 export type investor_movements = Prisma.investor_movementsModel
+/**
+ * Model user_roles
+ * RÔLES — ce qu'une personne est dans Ignitux, et qui décide de ce qu'elle voit.
+ * 
+ * Un rôle est une **vue**, jamais un conteneur. Aucune donnée ne lui
+ * appartient : les projets restent à `users`, les investissements restent
+ * dans `investors`/`participations`, la facturation reste où elle est.
+ * C'est ce qui évite la duplication que l'on paierait autrement deux fois —
+ * en stockage, puis en divergence le jour où les deux copies ne diraient
+ * plus la même chose.
+ * 
+ * Conséquence voulue : retirer un rôle ne supprime rien. Cela ferme une
+ * porte, cela n'efface pas une pièce.
+ */
+export type user_roles = Prisma.user_rolesModel

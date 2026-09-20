@@ -4,12 +4,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Brand } from '@/components/ignitux-mark';
+import { RoleBar } from '@/components/role-bar';
 import { api, ApiError, type Project } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { useRoles } from '@/lib/roles';
 
 export default function ProjectsPage() {
   const { token, user, isReady, logout } = useAuth();
   const router = useRouter();
+  const { roles, switchTo } = useRoles(token, 'entrepreneur');
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,6 +92,8 @@ export default function ProjectsPage() {
           </button>
         </div>
       </div>
+
+      <RoleBar roles={roles} onSwitch={switchTo} />
 
       <h1>Mes projets</h1>
 

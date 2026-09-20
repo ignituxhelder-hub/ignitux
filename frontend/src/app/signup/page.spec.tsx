@@ -19,7 +19,7 @@ describe('SignupPage', () => {
     vi.restoreAllMocks();
   });
 
-  it("crée le compte, connecte l'utilisateur, puis redirige vers /projects", async () => {
+  it("crée le compte, connecte l'utilisateur, puis demande qui il est", async () => {
     mockFetchSequence(
       { status: 201, body: { id: 'u1', email: 'a@b.com' } },
       { status: 200, body: { accessToken: 'tok123', user: { id: 'u1', email: 'a@b.com' } } },
@@ -35,7 +35,9 @@ describe('SignupPage', () => {
     fireEvent.change(screen.getByLabelText('Mot de passe'), { target: { value: 'motdepasse' } });
     fireEvent.click(screen.getByRole('button', { name: /créer mon compte/i }));
 
-    await waitFor(() => expect(router.replace).toHaveBeenCalledWith('/projects'));
+    // On ne l envoie pas directement dans l espace entrepreneur : rien ne dit
+    // encore qu il en est un. La question precede l espace.
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith('/roles'));
   });
 
   it('affiche le message du backend si l\'email existe déjà', async () => {

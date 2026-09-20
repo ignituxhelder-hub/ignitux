@@ -44,6 +44,10 @@ function excluded(reason: string): TableTreatment {
 
 export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   users: exported('compte'),
+  // Les rôles tenus font partie du compte, pas des données metier : ils ne
+  // detiennent rien et disparaissent en cascade avec lui. Les exporter reste
+  // utile — ils disent sous quelles casquettes la personne a travaille.
+  user_roles: exported('compte'),
 
   projects: exported('projets_et_contenus'),
   tasks: exported('projets_et_contenus'),

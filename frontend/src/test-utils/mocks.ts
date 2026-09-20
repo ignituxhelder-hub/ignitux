@@ -10,7 +10,9 @@ import { vi } from 'vitest';
  * partagé importé.
  */
 export function createRouterMock() {
-  return { replace: vi.fn() };
+  // `push` autant que `replace` : une bascule de mode empile une entree
+  // dans l historique — revenir en arriere doit ramener au mode precedent.
+  return { replace: vi.fn(), push: vi.fn() };
 }
 
 export function signInAs(token: string, user: { id: string; email: string }) {

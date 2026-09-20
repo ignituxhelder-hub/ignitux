@@ -57,6 +57,17 @@ export default function AccountPage() {
       <p className="muted">{user?.email}</p>
 
       <div className="card">
+        <h2 style={{ marginTop: 0 }}>Mes rôles</h2>
+        <p className="muted" style={{ marginTop: 0 }}>
+          Entrepreneur, investisseur, ou les deux. Un rôle décide de ce qui t&apos;est
+          montré — il ne détient aucune donnée, et en changer n&apos;en déplace aucune.
+        </p>
+        <Link className="secondary" href="/roles" style={{ display: 'inline-block' }}>
+          Gérer mes rôles
+        </Link>
+      </div>
+
+      <div className="card">
         <h2 style={{ marginTop: 0 }}>Changer le mot de passe</h2>
         {error && <p className="error">{error}</p>}
         {isDone && <p style={{ color: 'var(--ok)' }}>Mot de passe changé.</p>}

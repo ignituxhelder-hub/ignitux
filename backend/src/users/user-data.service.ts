@@ -60,13 +60,14 @@ export class UserDataService {
     const projectIds = await this.ownedProjectIds(userId);
     const byProject = { project_id: { in: projectIds } };
 
-    const [projects, concepts, contacts, documents, workflows, profile] = await Promise.all([
+    const [projects, concepts, contacts, documents, workflows, profile, roles] = await Promise.all([
       this.prisma.projects.findMany({ where: { owner_id: userId } }),
       this.prisma.concepts.findMany({ where: { user_id: userId } }),
       this.prisma.crm_contacts.findMany({ where: { owner_id: userId } }),
       this.prisma.billing_documents.findMany({ where: { owner_id: userId } }),
       this.prisma.workflow_definitions.findMany({ where: byProject }),
       this.prisma.marketplace_profiles.findUnique({ where: { user_id: userId } }),
+      this.prisma.user_roles.findMany({ where: { user_id: userId }, orderBy: { role: 'asc' } }),
     ]);
 
     const conceptIds = concepts.map((concept) => concept.id);
@@ -180,7 +181,10 @@ export class UserDataService {
         'deviens le gardien : conserve-le comme tu conserverais ces informations elles-mêmes, ' +
         "et ne le transmets pas plus largement qu'elles.",
       donnees: {
-        compte,
+        // Les roles tenus : sous quelles casquettes la personne a travaille.
+        // Ils ne detiennent aucune donnee, mais dire lesquels etaient pris
+        // explique la forme du reste du fichier.
+        compte: { ...compte, roles_tenus: roles },
         projets_et_contenus: {
           projets: projects,
           taches: tasks,

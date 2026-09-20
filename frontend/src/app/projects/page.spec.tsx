@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
-import { createRouterMock, mockFetchSequence, signInAs } from '@/test-utils/mocks';
+import { createRouterMock, mockApiRoutes, mockFetchSequence, signInAs } from '@/test-utils/mocks';
 import ProjectsPage from './page';
 
 const router = createRouterMock();
@@ -63,10 +63,16 @@ describe('ProjectsPage', () => {
 
   it('crée un projet et l\'ajoute en tête de liste', async () => {
     signInAs('tok123', { id: 'u1', email: 'a@b.com' });
-    mockFetchSequence(
-      { status: 200, body: [] },
-      { status: 201, body: { id: 'p1', owner_id: 'u1', title: 'Nouvelle idée', description: null } },
-    );
+    // Adresse par route et non par ordre d arrivee : la page interroge aussi
+    // ses roles, et une sequence positionnelle attribuerait la liste des
+    // projets a la mauvaise requete des que l ordre change.
+    mockApiRoutes({
+      'GET /projects': { status: 200, body: [] },
+      'POST /projects': {
+        status: 201,
+        body: { id: 'p1', owner_id: 'u1', title: 'Nouvelle idée', description: null },
+      },
+    });
 
     render(
       <AuthProvider>

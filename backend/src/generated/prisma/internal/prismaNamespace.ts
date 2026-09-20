@@ -442,7 +442,8 @@ export const ModelName = {
   investors: 'investors',
   financed_projects: 'financed_projects',
   participations: 'participations',
-  investor_movements: 'investor_movements'
+  investor_movements: 'investor_movements',
+  user_roles: 'user_roles'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -458,7 +459,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3866,6 +3867,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    user_roles: {
+      payload: Prisma.$user_rolesPayload<ExtArgs>
+      fields: Prisma.user_rolesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.user_rolesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$user_rolesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.user_rolesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$user_rolesPayload>
+        }
+        findFirst: {
+          args: Prisma.user_rolesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$user_rolesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.user_rolesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$user_rolesPayload>
+        }
+        findMany: {
+          args: Prisma.user_rolesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$user_rolesPayload>[]
+        }
+        create: {
+          args: Prisma.user_rolesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$user_rolesPayload>
+        }
+        createMany: {
+          args: Prisma.user_rolesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.user_rolesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$user_rolesPayload>[]
+        }
+        delete: {
+          args: Prisma.user_rolesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$user_rolesPayload>
+        }
+        update: {
+          args: Prisma.user_rolesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$user_rolesPayload>
+        }
+        deleteMany: {
+          args: Prisma.user_rolesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.user_rolesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.user_rolesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$user_rolesPayload>[]
+        }
+        upsert: {
+          args: Prisma.user_rolesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$user_rolesPayload>
+        }
+        aggregate: {
+          args: Prisma.User_rolesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUser_roles>
+        }
+        groupBy: {
+          args: Prisma.user_rolesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.User_rolesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.user_rolesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.User_rolesCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3910,7 +3985,8 @@ export const UsersScalarFieldEnum = {
   email: 'email',
   password_hash: 'password_hash',
   email_verified_at: 'email_verified_at',
-  created_at: 'created_at'
+  created_at: 'created_at',
+  active_role: 'active_role'
 } as const
 
 export type UsersScalarFieldEnum = (typeof UsersScalarFieldEnum)[keyof typeof UsersScalarFieldEnum]
@@ -4549,6 +4625,16 @@ export const Investor_movementsScalarFieldEnum = {
 export type Investor_movementsScalarFieldEnum = (typeof Investor_movementsScalarFieldEnum)[keyof typeof Investor_movementsScalarFieldEnum]
 
 
+export const User_rolesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  role: 'role',
+  granted_at: 'granted_at'
+} as const
+
+export type User_rolesScalarFieldEnum = (typeof User_rolesScalarFieldEnum)[keyof typeof User_rolesScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -4838,6 +4924,7 @@ export type GlobalOmitConfig = {
   financed_projects?: Prisma.financed_projectsOmit
   participations?: Prisma.participationsOmit
   investor_movements?: Prisma.investor_movementsOmit
+  user_roles?: Prisma.user_rolesOmit
 }
 
 /* Types for Logging */
