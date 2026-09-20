@@ -27,6 +27,7 @@ model users {
   crm_contacts              crm_contacts[]
   billing_documents         billing_documents[]
   roles                     user_roles[]
+  profile                   user_profiles?
   /// Le rôle sous lequel la personne travaille en ce moment. Rangé ici et
   /// non dans le navigateur pour que le mode suive la personne d une
   /// machine à l autre. null tant qu elle n a pas choisi.
@@ -1220,4 +1221,40 @@ model user_roles {
 
   @@unique([user_id, role])
   @@index([user_id])
+}
+
+/// PROFIL — ce qu'Ignitux sait de la personne, et pourquoi il le sait.
+///
+/// Colonnes explicites plutôt qu'un document JSON, et c'est un choix de
+/// fond : qui lit ce schéma doit voir d'un coup d'œil quelles données
+/// personnelles sont conservées. Un JSON opaque rendrait invisible ce qui
+/// doit précisément rester visible — y compris pour un audit RGPD, et pour
+/// moi dans six mois.
+///
+/// Chaque colonne correspond à un champ de `profile-fields.ts`, qui porte
+/// la raison de son existence. Aucun champ ici sans usage réel : ni
+/// nationalité, ni téléphone, ni adresse, ni niveau d'étude — ils ont été
+/// demandés et refusés faute d'emploi (voir le catalogue).
+model user_profiles {
+  user_id String @id @db.Uuid
+  user    users  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  /// Comment s'adresser à la personne. Jamais déduit de l'adresse email.
+  display_name       String?
+  /// Décide des obligations légales affichées. La nationalité, non.
+  activity_country   String?
+  sectors            String[]
+  experience         String?
+  availability       String?
+  has_founded_before String?
+  motivation         String?
+  skills             String[]
+
+  investor_kind      String?
+  investment_horizon String?
+  risk_level         String?
+  preferred_sectors  String[]
+
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @updatedAt @db.Timestamptz(6)
 }

@@ -15,6 +15,7 @@ import { InvestorsModule } from './investors/investors.module.js';
 import { RolesModule } from './roles/roles.module.js';
 import { ObservabilityModule } from './observability/observability.module.js';
 import { JourneyModule } from './journey/journey.module.js';
+import { ProfileModule } from './profile/profile.module.js';
 import { LedgerModule } from './ledger/ledger.module.js';
 import { CommunityModule } from './community/community.module.js';
 import { KnowledgeModule } from './igini/knowledge/knowledge.module.js';
@@ -52,6 +53,7 @@ import { UsersModule } from './users/users.module.js';
     RolesModule,
     ObservabilityModule,
     JourneyModule,
+    ProfileModule,
     FinanceAuditModule,
     MarketplaceModule,
   ],

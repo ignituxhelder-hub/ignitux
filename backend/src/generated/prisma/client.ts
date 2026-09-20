@@ -433,3 +433,19 @@ export type investor_movements = Prisma.investor_movementsModel
  * porte, cela n'efface pas une pièce.
  */
 export type user_roles = Prisma.user_rolesModel
+/**
+ * Model user_profiles
+ * PROFIL — ce qu'Ignitux sait de la personne, et pourquoi il le sait.
+ * 
+ * Colonnes explicites plutôt qu'un document JSON, et c'est un choix de
+ * fond : qui lit ce schéma doit voir d'un coup d'œil quelles données
+ * personnelles sont conservées. Un JSON opaque rendrait invisible ce qui
+ * doit précisément rester visible — y compris pour un audit RGPD, et pour
+ * moi dans six mois.
+ * 
+ * Chaque colonne correspond à un champ de `profile-fields.ts`, qui porte
+ * la raison de son existence. Aucun champ ici sans usage réel : ni
+ * nationalité, ni téléphone, ni adresse, ni niveau d'étude — ils ont été
+ * demandés et refusés faute d'emploi (voir le catalogue).
+ */
+export type user_profiles = Prisma.user_profilesModel

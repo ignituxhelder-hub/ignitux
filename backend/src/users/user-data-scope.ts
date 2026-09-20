@@ -48,6 +48,10 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   // detiennent rien et disparaissent en cascade avec lui. Les exporter reste
   // utile — ils disent sous quelles casquettes la personne a travaille.
   user_roles: exported('compte'),
+  // Le profil est la donnée la plus personnelle du produit — parcours,
+  // motivations, disponibilité. Elle appartient à la personne de la façon
+  // la plus directe qui soit : elle l'a écrite sur elle-même.
+  user_profiles: exported('compte'),
 
   projects: exported('projets_et_contenus'),
   tasks: exported('projets_et_contenus'),

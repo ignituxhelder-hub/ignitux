@@ -152,6 +152,7 @@ describe('UserDataService', () => {
         'email',
         'email_verifie_le',
         'id',
+        'profil',
         'roles_tenus',
       ]);
       expect(JSON.stringify(exported)).not.toContain('SECRET-A-NE-JAMAIS-DIFFUSER');

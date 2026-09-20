@@ -13,6 +13,7 @@ import {
 import { IginiMention } from '@/components/igini-mention';
 import { ProchaineEtape, Progression, SectionsFermees } from '@/components/parcours';
 import { AnalyseEnCours, AnalyseResultat } from './analyse-resultat';
+import { ChampsADemander } from '@/components/champs-profil';
 import {
   api,
   ApiError,
@@ -22,6 +23,7 @@ import {
   type FinancingPlan,
   type IginiStatus,
   type JourneyView,
+  type ProfileField,
   type Project,
   type TransmissionPlan,
 } from '@/lib/api';
@@ -160,6 +162,7 @@ export default function ProjectDetailPage() {
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [parcours, setParcours] = useState<JourneyView | null>(null);
   const [vueAvancee, setVueAvancee] = useState(false);
+  const [aDemander, setADemander] = useState<ProfileField[]>([]);
   const onGenerated = () => setRefreshSignal((n) => n + 1);
 
   const iginiStatus = useIginiStatus();
@@ -309,6 +312,21 @@ export default function ProjectDetailPage() {
       .catch(() => setParcours(null));
   }, [token, id, refreshSignal]);
 
+  /**
+   * Les questions de profil qui ont un sens ICI.
+   *
+   * Le serveur décide lesquelles : l'écran ne connaît pas le catalogue et
+   * n'a pas à le connaître. Un échec est silencieux — ne pas pouvoir poser
+   * une question facultative ne doit pas abîmer la page.
+   */
+  useEffect(() => {
+    if (!token) return;
+    api
+      .getProfileFieldsToAsk(token, 'premier-projet')
+      .then(setADemander)
+      .catch(() => setADemander([]));
+  }, [token, refreshSignal]);
+
   if (!isReady || !token) {
     return null;
   }
@@ -369,6 +387,21 @@ export default function ProjectDetailPage() {
             <ProchaineEtape
               parcours={parcours}
               iaDisponible={iginiStatus?.generatorsEnabled ?? true}
+            />
+          )}
+
+          {/* Demandé ici parce que c'est ici que ça sert, pas à
+              l'inscription où la personne n'avait encore rien vu. */}
+          {isOwner && (
+            <ChampsADemander
+              token={token}
+              champs={aDemander}
+              /* Le titre ne compte pas : le nombre de questions depend de
+                 ce qui reste a repondre, et annoncer « deux choses » au-dessus
+                 de quatre champs est le genre de petit faux qui use la
+                 confiance. Le sous-titre, lui, dit le compte exact. */
+              titre="Pour t&apos;accompagner correctement"
+              onEnregistre={() => setRefreshSignal((s) => s + 1)}
             />
           )}
           {!parcours && (

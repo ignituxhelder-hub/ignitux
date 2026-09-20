@@ -57,6 +57,17 @@ export default function AccountPage() {
       <p className="muted">{user?.email}</p>
 
       <div className="card">
+        <h2 style={{ marginTop: 0 }}>Mon profil</h2>
+        <p className="muted" style={{ marginTop: 0 }}>
+          Ce qu&apos;Ignitux sait de toi, pourquoi il le sait, et ce que chaque réponse
+          change. Rien n&apos;y est obligatoire.
+        </p>
+        <Link className="secondary" href="/profil" style={{ display: 'inline-block' }}>
+          Voir mon profil
+        </Link>
+      </div>
+
+      <div className="card">
         <h2 style={{ marginTop: 0 }}>Consommation IA</h2>
         <p className="muted" style={{ marginTop: 0 }}>
           Ce que les générateurs ont consommé ce mois-ci, ce qu&apos;il te reste, et le détail

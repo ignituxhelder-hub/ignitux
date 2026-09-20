@@ -1030,6 +1030,43 @@ export interface ProjectJourneySummary {
   nextStep: string | null;
 }
 
+// ── LE PROFIL ───────────────────────────────────────────────────────────────
+
+/** Où — et donc quand — un champ est demandé. */
+export type ProfileMoment = 'accueil' | 'premier-projet' | 'au-besoin';
+
+export interface ProfileField {
+  id: string;
+  label: string;
+  /** La question, telle qu'on la pose à la personne. */
+  question: string;
+  /** À quoi sert la réponse. Toujours affiché sous le champ. */
+  purpose: string;
+  /** Ce que remplir ce champ change concrètement. null si rien encore. */
+  unlocks: string | null;
+  roles: string[];
+  moment: ProfileMoment;
+  kind: 'texte' | 'texte-long' | 'choix' | 'liste';
+  options?: string[];
+  countsTowardCompletion: boolean;
+}
+
+export type ProfileValues = Record<string, string | string[] | null>;
+
+export interface ProfileCompletion {
+  percent: number;
+  filled: number;
+  total: number;
+  /** Ce qui manque, et ce que chacun ouvrirait. */
+  missing: Array<{ id: string; label: string; question: string; unlocks: string | null }>;
+}
+
+export interface ProfileView {
+  values: ProfileValues;
+  completion: ProfileCompletion;
+  fields: ProfileField[];
+}
+
 export const api = {
   getBuybackProgress: (token: string, projectId: string) =>
     request<BuybackProgress>(`/projects/${projectId}/financing/buyback`, {
@@ -1862,6 +1899,29 @@ export const api = {
   // projet ferait N appels pour une page d accueil.
   getMyProjectsJourney: (token: string) =>
     request<ProjectJourneySummary[]>(`/parcours/mes-projets`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  // ── LE PROFIL ─────────────────────────────────────────────────────────────
+  getProfile: (token: string) =>
+    request<ProfileView>('/profil', { headers: { Authorization: `Bearer ${token}` } }),
+
+  saveProfile: (token: string, values: ProfileValues) =>
+    request<ProfileView>('/profil', {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ values }),
+    }),
+
+  /**
+   * Ce qu'il est utile de demander ICI, et pas encore répondu.
+   *
+   * C'est la route qui porte le principe : un écran ne déroule pas un
+   * formulaire complet, il demande au serveur les deux ou trois questions
+   * qui ont un sens à cet endroit du parcours.
+   */
+  getProfileFieldsToAsk: (token: string, moment: ProfileMoment) =>
+    request<ProfileField[]>(`/profil/a-demander/${moment}`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
 };

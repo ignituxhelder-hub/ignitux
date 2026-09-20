@@ -97,7 +97,8 @@ export const ModelName = {
   financed_projects: 'financed_projects',
   participations: 'participations',
   investor_movements: 'investor_movements',
-  user_roles: 'user_roles'
+  user_roles: 'user_roles',
+  user_profiles: 'user_profiles'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -770,6 +771,27 @@ export const User_rolesScalarFieldEnum = {
 } as const
 
 export type User_rolesScalarFieldEnum = (typeof User_rolesScalarFieldEnum)[keyof typeof User_rolesScalarFieldEnum]
+
+
+export const User_profilesScalarFieldEnum = {
+  user_id: 'user_id',
+  display_name: 'display_name',
+  activity_country: 'activity_country',
+  sectors: 'sectors',
+  experience: 'experience',
+  availability: 'availability',
+  has_founded_before: 'has_founded_before',
+  motivation: 'motivation',
+  skills: 'skills',
+  investor_kind: 'investor_kind',
+  investment_horizon: 'investment_horizon',
+  risk_level: 'risk_level',
+  preferred_sectors: 'preferred_sectors',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type User_profilesScalarFieldEnum = (typeof User_profilesScalarFieldEnum)[keyof typeof User_profilesScalarFieldEnum]
 
 
 export const SortOrder = {
