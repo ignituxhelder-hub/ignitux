@@ -535,6 +535,62 @@ export interface ConstitutionViolation {
  * pour ça : un audit qui ne montre que ses trouvailles ne permet pas de
  * distinguer « rien à signaler » de « ce contrôle n existe pas ».
  */
+// ── LA COMPTABILITE ────────────────────────────────────────────────────────
+
+export const NATURES_DE_COMPTE_COMPTABLE = [
+  'actif',
+  'passif',
+  'capitaux',
+  'produit',
+  'charge',
+] as const;
+
+export interface LedgerAccount {
+  id: string;
+  code: string;
+  label: string;
+  kind: string;
+  currency: string;
+}
+
+export interface LedgerEntryLine {
+  id: string;
+  account_id: string;
+  debit_cents: number;
+  credit_cents: number;
+  description: string | null;
+  account?: { code: string; label: string };
+}
+
+export interface LedgerEntry {
+  id: string;
+  occurred_on: string;
+  label: string;
+  reference: string | null;
+  currency: string;
+  lines: LedgerEntryLine[];
+}
+
+export interface TrialBalanceLine {
+  accountId: string;
+  code: string;
+  label: string;
+  kind: string;
+  debitCents: number;
+  creditCents: number;
+  /** Debit moins credit. Positif pour un solde debiteur. */
+  balanceCents: number;
+}
+
+export interface TrialBalance {
+  currency: string;
+  lines: TrialBalanceLine[];
+  totalDebitCents: number;
+  totalCreditCents: number;
+  /** Une comptabilite en partie double equilibre toujours. */
+  balanced: boolean;
+}
+
 // ── LA BANQUE ──────────────────────────────────────────────────────────────
 
 export const NATURES_DE_COMPTE = [
@@ -1536,6 +1592,44 @@ export const api = {
   // Sans paramètre `country` : le serveur lit le pays déclaré au profil.
   // Le forcer à FR ici rendait le champ « Pays d'activité » décoratif.
   // Le moteur existait, testé, avec sa route — et aucun écran ne l appelait.
+  // ── LA COMPTABILITE ──────────────────────────────────────────────────────
+  listLedgerAccounts: (token: string) =>
+    request<LedgerAccount[]>('/comptabilite/comptes', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  openLedgerAccount: (token: string, compte: { code: string; label: string; kind: string }) =>
+    request<LedgerAccount>('/comptabilite/comptes', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(compte),
+    }),
+
+  listLedgerEntries: (token: string) =>
+    request<LedgerEntry[]>('/comptabilite/ecritures', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  recordLedgerEntry: (
+    token: string,
+    ecriture: {
+      occurredOn: string;
+      label: string;
+      reference?: string;
+      lines: Array<{ accountId: string; debitCents: number; creditCents: number }>;
+    },
+  ) =>
+    request<LedgerEntry>('/comptabilite/ecritures', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(ecriture),
+    }),
+
+  getTrialBalance: (token: string) =>
+    request<TrialBalance>('/comptabilite/balance', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
   // ── LA BANQUE ────────────────────────────────────────────────────────────
   listBankAccounts: (token: string) =>
     request<BankAccount[]>('/banque/comptes', { headers: { Authorization: `Bearer ${token}` } }),
