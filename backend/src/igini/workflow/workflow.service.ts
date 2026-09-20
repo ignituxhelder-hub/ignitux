@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { assertHasProjectAccess } from '../../prisma/assert-has-project-access.js';
 import { assertOwnsProject } from '../../prisma/assert-owns-project.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { AutomationService } from '../automation/automation.service.js';
 import type { TaskAssignee, TaskStatus } from './task-status.js';
 
 /**
@@ -15,7 +16,10 @@ import type { TaskAssignee, TaskStatus } from './task-status.js';
  */
 @Injectable()
 export class WorkflowService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly automation: AutomationService,
+  ) {}
 
   async createTask(
     userId: string,
@@ -27,9 +31,16 @@ export class WorkflowService {
   ) {
     await assertOwnsProject(this.prisma, userId, projectId);
 
-    return this.prisma.tasks.create({
+    const tache = await this.prisma.tasks.create({
       data: { project_id: projectId, title, description, assignee, source },
     });
+
+    // Une tâche ajoutée à la main change ce que l'orchestration voit — et
+    // donc les tâches d'étape, les liens de concepts et les scores. Sans
+    // ce rappel, il fallait cliquer « Actualiser » pour que le produit
+    // s'aperçoive de ce qu'on venait de lui dire.
+    await this.automation.runAfterChange(projectId);
+    return tache;
   }
 
   // Lecture seule : un collaborateur peut consulter les tâches, pas en créer
@@ -50,7 +61,16 @@ export class WorkflowService {
     }
     await assertOwnsProject(this.prisma, userId, task.project_id);
 
-    return this.prisma.tasks.update({ where: { id: taskId }, data: { status } });
+    const misAJour = await this.prisma.tasks.update({
+      where: { id: taskId },
+      data: { status },
+    });
+
+    // Cocher une tâche fait bouger le score Construction, qui est le rapport
+    // des tâches terminées. Le laisser figé jusqu'au prochain rechargement
+    // ferait douter du chiffre plutôt que de la tâche.
+    await this.automation.runAfterChange(task.project_id);
+    return misAJour;
   }
 
   /**

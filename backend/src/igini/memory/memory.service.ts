@@ -24,9 +24,15 @@ export interface MemorySearchFilters {
  */
 const RECALL_PRIORITY: Record<MemoryCategory, number> = {
   decision: 0,
-  learning: 1,
-  fact: 2,
-  preference: 3,
+  // Une erreur passe devant l'apprentissage qu'on en a tiré, et c'est
+  // délibéré : « j'ai produit 200 pièces invendables » se reconnaît quand la
+  // situation se représente, là où « il faut valider le prix avant de
+  // produire » se range et s'oublie. Rappeler le fait plutôt que la morale
+  // est ce qui évite de refaire.
+  error: 1,
+  learning: 2,
+  fact: 3,
+  preference: 4,
 };
 
 /**

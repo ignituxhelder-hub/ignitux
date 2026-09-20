@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { AutomationService } from '../automation/automation.service.js';
 import { KnowledgeService } from './knowledge.service.js';
 
 describe('KnowledgeService', () => {
@@ -29,7 +30,17 @@ describe('KnowledgeService', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [KnowledgeService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        KnowledgeService,
+        { provide: PrismaService, useValue: prisma },
+        // L'orchestration est relancée après chaque mutation manuelle. Un
+        // faux suffit ici : ces tests éprouvent la mutation elle-même, pas
+        // ce que l'orchestration en fait — vérifié dans son propre test.
+        {
+          provide: AutomationService,
+          useValue: { runAfterChange: vi.fn().mockResolvedValue(undefined) },
+        },
+      ],
     }).compile();
 
     service = module.get<KnowledgeService>(KnowledgeService);

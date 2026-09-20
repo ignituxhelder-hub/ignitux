@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { assertHasProjectAccess } from '../../prisma/assert-has-project-access.js';
 import { assertOwnsProject } from '../../prisma/assert-owns-project.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { AutomationService } from '../automation/automation.service.js';
 import {
   collectNeighbourhood,
   findIsolated,
@@ -22,7 +23,10 @@ export interface ConceptSearchFilters {
  */
 @Injectable()
 export class KnowledgeService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly automation: AutomationService,
+  ) {}
 
   async createConcept(
     userId: string,
@@ -35,7 +39,7 @@ export class KnowledgeService {
       await assertOwnsProject(this.prisma, userId, projectId);
     }
 
-    return this.prisma.concepts.create({
+    const concept = await this.prisma.concepts.create({
       data: {
         user_id: userId,
         name,
@@ -44,6 +48,12 @@ export class KnowledgeService {
         project_id: projectId ?? null,
       },
     });
+
+    // L'orchestration relie les concepts par mots communs : un concept
+    // ajouté sans la prévenir resterait isolé dans le graphe jusqu'à ce que
+    // quelqu'un pense à relancer l'automatisation à la main.
+    if (projectId) await this.automation.runAfterChange(projectId);
+    return concept;
   }
 
   /**

@@ -1,10 +1,14 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { AutomationService } from '../automation/automation.service.js';
 import { WorkflowService } from './workflow.service.js';
 
 describe('WorkflowService', () => {
   let service: WorkflowService;
+  // Interrogeable depuis les tests : l'orchestration relancée après chaque
+  // mutation manuelle est un comportement, pas un détail de câblage.
+  const automation = { runAfterChange: vi.fn().mockResolvedValue(undefined) };
   let prisma: {
     tasks: {
       create: ReturnType<typeof vi.fn>;
@@ -29,10 +33,18 @@ describe('WorkflowService', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [WorkflowService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        WorkflowService,
+        { provide: PrismaService, useValue: prisma },
+        // L'orchestration est relancée après chaque mutation manuelle. Un
+        // faux suffit ici : ces tests éprouvent la mutation elle-même, pas
+        // ce que l'orchestration en fait — vérifié dans son propre test.
+        { provide: AutomationService, useValue: automation },
+      ],
     }).compile();
 
     service = module.get<WorkflowService>(WorkflowService);
+    automation.runAfterChange.mockClear();
   });
 
   it('should be defined', () => {
@@ -126,6 +138,33 @@ describe('WorkflowService', () => {
           { project_id: 'p1', title: 'Étape 2', assignee: 'human', source: 'analysis' },
         ],
       });
+    });
+  });
+
+  describe('orchestration relancée après une action manuelle', () => {
+    // Avant, il fallait cliquer « Actualiser » pour que le produit
+    // s'aperçoive de ce qu'on venait de lui dire. Une tâche ajoutée ne
+    // bougeait ni les tâches d'étape, ni les liens de concepts, ni le score.
+    it("se relance quand une tâche est créée à la main", async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.tasks.create.mockResolvedValue({ id: 't1', project_id: 'p1' });
+
+      await service.createTask('u1', 'p1', 'Trouver un local');
+
+      expect(automation.runAfterChange).toHaveBeenCalledWith('p1');
+    });
+
+    // Le score Construction est le rapport des tâches terminées : le laisser
+    // figé jusqu'au prochain rechargement ferait douter du chiffre plutôt
+    // que de la tâche.
+    it('se relance quand une tâche change de statut', async () => {
+      prisma.tasks.findFirst.mockResolvedValue({ id: 't1', project_id: 'p1' });
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.tasks.update.mockResolvedValue({ id: 't1', status: 'done' });
+
+      await service.updateStatus('u1', 't1', 'done');
+
+      expect(automation.runAfterChange).toHaveBeenCalledWith('p1');
     });
   });
 });

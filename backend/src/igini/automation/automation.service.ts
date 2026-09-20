@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConstitutionService } from '../../constitution/constitution.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 
@@ -47,10 +47,33 @@ const MAX_CONCEPTS_FOR_AUTO_LINK = 50;
  */
 @Injectable()
 export class AutomationService {
+  private readonly logger = new Logger(AutomationService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly constitutionService: ConstitutionService,
   ) {}
+
+  /**
+   * Relance l'orchestration après un changement, sans jamais faire échouer
+   * ce qui l'a déclenchée.
+   *
+   * Une tâche cochée doit rester cochée même si la réévaluation échoue :
+   * l'orchestration est un confort, pas une condition. L'échec part au
+   * journal — le taire laisserait une orchestration morte passer pour une
+   * orchestration qui n'a rien trouvé à faire, et ces deux états n'ont pas
+   * la même conséquence.
+   */
+  async runAfterChange(projectId: string): Promise<void> {
+    try {
+      await this.run(projectId);
+    } catch (error) {
+      this.logger.error(
+        `Orchestration impossible après un changement sur le projet ${projectId} — ` +
+          (error instanceof Error ? error.message : String(error)),
+      );
+    }
+  }
 
   async run(projectId: string) {
     const [analysis, buildPlan, financingPlan, developmentPlan, transmissionPlan, openAutomationTasks, concepts] =
