@@ -46,7 +46,21 @@ export type ConstitutionAction =
       totalBasisPointsAfter: number | null;
     }
   /** Un module s'apprête à rendre une indication sur laquelle quelqu'un va décider. (art. 7) */
-  | { kind: 'publish_guidance'; module: string; notice: string | null };
+  | { kind: 'publish_guidance'; module: string; notice: string | null }
+  /** Une écriture comptable s'apprête à être enregistrée. (art. 22) */
+  | {
+      kind: 'record_ledger_entry';
+      /** Le propriétaire de l'écriture, en clair. */
+      entryOwner: string;
+      /** Le propriétaire de CHAQUE compte touché, dans l'ordre des lignes. */
+      lineOwners: string[];
+    }
+  /** Un mouvement bancaire s'apprête à être rattaché à une écriture. (art. 22) */
+  | {
+      kind: 'reconcile_bank_transaction';
+      bankAccountOwner: string;
+      entryOwner: string;
+    };
 
 export type ConstitutionSeverity = 'blocking' | 'warning';
 
@@ -207,6 +221,43 @@ export const CONSTITUTION_RULES: readonly ConstitutionRule[] = [
         return `La règle « ${action.slug} » (${action.country}) ne cite aucune source officielle.`;
       }
       return null;
+    },
+  },
+  {
+    id: 'caisses-separees',
+    articleSlug: 'v1-22-financement-ethique',
+    severity: 'blocking',
+    description:
+      "L'argent d'une personne n'entre jamais dans les livres d'IGNITUX, ni l'inverse : une " +
+      'écriture dont une ligne touche le compte d\'un autre propriétaire est refusée.',
+    check(action) {
+      if (action.kind !== 'record_ledger_entry') return null;
+      // Une écriture sans ligne ne mélange rien ; c'est un autre contrôle,
+      // côté service, qui refuse de l'enregistrer. Ici on ne se prononce
+      // que sur ce qui relève de l'article.
+      const etrangers = action.lineOwners.filter((owner) => owner !== action.entryOwner);
+      if (etrangers.length === 0) return null;
+      return (
+        `Cette écriture appartient à ${action.entryOwner} mais touche ${etrangers.length} compte(s) de ` +
+        `${[...new Set(etrangers)].join(', ')}. Un mouvement entre deux comptabilités s'enregistre des ` +
+        "deux côtés, jamais dans une écriture à cheval."
+      );
+    },
+  },
+  {
+    id: 'rapprochement-dans-la-meme-caisse',
+    articleSlug: 'v1-22-financement-ethique',
+    severity: 'blocking',
+    description:
+      'Un mouvement bancaire ne peut être rattaché qu\'à une écriture du même propriétaire.',
+    check(action) {
+      if (action.kind !== 'reconcile_bank_transaction') return null;
+      if (action.bankAccountOwner === action.entryOwner) return null;
+      return (
+        `Ce mouvement est sur un compte de ${action.bankAccountOwner} et l'écriture appartient à ` +
+        `${action.entryOwner}. Les rapprocher ferait passer de l'argent d'une comptabilité à l'autre ` +
+        'sans que rien ne le constate.'
+      );
     },
   },
   {

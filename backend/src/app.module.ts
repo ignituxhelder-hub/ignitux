@@ -8,7 +8,9 @@ import { BillingModule } from './billing/billing.module.js';
 import { ComplianceModule } from './compliance/compliance.module.js';
 import { ConstitutionModule } from './constitution/constitution.module.js';
 import { CrmModule } from './crm/crm.module.js';
+import { BankingModule } from './banking/banking.module.js';
 import { FinancingModule } from './financing/financing.module.js';
+import { LedgerModule } from './ledger/ledger.module.js';
 import { CommunityModule } from './community/community.module.js';
 import { KnowledgeModule } from './igini/knowledge/knowledge.module.js';
 import { MemoryModule } from './igini/memory/memory.module.js';
@@ -39,6 +41,8 @@ import { UsersModule } from './users/users.module.js';
     CrmModule,
     BillingModule,
     FinancingModule,
+    LedgerModule,
+    BankingModule,
     MarketplaceModule,
   ],
   controllers: [AppController],

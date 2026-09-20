@@ -52,9 +52,16 @@ marketplace) est IGNITUX.
 | CRM | `src/crm/` | Entreprises, contacts, échanges — **contient des données de tiers** |
 | Facturation | `src/billing/` | Devis, factures, avoirs, règlements. Numérotation sans trou, immuabilité après émission |
 | Financement | `src/financing/` | Apports, parts, dividendes versés, conditions de rachat définies par le porteur |
+| **Comptabilité** | `src/ledger/` | Plan de comptes, journal en partie double, balance. **Sépare les livres d’IGNITUX de ceux de chaque personne** : toute écriture a un propriétaire et un seul, et un mouvement entre les deux caisses s’écrit des deux côtés |
+| **Banque** | `src/banking/` | Comptes bancaires déclarés, mouvements saisis, rapprochement avec une écriture du même propriétaire. Aucune synchronisation, aucun virement, aucun IBAN complet détenu |
+| Coûts IA | `src/igini/usage/` | Journal des appels facturés : modèle, tokens d’entrée et de sortie, **réflexion interne**, durée, personne, projet, générateur |
 | Communauté | `src/community/` | Projets publics, encouragements |
 | Compliance | `src/compliance/` | Liste de référence France (contenu sourcé) + suivi par projet |
 | Marketplace | `src/marketplace/` | Annuaire mentors/investisseurs, mise en relation par message (sans argent) |
+
+> **Trois « financements » à ne pas confondre** : `src/financing/` suit l’argent réel d’UN projet
+> (apports, parts, dividendes) ; `src/igini/financing/` est le générateur IA qui rédige un plan de
+> financement ; `src/ledger/` tient la comptabilité, avec la frontière entre les caisses.
 
 ## Modèle d'accès à un projet
 

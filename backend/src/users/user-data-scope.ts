@@ -68,6 +68,20 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   billing_lines: exported('facturation'),
   billing_payments: exported('facturation'),
 
+  // Comptabilité et banque. Rattachées au groupe « facturation » parce que
+  // les groupes suivent le découpage des CGU §2.2 et qu'en inventer un
+  // nouveau ferait diverger l'export du document qu'il est censé refléter.
+  // Les clés du fichier exporté, elles, disent précisément ce que c'est.
+  //
+  // Seules les lignes de la personne sortent : ces tables contiennent aussi
+  // les livres d'IGNITUX, qui ne sont les données personnelles de personne.
+  // C'est la requête qui filtre sur le propriétaire, pas le classement.
+  ledger_accounts: exported('facturation'),
+  ledger_entries: exported('facturation'),
+  ledger_lines: exported('facturation'),
+  bank_accounts: exported('facturation'),
+  bank_transactions: exported('facturation'),
+
   financing_rounds: exported('financement'),
   equity_holders: exported('financement'),
   equity_events: exported('financement'),

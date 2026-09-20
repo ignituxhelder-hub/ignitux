@@ -313,3 +313,45 @@ export type buyback_objectives = Prisma.buyback_objectivesModel
  * la base pour toujours. Le coût se dérive à la lecture, via ai-pricing.ts.
  */
 export type ai_usage_events = Prisma.ai_usage_eventsModel
+/**
+ * Model ledger_accounts
+ * COMPTABILITÉ — un compte du plan comptable, appartenant à IGNITUX ou à une
+ * personne. Le plan de l'un n'est jamais celui de l'autre.
+ */
+export type ledger_accounts = Prisma.ledger_accountsModel
+/**
+ * Model ledger_entries
+ * COMPTABILITÉ — une écriture au journal. Équilibrée par construction :
+ * la somme des débits égale la somme des crédits, vérifié avant écriture.
+ */
+export type ledger_entries = Prisma.ledger_entriesModel
+/**
+ * Model ledger_lines
+ * COMPTABILITÉ — une ligne d'écriture. Un seul des deux montants est non nul :
+ * le sens est porté par la colonne, jamais par un signe négatif.
+ */
+export type ledger_lines = Prisma.ledger_linesModel
+/**
+ * Model bank_accounts
+ * BANQUE — un compte bancaire déclaré, appartenant à IGNITUX ou à une
+ * personne.
+ * 
+ * **Aucun IBAN complet n'est stocké**, seulement les quatre derniers
+ * caractères et un libellé : il n'existe aujourd'hui aucun virement ni
+ * aucune synchronisation dans le produit, donc rien ne justifie de détenir
+ * une coordonnée bancaire complète. Détenir une donnée qu'on ne sait pas
+ * encore protéger ni utiliser est un risque sans contrepartie. Le jour où
+ * un virement sera émis, ce champ devra être repensé avec un fournisseur
+ * choisi — pas rempli en douce.
+ */
+export type bank_accounts = Prisma.bank_accountsModel
+/**
+ * Model bank_transactions
+ * BANQUE — un mouvement sur un compte bancaire.
+ * 
+ * Le montant est signé ici, contrairement au journal : un relevé bancaire se
+ * lit en plus et en moins, et le recopier en débit/crédit au moment de
+ * l'import obligerait à interpréter avant d'avoir constaté. Le rapprochement
+ * avec une écriture, lui, se fait explicitement.
+ */
+export type bank_transactions = Prisma.bank_transactionsModel

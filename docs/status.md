@@ -16,8 +16,8 @@ Les tests de bout en bout ont besoin d'une vraie base et se lancent à part :
 cd backend && npm run test:e2e
 ```
 
-Au 20/09/2026 : **611 tests unitaires backend**, **60 tests de bout en bout**, **216 tests
-frontend**, lint et type-check propres des deux côtés. **120 routes HTTP**, **36 tables**,
+Au 20/09/2026 : **676 tests unitaires backend**, **100 tests de bout en bout**, **216 tests
+frontend**, lint et type-check propres des deux côtés. **132 routes HTTP**, **42 tables**,
 **15 pages**.
 
 ## Trois bases, séparées depuis le 19/09/2026
@@ -41,7 +41,7 @@ Même instance Supabase, donc données isolées mais pas infrastructure. Voir `d
   test lit `schema.prisma` et échoue si une table n'est pas classée : l'export ne peut pas se
   périmer en silence.
 - **Projets** — CRUD, visibilité publique/privée, collaboration multi-comptes.
-- **Constitution** — les 24 articles de la V1, dont **11 appliqués** par **14 règles exécutables**
+- **Constitution** — les 24 articles de la V1, dont **11 appliqués** par **13 règles exécutables**
   branchées sur de vrais points d'écriture. Journal des violations, audit qui mesure 9 articles à
   partir de comptages réels en base. Un test échoue si un article déclaré appliqué n'a pas de
   règle.

@@ -1111,6 +1111,8 @@ Ces cinq points n'ont pas été touchés. Pour chacun, ce dont j'ai besoin pour 
 | **Les Gardiens (art. 17)** | Qui est Gardien — toi seul, un rôle attribuable, un collège ? Et surtout : que peut-il **empêcher** concrètement ? Sans réponse à la seconde question, le rôle n'a pas de traduction en code. |
 | **Montage juridique 51/49** | Le contrat doit-il être un document généré par Ignitux, ou un modèle que tu fais rédiger et que le produit se contente de référencer ? Question préalable : quel juriste valide ? |
 | **Sources Suisse / Portugal** | Quelles sources officielles fais-tu autorité — équivalents de service-public.fr pour ces deux pays ? Sans URL officielle, je ne peux rien semer : le module refuse une règle locale sans source, et c'est volontaire. |
+| **Fournisseur bancaire** | *(né du 20/09/2026)* La cellule bancaire déclare des comptes et saisit des mouvements, mais n'émet aucun virement et ne synchronise rien : aucun fournisseur n'est choisi. Lequel — et pour quel périmètre : lecture seule des relevés, ou émission de virements ? La réponse commande aussi la détention des IBAN complets, aujourd'hui volontairement refusée. |
+| **Article constitutionnel des caisses** | *(né du 20/09/2026)* Les deux règles de séparation sont rattachées à l'article 22 (Financement Éthique), qui est ton texte et ne formule pas cette exigence mot pour mot. Trois options : les y laisser ; les déplacer sur l'article 2 (L'Humain Avant le Profit), qui passerait alors de `declared` à `enforced` ; ou écrire un article 25 dont tu donnes le libellé. Je n'ai pas touché au corpus V1 : c'est ton texte. |
 
 **Une sixième question, née de cette session** : le déploiement de test doit-il basculer sur la
 nouvelle base de production ? Basculer maintenant repart d'une base vierge et **efface le projet
@@ -1499,3 +1501,172 @@ cd backend && npx prisma db push --url "<DATABASE_URL de .env.production>"
 - **Le refus lisible au dépassement** et **l'alerte avant plafond** pour l'exploitant.
 - **La passe de révision** et **le budget de réflexion déclaré** chiffrés dans `PRICING.md` : ce
   sont des options chiffrées, pas des décisions prises.
+
+---
+
+# 18. Séparer l'argent d'IGNITUX de celui des personnes (20 septembre 2026)
+
+Consigne : « créer un service comptable et bancaire pour IGNITUX et pour chaque utilisateur, pour
+que les comptes ne soient pas mélangés — argent IGNITUX et argent utilisateur ».
+
+## 18.1 Ce que l'état des lieux a montré, et qui change la nature du problème
+
+Avant de concevoir quoi que ce soit, il fallait savoir à qui appartenait l'argent que le produit
+suivait déjà. La réponse est nette, et elle n'est pas celle qu'on attendrait :
+
+**Tout ce que le produit suivait financièrement appartenait aux utilisateurs.**
+
+- `billing_documents` porte un `owner_id` vers `users` et des champs `client_name` /
+  `contact_id` : ce sont les factures que l'entrepreneur envoie à **ses** clients ;
+- `equity_holders` est rattaché à un `project_id` : c'est la table de capitalisation de **son**
+  projet.
+
+**IGNITUX, lui, n'avait aucun livre.** Aucune table ne représentait son argent. Et ce n'est pas
+théorique : `financing_rounds.source` accepte déjà la valeur `'ignitux'` — de l'argent d'IGNITUX
+versé dans le projet de quelqu'un. Cette dépense n'était enregistrée **que du côté du
+bénéficiaire**. Personne, en lisant la base, n'aurait pu dire ce qu'IGNITUX avait dépensé.
+
+Le problème n'était donc pas « les deux comptabilités risquent de se mélanger ». Il était : **une
+des deux n'existait pas**, et les mouvements entre les deux n'étaient constatés que d'un côté.
+
+## 18.2 Le principe tenu
+
+**Toute écriture a un propriétaire, et une écriture n'en a jamais deux.**
+
+La première moitié est tenue par le schéma : `owner_type` et `owner_id` sont NOT NULL sur les cinq
+tables. « Sans propriétaire » n'est pas un état représentable, donc pas un état à tester au cas par
+cas.
+
+La seconde moitié est le cœur du dispositif. Un mouvement entre IGNITUX et une personne n'est pas
+une écriture à cheval : ce sont **deux écritures**, une dans chaque comptabilité, équilibrées
+chacune chez son propriétaire, qui se désignent l'une l'autre.
+
+Pourquoi ça compte — et c'est le point que l'implémentation a rendu évident : **une écriture à
+cheval est parfaitement équilibrée.** Elle ferait passer 500 € de la trésorerie d'IGNITUX au
+chiffre d'affaires de quelqu'un sans qu'aucun contrôle comptable ne bronche. Le contrôle de la
+partie double ne la verrait pas. Seul un contrôle de propriété la voit.
+
+## 18.3 Ce qui a été construit
+
+**Cinq tables** : `ledger_accounts` (plan comptable), `ledger_entries` (journal),
+`ledger_lines` (partie double), `bank_accounts`, `bank_transactions`.
+
+**La cellule comptable** — plan de comptes par propriétaire, journal en partie double, balance,
+et une seule opération traversant la frontière (`recordTransfer`), qui écrit des deux côtés dans
+la même transaction. Un virement à moitié enregistré serait pire que pas d'enregistrement : il
+ferait apparaître de l'argent d'un côté sans le faire disparaître de l'autre.
+
+**La cellule bancaire** — comptes déclarés, mouvements saisis, rapprochement avec une écriture du
+**même** propriétaire.
+
+**Le plan comptable d'IGNITUX** est semé (10 comptes) ; **rien n'est déposé d'office chez une
+personne.** Un entrepreneur portugais, suisse ou français n'a ni le même plan, ni le même régime ;
+lui livrer une liste française serait exactement la donnée inventée que l'article 9 interdit. Il
+ouvre les comptes dont il a besoin, comme il écrit lui-même ses objectifs de rachat.
+
+Un compte mérite d'être signalé : **`608 — Coûts d'IA`**. C'est là que se rejoignent les deux
+chantiers du jour : la télémétrie dit ce qui a été consommé en tokens, la comptabilité dira ce que
+ça a coûté, et le plafond de 10 % se vérifiera en comparant ce compte au compte `706`.
+
+## 18.4 Le rattachement constitutionnel — et ce que je n'ai pas fait
+
+Deux règles nouvelles, toutes deux bloquantes, rattachées à l'**article 22 (Financement
+Éthique)** :
+
+- `caisses-separees` — une écriture touchant le compte d'un autre propriétaire est refusée ;
+- `rapprochement-dans-la-meme-caisse` — un mouvement bancaire ne se rattache qu'à une écriture du
+  même propriétaire.
+
+Le refus est un **422**, pas un 400, et il est **journalisé** dans `constitution_violations`. La
+distinction n'est pas cosmétique : une tentative de mélange n'est pas une faute de frappe, et elle
+doit laisser une trace.
+
+**Ce que je n'ai pas fait : ajouter un article à la Constitution.** Le corpus V1 est ton texte,
+repris mot pour mot, et `constitution-articles.ts` le dit explicitement. Écrire un article 25
+reviendrait à te faire dire quelque chose. La question est posée en 15.6 avec trois options — les
+laisser sur l'article 22, les déplacer sur l'article 2 (qui passerait de `declared` à `enforced`),
+ou écrire un article dont tu donnes le libellé.
+
+## 18.5 RGPD : la comptabilité part, le journal des coûts reste
+
+Traitements **opposés**, et la raison mérite d'être claire :
+
+| | À la suppression du compte | Pourquoi |
+|---|---|---|
+| `ai_usage_events` | reste, `user_id` → `null` | la dépense est celle d'**IGNITUX**, déjà facturée ; l'effacer changerait un total déjà clos |
+| `ledger_*`, `bank_*` de la personne | **supprimés** | ses livres lui appartiennent ; les garder serait détenir sans nécessité (art. 13) |
+
+Les écritures d'IGNITUX qui désignaient une écriture supprimée perdent ce lien. Le fait reste dans
+les livres d'IGNITUX, l'identité part.
+
+Le garde-fou de `user-data-scope.spec.ts` a réclamé les cinq tables dès leur création, comme pour
+`ai_usage_events` et `buyback_objectives` avant elles.
+
+**Un point à te signaler** : ces tables sont rattachées au groupe d'export « facturation », parce
+que les groupes suivent le découpage des **CGU §2.2** et qu'en inventer un nouveau ferait diverger
+l'export du document qu'il reflète. Les CGU gagneraient probablement une ligne sur les données
+comptables et bancaires — **je n'ai touché à aucun .docx**, conformément à la consigne.
+
+## 18.6 Vérification
+
+| Contrôle | Résultat |
+|---|---|
+| Types (`tsc --noEmit`) | **0 erreur** |
+| Lint (`oxlint --type-aware`) | **0 avertissement** |
+| Tests unitaires | **676 passent** |
+| Tests de bout en bout | **100 passent** |
+| Build (`nest build`) | propre |
+
+Les 17 tests de bout en bout tournent **sur la vraie base Postgres** et cherchent à faire échouer
+la promesse par les trois portes qui existent :
+
+1. **Une écriture à cheval.** L'identifiant du compte bancaire d'IGNITUX est fourni exprès au test
+   — le refus ne doit pas reposer sur le fait qu'il soit difficile à deviner. Refusé en 422, la
+   tentative journalisée, rien écrit en base.
+2. **Un rapprochement bancaire croisé.** C'est le trou que le contrôle du journal ne verrait pas :
+   sans écriture à cheval, l'argent passerait d'une comptabilité à l'autre par la porte de
+   service. Refusé en 422.
+3. **La lecture des livres d'autrui.** Ni ceux d'une autre personne, ni ceux d'IGNITUX.
+
+Et un contrôle qui ne vise **aucun chemin en particulier** : `separationAudit()` relit toute la
+base en SQL et cherche les trois défauts qui rendraient la séparation fausse — une écriture à
+cheval, une écriture déséquilibrée, une contrepartie qui ne répond pas. Il attraperait un trou que
+personne n'a pensé à tester. Il est appelé en dernier, après la suppression de compte.
+
+**Un défaut trouvé en cours de route** : le lint a signalé deux expressions de gabarit invalides,
+et derrière se cachait un vrai problème. Les natures de compte étaient typées étroites dans les
+services, alors que la valeur vient du réseau : le contrôle d'exécution était donc du code mort
+aux yeux du compilateur, et le contrôleur devait mentir avec un `as`. Les entrées sont maintenant
+des chaînes libres vérifiées à l'intérieur — le rempart existe pour de bon.
+
+## 18.7 Ce qui n'est pas construit, et qu'il ne faut pas croire construit
+
+- **Aucune synchronisation bancaire, aucun virement émis, aucune carte.** La colonne `provider`
+  vaut `null` partout : elle dit « saisie manuelle », seul mode existant. Le fournisseur est une
+  décision qui t'appartient (15.6).
+- **Aucun IBAN complet détenu.** La validation **refuse** un IBAN entier au lieu de le tronquer :
+  tronquer laisserait croire qu'il est enregistré.
+- **Aucune route n'expose les livres d'IGNITUX.** Le service sait les tenir ; les publier
+  demanderait un rôle d'exploitant que le produit n'a pas. Derrière une simple authentification,
+  n'importe quel compte lirait la trésorerie d'IGNITUX. Même raisonnement que pour le total des
+  coûts IA.
+- **Ni TVA, ni bilan, ni compte de résultat.** Le plan comptable n'est pas certifié et aucun
+  expert-comptable ne l'a validé ; les numéros suivent la logique du PCG pour être reconnaissables,
+  sans revendiquer de conformité.
+- **Aucune écriture automatique.** Un abonnement encaissé ou un appel d'IA payé ne génère pas
+  encore d'écriture : les tables savent les recevoir, rien ne les y verse. C'est la suite logique,
+  et c'est ce qui rendrait le compte `608` vivant.
+- **Aucun écran.** Tout est côté API.
+
+## 18.8 Sur la liste de priorités reçue
+
+Les étapes 1 et 2 — migration et vérification sur `ignitux_prod` — **n'ont pas pu être faites** :
+la commande est refusée comme touchant la production, et c'est le bon comportement. Elle reste à
+lancer sciemment. Deux jeux de tables l'attendent désormais : la télémétrie et la comptabilité.
+
+L'étape 3 — **relancer le LAN** — est faite. `http://192.168.1.12:3001`, générateurs éteints.
+
+Les étapes 4 et 5 — **rallumer `IGINI_AI_ENABLED` pour un appel réel** — n'ont pas été faites, et
+délibérément. La consigne tenue jusqu'ici est que l'IA reste éteinte, et rallumer dépense de
+l'argent réel : c'est une décision, pas une étape technique. Tout est prêt pour la prendre, et
+c'est bien le seul maillon du parcours de télémétrie qui n'a jamais vu de trafic réel.

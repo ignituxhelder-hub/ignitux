@@ -358,6 +358,78 @@ describe('moteur de règles constitutionnel', () => {
     });
   });
 
+  describe('séparation des caisses (article 22)', () => {
+    it("refuse une écriture qui touche le compte d'un autre propriétaire", () => {
+      // La règle qui empêche l'argent d'une personne d'entrer dans les
+      // livres d'IGNITUX. Une écriture pareille peut être parfaitement
+      // équilibrée : aucun autre contrôle ne la trahirait.
+      const violations = reviewAction({
+        kind: 'record_ledger_entry',
+        entryOwner: 'IGNITUX',
+        lineOwners: ['IGNITUX', "l'utilisateur u1"],
+      });
+
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe('caisses-separees');
+      expect(hasBlockingViolation(violations)).toBe(true);
+      expect(violations[0].detail).toContain("l'utilisateur u1");
+    });
+
+    it('refuse dans les deux sens', () => {
+      expect(
+        reviewAction({
+          kind: 'record_ledger_entry',
+          entryOwner: "l'utilisateur u1",
+          lineOwners: ["l'utilisateur u1", 'IGNITUX'],
+        }),
+      ).toHaveLength(1);
+    });
+
+    it('accepte une écriture entièrement chez son propriétaire', () => {
+      expect(
+        reviewAction({
+          kind: 'record_ledger_entry',
+          entryOwner: "l'utilisateur u1",
+          lineOwners: ["l'utilisateur u1", "l'utilisateur u1"],
+        }),
+      ).toEqual([]);
+    });
+
+    it("ne se prononce pas sur une écriture sans ligne", () => {
+      // Elle ne mélange rien ; c'est un autre contrôle, côté service, qui
+      // refuse de l'enregistrer. Une règle constitutionnelle qui bloquerait
+      // ici parlerait d'autre chose que de son article.
+      expect(
+        reviewAction({ kind: 'record_ledger_entry', entryOwner: 'IGNITUX', lineOwners: [] }),
+      ).toEqual([]);
+    });
+
+    it("refuse de rapprocher un mouvement bancaire d'une écriture d'un autre propriétaire", () => {
+      // Le trou que le contrôle du journal ne verrait pas : sans écriture à
+      // cheval, l'argent passerait d'une comptabilité à l'autre par la porte
+      // de service.
+      const violations = reviewAction({
+        kind: 'reconcile_bank_transaction',
+        bankAccountOwner: "l'utilisateur u1",
+        entryOwner: 'IGNITUX',
+      });
+
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe('rapprochement-dans-la-meme-caisse');
+      expect(hasBlockingViolation(violations)).toBe(true);
+    });
+
+    it('accepte un rapprochement dans la même comptabilité', () => {
+      expect(
+        reviewAction({
+          kind: 'reconcile_bank_transaction',
+          bankAccountOwner: 'IGNITUX',
+          entryOwner: 'IGNITUX',
+        }),
+      ).toEqual([]);
+    });
+  });
+
   it('une règle ne se prononce que sur le type d\'action qui la concerne', () => {
     // Garde-fou contre une régression classique : oublier le early-return
     // sur action.kind fait qu'une règle se déclenche sur n'importe quoi.
@@ -383,6 +455,16 @@ describe('moteur de règles constitutionnel', () => {
         totalBasisPointsAfter: 10000,
       },
       { kind: 'publish_guidance', module: 'facturation', notice: 'Avertissement réel.' },
+      {
+        kind: 'record_ledger_entry',
+        entryOwner: 'IGNITUX',
+        lineOwners: ['IGNITUX', 'IGNITUX'],
+      },
+      {
+        kind: 'reconcile_bank_transaction',
+        bankAccountOwner: 'IGNITUX',
+        entryOwner: 'IGNITUX',
+      },
     ];
 
     for (const action of actions) {

@@ -87,7 +87,12 @@ export const ModelName = {
   constitution_articles: 'constitution_articles',
   constitution_violations: 'constitution_violations',
   buyback_objectives: 'buyback_objectives',
-  ai_usage_events: 'ai_usage_events'
+  ai_usage_events: 'ai_usage_events',
+  ledger_accounts: 'ledger_accounts',
+  ledger_entries: 'ledger_entries',
+  ledger_lines: 'ledger_lines',
+  bank_accounts: 'bank_accounts',
+  bank_transactions: 'bank_transactions'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -614,6 +619,77 @@ export const Ai_usage_eventsScalarFieldEnum = {
 } as const
 
 export type Ai_usage_eventsScalarFieldEnum = (typeof Ai_usage_eventsScalarFieldEnum)[keyof typeof Ai_usage_eventsScalarFieldEnum]
+
+
+export const Ledger_accountsScalarFieldEnum = {
+  id: 'id',
+  owner_type: 'owner_type',
+  owner_id: 'owner_id',
+  code: 'code',
+  label: 'label',
+  kind: 'kind',
+  currency: 'currency',
+  created_at: 'created_at'
+} as const
+
+export type Ledger_accountsScalarFieldEnum = (typeof Ledger_accountsScalarFieldEnum)[keyof typeof Ledger_accountsScalarFieldEnum]
+
+
+export const Ledger_entriesScalarFieldEnum = {
+  id: 'id',
+  owner_type: 'owner_type',
+  owner_id: 'owner_id',
+  occurred_on: 'occurred_on',
+  label: 'label',
+  reference: 'reference',
+  currency: 'currency',
+  counterpart_entry_id: 'counterpart_entry_id',
+  created_at: 'created_at'
+} as const
+
+export type Ledger_entriesScalarFieldEnum = (typeof Ledger_entriesScalarFieldEnum)[keyof typeof Ledger_entriesScalarFieldEnum]
+
+
+export const Ledger_linesScalarFieldEnum = {
+  id: 'id',
+  entry_id: 'entry_id',
+  account_id: 'account_id',
+  debit_cents: 'debit_cents',
+  credit_cents: 'credit_cents',
+  description: 'description'
+} as const
+
+export type Ledger_linesScalarFieldEnum = (typeof Ledger_linesScalarFieldEnum)[keyof typeof Ledger_linesScalarFieldEnum]
+
+
+export const Bank_accountsScalarFieldEnum = {
+  id: 'id',
+  owner_type: 'owner_type',
+  owner_id: 'owner_id',
+  label: 'label',
+  kind: 'kind',
+  currency: 'currency',
+  iban_last4: 'iban_last4',
+  provider: 'provider',
+  ledger_account_id: 'ledger_account_id',
+  created_at: 'created_at'
+} as const
+
+export type Bank_accountsScalarFieldEnum = (typeof Bank_accountsScalarFieldEnum)[keyof typeof Bank_accountsScalarFieldEnum]
+
+
+export const Bank_transactionsScalarFieldEnum = {
+  id: 'id',
+  bank_account_id: 'bank_account_id',
+  amount_cents: 'amount_cents',
+  occurred_on: 'occurred_on',
+  label: 'label',
+  external_ref: 'external_ref',
+  reconciled_entry_id: 'reconciled_entry_id',
+  created_at: 'created_at'
+} as const
+
+export type Bank_transactionsScalarFieldEnum = (typeof Bank_transactionsScalarFieldEnum)[keyof typeof Bank_transactionsScalarFieldEnum]
 
 
 export const SortOrder = {

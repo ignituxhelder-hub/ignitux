@@ -64,6 +64,20 @@ bout tant que la clé n'est pas renseignée.
 - **Score** — tableau de bord dérivé des données existantes ; `null` quand aucun signal réel n'existe,
   pas de score de confiance/réputation fabriqué
 
+**Argent**
+- **CRM et facturation** — entreprises, contacts, échanges ; devis, factures et avoirs numérotés
+  sans trou et figés à l’émission. Ce sont les factures que **tu** envoies à **tes** clients
+- **Financement** — apports reçus, répartition des parts, dividendes versés, et les trois
+  conditions de rachat que tu définis toi-même
+- **Comptabilité et banque** — plan de comptes, journal en partie double, balance, comptes
+  bancaires et rapprochement. **L’argent d’Ignitux n’est jamais le tien** : toute écriture a un
+  propriétaire et un seul, et un mouvement entre les deux comptabilités s’enregistre des deux
+  côtés, jamais dans une écriture à cheval. Une écriture qui toucherait les comptes de l’autre
+  est refusée par le moteur constitutionnel, et la tentative est journalisée
+- **Aucun virement n’est émis, aucun compte n’est synchronisé avec une banque, et aucun IBAN
+  complet n’est conservé** — seulement ses quatre derniers caractères, tant qu’aucun fournisseur
+  bancaire n’a été choisi
+
 **Communauté**
 - Un projet peut être rendu public par son propriétaire (`/projects/:id/visibility`)
 - Les autres utilisateurs découvrent les projets publics (`/community`) et peuvent y laisser des

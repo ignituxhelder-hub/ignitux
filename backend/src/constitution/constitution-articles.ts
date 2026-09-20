@@ -241,9 +241,21 @@ export const CONSTITUTION_ARTICLES: readonly ConstitutionArticleSeed[] = [
     title: 'Financement Éthique',
     text: 'Le financement doit servir la création de valeur réelle.',
     principle: 'financement_ethique',
-    // Vérifié : règle `majorite-du-porteur` — une répartition qui ferait
-    // passer le porteur sous la majorité est refusée (modèle économique
-    // IGNITUX : l'entrepreneur reste propriétaire principal).
+    // Vérifié par trois règles :
+    // - `majorite-du-porteur` — une répartition qui ferait passer le porteur
+    //   sous la majorité est refusée (modèle économique IGNITUX :
+    //   l'entrepreneur reste propriétaire principal) ;
+    // - `caisses-separees` — une écriture comptable touchant le compte d'un
+    //   autre propriétaire est refusée. L'argent d'une personne n'entre
+    //   jamais dans les livres d'IGNITUX, ni l'inverse ;
+    // - `rapprochement-dans-la-meme-caisse` — un mouvement bancaire ne se
+    //   rattache qu'à une écriture du même propriétaire.
+    //
+    // Les deux dernières traduisent une exigence que le texte de l'article ne
+    // formule pas mot pour mot : « le financement doit servir la création de
+    // valeur réelle » suppose au minimum qu'on sache de quel argent on parle.
+    // Si le porteur préfère que cette exigence porte son propre article, le
+    // rattachement se déplace sans toucher aux règles elles-mêmes.
     enforcement: 'enforced',
   },
   {

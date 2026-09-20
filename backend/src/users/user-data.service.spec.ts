@@ -13,6 +13,14 @@ const GOOD_PASSWORD = 'bon-mot-de-passe';
  * le service fait échouer le test de transaction.
  */
 const ANONYMISEES = ['constitution_violations', 'ai_usage_events'] as const;
+
+/**
+ * Les tables dont les lignes de la personne sont **effacées**, et non
+ * anonymisées : sa comptabilité et ses comptes bancaires lui appartiennent
+ * entièrement. Ignitux n'a aucune raison de garder les livres de quelqu'un
+ * qui s'en va.
+ */
+const SUPPRIMEES = ['ledger_entries', 'bank_accounts', 'ledger_accounts'] as const;
 /**
  * Un vrai hash bcrypt, pas un espion : `vi.spyOn(bcrypt, 'compare')` est
  * impossible sur un module ESM, et vérifier la vraie comparaison vaut mieux
@@ -42,6 +50,7 @@ interface TableMock {
   findUniqueOrThrow: Mock;
   updateMany: Mock;
   delete: Mock;
+  deleteMany: Mock;
 }
 
 function buildPrismaMock() {
@@ -55,6 +64,7 @@ function buildPrismaMock() {
       findUniqueOrThrow: vi.fn(),
       updateMany: vi.fn().mockResolvedValue({ count: 0 }),
       delete: vi.fn(),
+      deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
     };
   }
 
@@ -311,22 +321,39 @@ describe('UserDataService', () => {
       expect(prisma.ai_usage_events.delete).not.toHaveBeenCalled();
     });
 
+    it('efface la comptabilité de la personne, et pas seulement ses journaux', async () => {
+      // Traitement volontairement opposé à celui des deux journaux
+      // ci-dessus : les livres d'une personne lui appartiennent et partent
+      // avec elle, là où la dépense d'Ignitux reste. Voir ledger-deletion.ts.
+      await service.deleteAccount('u1', GOOD_PASSWORD);
+
+      const proprietaire = { owner_type: 'user', owner_id: 'u1' };
+      for (const table of SUPPRIMEES) {
+        expect(prisma[table].deleteMany).toHaveBeenCalledWith({ where: proprietaire });
+      }
+    });
+
     it('anonymise et supprime dans la même transaction', async () => {
       // Séparées, un échec entre les deux laisserait soit un journal
       // nominatif sans compte, soit un compte supprimé à moitié.
       await service.deleteAccount('u1', GOOD_PASSWORD);
 
-      // On vérifie la composition de la transaction, pas seulement sa
-      // taille : un simple décompte passerait encore si une anonymisation
-      // en remplaçait une autre, ce qui est exactement l'erreur qu'un
-      // refactor introduit sans le vouloir.
+      // On décrit ce que la transaction fait, plutôt que de compter ses
+      // opérations : un décompte passerait encore si une anonymisation en
+      // remplaçait une autre, ce qui est exactement l'erreur qu'un refactor
+      // introduit sans le vouloir. Le nombre est vérifié aussi, mais il ne
+      // porte pas la garantie à lui seul.
       const operations = prisma.$transaction.mock.calls[0][0] as unknown[];
-      expect(operations).toHaveLength(3);
+      expect(operations).toHaveLength(9);
+
       for (const table of ANONYMISEES) {
         expect(prisma[table].updateMany).toHaveBeenCalledWith({
           where: { user_id: 'u1' },
           data: { user_id: null },
         });
+      }
+      for (const table of SUPPRIMEES) {
+        expect(prisma[table].deleteMany).toHaveBeenCalled();
       }
       expect(prisma.users.delete).toHaveBeenCalledWith({ where: { id: 'u1' } });
     });

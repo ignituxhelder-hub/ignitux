@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { ledgerDeletionOperations } from '../ledger/ledger-deletion.js';
 import { exclusions } from './user-data-scope.js';
 
 /**
@@ -104,6 +105,9 @@ export class UserDataService {
       complianceChecks,
       violations,
       appelsIa,
+      comptesComptables,
+      ecritures,
+      comptesBancaires,
     ] = await Promise.all([
       this.prisma.tasks.findMany({ where: byProject }),
       this.prisma.memories.findMany({ where: { user_id: userId } }),
@@ -135,6 +139,17 @@ export class UserDataService {
       this.prisma.project_compliance_checks.findMany({ where: byProject }),
       this.prisma.constitution_violations.findMany({ where: { user_id: userId } }),
       this.prisma.ai_usage_events.findMany({ where: { user_id: userId } }),
+      // Comptabilité et banque : filtrées sur le propriétaire, puisque ces
+      // tables contiennent aussi les livres d'IGNITUX.
+      this.prisma.ledger_accounts.findMany({ where: { owner_type: 'user', owner_id: userId } }),
+      this.prisma.ledger_entries.findMany({
+        where: { owner_type: 'user', owner_id: userId },
+        include: { lines: true },
+      }),
+      this.prisma.bank_accounts.findMany({
+        where: { owner_type: 'user', owner_id: userId },
+        include: { transactions: true },
+      }),
     ]);
 
     return {
@@ -176,6 +191,11 @@ export class UserDataService {
           documents,
           lignes: lines,
           reglements: payments,
+          // Ta comptabilité et tes comptes bancaires. Les livres d'Ignitux
+          // n'y figurent pas : ce ne sont pas tes données.
+          comptabilite_plan_de_comptes: comptesComptables,
+          comptabilite_ecritures: ecritures,
+          comptes_bancaires: comptesBancaires,
         },
         financement: {
           apports: rounds,
@@ -348,6 +368,12 @@ export class UserDataService {
     // suppression de compte les effaçait, le total d'un mois déjà clos
     // changerait rétroactivement, et deux relevés du même mois ne diraient
     // plus la même chose.
+    // La comptabilité de la personne part entièrement, contrairement aux
+    // deux journaux ci-dessus qui sont anonymisés : ses livres lui
+    // appartiennent, et Ignitux n'a aucune raison de garder ceux de
+    // quelqu'un qui s'en va. Voir ledger-deletion.ts.
+    const comptabilite = await ledgerDeletionOperations(this.prisma, userId);
+
     await this.prisma.$transaction([
       this.prisma.constitution_violations.updateMany({
         where: { user_id: userId },
@@ -357,6 +383,7 @@ export class UserDataService {
         where: { user_id: userId },
         data: { user_id: null },
       }),
+      ...comptabilite,
       // Tout le reste part en cascade depuis `users` (voir schema.prisma).
       this.prisma.users.delete({ where: { id: userId } }),
     ]);

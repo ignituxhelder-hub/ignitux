@@ -831,3 +831,162 @@ model ai_usage_events {
   @@index([created_at])
   @@index([generator])
 }
+
+/// ─────────────────────────────────────────────────────────────────────────
+/// SÉPARATION DES CAISSES — l'argent d'IGNITUX n'est jamais celui de la
+/// personne.
+///
+/// Avant ces tables, tout ce que le produit suivait financièrement
+/// appartenait aux utilisateurs : `billing_documents` sont les factures que
+/// l'entrepreneur envoie à SES clients, `equity_holders` est la table de
+/// capitalisation de SON projet. IGNITUX, lui, n'avait aucun livre — alors
+/// même que `financing_rounds.source` peut valoir `'ignitux'`, c'est-à-dire
+/// de l'argent d'IGNITUX entrant dans le projet de quelqu'un. Cette dépense
+/// n'était enregistrée que du côté du bénéficiaire.
+///
+/// Le principe tenu ici : **toute écriture a un propriétaire, et une écriture
+/// n'en a jamais deux.** Un mouvement entre IGNITUX et une personne n'est pas
+/// une écriture à cheval : ce sont DEUX écritures, une dans chaque
+/// comptabilité, qui se désignent l'une l'autre. C'est ce qui rend la
+/// séparation vérifiable plutôt que déclarative.
+///
+/// `owner_type` et `owner_id` sont tous deux NOT NULL. La règle « aucune
+/// transaction sans propriétaire » est donc tenue par le schéma lui-même, pas
+/// seulement par du code. IGNITUX n'étant pas une ligne de `users`, il porte
+/// un identifiant sentinelle documenté (voir ledger-owner.ts) plutôt qu'un
+/// `null` : un `null` aurait rendu les contraintes d'unicité inopérantes
+/// (deux `null` sont distincts en Postgres) et aurait fait de « sans
+/// propriétaire » un état représentable.
+
+/// COMPTABILITÉ — un compte du plan comptable, appartenant à IGNITUX ou à une
+/// personne. Le plan de l'un n'est jamais celui de l'autre.
+model ledger_accounts {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// 'ignitux' | 'user'
+  owner_type String
+  /// L'utilisateur, ou l'identifiant sentinelle d'IGNITUX. Jamais null.
+  owner_id   String    @db.Uuid
+  /// Code du plan comptable, unique chez un propriétaire donné.
+  code       String
+  label      String
+  /// 'actif' | 'passif' | 'capitaux' | 'produit' | 'charge'
+  kind       String
+  currency   String    @default("EUR")
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  lines        ledger_lines[]
+  bank_account bank_accounts?
+
+  @@unique([owner_type, owner_id, code])
+  @@index([owner_type, owner_id])
+}
+
+/// COMPTABILITÉ — une écriture au journal. Équilibrée par construction :
+/// la somme des débits égale la somme des crédits, vérifié avant écriture.
+model ledger_entries {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_type           String
+  owner_id             String    @db.Uuid
+  occurred_on          DateTime  @db.Date
+  label                String
+  /// Ce que l'écriture constate, quand elle vient d'ailleurs dans le
+  /// produit : identifiant de facture, de tour de financement, etc. Texte
+  /// libre volontairement — une clé étrangère par origine possible aurait
+  /// couplé le journal à tout le reste.
+  reference            String?
+  currency             String    @default("EUR")
+  /// L'écriture jumelle, dans la comptabilité de l'AUTRE propriétaire, quand
+  /// ce mouvement traverse la frontière entre les deux caisses. Nulle pour
+  /// une écriture interne.
+  ///
+  /// Pas de clé étrangère : les deux écritures se créent dans la même
+  /// transaction et se désignent mutuellement, ce qu'une contrainte
+  /// référentielle rendrait impossible à poser sans écriture intermédiaire.
+  /// La cohérence est vérifiée par un contrôle dédié, pas par la base.
+  counterpart_entry_id String?   @db.Uuid
+  created_at           DateTime? @default(now()) @db.Timestamptz(6)
+
+  lines ledger_lines[]
+
+  @@index([owner_type, owner_id, occurred_on])
+  @@index([counterpart_entry_id])
+}
+
+/// COMPTABILITÉ — une ligne d'écriture. Un seul des deux montants est non nul :
+/// le sens est porté par la colonne, jamais par un signe négatif.
+model ledger_lines {
+  id           String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entry_id     String          @db.Uuid
+  entry        ledger_entries  @relation(fields: [entry_id], references: [id], onDelete: Cascade)
+  account_id   String          @db.Uuid
+  account      ledger_accounts @relation(fields: [account_id], references: [id], onDelete: Restrict)
+  /// En centimes entiers, toujours positifs ou nuls.
+  debit_cents  Int             @default(0)
+  credit_cents Int             @default(0)
+  description  String?
+
+  @@index([entry_id])
+  @@index([account_id])
+}
+
+/// BANQUE — un compte bancaire déclaré, appartenant à IGNITUX ou à une
+/// personne.
+///
+/// **Aucun IBAN complet n'est stocké**, seulement les quatre derniers
+/// caractères et un libellé : il n'existe aujourd'hui aucun virement ni
+/// aucune synchronisation dans le produit, donc rien ne justifie de détenir
+/// une coordonnée bancaire complète. Détenir une donnée qu'on ne sait pas
+/// encore protéger ni utiliser est un risque sans contrepartie. Le jour où
+/// un virement sera émis, ce champ devra être repensé avec un fournisseur
+/// choisi — pas rempli en douce.
+model bank_accounts {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_type        String
+  owner_id          String           @db.Uuid
+  label             String
+  /// 'courant' | 'reserve' | 'fiscal' | 'investissement' | 'autre'
+  kind              String
+  currency          String           @default("EUR")
+  /// Quatre derniers caractères de l'IBAN, pour reconnaître le compte. Jamais
+  /// l'IBAN entier.
+  iban_last4        String?
+  /// Le fournisseur de synchronisation, quand il y en aura un. Null = saisie
+  /// manuelle, ce qui est le seul mode existant aujourd'hui.
+  provider          String?
+  /// Le compte du plan comptable qui reflète ce compte bancaire. Il doit
+  /// appartenir au même propriétaire — vérifié par le service.
+  ledger_account_id String?          @unique @db.Uuid
+  ledger_account    ledger_accounts? @relation(fields: [ledger_account_id], references: [id], onDelete: SetNull)
+  created_at        DateTime?        @default(now()) @db.Timestamptz(6)
+
+  transactions bank_transactions[]
+
+  @@index([owner_type, owner_id])
+}
+
+/// BANQUE — un mouvement sur un compte bancaire.
+///
+/// Le montant est signé ici, contrairement au journal : un relevé bancaire se
+/// lit en plus et en moins, et le recopier en débit/crédit au moment de
+/// l'import obligerait à interpréter avant d'avoir constaté. Le rapprochement
+/// avec une écriture, lui, se fait explicitement.
+model bank_transactions {
+  id                  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bank_account_id     String        @db.Uuid
+  bank_account        bank_accounts @relation(fields: [bank_account_id], references: [id], onDelete: Cascade)
+  /// En centimes entiers, signé : négatif pour un débit bancaire.
+  amount_cents        Int
+  occurred_on         DateTime      @db.Date
+  label               String
+  /// Référence du relevé, pour ne pas importer deux fois le même mouvement.
+  external_ref        String?
+  /// L'écriture comptable qui constate ce mouvement. Elle doit appartenir au
+  /// même propriétaire que le compte bancaire — vérifié par le service et par
+  /// une règle constitutionnelle.
+  reconciled_entry_id String?       @db.Uuid
+  created_at          DateTime?     @default(now()) @db.Timestamptz(6)
+
+  @@unique([bank_account_id, external_ref])
+  @@index([bank_account_id, occurred_on])
+  @@index([reconciled_entry_id])
+}

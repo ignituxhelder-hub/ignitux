@@ -686,3 +686,77 @@ n'avaient **aucun `<h1>`**. Quelqu'un qui navigue de titre en titre arrivait sur
 premier titre était un `<h2>` perdu au milieu d'un formulaire. Les 55 champs de formulaire du
 produit, eux, étaient déjà tous correctement étiquetés — le test le fige.
 **Où** — `frontend/src/app/accessibilite.spec.ts`.
+
+## L'argent d'IGNITUX et celui d'une personne ne partagent jamais une écriture
+
+**Quoi** — toute ligne financière porte `owner_type` et `owner_id`, tous deux NOT NULL. Une
+écriture comptable appartient à un propriétaire et à un seul ; une écriture dont une ligne touche
+le compte d'un autre est refusée en 422 par la règle constitutionnelle `caisses-separees`, et la
+tentative est journalisée. Un mouvement entre IGNITUX et une personne produit **deux** écritures,
+une dans chaque comptabilité, qui se désignent l'une l'autre.
+
+**Pourquoi** — avant ces tables, tout ce que le produit suivait financièrement appartenait aux
+utilisateurs : `billing_documents` sont les factures que l'entrepreneur envoie à SES clients,
+`equity_holders` la table de capitalisation de SON projet. IGNITUX n'avait aucun livre. Or
+`financing_rounds.source` accepte déjà la valeur `'ignitux'` — de l'argent d'IGNITUX versé dans le
+projet de quelqu'un, enregistré uniquement du côté du bénéficiaire. Personne, en lisant la base,
+n'aurait pu dire ce qu'IGNITUX avait dépensé.
+
+Le danger d'une écriture à cheval est qu'elle est **parfaitement équilibrée** : elle ferait passer
+de l'argent d'une comptabilité à l'autre sans qu'aucun contrôle comptable ne bronche. C'est pour
+ça que le refus est constitutionnel et pas seulement une validation de saisie — une tentative
+laisse une trace.
+
+**Où** — `backend/src/ledger/`, règles `caisses-separees` et `rapprochement-dans-la-meme-caisse`
+(article 22), `backend/test/comptabilite.e2e-spec.ts`.
+
+## IGNITUX porte un identifiant sentinelle, pas un `null`
+
+**Quoi** — `IGNITUX_OWNER_ID = '00000000-0000-0000-0000-000000000000'`, avec `owner_type` valant
+`'ignitux'`. IGNITUX n'est pas une ligne de `users`.
+
+**Pourquoi pas une vraie ligne `users`** — elle apparaîtrait dans les exports RGPD, les listes de
+collaborateurs, les recherches de contacts. IGNITUX n'est pas une personne.
+
+**Pourquoi pas `null`** — deux raisons, et la seconde est la vraie. En Postgres, deux `null` sont
+distincts dans un index unique : `@@unique([owner_type, owner_id, code])` aurait laissé créer deux
+comptes IGNITUX portant le même code. Et surtout, un `null` aurait rendu « sans propriétaire »
+représentable, alors que tout ce module existe pour que ça ne le soit pas. Avec deux colonnes NOT
+NULL, la règle « aucune transaction sans propriétaire » est tenue par le schéma, pas par du code
+qu'on peut oublier d'appeler.
+
+**Où** — `backend/src/ledger/ledger-owner.ts`.
+
+## La comptabilité d'une personne est supprimée ; le journal des coûts IA, seulement anonymisé
+
+**Quoi** — à la suppression d'un compte, `ledger_accounts`, `ledger_entries`, `ledger_lines`,
+`bank_accounts` et `bank_transactions` de cette personne **partent**. `ai_usage_events` et
+`constitution_violations`, eux, restent et perdent leur `user_id`.
+
+**Pourquoi la différence** — le journal des coûts IA enregistre une dépense **d'IGNITUX**, déjà
+facturée par Anthropic. L'effacer ferait changer rétroactivement le total d'un mois déjà clos, et
+deux relevés du même mois ne diraient plus la même chose. La comptabilité d'une personne, elle,
+lui appartient entièrement : IGNITUX n'a aucune raison de garder les livres de quelqu'un qui s'en
+va, et conserver des données sans nécessité est précisément ce que l'article 13 refuse.
+
+Les écritures d'IGNITUX qui désignaient une écriture supprimée perdent ce lien plutôt que de
+pointer dans le vide. Le fait reste dans les livres d'IGNITUX, l'identité part — le même principe
+qu'ailleurs, appliqué à un pointeur.
+
+**Où** — `backend/src/ledger/ledger-deletion.ts`, `backend/src/users/user-data.service.ts`.
+
+## Aucun IBAN complet n'est détenu tant qu'aucun virement n'est émis
+
+**Quoi** — `bank_accounts.iban_last4` ne stocke que quatre caractères, et la validation du DTO
+**refuse** un IBAN entier au lieu de le tronquer en silence.
+
+**Pourquoi** — quatre caractères suffisent à reconnaître un compte dans une liste. L'IBAN entier
+ne sert qu'à émettre un virement, ce que le produit ne fait pas et ne fera pas tant qu'aucun
+fournisseur bancaire n'aura été choisi. Détenir une coordonnée bancaire complète sans pouvoir s'en
+servir, c'est prendre un risque de fuite sans contrepartie.
+
+**Pourquoi refuser plutôt que tronquer** — tronquer donnerait raison à l'appelant qui a envoyé
+trop : il croirait l'IBAN enregistré et construirait dessus. Un refus explicite dit que le produit
+ne veut pas de cette donnée.
+
+**Où** — `backend/src/banking/dto/banking.dto.ts`, `backend/src/banking/banking.service.ts`.
