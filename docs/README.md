@@ -11,6 +11,7 @@ Ce dossier centralise la documentation qui ne vit pas déjà à côté du code q
 - [`status.md`](status.md) — état réel du projet : ce qui est complet, partiel, ou totalement absent,
   et pourquoi. Mis à jour à chaque changement notable plutôt que reconstruit de mémoire.
 - [`decisions.md`](decisions.md) — les choix volontaires qui limitent le périmètre actuel (pas
+- [outillage.md](outillage.md) — audit des outils : ce qui existe, ce qui manque, ce dont le projet n'a pas besoin
   d'automatisation, pas de scores fabriqués, pas d'offline-first…) et la raison de chacun.
 
 La documentation propre à un module reste à côté de son code :
