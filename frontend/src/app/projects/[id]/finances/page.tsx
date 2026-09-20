@@ -13,6 +13,7 @@ import {
 } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { centimesDepuisEuros, euros, jour, pourcentage } from '@/lib/montants';
+import { AuditFinancier } from './audit-financier';
 
 const STATUTS: Record<string, string> = {
   ouvert: 'Ouvert au financement',
@@ -189,6 +190,10 @@ export default function ProjectFinancesPage() {
           <Historique registre={registre} />
 
           <Dividendes dividendes={dividendes} />
+
+          {/* En dernier, volontairement : on lit d'abord ce que le projet a
+              reçu et versé, puis on vérifie que tout cela tient ensemble. */}
+          <AuditFinancier token={token} projectId={projectId} />
         </>
       )}
     </main>

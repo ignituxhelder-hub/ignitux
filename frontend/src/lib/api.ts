@@ -528,6 +528,29 @@ export interface ConstitutionViolation {
   created_at: string;
 }
 
+/**
+ * Un contrôle de cohérence financière, et ce qu il a trouvé.
+ *
+ * `count` vaut zéro la plupart du temps, et la ligne existe justement
+ * pour ça : un audit qui ne montre que ses trouvailles ne permet pas de
+ * distinguer « rien à signaler » de « ce contrôle n existe pas ».
+ */
+export interface FinanceAuditFinding {
+  code: string;
+  label: string;
+  /** Pourquoi c est un défaut, et pas une bizarrerie sans conséquence. */
+  why: string;
+  count: number;
+  /** Quelques identifiants concernés. Jamais la liste entière. */
+  sample: string[];
+}
+
+export interface FinanceAudit {
+  checkedAt: string;
+  findings: FinanceAuditFinding[];
+  clean: boolean;
+}
+
 export interface ComplianceRequirement {
   id: string;
   country: string;
@@ -1472,6 +1495,12 @@ export const api = {
 
   // Sans paramètre `country` : le serveur lit le pays déclaré au profil.
   // Le forcer à FR ici rendait le champ « Pays d'activité » décoratif.
+  // Le moteur existait, testé, avec sa route — et aucun écran ne l appelait.
+  getProjectFinanceAudit: (token: string, projectId: string) =>
+    request<FinanceAudit>(`/projects/${projectId}/audit-financier`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
   getProjectCompliance: (token: string, projectId: string) =>
     request<ComplianceChecklist>(`/projects/${projectId}/compliance`, {
       headers: { Authorization: `Bearer ${token}` },

@@ -135,7 +135,7 @@ describe('le pays des démarches', () => {
   });
 });
 
-const EXIGENCE = (id, title, category = 'Création') => ({
+const EXIGENCE = (id: string, title: string, category = 'Création') => ({
   id,
   country: 'FR',
   category,
@@ -146,7 +146,7 @@ const EXIGENCE = (id, title, category = 'Création') => ({
   completed: false,
 });
 
-const CHECKLIST = (extra) => ({
+const CHECKLIST = (extra: Record<string, unknown>) => ({
   disclaimer: 'Info générale.',
   country: 'FR',
   countryDeclared: true,

@@ -91,6 +91,12 @@ function routes(overrides: Record<string, { status: number; body: unknown }> = {
     'GET /projects/p1/financement': { status: 200, body: registre() },
     'GET /projects/p1/financing/cap-table': { status: 200, body: capTable() },
     'GET /projects/p1/financing/dividends': { status: 200, body: { dividends: [], totalCents: 0 } },
+    // Les contrôles de cohérence closent la page. Sans cette route, ils
+    // tombaient sur la réponse de repli et cassaient tout le rendu.
+    'GET /projects/p1/audit-financier': {
+      status: 200,
+      body: { checkedAt: '2026-09-20T12:00:00.000Z', findings: [], clean: true },
+    },
     ...overrides,
   };
 }
