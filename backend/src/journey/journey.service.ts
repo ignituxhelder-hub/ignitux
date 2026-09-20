@@ -14,6 +14,41 @@ import { journeyView, type JourneyView, type ProjectFacts } from './journey-mode
 export class JourneyService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /**
+   * Le parcours de chacun de mes projets, en une seule requête.
+   *
+   * L'écran d'accueil montre « prochaine étape » sous chaque projet :
+   * interroger `/parcours` une fois par projet ferait N requêtes pour une
+   * page d'accueil, ce qui se paie en attente dès le troisième projet.
+   *
+   * Ne rend que l'essentiel — le titre de l'étape et la phase. Le détail
+   * appartient à la fiche, pas à la liste : y déverser tout le parcours
+   * reconstituerait la surcharge qu'on vient de retirer.
+   */
+  async forMyProjects(
+    userId: string,
+  ): Promise<
+    Array<{ projectId: string; title: string; phase: string; nextStep: string | null }>
+  > {
+    const projets = await this.prisma.projects.findMany({
+      where: { owner_id: userId },
+      select: { id: true, title: true },
+      orderBy: { updated_at: 'desc' },
+    });
+
+    return Promise.all(
+      projets.map(async (projet) => {
+        const vue = await this.forProject(userId, projet.id);
+        return {
+          projectId: projet.id,
+          title: projet.title,
+          phase: vue.phaseLabel,
+          nextStep: vue.nextStep?.titre ?? null,
+        };
+      }),
+    );
+  }
+
   async forProject(userId: string, projectId: string): Promise<JourneyView> {
     // Un projet qu'on ne peut pas voir n'a pas de parcours à montrer. On
     // accepte aussi le collaborateur : il suit le même chemin, en lecture.

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { AuthModule } from '../auth/auth.module.js';
-import { JourneyController } from './journey.controller.js';
+import { JourneyController, JourneySummaryController } from './journey.controller.js';
 import { JourneyService } from './journey.service.js';
 
 /**
@@ -13,7 +13,7 @@ import { JourneyService } from './journey.service.js';
  */
 @Module({
   imports: [AuthModule, PassportModule.register({ defaultStrategy: 'jwt' })],
-  controllers: [JourneyController],
+  controllers: [JourneyController, JourneySummaryController],
   providers: [JourneyService],
   exports: [JourneyService],
 })

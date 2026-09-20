@@ -25,3 +25,25 @@ export class JourneyController {
     return this.journey.forProject(user.id, id);
   }
 }
+
+/**
+ * Le résumé de tous mes projets.
+ *
+ * Sur un préfixe distinct plutôt que `projects/resume` : la route
+ * `projects/:id` valide son paramètre comme un UUID, et un segment littéral
+ * placé à côté dépendrait alors de l'ordre de déclaration pour être
+ * atteint. Une route dont le fonctionnement tient à l'ordre des lignes est
+ * une route qui cassera au premier rangement d'imports.
+ */
+@ApiTags('parcours')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@Controller('parcours')
+export class JourneySummaryController {
+  constructor(private readonly journey: JourneyService) {}
+
+  @Get('mes-projets')
+  mine(@CurrentUser() user: AuthenticatedUser) {
+    return this.journey.forMyProjects(user.id);
+  }
+}

@@ -1013,6 +1013,15 @@ export interface JourneyView {
   }>;
 }
 
+/** Le parcours d un projet, reduit a ce qu une liste doit montrer. */
+export interface ProjectJourneySummary {
+  projectId: string;
+  title: string;
+  phase: string;
+  /** null = aucune etape deduite. On ne remplit pas le vide. */
+  nextStep: string | null;
+}
+
 export const api = {
   getBuybackProgress: (token: string, projectId: string) =>
     request<BuybackProgress>(`/projects/${projectId}/financing/buyback`, {
@@ -1838,6 +1847,13 @@ export const api = {
   // alors l'écran qui déciderait de la méthode Ignitux.
   getProjectJourney: (token: string, projectId: string) =>
     request<JourneyView>(`/projects/${projectId}/parcours`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  // Une requete pour tous les projets : interroger /parcours une fois par
+  // projet ferait N appels pour une page d accueil.
+  getMyProjectsJourney: (token: string) =>
+    request<ProjectJourneySummary[]>(`/parcours/mes-projets`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
 };
