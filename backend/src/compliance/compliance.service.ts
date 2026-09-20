@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { assertHasProjectAccess } from '../prisma/assert-has-project-access.js';
 import { assertOwnsProject } from '../prisma/assert-owns-project.js';
 import { ConstitutionService } from '../constitution/constitution.service.js';
@@ -20,15 +20,39 @@ export const COMPLIANCE_DISCLAIMER =
  */
 @Injectable()
 export class ComplianceService implements OnModuleInit {
+  private readonly logger = new Logger(ComplianceService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly constitutionService: ConstitutionService,
   ) {}
 
-  // Upsert idempotent sur `slug` : ne duplique rien au redémarrage, et une
-  // modification du contenu dans compliance-requirements.ts se reflète au
-  // prochain démarrage sans script de migration séparé.
+  /**
+   * Sème le référentiel, sans pouvoir empêcher le serveur de démarrer.
+   *
+   * Upsert idempotent sur `slug` : ne duplique rien au redémarrage, et une
+   * modification du contenu dans compliance-requirements.ts se reflète au
+   * prochain démarrage sans script de migration séparé.
+   *
+   * L'erreur est journalisée, pas propagée. Avant, une base en retard
+   * d'une colonne faisait échouer ce semis, donc le bootstrap Nest, donc
+   * tout le serveur : plus personne ne pouvait se connecter parce que la
+   * section Conformité n'avait pas pu se remplir. La disproportion est le
+   * défaut. Ce qui manque reste visible : `/ready` compare les slugs
+   * attendus à ceux présents en base et le dit.
+   */
   async onModuleInit(): Promise<void> {
+    try {
+      await this.semer();
+    } catch (error) {
+      this.logger.error(
+        'Semis du référentiel de conformité impossible — la section sera incomplète. ' +
+          (error instanceof Error ? error.message : String(error)),
+      );
+    }
+  }
+
+  private async semer(): Promise<void> {
     for (const requirement of COMPLIANCE_REQUIREMENTS_FR) {
       // Article 15 (One Brain Multiple Regulations) : une règle propre à un
       // pays doit citer sa source officielle, sinon elle n'est ni

@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { getEnv } from '../config/env.js';
+import { COMPLIANCE_REQUIREMENTS_FR } from '../compliance/compliance-requirements.js';
+import { Prisma } from '../generated/prisma/client.js';
 import { MailService } from '../mail/mail.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
@@ -41,6 +43,16 @@ export interface Readiness {
  * La liste attendue est **dérivée du client Prisma lui-même**, pas recopiée :
  * une liste écrite à la main finirait par diverger du schéma, et c'est alors
  * la sonde qui mentirait.
+ *
+ * ### Les colonnes, pas seulement les tables
+ *
+ * Une table présente mais amputée d'une colonne se comporte exactement
+ * comme une table manquante, en plus discret : l'application démarre, les
+ * lectures passent, et la première écriture qui touche la colonne échoue.
+ * Le cas s'est présenté en ajoutant `projects.sector` et
+ * `compliance_requirements.sectors` — un déploiement sans migration aurait
+ * fait échouer le semis du référentiel au démarrage, sur une base qui
+ * aurait paru saine à une sonde qui ne compte que les tables.
  */
 @Injectable()
 export class ReadinessService {
@@ -62,10 +74,36 @@ export class ReadinessService {
     );
   }
 
+  /**
+   * Les colonnes attendues par table, lues sur les énumérations générées.
+   *
+   * Prisma expose pour chaque modèle un `<Modele>ScalarFieldEnum` dont les
+   * valeurs sont les noms de colonnes. La correspondance nom de table →
+   * nom d'énumération n'est qu'une majuscule initiale (`user_profiles` →
+   * `User_profilesScalarFieldEnum`), ce qui rend la dérivation exacte et
+   * non devinée. Une table dont l'énumération est introuvable est ignorée
+   * plutôt que signalée : mieux vaut une sonde qui vérifie moins qu'une
+   * sonde qui crie sur sa propre heuristique.
+   */
+  private expectedColumns(): Map<string, string[]> {
+    const namespace = Prisma as unknown as Record<string, Record<string, string> | undefined>;
+    const parTable = new Map<string, string[]>();
+
+    for (const table of this.expectedTables()) {
+      const cle = `${table.charAt(0).toUpperCase()}${table.slice(1)}ScalarFieldEnum`;
+      const enumeration = namespace[cle];
+      if (!enumeration || typeof enumeration !== 'object') continue;
+      parTable.set(table, Object.values(enumeration));
+    }
+
+    return parTable;
+  }
+
   async check(): Promise<Readiness> {
     const verifications: Record<string, CheckResult> = {
       base: await this.verifierBase(),
       schema: await this.verifierSchema(),
+      referentiel: await this.verifierReferentiel(),
       email: await this.verifierEmail(),
       ia: this.verifierIa(),
     };
@@ -99,7 +137,7 @@ export class ReadinessService {
       const manquantes = attendues.filter((t) => !presentes.has(t));
 
       if (manquantes.length === 0) {
-        return { etat: 'ok', detail: `Les ${attendues.length} tables du schéma sont présentes.` };
+        return this.verifierColonnes(attendues.length);
       }
 
       // « Panne » et non « dégradé » : le serveur répond, mais toute écriture
@@ -115,6 +153,108 @@ export class ReadinessService {
       return {
         etat: 'panne',
         detail: `Schéma invérifiable — ${error instanceof Error ? error.message : String(error)}`,
+      };
+    }
+  }
+
+  /**
+   * Les colonnes, une fois les tables réputées présentes.
+   *
+   * Une seule requête pour tout le schéma : interroger table par table
+   * ferait cinquante allers-retours à chaque appel de `/ready`, sonde
+   * qu'un superviseur appelle en boucle.
+   */
+  private async verifierColonnes(nombreDeTables: number): Promise<CheckResult> {
+    const attendues = this.expectedColumns();
+    try {
+      const lignes = await this.prisma.$queryRaw<
+        Array<{ table_name: string; column_name: string }>
+      >`
+        SELECT table_name, column_name FROM information_schema.columns
+        WHERE table_schema = 'public'
+      `;
+
+      const presentes = new Map<string, Set<string>>();
+      for (const ligne of lignes) {
+        const colonnes = presentes.get(ligne.table_name) ?? new Set<string>();
+        colonnes.add(ligne.column_name);
+        presentes.set(ligne.table_name, colonnes);
+      }
+
+      const manquantes: string[] = [];
+      for (const [table, colonnes] of attendues) {
+        const surPlace = presentes.get(table);
+        // Table absente : déjà signalé par la vérification précédente. La
+        // répéter ici noierait le message utile sous cinquante lignes.
+        if (!surPlace) continue;
+        for (const colonne of colonnes) {
+          if (!surPlace.has(colonne)) manquantes.push(`${table}.${colonne}`);
+        }
+      }
+
+      if (manquantes.length === 0) {
+        return {
+          etat: 'ok',
+          detail: `Les ${nombreDeTables} tables et leurs colonnes sont présentes.`,
+        };
+      }
+
+      const detail =
+        `${manquantes.length} colonne(s) manquent en base : ${manquantes.join(', ')}. ` +
+        "Les tables existent, donc l'application démarre et les lectures passent — seules " +
+        'les écritures touchant ces colonnes échoueront. Lancer `prisma db push` sur cette base.';
+      this.logger.error(detail);
+      return { etat: 'panne', detail };
+    } catch (error) {
+      return {
+        etat: 'panne',
+        detail: `Colonnes invérifiables — ${error instanceof Error ? error.message : String(error)}`,
+      };
+    }
+  }
+
+  /**
+   * Le référentiel de conformité est-il réellement en base ?
+   *
+   * Le semis tourne au démarrage et journalise son échec sans arrêter le
+   * serveur — ce qui est le bon arbitrage, mais laisserait la panne
+   * invisible si personne ne relisait les journaux. On compare donc ce que
+   * le code connaît à ce que la base contient, ce qui a l'avantage de
+   * rester vrai après un redémarrage : un drapeau en mémoire, lui,
+   * repartirait à zéro et effacerait le problème.
+   *
+   * « Dégradé » et non « panne » : tout le reste du produit fonctionne. La
+   * section Conformité est incomplète, ce n'est pas une raison de retirer
+   * le serveur de la rotation.
+   */
+  private async verifierReferentiel(): Promise<CheckResult> {
+    const attendus = COMPLIANCE_REQUIREMENTS_FR.map((r) => r.slug);
+    try {
+      const lignes = await this.prisma.compliance_requirements.findMany({
+        where: { slug: { in: attendus } },
+        select: { slug: true },
+      });
+      const presents = new Set(lignes.map((l) => l.slug));
+      const manquants = attendus.filter((slug) => !presents.has(slug));
+
+      if (manquants.length === 0) {
+        return {
+          etat: 'ok',
+          detail: `Les ${attendus.length} démarches du référentiel sont en base.`,
+        };
+      }
+
+      const detail =
+        `${manquants.length} démarche(s) manquent au référentiel : ${manquants.join(', ')}. ` +
+        'Le semis du démarrage a échoué — la section Conformité affichera une liste ' +
+        'incomplète, ce que personne ne peut deviner en la lisant. Voir les journaux ' +
+        'de démarrage.';
+      this.logger.error(detail);
+      return { etat: 'degrade', detail };
+    } catch (error) {
+      return {
+        etat: 'degrade',
+        detail: `Référentiel invérifiable — ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   }
