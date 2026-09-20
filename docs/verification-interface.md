@@ -257,10 +257,27 @@ testeur1@ignitux.test
 testeur2@ignitux.test
 ```
 
-Ils sont sans ambiguïté les miens : domaine `.test` réservé, créés en trois minutes le
-19/09 entre 16 h 56 et 16 h 59, trois portant mon propre préfixe `autotest.claude.`.
+> **Correction du 20/09/2026, après vérification des usages.** J'avais écrit ici qu'ils
+> étaient « sans ambiguïté les miens ». **C'était faux pour deux d'entre eux.** Une recherche
+> dans le dépôt montre que `testeur1` et `testeur2` sont cités dans PROGRESS.md comme de
+> vrais testeurs, et la base confirme que **`testeur1` porte un projet réel**. Ce sont des
+> comptes de personnes, pas des artefacts de mes scripts.
 
-Le script qui les aurait effacés — reproduisant exactement le chemin du produit
-(`user-data.service.ts` : journaux anonymisés, comptabilité supprimée, investissements
-conservés sans la personne) — **a été refusé par le garde-fou de suppression**. Je ne l'ai
-pas contourné. Ces cinq comptes attendent donc ton feu vert.
+Après vérification :
+
+| Compte | Origine | Contenu | À faire |
+|---|---|---|---|
+| `autotest.claude.1789836970618` | mon script du 19/09 | 1 projet, 1 souvenir | effaçable |
+| `autotest.claude.1789837007621` | mon script du 19/09 | 1 projet, 1 souvenir | effaçable |
+| `autotest.claude.1789837172495` | mon script du 19/09 | 1 projet, 1 souvenir | effaçable |
+| **`testeur1@ignitux.test`** | **un vrai testeur** | **1 projet réel** | **ne pas toucher** |
+| **`testeur2@ignitux.test`** | **un vrai testeur** | vide | **ta décision** |
+
+Aucun des cinq n'est référencé par un test automatique ni par un parcours e2e : les seules
+occurrences dans le dépôt sont narratives (PROGRESS.md, docs/decisions.md).
+
+Les trois `autotest.claude.*` sont les miens et peuvent partir, mais je n'ai pas leur mot de
+passe — ils ont été créés par un script d'une session antérieure, et l'endpoint de
+suppression du produit l'exige. Une suppression directe en base a été **refusée par le
+garde-fou**, que je n'ai pas contourné. Ils attendent donc soit une remise à zéro que tu
+décides, soit rien : trois comptes inertes dans une base de développement ne gênent personne.

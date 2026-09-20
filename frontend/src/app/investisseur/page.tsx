@@ -2,25 +2,19 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Brand } from '@/components/ignitux-mark';
 import { RoleBar } from '@/components/role-bar';
-import { api, ApiError, type InvestorSpace } from '@/lib/api';
+import {
+  api,
+  ApiError,
+  type InvestorMovement,
+  type InvestorSpace,
+  type ParticipationRow,
+} from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { euros, jour, pourcentage } from '@/lib/montants';
 import { useRoles } from '@/lib/roles';
-
-/** Centimes → euros, sans jamais passer par un flottant intermédiaire. */
-function euros(cents: number): string {
-  const signe = cents < 0 ? '-' : '';
-  const absolu = Math.abs(cents);
-  const entiers = String(Math.floor(absolu / 100)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-  return `${signe}${entiers},${String(absolu % 100).padStart(2, '0')} €`;
-}
-
-/** Points de base → pourcentage. 1000 = 10 %. */
-function pourcentage(basisPoints: number): string {
-  return `${(basisPoints / 100).toFixed(2).replace(/\.?0+$/, '').replace('.', ',')} %`;
-}
 
 const STATUTS: Record<string, string> = {
   ouvert: 'Ouvert au financement',
@@ -28,6 +22,14 @@ const STATUTS: Record<string, string> = {
   en_remboursement: 'En remboursement',
   solde: 'Soldé',
   arrete: 'Arrêté',
+};
+
+const MOUVEMENTS: Record<string, string> = {
+  investissement: 'Apport',
+  remboursement_capital: 'Remboursement de capital',
+  dividende: 'Dividende',
+  gain: 'Gain',
+  correction: 'Correction',
 };
 
 /**
@@ -48,9 +50,31 @@ export default function InvestorSpacePage() {
   const { roles, switchTo } = useRoles(token, 'investisseur');
 
   const [space, setSpace] = useState<InvestorSpace | null>(null);
+  const [participations, setParticipations] = useState<ParticipationRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refus, setRefus] = useState<string | null>(null);
+
+  const charger = useCallback(async () => {
+    if (!token) return;
+    setIsLoading(true);
+    try {
+      const espace = await api.getInvestorSpace(token);
+      setSpace(espace);
+      setRefus(null);
+      // Les participations ne se lisent que si un investisseur existe :
+      // sinon la route répond 404, ce qui serait un faux problème.
+      setParticipations(espace.investorId ? await api.listMyParticipations(token) : []);
+      setError(null);
+    } catch (err) {
+      // 403 = le rôle n'est pas pris. Ce n'est pas une panne : c'est une
+      // porte, et le message du serveur dit comment l'ouvrir.
+      if (err instanceof ApiError && err.status === 403) setRefus(err.message);
+      else setError(err instanceof ApiError ? err.message : "Impossible de charger l'espace.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -58,17 +82,8 @@ export default function InvestorSpacePage() {
       router.replace('/login');
       return;
     }
-    api
-      .getInvestorSpace(token)
-      .then(setSpace)
-      .catch((err) => {
-        // 403 = le rôle n'est pas pris. Ce n'est pas une panne : c'est une
-        // porte, et le message du serveur dit comment l'ouvrir.
-        if (err instanceof ApiError && err.status === 403) setRefus(err.message);
-        else setError(err instanceof ApiError ? err.message : "Impossible de charger l'espace.");
-      })
-      .finally(() => setIsLoading(false));
-  }, [isReady, token, router]);
+    void charger();
+  }, [isReady, token, router, charger]);
 
   if (!isReady || !token) return null;
 
@@ -112,9 +127,15 @@ export default function InvestorSpacePage() {
       {error && <p className="error">{error}</p>}
       {isLoading && <p className="loading">Chargement…</p>}
 
-      {space && (
+      {space && !space.investorId && (
+        <SeDeclarer token={token} onFait={charger} onErreur={setError} />
+      )}
+
+      {space && space.investorId && (
         <>
-          <div className="card">
+          <MonIdentifiant investorId={space.investorId} nom={space.displayName} />
+
+          <div className="card" style={{ marginTop: '1.5rem' }}>
             <h2 style={{ marginTop: 0 }}>Portefeuille global</h2>
             <div
               style={{
@@ -148,48 +169,275 @@ export default function InvestorSpacePage() {
             ) : (
               <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                 {space.lines.map((ligne) => (
-                  <li
-                    key={ligne.financedProjectId}
-                    className="project-item"
-                    style={{ cursor: 'default', marginBottom: '0.75rem' }}
-                  >
-                    <div className="top-bar" style={{ marginBottom: '0.5rem' }}>
-                      <strong>{ligne.projectTitle}</strong>
-                      <span className="muted">{STATUTS[ligne.status] ?? ligne.status}</span>
-                    </div>
-                    <dl
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-                        gap: '0.75rem',
-                        margin: 0,
-                      }}
-                    >
-                      <Poste libelle="Investi" valeur={euros(ligne.investedCents)} />
-                      <Poste libelle="Récupéré" valeur={euros(ligne.repaidCents)} />
-                      <Poste libelle="Dividendes" valeur={euros(ligne.dividendsCents)} />
-                      <Poste
-                        libelle="Participation"
-                        valeur={
-                          ligne.shareBasisPoints === null
-                            ? '—'
-                            : pourcentage(ligne.shareBasisPoints)
-                        }
-                      />
-                    </dl>
-                    {ligne.shareNotice && (
-                      <p className="muted" style={{ margin: '0.5rem 0 0' }}>
-                        {ligne.shareNotice}
-                      </p>
-                    )}
-                  </li>
+                  <LigneProjet key={ligne.financedProjectId} ligne={ligne} token={token} />
                 ))}
               </ul>
             )}
           </div>
+
+          <Participations participations={participations} />
         </>
       )}
     </main>
+  );
+}
+
+// ── Se déclarer investisseur ────────────────────────────────────────────────
+
+/**
+ * Personne ne pouvait devenir investisseur depuis l'interface : la route
+ * existait, aucun écran ne l'appelait. Un espace vide qui ne dit pas comment
+ * cesser de l'être est une impasse.
+ */
+function SeDeclarer({
+  token,
+  onFait,
+  onErreur,
+}: {
+  token: string;
+  onFait: () => Promise<void>;
+  onErreur: (m: string) => void;
+}) {
+  const [nom, setNom] = useState('');
+  const [nature, setNature] = useState('personne');
+  const [enCours, setEnCours] = useState(false);
+
+  async function soumettre(e: FormEvent) {
+    e.preventDefault();
+    if (nom.trim() === '') return;
+    setEnCours(true);
+    try {
+      await api.registerAsInvestor(token, nom.trim(), nature);
+      await onFait();
+    } catch (err) {
+      onErreur(err instanceof ApiError ? err.message : "L'enregistrement a échoué.");
+    } finally {
+      setEnCours(false);
+    }
+  }
+
+  return (
+    <div className="card">
+      <h2 style={{ marginTop: 0 }}>Te déclarer investisseur</h2>
+      <p className="muted" style={{ marginTop: 0 }}>
+        Aucun investissement n&apos;est encore enregistré à ton nom. Te déclarer crée ton
+        identifiant d&apos;investisseur : c&apos;est lui que tu communiqueras au porteur d&apos;un
+        projet pour qu&apos;il puisse enregistrer ton apport. Cela n&apos;engage rien et
+        n&apos;investit rien.
+      </p>
+      <form onSubmit={soumettre} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <label className="field" style={{ marginBottom: 0 }} htmlFor="investisseur-nom">
+          <span>Nom sous lequel tu investis</span>
+          <input
+            id="investisseur-nom"
+            value={nom}
+            onChange={(e) => setNom(e.target.value)}
+            placeholder="ton nom, ou celui de ta société"
+            required
+          />
+        </label>
+        <label className="field" style={{ marginBottom: 0 }} htmlFor="investisseur-nature">
+          <span>Nature</span>
+          <select
+            id="investisseur-nature"
+            value={nature}
+            onChange={(e) => setNature(e.target.value)}
+          >
+            <option value="personne">Personne</option>
+            <option value="societe">Société</option>
+          </select>
+        </label>
+        <button className="primary" type="submit" disabled={enCours} style={{ alignSelf: 'end' }}>
+          {enCours ? 'Enregistrement…' : 'Me déclarer investisseur'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+// ── Mon identifiant, à communiquer ──────────────────────────────────────────
+
+function MonIdentifiant({ investorId, nom }: { investorId: string; nom: string | null }) {
+  const [copie, setCopie] = useState(false);
+
+  return (
+    <div className="card">
+      <h2 style={{ marginTop: 0 }}>Mon identifiant</h2>
+      <p className="muted" style={{ marginTop: 0 }}>
+        {nom ? `Tu investis sous le nom « ${nom} ». ` : ''}
+        Communique cet identifiant au porteur d&apos;un projet pour qu&apos;il enregistre ton
+        apport. Ignitux ne propose aucune recherche d&apos;investisseur par email :
+        elle permettrait à quiconque de savoir qui investit.
+      </p>
+      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <code style={{ fontSize: '0.95rem', wordBreak: 'break-all' }}>{investorId}</code>
+        <button
+          className="secondary"
+          type="button"
+          onClick={() => {
+            // Le presse-papiers peut être refusé (contexte non sécurisé,
+            // permission) : on ne prétend pas avoir copié si ça a échoué.
+            navigator.clipboard
+              ?.writeText(investorId)
+              .then(() => setCopie(true))
+              .catch(() => setCopie(false));
+          }}
+        >
+          {copie ? 'Copié' : 'Copier'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Une ligne de projet, avec son historique dépliable ──────────────────────
+
+function LigneProjet({
+  ligne,
+  token,
+}: {
+  ligne: InvestorSpace['lines'][number];
+  token: string;
+}) {
+  const [ouvert, setOuvert] = useState(false);
+  const [mouvements, setMouvements] = useState<InvestorMovement[] | null>(null);
+  const [erreur, setErreur] = useState<string | null>(null);
+
+  async function basculer() {
+    const prochain = !ouvert;
+    setOuvert(prochain);
+    // On ne charge qu'à la première ouverture : replier puis déplier ne doit
+    // pas relancer une requête pour des faits qui ne bougent pas.
+    if (!prochain || mouvements !== null) return;
+    try {
+      const h = await api.getMyProjectHistory(token, ligne.financedProjectId);
+      setMouvements(h.movements);
+    } catch (err) {
+      setErreur(err instanceof ApiError ? err.message : "L'historique n'a pas pu être lu.");
+    }
+  }
+
+  return (
+    <li className="project-item" style={{ cursor: 'default', marginBottom: '0.75rem' }}>
+      <div className="top-bar" style={{ marginBottom: '0.5rem' }}>
+        <strong>{ligne.projectTitle}</strong>
+        <span className="muted">{STATUTS[ligne.status] ?? ligne.status}</span>
+      </div>
+      <dl
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gap: '0.75rem',
+          margin: 0,
+        }}
+      >
+        <Poste libelle="Investi" valeur={euros(ligne.investedCents)} />
+        <Poste libelle="Récupéré" valeur={euros(ligne.repaidCents)} />
+        <Poste libelle="Dividendes" valeur={euros(ligne.dividendsCents)} />
+        <Poste
+          libelle="Participation"
+          valeur={ligne.shareBasisPoints === null ? '—' : pourcentage(ligne.shareBasisPoints)}
+        />
+      </dl>
+      {ligne.shareNotice && (
+        <p className="muted" style={{ margin: '0.5rem 0 0' }}>
+          {ligne.shareNotice}
+        </p>
+      )}
+
+      <button
+        className="secondary"
+        type="button"
+        onClick={() => void basculer()}
+        aria-expanded={ouvert}
+        style={{ marginTop: '0.75rem' }}
+      >
+        {ouvert ? "Masquer l'historique" : "Voir l'historique"}
+      </button>
+
+      {ouvert && (
+        <div style={{ marginTop: '0.75rem' }}>
+          {erreur && <p className="error">{erreur}</p>}
+          {!erreur && mouvements === null && <p className="loading">Chargement…</p>}
+          {mouvements !== null && mouvements.length === 0 && (
+            <p className="muted" style={{ margin: 0 }}>
+              Aucun mouvement sur ce projet.
+            </p>
+          )}
+          {mouvements !== null && mouvements.length > 0 && (
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+              {[...mouvements].reverse().map((m) => (
+                <li
+                  key={m.id}
+                  className="top-bar"
+                  style={{ marginBottom: '0.3rem', cursor: 'default', alignItems: 'baseline' }}
+                >
+                  <span>
+                    <span className="muted">{jour(m.occurred_on)}</span>{' '}
+                    {MOUVEMENTS[m.kind] ?? m.kind}
+                    {m.reference && <span className="muted"> · {m.reference}</span>}
+                    {m.corrects_movement_id && (
+                      <span className="muted"> · rectifie une écriture antérieure</span>
+                    )}
+                  </span>
+                  <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {euros(m.amount_cents)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </li>
+  );
+}
+
+// ── Mes participations ──────────────────────────────────────────────────────
+
+function Participations({ participations }: { participations: ParticipationRow[] }) {
+  return (
+    <div className="card" style={{ marginTop: '1.5rem' }}>
+      <h2 style={{ marginTop: 0 }}>Mes participations</h2>
+      <p className="muted" style={{ marginTop: 0 }}>
+        Chaque apport, à sa date, avec la part accordée <strong>ce jour-là</strong>. Ce n&apos;est
+        pas la part d&apos;aujourd&apos;hui — celle-ci figure plus haut, projet par projet, et
+        une dilution ultérieure n&apos;aurait pas modifié la ligne ci-dessous.
+      </p>
+      {participations.length === 0 ? (
+        <p className="muted" style={{ marginBottom: 0 }}>
+          Aucune participation enregistrée.
+        </p>
+      ) : (
+        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+          {participations.map((p) => (
+            <li
+              key={p.id}
+              className="project-item"
+              style={{ cursor: 'default', marginBottom: '0.5rem' }}
+            >
+              <div className="top-bar" style={{ marginBottom: '0.25rem' }}>
+                <strong>
+                  {p.financed_project?.project?.title ??
+                    p.financed_project?.project_title ??
+                    'Projet'}
+                </strong>
+                <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {euros(p.invested_cents)}
+                </span>
+              </div>
+              <p className="muted" style={{ margin: 0 }}>
+                {jour(p.occurred_on)} ·{' '}
+                {p.share_basis_points_granted === null
+                  ? 'aucune part accordée (prêt ou avance)'
+                  : `${pourcentage(p.share_basis_points_granted)} accordés`}{' '}
+                · {p.status}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

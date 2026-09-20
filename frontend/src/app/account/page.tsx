@@ -57,6 +57,17 @@ export default function AccountPage() {
       <p className="muted">{user?.email}</p>
 
       <div className="card">
+        <h2 style={{ marginTop: 0 }}>Consommation IA</h2>
+        <p className="muted" style={{ marginTop: 0 }}>
+          Ce que les générateurs ont consommé ce mois-ci, ce qu&apos;il te reste, et le détail
+          appel par appel.
+        </p>
+        <Link className="secondary" href="/consommation-ia" style={{ display: 'inline-block' }}>
+          Voir ma consommation
+        </Link>
+      </div>
+
+      <div className="card">
         <h2 style={{ marginTop: 0 }}>Mes rôles</h2>
         <p className="muted" style={{ marginTop: 0 }}>
           Entrepreneur, investisseur, ou les deux. Un rôle décide de ce qui t&apos;est

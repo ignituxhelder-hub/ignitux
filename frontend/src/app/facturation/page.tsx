@@ -276,6 +276,10 @@ export default function BillingPage() {
 
       <div className="card" style={{ marginTop: '1.5rem' }}>
         <h2 style={{ marginTop: 0 }}>Documents</h2>
+        <p className="muted" style={{ marginTop: 0 }}>
+          Ouvre un document pour le voir tel que ton client le recevra, et l&apos;imprimer ou
+          l&apos;enregistrer en PDF.
+        </p>
         {isLoading && <p className="loading">Chargement…</p>}
         {!isLoading && documents.length === 0 && (
           <p className="muted">Aucun document pour l&apos;instant.</p>
@@ -288,9 +292,11 @@ export default function BillingPage() {
               style={{ cursor: 'default', marginBottom: '0.5rem' }}
             >
               <div className="top-bar" style={{ marginBottom: '0.25rem' }}>
-                <strong>
-                  {document.number} — {TYPE_LABELS[document.type]}
-                </strong>
+                <Link href={`/facturation/${document.id}`}>
+                  <strong>
+                    {document.number} — {TYPE_LABELS[document.type]}
+                  </strong>
+                </Link>
                 <span className="muted">{STATUS_LABELS[document.status]}</span>
               </div>
               <p style={{ margin: 0 }}>{document.client_name}</p>

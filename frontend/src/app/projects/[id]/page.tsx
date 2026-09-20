@@ -302,6 +302,9 @@ export default function ProjectDetailPage() {
         <Link href="/projects" className="muted">
           ← Retour aux projets
         </Link>
+        {/* L'argent a son propre écran : la fiche projet faisait déjà sept
+            mille pixels, et le financement s'y perdait tout en bas. */}
+        <Link href={`/projects/${id}/finances`}>Financement et investisseurs</Link>
       </div>
 
       {isLoading && <p className="loading">Chargement…</p>}

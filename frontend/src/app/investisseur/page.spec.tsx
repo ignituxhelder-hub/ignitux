@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
 import { createRouterMock, mockApiRoutes, signInAs } from '@/test-utils/mocks';
@@ -53,6 +53,7 @@ function routes(overrides: Record<string, { status: number; body: unknown }> = {
       status: 200,
       body: { roles: ['investisseur'], activeRole: 'investisseur', suggestions: [], catalogue: [] },
     },
+    'GET /investisseurs/moi/participations': { status: 200, body: [] },
     ...overrides,
   };
 }
@@ -154,7 +155,7 @@ describe('InvestorSpacePage', () => {
     expect(router.replace).not.toHaveBeenCalledWith('/login');
   });
 
-  it('rend un espace vide lisible plutôt qu’une page blanche', async () => {
+  it("propose de se déclarer investisseur quand personne ne l'est encore", async () => {
     mockApiRoutes(
       routes({
         'GET /espaces/investisseur': {
@@ -183,6 +184,79 @@ describe('InvestorSpacePage', () => {
       </AuthProvider>,
     );
 
-    expect(await screen.findByText(/Aucun investissement n'est enregistré/)).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Te déclarer investisseur' }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/Nom sous lequel tu investis/)).toBeInTheDocument();
+  });
+
+  // L'identifiant est le seul moyen pour un porteur d'enregistrer un apport :
+  // il n'existe aucune recherche par email, qui laisserait savoir qui investit.
+  it("montre l'identifiant à communiquer au porteur d'un projet", async () => {
+    mockApiRoutes(routes());
+
+    render(
+      <AuthProvider>
+        <InvestorSpacePage />
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByText('i1')).toBeInTheDocument();
+    expect(screen.getByText(/aucune recherche d'investisseur par email/i)).toBeInTheDocument();
+  });
+
+  it("déplie l'historique d'un projet à la demande, une seule fois", async () => {
+    mockApiRoutes(
+      routes({
+        'GET /investisseurs/moi/projets/f1': {
+          status: 200,
+          body: {
+            financedProjectId: 'f1',
+            movements: [
+              {
+                id: 'm1',
+                financed_project_id: 'f1',
+                investor_id: 'i1',
+                participation_id: null,
+                kind: 'dividende',
+                amount_cents: 35000,
+                occurred_on: '2026-09-01',
+                reference: 'VIR-09',
+                note: null,
+                corrects_movement_id: null,
+                distribution_id: null,
+              },
+            ],
+            totals: {
+              investedCents: 0,
+              repaidCents: 0,
+              dividendsCents: 35000,
+              gainsCents: 0,
+              netCents: 35000,
+            },
+          },
+        },
+      }),
+    );
+
+    render(
+      <AuthProvider>
+        <InvestorSpacePage />
+      </AuthProvider>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: "Voir l'historique" }));
+
+    expect(await screen.findByText(/VIR-09/)).toBeInTheDocument();
+
+    // Replier puis déplier ne doit pas relancer une requête pour des faits
+    // qui ne bougent pas.
+    fireEvent.click(screen.getByRole('button', { name: "Masquer l'historique" }));
+    fireEvent.click(screen.getByRole('button', { name: "Voir l'historique" }));
+
+    const appels = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.filter(
+      (call) => String(call[0]).includes('/investisseurs/moi/projets/f1'),
+    );
+    expect(appels).toHaveLength(1);
   });
 });

@@ -851,6 +851,124 @@ export interface EntrepreneurSpace {
   notice: string;
 }
 
+// ── FINANCEMENT D'UN PROJET, CÔTÉ PORTEUR ───────────────────────────────────
+
+export interface FinancedProject {
+  id: string;
+  project_id: string | null;
+  project_title: string;
+  target_cents: number | null;
+  /** 'ouvert' | 'finance' | 'en_remboursement' | 'solde' | 'arrete' */
+  status: string;
+  opened_on: string;
+  note: string | null;
+}
+
+export interface InvestorRow {
+  id: string;
+  user_id: string | null;
+  /** 'personne' | 'societe' | 'ignitux' */
+  kind: string;
+  display_name: string;
+  note: string | null;
+}
+
+export interface ParticipationRow {
+  id: string;
+  investor_id: string;
+  financed_project_id: string;
+  invested_cents: number;
+  /** La part accordée le jour de l'apport. null = l'apport ne donnait pas de part. */
+  share_basis_points_granted: number | null;
+  equity_holder_id: string | null;
+  /** 'active' | 'cedee' | 'soldee' */
+  status: string;
+  occurred_on: string;
+  note: string | null;
+  investor?: InvestorRow;
+  financed_project?: FinancedProject & { project?: { title: string } | null };
+}
+
+export interface InvestorMovement {
+  id: string;
+  financed_project_id: string;
+  investor_id: string;
+  participation_id: string | null;
+  /** 'investissement' | 'remboursement_capital' | 'dividende' | 'gain' | 'correction' */
+  kind: string;
+  /** Signé : négatif = l'investisseur verse. */
+  amount_cents: number;
+  occurred_on: string;
+  reference: string | null;
+  note: string | null;
+  corrects_movement_id: string | null;
+  distribution_id: string | null;
+}
+
+export interface ProjectFinancingRegister {
+  /** null = le projet n'a jamais été ouvert au financement. */
+  financedProject: FinancedProject | null;
+  raisedCents: number;
+  participations: ParticipationRow[];
+  movements: InvestorMovement[];
+  totals: {
+    investedCents: number;
+    repaidCents: number;
+    dividendsCents: number;
+    gainsCents: number;
+    netCents: number;
+  };
+}
+
+// ── CONSOMMATION IA ─────────────────────────────────────────────────────────
+
+export interface AiUsageMonth {
+  periode: { depuis: string; jusqua: string };
+  appels: number;
+  tokens: { entree: number; sortie: number; dont_reflexion: number };
+  cout: {
+    euros: number | null;
+    grille_du: string;
+    estimation: boolean;
+    modeles_non_tarifes: string[];
+  };
+  par_generateur: Array<{
+    generateur: string;
+    appels: number;
+    tokens_entree: number;
+    tokens_sortie: number;
+    dont_reflexion: number;
+    cout_euros: number | null;
+  }>;
+  quota: {
+    autorise: boolean;
+    plafond_atteint: boolean;
+    message: string | null;
+    bientot_atteint: boolean;
+    /** null = plafond non applicable, pas « il reste de la marge ». */
+    restant: { analyses: number | null; euros: number | null };
+    plafonds: { analyses_par_mois: number | null; euros_par_mois: number | null };
+  };
+}
+
+export interface AiUsageHistory {
+  limite: number;
+  grille_du: string;
+  appels: Array<{
+    id: string;
+    quand: string | null;
+    generateur: string;
+    modele: string;
+    projet_id: string | null;
+    tokens_entree: number;
+    tokens_sortie: number;
+    dont_reflexion: number | null;
+    duree_ms: number;
+    /** null = ce modèle échappe à la grille ; ce n'est pas zéro. */
+    cout_euros: number | null;
+  }>;
+}
+
 export const api = {
   getBuybackProgress: (token: string, projectId: string) =>
     request<BuybackProgress>(`/projects/${projectId}/financing/buyback`, {
@@ -1566,6 +1684,107 @@ export const api = {
 
   getInvestorSpace: (token: string) =>
     request<InvestorSpace>('/espaces/investisseur', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  // ── FINANCEMENT D'UN PROJET, CÔTÉ PORTEUR ─────────────────────────────────
+  getProjectFinancing: (token: string, projectId: string) =>
+    request<ProjectFinancingRegister>(`/projects/${projectId}/financement`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  openProjectFinancing: (
+    token: string,
+    input: { projectId: string; openedOn: string; targetCents?: number; note?: string },
+  ) =>
+    request<FinancedProject>('/projets-finances', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(input),
+    }),
+
+  recordParticipation: (
+    token: string,
+    financedProjectId: string,
+    input: {
+      investorId: string;
+      investedCents: number;
+      occurredOn: string;
+      shareBasisPointsGranted?: number;
+      equityHolderId?: string;
+      note?: string;
+    },
+  ) =>
+    request<ParticipationRow>(`/projets-finances/${financedProjectId}/participations`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(input),
+    }),
+
+  recordRepayment: (
+    token: string,
+    financedProjectId: string,
+    input: { amountCents: number; occurredOn: string; reference?: string; note?: string },
+  ) =>
+    request<unknown>(`/projets-finances/${financedProjectId}/remboursements`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(input),
+    }),
+
+  recordInvestorDividend: (
+    token: string,
+    financedProjectId: string,
+    input: {
+      amountCents: number;
+      occurredOn: string;
+      applyPerpetualShare: boolean;
+      reference?: string;
+      note?: string;
+    },
+  ) =>
+    request<unknown>(`/projets-finances/${financedProjectId}/dividendes`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(input),
+    }),
+
+  // ── CÔTÉ INVESTISSEUR ─────────────────────────────────────────────────────
+  registerAsInvestor: (token: string, displayName: string, kind = 'personne') =>
+    request<InvestorRow>('/investisseurs', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ displayName, kind }),
+    }),
+
+  listMyParticipations: (token: string) =>
+    request<ParticipationRow[]>('/investisseurs/moi/participations', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getMyProjectHistory: (token: string, financedProjectId: string) =>
+    request<{
+      financedProjectId: string;
+      movements: InvestorMovement[];
+      totals: ProjectFinancingRegister['totals'];
+    }>(`/investisseurs/moi/projets/${financedProjectId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  // ── CONSOMMATION IA ───────────────────────────────────────────────────────
+  getAiUsageMonth: (token: string) =>
+    request<AiUsageMonth>('/igini/usage/mois-en-cours', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getAiUsageHistory: (token: string) =>
+    request<AiUsageHistory>('/igini/usage/historique', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  // ── UN DOCUMENT DE FACTURATION, POUR L'IMPRIMER ───────────────────────────
+  getBillingDocument: (token: string, id: string) =>
+    request<BillingDocument>(`/billing/documents/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
 };

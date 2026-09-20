@@ -1,7 +1,12 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { getEnv } from '../../config/env.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { costMicroEur, microEurToEur, type TokenCounts } from './ai-pricing.js';
+import {
+  costMicroEur,
+  microEurToEur,
+  PRICE_GRID_DATE,
+  type TokenCounts,
+} from './ai-pricing.js';
 import { checkQuota, readQuotaLimits, type QuotaLimits, type QuotaVerdict } from './ai-quota.js';
 
 /**
@@ -157,6 +162,47 @@ export class AiUsageService {
         error as Error,
       );
     }
+  }
+
+  /**
+   * Les appels de la personne, du plus récent au plus ancien.
+   *
+   * Chaque ligne porte son coût dérivé, et `coutMicroEur: null` quand le
+   * modèle échappe à la grille tarifaire. Rendre 0 dans ce cas ferait croire
+   * que l'appel était gratuit — il ne l'était pas, on ignore seulement
+   * combien il a coûté, et c'est une information différente.
+   */
+  async history(userId: string, limit: number) {
+    const events = await this.prisma.ai_usage_events.findMany({
+      where: { user_id: userId },
+      orderBy: { created_at: 'desc' },
+      take: limit,
+    });
+
+    return {
+      limite: limit,
+      grille_du: PRICE_GRID_DATE,
+      appels: events.map((event) => {
+        const cout = costMicroEur(event.model, {
+          input_tokens: event.input_tokens,
+          output_tokens: event.output_tokens,
+          cache_creation_input_tokens: event.cache_creation_input_tokens ?? 0,
+          cache_read_input_tokens: event.cache_read_input_tokens ?? 0,
+        });
+        return {
+          id: event.id,
+          quand: event.created_at?.toISOString() ?? null,
+          generateur: event.generator,
+          modele: event.model,
+          projet_id: event.project_id,
+          tokens_entree: event.input_tokens,
+          tokens_sortie: event.output_tokens,
+          dont_reflexion: event.thinking_tokens,
+          duree_ms: event.duration_ms,
+          cout_euros: cout === null ? null : microEurToEur(cout),
+        };
+      }),
+    };
   }
 
   /** Consommation d'une personne sur le mois civil contenant `reference` (UTC). */

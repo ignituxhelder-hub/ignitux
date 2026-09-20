@@ -18,12 +18,27 @@ import { AiUsageService, type UsageSummary } from './ai-usage.service.js';
  * chiffre d'affaires en creux. Tant que ce rôle n'existe pas, cette vue se
  * consulte en base.
  */
+/** Assez pour lire un mois de travail, trop peu pour noyer un écran. */
+const HISTORY_LIMIT = 200;
+
 @ApiTags('igini')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('igini/usage')
 export class AiUsageController {
   constructor(private readonly aiUsage: AiUsageService) {}
+
+  /**
+   * Les appels de la personne, du plus récent au plus ancien.
+   *
+   * Un total sans le détail n'est pas vérifiable : savoir qu'on a dépensé
+   * 3,40 € ne dit pas sur quoi. La liste est bornée — on ne rend pas dix
+   * mille lignes à un écran qui en montre cinquante.
+   */
+  @Get('historique')
+  history(@CurrentUser() user: AuthenticatedUser) {
+    return this.aiUsage.history(user.id, HISTORY_LIMIT);
+  }
 
   @Get('mois-en-cours')
   async currentMonth(@CurrentUser() user: AuthenticatedUser) {

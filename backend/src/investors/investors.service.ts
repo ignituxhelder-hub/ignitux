@@ -211,6 +211,39 @@ export class InvestorsService {
   }
 
   /** Le registre d'un projet financé — réservé au porteur. */
+  /**
+   * Le registre financier d'un projet, trouvé par l'identifiant du PROJET.
+   *
+   * Sans cela, l'écran de financement d'un projet ne peut pas s'ouvrir : il
+   * connaît le projet, pas le registre. Rend `financedProject: null` quand le
+   * projet n'a jamais été ouvert au financement — ce n'est pas une erreur,
+   * c'est l'état normal de la plupart des projets, et un 404 obligerait
+   * l'écran à traiter une absence banale comme une panne.
+   */
+  async projectRegisterByProject(ownerId: string, projectId: string) {
+    const projet = await this.prisma.projects.findFirst({
+      where: { id: projectId, owner_id: ownerId },
+      select: { id: true },
+    });
+    if (!projet) throw new NotFoundException('Projet introuvable.');
+
+    const financed = await this.prisma.financed_projects.findUnique({
+      where: { project_id: projectId },
+      select: { id: true },
+    });
+    if (!financed) {
+      return {
+        financedProject: null,
+        raisedCents: 0,
+        participations: [],
+        movements: [],
+        totals: portfolioTotals([]),
+      };
+    }
+
+    return this.projectRegister(ownerId, financed.id);
+  }
+
   async projectRegister(ownerId: string, financedProjectId: string) {
     const financed = await this.requireOwnedFinancedProject(ownerId, financedProjectId);
 

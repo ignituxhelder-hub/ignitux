@@ -95,6 +95,20 @@ export class FinancedProjectsController {
     });
   }
 
+  /**
+   * Le registre, trouvé depuis le projet plutôt que depuis le registre.
+   *
+   * C'est la porte d'entrée de l'écran de financement : on arrive d'un projet,
+   * pas d'un identifiant de registre qu'on n'a aucun moyen de connaître.
+   */
+  @Get('projects/:projectId/financement')
+  byProject(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+  ) {
+    return this.investors.projectRegisterByProject(user.id, projectId);
+  }
+
   /** Le registre financier du projet : participations, mouvements, totaux. */
   @Get('projets-finances/:id')
   register(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
