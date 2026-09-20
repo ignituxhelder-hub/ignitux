@@ -123,6 +123,95 @@ describe('Coûts IA (e2e)', () => {
     ]);
   });
 
+  describe('le plafond mensuel', () => {
+    it('annonce ce qu’il reste, avant le mur', async () => {
+      // Un plafond qui ne se découvre qu'en s'y cognant est un mauvais
+      // plafond : la personne a préparé son travail, elle clique, et le
+      // produit lui apprend à ce moment-là que c'était fini.
+      const reponse = await api(app)
+        .get('/igini/usage/mois-en-cours')
+        .set(...auth(compte))
+        .expect(200);
+
+      expect(reponse.body.quota.autorise).toBe(true);
+      expect(reponse.body.quota.plafonds.analyses_par_mois).toBe(5);
+      expect(reponse.body.quota.plafonds.euros_par_mois).toBe(2);
+      // Un appel a deja ete enregistre par le test precedent : il en
+      // reste quatre, et le compteur le sait.
+      expect(reponse.body.quota.restant.analyses).toBe(4);
+      expect(reponse.body.quota.bientot_atteint).toBe(false);
+    });
+
+    it('prévient au dernier appel restant', async () => {
+      // Trois appels de plus, soit quatre en tout : il en reste un.
+      // C'est le moment d'avertir — assez tôt pour s'organiser, assez
+      // tard pour que ce ne soit pas un décor qu'on n'aperçoit plus.
+      for (let i = 0; i < 3; i += 1) {
+        await usage.record({
+          context: { userId: compte.userId, projectId, generator: 'analyser' },
+          model: 'claude-opus-5',
+          usage: { input_tokens: 100, output_tokens: 100 },
+          durationMs: 1000,
+        });
+      }
+
+      const reponse = await api(app)
+        .get('/igini/usage/mois-en-cours')
+        .set(...auth(compte))
+        .expect(200);
+
+      expect(reponse.body.quota.restant.analyses).toBe(1);
+      expect(reponse.body.quota.bientot_atteint).toBe(true);
+      expect(reponse.body.quota.autorise).toBe(true);
+    });
+
+    it('refuse le sixième appel, en 402 et sans ambiguïté', async () => {
+      await usage.record({
+        context: { userId: compte.userId, projectId, generator: 'transmettre' },
+        model: 'claude-opus-5',
+        usage: { input_tokens: 100, output_tokens: 100 },
+        durationMs: 1000,
+      });
+
+      const verdict = await usage.quotaFor(compte.userId);
+      expect(verdict.allowed).toBe(false);
+      expect(verdict.breach).toBe('appels');
+      expect(verdict.reason).toContain('5 analyses');
+
+      // 402 Payment Required : les autres codes du produit sont pris et
+      // voudraient dire autre chose. 503 dirait « éteint » alors que ça
+      // marche, 422 « la Constitution refuse » alors qu'elle n'y est pour
+      // rien, 429 est celui du limiteur de débit, et 401 déconnecterait.
+      await expect(usage.assertWithinQuota(compte.userId)).rejects.toMatchObject({
+        status: 402,
+      });
+    });
+
+    it('le dit aussi dans la lecture, pas seulement en refusant', async () => {
+      const reponse = await api(app)
+        .get('/igini/usage/mois-en-cours')
+        .set(...auth(compte))
+        .expect(200);
+
+      expect(reponse.body.quota.autorise).toBe(false);
+      expect(reponse.body.quota.plafond_atteint).toBe('appels');
+      expect(reponse.body.quota.restant.analyses).toBe(0);
+      expect(String(reponse.body.quota.message)).toContain('mois prochain');
+    });
+
+    it('ne pénalise personne d’autre', async () => {
+      // Le plafond est mensuel ET personnel. Un compte qui n'a rien
+      // consommé ne doit pas se retrouver bloqué parce qu'un autre l'a été.
+      const voisin = await createAccount(app);
+
+      const verdict = await usage.quotaFor(voisin.userId);
+      expect(verdict.allowed).toBe(true);
+      expect(verdict.remaining.calls).toBe(5);
+
+      await deleteAccount(app, voisin);
+    });
+  });
+
   it("ne montre jamais la dépense de quelqu'un d'autre", async () => {
     // Le test qui protège contre la fuite la plus banale : un `where`
     // oublié sur `user_id`. Sans lui, chaque personne verrait la

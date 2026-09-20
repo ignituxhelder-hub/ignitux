@@ -407,6 +407,7 @@ export const Dividend_distributionsScalarFieldEnum = {
   amount_cents: 'amount_cents',
   occurred_at: 'occurred_at',
   note: 'note',
+  investor_movement_id: 'investor_movement_id',
   created_at: 'created_at'
 } as const
 

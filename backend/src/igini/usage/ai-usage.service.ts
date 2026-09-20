@@ -1,6 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { getEnv } from '../../config/env.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { costMicroEur, microEurToEur, type TokenCounts } from './ai-pricing.js';
+import { checkQuota, readQuotaLimits, type QuotaLimits, type QuotaVerdict } from './ai-quota.js';
 
 /**
  * Les cinq générateurs, nommés comme la méthode IGINI les nomme.
@@ -167,6 +169,42 @@ export class AiUsageService {
     });
 
     return summarise(events, depuis, jusqua);
+  }
+
+  /** Les plafonds en vigueur, relus à chaque appel plutôt que mémorisés. */
+  limits(): QuotaLimits {
+    // Même raison que pour l'interrupteur des générateurs : une valeur figée
+    // au démarrage survivrait à un changement de configuration, et c'est le
+    // genre d'écart qui fait dépenser du budget qu'on croyait borné.
+    return readQuotaLimits(getEnv());
+  }
+
+  /** Où en est cette personne par rapport à ses plafonds, ce mois-ci. */
+  async quotaFor(userId: string, reference: Date = new Date()): Promise<QuotaVerdict> {
+    const resume = await this.monthlySummary(userId, reference);
+    return checkQuota({ calls: resume.appels, costMicroEur: resume.coutMicroEur }, this.limits());
+  }
+
+  /**
+   * Refuse un appel de plus quand le plafond est atteint.
+   *
+   * **402 Payment Required**, et le choix mérite d'être justifié. Les autres
+   * codes du produit sont déjà pris et voudraient dire autre chose : 503 dit
+   * « la fonctionnalité est éteinte » alors qu'elle marche, 422 dit « la
+   * Constitution refuse » alors qu'elle n'a rien à voir, 429 est celui du
+   * limiteur de débit — le confondre avec un quota mensuel rendrait les deux
+   * illisibles côté interface —, et 401 déclencherait une déconnexion.
+   *
+   * 402 dit exactement ce qui se passe : ce qui était inclus est consommé.
+   */
+  async assertWithinQuota(userId: string): Promise<void> {
+    const verdict = await this.quotaFor(userId);
+    if (verdict.allowed) return;
+
+    this.logger.log(
+      `Plafond ${verdict.breach} atteint pour l'utilisateur ${userId} : appel refusé avant tout appel réseau.`,
+    );
+    throw new HttpException(verdict.reason ?? 'Plafond atteint.', HttpStatus.PAYMENT_REQUIRED);
   }
 
   /** Consommation de tout le monde sur le mois — la vue de l'exploitant. */

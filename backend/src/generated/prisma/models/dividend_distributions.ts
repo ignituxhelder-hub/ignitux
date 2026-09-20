@@ -43,6 +43,7 @@ export type Dividend_distributionsMinAggregateOutputType = {
   amount_cents: number | null
   occurred_at: Date | null
   note: string | null
+  investor_movement_id: string | null
   created_at: Date | null
 }
 
@@ -53,6 +54,7 @@ export type Dividend_distributionsMaxAggregateOutputType = {
   amount_cents: number | null
   occurred_at: Date | null
   note: string | null
+  investor_movement_id: string | null
   created_at: Date | null
 }
 
@@ -63,6 +65,7 @@ export type Dividend_distributionsCountAggregateOutputType = {
   amount_cents: number
   occurred_at: number
   note: number
+  investor_movement_id: number
   created_at: number
   _all: number
 }
@@ -83,6 +86,7 @@ export type Dividend_distributionsMinAggregateInputType = {
   amount_cents?: true
   occurred_at?: true
   note?: true
+  investor_movement_id?: true
   created_at?: true
 }
 
@@ -93,6 +97,7 @@ export type Dividend_distributionsMaxAggregateInputType = {
   amount_cents?: true
   occurred_at?: true
   note?: true
+  investor_movement_id?: true
   created_at?: true
 }
 
@@ -103,6 +108,7 @@ export type Dividend_distributionsCountAggregateInputType = {
   amount_cents?: true
   occurred_at?: true
   note?: true
+  investor_movement_id?: true
   created_at?: true
   _all?: true
 }
@@ -200,6 +206,7 @@ export type Dividend_distributionsGroupByOutputType = {
   amount_cents: number
   occurred_at: Date
   note: string | null
+  investor_movement_id: string | null
   created_at: Date | null
   _count: Dividend_distributionsCountAggregateOutputType | null
   _avg: Dividend_distributionsAvgAggregateOutputType | null
@@ -233,6 +240,7 @@ export type dividend_distributionsWhereInput = {
   amount_cents?: Prisma.IntFilter<"dividend_distributions"> | number
   occurred_at?: Prisma.DateTimeFilter<"dividend_distributions"> | Date | string
   note?: Prisma.StringNullableFilter<"dividend_distributions"> | string | null
+  investor_movement_id?: Prisma.UuidNullableFilter<"dividend_distributions"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"dividend_distributions"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
   holder?: Prisma.XOR<Prisma.Equity_holdersScalarRelationFilter, Prisma.equity_holdersWhereInput>
@@ -245,6 +253,7 @@ export type dividend_distributionsOrderByWithRelationInput = {
   amount_cents?: Prisma.SortOrder
   occurred_at?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
+  investor_movement_id?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   project?: Prisma.projectsOrderByWithRelationInput
   holder?: Prisma.equity_holdersOrderByWithRelationInput
@@ -260,6 +269,7 @@ export type dividend_distributionsWhereUniqueInput = Prisma.AtLeast<{
   amount_cents?: Prisma.IntFilter<"dividend_distributions"> | number
   occurred_at?: Prisma.DateTimeFilter<"dividend_distributions"> | Date | string
   note?: Prisma.StringNullableFilter<"dividend_distributions"> | string | null
+  investor_movement_id?: Prisma.UuidNullableFilter<"dividend_distributions"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"dividend_distributions"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
   holder?: Prisma.XOR<Prisma.Equity_holdersScalarRelationFilter, Prisma.equity_holdersWhereInput>
@@ -272,6 +282,7 @@ export type dividend_distributionsOrderByWithAggregationInput = {
   amount_cents?: Prisma.SortOrder
   occurred_at?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
+  investor_movement_id?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.dividend_distributionsCountOrderByAggregateInput
   _avg?: Prisma.dividend_distributionsAvgOrderByAggregateInput
@@ -290,6 +301,7 @@ export type dividend_distributionsScalarWhereWithAggregatesInput = {
   amount_cents?: Prisma.IntWithAggregatesFilter<"dividend_distributions"> | number
   occurred_at?: Prisma.DateTimeWithAggregatesFilter<"dividend_distributions"> | Date | string
   note?: Prisma.StringNullableWithAggregatesFilter<"dividend_distributions"> | string | null
+  investor_movement_id?: Prisma.UuidNullableWithAggregatesFilter<"dividend_distributions"> | string | null
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"dividend_distributions"> | Date | string | null
 }
 
@@ -298,6 +310,7 @@ export type dividend_distributionsCreateInput = {
   amount_cents: number
   occurred_at: Date | string
   note?: string | null
+  investor_movement_id?: string | null
   created_at?: Date | string | null
   project: Prisma.projectsCreateNestedOneWithoutDividendsInput
   holder: Prisma.equity_holdersCreateNestedOneWithoutDividendsInput
@@ -310,6 +323,7 @@ export type dividend_distributionsUncheckedCreateInput = {
   amount_cents: number
   occurred_at: Date | string
   note?: string | null
+  investor_movement_id?: string | null
   created_at?: Date | string | null
 }
 
@@ -318,6 +332,7 @@ export type dividend_distributionsUpdateInput = {
   amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  investor_movement_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   project?: Prisma.projectsUpdateOneRequiredWithoutDividendsNestedInput
   holder?: Prisma.equity_holdersUpdateOneRequiredWithoutDividendsNestedInput
@@ -330,6 +345,7 @@ export type dividend_distributionsUncheckedUpdateInput = {
   amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  investor_movement_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -340,6 +356,7 @@ export type dividend_distributionsCreateManyInput = {
   amount_cents: number
   occurred_at: Date | string
   note?: string | null
+  investor_movement_id?: string | null
   created_at?: Date | string | null
 }
 
@@ -348,6 +365,7 @@ export type dividend_distributionsUpdateManyMutationInput = {
   amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  investor_movement_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -358,6 +376,7 @@ export type dividend_distributionsUncheckedUpdateManyInput = {
   amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  investor_movement_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -378,6 +397,7 @@ export type dividend_distributionsCountOrderByAggregateInput = {
   amount_cents?: Prisma.SortOrder
   occurred_at?: Prisma.SortOrder
   note?: Prisma.SortOrder
+  investor_movement_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -392,6 +412,7 @@ export type dividend_distributionsMaxOrderByAggregateInput = {
   amount_cents?: Prisma.SortOrder
   occurred_at?: Prisma.SortOrder
   note?: Prisma.SortOrder
+  investor_movement_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -402,6 +423,7 @@ export type dividend_distributionsMinOrderByAggregateInput = {
   amount_cents?: Prisma.SortOrder
   occurred_at?: Prisma.SortOrder
   note?: Prisma.SortOrder
+  investor_movement_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -498,6 +520,7 @@ export type dividend_distributionsCreateWithoutProjectInput = {
   amount_cents: number
   occurred_at: Date | string
   note?: string | null
+  investor_movement_id?: string | null
   created_at?: Date | string | null
   holder: Prisma.equity_holdersCreateNestedOneWithoutDividendsInput
 }
@@ -508,6 +531,7 @@ export type dividend_distributionsUncheckedCreateWithoutProjectInput = {
   amount_cents: number
   occurred_at: Date | string
   note?: string | null
+  investor_movement_id?: string | null
   created_at?: Date | string | null
 }
 
@@ -547,6 +571,7 @@ export type dividend_distributionsScalarWhereInput = {
   amount_cents?: Prisma.IntFilter<"dividend_distributions"> | number
   occurred_at?: Prisma.DateTimeFilter<"dividend_distributions"> | Date | string
   note?: Prisma.StringNullableFilter<"dividend_distributions"> | string | null
+  investor_movement_id?: Prisma.UuidNullableFilter<"dividend_distributions"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"dividend_distributions"> | Date | string | null
 }
 
@@ -555,6 +580,7 @@ export type dividend_distributionsCreateWithoutHolderInput = {
   amount_cents: number
   occurred_at: Date | string
   note?: string | null
+  investor_movement_id?: string | null
   created_at?: Date | string | null
   project: Prisma.projectsCreateNestedOneWithoutDividendsInput
 }
@@ -565,6 +591,7 @@ export type dividend_distributionsUncheckedCreateWithoutHolderInput = {
   amount_cents: number
   occurred_at: Date | string
   note?: string | null
+  investor_movement_id?: string | null
   created_at?: Date | string | null
 }
 
@@ -600,6 +627,7 @@ export type dividend_distributionsCreateManyProjectInput = {
   amount_cents: number
   occurred_at: Date | string
   note?: string | null
+  investor_movement_id?: string | null
   created_at?: Date | string | null
 }
 
@@ -608,6 +636,7 @@ export type dividend_distributionsUpdateWithoutProjectInput = {
   amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  investor_movement_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   holder?: Prisma.equity_holdersUpdateOneRequiredWithoutDividendsNestedInput
 }
@@ -618,6 +647,7 @@ export type dividend_distributionsUncheckedUpdateWithoutProjectInput = {
   amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  investor_movement_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -627,6 +657,7 @@ export type dividend_distributionsUncheckedUpdateManyWithoutProjectInput = {
   amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  investor_movement_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -636,6 +667,7 @@ export type dividend_distributionsCreateManyHolderInput = {
   amount_cents: number
   occurred_at: Date | string
   note?: string | null
+  investor_movement_id?: string | null
   created_at?: Date | string | null
 }
 
@@ -644,6 +676,7 @@ export type dividend_distributionsUpdateWithoutHolderInput = {
   amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  investor_movement_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   project?: Prisma.projectsUpdateOneRequiredWithoutDividendsNestedInput
 }
@@ -654,6 +687,7 @@ export type dividend_distributionsUncheckedUpdateWithoutHolderInput = {
   amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  investor_movement_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -663,6 +697,7 @@ export type dividend_distributionsUncheckedUpdateManyWithoutHolderInput = {
   amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  investor_movement_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -675,6 +710,7 @@ export type dividend_distributionsSelect<ExtArgs extends runtime.Types.Extension
   amount_cents?: boolean
   occurred_at?: boolean
   note?: boolean
+  investor_movement_id?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
   holder?: boolean | Prisma.equity_holdersDefaultArgs<ExtArgs>
@@ -687,6 +723,7 @@ export type dividend_distributionsSelectCreateManyAndReturn<ExtArgs extends runt
   amount_cents?: boolean
   occurred_at?: boolean
   note?: boolean
+  investor_movement_id?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
   holder?: boolean | Prisma.equity_holdersDefaultArgs<ExtArgs>
@@ -699,6 +736,7 @@ export type dividend_distributionsSelectUpdateManyAndReturn<ExtArgs extends runt
   amount_cents?: boolean
   occurred_at?: boolean
   note?: boolean
+  investor_movement_id?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
   holder?: boolean | Prisma.equity_holdersDefaultArgs<ExtArgs>
@@ -711,10 +749,11 @@ export type dividend_distributionsSelectScalar = {
   amount_cents?: boolean
   occurred_at?: boolean
   note?: boolean
+  investor_movement_id?: boolean
   created_at?: boolean
 }
 
-export type dividend_distributionsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "holder_id" | "amount_cents" | "occurred_at" | "note" | "created_at", ExtArgs["result"]["dividend_distributions"]>
+export type dividend_distributionsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "holder_id" | "amount_cents" | "occurred_at" | "note" | "investor_movement_id" | "created_at", ExtArgs["result"]["dividend_distributions"]>
 export type dividend_distributionsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
   holder?: boolean | Prisma.equity_holdersDefaultArgs<ExtArgs>
@@ -741,6 +780,18 @@ export type $dividend_distributionsPayload<ExtArgs extends runtime.Types.Extensi
     amount_cents: number
     occurred_at: Date
     note: string | null
+    /**
+     * Le mouvement d investisseur dont cette ligne est la projection.
+     * 
+     * Deux tables enregistrent un dividende, vu sous deux angles : celle-ci
+     * par detenteur de parts, investor_movements par investisseur. Elles ne
+     * sont pas deux verites concurrentes — depuis la consolidation, le
+     * moteur d investissement ecrit les deux dans la meme transaction et
+     * pose ce lien. null = ligne saisie a la main, pour un detenteur qui n
+     * est pas un investisseur enregistre. Unique, pour qu un mouvement ne
+     * puisse pas produire deux projections.
+     */
+    investor_movement_id: string | null
     created_at: Date | null
   }, ExtArgs["result"]["dividend_distributions"]>
   composites: {}
@@ -1173,6 +1224,7 @@ export interface dividend_distributionsFieldRefs {
   readonly amount_cents: Prisma.FieldRef<"dividend_distributions", 'Int'>
   readonly occurred_at: Prisma.FieldRef<"dividend_distributions", 'DateTime'>
   readonly note: Prisma.FieldRef<"dividend_distributions", 'String'>
+  readonly investor_movement_id: Prisma.FieldRef<"dividend_distributions", 'String'>
   readonly created_at: Prisma.FieldRef<"dividend_distributions", 'DateTime'>
 }
     

@@ -438,15 +438,31 @@ model equity_events {
 /// Il n'existe aucune table de dividende « prévu » : un dividende se
 /// constate, il ne se prédit pas (voir financing-legal.ts).
 model dividend_distributions {
-  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  project_id   String         @db.Uuid
-  project      projects       @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  holder_id    String         @db.Uuid
-  holder       equity_holders @relation(fields: [holder_id], references: [id], onDelete: Cascade)
-  amount_cents Int
-  occurred_at  DateTime       @db.Timestamptz(6)
-  note         String?
-  created_at   DateTime?      @default(now()) @db.Timestamptz(6)
+  id                   String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id           String         @db.Uuid
+  project              projects       @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  holder_id            String         @db.Uuid
+  holder               equity_holders @relation(fields: [holder_id], references: [id], onDelete: Cascade)
+  amount_cents         Int
+  occurred_at          DateTime       @db.Timestamptz(6)
+  note                 String?
+  /// Le mouvement d investisseur dont cette ligne est la projection.
+  ///
+  /// Deux tables enregistrent un dividende, vu sous deux angles : celle-ci
+  /// par detenteur de parts, investor_movements par investisseur. Elles ne
+  /// sont pas deux verites concurrentes — depuis la consolidation, le
+  /// moteur d investissement ecrit les deux dans la meme transaction et
+  /// pose ce lien. null = ligne saisie a la main, pour un detenteur qui n
+  /// est pas un investisseur enregistre. Unique, pour qu un mouvement ne
+  /// puisse pas produire deux projections.
+  /// Pas de contrainte d unicite en base, et c est un choix contraint : la
+  /// poser exigerait le drapeau --accept-data-loss, que les consignes du
+  /// depot reservent a un consentement explicite du porteur. L unicite est
+  /// donc tenue par le service — qui ecrit les deux lignes dans la meme
+  /// transaction — et verifiee apres coup par l audit financier. A poser en
+  /// index le jour d une vraie migration.
+  investor_movement_id String?        @db.Uuid
+  created_at           DateTime?      @default(now()) @db.Timestamptz(6)
 
   @@index([project_id])
   @@index([holder_id])

@@ -16,8 +16,8 @@ Les tests de bout en bout ont besoin d'une vraie base et se lancent à part :
 cd backend && npm run test:e2e
 ```
 
-Au 20/09/2026 : **711 tests unitaires backend**, **235 tests de bout en bout**, **216 tests
-frontend**, lint et type-check propres des deux côtés. **145 routes HTTP**, **46 tables**,
+Au 20/09/2026 : **740 tests unitaires backend**, **251 tests de bout en bout**, **216 tests
+frontend**, lint et type-check propres des deux côtés. **146 routes HTTP**, **46 tables**,
 **15 pages**.
 
 ## Trois bases, séparées depuis le 19/09/2026

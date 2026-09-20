@@ -383,25 +383,62 @@ export class InvestorsService {
     // un seul geste, même éclaté en dix mouvements.
     const distributionId = randomUUID();
 
-    await this.prisma.$transaction(
-      allocations
-        .filter((allocation) => allocation.amountCents > 0)
-        .map((allocation) =>
-          this.prisma.investor_movements.create({
-            data: {
-              financed_project_id: financedProjectId,
-              investor_id: allocation.investorId,
-              participation_id: allocation.participationId,
-              kind,
-              amount_cents: allocation.amountCents,
-              occurred_on: input.occurredOn,
-              reference: input.reference ?? null,
-              note: input.note ?? null,
-              distribution_id: distributionId,
-            },
-          }),
-        ),
+    // Le détenteur de parts correspondant à chaque participation, quand il y
+    // en a un. C'est lui qui permet de tenir à jour la vue « par détenteur »
+    // sans en faire une seconde vérité.
+    const detenteurParParticipation = new Map(
+      participations
+        .filter((p) => p.equity_holder_id !== null)
+        .map((p) => [p.id, p.equity_holder_id as string]),
     );
+
+    await this.prisma.$transaction(async (tx) => {
+      for (const allocation of allocations) {
+        if (allocation.amountCents <= 0) continue;
+
+        const mouvement = await tx.investor_movements.create({
+          data: {
+            financed_project_id: financedProjectId,
+            investor_id: allocation.investorId,
+            participation_id: allocation.participationId,
+            kind,
+            amount_cents: allocation.amountCents,
+            occurred_on: input.occurredOn,
+            reference: input.reference ?? null,
+            note: input.note ?? null,
+            distribution_id: distributionId,
+          },
+        });
+
+        // ── La consolidation des deux vues du dividende ────────────────
+        //
+        // Deux tables enregistrent un dividende : `dividend_distributions`
+        // par détenteur de parts, `investor_movements` par investisseur.
+        // Elles répondent à deux questions différentes et aucune ne peut
+        // remplacer l'autre — un détenteur n'est pas toujours un
+        // investisseur enregistré, et un investisseur n'est pas toujours au
+        // capital.
+        //
+        // Ce ne sont pas pour autant deux vérités concurrentes : depuis
+        // ici, **une seule voie d'écriture** alimente les deux, dans la
+        // même transaction, et pose le lien entre elles. La vue par
+        // détenteur devient une projection, plus une saisie parallèle qui
+        // dérive en silence.
+        const detenteur = detenteurParParticipation.get(allocation.participationId);
+        if (kind === 'dividende' && detenteur && financed.project_id) {
+          await tx.dividend_distributions.create({
+            data: {
+              project_id: financed.project_id,
+              holder_id: detenteur,
+              amount_cents: allocation.amountCents,
+              occurred_at: input.occurredOn,
+              note: input.note ?? null,
+              investor_movement_id: mouvement.id,
+            },
+          });
+        }
+      }
+    });
 
     return {
       distributionId,

@@ -10,6 +10,7 @@ import { ConstitutionModule } from './constitution/constitution.module.js';
 import { CrmModule } from './crm/crm.module.js';
 import { BankingModule } from './banking/banking.module.js';
 import { FinancingModule } from './financing/financing.module.js';
+import { FinanceAuditModule } from './finance-audit/finance-audit.module.js';
 import { InvestorsModule } from './investors/investors.module.js';
 import { LedgerModule } from './ledger/ledger.module.js';
 import { CommunityModule } from './community/community.module.js';
@@ -45,6 +46,7 @@ import { UsersModule } from './users/users.module.js';
     LedgerModule,
     BankingModule,
     InvestorsModule,
+    FinanceAuditModule,
     MarketplaceModule,
   ],
   controllers: [AppController],

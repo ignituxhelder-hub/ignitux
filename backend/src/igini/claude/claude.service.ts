@@ -84,6 +84,16 @@ export class ClaudeService {
       throw new ServiceUnavailableException(availability.reason);
     }
 
+    // Le plafond mensuel, au même endroit et pour la même raison : les cinq
+    // générateurs passent ici, donc aucun ne peut être oublié.
+    //
+    // **Avant** l'appel réseau, et **hors** du try. Avant, parce qu'un
+    // plafond vérifié après la dépense ne borne rien. Hors du try, parce que
+    // le catch traduit toute exception en 500 : un refus de quota avalé là
+    // ressortirait en « erreur interne », et la personne ne saurait pas que
+    // son forfait est consommé.
+    await this.aiUsage.assertWithinQuota(request.usage.userId);
+
     const startedAt = Date.now();
 
     try {

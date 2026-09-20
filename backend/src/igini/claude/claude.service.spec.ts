@@ -1,4 +1,9 @@
-import { InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  InternalServerErrorException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { z } from 'zod';
 import { AiUsageService } from '../usage/ai-usage.service.js';
@@ -61,12 +66,18 @@ const UTILISATION = {
 
 describe('ClaudeService', () => {
   let service: ClaudeService;
-  let aiUsage: { record: ReturnType<typeof vi.fn> };
+  let aiUsage: {
+    record: ReturnType<typeof vi.fn>;
+    assertWithinQuota: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     parseMock.mockReset();
     env.current = {};
-    aiUsage = { record: vi.fn().mockResolvedValue(undefined) };
+    aiUsage = {
+      record: vi.fn().mockResolvedValue(undefined),
+      assertWithinQuota: vi.fn().mockResolvedValue(undefined),
+    };
     const module: TestingModule = await Test.createTestingModule({
       providers: [ClaudeService, { provide: AiUsageService, useValue: aiUsage }],
     }).compile();
@@ -296,7 +307,88 @@ describe('ClaudeService', () => {
       message: expect.stringContaining('Impossible de contacter'),
     });
   });
-describe('journal des coûts', () => {
+
+    describe('plafond mensuel', () => {
+    it('refuse AVANT tout appel réseau quand le plafond est atteint', async () => {
+      // Le point entier du dispositif : un plafond vérifié après la dépense
+      // ne borne rien. Ce qui compte n'est pas le code renvoyé, c'est que
+      // `parse` n'ait pas été appelé.
+      const refus = new HttpException('Tes 5 analyses sont consommées.', HttpStatus.PAYMENT_REQUIRED);
+      aiUsage.assertWithinQuota.mockRejectedValue(refus);
+
+      await expect(
+        service.generateStructuredOutput({
+          schema,
+          system: 'system',
+          userContent: 'user',
+          logContext: 'contexte',
+          userErrorMessage: 'échec',
+          usage: ATTRIBUTION,
+        }),
+      ).rejects.toBe(refus);
+
+      expect(parseMock).not.toHaveBeenCalled();
+      expect(aiUsage.record).not.toHaveBeenCalled();
+    });
+
+    it('laisse le 402 ressortir tel quel, sans le changer en 500', async () => {
+      // Le refus est vérifié HORS du try : le catch traduit toute exception
+      // en InternalServerErrorException, et un plafond avalé là ressortirait
+      // en « erreur interne ». La personne ne saurait pas que son forfait est
+      // consommé — elle croirait le produit cassé.
+      aiUsage.assertWithinQuota.mockRejectedValue(
+        new HttpException('Plafond atteint.', HttpStatus.PAYMENT_REQUIRED),
+      );
+
+      await expect(
+        service.generateStructuredOutput({
+          schema,
+          system: 'system',
+          userContent: 'user',
+          logContext: 'contexte',
+          userErrorMessage: 'échec',
+          usage: ATTRIBUTION,
+        }),
+      ).rejects.toMatchObject({ status: HttpStatus.PAYMENT_REQUIRED });
+    });
+
+    it("ne consulte même pas le plafond quand l'interrupteur est éteint", async () => {
+      // L'ordre compte : inutile d'aller lire une consommation pour une
+      // fonctionnalité coupée. Et le message doit rester « éteint
+      // volontairement », pas « forfait consommé ».
+      env.current = { IGINI_AI_ENABLED: 'false' };
+
+      await expect(
+        service.generateStructuredOutput({
+          schema,
+          system: 'system',
+          userContent: 'user',
+          logContext: 'contexte',
+          userErrorMessage: 'échec',
+          usage: ATTRIBUTION,
+        }),
+      ).rejects.toBeInstanceOf(ServiceUnavailableException);
+
+      expect(aiUsage.assertWithinQuota).not.toHaveBeenCalled();
+    });
+
+    it('vérifie le plafond de la personne qui appelle, pas d’une autre', async () => {
+      parseMock.mockResolvedValue({ parsed_output: { answer: 'ok' }, usage: UTILISATION });
+
+      await service.generateStructuredOutput({
+        schema,
+        system: 'system',
+        userContent: 'user',
+        logContext: 'contexte',
+        userErrorMessage: 'échec',
+        usage: ATTRIBUTION,
+      });
+
+      expect(aiUsage.assertWithinQuota).toHaveBeenCalledWith(ATTRIBUTION.userId);
+    });
+  });
+
+  describe('journal des coûts', () => {
     it("enregistre ce que l'appel a réellement coûté", async () => {
       // Avant ce dispositif, response.usage était lu par le SDK puis jeté.
       // Cette seule omission rendait le coût réel inconnaissable, le plafond

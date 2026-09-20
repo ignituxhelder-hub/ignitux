@@ -18,6 +18,17 @@ const envSchema = z.object({
   // enum à dessein : une valeur inattendue laisse le produit complet plutôt
   // que d'empêcher le serveur de démarrer.
   IGINI_AI_ENABLED: z.string().optional(),
+  // Plafonds de consommation IA, par personne et par mois civil. Tous deux
+  // optionnels : leur absence retombe sur l'offre annoncée (5 analyses,
+  // 2,00 € de coût IA — voir ai-quota.ts). `illimite` désactive un axe.
+  //
+  // Non validés en nombre à dessein, comme IGINI_AI_ENABLED : une valeur
+  // illisible retombe sur le défaut plutôt que d'empêcher le serveur de
+  // démarrer. La différence avec l'interrupteur est le sens du repli — là
+  // une valeur inattendue laisse le produit complet, ici elle laisse le
+  // plafond en place. Dans les deux cas l'inattendu penche du côté prudent.
+  IGINI_QUOTA_CALLS_PER_MONTH: z.string().optional(),
+  IGINI_QUOTA_COST_EUR_PER_MONTH: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

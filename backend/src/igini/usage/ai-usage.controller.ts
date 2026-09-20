@@ -4,6 +4,7 @@ import { CurrentUser } from '../../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard.js';
 import { PRICE_GRID_DATE, microEurToEur } from './ai-pricing.js';
+import { shouldWarn, type QuotaLimits, type QuotaVerdict } from './ai-quota.js';
 import { AiUsageService, type UsageSummary } from './ai-usage.service.js';
 
 /**
@@ -26,8 +27,46 @@ export class AiUsageController {
 
   @Get('mois-en-cours')
   async currentMonth(@CurrentUser() user: AuthenticatedUser) {
-    return presenter(await this.aiUsage.monthlySummary(user.id));
+    const [resume, quota] = await Promise.all([
+      this.aiUsage.monthlySummary(user.id),
+      this.aiUsage.quotaFor(user.id),
+    ]);
+    return { ...presenter(resume), quota: presenterQuota(quota, this.aiUsage.limits()) };
   }
+}
+
+/**
+ * Ce qu'il reste, dit avant le mur.
+ *
+ * Un plafond qui ne se découvre qu'en s'y cognant est un mauvais plafond :
+ * la personne a préparé son travail, elle clique, et le produit lui apprend
+ * à ce moment-là que c'était fini. L'avertissement se déclenche à un appel
+ * près, ou à un cinquième du budget — assez tôt pour s'organiser, assez
+ * tard pour ne pas devenir un décor qu'on n'aperçoit plus.
+ */
+function presenterQuota(verdict: QuotaVerdict, limites: QuotaLimits) {
+  return {
+    autorise: verdict.allowed,
+    plafond_atteint: verdict.breach,
+    message: verdict.reason,
+    bientot_atteint: shouldWarn(verdict),
+    restant: {
+      analyses: verdict.remaining.calls,
+      // null se lit « plafond de coût non applicable », pas « il reste de la
+      // marge » : c'est le cas quand un modèle échappe à la grille.
+      euros:
+        verdict.remaining.costMicroEur === null
+          ? null
+          : microEurToEur(verdict.remaining.costMicroEur),
+    },
+    plafonds: {
+      analyses_par_mois: limites.callsPerMonth,
+      euros_par_mois:
+        limites.costMicroEurPerMonth === null
+          ? null
+          : microEurToEur(limites.costMicroEurPerMonth),
+    },
+  };
 }
 
 /**

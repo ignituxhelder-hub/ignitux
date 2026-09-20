@@ -2056,3 +2056,161 @@ relatif** pour cette raison, et ne cassent donc pas quand elles s'accumulent.
 - **Aucun écran.** Tout passe par l'API.
 - **Aucun parcours à forte charge.** Les scénarios manipulent quelques lignes ; rien ne dit ce que
   devient une répartition entre mille investisseurs.
+
+---
+
+# 22. Plafonds IA et consolidation financière (20 septembre 2026)
+
+Consigne : six chantiers — suivi des coûts IA, CRM, consolidation financière, graphe avancé,
+Offline First, modules pays.
+
+## 22.1 L'audit d'abord : quatre des six étaient déjà faits
+
+Avant d'écrire une ligne, l'état des lieux. Il évite de refaire ce qui existe et de manquer ce qui
+manque.
+
+| Chantier | État réel avant cette session |
+|---|---|
+| **Suivi des coûts IA** | `response.usage`, consommation, coûts : **faits** (§17). **Quotas : manquants** |
+| **CRM** | contacts, prospects (`kind`), entreprises, pipeline à 6 étapes : **les quatre existent** |
+| **Consolidation financière** | **rien** — le vrai chantier |
+| **Graphe de connaissance** | voisinage, plus court chemin, concepts isolés, recherche : **construit** |
+| **Offline First** | file d'écriture + cache daté + rejeu ordonné : **faits**, au périmètre que le porteur avait fixé (pas de service worker) |
+| **Modules pays** | **bloqué** sur une décision : aucune source officielle Suisse/Portugal n'a été désignée |
+
+Deux chantiers réels, donc. Les deux sont faits.
+
+## 22.2 Les plafonds — ce qui rendait la décision des 10 % inopposable
+
+`PRICING.md` concluait qu'un taux qu'on ne peut pas faire respecter n'est pas un taux. Le journal
+mesurait ; rien ne refusait.
+
+### Deux plafonds, parce qu'ils ne protègent pas la même chose
+
+- **Le nombre d'analyses** est ce que l'offre annonce — « 5 par mois ». C'est ce que la personne a
+  compris en payant.
+- **Le coût** est ce que la décision du porteur fixe — 10 % du prix, soit 2,00 €. Un appel peut
+  coûter dix fois plus qu'un autre : compter les appels ne protège pas la marge.
+
+Le premier atteint refuse. Tenir l'un sans l'autre laisserait soit une promesse non tenue, soit
+une marge qui fuit.
+
+### Où, et dans quel ordre
+
+Au **point de passage unique**, comme l'interrupteur des générateurs, et pour la même raison : les
+cinq générateurs y passent, donc aucun ne peut être oublié.
+
+**Avant** l'appel réseau — un plafond vérifié après la dépense ne borne rien. Et **hors du `try`**,
+parce que le `catch` traduit toute exception en 500 : un refus de quota avalé là ressortirait en
+« erreur interne », et la personne croirait le produit cassé au lieu de comprendre que son forfait
+est consommé.
+
+### 402, et pourquoi pas autre chose
+
+Les autres codes du produit sont pris et voudraient dire autre chose. **503** dit « la
+fonctionnalité est éteinte » alors qu'elle marche. **422** dit « la Constitution refuse » alors
+qu'elle n'y est pour rien. **429** est celui du limiteur de débit — le confondre avec un quota
+mensuel rendrait les deux illisibles côté interface. **401** déconnecterait.
+
+**402 Payment Required** dit exactement ce qui se passe : ce qui était inclus est consommé.
+
+### Trois choix qui méritent d'être connus
+
+1. **Une valeur illisible n'éteint PAS le plafond.** `IGINI_QUOTA_CALLS_PER_MONTH=abc` retombe sur
+   le défaut. C'est le sens de repli **inverse** de celui de l'interrupteur des générateurs, où
+   seule la chaîne exacte `'false'` coupe. Là-bas l'ambiguïté laisse le produit complet, ici elle
+   laisse le plafond en place : dans les deux cas, l'inattendu penche du côté prudent.
+2. **Un coût inconnu laisse passer, et le dit.** Quand un modèle échappe à la grille tarifaire, le
+   coût du mois vaut `null`. Refuser reviendrait à couper le service pour un défaut de
+   configuration qui ne concerne pas la personne ; on laisse passer, `restant.euros` vaut `null`,
+   ce qui se lit « plafond non applicable » et non « il reste de la marge ». Le plafond du nombre
+   d'appels, lui, reste exact.
+3. **On prévient avant le mur.** À un appel près, ou à un cinquième du budget. Un plafond qui ne
+   se découvre qu'en s'y cognant est un mauvais plafond : la personne a préparé son travail, elle
+   clique, et le produit lui apprend à ce moment-là que c'était fini.
+
+### Ce que ce plafond n'est pas
+
+**Pas un compteur comptable.** Le journal s'écrit en « meilleur effort » — il ne fait jamais
+échouer une génération — donc une écriture perdue est un appel non décompté. C'est un plafond
+haut, qui borne un usage pathologique. Facturer au réel demanderait de rendre l'écriture du
+journal bloquante, et ce serait un autre dispositif.
+
+## 22.3 La consolidation financière
+
+### Les deux vues du dividende, réunies sans en supprimer une
+
+`dividend_distributions` enregistre par **détenteur de parts** ; `investor_movements` par
+**investisseur**. Aucune ne peut remplacer l'autre : un détenteur n'est pas toujours un
+investisseur enregistré, et un investisseur n'est pas toujours au capital.
+
+Ce ne sont plus pour autant deux vérités concurrentes. Depuis cette session, **une seule voie
+d'écriture** alimente les deux, dans la même transaction, et pose le lien entre elles
+(`investor_movement_id`). La vue par détenteur devient une projection, plus une saisie parallèle
+qui dérive en silence.
+
+**Une contrainte assumée** : l'unicité de ce lien n'est pas posée en index. La poser exigeait
+`prisma db push --accept-data-loss`, que les consignes du dépôt réservent à un consentement
+explicite du porteur — que je n'ai pas. Plutôt que de contourner, j'ai changé le dessin :
+l'unicité est tenue par le service et **vérifiée par l'audit** (`double-projection`). À poser en
+index le jour d'une vraie migration.
+
+### L'audit global du module financier
+
+Dix contrôles, en SQL, sur ce qui est **réellement en base** :
+
+| Contrôle | Ce qu'il attrape |
+|---|---|
+| `ecriture-a-cheval` | écriture comptable touchant le compte d'un autre propriétaire |
+| `ecriture-desequilibree` | débits ≠ crédits |
+| `contrepartie-muette` | virement dont une seule moitié pointe vers l'autre |
+| `mouvement-inter-projets` | remboursement du projet A visant une participation du projet B |
+| `signe-incoherent` | investissement positif, remboursement négatif |
+| `correction-orpheline` | correction qui ne corrige rien |
+| `capital-incomplet` | répartition qui ne boucle pas à 100 % |
+| `dividende-sans-projection` | les deux vues divergent |
+| `projection-sans-mouvement` | lien qui pointe dans le vide |
+| `double-projection` | montant compté deux fois |
+| `numerotation-a-trous` | séquence de facturation non continue |
+
+**Pourquoi un audit, puisque les tests passent** : les tests disent que le code refuse ce qu'il
+doit refuser **au moment où il écrit**. Ils ne disent rien de l'état de la base. Une migration
+bâclée, un script lancé à la main, une version antérieure du code, un import : rien de tout cela
+ne passe par les contrôles d'écriture.
+
+**Chaque contrôle apparaît même à zéro**, avec sa raison d'être en une phrase. Un audit qui ne
+montre que les défauts ne dit pas ce qu'il a regardé : on ne saurait pas distinguer « tout va
+bien » de « ce contrôle n'existe pas ».
+
+**Aucune route pour l'audit global** : il parcourt les livres d'Ignitux et les registres de tous
+les porteurs. Le publier derrière une simple authentification donnerait à n'importe quel compte
+une vue sur l'activité de tout le monde. Ce qui est exposé, c'est
+`GET /projects/:id/audit-financier` — la cohérence d'un projet, rendue à qui a le droit de le
+lire.
+
+### Le test qui rend l'audit crédible
+
+La suite de bout en bout **casse la base en SQL brut**, en contournant le service, et vérifie que
+l'audit trouve. Un audit qu'on ne teste que sur une base saine ne prouve rien : débranché, il
+renverrait « tout va bien » exactement pareil.
+
+## 22.4 Vérification
+
+| Contrôle | Résultat |
+|---|---|
+| Types | **0 erreur** |
+| Lint | **0 avertissement** |
+| Tests unitaires | **740 passent** (62 fichiers) |
+| Tests de bout en bout | **251 passent** (15 fichiers) |
+| Build | propre |
+
+## 22.5 Ce qui reste, et à qui
+
+- **Préparation aux paiements réels** : rien n'est émis, et chaque répartition le dit. Le pas
+  suivant serait une file d'ordres de versement (à verser / versé / échoué), mais elle n'a de sens
+  qu'une fois le fournisseur bancaire choisi — décision en §15.6.
+- **Modules pays** : bloqué. Semer une règle sans source officielle est exactement ce que le
+  module refuse, et c'est volontaire.
+- **Graphe avancé** : le graphe fait voisinage, plus court chemin, isolés et recherche. Ce que
+  « avancé » veut dire de plus n'est pas défini, et les candidats évidents — grappes, centralité —
+  frôlent l'indicateur inventé que l'article 10 interdit. À préciser avant de construire.
