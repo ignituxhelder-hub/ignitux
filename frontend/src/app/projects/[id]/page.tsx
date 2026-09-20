@@ -309,6 +309,8 @@ export default function ProjectDetailPage() {
 
       {project && (
         <>
+          <h1 style={{ marginBottom: '0.75rem' }}>{project.title}</h1>
+
           <IginiMention style={{ marginBottom: '1.5rem' }}>
             t&apos;accompagne à travers les 5 étapes ci-dessous pour transformer cette idée en
             réalité.
@@ -368,8 +370,9 @@ export default function ProjectDetailPage() {
             </form>
           ) : (
             <div className="card">
-              <h1 style={{ marginTop: 0 }}>{project.title}</h1>
-              {project.description && <p style={{ marginBottom: 0 }}>{project.description}</p>}
+              {project.description && (
+                <p style={{ marginTop: 0, marginBottom: 0 }}>{project.description}</p>
+              )}
               <p className="muted" style={{ marginTop: '0.75rem', marginBottom: 0 }}>
                 Projet partagé avec toi — tu peux consulter son historique, mais seul le
                 propriétaire peut le modifier ou générer de nouveaux plans.
@@ -411,9 +414,12 @@ export default function ProjectDetailPage() {
         />
       )}
 
+      {/* Deux sections portaient le même nom : celle-ci, où IGINI rédige un plan,
+          et celle du bas, où figure l'argent réellement reçu. En faisant défiler,
+          on ne pouvait pas les distinguer. */}
       {project && (
         <GenerationSection
-          title="Financement"
+          title="Plan de financement"
           buttonLabel="Générer un plan de financement"
           buttonBusyLabel="Génération…"
           emptyLabel="Aucun plan de financement pour l'instant."

@@ -204,6 +204,119 @@ describe('BillingPage', () => {
     expect(await screen.findByText('Passage impossible.')).toBeInTheDocument();
   });
 
+  // La règle « une facture émise ne se corrige que par un avoir » était
+  // affichée en haut de page sans qu'aucun geste ne permette de l'appliquer.
+  describe('correction par avoir', () => {
+    const EMISE = document({ status: 'emis', issued_at: '2026-09-01T00:00:00.000Z' });
+
+    it("n'offre pas l'avoir sur un brouillon : un brouillon se modifie", async () => {
+      mockApiRoutes(routes());
+
+      render(
+        <AuthProvider>
+          <BillingPage />
+        </AuthProvider>,
+      );
+
+      await screen.findByText(/FAC-2026-0001/);
+      expect(screen.queryByRole('button', { name: 'Corriger par un avoir' })).toBeNull();
+    });
+
+    it("émet un avoir qui référence la facture et reprend son taux de TVA", async () => {
+      mockApiRoutes(
+        routes({
+          'GET /billing/documents': {
+            status: 200,
+            body: { disclaimer: DISCLAIMER, documents: [EMISE] },
+          },
+          'POST /billing/documents': { status: 201, body: EMISE },
+        }),
+      );
+
+      render(
+        <AuthProvider>
+          <BillingPage />
+        </AuthProvider>,
+      );
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Corriger par un avoir' }));
+
+      // Le montant est pré-rempli au total HT de la facture corrigée.
+      const montant = screen.getByLabelText('Montant hors taxes à créditer en euros');
+      expect((montant as HTMLInputElement).value).toBe('100.00');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Émettre l’avoir' }));
+
+      await waitFor(() => {
+        const envoi = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.find(
+          (call) => (call[1]?.method ?? 'GET') === 'POST',
+        );
+        expect(envoi).toBeDefined();
+        const corps = JSON.parse(String(envoi![1].body));
+        expect(corps.type).toBe('avoir');
+        expect(corps.correctsId).toBe('d1');
+        expect(corps.lines[0].vatRateBasisPoints).toBe(2000);
+        expect(corps.lines[0].unitPriceCents).toBe(10000);
+      });
+    });
+
+    it("refuse un montant illisible sans rien envoyer", async () => {
+      mockApiRoutes(
+        routes({
+          'GET /billing/documents': {
+            status: 200,
+            body: { disclaimer: DISCLAIMER, documents: [EMISE] },
+          },
+        }),
+      );
+
+      render(
+        <AuthProvider>
+          <BillingPage />
+        </AuthProvider>,
+      );
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Corriger par un avoir' }));
+      fireEvent.change(screen.getByLabelText('Montant hors taxes à créditer en euros'), {
+        target: { value: 'beaucoup' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Émettre l’avoir' }));
+
+      expect(await screen.findByText(/Montant de l’avoir illisible/)).toBeInTheDocument();
+    });
+
+    it('dit de quel document un avoir se déduit', async () => {
+      mockApiRoutes(
+        routes({
+          'GET /billing/documents': {
+            status: 200,
+            body: {
+              disclaimer: DISCLAIMER,
+              documents: [
+                EMISE,
+                document({
+                  id: 'd2',
+                  type: 'avoir',
+                  number: 'AV-2026-0001',
+                  status: 'brouillon',
+                  corrects_id: 'd1',
+                }),
+              ],
+            },
+          },
+        }),
+      );
+
+      render(
+        <AuthProvider>
+          <BillingPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByText(/À déduire de FAC-2026-0001/)).toBeInTheDocument();
+    });
+  });
+
   it('redirige vers la connexion sans jeton', async () => {
     window.localStorage.clear();
     mockApiRoutes(routes());

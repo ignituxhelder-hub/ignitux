@@ -54,9 +54,19 @@ export default function SignupPage() {
             required
             minLength={8}
             autoComplete="new-password"
+            aria-describedby="password-regle"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          {/* La règle était appliquée mais jamais dite : on ne l'apprenait
+              qu'en la heurtant, dans une bulle écrite par le navigateur, donc
+              pas forcément en français. Elle est maintenant énoncée avant. */}
+          <p className="muted" id="password-regle" style={{ margin: 0, fontSize: '0.8rem' }}>
+            Huit caractères au minimum.
+            {password.length > 0 && password.length < 8
+              ? ` Il en manque ${8 - password.length}.`
+              : ''}
+          </p>
         </div>
         <button className="primary" type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Création…' : 'Créer mon compte'}

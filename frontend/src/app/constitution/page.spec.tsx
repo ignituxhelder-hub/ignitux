@@ -242,7 +242,9 @@ describe('ConstitutionPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('redirige vers la connexion si aucun jeton', async () => {
+  // Le texte fondateur engage la personne avant qu'elle ne s'inscrive : le lui
+  // cacher jusqu'au compte créé contredirait l'article 11 (Transparence).
+  it('se lit sans compte, sans renvoyer vers la connexion', async () => {
     window.localStorage.clear();
     mockApiRoutes(routes());
 
@@ -252,6 +254,25 @@ describe('ConstitutionPage', () => {
       </AuthProvider>,
     );
 
-    await waitFor(() => expect(router.replace).toHaveBeenCalledWith('/login'));
+    expect(await screen.findByText(/Pas de score inventé/)).toBeInTheDocument();
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  // …mais l'audit mesuré et les violations sont des données personnelles.
+  it('masque le journal des violations tant que personne n est connecté', async () => {
+    window.localStorage.clear();
+    mockApiRoutes(routes());
+
+    render(
+      <AuthProvider>
+        <ConstitutionPage />
+      </AuthProvider>,
+    );
+
+    await screen.findByText(/Pas de score inventé/);
+    expect(screen.queryByText('Journal des violations')).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/n'apparaissent qu'une fois connecté/),
+    ).toBeInTheDocument();
   });
 });

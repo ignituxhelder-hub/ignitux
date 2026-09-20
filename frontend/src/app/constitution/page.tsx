@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
   api,
@@ -25,7 +24,6 @@ import { useAuth } from '@/lib/auth';
  */
 export default function ConstitutionPage() {
   const { token, isReady } = useAuth();
-  const router = useRouter();
 
   const [articles, setArticles] = useState<ConstitutionArticle[]>([]);
   const [preamble, setPreamble] = useState<string | null>(null);
@@ -35,12 +33,11 @@ export default function ConstitutionPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Le texte se lit sans compte. Ce qui suppose un compte — l'audit mesuré en
+  // base et le journal des violations de la personne — n'est demandé que
+  // lorsqu'il y a un jeton, et son absence ne vide pas la page.
   useEffect(() => {
-    if (isReady && !token) {
-      router.replace('/login');
-      return;
-    }
-    if (!token) return;
+    if (!isReady) return;
 
     setIsLoading(true);
     setError(null);
@@ -48,8 +45,8 @@ export default function ConstitutionPage() {
       api.getConstitutionPreamble(token),
       api.listConstitutionArticles(token),
       api.listConstitutionRules(token),
-      api.getConstitutionAudit(token),
-      api.listConstitutionViolations(token),
+      token ? api.getConstitutionAudit(token) : Promise.resolve([]),
+      token ? api.listConstitutionViolations(token) : Promise.resolve([]),
     ])
       .then(([preambleResult, articleList, ruleList, auditList, violationList]) => {
         setPreamble(preambleResult?.preamble ?? null);
@@ -64,9 +61,9 @@ export default function ConstitutionPage() {
         ),
       )
       .finally(() => setIsLoading(false));
-  }, [isReady, token, router]);
+  }, [isReady, token]);
 
-  if (!isReady || !token) {
+  if (!isReady) {
     return null;
   }
 
@@ -82,8 +79,8 @@ export default function ConstitutionPage() {
     <main className="page page--wide">
       <div className="top-bar">
         <h1>Constitution IGNITUX</h1>
-        <Link href="/projects" className="muted">
-          ← Retour aux projets
+        <Link href={token ? '/projects' : '/'} className="muted">
+          {token ? '← Retour aux projets' : "← Retour à l'accueil"}
         </Link>
       </div>
 
@@ -162,7 +159,18 @@ export default function ConstitutionPage() {
         );
       })}
 
-      {!isLoading && (
+      {!isLoading && !token && (
+        <div className="card" style={{ marginTop: '1.5rem' }}>
+          <h2 style={{ marginTop: 0 }}>Ce que cette page ne montre pas sans compte</h2>
+          <p className="muted" style={{ marginBottom: 0 }}>
+            L&apos;audit mesuré en base et le journal des violations portent sur des données
+            personnelles : ils n&apos;apparaissent qu&apos;une fois connecté, et chacun ne voit
+            que les siennes.
+          </p>
+        </div>
+      )}
+
+      {!isLoading && token && (
         <div className="card" style={{ marginTop: '1.5rem' }}>
           <h2 style={{ marginTop: 0 }}>Journal des violations</h2>
           {violations.length === 0 ? (

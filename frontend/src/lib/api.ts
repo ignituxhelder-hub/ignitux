@@ -765,6 +765,12 @@ export interface AutomationRunResult {
   conceptLinksCreated: ConceptLink[];
 }
 
+/** En-tête d'autorisation seulement s'il y a un jeton : les routes publiques
+ * doivent répondre à une personne déconnectée, pas la renvoyer au login. */
+function enTeteFacultatif(token: string | null): Record<string, string> {
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export const api = {
   getBuybackProgress: (token: string, projectId: string) =>
     request<BuybackProgress>(`/projects/${projectId}/financing/buyback`, {
@@ -1381,19 +1387,22 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     }),
 
-  getConstitutionPreamble: (token: string) =>
+  // Le préambule, les articles et les règles sont publics côté serveur : une
+  // personne qui hésite à s'inscrire doit pouvoir lire le texte qui l'engagera.
+  // Le jeton reste accepté quand il existe, mais il n'est jamais exigé.
+  getConstitutionPreamble: (token: string | null) =>
     request<{ version: string; preamble: string }>('/constitution/preamble', {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: enTeteFacultatif(token),
     }),
 
-  listConstitutionArticles: (token: string) =>
+  listConstitutionArticles: (token: string | null) =>
     request<ConstitutionArticle[]>('/constitution/articles', {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: enTeteFacultatif(token),
     }),
 
-  listConstitutionRules: (token: string) =>
+  listConstitutionRules: (token: string | null) =>
     request<ConstitutionRule[]>('/constitution/rules', {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: enTeteFacultatif(token),
     }),
 
   getConstitutionAudit: (token: string) =>
