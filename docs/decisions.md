@@ -760,3 +760,106 @@ trop : il croirait l'IBAN enregistré et construirait dessus. Un refus explicite
 ne veut pas de cette donnée.
 
 **Où** — `backend/src/banking/dto/banking.dto.ts`, `backend/src/banking/banking.service.ts`.
+
+## Un investisseur traverse les projets, son argent jamais
+
+**Quoi** — quatre tables : `investors` (l'identité), `financed_projects` (un projet ouvert au
+financement), `participations` (ce qu'une personne a mis dans UN projet) et `investor_movements`
+(le journal de tout ce qui bouge). Chaque mouvement porte son projet **et** son investisseur, tous
+deux NOT NULL.
+
+**Pourquoi** — le produit savait suivre le capital d'UN projet, mais un détenteur n'y était qu'un
+**nom** : « Marie Dubois » sur le projet A et « Marie Dubois » sur le projet B étaient deux lignes
+sans le moindre lien. Impossible de dire ce qu'une personne avait investi en tout, ni ce qui lui
+était revenu. L'axe manquant n'était pas l'argent, c'était la personne.
+
+La séparation est tenue à trois niveaux : le schéma (deux colonnes NOT NULL, donc « mouvement
+flottant » n'est pas représentable), la règle constitutionnelle `investissements-non-melanges`
+(article 22), et `separationAudit()` qui relit tout le registre en SQL après coup.
+
+**Où** — `backend/src/investors/`, `backend/test/investisseurs.e2e-spec.ts`.
+
+## Répartir au centime exact, par la méthode du plus fort reste
+
+**Quoi** — `allocatePro()` attribue à chacun sa part entière du prorata, puis distribue les
+centimes restants aux plus forts restes. La somme des allocations égale **toujours** le montant
+réparti.
+
+**Pourquoi** — répartir 1 000 € entre trois investisseurs est trivial ; le faire sans perdre ni
+inventer un centime ne l'est pas. Trois parts de 100 000 centimes donnent 33 333 chacune, soit
+99 999 : un centime s'évapore. Arrondir au supérieur en crée un.
+
+Un centime par versement, sur des milliers de projets et des années, n'est pas une coquetterie :
+c'est un écart permanent entre ce que le projet a versé et ce que les investisseurs ont reçu, qui
+grossit tout seul et que personne ne sait expliquer. La propriété est vérifiée sur **20 000
+tirages** aléatoires.
+
+Les ex æquo sont départagés par l'ordre d'origine. C'est arbitraire mais **déterministe** : un
+partage qu'on sait rejouer se contrôle, là où un partage aléatoire ne s'explique jamais.
+
+**Où** — `backend/src/investors/distribution.ts`.
+
+## Le registre d'un projet survit à la suppression du projet et de son porteur
+
+**Quoi** — `financed_projects.project_id` est nullable, en `SET NULL`, et le titre du projet est
+**recopié** à l'ouverture (`project_title`). À la suppression d'un compte porteur,
+`entrepreneur_user_id` passe à null ; le registre reste.
+
+**Pourquoi** — deux raisons, et la première est un défaut trouvé en concevant : `participations`
+refuse de partir (`Restrict`), donc une cascade depuis `projects` aurait fait **échouer la
+suppression de compte** sur une violation de clé étrangère. La seconde est de fond : si la
+suppression du projet emportait le registre, un entrepreneur pourrait faire disparaître la trace
+de l'argent que d'autres ont mis chez lui.
+
+Le titre recopié suit le précédent de `billing_documents.client_name` : ce qui est écrit à
+l'instant T ne bouge plus.
+
+**Où** — `backend/prisma/schema.prisma`, `backend/src/investors/investors.service.ts`.
+
+## Un investisseur qui s'en va est détaché, pas effacé
+
+**Quoi** — à la suppression du compte, la ligne `investors` reste : `user_id` passe à null et
+`display_name` devient « Investisseur retiré ». Aucune participation, aucun mouvement n'est
+supprimé.
+
+**Pourquoi** — l'argent est réellement entré dans les projets **d'autres personnes** et devra en
+ressortir. Effacer ses participations falsifierait leurs registres ; laisser son nom conserverait
+une donnée personnelle après une demande d'effacement. Le fait reste, l'identité part — le porteur
+continue de voir qu'il doit 1 000 € à quelqu'un, il ne voit plus qui.
+
+C'est le traitement inverse de la comptabilité personnelle (`ledger_*`), qui est **supprimée** :
+celle-là n'appartient qu'à la personne, celle-ci engage un tiers.
+
+**Où** — `backend/src/investors/investors-deletion.ts`.
+
+## Rien ne s'efface dans le journal d'investissement
+
+**Quoi** — aucune méthode de suppression dans `InvestorsService`, aucune route pour en appeler
+une. Une erreur se corrige par un mouvement de `correction` qui désigne celui qu'il rectifie, avec
+un motif obligatoire.
+
+**Pourquoi** — même principe qu'un avoir en facturation, et pour la même raison : un historique
+qu'on peut réécrire ne prouve rien, et c'est précisément ce qu'on demande à un registre
+d'investissement. Le motif est obligatoire parce qu'une correction sans raison consignée est une
+réécriture déguisée — six mois plus tard, personne ne saura pourquoi le montant a changé.
+
+Dans les totaux, une correction se rattache au **poste du mouvement qu'elle vise**, pas à une
+catégorie « corrections ». Sinon le montant erroné resterait visible dans son poste d'origine et
+le total cesserait de décrire la réalité.
+
+**Où** — `backend/src/investors/investors.service.ts`, `distribution.ts` (`portfolioTotals`).
+
+## La part perpétuelle de 5 % se dit, elle ne se devine pas
+
+**Quoi** — `POST /projets-finances/:id/dividendes` exige `applyPerpetualShare` explicitement.
+Aucun défaut.
+
+**Pourquoi** — tous les projets financés ne sont pas entrés au capital selon le modèle 51/49.
+Prélever 5 % par défaut reviendrait à décider à la place du porteur ; ne rien prélever par défaut
+ferait perdre à Ignitux ce que le modèle lui accorde. Dans les deux cas le produit trancherait une
+question qui ne lui appartient pas.
+
+Le calcul réutilise `perpetualShareCents` du modèle économique plutôt que de refaire la règle :
+une seconde implémentation de la même règle finit toujours par diverger de la première.
+
+**Où** — `backend/src/investors/distribution.ts` (`splitDividend`).

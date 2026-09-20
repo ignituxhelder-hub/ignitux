@@ -88,6 +88,18 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   dividend_distributions: exported('financement'),
   buyback_objectives: exported('financement'),
 
+  // Investissements. Seules les lignes de la personne sortent : ces tables
+  // contiennent aussi celles des autres investisseurs des mêmes projets.
+  //
+  // À la suppression du compte, rien n'est effacé et tout est détaché :
+  // l'argent est réellement entré dans les projets d'autres personnes, et
+  // effacer ses participations falsifierait leurs registres. Le fait reste,
+  // l'identité part. Voir investors-deletion.ts.
+  investors: exported('financement'),
+  financed_projects: exported('financement'),
+  participations: exported('financement'),
+  investor_movements: exported('financement'),
+
   community_comments: exported('communaute_et_marketplace'),
   marketplace_profiles: exported('communaute_et_marketplace'),
   marketplace_contacts: exported('communaute_et_marketplace'),

@@ -92,7 +92,11 @@ export const ModelName = {
   ledger_entries: 'ledger_entries',
   ledger_lines: 'ledger_lines',
   bank_accounts: 'bank_accounts',
-  bank_transactions: 'bank_transactions'
+  bank_transactions: 'bank_transactions',
+  investors: 'investors',
+  financed_projects: 'financed_projects',
+  participations: 'participations',
+  investor_movements: 'investor_movements'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -690,6 +694,68 @@ export const Bank_transactionsScalarFieldEnum = {
 } as const
 
 export type Bank_transactionsScalarFieldEnum = (typeof Bank_transactionsScalarFieldEnum)[keyof typeof Bank_transactionsScalarFieldEnum]
+
+
+export const InvestorsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  kind: 'kind',
+  display_name: 'display_name',
+  note: 'note',
+  created_at: 'created_at'
+} as const
+
+export type InvestorsScalarFieldEnum = (typeof InvestorsScalarFieldEnum)[keyof typeof InvestorsScalarFieldEnum]
+
+
+export const Financed_projectsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  project_title: 'project_title',
+  entrepreneur_user_id: 'entrepreneur_user_id',
+  target_cents: 'target_cents',
+  status: 'status',
+  opened_on: 'opened_on',
+  note: 'note',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Financed_projectsScalarFieldEnum = (typeof Financed_projectsScalarFieldEnum)[keyof typeof Financed_projectsScalarFieldEnum]
+
+
+export const ParticipationsScalarFieldEnum = {
+  id: 'id',
+  investor_id: 'investor_id',
+  financed_project_id: 'financed_project_id',
+  invested_cents: 'invested_cents',
+  share_basis_points_granted: 'share_basis_points_granted',
+  equity_holder_id: 'equity_holder_id',
+  status: 'status',
+  occurred_on: 'occurred_on',
+  note: 'note',
+  created_at: 'created_at'
+} as const
+
+export type ParticipationsScalarFieldEnum = (typeof ParticipationsScalarFieldEnum)[keyof typeof ParticipationsScalarFieldEnum]
+
+
+export const Investor_movementsScalarFieldEnum = {
+  id: 'id',
+  financed_project_id: 'financed_project_id',
+  investor_id: 'investor_id',
+  participation_id: 'participation_id',
+  kind: 'kind',
+  amount_cents: 'amount_cents',
+  occurred_on: 'occurred_on',
+  reference: 'reference',
+  note: 'note',
+  corrects_movement_id: 'corrects_movement_id',
+  distribution_id: 'distribution_id',
+  created_at: 'created_at'
+} as const
+
+export type Investor_movementsScalarFieldEnum = (typeof Investor_movementsScalarFieldEnum)[keyof typeof Investor_movementsScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -438,7 +438,11 @@ export const ModelName = {
   ledger_entries: 'ledger_entries',
   ledger_lines: 'ledger_lines',
   bank_accounts: 'bank_accounts',
-  bank_transactions: 'bank_transactions'
+  bank_transactions: 'bank_transactions',
+  investors: 'investors',
+  financed_projects: 'financed_projects',
+  participations: 'participations',
+  investor_movements: 'investor_movements'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -454,7 +458,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3566,6 +3570,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    investors: {
+      payload: Prisma.$investorsPayload<ExtArgs>
+      fields: Prisma.investorsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.investorsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investorsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.investorsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investorsPayload>
+        }
+        findFirst: {
+          args: Prisma.investorsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investorsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.investorsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investorsPayload>
+        }
+        findMany: {
+          args: Prisma.investorsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investorsPayload>[]
+        }
+        create: {
+          args: Prisma.investorsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investorsPayload>
+        }
+        createMany: {
+          args: Prisma.investorsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.investorsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investorsPayload>[]
+        }
+        delete: {
+          args: Prisma.investorsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investorsPayload>
+        }
+        update: {
+          args: Prisma.investorsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investorsPayload>
+        }
+        deleteMany: {
+          args: Prisma.investorsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.investorsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.investorsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investorsPayload>[]
+        }
+        upsert: {
+          args: Prisma.investorsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investorsPayload>
+        }
+        aggregate: {
+          args: Prisma.InvestorsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInvestors>
+        }
+        groupBy: {
+          args: Prisma.investorsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvestorsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.investorsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvestorsCountAggregateOutputType> | number
+        }
+      }
+    }
+    financed_projects: {
+      payload: Prisma.$financed_projectsPayload<ExtArgs>
+      fields: Prisma.financed_projectsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.financed_projectsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financed_projectsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.financed_projectsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financed_projectsPayload>
+        }
+        findFirst: {
+          args: Prisma.financed_projectsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financed_projectsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.financed_projectsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financed_projectsPayload>
+        }
+        findMany: {
+          args: Prisma.financed_projectsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financed_projectsPayload>[]
+        }
+        create: {
+          args: Prisma.financed_projectsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financed_projectsPayload>
+        }
+        createMany: {
+          args: Prisma.financed_projectsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.financed_projectsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financed_projectsPayload>[]
+        }
+        delete: {
+          args: Prisma.financed_projectsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financed_projectsPayload>
+        }
+        update: {
+          args: Prisma.financed_projectsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financed_projectsPayload>
+        }
+        deleteMany: {
+          args: Prisma.financed_projectsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.financed_projectsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.financed_projectsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financed_projectsPayload>[]
+        }
+        upsert: {
+          args: Prisma.financed_projectsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financed_projectsPayload>
+        }
+        aggregate: {
+          args: Prisma.Financed_projectsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFinanced_projects>
+        }
+        groupBy: {
+          args: Prisma.financed_projectsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Financed_projectsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.financed_projectsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Financed_projectsCountAggregateOutputType> | number
+        }
+      }
+    }
+    participations: {
+      payload: Prisma.$participationsPayload<ExtArgs>
+      fields: Prisma.participationsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.participationsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participationsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.participationsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participationsPayload>
+        }
+        findFirst: {
+          args: Prisma.participationsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participationsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.participationsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participationsPayload>
+        }
+        findMany: {
+          args: Prisma.participationsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participationsPayload>[]
+        }
+        create: {
+          args: Prisma.participationsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participationsPayload>
+        }
+        createMany: {
+          args: Prisma.participationsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.participationsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participationsPayload>[]
+        }
+        delete: {
+          args: Prisma.participationsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participationsPayload>
+        }
+        update: {
+          args: Prisma.participationsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participationsPayload>
+        }
+        deleteMany: {
+          args: Prisma.participationsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.participationsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.participationsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participationsPayload>[]
+        }
+        upsert: {
+          args: Prisma.participationsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participationsPayload>
+        }
+        aggregate: {
+          args: Prisma.ParticipationsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateParticipations>
+        }
+        groupBy: {
+          args: Prisma.participationsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ParticipationsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.participationsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ParticipationsCountAggregateOutputType> | number
+        }
+      }
+    }
+    investor_movements: {
+      payload: Prisma.$investor_movementsPayload<ExtArgs>
+      fields: Prisma.investor_movementsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.investor_movementsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investor_movementsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.investor_movementsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investor_movementsPayload>
+        }
+        findFirst: {
+          args: Prisma.investor_movementsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investor_movementsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.investor_movementsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investor_movementsPayload>
+        }
+        findMany: {
+          args: Prisma.investor_movementsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investor_movementsPayload>[]
+        }
+        create: {
+          args: Prisma.investor_movementsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investor_movementsPayload>
+        }
+        createMany: {
+          args: Prisma.investor_movementsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.investor_movementsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investor_movementsPayload>[]
+        }
+        delete: {
+          args: Prisma.investor_movementsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investor_movementsPayload>
+        }
+        update: {
+          args: Prisma.investor_movementsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investor_movementsPayload>
+        }
+        deleteMany: {
+          args: Prisma.investor_movementsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.investor_movementsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.investor_movementsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investor_movementsPayload>[]
+        }
+        upsert: {
+          args: Prisma.investor_movementsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$investor_movementsPayload>
+        }
+        aggregate: {
+          args: Prisma.Investor_movementsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInvestor_movements>
+        }
+        groupBy: {
+          args: Prisma.investor_movementsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Investor_movementsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.investor_movementsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Investor_movementsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -4186,6 +4486,68 @@ export const Bank_transactionsScalarFieldEnum = {
 export type Bank_transactionsScalarFieldEnum = (typeof Bank_transactionsScalarFieldEnum)[keyof typeof Bank_transactionsScalarFieldEnum]
 
 
+export const InvestorsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  kind: 'kind',
+  display_name: 'display_name',
+  note: 'note',
+  created_at: 'created_at'
+} as const
+
+export type InvestorsScalarFieldEnum = (typeof InvestorsScalarFieldEnum)[keyof typeof InvestorsScalarFieldEnum]
+
+
+export const Financed_projectsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  project_title: 'project_title',
+  entrepreneur_user_id: 'entrepreneur_user_id',
+  target_cents: 'target_cents',
+  status: 'status',
+  opened_on: 'opened_on',
+  note: 'note',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Financed_projectsScalarFieldEnum = (typeof Financed_projectsScalarFieldEnum)[keyof typeof Financed_projectsScalarFieldEnum]
+
+
+export const ParticipationsScalarFieldEnum = {
+  id: 'id',
+  investor_id: 'investor_id',
+  financed_project_id: 'financed_project_id',
+  invested_cents: 'invested_cents',
+  share_basis_points_granted: 'share_basis_points_granted',
+  equity_holder_id: 'equity_holder_id',
+  status: 'status',
+  occurred_on: 'occurred_on',
+  note: 'note',
+  created_at: 'created_at'
+} as const
+
+export type ParticipationsScalarFieldEnum = (typeof ParticipationsScalarFieldEnum)[keyof typeof ParticipationsScalarFieldEnum]
+
+
+export const Investor_movementsScalarFieldEnum = {
+  id: 'id',
+  financed_project_id: 'financed_project_id',
+  investor_id: 'investor_id',
+  participation_id: 'participation_id',
+  kind: 'kind',
+  amount_cents: 'amount_cents',
+  occurred_on: 'occurred_on',
+  reference: 'reference',
+  note: 'note',
+  corrects_movement_id: 'corrects_movement_id',
+  distribution_id: 'distribution_id',
+  created_at: 'created_at'
+} as const
+
+export type Investor_movementsScalarFieldEnum = (typeof Investor_movementsScalarFieldEnum)[keyof typeof Investor_movementsScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -4471,6 +4833,10 @@ export type GlobalOmitConfig = {
   ledger_lines?: Prisma.ledger_linesOmit
   bank_accounts?: Prisma.bank_accountsOmit
   bank_transactions?: Prisma.bank_transactionsOmit
+  investors?: Prisma.investorsOmit
+  financed_projects?: Prisma.financed_projectsOmit
+  participations?: Prisma.participationsOmit
+  investor_movements?: Prisma.investor_movementsOmit
 }
 
 /* Types for Logging */

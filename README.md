@@ -74,6 +74,11 @@ bout tant que la clé n'est pas renseignée.
   propriétaire et un seul, et un mouvement entre les deux comptabilités s’enregistre des deux
   côtés, jamais dans une écriture à cheval. Une écriture qui toucherait les comptes de l’autre
   est refusée par le moteur constitutionnel, et la tentative est journalisée
+- **Investisseurs** — un investisseur peut financer un projet ou cent, et chacun reste un
+  registre **indépendant** : les remboursements du projet A n'apparaissent jamais dans le
+  projet B. Portefeuille global et détail projet par projet, répartition automatique des
+  remboursements et dividendes **au centime exact**, et un historique où **rien ne s’efface** —
+  une erreur se corrige par une écriture de correction motivée
 - **Aucun virement n’est émis, aucun compte n’est synchronisé avec une banque, et aucun IBAN
   complet n’est conservé** — seulement ses quatre derniers caractères, tant qu’aucun fournisseur
   bancaire n’a été choisi

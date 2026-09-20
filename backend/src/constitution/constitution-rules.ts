@@ -60,6 +60,17 @@ export type ConstitutionAction =
       kind: 'reconcile_bank_transaction';
       bankAccountOwner: string;
       entryOwner: string;
+    }
+  /** Un mouvement d'investisseur s'apprête à être enregistré. (art. 22) */
+  | {
+      kind: 'record_investor_movement';
+      /** Le projet financé auquel le mouvement est attribué. */
+      movementProject: string;
+      /**
+       * Le projet auquel appartient la participation visée, quand il y en a
+       * une. null pour un mouvement qui n'en désigne aucune.
+       */
+      participationProject: string | null;
     };
 
 export type ConstitutionSeverity = 'blocking' | 'warning';
@@ -221,6 +232,26 @@ export const CONSTITUTION_RULES: readonly ConstitutionRule[] = [
         return `La règle « ${action.slug} » (${action.country}) ne cite aucune source officielle.`;
       }
       return null;
+    },
+  },
+  {
+    id: 'investissements-non-melanges',
+    articleSlug: 'v1-22-financement-ethique',
+    severity: 'blocking',
+    description:
+      "L'argent d'un projet financé ne touche jamais celui d'un autre : un mouvement attribué " +
+      'à un projet ne peut pas viser la participation prise dans un autre.',
+    check(action) {
+      if (action.kind !== 'record_investor_movement') return null;
+      // Sans participation visée, il n'y a rien à mélanger : le mouvement est
+      // rattaché à son projet et c'est tout.
+      if (action.participationProject === null) return null;
+      if (action.participationProject === action.movementProject) return null;
+      return (
+        `Ce mouvement est attribué au projet ${action.movementProject} mais vise une participation ` +
+        `prise dans le projet ${action.participationProject}. Un remboursement ne traverse jamais ` +
+        "la frontière d'un projet : chaque projet financé a son propre registre."
+      );
     },
   },
   {

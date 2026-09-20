@@ -419,6 +419,46 @@ describe('moteur de règles constitutionnel', () => {
       expect(hasBlockingViolation(violations)).toBe(true);
     });
 
+    it("refuse un mouvement attribué à un projet mais visant la participation d'un autre", () => {
+      // La séparation par projet. Un investisseur traverse les projets ;
+      // son argent, jamais. Un remboursement du projet A qui viserait une
+      // participation prise dans le projet B ferait passer de l'argent d'un
+      // registre à l'autre sans que rien ne le constate.
+      const violations = reviewAction({
+        kind: 'record_investor_movement',
+        movementProject: 'projet-A',
+        participationProject: 'projet-B',
+      });
+
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe('investissements-non-melanges');
+      expect(hasBlockingViolation(violations)).toBe(true);
+      expect(violations[0].detail).toContain('projet-A');
+      expect(violations[0].detail).toContain('projet-B');
+    });
+
+    it('accepte un mouvement qui reste dans son projet', () => {
+      expect(
+        reviewAction({
+          kind: 'record_investor_movement',
+          movementProject: 'projet-A',
+          participationProject: 'projet-A',
+        }),
+      ).toEqual([]);
+    });
+
+    it("ne se prononce pas sur un mouvement qui ne vise aucune participation", () => {
+      // Sans participation visée, il n'y a rien à mélanger : le mouvement
+      // est rattaché à son projet et c'est tout.
+      expect(
+        reviewAction({
+          kind: 'record_investor_movement',
+          movementProject: 'projet-A',
+          participationProject: null,
+        }),
+      ).toEqual([]);
+    });
+
     it('accepte un rapprochement dans la même comptabilité', () => {
       expect(
         reviewAction({
@@ -464,6 +504,11 @@ describe('moteur de règles constitutionnel', () => {
         kind: 'reconcile_bank_transaction',
         bankAccountOwner: 'IGNITUX',
         entryOwner: 'IGNITUX',
+      },
+      {
+        kind: 'record_investor_movement',
+        movementProject: 'projet-A',
+        participationProject: 'projet-A',
       },
     ];
 

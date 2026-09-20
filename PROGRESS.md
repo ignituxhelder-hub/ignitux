@@ -1113,6 +1113,7 @@ Ces cinq points n'ont pas été touchés. Pour chacun, ce dont j'ai besoin pour 
 | **Sources Suisse / Portugal** | Quelles sources officielles fais-tu autorité — équivalents de service-public.fr pour ces deux pays ? Sans URL officielle, je ne peux rien semer : le module refuse une règle locale sans source, et c'est volontaire. |
 | **Fournisseur bancaire** | *(né du 20/09/2026)* La cellule bancaire déclare des comptes et saisit des mouvements, mais n'émet aucun virement et ne synchronise rien : aucun fournisseur n'est choisi. Lequel — et pour quel périmètre : lecture seule des relevés, ou émission de virements ? La réponse commande aussi la détention des IBAN complets, aujourd'hui volontairement refusée. |
 | **Article constitutionnel des caisses** | *(né du 20/09/2026)* Les deux règles de séparation sont rattachées à l'article 22 (Financement Éthique), qui est ton texte et ne formule pas cette exigence mot pour mot. Trois options : les y laisser ; les déplacer sur l'article 2 (L'Humain Avant le Profit), qui passerait alors de `declared` à `enforced` ; ou écrire un article 25 dont tu donnes le libellé. Je n'ai pas touché au corpus V1 : c'est ton texte. |
+| **Deux tables de dividendes** | *(né du 20/09/2026)* `dividend_distributions` (par détenteur de parts) et `investor_movements` (par investisseur) enregistrent le même genre d'événement vu sous deux angles. Faut-il faire de la première une projection de la seconde ? Cela changerait une surface existante du produit, d'où la question. |
 
 **Une sixième question, née de cette session** : le déploiement de test doit-il basculer sur la
 nouvelle base de production ? Basculer maintenant repart d'une base vierge et **efface le projet
@@ -1800,3 +1801,145 @@ en base : si elle cesse de tout nettoyer, on veut le savoir. L'audit qui a suivi
   défaut 3 ont été retirées à la main, puisque rien ne les emportait) ;
 - la trace de refus laissée par le parcours, effacée ;
 - **10 comptes sans rapport avec le test, intacts** — dont ceux des testeurs.
+
+---
+
+# 20. Le moteur d'investissement (20 septembre 2026)
+
+Consigne : construire le système complet de gestion des investisseurs, où chaque investissement
+est traçable, indépendant et automatisable, et où **aucun mélange n'est possible entre projets**.
+
+## 20.1 Ce que le produit savait déjà, et l'axe qui manquait
+
+Avant de concevoir, l'état des lieux. Le modèle économique était **déjà implémenté** :
+`FOUNDER_ENTRY_BASIS_POINTS = 5100`, `IGNITUX_ENTRY_BASIS_POINTS = 4900`,
+`perpetualShareCents()` pour les 5 % perpétuels, `buildCapTable()` et `founderTrajectory()` pour
+l'évolution vers l'autonomie. Rien de tout cela n'a été refait.
+
+Ce qui manquait n'était pas l'argent : c'était **la personne**. Tout était rattaché à un
+`project_id`, et un détenteur de parts n'était qu'un **nom**. « Marie Dubois » sur le projet A et
+« Marie Dubois » sur le projet B étaient deux lignes sans le moindre lien. Impossible de dire ce
+qu'une personne avait investi en tout, ni ce qui lui était revenu.
+
+## 20.2 Les quatre tables
+
+| Table | Ce qu'elle porte |
+|---|---|
+| `investors` | l'identité, indépendante des projets |
+| `financed_projects` | un projet ouvert au financement, avec son état propre |
+| `participations` | ce qu'un investisseur a mis dans **un** projet |
+| `investor_movements` | le journal immuable de tout ce qui bouge |
+
+**La règle tenue** : tout mouvement porte son projet **et** son investisseur, tous deux NOT NULL.
+« Mouvement flottant » n'est pas un état représentable.
+
+La séparation est vérifiée à trois niveaux :
+
+1. le schéma — deux colonnes obligatoires ;
+2. la règle constitutionnelle **`investissements-non-melanges`** (article 22) — un mouvement
+   attribué à un projet ne peut pas viser une participation prise dans un autre ;
+3. **`separationAudit()`** — relit tout le registre en SQL et cherche trois défauts : un mouvement
+   au mauvais projet, un signe qui contredit sa nature, une correction qui ne corrige rien.
+
+## 20.3 Le centime qui disparaît
+
+C'est le vrai problème du module, et il n'est pas celui qu'on croit. Répartir 1 000 € entre trois
+investisseurs est trivial ; le faire **sans perdre ni inventer un centime** ne l'est pas. Trois
+parts de 100 000 centimes donnent 33 333 chacune, soit 99 999 : un centime s'évapore. Arrondir au
+supérieur en crée un.
+
+Un centime par versement, sur des milliers de projets et des années, n'est pas une coquetterie :
+c'est un écart permanent entre ce que le projet a versé et ce que les investisseurs ont reçu, qui
+grossit tout seul et que personne ne sait expliquer.
+
+**Méthode du plus fort reste** : part entière à chacun, puis les centimes restants aux plus fortes
+fractions perdues. La somme est exacte par construction. Vérifiée sur **20 000 tirages
+aléatoires**, avec des poids allant de 1 à 5 000 000 de centimes et jusqu'à douze investisseurs.
+
+Les ex æquo sont départagés par l'ordre d'origine : arbitraire, mais **déterministe**. Un partage
+qu'on sait rejouer se contrôle ; un partage aléatoire ne s'explique jamais.
+
+## 20.4 Deux défauts trouvés en concevant
+
+### La suppression de compte aurait échoué
+
+`participations` refuse de partir (`Restrict`) et `financed_projects` cascadait depuis `projects`.
+Un porteur ayant des investisseurs n'aurait **pas pu supprimer son compte** : violation de clé
+étrangère, erreur brute.
+
+Corrigé, et la correction est aussi la bonne réponse de fond : `project_id` devient nullable en
+`SET NULL`, le titre du projet est **recopié** à l'ouverture. Si la suppression du projet
+emportait le registre, un entrepreneur pourrait faire disparaître la trace de l'argent que
+d'autres ont mis chez lui.
+
+### Un investisseur qui part ne peut pas effacer ce qu'il a mis chez les autres
+
+À la suppression du compte, la ligne `investors` **reste** : `user_id` à null, `display_name`
+remplacé par « Investisseur retiré ». Aucune participation, aucun mouvement supprimé.
+
+L'argent est réellement entré dans les projets d'autres personnes et devra en ressortir. Effacer
+falsifierait leurs registres ; garder le nom conserverait une donnée personnelle après effacement.
+Le fait reste, l'identité part.
+
+C'est le traitement **inverse** de la comptabilité personnelle (`ledger_*`), qui est supprimée :
+celle-là n'appartient qu'à la personne, celle-ci engage un tiers.
+
+## 20.5 Ce qui ne s'efface pas
+
+Aucune méthode de suppression dans le service, aucune route pour en appeler une — et le test de
+bout en bout le vérifie en constatant un **404 sur la route de suppression**, c'est-à-dire son
+absence. Une erreur se corrige par un mouvement de `correction` qui désigne sa cible, avec un
+motif obligatoire.
+
+Dans les totaux, une correction se rattache au **poste du mouvement qu'elle vise**. Rangée à part,
+elle laisserait le montant erroné visible dans son poste d'origine.
+
+## 20.6 Ce que le produit refuse de deviner
+
+- **La part perpétuelle de 5 %** doit être dite explicitement à chaque dividende. Aucun défaut :
+  tous les projets financés ne sont pas entrés au capital selon le modèle 51/49, et trancher dans
+  un sens ou dans l'autre reviendrait à décider à la place du porteur.
+- **Un projet dont les participations totalisent zéro** ne se répartit pas. Partager en parts
+  égales serait une décision, pas un calcul.
+- **Le pourcentage courant** reste lu dans la table de capitalisation. `participations`
+  n'enregistre que la part accordée *au moment de l'apport* — un fait historique. Deux sources de
+  vérité sur un pourcentage finiraient par diverger, et la mauvaise servirait à calculer un
+  versement.
+
+## 20.7 Vérification
+
+| Contrôle | Résultat |
+|---|---|
+| Types (`tsc --noEmit`) | **0 erreur** |
+| Lint (`oxlint --type-aware`) | **0 avertissement** |
+| Tests unitaires | **711 passent** (61 fichiers) |
+| Tests de bout en bout | **134 passent** (9 fichiers) |
+| Build | propre |
+
+**26 tests unitaires** sur le calcul pur, dont le balayage de 20 000 tirages. **25 tests de bout
+en bout** sur la vraie base Postgres, rejouant le décor exact de la spécification :
+
+> Projet A — investisseur 1 : 1 000 €, investisseur 2 : 500 €
+> Projet B — investisseur 1 : 3 000 €
+
+Un remboursement de 900 € sur A se partage en 600 / 300, **et le projet B n'en porte aucune
+trace**. Un dividende de 200 € sur B prélève 1 000 centimes pour Ignitux et verse 19 000 à
+l'investisseur 1 seul. Le portefeuille de l'investisseur 1 montre **deux lignes séparées**, et son
+global est exactement la somme des lignes — jamais un chiffre calculé à part, qui finirait par
+donner une seconde réponse.
+
+## 20.8 Ce qui n'est pas construit
+
+- **Aucun virement n'est émis.** Chaque répartition renvoie un avertissement qui le dit :
+  « cette répartition est enregistrée, pas exécutée ». Le produit calcule ce qui revient à chacun ;
+  verser reste manuel tant qu'aucun fournisseur bancaire n'est choisi (décision en §15.6).
+- **Aucune évolution automatique du 51/49.** Le rachat progressif reste déclenché par le porteur,
+  parce que les seuils — rentabilité, autonomie, stabilité — ne sont pas chiffrés dans le modèle.
+  Le moteur sait *enregistrer* l'évolution et refuser une répartition qui ferait passer le porteur
+  sous la majorité ; il ne sait pas *décider* qu'un objectif est atteint, et c'est volontaire.
+- **Aucun écran.** Tout est côté API.
+- **Deux tables de dividendes coexistent** : `dividend_distributions` (l'ancienne, par détenteur
+  de parts, alimentée par `POST /financing/holders/:id/dividends`) et `investor_movements` (la
+  nouvelle, par investisseur). Elles répondent à deux questions différentes, mais la première
+  pourrait devenir une projection de la seconde. Les consolider changerait une surface existante
+  du produit : c'est une décision, elle est posée en §15.6.

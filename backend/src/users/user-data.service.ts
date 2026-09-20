@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { investorsDeletionOperations } from '../investors/investors-deletion.js';
 import { ledgerDeletionOperations } from '../ledger/ledger-deletion.js';
 import { exclusions } from './user-data-scope.js';
 
@@ -108,6 +109,10 @@ export class UserDataService {
       comptesComptables,
       ecritures,
       comptesBancaires,
+      investisseur,
+      participationsInvestisseur,
+      mouvementsInvestisseur,
+      projetsOuvertsAuFinancement,
     ] = await Promise.all([
       this.prisma.tasks.findMany({ where: byProject }),
       this.prisma.memories.findMany({ where: { user_id: userId } }),
@@ -150,6 +155,18 @@ export class UserDataService {
         where: { owner_type: 'user', owner_id: userId },
         include: { transactions: true },
       }),
+      // Investissements : ce que TU as mis chez les autres, et ce que tu as
+      // ouvert au financement chez toi.
+      this.prisma.investors.findFirst({ where: { user_id: userId } }),
+      this.prisma.participations.findMany({
+        where: { investor: { user_id: userId } },
+        include: { financed_project: { select: { project_title: true, status: true } } },
+      }),
+      this.prisma.investor_movements.findMany({
+        where: { investor: { user_id: userId } },
+        orderBy: [{ occurred_on: 'asc' }],
+      }),
+      this.prisma.financed_projects.findMany({ where: { entrepreneur_user_id: userId } }),
     ]);
 
     return {
@@ -203,6 +220,12 @@ export class UserDataService {
           evenements_de_repartition: equityEvents,
           dividendes_verses: dividends,
           objectifs_de_rachat: buybackObjectives,
+          // Ton profil d'investisseur, ce que tu as placé, et l'historique
+          // de ce qui t'est revenu — projet par projet, jamais mélangés.
+          profil_investisseur: investisseur,
+          mes_participations: participationsInvestisseur,
+          mes_mouvements_d_investisseur: mouvementsInvestisseur,
+          mes_projets_ouverts_au_financement: projetsOuvertsAuFinancement,
         },
         communaute_et_marketplace: {
           commentaires: comments,
@@ -374,6 +397,11 @@ export class UserDataService {
     // quelqu'un qui s'en va. Voir ledger-deletion.ts.
     const comptabilite = await ledgerDeletionOperations(this.prisma, userId);
 
+    // Les investissements, eux, ne partent PAS : l'argent est entré dans les
+    // projets d'autres personnes et devra en ressortir. On retire la
+    // personne, on garde le fait. Voir investors-deletion.ts.
+    const investissements = investorsDeletionOperations(this.prisma, userId);
+
     await this.prisma.$transaction([
       this.prisma.constitution_violations.updateMany({
         where: { user_id: userId },
@@ -384,6 +412,7 @@ export class UserDataService {
         data: { user_id: null },
       }),
       ...comptabilite,
+      ...investissements,
       // Tout le reste part en cascade depuis `users` (voir schema.prisma).
       this.prisma.users.delete({ where: { id: userId } }),
     ]);

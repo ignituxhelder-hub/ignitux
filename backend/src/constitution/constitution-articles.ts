@@ -249,7 +249,10 @@ export const CONSTITUTION_ARTICLES: readonly ConstitutionArticleSeed[] = [
     //   autre propriétaire est refusée. L'argent d'une personne n'entre
     //   jamais dans les livres d'IGNITUX, ni l'inverse ;
     // - `rapprochement-dans-la-meme-caisse` — un mouvement bancaire ne se
-    //   rattache qu'à une écriture du même propriétaire.
+    //   rattache qu'à une écriture du même propriétaire ;
+    // - `investissements-non-melanges` — un mouvement attribué à un projet
+    //   financé ne peut pas viser une participation prise dans un autre. Un
+    //   investisseur traverse les projets ; son argent, jamais.
     //
     // Les deux dernières traduisent une exigence que le texte de l'article ne
     // formule pas mot pour mot : « le financement doit servir la création de

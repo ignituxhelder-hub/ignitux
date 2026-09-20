@@ -21,6 +21,14 @@ const ANONYMISEES = ['constitution_violations', 'ai_usage_events'] as const;
  * qui s'en va.
  */
 const SUPPRIMEES = ['ledger_entries', 'bank_accounts', 'ledger_accounts'] as const;
+
+/**
+ * Les tables dont les lignes de la personne sont **détachées**, ni effacées
+ * ni laissées nominatives : l'argent qu'un investisseur a mis dans les
+ * projets d'autres personnes est réellement entré chez eux et devra en
+ * ressortir. Effacer ses participations falsifierait leurs registres.
+ */
+const DETACHEES = ['investors', 'financed_projects'] as const;
 /**
  * Un vrai hash bcrypt, pas un espion : `vi.spyOn(bcrypt, 'compare')` est
  * impossible sur un module ESM, et vérifier la vraie comparaison vaut mieux
@@ -45,6 +53,7 @@ type Mock = ReturnType<typeof vi.fn>;
  */
 interface TableMock {
   findMany: Mock;
+  findFirst: Mock;
   count: Mock;
   findUnique: Mock;
   findUniqueOrThrow: Mock;
@@ -59,6 +68,7 @@ function buildPrismaMock() {
   for (const table of exportedTables()) {
     prisma[table] = {
       findMany: vi.fn().mockResolvedValue([]),
+      findFirst: vi.fn().mockResolvedValue(null),
       count: vi.fn().mockResolvedValue(0),
       findUnique: vi.fn().mockResolvedValue(null),
       findUniqueOrThrow: vi.fn(),
@@ -333,6 +343,26 @@ describe('UserDataService', () => {
       }
     });
 
+    it("détache les investissements au lieu de les effacer", async () => {
+      // L'argent qu'un investisseur a mis dans les projets d'autres
+      // personnes est réellement entré chez eux. Effacer ses participations
+      // falsifierait leurs registres ; laisser son nom conserverait une
+      // donnée personnelle après une demande d'effacement. Le fait reste,
+      // l'identité part.
+      await service.deleteAccount('u1', GOOD_PASSWORD);
+
+      expect(prisma.investors.updateMany).toHaveBeenCalledWith({
+        where: { user_id: 'u1' },
+        data: { user_id: null, display_name: 'Investisseur retiré', note: null },
+      });
+      expect(prisma.financed_projects.updateMany).toHaveBeenCalledWith({
+        where: { entrepreneur_user_id: 'u1' },
+        data: { entrepreneur_user_id: null },
+      });
+      expect(prisma.participations.deleteMany).not.toHaveBeenCalled();
+      expect(prisma.investor_movements.deleteMany).not.toHaveBeenCalled();
+    });
+
     it('anonymise et supprime dans la même transaction', async () => {
       // Séparées, un échec entre les deux laisserait soit un journal
       // nominatif sans compte, soit un compte supprimé à moitié.
@@ -344,7 +374,7 @@ describe('UserDataService', () => {
       // introduit sans le vouloir. Le nombre est vérifié aussi, mais il ne
       // porte pas la garantie à lui seul.
       const operations = prisma.$transaction.mock.calls[0][0] as unknown[];
-      expect(operations).toHaveLength(9);
+      expect(operations).toHaveLength(11);
 
       for (const table of ANONYMISEES) {
         expect(prisma[table].updateMany).toHaveBeenCalledWith({
@@ -354,6 +384,11 @@ describe('UserDataService', () => {
       }
       for (const table of SUPPRIMEES) {
         expect(prisma[table].deleteMany).toHaveBeenCalled();
+      }
+      for (const table of DETACHEES) {
+        expect(prisma[table].updateMany).toHaveBeenCalled();
+        // Et surtout : rien n'y est supprimé.
+        expect(prisma[table].deleteMany).not.toHaveBeenCalled();
       }
       expect(prisma.users.delete).toHaveBeenCalledWith({ where: { id: 'u1' } });
     });

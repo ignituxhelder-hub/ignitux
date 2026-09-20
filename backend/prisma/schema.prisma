@@ -80,6 +80,7 @@ model projects {
   equity_events        equity_events[]
   dividends            dividend_distributions[]
   buyback_objectives   buyback_objectives[]
+  financedProjects     financed_projects?
 
   @@index([owner_id])
   @@index([is_public])
@@ -398,8 +399,9 @@ model equity_holders {
   is_founder Boolean   @default(false)
   created_at DateTime? @default(now()) @db.Timestamptz(6)
 
-  equity_events equity_events[]
-  dividends     dividend_distributions[]
+  equity_events  equity_events[]
+  dividends      dividend_distributions[]
+  participations participations[]
 
   @@index([project_id])
 }
@@ -989,4 +991,175 @@ model bank_transactions {
   @@unique([bank_account_id, external_ref])
   @@index([bank_account_id, occurred_on])
   @@index([reconciled_entry_id])
+}
+
+/// ─────────────────────────────────────────────────────────────────────────
+/// INVESTISSEURS — un investisseur traverse les projets, l'argent jamais.
+///
+/// Ce que le produit savait déjà faire : suivre le capital d'UN projet
+/// (`equity_holders`, `equity_events`), ses apports (`financing_rounds`) et
+/// les dividendes versés à ses détenteurs (`dividend_distributions`). Tout
+/// était rattaché à un `project_id`, et un détenteur n'était qu'un **nom** :
+/// « Marie Dubois » sur le projet A et « Marie Dubois » sur le projet B
+/// étaient deux lignes sans le moindre lien. Impossible, donc, de dire ce
+/// qu'une personne avait investi en tout, ni ce qui lui était revenu.
+///
+/// Ces quatre tables ajoutent l'axe manquant — la personne — sans jamais
+/// permettre à l'argent de traverser la frontière des projets :
+///
+///   investors            qui investit (une identité, plusieurs projets)
+///   financed_projects    un projet ouvert au financement
+///   participations       ce qu'un investisseur a mis dans UN projet
+///   investor_movements   tout ce qui bouge, par projet ET par investisseur
+///
+/// La règle tenue : **aucun mouvement sans son projet et son investisseur.**
+/// Les deux colonnes sont NOT NULL, donc « mouvement flottant » n'est pas un
+/// état représentable. Un remboursement du projet A ne peut pas apparaître
+/// dans le projet B : il faudrait pour cela écrire un mouvement dont le
+/// projet et la participation se contredisent, ce qu'une règle
+/// constitutionnelle refuse et qu'un audit SQL relit après coup.
+
+/// INVESTISSEURS — l'identité d'un investisseur, indépendante des projets.
+model investors {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Le compte Ignitux, quand l'investisseur en a un. Nullable : Ignitux
+  /// lui-même investit, et un investisseur extérieur peut être suivi avant
+  /// d'avoir un compte. Sans clé étrangère vers `users`, pour la même raison
+  /// que le journal des coûts : un investissement a réellement eu lieu, et
+  /// la suppression d'un compte ne doit pas effacer l'argent placé dans le
+  /// projet de quelqu'un d'autre.
+  user_id      String?   @db.Uuid
+  /// 'personne' | 'societe' | 'ignitux'
+  kind         String    @default("personne")
+  display_name String
+  /// Notes libres du porteur. Jamais rempli par le produit.
+  note         String?
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+
+  participations participations[]
+  movements      investor_movements[]
+
+  @@index([user_id])
+}
+
+/// INVESTISSEURS — un projet ouvert au financement.
+///
+/// Distinct de `projects` : tous les projets ne cherchent pas d'argent, et
+/// celui qui en cherche a un état propre (ouvert, financé, en remboursement,
+/// soldé) que le projet lui-même n'a pas à porter.
+model financed_projects {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Le projet, tant qu'il existe.
+  ///
+  /// Nullable et détaché plutôt que cascadé, et c'est un choix de fond. Si
+  /// la suppression du projet emportait le registre, un entrepreneur pourrait
+  /// faire disparaître la trace de l'argent que d'autres ont mis chez lui —
+  /// et la suppression de son compte échouerait de toute façon, puisque les
+  /// participations refusent de partir (`Restrict`). Le registre survit donc
+  /// au projet, détaché.
+  project_id           String?   @unique @db.Uuid
+  project              projects? @relation(fields: [project_id], references: [id], onDelete: SetNull)
+  /// Le titre recopié à l'ouverture, pour que le registre reste lisible
+  /// quand le projet n'est plus là. Même principe que `client_name` sur une
+  /// facture émise : ce qui est écrit à l'instant T ne bouge plus.
+  project_title        String
+  /// Le porteur. Passe à null à la suppression de son compte : le fait
+  /// reste, l'identité part.
+  entrepreneur_user_id String?   @db.Uuid
+  /// Ce que le projet cherche à lever. null = pas de cible annoncée ; on
+  /// n'en invente pas.
+  target_cents         Int?
+  /// 'ouvert' | 'finance' | 'en_remboursement' | 'solde' | 'arrete'
+  status               String    @default("ouvert")
+  opened_on            DateTime  @db.Date
+  note                 String?
+  created_at           DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime? @updatedAt @db.Timestamptz(6)
+
+  participations participations[]
+  movements      investor_movements[]
+
+  @@index([entrepreneur_user_id])
+  @@index([status])
+}
+
+/// INVESTISSEURS — ce qu'un investisseur a mis dans UN projet.
+///
+/// Pas de contrainte d'unicité sur (investisseur, projet) : on peut remettre
+/// au pot. Chaque apport est sa propre participation, datée, ce qui garde
+/// l'historique lisible au lieu d'écraser un montant cumulé.
+model participations {
+  id                         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  investor_id                String            @db.Uuid
+  investor                   investors         @relation(fields: [investor_id], references: [id], onDelete: Restrict)
+  financed_project_id        String            @db.Uuid
+  financed_project           financed_projects @relation(fields: [financed_project_id], references: [id], onDelete: Restrict)
+  invested_cents             Int
+  /// La part accordée **au moment de cet apport**, en points de base.
+  ///
+  /// C'est un fait historique, pas l'état courant. La part d'aujourd'hui se
+  /// lit dans la table de capitalisation (`equity_events`), qui reste la
+  /// seule autorité sur le capital — deux sources de vérité sur un
+  /// pourcentage finiraient par diverger, et la mauvaise servirait à
+  /// calculer un versement. null quand l'apport ne donne pas de part
+  /// (prêt, avance).
+  share_basis_points_granted Int?
+  /// Le détenteur correspondant dans la table de capitalisation, s'il existe.
+  equity_holder_id           String?           @db.Uuid
+  equity_holder              equity_holders?   @relation(fields: [equity_holder_id], references: [id], onDelete: SetNull)
+  /// 'active' | 'cedee' | 'soldee'
+  status                     String            @default("active")
+  occurred_on                DateTime          @db.Date
+  note                       String?
+  created_at                 DateTime?         @default(now()) @db.Timestamptz(6)
+
+  movements investor_movements[]
+
+  @@index([investor_id])
+  @@index([financed_project_id])
+  @@index([investor_id, financed_project_id])
+}
+
+/// INVESTISSEURS — le journal immuable de tout ce qui bouge.
+///
+/// **Rien ne s'y supprime.** Une erreur se corrige par un mouvement de
+/// correction qui désigne celui qu'il rectifie — même principe qu'un avoir
+/// en facturation, et pour la même raison : un historique qu'on peut réécrire
+/// ne prouve rien.
+///
+/// Le montant est **signé du point de vue de l'investisseur** : négatif
+/// quand il verse, positif quand il reçoit. Une seule colonne, un seul sens,
+/// et le portefeuille devient une somme. C'est l'inverse du choix fait pour
+/// le grand livre, où débit et crédit portent le sens — là-bas une écriture
+/// a deux côtés, ici un mouvement n'en a qu'un.
+model investor_movements {
+  id                   String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  financed_project_id  String            @db.Uuid
+  financed_project     financed_projects @relation(fields: [financed_project_id], references: [id], onDelete: Restrict)
+  investor_id          String            @db.Uuid
+  investor             investors         @relation(fields: [investor_id], references: [id], onDelete: Restrict)
+  /// La participation concernée, quand le mouvement s'y rattache.
+  participation_id     String?           @db.Uuid
+  participation        participations?   @relation(fields: [participation_id], references: [id], onDelete: Restrict)
+  /// 'investissement' | 'remboursement_capital' | 'dividende' | 'gain' | 'correction'
+  kind                 String
+  /// En centimes entiers, signé : négatif = l'investisseur verse.
+  amount_cents         Int
+  occurred_on          DateTime          @db.Date
+  /// D'où vient ce mouvement : numéro de virement, référence de versement…
+  reference            String?
+  note                 String?
+  /// Le mouvement que celui-ci rectifie. Renseigné uniquement sur les
+  /// corrections, et seule façon d'annuler quoi que ce soit.
+  corrects_movement_id String?           @db.Uuid
+  /// Regroupe les mouvements nés d'une même répartition, pour qu'un
+  /// versement unique reste lisible comme un seul geste.
+  distribution_id      String?           @db.Uuid
+  created_at           DateTime?         @default(now()) @db.Timestamptz(6)
+
+  @@index([financed_project_id, occurred_on])
+  @@index([investor_id, occurred_on])
+  @@index([participation_id])
+  @@index([distribution_id])
+  @@index([corrects_movement_id])
 }

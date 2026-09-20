@@ -53,6 +53,7 @@ marketplace) est IGNITUX.
 | Facturation | `src/billing/` | Devis, factures, avoirs, règlements. Numérotation sans trou, immuabilité après émission |
 | Financement | `src/financing/` | Apports, parts, dividendes versés, conditions de rachat définies par le porteur |
 | **Comptabilité** | `src/ledger/` | Plan de comptes, journal en partie double, balance. **Sépare les livres d’IGNITUX de ceux de chaque personne** : toute écriture a un propriétaire et un seul, et un mouvement entre les deux caisses s’écrit des deux côtés |
+| **Investisseurs** | `src/investors/` | Investisseurs, projets financés, participations, répartition des remboursements et dividendes. **Un investisseur traverse les projets, son argent jamais** : tout mouvement porte son projet ET son investisseur, et rien ne s'y efface — une erreur se corrige par une écriture de correction |
 | **Banque** | `src/banking/` | Comptes bancaires déclarés, mouvements saisis, rapprochement avec une écriture du même propriétaire. Aucune synchronisation, aucun virement, aucun IBAN complet détenu |
 | Coûts IA | `src/igini/usage/` | Journal des appels facturés : modèle, tokens d’entrée et de sortie, **réflexion interne**, durée, personne, projet, générateur |
 | Communauté | `src/community/` | Projets publics, encouragements |
@@ -61,7 +62,8 @@ marketplace) est IGNITUX.
 
 > **Trois « financements » à ne pas confondre** : `src/financing/` suit l’argent réel d’UN projet
 > (apports, parts, dividendes) ; `src/igini/financing/` est le générateur IA qui rédige un plan de
-> financement ; `src/ledger/` tient la comptabilité, avec la frontière entre les caisses.
+> financement ; `src/ledger/` tient la comptabilité, avec la frontière entre les caisses ;
+> `src/investors/` suit ce qu'une PERSONNE a mis dans TOUS ses projets, et ce qui lui revient.
 
 ## Modèle d'accès à un projet
 

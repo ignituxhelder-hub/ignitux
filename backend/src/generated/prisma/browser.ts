@@ -355,3 +355,42 @@ export type bank_accounts = Prisma.bank_accountsModel
  * avec une écriture, lui, se fait explicitement.
  */
 export type bank_transactions = Prisma.bank_transactionsModel
+/**
+ * Model investors
+ * INVESTISSEURS — l'identité d'un investisseur, indépendante des projets.
+ */
+export type investors = Prisma.investorsModel
+/**
+ * Model financed_projects
+ * INVESTISSEURS — un projet ouvert au financement.
+ * 
+ * Distinct de `projects` : tous les projets ne cherchent pas d'argent, et
+ * celui qui en cherche a un état propre (ouvert, financé, en remboursement,
+ * soldé) que le projet lui-même n'a pas à porter.
+ */
+export type financed_projects = Prisma.financed_projectsModel
+/**
+ * Model participations
+ * INVESTISSEURS — ce qu'un investisseur a mis dans UN projet.
+ * 
+ * Pas de contrainte d'unicité sur (investisseur, projet) : on peut remettre
+ * au pot. Chaque apport est sa propre participation, datée, ce qui garde
+ * l'historique lisible au lieu d'écraser un montant cumulé.
+ */
+export type participations = Prisma.participationsModel
+/**
+ * Model investor_movements
+ * INVESTISSEURS — le journal immuable de tout ce qui bouge.
+ * 
+ * **Rien ne s'y supprime.** Une erreur se corrige par un mouvement de
+ * correction qui désigne celui qu'il rectifie — même principe qu'un avoir
+ * en facturation, et pour la même raison : un historique qu'on peut réécrire
+ * ne prouve rien.
+ * 
+ * Le montant est **signé du point de vue de l'investisseur** : négatif
+ * quand il verse, positif quand il reçoit. Une seule colonne, un seul sens,
+ * et le portefeuille devient une somme. C'est l'inverse du choix fait pour
+ * le grand livre, où débit et crédit portent le sens — là-bas une écriture
+ * a deux côtés, ici un mouvement n'en a qu'un.
+ */
+export type investor_movements = Prisma.investor_movementsModel
