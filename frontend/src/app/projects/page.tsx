@@ -136,6 +136,7 @@ export default function ProjectsPage() {
         <nav className="card app-nav" aria-label="Tous mes outils" style={{ marginBottom: '1.5rem' }}>
           <Link href="/crm">Relations</Link>
           <Link href="/facturation">Facturation</Link>
+          <Link href="/banque">Banque</Link>
           <Link href="/community">Communauté</Link>
           <Link href="/marketplace">Mentors &amp; investisseurs</Link>
           <Link href="/profil">Mon profil</Link>

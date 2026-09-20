@@ -535,6 +535,46 @@ export interface ConstitutionViolation {
  * pour ça : un audit qui ne montre que ses trouvailles ne permet pas de
  * distinguer « rien à signaler » de « ce contrôle n existe pas ».
  */
+// ── LA BANQUE ──────────────────────────────────────────────────────────────
+
+export const NATURES_DE_COMPTE = [
+  'courant',
+  'reserve',
+  'fiscal',
+  'investissement',
+  'autre',
+] as const;
+export type BankAccountKind = (typeof NATURES_DE_COMPTE)[number];
+
+export interface BankAccount {
+  id: string;
+  label: string;
+  kind: string;
+  currency: string;
+  /** Les quatre derniers caracteres de l IBAN. Jamais l IBAN entier. */
+  iban_last4: string | null;
+  ledger_account_id: string | null;
+  created_at: string;
+}
+
+export interface BankTransaction {
+  id: string;
+  bank_account_id: string;
+  /** Signe : negatif pour un debit. */
+  amount_cents: number;
+  occurred_on: string;
+  label: string;
+  external_ref: string | null;
+  reconciled_entry_id: string | null;
+}
+
+export interface BankBalance {
+  balanceCents: number;
+  movements: number;
+  unreconciledCount: number;
+  unreconciledCents: number;
+}
+
 export interface FinanceAuditFinding {
   code: string;
   label: string;
@@ -1496,6 +1536,41 @@ export const api = {
   // Sans paramètre `country` : le serveur lit le pays déclaré au profil.
   // Le forcer à FR ici rendait le champ « Pays d'activité » décoratif.
   // Le moteur existait, testé, avec sa route — et aucun écran ne l appelait.
+  // ── LA BANQUE ────────────────────────────────────────────────────────────
+  listBankAccounts: (token: string) =>
+    request<BankAccount[]>('/banque/comptes', { headers: { Authorization: `Bearer ${token}` } }),
+
+  declareBankAccount: (
+    token: string,
+    compte: { label: string; kind: string; ibanLast4?: string },
+  ) =>
+    request<BankAccount>('/banque/comptes', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(compte),
+    }),
+
+  listBankTransactions: (token: string, accountId: string) =>
+    request<BankTransaction[]>(`/banque/comptes/${accountId}/mouvements`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getBankBalance: (token: string, accountId: string) =>
+    request<BankBalance>(`/banque/comptes/${accountId}/solde`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  importBankTransaction: (
+    token: string,
+    accountId: string,
+    mouvement: { amountCents: number; occurredOn: string; label: string; externalRef?: string },
+  ) =>
+    request<BankTransaction>(`/banque/comptes/${accountId}/mouvements`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(mouvement),
+    }),
+
   getProjectFinanceAudit: (token: string, projectId: string) =>
     request<FinanceAudit>(`/projects/${projectId}/audit-financier`, {
       headers: { Authorization: `Bearer ${token}` },
