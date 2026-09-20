@@ -13,6 +13,9 @@ Ce dossier centralise la documentation qui ne vit pas déjà à côté du code q
 - [`decisions.md`](decisions.md) — les choix volontaires qui limitent le périmètre actuel (pas
 - [outillage.md](outillage.md) — audit des outils : ce qui existe, ce qui manque, ce dont le projet n'a pas besoin
 - [mise-en-production.md](mise-en-production.md) — audit de production, architecture cible, coût, étapes et risques restants
+- [session-autonome-2026-09-20.md](session-autonome-2026-09-20.md) — sept sources légales mortes
+  sur douze, trois modules sans écran, une tâche qui en donnait six : ce qui a été trouvé,
+  corrigé, et les deux points qui attendent une décision
   d'automatisation, pas de scores fabriqués, pas d'offline-first…) et la raison de chacun.
 
 La documentation propre à un module reste à côté de son code :
