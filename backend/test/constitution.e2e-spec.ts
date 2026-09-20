@@ -238,11 +238,17 @@ describe('Constitution et données personnelles (e2e)', () => {
         .expect(200);
 
       expect(Object.keys(response.body.donnees)).toHaveLength(8);
+      // `profil` et `roles_tenus` ne viennent pas de la table `users` mais
+      // doivent partir avec l'export : ce sont des données personnelles,
+      // et le droit d'accès porte sur elles aussi. Les omettre rendrait
+      // l'export incomplet sans que personne ne puisse s'en apercevoir.
       expect(Object.keys(response.body.donnees.compte).sort()).toEqual([
         'compte_cree_le',
         'email',
         'email_verifie_le',
         'id',
+        'profil',
+        'roles_tenus',
       ]);
       expect(JSON.stringify(response.body)).not.toContain('$2b$');
       expect(response.body.non_inclus.length).toBeGreaterThan(0);

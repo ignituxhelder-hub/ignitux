@@ -78,8 +78,74 @@ jobs:
       - name: Build
         run: npm run build
 
-  # Les tests de bout en bout ne tournent pas ici : ils ont besoin d'une
-  # vraie base Postgres, et la brancher demanderait de déposer la chaîne de
-  # connexion de l'instance Supabase dans les secrets GitHub — donc d'y
-  # exposer un accès à la même instance que la production. Ils se lancent à
-  # la main : `npm run test:e2e` depuis `backend/`. Voir docs/decisions.md.
+  # LES TESTS DE BOUT EN BOUT, SUR UNE BASE JETABLE
+  #
+  # Ils ne tournaient pas ici, pour une raison qui semblait close : les
+  # brancher demanderait de déposer la chaîne de connexion Supabase dans
+  # les secrets GitHub, donc d'exposer un accès à l'instance qui héberge
+  # aussi la production.
+  #
+  # L'objection tenait à l'instance, pas aux tests. Un conteneur Postgres
+  # créé et détruit avec le job n'a rien à voir avec Supabase : pas de
+  # secret à déposer, pas d'accès à exposer, et une base vide à chaque
+  # exécution — ce qui éprouve en prime que le schéma se pose à neuf.
+  #
+  # Ce que leur absence coûtait : 251 tests ne tournaient que quand
+  # quelqu'un y pensait. Trois d'entre eux sont restés rouges sans que
+  # personne le sache, et ils avaient raison — ils décrivaient une
+  # régression réelle du produit.
+  e2e:
+    name: Bout en bout
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ignitux
+          POSTGRES_PASSWORD: ignitux
+          # Le nom compte : test/setup-e2e.ts refuse de démarrer sur toute
+          # base qui ne s'appelle pas ainsi. Le garde-fou reste actif ici.
+          POSTGRES_DB: ignitux_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://ignitux:ignitux@localhost:5432/ignitux_test
+      JWT_SECRET: secret-de-ci-sans-valeur-hors-de-ce-job-mais-assez-long
+      JWT_EXPIRES_IN: 1d
+      FRONTEND_URL: http://localhost:3001
+      # Éteints, et ce n'est pas un détail : le budget IA est plafonné à
+      # 50 €/mois, et une CI qui appelle Claude à chaque push le mangerait
+      # sans que personne ne décide rien. Les tests n'en ont pas besoin —
+      # le produit fonctionne générateurs éteints, c'est un principe.
+      IGINI_AI_ENABLED: 'false'
+      MAIL_TRANSPORT: log
+      TRUST_PROXY: 'false'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+
+      # Sur une base vide : c'est aussi la seule vérification automatique
+      # que le schéma se pose de zéro, ce qu'aucun autre job ne fait.
+      - name: Poser le schéma
+        run: npx prisma db push
+
+      - name: Tests de bout en bout
+        run: npm run test:e2e

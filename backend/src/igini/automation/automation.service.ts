@@ -9,7 +9,7 @@ interface StageDefinition {
 
 // Titre fixe par étape : sert de clé pour retrouver/fermer la tâche que
 // l'automatisation a elle-même créée, sans dépendre d'un identifiant à part.
-const STAGES: StageDefinition[] = [
+export const STAGES: StageDefinition[] = [
   { key: 'analysis', taskTitle: "Lancer l'analyse de faisabilité (Étincelle)" },
   { key: 'build_plan', taskTitle: 'Créer le plan de construction (Construction)' },
   { key: 'financing_plan', taskTitle: 'Créer le plan de financement (Financement)' },
@@ -56,17 +56,31 @@ export class AutomationService {
 
   /**
    * Relance l'orchestration après un changement, sans jamais faire échouer
-   * ce qui l'a déclenchée.
+   * ce qui l'a déclenchée — et sans créer de tâches d'étape.
    *
    * Une tâche cochée doit rester cochée même si la réévaluation échoue :
    * l'orchestration est un confort, pas une condition. L'échec part au
    * journal — le taire laisserait une orchestration morte passer pour une
    * orchestration qui n'a rien trouvé à faire, et ces deux états n'ont pas
    * la même conséquence.
+   *
+   * ## Pourquoi la création est coupée ici
+   *
+   * Sans cette coupure, écrire « Trouver un local » et cliquer sur Ajouter
+   * faisait apparaître six tâches : la sienne, plus les cinq tâches
+   * d'étape que l'orchestration ouvre. Trois tests de bout en bout sont
+   * tombés dessus, et ils avaient raison : faire A et voir six choses
+   * arriver est le contraire du produit qu'on construit.
+   *
+   * Ce que la réconciliation garde, c'est ce qui remet l'état d'accord
+   * avec les faits — refermer une tâche d'étape dont l'étape est franchie,
+   * relier des concepts devenus proches. Ouvrir cinq chantiers que
+   * personne n'a demandés, non : cela reste le geste explicite
+   * « Lancer l'automatisation ».
    */
   async runAfterChange(projectId: string): Promise<void> {
     try {
-      await this.run(projectId);
+      await this.run(projectId, { creerLesTachesDEtape: false });
     } catch (error) {
       this.logger.error(
         `Orchestration impossible après un changement sur le projet ${projectId} — ` +
@@ -75,7 +89,15 @@ export class AutomationService {
     }
   }
 
-  async run(projectId: string) {
+  /**
+   * @param options.creerLesTachesDEtape Ouvrir les tâches des étapes non
+   *   franchies. Vrai par défaut — c'est ce que fait « Lancer
+   *   l'automatisation », un geste explicite dont on attend qu'il produise
+   *   du travail. Faux quand l'orchestration se relance toute seule après
+   *   une action manuelle : voir `runAfterChange`.
+   */
+  async run(projectId: string, options: { creerLesTachesDEtape?: boolean } = {}) {
+    const creerLesTachesDEtape = options.creerLesTachesDEtape ?? true;
     const [analysis, buildPlan, financingPlan, developmentPlan, transmissionPlan, openAutomationTasks, concepts] =
       await Promise.all([
         this.prisma.analyses.findFirst({ where: { project_id: projectId } }),
@@ -108,7 +130,7 @@ export class AutomationService {
             await this.prisma.tasks.update({ where: { id: existingOpenTask.id }, data: { status: 'done' } }),
           );
         }
-      } else if (!existingOpenTask) {
+      } else if (!existingOpenTask && creerLesTachesDEtape) {
         tasksCreated.push(
           await this.prisma.tasks.create({
             data: { project_id: projectId, title: stage.taskTitle, assignee: 'igini', source: 'automation' },

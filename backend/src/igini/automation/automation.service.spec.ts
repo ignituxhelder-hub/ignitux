@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConstitutionService } from '../../constitution/constitution.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { AutomationService } from './automation.service.js';
+import { AutomationService, STAGES } from './automation.service.js';
 
 describe('AutomationService', () => {
   let service: AutomationService;
@@ -195,6 +195,40 @@ describe('AutomationService', () => {
         orderBy: { created_at: 'desc' },
       });
       expect(result).toEqual([{ id: 'run1' }]);
+    });
+  });
+
+  // Trois tests de bout en bout sont tombés sur ce point : ecrire une
+  // tache et en voir apparaitre six est le contraire du produit visé.
+  describe('runAfterChange — reconcilier, pas ouvrir des chantiers', () => {
+    it('n ouvre aucune tache d etape', async () => {
+      await service.runAfterChange('p1');
+
+      expect(prisma.tasks.create).not.toHaveBeenCalled();
+    });
+
+    // Ce qui remet l etat d accord avec les faits doit continuer : une
+    // tache d etape dont l etape est franchie reste ouverte sinon, et le
+    // score Construction la compte comme du travail restant.
+    it('referme quand meme les taches dont l etape est franchie', async () => {
+      prisma.analyses.findFirst.mockResolvedValue({ id: 'a1' });
+      prisma.tasks.findMany.mockResolvedValue([
+        { id: 't1', title: STAGES[0].taskTitle },
+      ]);
+      prisma.tasks.update.mockResolvedValue({ id: 't1', status: 'done' });
+
+      await service.runAfterChange('p1');
+
+      expect(prisma.tasks.update).toHaveBeenCalled();
+    });
+
+    // Le geste explicite, lui, doit produire du travail.
+    it('run() garde la creation par defaut', async () => {
+      prisma.tasks.create.mockImplementation((args) => Promise.resolve({ id: 't', ...args.data }));
+
+      await service.run('p1');
+
+      expect(prisma.tasks.create).toHaveBeenCalledTimes(5);
     });
   });
 });
