@@ -1164,7 +1164,12 @@ export interface AiUsageMonth {
     bientot_atteint: boolean;
     /** null = plafond non applicable, pas « il reste de la marge ». */
     restant: { analyses: number | null; euros: number | null };
-    plafonds: { analyses_par_mois: number | null; euros_par_mois: number | null };
+    plafonds: {
+      analyses_par_mois: number | null;
+      /** Lequel des deux plafonds donne ce chiffre : « offre decouverte » ou « budget Ignitux ». */
+      analyses_selon?: string;
+      euros_par_mois: number | null;
+    };
   };
 }
 

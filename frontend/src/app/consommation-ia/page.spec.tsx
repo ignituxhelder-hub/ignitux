@@ -214,6 +214,45 @@ describe('AiUsagePage', () => {
     expect(await screen.findByText(/rien n'a été dépensé/)).toBeInTheDocument();
   });
 
+  it('dit sur combien porte le reste, et qui fixe ce combien', async () => {
+    // « Il me reste 2 » ne veut rien dire tant qu'on ne sait pas 2 sur
+    // combien. Et le combien a une provenance : le produit a longtemps
+    // affiché son garde-fou technique (5) au lieu du chiffre de l'offre
+    // (3 en Découverte), donc un compteur juste à l'unité près et faux sur
+    // le plafond. Nommer la source est ce qui rend l'erreur visible.
+    mockApiRoutes(
+      routes({
+        'GET /igini/usage/mois-en-cours': {
+          status: 200,
+          body: mois({
+            quota: {
+              autorise: true,
+              plafond_atteint: false,
+              message: null,
+              bientot_atteint: false,
+              restant: { analyses: 2, euros: 1.8 },
+              plafonds: {
+                analyses_par_mois: 3,
+                analyses_selon: 'offre decouverte',
+                euros_par_mois: 2,
+              },
+            },
+          }),
+        },
+      }),
+    );
+
+    render(
+      <AuthProvider>
+        <AiUsagePage />
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByText(/Sur les 3 incluses ce mois-ci/)).toBeInTheDocument();
+    expect(screen.getByText(/offre decouverte/)).toBeInTheDocument();
+    expect(screen.getByText(/repart au premier jour du mois prochain/)).toBeInTheDocument();
+  });
+
   it('détaille chaque appel avec son modèle et son coût', async () => {
     mockApiRoutes(routes());
 

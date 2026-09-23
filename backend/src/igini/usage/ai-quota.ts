@@ -65,15 +65,29 @@ export interface QuotaVerdict {
 }
 
 /**
- * Valeurs par défaut, alignées sur l'offre telle qu'elle est annoncée
- * aujourd'hui : 20 €/mois pour 5 analyses, et un coût IA plafonné à 10 % du
- * prix.
+ * Valeurs par défaut — et pourquoi le nombre d'appels n'en a plus.
  *
- * Ce sont des **valeurs de repli**, pas une décision du code : les deux se
- * règlent par variable d'environnement. Le jour où l'offre change, elle
- * change là, pas ici.
+ * `null` ne veut pas dire « illimité » : il veut dire **ce n'est pas ici
+ * qu'on compte les appels**. Le nombre d'analyses incluses est une promesse
+ * commerciale, et elle vit dans le catalogue des offres — 3 en Découverte,
+ * 30 en Entrepreneur, 150 en Construction. Chaque génération la fait
+ * respecter en passant par `OffresService.exiger`.
+ *
+ * Ce repli valait 5, écrit du temps d'une offre unique à 20 €/mois pour 5
+ * analyses. Cette offre n'existe plus, et le chiffre lui a survécu : il
+ * serait tombé **avant** l'offre pour tout abonné payant, coupant à la
+ * cinquième analyse quelqu'un qui en a acheté trente. Deux endroits qui
+ * comptent la même chose finissent toujours par se contredire ; celui qui
+ * connaît le prix payé gagne.
+ *
+ * Le plafond de **coût**, lui, reste : il ne double aucune promesse, il
+ * protège la facture. C'est le seul des deux axes qui ait encore un travail
+ * propre.
+ *
+ * Les deux restent réglables par variable d'environnement, pour pouvoir
+ * serrer la vis sans redéployer.
  */
-export const DEFAULT_CALLS_PER_MONTH = 5;
+export const DEFAULT_CALLS_PER_MONTH: number | null = null;
 export const DEFAULT_COST_MICRO_EUR_PER_MONTH = 2 * MICRO_EUR_PER_EUR;
 
 /**
@@ -101,7 +115,7 @@ export function readQuotaLimits(env: {
   };
 }
 
-function lireEntier(valeur: string | undefined, defaut: number): number | null {
+function lireEntier(valeur: string | undefined, defaut: number | null): number | null {
   if (valeur === undefined || valeur.trim() === '') return defaut;
   if (valeur.trim().toLowerCase() === 'illimite') return null;
   const nombre = Number(valeur);

@@ -130,6 +130,19 @@ export default function AiUsagePage() {
               />
             </div>
 
+            {mois.quota.plafonds.analyses_par_mois !== null && (
+              <p className="muted" style={{ marginTop: '1rem', marginBottom: 0 }}>
+                {/* Un compteur sans son plafond ne se lit pas : « il me reste 2 »
+                    ne veut rien dire tant qu'on ne sait pas 2 sur combien, ni
+                    qui fixe ce combien. */}
+                Sur les {milliers(mois.quota.plafonds.analyses_par_mois)} incluses ce mois-ci
+                {mois.quota.plafonds.analyses_selon
+                  ? ` par ton ${mois.quota.plafonds.analyses_selon}`
+                  : ''}
+                . Le compteur repart au premier jour du mois prochain.
+              </p>
+            )}
+
             <p className="muted" style={{ marginTop: '1rem', marginBottom: 0 }}>
               Coût <strong>estimé</strong> depuis la grille tarifaire du {mois.cout.grille_du} —
               ce n&apos;est pas un montant facturé, c&apos;est un calcul à partir des jetons

@@ -124,36 +124,47 @@ describe('Coûts IA (e2e)', () => {
   });
 
   describe('le plafond mensuel', () => {
-    it('annonce ce qu’il reste, avant le mur', async () => {
-      // Un plafond qui ne se découvre qu'en s'y cognant est un mauvais
-      // plafond : la personne a préparé son travail, elle clique, et le
-      // produit lui apprend à ce moment-là que c'était fini.
+    // ── Deux plafonds, et un seul chiffre à l'écran ────────────────────
+    //
+    // Ces tests disaient « 5 analyses », parce qu'à l'époque le produit
+    // n'avait qu'une offre, à 20 €/mois pour 5 analyses. Le catalogue est
+    // arrivé depuis — 3 en Découverte, 30 en Entrepreneur, 150 en
+    // Construction — et le 5 lui a survécu, dans une constante technique
+    // que plus personne ne relisait. Il serait tombé **avant** l'offre pour
+    // tout abonné payant : coupé à la cinquième analyse après en avoir
+    // acheté trente.
+    //
+    // Ce qui suit vérifie que c'est désormais l'offre qui compte les
+    // analyses, et que l'écran affiche le plafond qui arrêtera vraiment la
+    // personne — pas l'autre.
+
+    it('annonce ce que l’offre inclut, pas un chiffre technique', async () => {
       const reponse = await api(app)
         .get('/igini/usage/mois-en-cours')
         .set(...auth(compte))
         .expect(200);
 
       expect(reponse.body.quota.autorise).toBe(true);
-      expect(reponse.body.quota.plafonds.analyses_par_mois).toBe(5);
+      // Découverte : trois analyses. C'est le chiffre du catalogue, celui
+      // que la personne a lu avant de s'inscrire.
+      expect(reponse.body.quota.plafonds.analyses_par_mois).toBe(3);
+      expect(reponse.body.quota.plafonds.analyses_selon).toBe('offre decouverte');
       expect(reponse.body.quota.plafonds.euros_par_mois).toBe(2);
-      // Un appel a deja ete enregistre par le test precedent : il en
-      // reste quatre, et le compteur le sait.
-      expect(reponse.body.quota.restant.analyses).toBe(4);
-      expect(reponse.body.quota.bientot_atteint).toBe(false);
+      // Un appel a déjà été enregistré par le test précédent : il en reste
+      // deux, et le compteur le sait.
+      expect(reponse.body.quota.restant.analyses).toBe(2);
     });
 
     it('prévient au dernier appel restant', async () => {
-      // Trois appels de plus, soit quatre en tout : il en reste un.
-      // C'est le moment d'avertir — assez tôt pour s'organiser, assez
-      // tard pour que ce ne soit pas un décor qu'on n'aperçoit plus.
-      for (let i = 0; i < 3; i += 1) {
-        await usage.record({
-          context: { userId: compte.userId, projectId, generator: 'analyser' },
-          model: 'claude-opus-5',
-          usage: { input_tokens: 100, output_tokens: 100 },
-          durationMs: 1000,
-        });
-      }
+      // Un appel de plus, soit deux en tout : il en reste un. C'est le
+      // moment d'avertir — assez tôt pour s'organiser, assez tard pour que
+      // ce ne soit pas un décor qu'on n'aperçoit plus.
+      await usage.record({
+        context: { userId: compte.userId, projectId, generator: 'analyser' },
+        model: 'claude-opus-5',
+        usage: { input_tokens: 100, output_tokens: 100 },
+        durationMs: 1000,
+      });
 
       const reponse = await api(app)
         .get('/igini/usage/mois-en-cours')
@@ -162,21 +173,62 @@ describe('Coûts IA (e2e)', () => {
 
       expect(reponse.body.quota.restant.analyses).toBe(1);
       expect(reponse.body.quota.bientot_atteint).toBe(true);
-      expect(reponse.body.quota.autorise).toBe(true);
     });
 
-    it('refuse le sixième appel, en 402 et sans ambiguïté', async () => {
+    it('dit zéro quand l’offre est consommée, sans attendre de s’y cogner', async () => {
       await usage.record({
-        context: { userId: compte.userId, projectId, generator: 'transmettre' },
+        context: { userId: compte.userId, projectId, generator: 'analyser' },
         model: 'claude-opus-5',
         usage: { input_tokens: 100, output_tokens: 100 },
         durationMs: 1000,
       });
 
+      const reponse = await api(app)
+        .get('/igini/usage/mois-en-cours')
+        .set(...auth(compte))
+        .expect(200);
+
+      expect(reponse.body.quota.restant.analyses).toBe(0);
+      expect(reponse.body.quota.bientot_atteint).toBe(true);
+    });
+
+    it('ne coupe plus un abonné payant à la cinquième analyse', async () => {
+      // LE TEST QUI MANQUAIT. Le plafond technique valait 5 : un compte
+      // Entrepreneur, qui achète trente analyses, en aurait obtenu cinq.
+      // Le plafond d'appels ne vit plus là ; seul le coût y reste.
+      const limites = usage.limits();
+      expect(limites.callsPerMonth).toBeNull();
+      expect(limites.costMicroEurPerMonth).not.toBeNull();
+
+      // Et le garde-fou technique laisse passer bien au-delà de cinq.
+      for (let i = 0; i < 6; i += 1) {
+        await usage.record({
+          context: { userId: compte.userId, projectId, generator: 'analyser' },
+          model: 'claude-opus-5',
+          usage: { input_tokens: 10, output_tokens: 10 },
+          durationMs: 100,
+        });
+      }
+
+      const verdict = await usage.quotaFor(compte.userId);
+      expect(verdict.allowed).toBe(true);
+      expect(verdict.breach).toBeNull();
+    });
+
+    it('refuse quand même quand le budget est dépassé', async () => {
+      // L'axe qui reste, et celui qui protège vraiment : le coût. Un seul
+      // appel très gros suffit à franchir les 2 € — c'est exactement le cas
+      // que compter les appels ne voyait pas.
+      await usage.record({
+        context: { userId: compte.userId, projectId, generator: 'analyser' },
+        model: 'claude-opus-5',
+        usage: { input_tokens: 2_000_000, output_tokens: 200_000 },
+        durationMs: 5000,
+      });
+
       const verdict = await usage.quotaFor(compte.userId);
       expect(verdict.allowed).toBe(false);
-      expect(verdict.breach).toBe('appels');
-      expect(verdict.reason).toContain('5 analyses');
+      expect(verdict.breach).toBe('cout');
 
       // 402 Payment Required : les autres codes du produit sont pris et
       // voudraient dire autre chose. 503 dirait « éteint » alors que ça
@@ -187,18 +239,6 @@ describe('Coûts IA (e2e)', () => {
       });
     });
 
-    it('le dit aussi dans la lecture, pas seulement en refusant', async () => {
-      const reponse = await api(app)
-        .get('/igini/usage/mois-en-cours')
-        .set(...auth(compte))
-        .expect(200);
-
-      expect(reponse.body.quota.autorise).toBe(false);
-      expect(reponse.body.quota.plafond_atteint).toBe('appels');
-      expect(reponse.body.quota.restant.analyses).toBe(0);
-      expect(String(reponse.body.quota.message)).toContain('mois prochain');
-    });
-
     it('ne pénalise personne d’autre', async () => {
       // Le plafond est mensuel ET personnel. Un compte qui n'a rien
       // consommé ne doit pas se retrouver bloqué parce qu'un autre l'a été.
@@ -206,7 +246,15 @@ describe('Coûts IA (e2e)', () => {
 
       const verdict = await usage.quotaFor(voisin.userId);
       expect(verdict.allowed).toBe(true);
-      expect(verdict.remaining.calls).toBe(5);
+      // `null` sur cet axe : ce n'est pas « illimité », c'est « ce n'est
+      // pas ici qu'on compte les analyses ».
+      expect(verdict.remaining.calls).toBeNull();
+
+      const reponse = await api(app)
+        .get('/igini/usage/mois-en-cours')
+        .set(...auth(voisin))
+        .expect(200);
+      expect(reponse.body.quota.restant.analyses).toBe(3);
 
       await deleteAccount(app, voisin);
     });
