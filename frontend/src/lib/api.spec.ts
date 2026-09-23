@@ -103,6 +103,74 @@ describe('api', () => {
       expect(storage.entries.size).toBe(0);
     });
 
+    /**
+     * Trouvé en traversant les écrans avec un vrai navigateur, pas en
+     * lisant le code : une connexion tentée hors ligne était mise en file
+     * comme n'importe quelle écriture, et la file conserve le corps de la
+     * requête tel quel. Le mot de passe en clair se retrouvait dans
+     * localStorage, et y restait.
+     */
+    describe('les routes d’authentification n’entrent jamais en file', () => {
+      function horsLigne() {
+        global.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+      }
+
+      it('ne conserve pas le mot de passe d’une connexion hors ligne', async () => {
+        const storage = fakeStorage();
+        setOfflineStorage(storage);
+        horsLigne();
+
+        await expect(api.login('victime@exemple.fr', 'MotDePasseSecret')).rejects.toBeInstanceOf(
+          ApiError,
+        );
+
+        const tout = [...storage.entries.values()].join(' ');
+        expect(tout).not.toContain('MotDePasseSecret');
+        expect(tout).not.toContain('victime@exemple.fr');
+      });
+
+      it('ne conserve pas non plus celui d’une inscription', async () => {
+        const storage = fakeStorage();
+        setOfflineStorage(storage);
+        horsLigne();
+
+        await expect(api.signup('victime@exemple.fr', 'MotDePasseSecret')).rejects.toBeInstanceOf(
+          ApiError,
+        );
+
+        expect([...storage.entries.values()].join(' ')).not.toContain('MotDePasseSecret');
+      });
+
+      it('dit que rien n’a été gardé, au lieu de promettre un envoi différé', async () => {
+        // « 1 action en attente d'envoi » est faux ici : une connexion en
+        // file ne peut pas être rejouée, puisque le rejeu exige un jeton
+        // qu'on n'obtient qu'en se connectant. L'entrée resterait là pour
+        // toujours, et la personne attendrait quelque chose qui n'arrive
+        // jamais.
+        const storage = fakeStorage();
+        setOfflineStorage(storage);
+        horsLigne();
+
+        await expect(api.login('a@b.fr', 'x')).rejects.toMatchObject({
+          message: expect.stringContaining('ne peut pas être mis de côté'),
+          status: 0,
+        });
+        expect(storage.entries.size).toBe(0);
+      });
+
+      it('met toujours en file une écriture ordinaire', async () => {
+        // Sinon les tests précédents passeraient pour une mauvaise raison :
+        // il suffirait que la file soit cassée partout.
+        const storage = fakeStorage();
+        setOfflineStorage(storage);
+        horsLigne();
+
+        await expect(api.createProject('token', 'Mon projet', 'Une description')).rejects.toBeTruthy();
+
+        expect([...storage.entries.values()].join(' ')).toContain('Mon projet');
+      });
+    });
+
     it('continue de mettre en cache une lecture ordinaire', async () => {
       // Sinon le test précédent passerait pour une mauvaise raison : il
       // suffirait que le cache soit cassé partout.

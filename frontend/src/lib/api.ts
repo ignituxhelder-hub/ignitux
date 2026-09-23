@@ -151,8 +151,52 @@ export function setOfflineChangeHandler(handler: OfflineChangeHandler | null) {
   onOfflineChange = handler;
 }
 
+/**
+ * Les routes qui ne doivent JAMAIS entrer dans la file d'attente.
+ *
+ * Trouvé en traversant les écrans avec un vrai navigateur : une tentative de
+ * connexion hors ligne était mise en file comme n'importe quelle écriture, et
+ * le corps de la requête est conservé tel quel. Le mot de passe en clair
+ * atterrissait donc dans `localStorage`, et y restait :
+ *
+ *   {"path":"/auth/login","body":"{\"email\":\"…\",\"password\":\"…\"}"}
+ *
+ * C'est exactement ce que la file dit vouloir éviter — elle ne stocke pas le
+ * jeton « pour qu'un vol du stockage local ne livre pas aussi la session » —
+ * en pire : un jeton expire, un mot de passe non, et il ouvre souvent la
+ * boîte mail avec.
+ *
+ * Deux autres raisons, qui tiendraient même sans le mot de passe :
+ *
+ * - **Une connexion en file ne peut pas être rejouée.** `replayOfflineQueue`
+ *   exige un jeton, et un jeton ne s'obtient qu'en se connectant. L'entrée
+ *   reste là pour toujours.
+ * - **On promet quelque chose qui n'arrivera pas.** La personne lit « 1
+ *   action en attente d'envoi » et croit sa connexion partie. Elle ne part
+ *   jamais.
+ *
+ * Ces routes échouent donc tout de suite, en disant pourquoi.
+ */
+const JAMAIS_EN_FILE = [
+  '/auth/login',
+  '/auth/me/password',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/verify-email',
+  '/users/signup',
+];
+
 function handleOffline<T>(path: string, options: RequestInit): Promise<T> {
   const method = (options.method ?? 'GET').toUpperCase();
+
+  if (JAMAIS_EN_FILE.some((route) => path === route || path.startsWith(`${route}/`))) {
+    throw new ApiError(
+      'Pas de réseau. Ce type de demande ne peut pas être mis de côté pour plus ' +
+        'tard — réessaie une fois la connexion revenue. Rien n’a été enregistré ' +
+        'sur cet appareil.',
+      0,
+    );
+  }
 
   if (!offlineStorage) {
     // Sans stockage, on ne peut ni servir du cache ni mettre en file. Dire
