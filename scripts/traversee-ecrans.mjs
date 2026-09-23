@@ -328,6 +328,99 @@ for (const ecran of ECRANS) {
   // points sans qu'aucune de ces trois choses soit vraie. Elles ne cassent
   // rien ; elles rendent le produit pénible, ce qui revient au même quand
   // personne n'est obligé de rester.
+  // ── Ce qu'entend quelqu'un qui n'y voit rien ───────────────────────
+  //
+  // Trois défauts qui rendent un écran inutilisable au lecteur vocal, et
+  // qu'aucun test ne voit parce que la page fonctionne parfaitement à la
+  // souris.
+  //
+  // Le contraste n'est pas mesuré ici : les commentaires de globals.css
+  // montrent des ratios calculés à la décimale (4.61:1, 3.06:1, 4.53:1) et
+  // des couleurs corrigées pour les atteindre. Le travail a été fait ; le
+  // refaire produirait du bruit, pas de l'information.
+  const muets = await page
+    .evaluate(() => {
+      const nomAccessible = (el) => {
+        const aria = el.getAttribute('aria-label');
+        if (aria && aria.trim()) return aria.trim();
+        const par = el.getAttribute('aria-labelledby');
+        if (par) {
+          const cible = document.getElementById(par);
+          if (cible && (cible.textContent || '').trim()) return cible.textContent.trim();
+        }
+        if (el.id) {
+          const label = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+          if (label && (label.textContent || '').trim()) return label.textContent.trim();
+        }
+        const enveloppe = el.closest('label');
+        if (enveloppe && (enveloppe.textContent || '').trim()) return enveloppe.textContent.trim();
+        if (el.tagName === 'BUTTON' || el.tagName === 'A') {
+          const texte = (el.textContent || '').trim();
+          if (texte) return texte;
+          const titre = el.getAttribute('title');
+          if (titre && titre.trim()) return titre.trim();
+        }
+        return null;
+      };
+
+      const champsSansNom = [];
+      for (const el of document.querySelectorAll('input:not([type=hidden]), select, textarea')) {
+        if (nomAccessible(el)) continue;
+        // Un placeholder n'est PAS un nom : il disparaît dès qu'on tape, et
+        // beaucoup de lecteurs vocaux l'ignorent. On le cite quand même,
+        // parce qu'il identifie le champ pour celui qui lira le rapport.
+        const indice = el.getAttribute('placeholder') || el.type || el.tagName;
+        champsSansNom.push(indice.slice(0, 28));
+      }
+
+      const boutonsMuets = [];
+      for (const el of document.querySelectorAll('button, a[href], [role="button"]')) {
+        if (nomAccessible(el)) continue;
+        boutonsMuets.push(el.tagName.toLowerCase() + (el.className ? `.${String(el.className).split(' ')[0]}` : ''));
+      }
+
+      const imagesSansAlt = [];
+      for (const el of document.querySelectorAll('img')) {
+        // alt="" est une réponse valide : elle dit « décoratif, passe ton
+        // chemin ». C'est l'absence d'attribut qui laisse le lecteur vocal
+        // annoncer le nom du fichier.
+        if (el.getAttribute('alt') === null) imagesSansAlt.push(el.getAttribute('src')?.slice(-24) ?? 'img');
+      }
+
+      return { champsSansNom, boutonsMuets, imagesSansAlt };
+    })
+    .catch(() => null);
+
+  if (muets) {
+    if (muets.champsSansNom.length) {
+      note(
+        ecran.nom,
+        'MOYEN',
+        `${muets.champsSansNom.length} champ(s) sans nom accessible : au lecteur vocal, « zone de saisie » et rien d'autre`,
+        muets.champsSansNom.slice(0, 4).join(', '),
+      );
+      ligne.push(`${muets.champsSansNom.length} champ(s) muet(s)`);
+    }
+    if (muets.boutonsMuets.length) {
+      note(
+        ecran.nom,
+        'MAJEUR',
+        `${muets.boutonsMuets.length} bouton(s) ou lien(s) sans intitulé`,
+        muets.boutonsMuets.slice(0, 4).join(', '),
+      );
+      ligne.push(`${muets.boutonsMuets.length} bouton(s) muet(s)`);
+    }
+    if (muets.imagesSansAlt.length) {
+      note(
+        ecran.nom,
+        'MOYEN',
+        `${muets.imagesSansAlt.length} image(s) sans attribut alt`,
+        muets.imagesSansAlt.slice(0, 3).join(', '),
+      );
+      ligne.push(`${muets.imagesSansAlt.length} image(s) sans alt`);
+    }
+  }
+
   if (TELEPHONE) {
     const mesures = await page
       .evaluate(
