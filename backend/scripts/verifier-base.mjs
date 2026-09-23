@@ -35,7 +35,16 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { Client } = require('pg');
 
-const fichier = process.argv[2] ?? '.env';
+/**
+ * Le fichier d'environnement, nomme avec ou sans `--env` — voir la meme
+ * note dans `sauvegarde.mjs` : les deux scripts s'enchainent, et une
+ * convention par script est une convention de trop.
+ */
+const drapeauEnv = process.argv.indexOf('--env');
+const fichier =
+  drapeauEnv >= 0 && process.argv[drapeauEnv + 1]
+    ? process.argv[drapeauEnv + 1]
+    : (process.argv.slice(2).find((a) => !a.startsWith('--')) ?? '.env');
 
 function lireUrl(chemin) {
   const texte = readFileSync(chemin, 'utf8');
