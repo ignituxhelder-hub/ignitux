@@ -149,3 +149,32 @@ jobs:
 
       - name: Tests de bout en bout
         run: npm run test:e2e
+
+  # LES IMAGES SE CONSTRUISENT-ELLES ?
+  #
+  # Les Dockerfiles ont été écrits sur une machine sans Docker : ils sont
+  # justes en lecture, et rien de plus. Ce job en fait un fait vérifié à
+  # chaque poussée, au lieu de le découvrir au premier déploiement.
+  #
+  # On construit sans pousser : aucun registre, aucun identifiant. Ce qui
+  # est éprouvé ici est la construction, pas la distribution.
+  images:
+    name: Images Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Construire l'image du serveur
+        run: docker build -t ignitux-backend:ci ./backend
+
+      # L'adresse de l'API est gravée dans le paquet au build (voir
+      # frontend/Dockerfile). On passe une valeur factice : ce qu'on
+      # vérifie ici est que la construction aboutit, pas qu'elle pointe au
+      # bon endroit.
+      - name: Construire l'image de l'interface
+        run: docker build --build-arg NEXT_PUBLIC_API_URL=http://localhost:3000 -t ignitux-frontend:ci ./frontend
+
+      - name: La composition est-elle valide ?
+        run: docker compose config --quiet
+        env:
+          JWT_SECRET: secret-de-ci-sans-valeur-hors-de-ce-job-mais-assez-long

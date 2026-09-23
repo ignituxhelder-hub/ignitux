@@ -45,12 +45,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl \
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
+# `dist/` contient déjà le client Prisma compilé (`dist/generated/prisma/`) :
+# il est généré dans `src/` puis transpilé avec le reste. Le copier une
+# seconde fois depuis `src/` alourdissait l'image de sources TypeScript qui
+# n'y ont rien à faire — vérifié sur un build réel avant de le retirer.
 COPY --from=build /app/dist ./dist
+# Le schéma reste utile : `prisma db push` et les scripts de sauvegarde le
+# lisent, et on veut pouvoir les lancer depuis le conteneur.
 COPY --from=build /app/prisma ./prisma
-# Le client généré vit dans les sources et non dans node_modules : il doit
-# donc être copié explicitement, sans quoi le serveur démarre et échoue à
-# la première requête.
-COPY --from=build /app/src/generated ./src/generated
 
 # Ne pas tourner en root. Le compte `node` existe dans l'image officielle.
 USER node

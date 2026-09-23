@@ -161,7 +161,7 @@ Le système est complet. Ce qui manque est un fournisseur, pas du code.
 | `prisma db push` réclame `--accept-data-loss` | moyenne | Ce serait le signe qu'une hypothèse est fausse. `verifier-base.mjs` le dit avant, et la consigne est de **s'arrêter**, pas de passer le drapeau |
 | Les liens de réinitialisation pointent vers la mauvaise adresse | **élevée** | Non traité tant que `FRONTEND_URL` est fausse. À vérifier en premier après le déploiement |
 | Une image poussée avec un `.env` dedans | faible | `.dockerignore` les exclut, fichiers d'environnement en tête |
-| Les images Docker n'ont jamais été construites | moyenne | Ni Docker ni base sur cette machine. Première construction = première preuve |
+| Les images Docker n'ont jamais été construites | moyenne | **La CI les construit désormais à chaque poussée** (job « Images Docker ») : la première preuve viendra de GitHub, pas d'un déploiement |
 | Budget IA consommé par accident | faible | `IGINI_AI_ENABLED=false` par défaut dans la composition |
 
 ---
