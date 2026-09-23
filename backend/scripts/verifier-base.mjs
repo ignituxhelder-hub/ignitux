@@ -165,9 +165,14 @@ try {
   }
 
   console.log('');
-  const sur = enTrop.length === 0 && colonnesManquantes.length === 0;
+  // Les tables manquantes comptent, évidemment — et les oublier ici faisait
+  // annoncer « rien à migrer » à une base qui en attendait deux. Le défaut
+  // est passé jusqu'à la première vraie connexion : un verdict faux dans le
+  // sens rassurant est le pire genre de verdict.
+  const aJour =
+    enTrop.length === 0 && colonnesManquantes.length === 0 && tablesManquantes.length === 0;
   const additif = enTrop.length === 0;
-  if (sur) {
+  if (aJour) {
     console.log('VERDICT : la base est à jour. Rien à migrer.');
   } else if (additif) {
     console.log('VERDICT : ADDITIF. `prisma db push` ne fera que créer.');

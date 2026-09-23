@@ -101,13 +101,57 @@ const manifeste = {
 };
 
 let total = 0;
+/**
+ * Les tables que le schéma connaît mais que la base n'a pas encore.
+ *
+ * Le script levait sur la première d'entre elles et ne sauvegardait RIEN —
+ * or une base en retard sur le schéma est précisément l'état où l'on
+ * sauvegarde, juste avant de migrer. Refuser de protéger les données au
+ * motif qu'une table future manque était le pire moment pour échouer.
+ */
+const absentes = [];
+
 for (const table of tables()) {
-  const lignes = await prisma[table].findMany();
+  let lignes;
+  try {
+    lignes = await prisma[table].findMany();
+  } catch (erreur) {
+    // Prisma imbrique la cause réelle sur plusieurs niveaux, et la
+    // profondeur change d'une version à l'autre. On parcourt la chaîne
+    // plutôt que de parier sur un niveau précis.
+    let cause = erreur;
+    let tableAbsente = false;
+    for (let i = 0; i < 6 && cause; i += 1) {
+      if (cause.kind === 'TableDoesNotExist' || cause.originalCode === '42P01') {
+        tableAbsente = true;
+        break;
+      }
+      cause = cause.cause;
+    }
+    if (!tableAbsente && /does not exist|42P01/.test(String(erreur?.message ?? ''))) {
+      tableAbsente = true;
+    }
+    if (tableAbsente) {
+      absentes.push(table);
+      continue;
+    }
+    throw erreur;
+  }
   const contenu = JSON.stringify(remplacerDates(lignes), encoder);
   writeFileSync(join(dossier, `${table}.json`), contenu, 'utf8');
   manifeste.tables[table] = lignes.length;
   total += lignes.length;
   if (lignes.length > 0) console.log(`  ${table.padEnd(32)} ${lignes.length}`);
+}
+
+if (absentes.length > 0) {
+  // Inscrit au manifeste, pas seulement affiché : une restauration doit
+  // pouvoir savoir que ces tables n'existaient pas au moment de l'export,
+  // plutôt que de croire qu'elles étaient vides.
+  manifeste.tables_absentes = absentes;
+  console.log(`\n  ${absentes.length} table(s) du schéma absente(s) de cette base, non exportée(s) :`);
+  console.log(`    ${absentes.join(', ')}`);
+  console.log('    (normal si la migration n’a pas encore été passée)');
 }
 
 manifeste.total_lignes = total;
