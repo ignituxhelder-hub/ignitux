@@ -1,4 +1,6 @@
 import { Global, Module } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
+import { AuthModule } from '../auth/auth.module.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { OffresController } from './offres.controller.js';
 import { OffresService } from './offres.service.js';
@@ -14,7 +16,13 @@ import { OffresService } from './offres.service.js';
  */
 @Global()
 @Module({
-  imports: [PrismaModule],
+  // `AuthModule` et `PassportModule` parce que le contrôleur pose
+  // `@UseGuards(JwtAuthGuard)` : sans eux, Nest ne résout pas la garde et
+  // **l'application entière refuse de démarrer**. Les tests unitaires ne
+  // pouvaient pas l'attraper — ils instancient les services un par un, sans
+  // jamais assembler le graphe. C'est la suite de bout en bout qui l'a vu,
+  // à la première exécution contre une vraie base.
+  imports: [AuthModule, PassportModule.register({ defaultStrategy: 'jwt' }), PrismaModule],
   controllers: [OffresController],
   providers: [OffresService],
   exports: [OffresService],
