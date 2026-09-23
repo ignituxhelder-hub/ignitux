@@ -10,6 +10,7 @@ import { PlanningService } from '../igini/planning/planning.service.js';
 import { TransmissionService } from '../igini/transmission/transmission.service.js';
 import { WorkflowEngineService } from '../igini/workflow/workflow-engine.service.js';
 import { WorkflowService } from '../igini/workflow/workflow.service.js';
+import { OffresService } from '../offres/offres.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
@@ -26,6 +27,7 @@ export class ProjectsService {
     private readonly constitutionService: ConstitutionService,
     private readonly memoryService: MemoryService,
     private readonly workflowEngineService: WorkflowEngineService,
+    private readonly offres: OffresService,
   ) {}
 
   /**
@@ -53,6 +55,17 @@ export class ProjectsService {
   }
 
   async create(ownerId: string, title: string, description?: string) {
+    // Ce que l'offre couvre, avant d'écrire quoi que ce soit.
+    //
+    // On compte les projets DONT LA PERSONNE EST PROPRIÉTAIRE, pas ceux
+    // qu'elle voit : être invitée sur le projet de quelqu'un d'autre ne
+    // doit pas consommer sa propre limite, sinon collaborer coûterait sa
+    // place — ce qui découragerait exactement ce qu'on veut encourager.
+    const projetsActuels = await this.prisma.projects.count({
+      where: { owner_id: ownerId },
+    });
+    await this.offres.exiger(ownerId, { kind: 'creer_projet', projetsActuels });
+
     // Article 13 (Respect de la Vie Privée) : un projet naît privé. La
     // règle attrape une régression où `is_public` prendrait `true` par
     // défaut — un basculement silencieux que personne ne remarquerait.

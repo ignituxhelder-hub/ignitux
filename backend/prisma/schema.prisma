@@ -28,6 +28,7 @@ model users {
   billing_documents         billing_documents[]
   roles                     user_roles[]
   profile                   user_profiles?
+  subscription              subscriptions?
   /// Le rôle sous lequel la personne travaille en ce moment. Rangé ici et
   /// non dans le navigateur pour que le mode suive la personne d une
   /// machine à l autre. null tant qu elle n a pas choisi.
@@ -1282,4 +1283,37 @@ model user_profiles {
 
   created_at DateTime? @default(now()) @db.Timestamptz(6)
   updated_at DateTime? @updatedAt @db.Timestamptz(6)
+}
+
+/// L'OFFRE D'UNE PERSONNE, ET DEPUIS QUAND.
+///
+/// Une seule ligne par compte : on ne cumule pas deux abonnements. Ce qui
+/// change au fil du temps est l'offre portée par cette ligne ; l'historique
+/// de facturation vit chez le fournisseur de paiement, pas ici — le
+/// dupliquer dans deux systèmes garantit qu'ils divergeront, et c'est celui
+/// qui encaisse qui fait foi.
+///
+/// Absence de ligne = offre Découverte. C'est volontaire : personne ne doit
+/// se retrouver sans offre parce qu'une écriture a échoué, et retomber sur
+/// la gratuite ne prive de rien.
+model subscriptions {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id      String    @unique @db.Uuid
+  user         users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  /// decouverte | entrepreneur | construction — voir offres-catalogue.ts.
+  /// Chaîne libre plutôt qu'enum Postgres : ajouter une offre ne doit pas
+  /// demander une migration de type, et le catalogue reste l'autorité.
+  offre        String
+  started_on   DateTime  @db.Date
+  /// Fin d'engagement. null = en cours.
+  ends_on      DateTime? @db.Date
+  /// Le fournisseur de paiement et la référence chez lui. null tant
+  /// qu'aucun encaissement réel n'a lieu — et dans ce cas l'offre ne peut
+  /// pas être payante, ce que le service vérifie.
+  provider     String?
+  provider_ref String?
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @updatedAt @db.Timestamptz(6)
+
+  @@index([offre])
 }

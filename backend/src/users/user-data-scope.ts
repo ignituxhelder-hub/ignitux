@@ -52,6 +52,12 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   // motivations, disponibilité. Elle appartient à la personne de la façon
   // la plus directe qui soit : elle l'a écrite sur elle-même.
   user_profiles: exported('compte'),
+  // L offre souscrite fait partie du compte : c est une relation
+  // contractuelle avec Ignitux, pas une donnee metier du projet. Exportee
+  // parce que la personne a le droit de savoir ce qu Ignitux retient de
+  // son abonnement — la reference chez le fournisseur de paiement comprise,
+  // qui est le seul fil permettant de retrouver ses propres paiements.
+  subscriptions: exported('compte'),
 
   projects: exported('projets_et_contenus'),
   tasks: exported('projets_et_contenus'),

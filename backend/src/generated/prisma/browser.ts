@@ -425,3 +425,18 @@ export type user_roles = Prisma.user_rolesModel
  * demandés et refusés faute d'emploi (voir le catalogue).
  */
 export type user_profiles = Prisma.user_profilesModel
+/**
+ * Model subscriptions
+ * L'OFFRE D'UNE PERSONNE, ET DEPUIS QUAND.
+ * 
+ * Une seule ligne par compte : on ne cumule pas deux abonnements. Ce qui
+ * change au fil du temps est l'offre portée par cette ligne ; l'historique
+ * de facturation vit chez le fournisseur de paiement, pas ici — le
+ * dupliquer dans deux systèmes garantit qu'ils divergeront, et c'est celui
+ * qui encaisse qui fait foi.
+ * 
+ * Absence de ligne = offre Découverte. C'est volontaire : personne ne doit
+ * se retrouver sans offre parce qu'une écriture a échoué, et retomber sur
+ * la gratuite ne prive de rien.
+ */
+export type subscriptions = Prisma.subscriptionsModel

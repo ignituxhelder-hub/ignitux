@@ -17,16 +17,17 @@ import { checkQuota, readQuotaLimits, type QuotaLimits, type QuotaVerdict } from
  * chaîne libre aurait laissé passer un `'analyse'` au singulier ou un
  * `'Analyser'` majuscule, et le journal se serait mis à compter deux
  * générateurs là où il n'y en a qu'un — sans que rien n'échoue.
+ *
+ * La liste elle-même a déménagé dans `generator-names.ts` : le catalogue
+ * des offres en a besoin et doit rester pur, sans Nest ni base. Réexportée
+ * ici pour que les appelants existants n'aient rien à changer.
  */
-export const GENERATOR_NAMES = [
-  'analyser',
-  'construire',
-  'financer',
-  'developper',
-  'transmettre',
-] as const;
-
-export type GeneratorName = (typeof GENERATOR_NAMES)[number];
+export {
+  GENERATOR_NAMES,
+  estGenerateur,
+  type GeneratorName,
+} from './generator-names.js';
+import { GENERATOR_NAMES, type GeneratorName } from './generator-names.js';
 
 /**
  * Le « qui » d'un appel.
@@ -215,6 +216,21 @@ export class AiUsageService {
     });
 
     return summarise(events, depuis, jusqua);
+  }
+
+  /**
+   * Le nombre d appels de cette personne sur le mois civil en cours.
+   *
+   * Distinct du plafond technique : celui-ci protege le budget d Ignitux,
+   * ce compteur-la sert a savoir ou en est la personne dans ce que son
+   * offre inclut. Les deux repondent a des questions differentes et n ont
+   * pas les memes seuils.
+   */
+  async callsThisMonth(userId: string, reference: Date = new Date()): Promise<number> {
+    const { depuis, jusqua } = monthRange(reference);
+    return this.prisma.ai_usage_events.count({
+      where: { user_id: userId, created_at: { gte: depuis, lt: jusqua } },
+    });
   }
 
   /** Les plafonds en vigueur, relus à chaque appel plutôt que mémorisés. */

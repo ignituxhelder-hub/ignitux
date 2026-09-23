@@ -23,6 +23,7 @@ import { MemoryModule } from './igini/memory/memory.module.js';
 import { ScoringModule } from './igini/scoring/scoring.module.js';
 import { WorkflowModule } from './igini/workflow/workflow.module.js';
 import { MarketplaceModule } from './marketplace/marketplace.module.js';
+import { OffresModule } from './offres/offres.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { ProjectsModule } from './projects/projects.module.js';
 import { UsersModule } from './users/users.module.js';
@@ -34,6 +35,7 @@ import { UsersModule } from './users/users.module.js';
     // posée directement sur leur route via @Throttle().
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 20 }]),
     PrismaModule,
+    OffresModule,
     UsersModule,
     AuthModule,
     ProjectsModule,

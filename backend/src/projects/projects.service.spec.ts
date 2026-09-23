@@ -15,6 +15,7 @@ import { MemoryService } from '../igini/memory/memory.service.js';
 import { WorkflowEngineService } from '../igini/workflow/workflow-engine.service.js';
 import { WorkflowService } from '../igini/workflow/workflow.service.js';
 import { CLAUDE_MODEL } from '../igini/claude/claude.service.js';
+import { OffresService } from '../offres/offres.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ProjectsService } from './projects.service.js';
 
@@ -38,6 +39,7 @@ describe('ProjectsService', () => {
   let prisma: {
     projects: {
       create: ReturnType<typeof vi.fn>;
+      count: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
       findFirst: ReturnType<typeof vi.fn>;
       update: ReturnType<typeof vi.fn>;
@@ -85,6 +87,9 @@ describe('ProjectsService', () => {
   let workflowService: { createTasksFromSuggestions: ReturnType<typeof vi.fn> };
   let automationService: { run: ReturnType<typeof vi.fn>; listRuns: ReturnType<typeof vi.fn> };
   let constitutionService: { guard: ReturnType<typeof vi.fn> };
+  // Les droits ouverts par l'offre ont leur propre suite : ici un faux
+  // permissif, pour que ces tests éprouvent le projet et pas la facturation.
+  let offres: { exiger: ReturnType<typeof vi.fn> };
   let memoryService: { recallAsContext: ReturnType<typeof vi.fn> };
   let workflowEngineService: { advanceActiveRunsForProject: ReturnType<typeof vi.fn> };
 
@@ -92,6 +97,8 @@ describe('ProjectsService', () => {
     prisma = {
       projects: {
         create: vi.fn(),
+        // Le nombre de projets deja possedes sert a la limite de l offre.
+        count: vi.fn().mockResolvedValue(0),
         findMany: vi.fn(),
         findFirst: vi.fn(),
         update: vi.fn(),
@@ -129,6 +136,7 @@ describe('ProjectsService', () => {
     // le fil des étapes, pas la mémoire.
     memoryService = { recallAsContext: vi.fn().mockResolvedValue(undefined) };
     workflowEngineService = { advanceActiveRunsForProject: vi.fn() };
+    offres = { exiger: vi.fn().mockResolvedValue(undefined) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -144,6 +152,7 @@ describe('ProjectsService', () => {
         { provide: ConstitutionService, useValue: constitutionService },
         { provide: MemoryService, useValue: memoryService },
         { provide: WorkflowEngineService, useValue: workflowEngineService },
+        { provide: OffresService, useValue: offres },
       ],
     }).compile();
 
@@ -152,6 +161,34 @@ describe('ProjectsService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('la limite de projets de l’offre', () => {
+    // Le contrôle vit dans create() et non dans le contrôleur : une route
+    // ajoutée plus tard qui créerait un projet sans passer par là le
+    // contournerait, sans que rien ne le signale.
+    it('demande la permission avant d’écrire quoi que ce soit', async () => {
+      offres.exiger.mockRejectedValue(new Error('offre insuffisante'));
+
+      await expect(service.create('u1', 'Idée')).rejects.toThrow();
+      expect(prisma.projects.create).not.toHaveBeenCalled();
+    });
+
+    // Être invité sur le projet de quelqu'un d'autre ne doit pas consommer
+    // sa propre limite : collaborer coûterait sa place, ce qui découragerait
+    // exactement ce qu'on veut encourager.
+    it('ne compte que les projets dont la personne est propriétaire', async () => {
+      prisma.projects.create.mockResolvedValue({ id: 'p1' });
+      prisma.projects.count.mockResolvedValue(1);
+
+      await service.create('u1', 'Idée');
+
+      expect(prisma.projects.count).toHaveBeenCalledWith({ where: { owner_id: 'u1' } });
+      expect(offres.exiger).toHaveBeenCalledWith('u1', {
+        kind: 'creer_projet',
+        projetsActuels: 1,
+      });
+    });
   });
 
   it('create scope le projet au propriétaire', async () => {

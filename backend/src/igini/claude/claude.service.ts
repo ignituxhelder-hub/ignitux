@@ -8,6 +8,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import type { z } from 'zod';
 import { getEnv } from '../../config/env.js';
+import { OffresService } from '../../offres/offres.service.js';
 import { AiUsageService, type AiUsageContext } from '../usage/ai-usage.service.js';
 import {
   readGeneratorsAvailability,
@@ -54,7 +55,10 @@ export class ClaudeService {
   private readonly logger = new Logger(ClaudeService.name);
   private client: Anthropic | undefined;
 
-  constructor(private readonly aiUsage: AiUsageService) {}
+  constructor(
+    private readonly aiUsage: AiUsageService,
+    private readonly offres: OffresService,
+  ) {}
 
   // Instancié à la première utilisation (et pas comme champ de classe) pour
   // que l'absence d'identifiants (ANTHROPIC_API_KEY ou autre mécanisme pris
@@ -92,6 +96,20 @@ export class ClaudeService {
     // le catch traduit toute exception en 500 : un refus de quota avalé là
     // ressortirait en « erreur interne », et la personne ne saurait pas que
     // son forfait est consommé.
+    // Ce que l'offre couvre, au même endroit et pour la même raison que le
+    // plafond : les cinq générateurs passent ici.
+    //
+    // **Avant** le plafond global, et l'ordre a un sens. Le plafond
+    // technique protège le budget d'Ignitux ; l'offre décrit ce que la
+    // personne a souscrit. Lui répondre « plafond atteint » alors que son
+    // offre n'inclut simplement pas ce générateur lui ferait attendre un
+    // mois pour rien.
+    await this.offres.exiger(request.usage.userId, {
+      kind: 'generer',
+      generateur: request.usage.generator,
+      appelsCeMois: await this.aiUsage.callsThisMonth(request.usage.userId),
+    });
+
     await this.aiUsage.assertWithinQuota(request.usage.userId);
 
     const startedAt = Date.now();

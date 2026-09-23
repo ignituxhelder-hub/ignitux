@@ -98,7 +98,8 @@ export const ModelName = {
   participations: 'participations',
   investor_movements: 'investor_movements',
   user_roles: 'user_roles',
-  user_profiles: 'user_profiles'
+  user_profiles: 'user_profiles',
+  subscriptions: 'subscriptions'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -795,6 +796,21 @@ export const User_profilesScalarFieldEnum = {
 } as const
 
 export type User_profilesScalarFieldEnum = (typeof User_profilesScalarFieldEnum)[keyof typeof User_profilesScalarFieldEnum]
+
+
+export const SubscriptionsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  offre: 'offre',
+  started_on: 'started_on',
+  ends_on: 'ends_on',
+  provider: 'provider',
+  provider_ref: 'provider_ref',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type SubscriptionsScalarFieldEnum = (typeof SubscriptionsScalarFieldEnum)[keyof typeof SubscriptionsScalarFieldEnum]
 
 
 export const SortOrder = {

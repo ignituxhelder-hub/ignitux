@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { z } from 'zod';
+import { OffresService } from '../../offres/offres.service.js';
 import { AiUsageService } from '../usage/ai-usage.service.js';
 import { ClaudeService } from './claude.service.js';
 import { GENERATORS_DISABLED_MESSAGE } from './generators-availability.js';
@@ -69,7 +70,20 @@ describe('ClaudeService', () => {
   let aiUsage: {
     record: ReturnType<typeof vi.fn>;
     assertWithinQuota: ReturnType<typeof vi.fn>;
+    callsThisMonth: ReturnType<typeof vi.fn>;
   };
+  let offres: { exiger: ReturnType<typeof vi.fn> };
+
+  /** Une generation ordinaire, pour les tests qui n eprouvent pas la requete. */
+  const genererQuelqueChose = () =>
+    service.generateStructuredOutput({
+      schema,
+      system: 'system',
+      userContent: 'user',
+      logContext: 'contexte',
+      userErrorMessage: 'échec',
+      usage: ATTRIBUTION,
+    });
 
   beforeEach(async () => {
     parseMock.mockReset();
@@ -77,9 +91,18 @@ describe('ClaudeService', () => {
     aiUsage = {
       record: vi.fn().mockResolvedValue(undefined),
       assertWithinQuota: vi.fn().mockResolvedValue(undefined),
+      callsThisMonth: vi.fn().mockResolvedValue(0),
     };
+    // Ce que l offre couvre est verifie au meme endroit que le plafond.
+    // Un faux permissif ici : ces tests eprouvent l appel, pas les droits,
+    // qui ont leur propre suite.
+    offres = { exiger: vi.fn().mockResolvedValue(undefined) };
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ClaudeService, { provide: AiUsageService, useValue: aiUsage }],
+      providers: [
+        ClaudeService,
+        { provide: AiUsageService, useValue: aiUsage },
+        { provide: OffresService, useValue: offres },
+      ],
     }).compile();
 
     service = module.get<ClaudeService>(ClaudeService);
@@ -487,6 +510,38 @@ describe('ClaudeService', () => {
           usage: ATTRIBUTION,
         }),
       ).resolves.toEqual({ answer: '42' });
+    });
+  });
+
+  describe('ce que l offre couvre', () => {
+    // Les cinq generateurs passent par ce point unique : un controle pose
+    // ici ne peut etre oublie par aucun d entre eux.
+    it('verifie les droits avant tout appel reseau', async () => {
+      offres.exiger.mockRejectedValue(new Error('offre insuffisante'));
+
+      await expect(genererQuelqueChose()).rejects.toThrow();
+      expect(parseMock).not.toHaveBeenCalled();
+    });
+
+    it('transmet le generateur reellement appele', async () => {
+      parseMock.mockResolvedValue({ parsed_output: { answer: 'ok' }, usage: UTILISATION });
+
+      await genererQuelqueChose();
+
+      const action = offres.exiger.mock.calls[0][1];
+      expect(action.kind).toBe('generer');
+      expect(action.generateur).toBe('analyser');
+    });
+
+    // Le plafond technique protege le budget d Ignitux ; l offre decrit ce
+    // que la personne a souscrit. Repondre « plafond atteint » a quelqu un
+    // dont l offre n inclut pas ce generateur lui ferait attendre un mois
+    // pour rien.
+    it('passe par l offre avant le plafond technique', async () => {
+      offres.exiger.mockRejectedValue(new Error('offre insuffisante'));
+
+      await expect(genererQuelqueChose()).rejects.toThrow();
+      expect(aiUsage.assertWithinQuota).not.toHaveBeenCalled();
     });
   });
 });
