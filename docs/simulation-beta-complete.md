@@ -2,39 +2,77 @@
 
 23 septembre 2026. Rédigé comme un auditeur externe : sans ménagement, sans protéger le projet.
 
-> **Note de préparation bêta : 52 / 100.**
+> **Note de préparation bêta : 74 / 100** — relevée de 52 le soir même, une fois
+> la base rendue joignable et les dix parcours réellement exécutés.
 >
-> Le produit est solide. L'exploitation n'existe pas. Ignitux ne peut aujourd'hui être ouvert à
-> personne — non pas à cause d'un défaut fonctionnel, mais parce qu'il ne peut ni démarrer en
-> production, ni envoyer un email, ni être déployé nulle part, et qu'un tiers de ses
-> fonctionnalités n'a jamais touché une base de données.
+> Le produit est éprouvé, pas seulement relu. L'exploitation n'existe toujours pas.
+
+> ### Mise à jour du 23 septembre 2026, en soirée
+>
+> **Ce document a été rédigé avant que la base soit joignable.** Sa section 0
+> disait qu'aucune des dix simulations n'avait pu être exécutée, et que
+> `docs/validation-finale.md` n'existait pas. Les deux sont devenus faux le
+> soir même : la chaîne de connexion est arrivée, les dix profils ont tourné,
+> et le rapport existe.
+>
+> Ce qui suit — l'audit statique des sections 1 à 4 — reste exact et garde son
+> intérêt : il dit ce qu'on peut savoir sans exécuter. Mais ses conclusions
+> sont désormais **doublées par des preuves d'exécution**, qui sont meilleures.
+> Se reporter à **[`validation-finale.md`](validation-finale.md)** pour l'état
+> de fait.
 
 ---
 
-## 0. Ce qui n'a pas pu être fait, et pourquoi
+## 0. Ce qui a été exécuté, finalement
 
-**La mission demandait de partir d'une nouvelle `DATABASE_URL`. Elle n'est pas arrivée sur cette
-machine.**
+La `DATABASE_URL` est arrivée en fin de journée. Tout ce que cette section
+annonçait comme impossible a été fait :
 
-```
-backend/.env            -> db.vrgsrisgoocyjqbhefsg.supabase.co  (ENOTFOUND)
-backend/.env.test       -> idem
-backend/.env.production -> idem
-variable d'environnement du shell : absente
-dernier fichier .env modifié : par moi, à 08h08
-```
+| | Résultat |
+|---|---|
+| Migration (`postgres`, `ignitux_test`) | passée — verdict `verifier-base.mjs` : « la base est à jour » |
+| Sauvegarde | 50 tables, 802 lignes |
+| Tests unitaires + bout en bout + frontend | **1 636 verts** |
+| `validation-reelle.mjs --avec-ia` | **41 vérifiés · 0 en échec · 0 non prouvés** |
+| `simulation-beta.mjs --avec-ia` | **0 critique · 0 majeur · 0 moyen · 0 mineur** |
 
-Vérifié aussi : aucun fichier du dépôt n'a été touché par quelqu'un d'autre dans les deux
-dernières heures. La chaîne existe peut-être dans un tableau de bord Supabase ; elle n'existe pas
-ici.
+**Les dix profils passent sans un seul constat, appels IA réels compris.**
 
-**Conséquence directe : aucune des dix simulations n'a été exécutée.** Ni migration, ni
-sauvegarde, ni validation. Le document `docs/validation-finale.md` demandé n'a **pas** été créé —
-un document intitulé « validation finale » qui ne rapporterait aucune validation serait un
-mensonge par titre.
+Trois défauts produit ont été trouvés en exécutant, qu'aucune lecture n'avait
+vus — et c'est le meilleur argument contre l'audit statique dont ce document
+est fait :
 
-Ce qui suit est donc de deux natures, et je les sépare : ce qui a été **vérifié** par lecture du
-code, et ce qui est **prêt à être exécuté**.
+1. **L'application entière refusait de démarrer.** `OffresModule` n'importait
+   pas `AuthModule` : Nest ne résolvait pas la garde du contrôleur et ne
+   construisait pas le graphe. Aucune route ne répondait. Les 1 028 tests
+   unitaires ne pouvaient pas le voir — ils n'assemblent jamais le graphe.
+2. **200 000 caractères dans une description rendaient un 500** au lieu d'un
+   refus lisible. Le parseur JSON refuse avant toute validation, et son erreur
+   n'est pas une `HttpException`. Devenu 413, avec un message qui dit que rien
+   n'a été enregistré.
+3. **Le compteur d'analyses mentait** : « 5 restantes » à un compte que le
+   produit arrête à 3 — et, plus grave, ce plafond serait tombé avant l'offre
+   pour tout abonné payant, livrant 5 analyses à qui en a acheté 30.
+
+Et la vérification qui comptait le plus : **Kevin**, entreprise spatiale avec
+500 € et aucune formation, reçoit **2/10 et 5 risques identifiés**. IGINI dit
+la vérité à quelqu'un dont le projet ne tient pas. C'est la seule chose de ce
+document qu'aucune lecture de code n'aurait pu établir.
+
+### La note, décomposée
+
+| Axe | Sur | Obtenu | Pourquoi |
+|---|---:|---:|---|
+| Produit et garde-fous, éprouvés à l'exécution | 30 | 30 | 41/41, dix profils sans constat |
+| Sécurité applicative (cloisonnement des comptes) | 20 | 20 | aucune lecture ni écriture croisée, profil malveillant sans prise |
+| Sécurité de l'infrastructure | 15 | 4 | la surface REST de l'hébergeur est ouverte sur 49 tables — voir `validation-finale.md` § 6.1 |
+| Qualité des refus et des messages | 15 | 15 | chaque refus nomme la sortie ; 413 corrigé |
+| Base de production | 10 | 5 | sauvegardée, verdict additif, **non migrée** |
+| Exploitation : hébergeur, domaine, email, paiement | 10 | 0 | rien de tout cela n'existe |
+| **Total** | **100** | **74** | |
+
+Les 26 points manquants ne sont pas du développement : ce sont **quatre
+comptes à ouvrir, une base à migrer et une porte à fermer.**
 
 ---
 
@@ -56,7 +94,9 @@ automatiquement. 10 ne portaient pas de garde visible ; **les 10 ont été lues 
 | `workflow-engine.advanceActiveRunsForProject` | Aucune route ne l'expose |
 
 **Zéro faille d'autorisation horizontale détectable statiquement.** Ce n'est pas une preuve
-d'absence : le profil 8 du harnais attaque réellement ces routes, et lui seul tranchera.
+d'absence — et c'est le profil 8 du harnais qui a tranché : il attaque réellement ces
+routes, et il est passé sans une seule lecture ni écriture croisée. La conclusion statique et la
+preuve d'exécution disent la même chose.
 
 ### 1.2 Injection : la surface est structurellement fermée
 
@@ -206,8 +246,11 @@ npx prisma db push
 npm run test:e2e
 
 # 3. Les deux harnais :
-node ../scripts/validation-reelle.mjs        # 30 vérifications
-node ../scripts/simulation-beta.mjs          # 10 profils
+node ../scripts/validation-reelle.mjs --avec-ia   # 41 vérifications
+node ../scripts/simulation-beta.mjs --avec-ia    # 10 profils
+
+# --avec-ia lance de vrais appels Claude (≈ 0,05 € l'unité). Sans lui, les
+# lignes concernées comptent comme NON PROUVÉES, jamais comme des succès.
 ```
 
 Si `verifier-base.mjs` répond **À EXAMINER**, s'arrêter et lire ce qu'il nomme. Ne pas passer
