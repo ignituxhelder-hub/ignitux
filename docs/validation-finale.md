@@ -202,7 +202,8 @@ Tout est reproductible en une commande, sans préparation.
 | L'état de la surface REST | `node backend/scripts/fermer-surface-rest.mjs [fichier]` (aperçu, n'écrit rien) |
 | Migrer la production sans pouvoir viser la mauvaise base | `node backend/scripts/migrer-prod.mjs` (aperçu, n'écrit rien) |
 | Le déploiement à blanc | `node backend/scripts/verifier-production.mjs .env.production` |
-| Les 18 écrans, vus comme un premier utilisateur | `node scripts/traversee-ecrans.mjs --web http://127.0.0.1:3001` |
+| Les 21 écrans, vus comme un premier utilisateur | `node scripts/traversee-ecrans.mjs [--telephone]` |
+| Le parcours complet, sans jamais taper une adresse | `node scripts/parcours-premier-utilisateur.mjs [--telephone]` |
 
 **Sauvegardes prises pendant cette session** — `backend/sauvegardes/` :
 
@@ -474,3 +475,10 @@ Ce qui reste :
   signalait en tête de `test/couts-ia.e2e-spec.ts` reste exacte pour la suite
   e2e elle-même, qui garde les générateurs éteints.
 - Rien n'a été déployé. Rien ne sera déployé sans que tu le demandes.
+
+---
+
+**Suite :** la session du 24 septembre a repris le produit par l'expérience
+plutôt que par les routes, et y a trouvé quatre défauts qu'aucune de ces
+vérifications ne pouvait voir — dont un mot de passe en clair dans le
+navigateur. Voir [`session-autonome-2026-09-24.md`](session-autonome-2026-09-24.md).
