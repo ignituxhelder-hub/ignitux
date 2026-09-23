@@ -1,0 +1,27 @@
+# Ce qui ne doit JAMAIS entrer dans une image.
+#
+# Les fichiers d'environnement en tête de liste : une image contenant un
+# `.env.production` porte la chaîne de connexion et le secret de signature
+# partout où elle est poussée, y compris dans un registre public.
+.env
+.env.*
+!.env.example
+
+node_modules
+dist
+.next
+
+# Tests et outillage : inutiles à l'exécution, et leur présence rend
+# possible de les lancer en production par accident.
+test
+**/*.spec.ts
+**/*.e2e-spec.ts
+vitest.config*.ts
+coverage
+
+sauvegardes
+.git
+.github
+.claude
+.agents
+*.md
