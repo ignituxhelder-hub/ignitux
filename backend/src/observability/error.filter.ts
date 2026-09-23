@@ -67,6 +67,27 @@ export class UnexpectedErrorFilter implements ExceptionFilter {
       return;
     }
 
+    // ── Un corps trop gros n'est pas une panne ──────────────────────────
+    //
+    // Le parseur JSON refuse au-delà de sa limite, AVANT toute validation,
+    // et lève une erreur qui n'est pas une HttpException. Elle tombait donc
+    // ici et ressortait en « erreur de notre côté » — ce qui est faux, et
+    // faux dans le sens le plus coûteux : la personne croit le produit
+    // cassé alors qu'elle peut corriger son envoi en raccourcissant.
+    //
+    // Trouvé en envoyant 200 000 caractères dans une description : 50 000
+    // rendaient un 400 clair, 200 000 un 500 anonyme.
+    const type = (exception as { type?: string } | null)?.type;
+    if (type === 'entity.too.large' || (exception as { status?: number })?.status === 413) {
+      response.status(HttpStatus.PAYLOAD_TOO_LARGE).json({
+        statusCode: HttpStatus.PAYLOAD_TOO_LARGE,
+        message:
+          'Ce que tu as envoyé est trop volumineux pour être traité. Raccourcis le texte ' +
+          "et réessaie — ce n'est pas une panne, et rien n'a été enregistré.",
+      });
+      return;
+    }
+
     // Court, lisible à l'oral, et suffisant pour retrouver une ligne dans un
     // journal de bêta privée. Un UUID entier serait illisible au téléphone.
     const reference = randomUUID().slice(0, 8);
