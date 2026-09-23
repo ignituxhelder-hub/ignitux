@@ -49,24 +49,49 @@ const ok = (quoi) => console.log(`    ok   ${quoi}`);
 
 // ── Un compte, un client ───────────────────────────────────────────────────
 
+const patienter = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Crée un compte, en respectant le limiteur de débit.
+ *
+ * Le produit limite l'inscription à 5 par minute et par adresse IP. C'est
+ * une protection voulue, pas un défaut : la première version de ce harnais
+ * demandait onze comptes en quelques secondes et s'est fait refuser sept
+ * fois. On attend donc, plutôt que de compter la protection comme une
+ * panne — une simulation qui exige qu'on baisse les défenses ne simule
+ * plus rien.
+ */
 async function creerCompte(slug) {
   const email = `sim.${slug}.${ts}@ignitux.test`;
   const motDePasse = `Sim!${ts}aA`;
 
-  const inscription = await fetch(`${API}/users/signup`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password: motDePasse }),
-  });
+  let inscription;
+  for (let essai = 0; essai < 4; essai += 1) {
+    inscription = await fetch(`${API}/users/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: motDePasse }),
+    });
+    if (inscription.status !== 429) break;
+    // La fenêtre du limiteur fait une minute : on la laisse s'écouler
+    // plutôt que de marteler.
+    process.stdout.write('    (limiteur atteint — attente de la fenêtre)\n');
+    await patienter(62_000);
+  }
   if (!inscription.ok) throw new Error(`inscription HTTP ${inscription.status}`);
 
-  const connexion = await fetch(`${API}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password: motDePasse }),
-  });
+  let connexion;
+  for (let essai = 0; essai < 4; essai += 1) {
+    connexion = await fetch(`${API}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: motDePasse }),
+    });
+    if (connexion.status !== 429) break;
+    await patienter(62_000);
+  }
   const { accessToken } = await connexion.json();
-  if (!accessToken) throw new Error('aucun jeton');
+  if (!accessToken) throw new Error(`aucun jeton (HTTP ${connexion.status})`);
 
   const appel = async (chemin, options = {}) => {
     const r = await fetch(`${API}${chemin}`, {
@@ -208,15 +233,19 @@ async function profil3() {
 
   const profil = await appel('/profil', {
     method: 'PUT',
+    // Le DTO attend `{ values: {...} }` — un envoi à plat est refusé, ce qui
+    // est le bon comportement (`forbidNonWhitelisted`).
     body: JSON.stringify({
-      display_name: 'Antoine',
-      activity_country: 'France',
-      sectors: ['Transport', 'Logiciel'],
-      experience:
-        "Quinze ans dans la logistique, dont huit a planifier des tournees de livraison pour un transporteur regional.",
-      availability: 'À plein temps',
-      has_founded_before: 'Non',
-      skills: ['Technique', 'Management'],
+      values: {
+        display_name: 'Antoine',
+        activity_country: 'France',
+        sectors: ['Transport', 'Logiciel'],
+        experience:
+          "Quinze ans dans la logistique, dont huit a planifier des tournees de livraison pour un transporteur regional.",
+        availability: 'À plein temps',
+        has_founded_before: 'Non',
+        skills: ['Technique', 'Management'],
+      },
     }),
   });
   if (profil.statut >= 400) {
@@ -538,11 +567,21 @@ async function profil9() {
   });
 
   // Il revient : nouvelle session, même compte.
-  const retour = await fetch(`${API}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password: motDePasse }),
-  });
+  // Le limiteur compte aussi les connexions : on attend sa fenêtre plutôt
+  // que de conclure à tort que le travail est perdu. La première version de
+  // ce profil rapportait un « critique » qui n'était que la protection en
+  // train de fonctionner.
+  let retour;
+  for (let essai = 0; essai < 4; essai += 1) {
+    retour = await fetch(`${API}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: motDePasse }),
+    });
+    if (retour.status !== 429) break;
+    process.stdout.write('    (limiteur atteint — attente de la fenêtre)\n');
+    await patienter(62_000);
+  }
   const { accessToken } = await retour.json();
   if (!accessToken) {
     constat('CRITIQUE', 'Impossible de se reconnecter', 'le travail est inaccessible');

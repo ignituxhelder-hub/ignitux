@@ -7,6 +7,8 @@
  *
  *   node scripts/validation-reelle.mjs
  *   node scripts/validation-reelle.mjs --api http://localhost:3000 --web http://localhost:3001
+ *   node scripts/validation-reelle.mjs --avec-ia          (un vrai appel Claude)
+ *   node scripts/validation-reelle.mjs --sans-navigateur
  *
  * ── Ce qu'il crée, et ce qu'il ne touche pas ──────────────────────────────
  *
@@ -26,8 +28,6 @@
  * Un `IGNORÉ` silencieux serait pire qu'un échec, parce qu'il se lirait
  * comme un vert de plus dans le total.
  */
-import { pathToFileURL } from 'node:url';
-
 const args = process.argv.slice(2);
 const lire = (nom, defaut) => {
   const i = args.indexOf(`--${nom}`);
@@ -37,6 +37,13 @@ const lire = (nom, defaut) => {
 const API = lire('api', 'http://localhost:3000');
 const WEB = lire('web', 'http://localhost:3001');
 const AVEC_NAVIGATEUR = !args.includes('--sans-navigateur');
+/**
+ * Éteint par défaut, et c'est le seul drapeau du script qui coûte de
+ * l'argent : il déclenche un vrai appel Claude. Par défaut la ligne compte
+ * comme *non prouvée*, jamais comme un succès — ne pas dépenser est un choix
+ * défendable, se dire vérifié sans avoir vérifié ne l'est pas.
+ */
+const AVEC_IA = args.includes('--avec-ia');
 
 const horodatage = Date.now();
 const EMAIL = `validation.${horodatage}@ignitux.test`;
@@ -328,11 +335,15 @@ titre('Profil');
 await verifier('Enregistrement du profil', async () => {
   const { statut } = await appel('/profil', {
     method: 'PUT',
+    // Le DTO attend `{ values: {...} }`. Un envoi à plat est refusé — ce qui
+    // prouve au passage que `forbidNonWhitelisted` fait son travail.
     body: JSON.stringify({
-      display_name: 'Validation',
-      activity_country: 'France',
-      sectors: ['Transport'],
-      experience: 'Conducteur d engins ferroviaires pendant douze ans.',
+      values: {
+        display_name: 'Validation',
+        activity_country: 'France',
+        sectors: ['Transport'],
+        experience: 'Conducteur d engins ferroviaires pendant douze ans.',
+      },
     }),
   });
   return statut < 400;
@@ -464,11 +475,94 @@ if (!iaAllumee) {
 } else {
   await verifier('Le générateur Construire est refusé en Découverte', async () => {
     if (!projetId) throw new Error('aucun projet');
-    const { statut, corps } = await appel(`/projects/${projetId}/build-plan`, { method: 'POST' });
+    const { statut, corps } = await appel(`/projects/${projetId}/plan`, { method: 'POST' });
     if (statut !== 403) throw new Error(`attendu 403, reçu ${statut}`);
     return `offre qui ouvre : ${corps?.offreQuiOuvre}`;
   });
-  noter('ignore', 'Analyse réelle par IGINI', 'non lancée : consomme du budget — à faire à la main');
+  // ── L'analyse réelle : la seule ligne qui coûte de l'argent ────────────
+  //
+  // Un appel Claude, soit quelques centimes sur un budget mensuel plafonné.
+  // Elle reste derrière un drapeau parce qu'une commande qu'on relance vingt
+  // fois dans la journée ne doit pas dépenser vingt fois sans le dire ; mais
+  // sans elle, IGINI n'est prouvé nulle part — tout le reste vérifie le
+  // produit *autour* de l'IA, pas l'IA.
+  if (!AVEC_IA) {
+    noter(
+      'ignore',
+      'Analyse réelle par IGINI',
+      'non lancée : ajouter --avec-ia (consomme du budget)',
+    );
+  } else {
+    let avant = null;
+    await verifier('Le quota d’analyses est lisible avant l’appel', async () => {
+      const { statut, corps } = await appel('/igini/usage/mois-en-cours');
+      if (statut !== 200) throw new Error(`statut ${statut}`);
+      avant = corps?.quota?.restant?.analyses ?? null;
+      return `restant : ${avant}`;
+    });
+
+    await verifier('IGINI rend une analyse réelle, pas un gabarit', async () => {
+      if (!projetId) throw new Error('aucun projet');
+      const { statut, corps } = await appel(`/projects/${projetId}/analyze`, { method: 'POST' });
+      if (statut !== 201) throw new Error(`attendu 201, reçu ${statut}`);
+      const texte = JSON.stringify(corps ?? {});
+      // Un gabarit ne parle pas du projet ; une vraie analyse le nomme ou en
+      // reprend les termes. Et une réponse de 200 caractères n'est pas une
+      // analyse, quel que soit son contenu.
+      if (texte.length < 400) throw new Error(`réponse trop courte (${texte.length} car.)`);
+      for (const motif of ['undefined', '[object Object]', 'lorem ipsum']) {
+        if (texte.toLowerCase().includes(motif)) throw new Error(`« ${motif} » dans la réponse`);
+      }
+      return `${texte.length} caractères`;
+    });
+
+    await verifier('L’appel est journalisé et décompté', async () => {
+      const { statut, corps } = await appel('/igini/usage/mois-en-cours');
+      if (statut !== 200) throw new Error(`statut ${statut}`);
+      const apres = corps?.quota?.restant?.analyses ?? null;
+      if (avant !== null && apres !== null && apres >= avant) {
+        throw new Error(`quota non décompté : ${avant} → ${apres}`);
+      }
+      const { corps: historique } = await appel('/igini/usage/historique');
+      const appels = historique?.appels;
+      if (!Array.isArray(appels) || appels.length === 0) {
+        throw new Error('aucune ligne dans l’historique');
+      }
+      const dernier = appels[0];
+      // Une ligne sans tokens ni coût est une ligne qui ne sert à rien : le
+      // plafond de 50 €/mois se calcule dessus.
+      if (!dernier.tokens_entree || !dernier.tokens_sortie) {
+        throw new Error(`ligne sans tokens : ${JSON.stringify(dernier).slice(0, 80)}`);
+      }
+      return `restant ${avant} → ${apres}, ${appels.length} appel(s), dernier ${dernier.generateur} ${dernier.cout_euros} €`;
+    });
+
+    // ── Le plafond de l'offre, et non le garde-fou technique ─────────────
+    //
+    // Deux plafonds coexistent et se confondent facilement : celui du
+    // catalogue (3 analyses/mois en Découverte, ce que la personne a
+    // souscrit) et celui du budget Ignitux (`assertWithinQuota`, qui protège
+    // la facture). Le second vient d'être prouvé ; le premier est celui dont
+    // dépend tout le modèle économique. S'il ne tient pas, Découverte est en
+    // réalité illimitée et les offres payantes n'ouvrent rien.
+    //
+    // Coûte deux appels réels : il faut consommer les 3 pour voir refuser le
+    // 4e — et ce 4e refus, lui, ne coûte rien puisqu'il tombe avant Claude.
+    await verifier('Découverte s’arrête à 3 analyses, et le 4e refus est gratuit', async () => {
+      if (!projetId) throw new Error('aucun projet');
+      for (const rang of [2, 3]) {
+        const { statut } = await appel(`/projects/${projetId}/analyze`, { method: 'POST' });
+        if (statut !== 201) throw new Error(`analyse ${rang} : attendu 201, reçu ${statut}`);
+      }
+      const { statut, corps } = await appel(`/projects/${projetId}/analyze`, { method: 'POST' });
+      if (statut !== 403) throw new Error(`4e analyse : attendu 403, reçu ${statut}`);
+      // Un refus qui ne nomme pas la sortie est un mur ; celui-ci doit dire
+      // quelle offre rouvre la porte, et que le compteur repart le mois
+      // prochain.
+      if (!corps?.offreQuiOuvre) throw new Error('refus sans offre nommée');
+      return `403, ouvre avec ${corps.offreQuiOuvre}, renouvellement ${corps.seRenouvelleLeMoisProchain}`;
+    });
+  }
 }
 
 // ── 9. Le navigateur ───────────────────────────────────────────────────────
@@ -476,13 +570,11 @@ if (!iaAllumee) {
 if (AVEC_NAVIGATEUR) {
   titre('Navigateur');
   try {
+    // `new URL(...).pathname` percent-encode les espaces : le dossier du
+    // projet en contient un, et le chemin devenait introuvable. On importe
+    // l'URL directement, sans repasser par une chaîne de chemin.
     const pw = await import(
-      pathToFileURL(
-        new URL('../frontend/node_modules/playwright/index.js', import.meta.url).pathname.replace(
-          /^\/([A-Za-z]:)/,
-          '$1',
-        ),
-      ).href
+      new URL('../frontend/node_modules/playwright/index.js', import.meta.url).href
     );
     const chromium = pw.chromium ?? pw.default.chromium;
     const nav = await chromium.launch({ channel: 'msedge', headless: true });
