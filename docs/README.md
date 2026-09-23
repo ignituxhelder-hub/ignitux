@@ -13,6 +13,8 @@ Ce dossier centralise la documentation qui ne vit pas déjà à côté du code q
 - [`decisions.md`](decisions.md) — les choix volontaires qui limitent le périmètre actuel (pas
 - [outillage.md](outillage.md) — audit des outils : ce qui existe, ce qui manque, ce dont le projet n'a pas besoin
 - [mise-en-production.md](mise-en-production.md) — audit de production, architecture cible, coût, étapes et risques restants
+- [simulation-beta-complete.md](simulation-beta-complete.md) — audit externe sans menagement :
+  ce qui a ete verifie par lecture du code, les defauts classes, et la note sur 100
 - [beta-ready.md](beta-ready.md) — etat de preparation : ce qui est fait, ce qui reste,
   a qui, et la premiere commande a taper des que la base repond
 - [deblocage-beta.md](deblocage-beta.md) — diagnostic des blocages (Supabase, migrations,
