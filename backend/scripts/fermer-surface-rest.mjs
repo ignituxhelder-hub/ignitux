@@ -45,8 +45,8 @@
  * Révoquer sur les tables existantes ne suffit pas : `ALTER DEFAULT
  * PRIVILEGES` redonne tout à `anon` sur chaque table **future**. Le trou se
  * rouvrirait donc au prochain `prisma db push`, sans que personne ne le
- * voie. On modifie aussi ces valeurs par défaut, pour les deux rôles qui
- * les ont posées.
+ * voie. On modifie donc aussi ce réglage — celui de `postgres`, qui est le
+ * rôle sous lequel Prisma crée les tables, et c'est celui qui compte ici.
  */
 import { createRequire } from 'node:module';
 import { config } from 'dotenv';
@@ -129,25 +129,53 @@ const sansRls = await q(`
 console.log(`  dont ${sansRls[0].n} table(s) sans RLS — donc lisibles telles quelles.`);
 
 // ── 2. Ce qu'on va écrire ────────────────────────────────────────────────
+//
+// Deux listes, et la distinction n'est pas cosmétique : la première est la
+// correction, la seconde une précaution que l'hébergeur peut refuser.
 
-const ordres = [
-  `REVOKE ALL ON ALL TABLES IN SCHEMA public FROM anon, authenticated`,
-  `REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM anon, authenticated`,
-  `REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM anon, authenticated`,
+/** Ceux qui comptent. Ils passent ensemble ou pas du tout. */
+const obligatoires = [
+  'REVOKE ALL ON ALL TABLES IN SCHEMA public FROM anon, authenticated',
+  'REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM anon, authenticated',
+  'REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM anon, authenticated',
   // Sans ceci, la prochaine table créée par Prisma repart avec tous les
-  // droits : le trou se rouvrirait au prochain `db push`, en silence.
-  `ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated`,
-  `ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON SEQUENCES FROM anon, authenticated`,
-  `ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON FUNCTIONS FROM anon, authenticated`,
-  // `supabase_admin` a posé les siens séparément ; les laisser laisserait la
-  // moitié du piège en place.
-  `ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated`,
-  `ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public REVOKE ALL ON SEQUENCES FROM anon, authenticated`,
-  `ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public REVOKE ALL ON FUNCTIONS FROM anon, authenticated`,
+  // droits : le trou se rouvrirait au prochain `db push`, en silence. C'est
+  // `postgres` qui crée ces tables, donc c'est bien ce réglage-ci qui les
+  // gouverne.
+  'ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated',
+  'ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON SEQUENCES FROM anon, authenticated',
+  'ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON FUNCTIONS FROM anon, authenticated',
+];
+
+/**
+ * Ceux qu'on tente sans en dépendre.
+ *
+ * `supabase_admin` a posé ses propres privilèges par défaut. Les retirer
+ * demande d'être membre de ce rôle, ce que `postgres` n'est pas sur une
+ * instance hébergée : Postgres répond « permission denied to change default
+ * privileges ».
+ *
+ * La première version de ce script les mettait dans la même transaction que
+ * les six autres. Résultat observé sur la vraie base : les six passaient,
+ * le septième échouait, **tout était annulé et rien n'était corrigé** — pour
+ * trois ordres qui ne changent rien ici. Un garde-fou qui empêche la
+ * correction qu'il devait protéger est un garde-fou mal placé.
+ *
+ * Ils ne concerneraient que les tables créées *par* `supabase_admin` dans le
+ * schéma public. Ignitux n'en crée aucune de cette façon : ses 50 tables
+ * appartiennent à `postgres`, et `prisma db push` s'exécute sous ce rôle.
+ * Leur échec laisse donc la correction entière.
+ */
+const precautions = [
+  'ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated',
+  'ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public REVOKE ALL ON SEQUENCES FROM anon, authenticated',
+  'ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public REVOKE ALL ON FUNCTIONS FROM anon, authenticated',
 ];
 
 console.log('\nOrdres à passer :');
-for (const o of ordres) console.log(`  ${o};`);
+for (const o of obligatoires) console.log(`  ${o};`);
+console.log('\nTentés sans en dépendre (l’hébergeur peut les refuser) :');
+for (const o of precautions) console.log(`  ${o};`);
 
 if (!APPLIQUER) {
   console.log('\nAperçu seulement. Relancer avec --appliquer pour écrire.');
@@ -157,12 +185,12 @@ if (!APPLIQUER) {
   process.exit(0);
 }
 
-// ── 3. Écriture, d'un bloc ───────────────────────────────────────────────
+// ── 3. Écriture ──────────────────────────────────────────────────────────
 
 console.log('');
 await client.query('BEGIN');
 try {
-  for (const o of ordres) {
+  for (const o of obligatoires) {
     await client.query(o);
     console.log(`  fait : ${o.slice(0, 62)}…`);
   }
@@ -175,6 +203,18 @@ try {
   process.exit(1);
 }
 
+// Hors transaction, et une par une : un refus sur l'une ne doit pas défaire
+// les six qui viennent d'être validées.
+const refusees = [];
+for (const o of precautions) {
+  try {
+    await client.query(o);
+    console.log(`  fait : ${o.slice(0, 62)}…`);
+  } catch (erreur) {
+    refusees.push(erreur.message);
+  }
+}
+
 // ── 4. L'état, après — vérifié, pas supposé ─────────────────────────────
 
 const apres = await q(`
@@ -183,7 +223,7 @@ const apres = await q(`
   WHERE table_schema = 'public' AND grantee IN ('anon', 'authenticated')
   GROUP BY grantee`);
 
-const lecture = await q(`SELECT count(*)::int AS n FROM users`);
+const lecture = await q('SELECT count(*)::int AS n FROM users');
 
 console.log('\nAprès :');
 console.log(
@@ -192,5 +232,12 @@ console.log(
   }`,
 );
 console.log(`  le produit lit toujours ses données : users = ${lecture[0].n} ligne(s)`);
+
+if (refusees.length > 0) {
+  console.log(`\n  ${refusees.length} précaution(s) refusée(s) par l’hébergeur — sans effet ici :`);
+  console.log(`    ${refusees[0]}`);
+  console.log('    Elles ne visaient que les tables créées par « supabase_admin » dans');
+  console.log('    le schéma public. Ignitux n’en crée aucune de cette façon.');
+}
 
 await client.end();
