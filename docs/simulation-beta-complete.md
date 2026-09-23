@@ -2,10 +2,12 @@
 
 23 septembre 2026. Rédigé comme un auditeur externe : sans ménagement, sans protéger le projet.
 
-> **Note de préparation bêta : 74 / 100** — relevée de 52 le soir même, une fois
-> la base rendue joignable et les dix parcours réellement exécutés.
+> **Note de préparation bêta : 84 / 100** — relevée de 52 le soir même : la
+> base est devenue joignable, les dix parcours ont réellement tourné, la
+> surface REST a été fermée et `ignitux_prod` migrée.
 >
-> Le produit est éprouvé, pas seulement relu. L'exploitation n'existe toujours pas.
+> Le produit est éprouvé et la base est en ordre. L'exploitation n'existe
+> toujours pas — et c'est désormais le seul obstacle.
 
 > ### Mise à jour du 23 septembre 2026, en soirée
 >
@@ -65,14 +67,15 @@ document qu'aucune lecture de code n'aurait pu établir.
 |---|---:|---:|---|
 | Produit et garde-fous, éprouvés à l'exécution | 30 | 30 | 41/41, dix profils sans constat |
 | Sécurité applicative (cloisonnement des comptes) | 20 | 20 | aucune lecture ni écriture croisée, profil malveillant sans prise |
-| Sécurité de l'infrastructure | 15 | 4 | la surface REST de l'hébergeur est ouverte sur 49 tables — voir `validation-finale.md` § 6.1 |
+| Sécurité de l'infrastructure | 15 | 14 | surface REST fermée sur les trois bases, privilèges par défaut compris ; reste trois réglages de `supabase_admin` que l'hébergeur refuse de céder, sans effet constaté |
 | Qualité des refus et des messages | 15 | 15 | chaque refus nomme la sortie ; 413 corrigé |
-| Base de production | 10 | 5 | sauvegardée, verdict additif, **non migrée** |
+| Base de production | 10 | 10 | sauvegardée puis migrée : 50/50 tables, aucune colonne manquante, 12 lignes de conformité intactes |
 | Exploitation : hébergeur, domaine, email, paiement | 10 | 0 | rien de tout cela n'existe |
-| **Total** | **100** | **74** | |
+| **Total** | **100** | **84** | |
 
-Les 26 points manquants ne sont pas du développement : ce sont **quatre
-comptes à ouvrir, une base à migrer et une porte à fermer.**
+Les 16 points manquants ne sont pas du développement, et il n'en reste qu'une
+seule sorte : **quatre comptes à ouvrir chez des tiers** — hébergeur, domaine,
+email, paiement. Tout le reste est fait.
 
 ---
 

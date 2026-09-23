@@ -9,9 +9,13 @@ ce dernier disait « prêt sous réserve de vérification », celui-ci dit ce qu
 > appels IA. La simulation des dix bêta-testeurs ne remonte plus aucun
 > constat, à aucun niveau de gravité.**
 >
-> Ce n'est pas la même chose que « prêt à ouvrir ». Le produit est éprouvé ;
-> l'infrastructure qui le porterait n'existe pas encore, et deux actions de
-> base attendent ton autorisation explicite.
+> Les deux actions de base qui restaient — fermer la surface REST et migrer
+> `ignitux_prod` — **ont été passées le soir même par le porteur**, et
+> revérifiées ici.
+>
+> Ce n'est pas la même chose que « prêt à ouvrir ». Le produit est éprouvé et
+> la base est en ordre ; l'infrastructure qui porterait le tout n'existe pas
+> encore.
 
 ---
 
@@ -73,8 +77,10 @@ accès sans jeton.
 
 ## 2. Erreurs corrigées
 
-Sept défauts, tous trouvés en exécutant pour de vrai — aucun n'était visible
-en lecture de code.
+Dix défauts, tous trouvés en exécutant pour de vrai — aucun n'était visible
+en lecture de code. Les deux derniers l'ont été en lançant l'outil de
+sécurité lui-même, ce qui est la meilleure illustration du principe : un
+script qu'on n'a pas exécuté n'est pas un script qui marche.
 
 ### 2.1 L'application entière refusait de démarrer — *bloquant absolu*
 
@@ -161,6 +167,25 @@ pas.
 - L'historique de consommation était lu comme un tableau alors que la route
   rend `{ appels: [...] }`, ce qui a produit un faux échec.
 
+### 2.8 L'outil de sécurité, deux fois pris en défaut par son propre usage
+
+**Sa transaction empêchait sa propre correction.** Les neuf ordres SQL étaient
+dans un seul bloc. Les six qui comptent passaient ; le septième — `ALTER
+DEFAULT PRIVILEGES FOR ROLE supabase_admin` — échouait sur « permission denied
+to change default privileges », parce que `postgres` n'est pas membre de ce
+rôle sur une instance hébergée. Tout était alors annulé, **et la surface
+restait grande ouverte** — pour trois ordres sans effet ici. Un garde-fou placé
+là protégeait le mauvais bout. Les six obligatoires gardent leur transaction ;
+les trois autres sont tentés après le `COMMIT`, un par un, et un refus est
+signalé au lieu d'être fatal.
+
+**Son raccourci « rien à faire » laissait le piège armé.** Le script s'arrêtait
+dès qu'aucun droit n'était accordé sur les tables — sans jamais regarder les
+privilèges *par défaut*, qui ne se voient pas dans `role_table_grants` et
+n'agissent que sur les tables à venir. Une base fraîche est exactement ce cas :
+le script aurait annoncé que tout allait bien en laissant le trou se rouvrir au
+prochain `db push`. Il regarde maintenant les deux avant de conclure.
+
 ---
 
 ## 3. Preuves disponibles
@@ -174,7 +199,8 @@ Tout est reproductible en une commande, sans préparation.
 | Les 1 636 tests | `npm test` (backend, frontend), `npm run test:e2e` (backend) |
 | Les 41 vérifications réelles | `node scripts/validation-reelle.mjs --avec-ia` |
 | Les dix bêta-testeurs | `node scripts/simulation-beta.mjs --avec-ia` |
-| La surface REST ouverte | `node backend/scripts/fermer-surface-rest.mjs` (aperçu, n'écrit rien) |
+| L'état de la surface REST | `node backend/scripts/fermer-surface-rest.mjs [fichier]` (aperçu, n'écrit rien) |
+| Migrer la production sans pouvoir viser la mauvaise base | `node backend/scripts/migrer-prod.mjs` (aperçu, n'écrit rien) |
 
 **Sauvegardes prises pendant cette session** — `backend/sauvegardes/` :
 
@@ -209,12 +235,19 @@ pas.
 |---|---|---|
 | `postgres` (développement) | **à jour** | 82 comptes, 63 projets, 802 lignes |
 | `ignitux_test` (bout en bout) | **à jour** | recréée à chaque exécution |
-| `ignitux_prod` | **en retard** | 3 tables et 4 colonnes manquantes ; 12 lignes de conformité, 24 articles de Constitution, 0 compte, 0 projet |
+| `ignitux_prod` | **à jour** | 50/50 tables, aucune colonne manquante ; 12 lignes de conformité, 24 articles de Constitution, 0 compte, 0 projet |
 
-La migration d'`ignitux_prod` est **additive** — `verifier-base.mjs` le
-confirme : `db push` ne ferait que créer, aucune destruction n'est en jeu. Elle
-n'a **pas** été passée : l'action a été refusée comme déploiement de
-production. Elle t'attend (§ 6).
+`ignitux_prod` a été migrée. Le verdict préalable était **ADDITIF** — aucune
+destruction en jeu — et la vérification d'après le confirme : « la base est à
+jour, rien à migrer », avec les 12 lignes de conformité intactes.
+
+Deux colonnes étaient signalées **À EXAMINER** avant la migration
+(`compliance_requirements.sectors` et `.verified_on`, sur une table portant 12
+lignes). C'était un signalement, pas un danger : ajouter une colonne à une
+table peuplée donne `NULL` aux lignes existantes, sans rien perdre. Reste une
+conséquence de contenu, mineure et à rattraper le jour où prod sera peuplée :
+ces 12 démarches y ont `sectors` vide, donc toutes traitées comme « toute
+activité », là où 2 sur 12 portent un secteur précis en développement.
 
 ### 4.3 Ce qui coûte
 
@@ -265,6 +298,11 @@ de ces chiffres. C'est un choix d'hébergement, pas un travail de code.
   reverse proxy, qui mettrait tous les comptes dans le même seau.
 - Aucun secret n'est dans le code source : tout passe par l'environnement, et
   les fichiers `.env*` sont hors dépôt.
+- **La base n'est plus exposée** : les rôles `anon` et `authenticated` n'ont
+  plus aucun droit, sur aucune des trois bases, et les privilèges par défaut
+  ne leur en rouvriront pas (§ 6.1).
+- **`ignitux_prod` est à jour** : 50 tables sur 50, aucune colonne manquante
+  (§ 6.2).
 
 ### Ce qui manque, et qui ne dépend pas de moi
 
@@ -278,70 +316,91 @@ de ces chiffres. C'est un choix d'hébergement, pas un travail de code.
 L'absence de paiement **n'est pas un blocage pour une bêta privée** : une bêta
 privée n'a rien à vendre. C'est un blocage pour ouvrir les offres.
 
-### Les deux réserves techniques
+### La réserve technique qui reste
 
-1. **La surface REST de Supabase est ouverte** (§ 6). C'est le point le plus
-   sérieux du document.
-2. **Le plafond de coût par personne est à 2 €/mois**, ce qui suffit à
+La surface REST de Supabase **a été fermée** (§ 6). Il reste un seul point, et
+ce n'est pas un défaut de code :
+
+- **Le plafond de coût par personne est à 2 €/mois**, ce qui suffit à
    Découverte (0,14 €) et à Entrepreneur (≈ 1,77 € pour 30 appels), mais
    **pas à Construction** : 150 appels à 0,059 € font 8,85 €, donc un abonné
-   à 59 € serait coupé vers la 34ᵉ analyse sur 150 promises. Ce n'est pas un
-   défaut de code — c'est un arbitrage de marge qui t'appartient, et il n'a
-   aucun effet tant qu'aucune offre payante n'est vendable.
+  à 59 € serait coupé vers la 34ᵉ analyse sur 150 promises. C'est un
+  arbitrage de marge qui t'appartient, et il n'a aucun effet tant qu'aucune
+  offre payante n'est vendable.
 
 ---
 
-## 6. Deux actions qui t'attendent
+## 6. Les deux actions de base, passées et vérifiées
 
-Les deux ont été préparées, vérifiées en aperçu, et **refusées à l'exécution**
-par la garde qui protège les bases partagées et la production. C'est le
-comportement voulu : ces deux gestes sont les tiens.
+Toutes deux avaient été refusées à l'exécution par la garde qui protège les
+bases partagées et la production. Le porteur les a passées lui-même, à la main,
+le soir du 23 septembre. Ce qui suit est l'état constaté après.
 
-### 6.1 Fermer la surface REST — *à faire en priorité*
+### 6.1 La surface REST est fermée
 
-Constaté sur la base :
+Ce qui était constaté avant :
 
-- les rôles `anon` et `authenticated` ont **SELECT, INSERT, UPDATE, DELETE et
-  TRUNCATE sur les 50 tables** du schéma public ;
-- la sécurité par ligne n'est active que sur `users`, donc **49 tables sont
+- les rôles `anon` et `authenticated` avaient **SELECT, INSERT, UPDATE, DELETE
+  et TRUNCATE sur les 50 tables** du schéma public de la base `postgres` ;
+- la sécurité par ligne n'était active que sur `users`, donc **49 tables
   lisibles telles quelles** ;
-- l'API REST de l'hébergeur répond bien sur `/rest/v1/users` : elle réclame une
+- l'API REST de l'hébergeur répondait sur `/rest/v1/users` : elle réclamait une
   clé `apikey`, et rien d'autre.
 
 Or cette clé est, dans le modèle Supabase, une clé **publique** : elle est
 faite pour être posée dans du code de navigateur, et c'est la RLS qui protège
 les données derrière. Ignitux n'utilise ni l'une ni l'autre — aucun paquet
-`@supabase`, aucune clé dans le dépôt, tout passe par Prisma. Il reste donc une
+`@supabase`, aucune clé dans le dépôt, tout passe par Prisma. C'était une
 porte, sans serrure, devant une pièce où personne n'a affaire.
 
-Fermer vaut mieux qu'activer RLS sur cinquante tables : ce serait cinquante
-jeux de politiques pour un chemin que le produit n'emprunte jamais, donc du
-code non exécuté, donc non éprouvé, donc faux tôt ou tard.
+**Après `fermer-surface-rest.mjs --appliquer` :**
+
+| Base | Droits `anon`/`authenticated` | Privilèges par défaut ouverts |
+|---|---|---|
+| `postgres` (dev) | **aucun** | `supabase_admin` seulement — voir ci-dessous |
+| `ignitux_test` | **aucun** | aucun |
+| `ignitux_prod` | **aucun** | aucun |
+
+Deux enseignements que seule l'exécution a donnés :
+
+1. **L'exposition ne concernait que la base `postgres`.** `ignitux_test` et
+   `ignitux_prod` ont répondu « rien à faire » : Supabase ne pose ses droits
+   `anon` que sur la base qu'il provisionne lui-même, et les bases créées
+   ensuite n'en héritent pas. La faille portait donc exactement sur celle qui
+   contenait les 85 comptes — et elle est fermée.
+2. **Les trois `ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin` sont
+   refusés** par l'hébergeur (`permission denied to change default
+   privileges`), parce que `postgres` n'est pas membre de ce rôle. Sans effet
+   ici : ils ne gouvernent que les tables créées *par* `supabase_admin` dans
+   le schéma public, et Prisma crée sous `postgres`, dont les privilèges par
+   défaut ont bien été vidés.
+
+Le second point a été **prouvé** juste après : la migration d'`ignitux_prod` a
+créé trois tables neuves, et aucune n'a reçu de droit `anon`. Le piège qui
+aurait rouvert le trou au prochain `db push` est bien désamorcé.
+
+**Et le produit n'a rien perdu** : les 41 vérifications réelles ont été
+relancées après la fermeture — 41 sur 41, dont l'analyse IGINI et les quatre
+écrans du navigateur.
+
+### 6.2 `ignitux_prod` est migrée
+
+Sauvegarde prise avant (`ignitux_prod-2026-09-23T20-25-54`, 36 lignes).
+Verdict préalable de `verifier-base.mjs` : **ADDITIF**.
 
 ```
-node backend/scripts/fermer-surface-rest.mjs                     # aperçu
-node backend/scripts/fermer-surface-rest.mjs --appliquer         # développement
-node backend/scripts/fermer-surface-rest.mjs .env.production --appliquer
+node scripts/migrer-prod.mjs --appliquer
+→ Your database is now in sync with your Prisma schema. Done in 5.01s
+
+node scripts/verifier-base.mjs .env.production
+→ Tables : 50 présentes / 50 attendues · Colonnes : aucune manquante
+→ VERDICT : la base est à jour. Rien à migrer.
 ```
 
-Le script vérifie d'abord que les tables appartiennent bien au rôle de la
-connexion — c'est le cas, les 50 appartiennent à `postgres` — puis écrit d'un
-bloc. Il traite aussi le piège qui rendrait la correction inutile : sans
-modifier les privilèges par défaut, **le trou se rouvrirait au prochain
-`prisma db push`**, en silence. Retour arrière en une ligne, indiqué par le
-script lui-même.
-
-### 6.2 Migrer `ignitux_prod`
-
-Sauvegarde déjà prise (`ignitux_prod-2026-09-23T20-25-54`, 36 lignes). Verdict
-de `verifier-base.mjs` : **ADDITIF**, aucune destruction en jeu.
-
-```
-cd backend && DATABASE_URL="<celle de .env.production>" npx prisma db push --skip-generate
-```
-
-Sans `--accept-data-loss` : si Prisma propose quoi que ce soit de destructif,
-la commande s'arrête d'elle-même, et il faudra en reparler.
+Les 12 lignes de `compliance_requirements` sont intactes. Les deux colonnes
+signalées **À EXAMINER** avant la migration étaient un avertissement, pas un
+danger : ajouter une colonne à une table peuplée donne `NULL` aux lignes
+existantes, sans rien perdre.
 
 ---
 
@@ -392,13 +451,24 @@ Trois remarques qui comptent autant que le chiffre :
 
 ## 8. Ce qui reste ouvert, honnêtement
 
-- `ignitux_prod` n'est pas migrée — refusée à l'exécution, § 6.2.
-- La surface REST n'est pas fermée — refusée à l'exécution, § 6.1.
-- Le plafond de coût par personne (2 €/mois) ne couvre pas l'offre
-  Construction. Arbitrage de marge, pas défaut de code.
-- Le trajet depuis un vrai appel Anthropic **est** désormais éprouvé
-  (§ 1.2, § 1.3) ; c'était le dernier maillon non couvert du parcours, et la
-  remarque qui le signalait en tête de `test/couts-ia.e2e-spec.ts` n'est plus
-  vraie de ce côté-là — elle reste exacte pour la suite e2e elle-même, qui
-  garde les générateurs éteints.
+**Fermé depuis la rédaction :** `ignitux_prod` est migrée et la surface REST
+est close (§ 6). Les deux seules lignes techniques de cette liste ont disparu.
+
+Ce qui reste :
+
+- **Le plafond de coût par personne (2 €/mois) ne couvre pas l'offre
+  Construction** : 150 appels à 0,059 € font 8,85 €. Arbitrage de marge, pas
+  défaut de code, et sans effet tant qu'aucune offre payante n'est vendable.
+- **Sur la base `postgres`, trois privilèges par défaut restent posés par
+  `supabase_admin`** et l'hébergeur refuse qu'on les retire. Ils ne
+  gouvernent que les tables créées par ce rôle ; Prisma crée sous `postgres`,
+  et la migration de prod l'a vérifié en pratique — trois tables neuves, zéro
+  droit `anon`. À reregarder si Supabase change ce fonctionnement.
+- **Il n'y a ni hébergeur, ni domaine, ni fournisseur d'email, ni fournisseur
+  de paiement.** C'est désormais le seul obstacle entre Ignitux et une bêta
+  privée.
+- Le trajet depuis un vrai appel Anthropic **est** éprouvé (§ 1.2, § 1.3) ;
+  c'était le dernier maillon non couvert du parcours. La remarque qui le
+  signalait en tête de `test/couts-ia.e2e-spec.ts` reste exacte pour la suite
+  e2e elle-même, qui garde les générateurs éteints.
 - Rien n'a été déployé. Rien ne sera déployé sans que tu le demandes.

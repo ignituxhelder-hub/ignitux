@@ -113,14 +113,43 @@ const avant = await q(`
   WHERE table_schema = 'public' AND grantee IN ('anon', 'authenticated')
   GROUP BY grantee ORDER BY grantee`);
 
-if (avant.length === 0) {
-  console.log('\nRien à faire : ni « anon » ni « authenticated » n’a de droit ici.');
+/**
+ * Les privilèges par défaut, regardés séparément — et c'est le point.
+ *
+ * Une base peut n'avoir **aucun** droit accordé sur ses tables et porter
+ * quand même le piège : `ALTER DEFAULT PRIVILEGES` ne se voit pas dans
+ * `role_table_grants`, il n'agit que sur les tables à venir. Une base
+ * fraîche est exactement ce cas.
+ *
+ * La première version s'arrêtait sur « rien à faire » dès que la première
+ * requête revenait vide, sans jamais regarder ici : elle aurait laissé le
+ * piège armé sur une base vide, en annonçant que tout allait bien.
+ */
+const defautsOuverts = await q(`
+  SELECT pg_get_userbyid(d.defaclrole) AS par
+  FROM pg_default_acl d JOIN pg_namespace n ON n.oid = d.defaclnamespace
+  WHERE n.nspname = 'public'
+    AND array_to_string(d.defaclacl, ' ') ~ '(anon|authenticated)='`);
+
+if (avant.length === 0 && defautsOuverts.length === 0) {
+  console.log(
+    '\nRien à faire : ni « anon » ni « authenticated » n’a de droit ici,' +
+      '\net aucun privilège par défaut ne leur en rouvrirait.',
+  );
   await client.end();
   process.exit(0);
 }
 
 console.log('\nDroits actuellement accordés :');
+if (avant.length === 0) console.log('  aucun sur les tables existantes');
 for (const a of avant) console.log(`  ${a.grantee.padEnd(14)} sur ${a.tables} table(s)`);
+if (defautsOuverts.length > 0) {
+  console.log(
+    `  privilèges par défaut ouverts, posés par : ${[
+      ...new Set(defautsOuverts.map((d) => d.par)),
+    ].join(', ')}`,
+  );
+}
 
 const sansRls = await q(`
   SELECT count(*)::int AS n

@@ -96,7 +96,13 @@ if (!APPLIQUER) {
 
 // `dotenv` ne remplace jamais une variable déjà posée : en la donnant ici, on
 // est sûr que `prisma7.config.ts` verra celle-ci et non celle de `.env`.
-const fils = spawn('npx', ['prisma', 'db', 'push'], {
+// La commande part en une seule chaîne, et non en tableau d'arguments :
+// avec `shell: true`, Node déprécie la seconde forme (DEP0190) parce que les
+// arguments sont concaténés sans être échappés. Rien ici ne vient de
+// l'extérieur, mais un avertissement qu'on laisse traîner finit par masquer
+// celui qui comptera. `shell: true` reste nécessaire sous Windows, où `npx`
+// est un `.cmd`.
+const fils = spawn('npx prisma db push', {
   stdio: 'inherit',
   shell: true,
   env: { ...process.env, DATABASE_URL: url },
