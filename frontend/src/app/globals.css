@@ -300,6 +300,51 @@ a:hover {
    Les champs.
    -------------------------------------------------------------------------- */
 
+/*
+ * Le socle : aucun champ ne doit retomber sur les réglages du navigateur.
+ *
+ * `.field` habille correctement ce qu'il entoure, et treize écrans s'en
+ * servent. Trois ne s'en servaient pas — Relations, Facturation, Place de
+ * marché — et leurs quatorze champs héritaient donc des valeurs par défaut :
+ * `padding: 1px 2px`, `font-size: 13.33px`. Mesuré au téléphone : 177×21
+ * points, contre 319×43 sur l'écran de connexion.
+ *
+ * Deux conséquences, et la seconde est la vraie :
+ *
+ * 1. Vingt et un points de haut, c'est difficile à viser au pouce.
+ * 2. **Sous 16px, iOS zoome tout seul quand on touche le champ.** La page
+ *    saute, le reste déborde, et il faut repincer pour revenir. La connexion
+ *    y échappait avec ses 16px ; ces trois écrans non. Ce n'est pas une
+ *    question de goût : c'est un comportement du système qu'on déclenche ou
+ *    qu'on évite.
+ *
+ * Corriger écran par écran aurait laissé le prochain formulaire retomber
+ * dans le même trou. Le socle vaut pour tout ce qui existe et tout ce qui
+ * viendra ; `.field` continue de l'affiner, et n'importe quelle classe plus
+ * spécifique le remplace.
+ */
+/*
+ * `:where()` et non un sélecteur nu : sa spécificité vaut zéro, donc
+ * n'importe quelle classe le remplace sans avoir à se battre.
+ *
+ * Écrit d'abord sans, avec trois `:not()` — et chaque `:not()` compte dans
+ * la spécificité. Le socle est passé devant `.field input` et a **rétréci**
+ * les champs de connexion, de 43 à 38 points : une correction qui abîmait
+ * précisément ce qui allait bien.
+ */
+:where(input:not([type='checkbox']):not([type='radio']):not([type='range'])),
+:where(select),
+:where(textarea) {
+  font-family: inherit;
+  /* Jamais moins de 16px : en dessous, iOS zoome à la saisie. */
+  font-size: max(1rem, 16px);
+  padding: 0.5rem 0.65rem;
+  color: var(--text);
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
 .field {
   display: flex;
   flex-direction: column;

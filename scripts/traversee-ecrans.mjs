@@ -54,6 +54,21 @@ const lire = (nom, defaut) => {
 const API = lire('api', 'http://127.0.0.1:3000');
 const WEB = lire('web', 'http://127.0.0.1:3001');
 const CAPTURES = args.includes('--captures');
+/**
+ * iPhone 14 : 390 points de large. Le format le plus probable chez un
+ * bêta-testeur français, et celui qu'aucune des suites ne regardait.
+ */
+const TELEPHONE = args.includes('--telephone');
+const ECRAN = TELEPHONE ? { width: 390, height: 844 } : { width: 1280, height: 1800 };
+
+/**
+ * 44 points : la taille minimale d'une cible tactile chez Apple, 48 dp chez
+ * Google. En dessous, on vise à côté — et sur un écran où l'on tape avec le
+ * pouce, viser à côté veut dire ouvrir autre chose.
+ */
+const CIBLE_MINIMALE = 40;
+/** En dessous, le texte n'est pas lu : il est deviné. */
+const TEXTE_MINIMAL = 12;
 
 /** Les mots qui n'appartiennent pas à la personne qui lit l'écran. */
 const FUITES = [
@@ -100,6 +115,14 @@ const ECRANS = [
 ];
 
 const resultats = [];
+/**
+ * Les cibles tactiles trop petites, regroupées par élément et non par écran.
+ *
+ * « ← Retour aux projets » mesure 137×22 sur douze écrans. Le signaler douze
+ * fois donnerait douze constats pour un seul bouton à agrandir, et noierait
+ * les deux qui comptent vraiment sous dix qui n'existent pas.
+ */
+const ciblesTropPetites = new Map();
 const note = (ecran, gravite, quoi, detail) =>
   resultats.push({ ecran, gravite, quoi, detail });
 
@@ -124,7 +147,10 @@ const pw = await import(
 );
 const chromium = pw.chromium ?? pw.default.chromium;
 const nav = await chromium.launch({ channel: 'msedge', headless: true });
-const ctx = await nav.newContext({ viewport: { width: 1280, height: 1800 } });
+const ctx = await nav.newContext({
+  viewport: ECRAN,
+  ...(TELEPHONE ? { isMobile: true, hasTouch: true, deviceScaleFactor: 3 } : {}),
+});
 const page = await ctx.newPage();
 
 let erreursJs = [];
@@ -142,6 +168,7 @@ page.on('response', (r) => {
 
 console.log(`┌─ Traversée des écrans ────────────────────────────────────`);
 console.log(`│ interface : ${WEB}`);
+console.log(`│ écran     : ${ECRAN.width}×${ECRAN.height}${TELEPHONE ? ' (téléphone)' : ''}`);
 console.log(`│ compte    : ${EMAIL}`);
 console.log(`│ écrans    : ${ECRANS.length}`);
 console.log(`└───────────────────────────────────────────────────────────\n`);
@@ -295,6 +322,111 @@ for (const ecran of ECRANS) {
     ligne.push('cul-de-sac');
   }
 
+  // ── Ce qui ne se voit qu'au téléphone ──────────────────────────────
+  //
+  // Le parcours peut se cliquer d'un bout à l'autre sur un écran de 390
+  // points sans qu'aucune de ces trois choses soit vraie. Elles ne cassent
+  // rien ; elles rendent le produit pénible, ce qui revient au même quand
+  // personne n'est obligé de rester.
+  if (TELEPHONE) {
+    const mesures = await page
+      .evaluate(
+        ({ cible, texteMin, largeur }) => {
+          const deborde = document.documentElement.scrollWidth - largeur;
+
+          const troplarges = [];
+          const petitesCibles = [];
+          const petitsTextes = new Set();
+
+          for (const el of document.querySelectorAll('body *')) {
+            const r = el.getBoundingClientRect();
+            if (r.width === 0 && r.height === 0) continue;
+
+            // Un élément qui dépasse à droite est ce qui crée la barre de
+            // défilement horizontale — on nomme le coupable, pas le symptôme.
+            if (r.right > largeur + 2 && el.children.length === 0) {
+              troplarges.push(`${el.tagName.toLowerCase()} « ${(el.textContent || '').trim().slice(0, 24)} » +${Math.round(r.right - largeur)}px`);
+            }
+
+            const interactif =
+              ['A', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName) ||
+              el.getAttribute('role') === 'button';
+            if (interactif && !el.hasAttribute('disabled')) {
+              // La cible réelle est la PLUS GRANDE de l'élément et de son
+              // libellé, jamais le libellé seul.
+              //
+              // Deux formes existent, et il a fallu se tromper deux fois pour
+              // les distinguer. Quand le <label> ENVELOPPE la case — écran
+              // des rôles, 13×13 dans une zone de 319×96 — c'est lui qui
+              // reçoit le doigt, et mesurer l'input criait au loup. Quand le
+              // <label> est POSÉ AU-DESSUS du champ — le petit « EMAIL » de
+              // 319×20 sur la connexion — c'est l'inverse : le champ fait
+              // 319×43 et se tape très bien, et mesurer le libellé criait au
+              // loup dans l'autre sens.
+              //
+              // Prendre le plus grand des deux couvre les deux formes, et
+              // n'invente ni l'un ni l'autre cas.
+              const etiquette =
+                el.closest('label') ??
+                (el.id ? document.querySelector(`label[for="${CSS.escape(el.id)}"]`) : null);
+              const zoneEtiquette = etiquette ? etiquette.getBoundingClientRect() : null;
+              const aire = (b) => (b ? b.width * b.height : 0);
+              const zone = aire(zoneEtiquette) > aire(r) ? zoneEtiquette : r;
+              if (zone.width < cible || zone.height < cible) {
+                const quoi = (el.textContent || el.getAttribute('placeholder') || el.tagName).trim();
+                petitesCibles.push(
+                  `« ${quoi.slice(0, 22)} » ${Math.round(zone.width)}×${Math.round(zone.height)}`,
+                );
+              }
+            }
+
+            if (el.children.length === 0 && (el.textContent || '').trim().length > 3) {
+              const taille = parseFloat(getComputedStyle(el).fontSize);
+              if (taille && taille < texteMin) petitsTextes.add(`${taille}px`);
+            }
+          }
+          return {
+            deborde,
+            troplarges: troplarges.slice(0, 3),
+            petitesCibles: [...new Set(petitesCibles)].slice(0, 3),
+            nbPetitesCibles: new Set(petitesCibles).size,
+            petitsTextes: [...petitsTextes].slice(0, 3),
+          };
+        },
+        { cible: CIBLE_MINIMALE, texteMin: TEXTE_MINIMAL, largeur: ECRAN.width },
+      )
+      .catch(() => null);
+
+    if (mesures) {
+      if (mesures.deborde > 2) {
+        note(
+          ecran.nom,
+          'MAJEUR',
+          `déborde de ${mesures.deborde}px : il faut faire glisser l'écran sur le côté`,
+          mesures.troplarges.join(' | ') || undefined,
+        );
+        ligne.push(`déborde +${mesures.deborde}px`);
+      }
+      if (mesures.nbPetitesCibles > 0) {
+        for (const cible of mesures.petitesCibles) {
+          const connu = ciblesTropPetites.get(cible) ?? [];
+          connu.push(ecran.nom);
+          ciblesTropPetites.set(cible, connu);
+        }
+        ligne.push(`${mesures.nbPetitesCibles} cible(s) trop petite(s)`);
+      }
+      if (mesures.petitsTextes.length) {
+        note(
+          ecran.nom,
+          'MOYEN',
+          `texte sous ${TEXTE_MINIMAL}px`,
+          mesures.petitsTextes.join(', '),
+        );
+        ligne.push(`texte ${mesures.petitsTextes[0]}`);
+      }
+    }
+  }
+
   const verdict = ligne.length === 0 ? 'ok' : ligne.join(' · ');
   const marque = ligne.length === 0 ? '  ok  ' : '  !!  ';
   console.log(`${marque}${ecran.nom.padEnd(22)}${verdict}`);
@@ -306,6 +438,32 @@ for (const ecran of ECRANS) {
 }
 
 await nav.close();
+
+// ── Les cibles tactiles, une fois chacune ───────────────────────────────
+
+if (ciblesTropPetites.size > 0) {
+  console.log(`
+Cibles tactiles sous ${CIBLE_MINIMALE}px — chacune une fois, avec ses écrans :
+`);
+  const classees = [...ciblesTropPetites.entries()].sort((a, b) => b[1].length - a[1].length);
+  for (const [cible, ecrans] of classees) {
+    // Un champ de saisie ou une case à cocher trop petits se ratent au
+    // pouce ; un lien de texte de 20 points est partout sur le web et se
+    // vise très bien. Les mettre au même niveau ferait passer la vraie
+    // gêne pour du bruit.
+    const estChamp = /INPUT|Prénom|Nom|Client|Ex :|Montant/i.test(cible);
+    const dimensions = cible.match(/(d+)×(d+)/);
+    const hauteur = dimensions ? Number(dimensions[2]) : 99;
+    const gravite = estChamp || hauteur < 20 ? 'MOYEN' : 'MINEUR';
+    resultats.push({
+      section: 'Téléphone',
+      libelle: cible,
+      gravite,
+      detail: `${ecrans.length} écran(s) : ${ecrans.slice(0, 4).join(', ')}${ecrans.length > 4 ? '…' : ''}`,
+    });
+    console.log(`  ${gravite === 'MOYEN' ? '!!' : '  '} ${cible.padEnd(46)} ${ecrans.length} écran(s)`);
+  }
+}
 
 // ── Verdict ──────────────────────────────────────────────────────────────
 
@@ -324,7 +482,7 @@ for (const gravite of ['CRITIQUE', 'MAJEUR', 'MOYEN', 'MINEUR']) {
   if (!lot.length) continue;
   console.log(`\n${gravite} :`);
   for (const r of lot) {
-    console.log(`  [${r.ecran}] ${r.quoi}${r.detail ? ` — ${r.detail}` : ''}`);
+    console.log(`  [${r.ecran ?? r.section}] ${r.quoi ?? r.libelle}${r.detail ? ` — ${r.detail}` : ''}`);
   }
 }
 
