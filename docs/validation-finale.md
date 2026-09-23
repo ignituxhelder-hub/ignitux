@@ -201,6 +201,8 @@ Tout est reproductible en une commande, sans préparation.
 | Les dix bêta-testeurs | `node scripts/simulation-beta.mjs --avec-ia` |
 | L'état de la surface REST | `node backend/scripts/fermer-surface-rest.mjs [fichier]` (aperçu, n'écrit rien) |
 | Migrer la production sans pouvoir viser la mauvaise base | `node backend/scripts/migrer-prod.mjs` (aperçu, n'écrit rien) |
+| Le déploiement à blanc | `node backend/scripts/verifier-production.mjs .env.production` |
+| Les 18 écrans, vus comme un premier utilisateur | `node scripts/traversee-ecrans.mjs --web http://127.0.0.1:3001` |
 
 **Sauvegardes prises pendant cette session** — `backend/sauvegardes/` :
 

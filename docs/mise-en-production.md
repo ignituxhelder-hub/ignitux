@@ -6,6 +6,36 @@
 
 ---
 
+> ### Mise à jour du 23 septembre 2026 — les trois alertes ci-dessous sont corrigées
+>
+> Ce document a été écrit le 20 septembre. Ses « trois choses à savoir »
+> décrivaient trois défauts réels ; les trois ont été traités depuis, et les
+> laisser tels quels ferait perdre du temps à les rechercher.
+>
+> | Alerte du 20/09 | État au 23/09 |
+> |---|---|
+> | Le limiteur de débit deviendrait global derrière un proxy | **Corrigé.** `TRUST_PROXY` est désormais obligatoire : la production refuse de démarrer sans, avec l'explication exacte du piège. |
+> | `/docs` publie 146 routes sans condition | **Corrigé.** `shouldServeApiDocs` ne les sert en production que si `ENABLE_API_DOCS=true`. |
+> | Aucun artefact de déploiement | **Corrigé.** `backend/Dockerfile`, `frontend/Dockerfile`, `docker-compose.yml` (avec sa propre base), `.env.docker.example`, et une construction d'images en CI. |
+>
+> Reste vrai : les trois bases vivent sur la même instance Supabase.
+>
+> **Pour savoir où en est une configuration, ne pas relire ce document —
+> lancer la commande :**
+>
+> ```
+> node backend/scripts/verifier-production.mjs .env.production
+> ```
+>
+> Elle pose les questions du démarrage sans démarrer, et ajoute celles que le
+> contrôle de démarrage ne peut pas poser : la base répond-elle, l'adresse du
+> frontend existe-t-elle, le serveur SMTP accepte-t-il une connexion.
+>
+> Au 23 septembre elle répond : **1 bloquant** — `FRONTEND_URL` n'est pas en
+> https, parce qu'il n'y a pas encore de domaine — et 2 avertissements.
+
+---
+
 ## Les trois choses à savoir avant de lire le reste
 
 1. **Le limiteur de débit cessera de fonctionner correctement dès la mise en ligne.**
