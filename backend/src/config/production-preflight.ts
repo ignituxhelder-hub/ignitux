@@ -31,6 +31,9 @@ export interface PreflightInput {
   SMTP_USER?: string;
   SMTP_PASSWORD?: string;
   ENABLE_API_DOCS?: string;
+  IGNITUX_RAISON_SOCIALE?: string;
+  IGNITUX_ADRESSE?: string;
+  IGNITUX_EMAIL?: string;
 }
 
 export interface PreflightProblem {
@@ -190,6 +193,30 @@ export function productionProblems(env: PreflightInput): PreflightProblem[] {
     const port = Number(env.SMTP_PORT ?? '');
     if (env.SMTP_PORT !== undefined && (!Number.isInteger(port) || port <= 0 || port > 65535)) {
       probleme('SMTP_PORT', `« ${env.SMTP_PORT} » n'est pas un port valide.`);
+    }
+  }
+
+  // ── L'identité légale ────────────────────────────────────────────────────
+  //
+  // Un service en ligne ouvert au public doit publier qui l'édite, et une
+  // facture sans raison sociale ni adresse n'est pas une facture incomplète :
+  // c'est un document sans valeur. Les deux se découvrent tard — l'un à une
+  // mise en demeure, l'autre à un contrôle — donc ils se refusent tôt.
+  //
+  // Le SIREN et la TVA ne figurent pas ici : une activité peut démarrer
+  // avant son immatriculation, et toutes ne sont pas assujetties.
+  const identite: Array<[string, string | undefined, string]> = [
+    ['IGNITUX_RAISON_SOCIALE', env.IGNITUX_RAISON_SOCIALE, 'le nom sous lequel Ignitux facture'],
+    ['IGNITUX_ADRESSE', env.IGNITUX_ADRESSE, "l'adresse postale de l'éditeur"],
+    ['IGNITUX_EMAIL', env.IGNITUX_EMAIL, "l'adresse de contact publiée"],
+  ];
+  for (const [cle, valeur, quoi] of identite) {
+    if (!valeur || valeur.trim() === '') {
+      probleme(
+        cle,
+        `est vide. C'est ${quoi} : sans elle, les mentions légales sont incomplètes et ` +
+          "toute facture émise est sans valeur. Ignitux ne l'invente pas — renseigne-la.",
+      );
     }
   }
 

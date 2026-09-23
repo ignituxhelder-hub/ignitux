@@ -20,6 +20,9 @@ function saine(overrides: PreflightInput = {}): PreflightInput {
     SMTP_PORT: '587',
     SMTP_USER: 'apikey',
     SMTP_PASSWORD: 'secret',
+    IGNITUX_RAISON_SOCIALE: 'Ignitux',
+    IGNITUX_ADRESSE: '1 rue Exemple, 00000 Ville, France',
+    IGNITUX_EMAIL: 'contact@exemple.fr',
     ...overrides,
   };
 }
@@ -205,5 +208,36 @@ describe('documentation d’API', () => {
 
   it('se rallume sur demande explicite', () => {
     expect(shouldServeApiDocs({ NODE_ENV: 'production', ENABLE_API_DOCS: 'true' })).toBe(true);
+  });
+
+  describe('identité légale', () => {
+    // Un service ouvert au public doit publier qui l édite, et une facture
+    // sans raison sociale ni adresse est un document sans valeur. Les deux
+    // se decouvrent tard : a une mise en demeure, ou a un controle.
+    it('refuse de démarrer sans raison sociale', () => {
+      expect(problemesSur({ IGNITUX_RAISON_SOCIALE: '' })).toContain('IGNITUX_RAISON_SOCIALE');
+    });
+
+    it('refuse de démarrer sans adresse', () => {
+      expect(problemesSur({ IGNITUX_ADRESSE: undefined })).toContain('IGNITUX_ADRESSE');
+    });
+
+    it('refuse de démarrer sans adresse de contact', () => {
+      expect(problemesSur({ IGNITUX_EMAIL: '   ' })).toContain('IGNITUX_EMAIL');
+    });
+
+    // Une activité peut demarrer avant son immatriculation, et toutes ne
+    // sont pas assujetties a la TVA. Les exiger bloquerait a tort.
+    it('n exige ni SIREN ni numéro de TVA', () => {
+      expect(problemesSur({})).toEqual([]);
+    });
+
+    it('dit quoi faire, pas seulement ce qui manque', () => {
+      const probleme = productionProblems(saine({ IGNITUX_ADRESSE: '' })).find(
+        (p) => p.setting === 'IGNITUX_ADRESSE',
+      );
+
+      expect(probleme?.detail).toMatch(/renseigne/i);
+    });
   });
 });

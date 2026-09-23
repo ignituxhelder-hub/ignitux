@@ -1,6 +1,7 @@
 import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service.js';
+import { MENTION_PATERNITE, pourAffichage } from './config/identite-ignitux.js';
 import { PrismaService } from './prisma/prisma.service.js';
 
 @ApiTags('app')
@@ -27,5 +28,21 @@ export class AppController {
     }
 
     return { status: 'ok' };
+  }
+
+  /**
+   * Les mentions légales. Publique, et sans jeton — c'est le propre d'une
+   * mention légale d'être lisible avant d'avoir un compte.
+   *
+   * Ce qui n'est pas configuré rend `null` plutôt qu'une valeur plausible :
+   * une adresse inventée sur cette page serait pire que son absence, parce
+   * qu'elle aurait l'air d'une réponse.
+   *
+   * L'IBAN n'y figure que masqué. Il n'existe aucune route qui le rende
+   * entier, et ce n'est pas un oubli.
+   */
+  @Get('mentions-legales')
+  getMentionsLegales() {
+    return { ...pourAffichage(), paternite: MENTION_PATERNITE };
   }
 }
