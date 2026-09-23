@@ -142,6 +142,7 @@ export default function ProjectsPage() {
           <Link href="/marketplace">Mentors &amp; investisseurs</Link>
           <Link href="/profil">Mon profil</Link>
           <Link href="/consommation-ia">Consommation IA</Link>
+          <Link href="/offres">Offres</Link>
           <Link href="/constitution">Constitution</Link>
           <Link href="/account">Mon compte</Link>
         </nav>

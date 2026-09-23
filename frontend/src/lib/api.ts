@@ -535,6 +535,44 @@ export interface ConstitutionViolation {
  * pour ça : un audit qui ne montre que ses trouvailles ne permet pas de
  * distinguer « rien à signaler » de « ce contrôle n existe pas ».
  */
+// ── LES OFFRES ─────────────────────────────────────────────────────────────
+
+export type OffreId = 'decouverte' | 'entrepreneur' | 'construction';
+
+export interface OffreCapacites {
+  projets: number | null;
+  generateurs: string[];
+  appelsIaParMois: number | null;
+  outilsDeGestion: boolean;
+  investisseurs: boolean;
+  collaborateurs: number | null;
+}
+
+export interface Offre {
+  id: OffreId;
+  label: string;
+  prixCentimes: number;
+  resume: string;
+  /** null pour la premiere : il n y a rien avant elle. */
+  argument: string | null;
+  capacites: OffreCapacites;
+  actuelle: boolean;
+}
+
+export interface CatalogueOffres {
+  actuelle: OffreId;
+  /** false quand rien n encaisse : aucun bouton ne doit promettre. */
+  souscriptionPossible: boolean;
+  offres: Offre[];
+  evaluationFinancement: {
+    prixCentimes: number;
+    label: string;
+    resume: string;
+    /** Ne doit jamais s afficher sans le montant, ni le montant sans elle. */
+    avertissement: string;
+  };
+}
+
 // ── LA COMPTABILITE ────────────────────────────────────────────────────────
 
 export const NATURES_DE_COMPTE_COMPTABLE = [
@@ -1592,6 +1630,17 @@ export const api = {
   // Sans paramètre `country` : le serveur lit le pays déclaré au profil.
   // Le forcer à FR ici rendait le champ « Pays d'activité » décoratif.
   // Le moteur existait, testé, avec sa route — et aucun écran ne l appelait.
+  // ── LES OFFRES ───────────────────────────────────────────────────────────
+  getOffres: (token: string) =>
+    request<CatalogueOffres>('/offres', { headers: { Authorization: `Bearer ${token}` } }),
+
+  changerOffre: (token: string, offre: OffreId) =>
+    request<unknown>('/offres/changer', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ offre }),
+    }),
+
   // ── LA COMPTABILITE ──────────────────────────────────────────────────────
   listLedgerAccounts: (token: string) =>
     request<LedgerAccount[]>('/comptabilite/comptes', {
