@@ -15,6 +15,10 @@ describe('ScoringService', () => {
     development_plans: { findFirst: ReturnType<typeof vi.fn> };
     transmission_plans: { findFirst: ReturnType<typeof vi.fn> };
     tasks: { findMany: ReturnType<typeof vi.fn> };
+    score_snapshots: {
+      upsert: ReturnType<typeof vi.fn>;
+      findMany: ReturnType<typeof vi.fn>;
+    };
     constitution_violations: { createMany: ReturnType<typeof vi.fn> };
   };
 
@@ -27,6 +31,8 @@ describe('ScoringService', () => {
       development_plans: { findFirst: vi.fn() },
       transmission_plans: { findFirst: vi.fn() },
       tasks: { findMany: vi.fn() },
+      // Le relevé du jour est posé à chaque lecture des scores.
+      score_snapshots: { upsert: vi.fn().mockResolvedValue({}), findMany: vi.fn() },
       constitution_violations: { createMany: vi.fn() },
     };
     // Par défaut, rien n'existe encore pour ce projet.
@@ -172,6 +178,94 @@ describe('ScoringService', () => {
         UnprocessableEntityException,
       );
       expect(prisma.constitution_violations.createMany).toHaveBeenCalled();
+    });
+  });
+
+  describe('ScoringService — l’évolution dans le temps', () => {
+    // Les scores restent calculés à la lecture. Cette table ne stocke pas LE
+    // score, mais ce qu'il VALAIT un jour donné : deux choses différentes.
+    it('relève les scores du jour à chaque lecture', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.analyses.findFirst.mockResolvedValue({ feasibility_score: 8 });
+      prisma.tasks.findMany.mockResolvedValue([{ status: 'done' }]);
+
+      await service.getScoreCard('u1', 'p1');
+
+      expect(prisma.score_snapshots.upsert).toHaveBeenCalled();
+      const appel = prisma.score_snapshots.upsert.mock.calls[0][0];
+      expect(appel.create.etincelle).toBe(8);
+    });
+
+    // Un relevé entièrement vide occuperait la courbe d'un point sans
+    // information.
+    it('ne relève rien quand aucun axe n’a de source', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+
+      await service.getScoreCard('u1', 'p1');
+
+      expect(prisma.score_snapshots.upsert).not.toHaveBeenCalled();
+    });
+
+    // Perdre la lecture pour sauver l'historique est le mauvais arbitrage.
+    it('rend les scores même si le relevé échoue', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.analyses.findFirst.mockResolvedValue({ feasibility_score: 8 });
+      prisma.score_snapshots.upsert.mockRejectedValue(new Error('base injoignable'));
+
+      await expect(service.getScoreCard('u1', 'p1')).resolves.toMatchObject({ etincelle: 8 });
+    });
+
+    it('rend l’historique du plus ancien au plus récent', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.score_snapshots.findMany.mockResolvedValue([
+        {
+          captured_on: new Date('2026-09-01T00:00:00Z'),
+          etincelle: 6,
+          construction: null,
+          evolution: null,
+          transmission: null,
+          confiance: 2,
+        },
+      ]);
+
+      const historique = await service.historique('u1', 'p1');
+
+      expect(historique).toEqual([
+        {
+          jour: '2026-09-01',
+          etincelle: 6,
+          construction: null,
+          evolution: null,
+          transmission: null,
+          confiance: 2,
+        },
+      ]);
+      expect(prisma.score_snapshots.findMany.mock.calls[0][0].orderBy).toEqual({
+        captured_on: 'asc',
+      });
+    });
+
+    // Un projet qu'on n'a pas ouvert pendant trois semaines n'a pas
+    // « progressé régulièrement » : il n'a pas été mesuré. Une courbe lissée
+    // raconterait une histoire que personne n'a vécue.
+    it('ne rend que des points observés, sans en inventer entre deux', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.score_snapshots.findMany.mockResolvedValue([
+        { captured_on: new Date('2026-09-01T00:00:00Z'), etincelle: 6, construction: null, evolution: null, transmission: null, confiance: null },
+        { captured_on: new Date('2026-09-20T00:00:00Z'), etincelle: 8, construction: null, evolution: null, transmission: null, confiance: null },
+      ]);
+
+      const historique = await service.historique('u1', 'p1');
+
+      expect(historique).toHaveLength(2);
+      expect(historique.map((p) => p.jour)).toEqual(['2026-09-01', '2026-09-20']);
+    });
+
+    it('rend une liste vide pour un projet jamais mesuré, ce qui n’est pas une erreur', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.score_snapshots.findMany.mockResolvedValue([]);
+
+      await expect(service.historique('u1', 'p1')).resolves.toEqual([]);
     });
   });
 });

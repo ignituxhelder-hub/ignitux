@@ -464,3 +464,22 @@ export type user_profiles = Prisma.user_profilesModel
  * la gratuite ne prive de rien.
  */
 export type subscriptions = Prisma.subscriptionsModel
+/**
+ * Model score_snapshots
+ * UN RELEVE DE SCORES, A UNE DATE.
+ * 
+ * Les scores sont calcules a la lecture, jamais stockes : c'est voulu, et
+ * ca reste vrai. Cette table ne stocke pas LE score, elle stocke ce qu'il
+ * VALAIT un jour donne — deux choses differentes. Le score du jour se
+ * recalcule ; un releve d'il y a trois semaines ne se recalcule pas, parce
+ * que les donnees qui l'ont produit ont change depuis.
+ * 
+ * Un seul releve par projet et par jour (@@unique). L'evolution d'un projet
+ * se lit en semaines, pas en minutes : garder chaque lecture ferait des
+ * milliers de lignes identiques pour une courbe qui ne dirait rien de plus.
+ * 
+ * Toutes les colonnes sont nullables, et c'est le meme principe que partout
+ * ailleurs : un axe sans source vaut null, jamais zero. Une courbe qui
+ * partirait de zero raconterait une progression qui n'a pas eu lieu.
+ */
+export type score_snapshots = Prisma.score_snapshotsModel

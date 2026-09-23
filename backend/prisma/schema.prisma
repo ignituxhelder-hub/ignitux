@@ -87,6 +87,7 @@ model projects {
   community_comments   community_comments[]
   collaborators        project_collaborators[]
   compliance_checks    project_compliance_checks[]
+  score_snapshots      score_snapshots[]
   automation_runs      automation_runs[]
   workflow_definitions workflow_definitions[]
   workflow_runs        workflow_runs[]
@@ -1316,4 +1317,37 @@ model subscriptions {
   updated_at   DateTime? @updatedAt @db.Timestamptz(6)
 
   @@index([offre])
+}
+
+/// UN RELEVE DE SCORES, A UNE DATE.
+///
+/// Les scores sont calcules a la lecture, jamais stockes : c'est voulu, et
+/// ca reste vrai. Cette table ne stocke pas LE score, elle stocke ce qu'il
+/// VALAIT un jour donne — deux choses differentes. Le score du jour se
+/// recalcule ; un releve d'il y a trois semaines ne se recalcule pas, parce
+/// que les donnees qui l'ont produit ont change depuis.
+///
+/// Un seul releve par projet et par jour (@@unique). L'evolution d'un projet
+/// se lit en semaines, pas en minutes : garder chaque lecture ferait des
+/// milliers de lignes identiques pour une courbe qui ne dirait rien de plus.
+///
+/// Toutes les colonnes sont nullables, et c'est le meme principe que partout
+/// ailleurs : un axe sans source vaut null, jamais zero. Une courbe qui
+/// partirait de zero raconterait une progression qui n'a pas eu lieu.
+model score_snapshots {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id   String    @db.Uuid
+  project      projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  /// Le jour du releve, en date et non en horodatage : c'est l'unite a
+  /// laquelle l'unicite a un sens.
+  captured_on  DateTime  @db.Date
+  etincelle    Int?
+  construction Int?
+  evolution    Int?
+  transmission Int?
+  confiance    Int?
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([project_id, captured_on])
+  @@index([project_id, captured_on])
 }

@@ -12,6 +12,24 @@ import { ScoringService } from './scoring.service.js';
 export class ScoringController {
   constructor(private readonly scoringService: ScoringService) {}
 
+  /**
+   * L'évolution des scores dans le temps.
+   *
+   * Déclarée AVANT la route racine : Nest résout les routes dans l'ordre de
+   * déclaration, et `historique` doit être reconnu comme un segment littéral
+   * plutôt qu'absorbé par un paramètre.
+   *
+   * Rend une liste, éventuellement vide. Un projet qui n'a jamais été mesuré
+   * n'a pas d'historique, et ce n'est pas une erreur.
+   */
+  @Get('historique')
+  historique(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+  ) {
+    return this.scoringService.historique(user.id, projectId);
+  }
+
   @Get()
   getScoreCard(
     @CurrentUser() user: AuthenticatedUser,

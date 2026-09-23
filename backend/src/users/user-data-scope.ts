@@ -67,6 +67,11 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   project_collaborators: exported('projets_et_contenus'),
   workflow_definitions: exported('projets_et_contenus'),
   workflow_steps: exported('projets_et_contenus'),
+  // Les releves de scores decrivent le projet, pas la personne : ils
+  // partent donc avec les contenus du projet. Exportes parce qu ils
+  // racontent son evolution, qui est le travail de la personne autant que
+  // les taches qu elle a cochees.
+  score_snapshots: exported('projets_et_contenus'),
 
   analyses: exported('contenus_generes_par_igini'),
   build_plans: exported('contenus_generes_par_igini'),

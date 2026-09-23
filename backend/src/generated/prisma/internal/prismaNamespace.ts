@@ -445,7 +445,8 @@ export const ModelName = {
   investor_movements: 'investor_movements',
   user_roles: 'user_roles',
   user_profiles: 'user_profiles',
-  subscriptions: 'subscriptions'
+  subscriptions: 'subscriptions',
+  score_snapshots: 'score_snapshots'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -461,7 +462,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_profiles" | "subscriptions"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_profiles" | "subscriptions" | "score_snapshots"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -4091,6 +4092,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    score_snapshots: {
+      payload: Prisma.$score_snapshotsPayload<ExtArgs>
+      fields: Prisma.score_snapshotsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.score_snapshotsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$score_snapshotsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.score_snapshotsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$score_snapshotsPayload>
+        }
+        findFirst: {
+          args: Prisma.score_snapshotsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$score_snapshotsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.score_snapshotsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$score_snapshotsPayload>
+        }
+        findMany: {
+          args: Prisma.score_snapshotsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$score_snapshotsPayload>[]
+        }
+        create: {
+          args: Prisma.score_snapshotsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$score_snapshotsPayload>
+        }
+        createMany: {
+          args: Prisma.score_snapshotsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.score_snapshotsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$score_snapshotsPayload>[]
+        }
+        delete: {
+          args: Prisma.score_snapshotsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$score_snapshotsPayload>
+        }
+        update: {
+          args: Prisma.score_snapshotsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$score_snapshotsPayload>
+        }
+        deleteMany: {
+          args: Prisma.score_snapshotsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.score_snapshotsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.score_snapshotsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$score_snapshotsPayload>[]
+        }
+        upsert: {
+          args: Prisma.score_snapshotsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$score_snapshotsPayload>
+        }
+        aggregate: {
+          args: Prisma.Score_snapshotsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateScore_snapshots>
+        }
+        groupBy: {
+          args: Prisma.score_snapshotsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Score_snapshotsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.score_snapshotsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Score_snapshotsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -4825,6 +4900,21 @@ export const SubscriptionsScalarFieldEnum = {
 export type SubscriptionsScalarFieldEnum = (typeof SubscriptionsScalarFieldEnum)[keyof typeof SubscriptionsScalarFieldEnum]
 
 
+export const Score_snapshotsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  captured_on: 'captured_on',
+  etincelle: 'etincelle',
+  construction: 'construction',
+  evolution: 'evolution',
+  transmission: 'transmission',
+  confiance: 'confiance',
+  created_at: 'created_at'
+} as const
+
+export type Score_snapshotsScalarFieldEnum = (typeof Score_snapshotsScalarFieldEnum)[keyof typeof Score_snapshotsScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -5117,6 +5207,7 @@ export type GlobalOmitConfig = {
   user_roles?: Prisma.user_rolesOmit
   user_profiles?: Prisma.user_profilesOmit
   subscriptions?: Prisma.subscriptionsOmit
+  score_snapshots?: Prisma.score_snapshotsOmit
 }
 
 /* Types for Logging */

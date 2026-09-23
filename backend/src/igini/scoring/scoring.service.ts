@@ -25,6 +25,12 @@ export interface ScoreCard {
   confiance: number | null;
 }
 
+/** Un relevé passé, tel qu'il a été observé ce jour-là. */
+export interface ScoreSnapshot extends ScoreCard {
+  /** Le jour du relevé, au format ISO (AAAA-MM-JJ). */
+  jour: string;
+}
+
 /**
  * SCORING — le quatrième moteur du cerveau IGINI. Chaque score est calculé à
  * partir de données réelles déjà en base (analyses, plans, tâches) — aucun
@@ -104,7 +110,78 @@ export class ScoringService {
       confiance: stagesStarted > 0,
     });
 
+    // Relevé du jour, posé après que le moteur constitutionnel a validé
+    // les chiffres : enregistrer avant reviendrait à garder une trace de
+    // valeurs que le produit aurait refusé de montrer.
+    await this.releverAujourdHui(projectId, scoreCard);
+
     return scoreCard;
+  }
+
+  /**
+   * Garde une trace de ce que les scores valaient aujourd'hui.
+   *
+   * Les scores restent calculés à la lecture — cette table ne stocke pas LE
+   * score, mais ce qu'il VALAIT un jour donné. Le score du jour se
+   * recalcule ; un relevé d'il y a trois semaines, non, parce que les
+   * données qui l'ont produit ont changé depuis.
+   *
+   * Un seul relevé par jour : l'évolution d'un projet se lit en semaines,
+   * et garder chaque lecture ferait des milliers de lignes identiques pour
+   * une courbe qui ne dirait rien de plus.
+   *
+   * L'échec est avalé. Consulter ses scores ne doit pas échouer parce qu'un
+   * relevé n'a pas pu s'écrire : on perdrait la lecture pour sauver
+   * l'historique, ce qui est le mauvais arbitrage.
+   */
+  private async releverAujourdHui(projectId: string, scores: ScoreCard): Promise<void> {
+    // Un relevé entièrement vide ne dit rien et occuperait la courbe d'un
+    // point sans information.
+    const aQuelqueChose = Object.values(scores).some((valeur) => valeur !== null);
+    if (!aQuelqueChose) return;
+
+    const jour = new Date();
+    jour.setUTCHours(0, 0, 0, 0);
+
+    try {
+      await this.prisma.score_snapshots.upsert({
+        where: { project_id_captured_on: { project_id: projectId, captured_on: jour } },
+        update: { ...scores },
+        create: { project_id: projectId, captured_on: jour, ...scores },
+      });
+    } catch {
+      // Silencieux à dessein : voir le commentaire ci-dessus.
+    }
+  }
+
+  /**
+   * L'évolution des scores, du plus ancien au plus récent.
+   *
+   * Ne rend que des points observés. Aucune interpolation entre deux
+   * relevés : un projet qu'on n'a pas ouvert pendant trois semaines n'a pas
+   * « progressé régulièrement », il n'a simplement pas été mesuré. Une
+   * courbe lissée raconterait une histoire que personne n'a vécue.
+   */
+  async historique(userId: string, projectId: string, jours = 90): Promise<ScoreSnapshot[]> {
+    await assertHasProjectAccess(this.prisma, userId, projectId);
+
+    const depuis = new Date();
+    depuis.setUTCHours(0, 0, 0, 0);
+    depuis.setUTCDate(depuis.getUTCDate() - jours);
+
+    const lignes = await this.prisma.score_snapshots.findMany({
+      where: { project_id: projectId, captured_on: { gte: depuis } },
+      orderBy: { captured_on: 'asc' },
+    });
+
+    return lignes.map((ligne) => ({
+      jour: ligne.captured_on.toISOString().slice(0, 10),
+      etincelle: ligne.etincelle,
+      construction: ligne.construction,
+      evolution: ligne.evolution,
+      transmission: ligne.transmission,
+      confiance: ligne.confiance,
+    }));
   }
 
   private async assertScoresHaveSources(
