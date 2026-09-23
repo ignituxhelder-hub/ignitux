@@ -170,7 +170,7 @@ console.log(`┌─ Traversée des écrans ────────────�
 console.log(`│ interface : ${WEB}`);
 console.log(`│ écran     : ${ECRAN.width}×${ECRAN.height}${TELEPHONE ? ' (téléphone)' : ''}`);
 console.log(`│ compte    : ${EMAIL}`);
-console.log(`│ écrans    : ${ECRANS.length}`);
+console.log(`│ écrans    : ${ECRANS.length} fixes, plus ceux du projet créé plus bas`);
 console.log(`└───────────────────────────────────────────────────────────\n`);
 
 // ── La connexion, par l'interface et non par l'API ───────────────────────
@@ -226,12 +226,67 @@ if (!connecte) {
 }
 console.log('Connexion : ok\n');
 
+/**
+ * Les écrans dynamiques manquaient, et le plus important était dedans.
+ *
+ * La liste ci-dessus est faite de chemins fixes. Or la page d'un projet —
+ * `/projects/<id>` — est l'écran le plus riche du produit : le tableau de
+ * bord, le parcours en cinq étapes, les quatre questions de profil, les
+ * tâches, la connaissance, le financement. C'est là qu'une personne passe
+ * son temps, et c'était le seul écran que la traversée ne regardait pas.
+ *
+ * On en crée donc un par l'interface — le navigateur est déjà authentifié,
+ * contrairement à ce script — et on l'ajoute à la liste. Deux entrées
+ * plutôt qu'une : la vue simple et la vue avancée n'affichent pas le même
+ * écran (2 000 caractères contre 11 800), et les défauts de l'une ne sont
+ * pas ceux de l'autre.
+ */
+let idProjet = null;
+await page.goto(WEB + '/projects', { waitUntil: 'domcontentloaded' }).catch(() => {});
+await page.waitForTimeout(1200);
+{
+  const bouton = page.locator('button').filter({ hasText: /créer mon projet|nouveau projet/i }).first();
+  if ((await bouton.count()) > 0) {
+    await bouton.click();
+    await page.waitForTimeout(900);
+    const titre = page.locator('input').first();
+    if ((await titre.count()) > 0) await titre.fill('Boulangerie de la traversée');
+    const desc = page.locator('textarea').first();
+    if ((await desc.count()) > 0) await desc.fill('Projet créé pour éprouver la page projet.');
+    const valider = page.locator('button').filter({ hasText: /commencer|créer|valider/i }).first();
+    if ((await valider.count()) > 0) {
+      await valider.click();
+      await page.waitForTimeout(2500);
+    }
+    const trouve = new URL(page.url()).pathname.match(/\/projects\/([0-9a-f-]{8,})/);
+    if (trouve) idProjet = trouve[1];
+  }
+}
+
+if (idProjet) {
+  ECRANS.push({ chemin: '/projects/' + idProjet, nom: 'Projet (vue simple)' });
+  ECRANS.push({ chemin: '/projects/' + idProjet, nom: 'Projet (vue avancée)', deplier: true });
+  ECRANS.push({ chemin: '/projects/' + idProjet + '/finances', nom: 'Projet — financement' });
+  console.log('Projet créé pour la traversée : ' + idProjet.slice(0, 8) + '…\n');
+} else {
+  note('Page projet', 'MAJEUR', 'aucun projet n’a pu être créé par l’interface');
+}
+
 for (const ecran of ECRANS) {
   erreursJs = [];
   reponses5xx = [];
 
   await page.goto(`${WEB}${ecran.chemin}`, { waitUntil: 'domcontentloaded' }).catch(() => {});
   await page.waitForTimeout(1200);
+
+  // La vue avancée d'un projet est un autre écran, pas un détail du même.
+  if (ecran.deplier) {
+    const bouton = page.locator('button').filter({ hasText: /vue avancée/i }).first();
+    if ((await bouton.count()) > 0) {
+      await bouton.click();
+      await page.waitForTimeout(1500);
+    }
+  }
 
   const arrive = new URL(page.url()).pathname;
   const redirige = arrive !== ecran.chemin;
@@ -421,6 +476,48 @@ for (const ecran of ECRANS) {
     }
   }
 
+  // ── Ce qui se clique à la souris et pas au clavier ─────────────────
+  //
+  // Le défaut d'accessibilité le plus courant, et le plus invisible pour
+  // qui développe avec une souris : un `div` ou un `span` qu'on a rendu
+  // cliquable sans le rendre focalisable. Il se voit, il réagit au clic, et
+  // la touche Tab passe devant sans s'arrêter. Personne au clavier ne peut
+  // l'actionner — ni au lecteur vocal, qui ne l'annonce même pas.
+  //
+  // `cursor: pointer` sur un élément non focalisable est le signe : c'est
+  // le développeur qui a dit « ceci se clique » sans le dire au navigateur.
+  const clavier = await page
+    .evaluate(() => {
+      const natifs = new Set(['A', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA', 'SUMMARY', 'DETAILS']);
+      const inatteignables = [];
+      for (const el of document.querySelectorAll('body *')) {
+        if (natifs.has(el.tagName)) continue;
+        if (el.hasAttribute('tabindex')) continue;
+        if (el.closest('a, button, label, [tabindex]')) continue;
+        if (getComputedStyle(el).cursor !== 'pointer') continue;
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 || r.height === 0) continue;
+        // Un conteneur qui hérite du curseur de son enfant cliquable n'est
+        // pas le coupable : on ne retient que les feuilles.
+        if (el.querySelector('a, button, input, select, textarea, [tabindex]')) continue;
+        inatteignables.push(
+          `${el.tagName.toLowerCase()} « ${(el.textContent || '').trim().slice(0, 26)} »`,
+        );
+      }
+      return [...new Set(inatteignables)];
+    })
+    .catch(() => []);
+
+  if (clavier.length) {
+    note(
+      ecran.nom,
+      'MAJEUR',
+      `${clavier.length} élément(s) cliquable(s) à la souris et inatteignable(s) au clavier`,
+      clavier.slice(0, 3).join(' | '),
+    );
+    ligne.push(`${clavier.length} hors clavier`);
+  }
+
   if (TELEPHONE) {
     const mesures = await page
       .evaluate(
@@ -475,7 +572,11 @@ for (const ecran of ECRANS) {
 
             if (el.children.length === 0 && (el.textContent || '').trim().length > 3) {
               const taille = parseFloat(getComputedStyle(el).fontSize);
-              if (taille && taille < texteMin) petitsTextes.add(`${taille}px`);
+              // Le mot, pas seulement la mesure : « texte sous 12px » ne dit
+              // pas quoi regarder, « Étincelle à 11.2px » si.
+              if (taille && taille < texteMin) {
+                petitsTextes.add(`« ${(el.textContent || '').trim().slice(0, 18)} » ${taille}px`);
+              }
             }
           }
           return {
