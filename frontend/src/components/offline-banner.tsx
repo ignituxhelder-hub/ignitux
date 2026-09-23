@@ -73,6 +73,8 @@ export function OfflineBanner() {
   // le rejeu en cours — la file partait, mais le résultat n'arrivait jamais
   // à l'écran. Une ref ne provoque pas de rendu, donc pas de relancement.
   const syncing = useRef(false);
+  /** Vrai dès qu'un rejeu a réellement fait partir quelque chose. */
+  const [envoiReussi, setEnvoiReussi] = useState(false);
 
   useEffect(() => {
     if (!isOnline || !token || state.pending.length === 0 || syncing.current) return;
@@ -83,6 +85,7 @@ export function OfflineBanner() {
       .then((outcome) => {
         setState(readOfflineState());
         setStorageStalled(outcome.storageStalled === true);
+        setEnvoiReussi(outcome.sent > 0);
         setLastSync(
           `${outcome.sent} action(s) envoyée(s)` +
             (outcome.rejected > 0 ? `, ${outcome.rejected} refusée(s)` : '') +
@@ -141,9 +144,42 @@ export function OfflineBanner() {
       )}
 
       {isSyncing && <p className="loading">Envoi en cours…</p>}
+      {/*
+        Ce que l'écran ne montre pas tout seul.
+
+        Le rejeu réussit et la file se vide, mais rien ne prévient les pages
+        de relire leurs données : elles se sont chargées avant la coupure et
+        n'ont aucune raison de recommencer. Vérifié de bout en bout — une
+        tâche écrite hors ligne arrive bien en base à la reconnexion, reste
+        invisible à l'écran, et apparaît après un rechargement.
+
+        Pour la personne, la séquence est trompeuse : « 1 action en attente »
+        disparaît, sa tâche n'est toujours pas là. La conclusion raisonnable
+        est qu'elle a été perdue — alors elle la ressaisit, et se retrouve
+        avec un doublon qu'elle n'a pas demandé.
+
+        On ne recharge pas à sa place : un rechargement d'office effacerait
+        un formulaire à demi rempli, et le moment où l'on retrouve le réseau
+        est précisément celui où l'on était en train d'écrire. On dit ce qui
+        s'est passé, on dit que l'écran est en retard, et on met le geste à
+        portée de clic.
+      */}
       {!isSyncing && lastSync && state.pending.length === 0 && (
         <p className="muted" style={{ margin: 0 }}>
           {lastSync}
+          {envoiReussi && (
+            <>
+              {' '}
+              Cet écran date d&apos;avant la coupure et ne les montre pas encore.{' '}
+              <button
+                className="secondary"
+                type="button"
+                onClick={() => window.location.reload()}
+              >
+                Rafraîchir l&apos;affichage
+              </button>
+            </>
+          )}
         </p>
       )}
 

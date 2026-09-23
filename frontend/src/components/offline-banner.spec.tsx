@@ -169,6 +169,46 @@ it('prévient quand le stockage ne retient plus ce qui a été envoyé', async (
     expect(await screen.findByText(/1 action\(s\) envoyée\(s\)/)).toBeInTheDocument();
   });
 
+  it('dit que l’écran est en retard, et met le rafraîchissement à portée de clic', async () => {
+    // Vérifié de bout en bout au navigateur : une tâche écrite hors ligne
+    // arrive bien en base à la reconnexion, reste invisible à l'écran, et
+    // apparaît après un rechargement. Pour la personne, la séquence est
+    // trompeuse — « 1 action en attente » disparaît et sa tâche n'est
+    // toujours pas là. Elle conclut qu'elle est perdue, la ressaisit, et
+    // se retrouve avec un doublon.
+    seedQueue([PENDING]);
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({}),
+    }) as unknown as typeof fetch;
+
+    render(
+      <AuthProvider>
+        <OfflineBanner />
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByText(/ne les montre pas encore/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /rafraîchir/i })).toBeInTheDocument();
+  });
+
+  it('ne propose pas de rafraîchir quand rien n’est parti', async () => {
+    // Sinon le bouton deviendrait un décor qu'on n'aperçoit plus, et il
+    // n'aurait rien à montrer.
+    seedQueue([]);
+
+    render(
+      <AuthProvider>
+        <OfflineBanner />
+      </AuthProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /rafraîchir/i })).not.toBeInTheDocument();
+    });
+  });
+
   it('range en « refusée » une action que le serveur rejette au rejeu', async () => {
     seedQueue([PENDING]);
     global.fetch = vi.fn().mockResolvedValue({
