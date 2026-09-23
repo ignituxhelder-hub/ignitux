@@ -78,6 +78,7 @@ describe('ProjectsService', () => {
     users: {
       findUnique: ReturnType<typeof vi.fn>;
     };
+    user_profiles: { findUnique: ReturnType<typeof vi.fn> };
   };
   let analysisService: { analyzeProject: ReturnType<typeof vi.fn> };
   let planningService: { createBuildPlan: ReturnType<typeof vi.fn> };
@@ -116,6 +117,9 @@ describe('ProjectsService', () => {
         deleteMany: vi.fn(),
       },
       users: { findUnique: vi.fn() },
+      // Le profil alimente le contexte de chaque generation. Vide par
+      // defaut : ces tests eprouvent le fil des etapes, pas la personne.
+      user_profiles: { findUnique: vi.fn().mockResolvedValue(null) },
     };
     // Par défaut, aucune étape précédente n'existe encore (buildProjectContext
     // doit alors renvoyer undefined) ; les tests qui veulent simuler un
@@ -434,6 +438,60 @@ describe('ProjectsService', () => {
         data: { project_id: 'p1', ...analysis, ...GENERATED_PROVENANCE },
       });
       expect(result).toEqual({ id: 'a1', project_id: 'p1', ...analysis });
+    });
+
+    describe('ce qu’IGINI sait de la personne', () => {
+      // Le profil se remplissait consciencieusement sans que rien ne le
+      // relise jamais — le même défaut que la mémoire avait avant d'être
+      // branchée ici.
+      it('injecte le profil déclaré dans le contexte', async () => {
+        prisma.projects.findFirst.mockResolvedValue({
+          id: 'p1',
+          owner_id: 'u1',
+          title: 'Idée',
+          description: 'Desc',
+        });
+        prisma.user_profiles.findUnique.mockResolvedValue({
+          sectors: ['Transport'],
+          activity_country: 'France',
+        });
+        analysisService.analyzeProject.mockResolvedValue({
+          summary: 'R',
+          feasibility_score: 8,
+          strengths: [],
+          risks: [],
+          next_steps: [],
+        });
+        prisma.analyses.create.mockResolvedValue({ id: 'a1' });
+
+        await service.analyzeForOwner('u1', 'p1');
+
+        const contexte = analysisService.analyzeProject.mock.calls[0][3] as string;
+        expect(contexte).toContain('Transport');
+        expect(contexte).toContain('France');
+      });
+
+      // Une analyse ne doit pas échouer parce qu'un profil n'a pas pu être
+      // lu : elle sera moins bien renseignée, ce qui est l'état d'avant.
+      it('analyse quand même si le profil est illisible', async () => {
+        prisma.projects.findFirst.mockResolvedValue({
+          id: 'p1',
+          owner_id: 'u1',
+          title: 'Idée',
+          description: 'Desc',
+        });
+        prisma.user_profiles.findUnique.mockRejectedValue(new Error('base injoignable'));
+        analysisService.analyzeProject.mockResolvedValue({
+          summary: 'R',
+          feasibility_score: 8,
+          strengths: [],
+          risks: [],
+          next_steps: [],
+        });
+        prisma.analyses.create.mockResolvedValue({ id: 'a1' });
+
+        await expect(service.analyzeForOwner('u1', 'p1')).resolves.toBeTruthy();
+      });
     });
 
     it('soumet la provenance au moteur constitutionnel avant de persister', async () => {

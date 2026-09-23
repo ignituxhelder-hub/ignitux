@@ -11,6 +11,7 @@ import { TransmissionService } from '../igini/transmission/transmission.service.
 import { WorkflowEngineService } from '../igini/workflow/workflow-engine.service.js';
 import { WorkflowService } from '../igini/workflow/workflow.service.js';
 import { OffresService } from '../offres/offres.service.js';
+import { contextePersonne } from '../profile/contexte-personne.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
@@ -248,6 +249,28 @@ export class ProjectsService {
     return this.memoryService.recallAsContext(ownerId, projectId);
   }
 
+  /**
+   * Ce qu'IGINI sait de la personne, injecté dans CHAQUE génération.
+   *
+   * Le profil se remplissait consciencieusement sans que rien ne le relise
+   * jamais — le même défaut que la mémoire avait avant d'être branchée ici.
+   *
+   * L'échec est avalé : une analyse ne doit pas échouer parce qu'un profil
+   * n'a pas pu être lu. Elle sera simplement moins bien renseignée, ce qui
+   * est exactement l'état d'avant.
+   */
+  private async personContext(ownerId: string): Promise<string | undefined> {
+    try {
+      const [profil, projetsPortes] = await Promise.all([
+        this.prisma.user_profiles.findUnique({ where: { user_id: ownerId } }),
+        this.prisma.projects.count({ where: { owner_id: ownerId } }),
+      ]);
+      return contextePersonne(profil, { projetsPortes }) ?? undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
   private joinContext(...parts: Array<string | undefined>): string | undefined {
     const present = parts.filter((part): part is string => Boolean(part));
     return present.length > 0 ? present.join('\n') : undefined;
@@ -259,7 +282,7 @@ export class ProjectsService {
       project.title,
       project.description,
       { userId: ownerId, projectId: project.id },
-      await this.memoryContext(ownerId, id),
+      this.joinContext(await this.personContext(ownerId), await this.memoryContext(ownerId, id)),
     );
 
     const analysis = await this.prisma.analyses.create({
@@ -296,11 +319,12 @@ export class ProjectsService {
 
   async createBuildPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
-    const [memory, analysis] = await Promise.all([
+    const [personne, memory, analysis] = await Promise.all([
+      this.personContext(ownerId),
       this.memoryContext(ownerId, id),
       this.latestAnalysisContext(id),
     ]);
-    const context = this.joinContext(memory, analysis);
+    const context = this.joinContext(personne, memory, analysis);
     const result = await this.planningService.createBuildPlan(
       project.title,
       project.description,
@@ -338,12 +362,13 @@ export class ProjectsService {
 
   async createFinancingPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
-    const [memory, analysis, buildPlan] = await Promise.all([
+    const [personne, memory, analysis, buildPlan] = await Promise.all([
+      this.personContext(ownerId),
       this.memoryContext(ownerId, id),
       this.latestAnalysisContext(id),
       this.latestBuildPlanContext(id),
     ]);
-    const context = this.joinContext(memory, analysis, buildPlan);
+    const context = this.joinContext(personne, memory, analysis, buildPlan);
     const result = await this.financingService.createFinancingPlan(
       project.title,
       project.description,
@@ -377,13 +402,14 @@ export class ProjectsService {
 
   async createDevelopmentPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
-    const [memory, analysis, buildPlan, financingPlan] = await Promise.all([
+    const [personne, memory, analysis, buildPlan, financingPlan] = await Promise.all([
+      this.personContext(ownerId),
       this.memoryContext(ownerId, id),
       this.latestAnalysisContext(id),
       this.latestBuildPlanContext(id),
       this.latestFinancingPlanContext(id),
     ]);
-    const context = this.joinContext(memory, analysis, buildPlan, financingPlan);
+    const context = this.joinContext(personne, memory, analysis, buildPlan, financingPlan);
     const result = await this.developmentService.createDevelopmentPlan(
       project.title,
       project.description,
@@ -417,7 +443,9 @@ export class ProjectsService {
 
   async createTransmissionPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
-    const [memory, analysis, buildPlan, financingPlan, developmentPlan] = await Promise.all([
+    const [personne, memory, analysis, buildPlan, financingPlan, developmentPlan] =
+      await Promise.all([
+      this.personContext(ownerId),
       this.memoryContext(ownerId, id),
       this.latestAnalysisContext(id),
       this.latestBuildPlanContext(id),
@@ -425,6 +453,7 @@ export class ProjectsService {
       this.latestDevelopmentPlanContext(id),
     ]);
     const context = this.joinContext(
+      personne,
       memory,
       analysis,
       buildPlan,
