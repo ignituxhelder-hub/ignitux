@@ -3,13 +3,15 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard.js';
+import { RefuserEcritureDepassee } from '../../hors-ligne/ecriture-depassee.decorator.js';
+import { EcritureDepasseeGuard } from '../../hors-ligne/ecriture-depassee.guard.js';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
 import { WorkflowService } from './workflow.service.js';
 
 @ApiTags('igini-workflow')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, EcritureDepasseeGuard)
 @Controller()
 export class WorkflowController {
   constructor(private readonly workflowService: WorkflowService) {}
@@ -29,6 +31,7 @@ export class WorkflowController {
     return this.workflowService.listTasks(user.id, projectId);
   }
 
+  @RefuserEcritureDepassee('tasks', 'taskId')
   @Patch('tasks/:taskId/status')
   updateStatus(
     @CurrentUser() user: AuthenticatedUser,

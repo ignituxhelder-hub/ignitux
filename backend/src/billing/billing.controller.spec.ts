@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { EcritureDepasseeGuard } from '../hors-ligne/ecriture-depassee.guard.js';
 import { BillingController } from './billing.controller.js';
 import { BillingService } from './billing.service.js';
 
@@ -26,6 +27,11 @@ describe('BillingController', () => {
       providers: [{ provide: BillingService, useValue: billingService }],
     })
       .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      // Ces tests portent sur la délégation au service, pas sur les gardes.
+      // Que celui-ci soit bien monté est vérifié là où ça se voit :
+      // test/hors-ligne.e2e-spec.ts, qui passe par la vraie pile HTTP.
+      .overrideGuard(EcritureDepasseeGuard)
       .useValue({ canActivate: () => true })
       .compile();
 

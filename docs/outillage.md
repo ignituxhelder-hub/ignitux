@@ -156,8 +156,11 @@ service.
 > **Note du 24 septembre 2026.** Cette section a été écrite quand le service
 > worker était hors périmètre. Il existe depuis : `frontend/public/sw.js` fait
 > démarrer l'application sans réseau, et `scripts/hors-ligne.mjs` le vérifie en
-> coupant le réseau pour de bon. Ce qui suit reste vrai — il y est question du
-> **stockage** et des **conflits**, deux sujets que le worker ne touche pas.
+> coupant le réseau pour de bon.
+>
+> Les conflits, décrits plus bas comme « le vrai trou non résolu », sont
+> désormais **détectés** — voir la mise à jour à la fin de la section. Ce qui
+> reste entier est le **stockage** : `localStorage` et ses trois limites.
 
 Aujourd'hui : file d'écriture et cache de lecture daté, tous deux dans **`localStorage`**, avec
 un plafond de 60 entrées — plafond posé explicitement dans le code pour que le cache n'étouffe
@@ -175,6 +178,41 @@ l'ordre, mais rien ne détecte qu'une donnée a changé côté serveur entre la 
 Deux réponses possibles, et il faut en choisir une explicitement : soit une version par ressource
 (`If-Match`, rejet en 409 et l'interface demande à la personne), soit « la dernière écriture
 gagne » — **assumé et affiché**, pas subi en silence.
+
+> ### Mise à jour du 24 septembre 2026 — la première réponse a été retenue
+>
+> Le paragraphe ci-dessus demandait un choix explicite. Il est fait, et c'est le
+> premier : **détecter et le dire**. « La dernière écriture gagne » aurait
+> consisté à effacer le travail de quelqu'un en affichant un avertissement
+> général, ce qu'une devise « la vérité avant tout » supporte mal, et que
+> l'article 13 supporterait encore moins le jour où le conflit porte sur la
+> visibilité d'un projet.
+>
+> Le dispositif tient en deux pièces, dans `backend/src/hors-ligne/` et dans
+> `replayOfflineQueue` :
+>
+> - chaque écriture rejouée part avec **son âge**, en millisecondes — pas avec
+>   une date. Une date viendrait de l'horloge de l'appareil ; une montre en
+>   retard de dix minutes ferait refuser tout ce que la personne a fait hors
+>   ligne, c'est-à-dire exactement la panne qu'on veut éviter. Un âge est une
+>   soustraction entre deux lectures de la même horloge : son décalage s'annule ;
+> - le serveur reconstitue l'instant de capture sur **sa** propre horloge et
+>   refuse en 409 si la ligne a bougé depuis. L'écriture n'est ni appliquée ni
+>   jetée : elle rejoint les « refusées » du bandeau, avec la raison.
+>
+> **Ce que ça ne fait pas**, et il vaut mieux l'écrire : cela ne fusionne rien.
+> Fusionner deux versions supposerait savoir laquelle a raison, ce que personne
+> ici ne sait. La personne décide.
+>
+> **Ce qui est couvert** : `projects`, `tasks`, `billing_documents`,
+> `crm_contacts`, `crm_companies` — les modèles qui portent `updated_at`, soit
+> 11 des 50. Les 39 autres ne peuvent pas entrer sans migration, et il vaut
+> mieux qu'ils restent dehors que d'y entrer avec une date approchée. Restent
+> aussi dehors les routes dont l'URL ne porte pas l'identifiant de la ligne —
+> l'objectif de rachat, par exemple, qui se désigne par projet et par type.
+>
+> **Ce qui reste entier** : le stockage. `localStorage` a toujours ses 5 Mo,
+> son plafond de 60 entrées et ses lectures synchrones.
 
 ### CRM
 

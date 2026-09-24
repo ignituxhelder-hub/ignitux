@@ -16,6 +16,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { RefuserEcritureDepassee } from '../hors-ligne/ecriture-depassee.decorator.js';
+import { EcritureDepasseeGuard } from '../hors-ligne/ecriture-depassee.guard.js';
 import {
   isCrmChannel,
   isCrmKind,
@@ -34,7 +36,7 @@ import {
 
 @ApiTags('crm')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, EcritureDepasseeGuard)
 @Controller('crm')
 export class CrmController {
   constructor(private readonly crmService: CrmService) {}
@@ -50,6 +52,7 @@ export class CrmController {
     return this.crmService.listCompanies(user.id);
   }
 
+  @RefuserEcritureDepassee('crm_companies')
   @Patch('companies/:id')
   updateCompany(
     @CurrentUser() user: AuthenticatedUser,
@@ -105,6 +108,7 @@ export class CrmController {
     return this.crmService.getContact(user.id, id);
   }
 
+  @RefuserEcritureDepassee('crm_contacts')
   @Patch('contacts/:id')
   updateContact(
     @CurrentUser() user: AuthenticatedUser,

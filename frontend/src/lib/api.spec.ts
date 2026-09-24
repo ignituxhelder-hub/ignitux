@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { api, ApiError, setOfflineStorage, setUnauthorizedHandler } from './api';
+import {
+  api,
+  ApiError,
+  readOfflineState,
+  replayOfflineQueue,
+  setOfflineStorage,
+  setUnauthorizedHandler,
+} from './api';
 
 function mockFetchOnce(status: number, body: unknown) {
   global.fetch = vi.fn().mockResolvedValue({
@@ -181,6 +188,123 @@ describe('api', () => {
       await api.listProjects('token');
 
       expect(storage.entries.size).toBeGreaterThan(0);
+    });
+
+    /**
+     * L'ÂGE DE CAPTURE — ce qui empêche une écriture hors ligne d'effacer
+     * du travail plus récent.
+     *
+     * Chaque écriture rejouée part avec le nombre de millisecondes écoulées
+     * depuis sa mise en file. Le serveur reconstitue l'instant de capture sur
+     * SA propre horloge et refuse l'écriture si la ressource a bougé depuis.
+     *
+     * Un âge, et non une date : une date viendrait de l'horloge de l'appareil,
+     * et une montre en retard de dix minutes ferait refuser tout ce que la
+     * personne a fait hors ligne. C'est précisément la panne que ce dispositif
+     * doit éviter, pas provoquer.
+     */
+    describe('l’âge de capture accompagne les écritures rejouées', () => {
+      const T0 = new Date('2026-09-24T12:00:00.000Z').getTime();
+
+      function horsLigne() {
+        global.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+      }
+
+      /** Rebranche le réseau et note les en-têtes de chaque envoi. */
+      function enLigneEnNotant(statut = 200) {
+        const envois: Array<{ url: string; headers: Record<string, string> }> = [];
+        global.fetch = vi.fn().mockImplementation((url: string, init: RequestInit) => {
+          envois.push({ url, headers: (init.headers ?? {}) as Record<string, string> });
+          return Promise.resolve({
+            ok: statut >= 200 && statut < 300,
+            status: statut,
+            json: () => Promise.resolve({ message: 'Ce projet a changé pendant que tu étais hors ligne.' }),
+          });
+        }) as unknown as typeof fetch;
+        return envois;
+      }
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it('envoie le temps écoulé depuis la mise en file, pas une date', async () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(T0);
+        setOfflineStorage(fakeStorage());
+        horsLigne();
+        await expect(api.updateProject('t', 'p1', 'Titre', 'Corps')).rejects.toBeDefined();
+
+        vi.setSystemTime(T0 + 5 * 60_000);
+        const envois = enLigneEnNotant();
+        await replayOfflineQueue('t');
+
+        expect(envois).toHaveLength(1);
+        expect(envois[0].headers['X-Ignitux-Capture-Age']).toBe(String(5 * 60_000));
+      });
+
+      it('ne le pose pas sur une écriture envoyée directement', async () => {
+        // Le garde du serveur ne s'adresse qu'aux écritures revenues du froid.
+        // Une écriture en ligne n'a pas d'âge à comparer : se mesurer à
+        // soi-même n'aurait aucun sens, et refuserait du travail en cours.
+        setOfflineStorage(fakeStorage());
+        const envois = enLigneEnNotant();
+
+        await api.updateProject('t', 'p1', 'Titre', 'Corps');
+
+        expect(envois[0].headers['X-Ignitux-Capture-Age']).toBeUndefined();
+      });
+
+      it('ne fait pas se heurter deux modifications du même projet', async () => {
+        // Le piège : la première écriture rejouée repousse la date de dernière
+        // modification à maintenant. Sans cette règle, la seconde — capturée
+        // avant — se ferait refuser, et la personne lirait « ce projet a changé
+        // pendant que tu étais hors ligne » alors que ce qui a changé est sa
+        // propre écriture, partie dix millisecondes plus tôt.
+        setOfflineStorage(fakeStorage());
+        horsLigne();
+        await expect(api.updateProject('t', 'p1', 'Premier', 'a')).rejects.toBeDefined();
+        await expect(api.updateProjectSector('t', 'p1', 'agriculture')).rejects.toBeDefined();
+
+        const envois = enLigneEnNotant();
+        await replayOfflineQueue('t');
+
+        expect(envois).toHaveLength(2);
+        expect(envois[0].headers['X-Ignitux-Capture-Age']).toBeDefined();
+        expect(envois[1].headers['X-Ignitux-Capture-Age']).toBeUndefined();
+      });
+
+      it('garde la protection sur une ressource différente', async () => {
+        setOfflineStorage(fakeStorage());
+        horsLigne();
+        await expect(api.updateProject('t', 'p1', 'Premier', 'a')).rejects.toBeDefined();
+        await expect(api.updateTaskStatus('t', 'tache-1', 'done')).rejects.toBeDefined();
+
+        const envois = enLigneEnNotant();
+        await replayOfflineQueue('t');
+
+        expect(envois).toHaveLength(2);
+        expect(envois[0].headers['X-Ignitux-Capture-Age']).toBeDefined();
+        // Deux lignes distinctes en base : rien ne justifie de baisser la garde.
+        expect(envois[1].headers['X-Ignitux-Capture-Age']).toBeDefined();
+      });
+
+      it('un refus 409 part dans les « refusées », avec la raison du serveur', async () => {
+        // C'est ce qui rend le dispositif honnête : l'écriture n'est ni
+        // appliquée ni jetée, et la personne lit pourquoi.
+        setOfflineStorage(fakeStorage());
+        horsLigne();
+        await expect(api.updateProject('t', 'p1', 'Titre', 'Corps')).rejects.toBeDefined();
+
+        enLigneEnNotant(409);
+        const bilan = await replayOfflineQueue('t');
+
+        expect(bilan.rejected).toBe(1);
+        const refusees = readOfflineState().rejected;
+        expect(refusees).toHaveLength(1);
+        expect(refusees[0].status).toBe(409);
+        expect(refusees[0].reason).toContain('hors ligne');
+      });
     });
   });
 });

@@ -1211,6 +1211,90 @@ await verifier('Après le retrait, la porte se referme vraiment', async () => {
   return `retrait ${retrait.statut}, lecture ensuite ${apres.statut}`;
 });
 
+// ── Les écritures revenues du froid ────────────────────────────────────────
+//
+// Une modification faite sans réseau part en file d'attente et n'arrive au
+// serveur que plus tard — parfois des heures. Si la ressource a changé
+// entre-temps, l'appliquer efface le travail plus récent, sans que rien ne le
+// signale. C'était le dernier trou connu du dispositif hors ligne.
+//
+// Ce qu'on vérifie ici est le trajet complet : l'en-tête traverse le CORS, le
+// garde est bien monté derrière l'authentification, il refuse quand il doit,
+// et — le fait qui compte vraiment — la version récente est toujours là après
+// le refus.
+
+titre('Écritures revenues du froid');
+
+await verifier('L’en-tête de capture traverse la pré-vérification CORS', async () => {
+  // Deux origines distinctes (interface 3001, API 3000) : le navigateur
+  // pré-vérifie toute requête portant un en-tête non standard. Si le serveur
+  // ne l'annonce pas, la requête n'est jamais envoyée — et le dispositif
+  // entier ne sert à rien, sans le moindre message d'erreur.
+  const reponse = await fetch(`${API}/projects/abc`, {
+    method: 'OPTIONS',
+    headers: {
+      Origin: WEB,
+      'Access-Control-Request-Method': 'PATCH',
+      'Access-Control-Request-Headers': 'content-type,authorization,x-ignitux-capture-age',
+    },
+  });
+  const autorises = (reponse.headers.get('access-control-allow-headers') ?? '').toLowerCase();
+  if (!autorises.includes('x-ignitux-capture-age')) {
+    throw new Error(`en-tête non autorisé (reçu : ${autorises || 'rien'})`);
+  }
+  return `HTTP ${reponse.status}`;
+});
+
+await verifier('Une modification périmée est refusée, et la récente survit', async () => {
+  if (!projetId) throw new Error('aucun projet');
+
+  const recent = 'Titre ecrit depuis l ordinateur';
+  const enLigne = await appel(`/projects/${projetId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ title: recent }),
+  });
+  if (enLigne.statut !== 200) throw new Error(`écriture en ligne HTTP ${enLigne.statut}`);
+
+  // Le téléphone rejoue une écriture capturée une heure plus tôt.
+  const rejeu = await appel(`/projects/${projetId}`, {
+    method: 'PATCH',
+    headers: { 'X-Ignitux-Capture-Age': String(60 * 60_000) },
+    body: JSON.stringify({ title: 'Titre ecrit hors ligne, perime' }),
+  });
+  if (rejeu.statut !== 409) throw new Error(`attendu 409, reçu ${rejeu.statut}`);
+
+  const apres = await appel(`/projects/${projetId}`);
+  if (apres.corps?.title !== recent) {
+    throw new Error(`le titre récent a été écrasé : « ${apres.corps?.title} »`);
+  }
+  return 'refus 409, version récente intacte';
+});
+
+await verifier('Le refus dit ce qui s’est passé et quoi faire', async () => {
+  if (!projetId) throw new Error('aucun projet');
+  const rejeu = await appel(`/projects/${projetId}`, {
+    method: 'PATCH',
+    headers: { 'X-Ignitux-Capture-Age': String(60 * 60_000) },
+    body: JSON.stringify({ title: 'Encore perime' }),
+  });
+  const message = String(rejeu.corps?.message ?? '');
+  if (!message.includes('hors ligne')) throw new Error('le message ne dit pas la cause');
+  if (!/refais/i.test(message)) throw new Error('le message ne propose pas de suite');
+  return `${message.slice(0, 58)}…`;
+});
+
+await verifier('Rien ne change pour une écriture envoyée sans en-tête', async () => {
+  // Le garde ne s'adresse qu'aux écritures rejouées. S'il touchait aux appels
+  // ordinaires, il casserait tout le produit — et ce contrôle-ci est le seul
+  // du lot dont l'échec serait une urgence.
+  if (!projetId) throw new Error('aucun projet');
+  const { statut } = await appel(`/projects/${projetId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ title: 'Projet de validation (modifie)' }),
+  });
+  return statut === 200 ? 'HTTP 200' : false;
+});
+
 // ── 10. Les droits de la personne sur ses données ──────────────────────────
 //
 // Ignitux est français et recevra de vraies personnes. Le droit d'accès et

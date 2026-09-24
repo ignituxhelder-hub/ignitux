@@ -17,6 +17,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { RefuserEcritureDepassee } from '../hors-ligne/ecriture-depassee.decorator.js';
+import { EcritureDepasseeGuard } from '../hors-ligne/ecriture-depassee.guard.js';
 import {
   isDocumentStatus,
   isDocumentType,
@@ -35,7 +37,7 @@ import {
 
 @ApiTags('billing')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, EcritureDepasseeGuard)
 @Controller('billing')
 export class BillingController {
   constructor(private readonly billingService: BillingService) {}
@@ -90,6 +92,7 @@ export class BillingController {
     return this.billingService.getDocument(user.id, id);
   }
 
+  @RefuserEcritureDepassee('billing_documents')
   @Patch('documents/:id')
   updateDraft(
     @CurrentUser() user: AuthenticatedUser,
@@ -114,6 +117,7 @@ export class BillingController {
     await this.billingService.deleteDraft(user.id, id);
   }
 
+  @RefuserEcritureDepassee('billing_documents')
   @Patch('documents/:id/status')
   changeStatus(
     @CurrentUser() user: AuthenticatedUser,

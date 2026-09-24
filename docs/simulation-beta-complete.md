@@ -72,7 +72,7 @@ document qu'aucune lecture de code n'aurait pu établir.
 
 | Axe | Sur | Obtenu | Pourquoi |
 |---|---:|---:|---|
-| Produit et garde-fous, éprouvés à l'exécution | 30 | 30 | 65/66 contrôles, dix profils sans constat ; l'article 16 est désormais tenu dans les faits (l'application s'ouvre sans réseau) |
+| Produit et garde-fous, éprouvés à l'exécution | 30 | 30 | 69/70 contrôles, dix profils sans constat ; l'article 16 est désormais tenu dans les faits (l'application s'ouvre sans réseau) |
 | Sécurité applicative (cloisonnement des comptes) | 20 | 20 | aucune lecture ni écriture croisée, profil malveillant sans prise |
 | Sécurité de l'infrastructure | 15 | 14 | surface REST fermée sur les trois bases, privilèges par défaut compris ; reste trois réglages de `supabase_admin` que l'hébergeur refuse de céder, sans effet constaté |
 | Qualité des refus et des messages | 15 | 15 | chaque refus nomme la sortie ; 413 corrigé |

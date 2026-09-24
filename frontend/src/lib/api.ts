@@ -253,23 +253,72 @@ function describeMutation(method: string, path: string): string {
 }
 
 /**
+ * Une ressource a-t-elle déjà été écrite pendant CE rejeu ?
+ *
+ * Le cas à éviter : deux modifications hors ligne du même projet. La première
+ * est rejouée et repousse la date de dernière modification à maintenant. La
+ * seconde, capturée avant, se heurterait alors au garde du serveur — et la
+ * personne verrait « ce projet a changé pendant que tu étais hors ligne »
+ * alors que ce qui a changé est sa propre modification, partie dix
+ * millisecondes plus tôt.
+ *
+ * On compare par préfixe et dans les deux sens : `/projects/x` et
+ * `/projects/x/secteur` touchent la même ligne, et créer une tâche sous
+ * `/projects/x/tasks` peut aussi la dater. Le test est volontairement large :
+ * ce qu'il coûte quand il se trompe est de ne PAS détecter un conflit, c'est-
+ * à-dire de revenir au comportement d'avant ce dispositif. L'erreur inverse —
+ * refuser le travail de quelqu'un pour un conflit qui n'existe pas — coûte
+ * beaucoup plus cher.
+ */
+function dejaEcriteDansCeRejeu(envoyees: string[], chemin: string): boolean {
+  return envoyees.some((deja) => chemin.startsWith(deja) || deja.startsWith(chemin));
+}
+
+/**
  * Rejoue la file d'attente. Le jeton est passé par l'appelant : la file ne
  * stocke jamais d'identifiant d'authentification, pour qu'un vol du
  * stockage local ne livre pas aussi la session.
+ *
+ * ── L'âge de capture ─────────────────────────────────────────────────────
+ *
+ * Chaque écriture rejouée part avec `X-Ignitux-Capture-Age` : le nombre de
+ * millisecondes écoulées depuis sa mise en file. Le serveur s'en sert pour
+ * refuser une écriture qui effacerait une version plus récente (voir
+ * `backend/src/hors-ligne/`).
+ *
+ * Un âge, et non une date, parce qu'une date viendrait de l'horloge de
+ * l'appareil — qu'on ne contrôle pas. Une montre en retard de dix minutes
+ * ferait refuser tout ce que la personne a fait hors ligne. Un âge est une
+ * soustraction entre deux lectures de la même horloge ; son décalage
+ * s'annule.
  */
 export function replayOfflineQueue(token: string) {
   if (!offlineStorage) {
     return Promise.resolve({ sent: 0, rejected: 0, remaining: 0 } as ReplayOutcome);
   }
 
+  const envoyees: string[] = [];
+
   return replay(offlineStorage, async (mutation) => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    };
+    const age = Date.now() - Date.parse(mutation.queuedAt);
+    if (Number.isFinite(age) && age >= 0 && !dejaEcriteDansCeRejeu(envoyees, mutation.path)) {
+      headers['X-Ignitux-Capture-Age'] = String(age);
+    }
+
     try {
       const res = await fetch(`${API_URL}${mutation.path}`, {
         method: mutation.method,
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers,
         body: mutation.body ?? undefined,
       });
-      if (res.ok) return { ok: true as const };
+      if (res.ok) {
+        envoyees.push(mutation.path);
+        return { ok: true as const };
+      }
 
       const body: unknown = await res.json().catch(() => null);
       const reason =
