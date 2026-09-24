@@ -51,7 +51,48 @@ const envSchema = z.object({
   // plafond en place. Dans les deux cas l'inattendu penche du côté prudent.
   IGINI_QUOTA_CALLS_PER_MONTH: z.string().optional(),
   IGINI_QUOTA_COST_EUR_PER_MONTH: z.string().optional(),
+  /**
+   * L'identité légale d'Ignitux. Déclarées ici, et il a fallu une panne
+   * pour comprendre pourquoi.
+   *
+   * `identite-ignitux.ts` les lit directement dans `process.env`, donc
+   * elles fonctionnaient. Mais `production-preflight.ts`, lui, reçoit les
+   * données **validées par zod** — et zod retire les clés qu'il ne connaît
+   * pas. Le contrôle vérifiait donc trois réglages qui ne lui parvenaient
+   * jamais, et refusait de démarrer en annonçant :
+   *
+   *     IGNITUX_RAISON_SOCIALE : est vide. Ignitux ne l'invente pas —
+   *     renseigne-la.
+   *
+   * ...devant un fichier où elle est renseignée. La production ne pouvait
+   * pas démarrer, avec une configuration correcte et un message qui
+   * envoyait chercher au mauvais endroit.
+   *
+   * Optionnelles ici parce que le développement s'en passe : c'est le
+   * contrôle de production qui exige les trois premières, et lui seul.
+   */
+  IGNITUX_RAISON_SOCIALE: z.string().optional(),
+  IGNITUX_ADRESSE: z.string().optional(),
+  IGNITUX_EMAIL: z.string().optional(),
+  IGNITUX_IDENTIFIANT: z.string().optional(),
+  IGNITUX_TVA: z.string().optional(),
+  IGNITUX_IBAN: z.string().optional(),
+  IGNITUX_BIC: z.string().optional(),
+  /** 'aucun' tant qu'aucun encaissement n'est branché. Voir offres.service.ts. */
+  PAIEMENT_FOURNISSEUR: z.string().optional(),
 });
+
+/**
+ * Le schéma, exporté pour que le contrôle à blanc emprunte exactement le
+ * même chemin que le démarrage.
+ *
+ * Sans cela, `scripts/verifier-production.mjs` appelait le contrôle avec
+ * `process.env` brut, où rien n'est retiré — et annonçait « 1 bloquant »
+ * quand le vrai démarrage en comptait quatre. Un contrôle à blanc plus
+ * optimiste que la réalité est pire que pas de contrôle : il donne la
+ * permission de déployer.
+ */
+export { envSchema };
 
 export type Env = z.infer<typeof envSchema>;
 

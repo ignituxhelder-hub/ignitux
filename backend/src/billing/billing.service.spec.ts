@@ -105,14 +105,21 @@ describe('BillingService', () => {
       prisma.billing_documents.findFirst.mockResolvedValue({ sequence: 4 });
       prisma.billing_documents.create.mockRejectedValue(conflit());
 
-      const erreur = await service
-        .createDocument('u1', {
+      // `.catch()` élargit le type de retour à « le document OU l'erreur » :
+      // on capture donc l'erreur à part, pour que TypeScript sache de quoi
+      // on parle.
+      let leve: unknown;
+      try {
+        await service.createDocument('u1', {
           type: 'facture',
           clientName: 'Client',
           lines: [{ label: 'X', quantityMilli: 1000, unitPriceCents: 100 }],
-        })
-        .catch((e: unknown) => e as { message: string; getResponse?: () => unknown });
+        });
+      } catch (e) {
+        leve = e;
+      }
 
+      const erreur = leve as { message?: string; getResponse?: () => unknown };
       const message = JSON.stringify(erreur.getResponse?.() ?? erreur.message);
       expect(message).toMatch(/rien n’a été enregistré|rien n'a été enregistré/i);
       expect(message).toMatch(/réessaie/i);

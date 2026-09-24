@@ -5,6 +5,7 @@ import {
   shouldServeApiDocs,
   type PreflightInput,
 } from './production-preflight.js';
+import { envSchema } from './env.js';
 
 /** Une production entièrement saine, dont chaque test dégrade un réglage. */
 function saine(overrides: PreflightInput = {}): PreflightInput {
@@ -34,6 +35,46 @@ function problemesSur(overrides: PreflightInput): string[] {
 describe('préflight de production', () => {
   it('ne reproche rien à une configuration saine', () => {
     expect(productionProblems(saine())).toEqual([]);
+  });
+
+  /**
+   * Le même contrôle, mais par le chemin que le produit emprunte vraiment.
+   *
+   * Le test ci-dessus passait déjà, et c'est précisément pour cela que le
+   * défaut a vécu : il donne au contrôle un objet **brut**. Le démarrage,
+   * lui, valide d'abord avec zod — et zod retire les clés qu'il ne connaît
+   * pas. Trois réglages d'identité n'étaient pas déclarés au schéma : le
+   * contrôle les recevait vides et refusait de démarrer en annonçant
+   *
+   *     IGNITUX_RAISON_SOCIALE : est vide. Ignitux ne l'invente pas —
+   *     renseigne-la.
+   *
+   * ...devant un fichier où elle était renseignée. La production ne pouvait
+   * pas démarrer, avec une configuration correcte, et le message envoyait
+   * chercher au mauvais endroit.
+   *
+   * Ce test passe par `envSchema`, donc il tombe dès qu'un réglage exigé
+   * par le contrôle cesse d'être déclaré. C'est la seule façon de tenir
+   * l'invariant qui compte : **une configuration correcte démarre.**
+   */
+  it('ne reproche rien non plus après la validation que fait le démarrage', () => {
+    const valide = envSchema.safeParse(saine());
+    expect(valide.success).toBe(true);
+    if (!valide.success) return;
+
+    expect(productionProblems(valide.data)).toEqual([]);
+  });
+
+  it('le schéma conserve tout ce que le contrôle sait reprocher', () => {
+    // La forme générale du défaut : un réglage que le contrôle inspecte mais
+    // que le schéma laisse tomber est un refus impossible à corriger — on
+    // renseigne la variable, et le serveur continue de dire qu'elle manque.
+    const complete = saine();
+    const apres = envSchema.parse(complete);
+
+    for (const cle of Object.keys(complete)) {
+      expect(apres, `${cle} disparaît à la validation`).toHaveProperty(cle);
+    }
   });
 
   // Ces exigences n'ont de sens que face à de vrais comptes. Les imposer en

@@ -72,6 +72,31 @@ const { productionProblems } = await import('../dist/config/production-preflight
   process.exit(1);
 });
 
+/**
+ * On passe par le MÊME schéma que le démarrage, et pas par `process.env`.
+ *
+ * La première version donnait l'environnement brut au contrôle. Or le vrai
+ * démarrage valide d'abord avec zod, qui **retire les clés qu'il ne connaît
+ * pas** — si bien que ce script annonçait « 1 bloquant » là où le serveur en
+ * comptait quatre, et donnait la permission de déployer une configuration
+ * qui ne démarrerait pas.
+ *
+ * Un contrôle à blanc plus optimiste que la réalité est pire que pas de
+ * contrôle. Il emprunte donc exactement le même chemin, et si le schéma
+ * change demain, les deux changent ensemble.
+ */
+const { envSchema } = await import('../dist/config/env.js');
+const valide = envSchema.safeParse(candidat);
+if (!valide.success) {
+  console.log('Configuration invalide — le serveur refuserait de démarrer :\n');
+  for (const souci of valide.error.issues) {
+    console.log(`  ${String(souci.path.join('.')).padEnd(24)} ${souci.message}`);
+  }
+  console.log('\nCes fautes portent sur la FORME des variables. Les corriger, puis relancer.');
+  process.exit(1);
+}
+const candidatValide = valide.data;
+
 console.log('┌─ Déploiement à blanc ─────────────────────────────────────');
 console.log(`│ fichier : ${fichier}`);
 console.log(`│ mode    : lecture seule, rien ne démarre`);
@@ -82,7 +107,7 @@ const avertissements = [];
 
 // ── 1. Le contrôle de démarrage, tel quel ────────────────────────────────
 
-const problemes = productionProblems(candidat);
+const problemes = productionProblems(candidatValide);
 console.log('Contrôle de démarrage :');
 if (problemes.length === 0) {
   console.log('  ok — le serveur accepterait de démarrer avec cette configuration.');
