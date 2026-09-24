@@ -2,12 +2,19 @@
 
 23 septembre 2026. Rédigé comme un auditeur externe : sans ménagement, sans protéger le projet.
 
-> **Note de préparation bêta : 84 / 100** — relevée de 52 le soir même : la
+> **Note de préparation bêta : 89 / 100** — relevée de 52 le soir même : la
 > base est devenue joignable, les dix parcours ont réellement tourné, la
 > surface REST a été fermée et `ignitux_prod` migrée.
 >
 > Le produit est éprouvé et la base est en ordre. L'exploitation n'existe
 > toujours pas — et c'est désormais le seul obstacle.
+>
+> **Correction du 24 septembre 2026.** Ce document a affiché **84** pendant
+> une journée. C'était une faute d'addition, pas un jugement : la colonne de
+> droite du tableau ci-dessous a toujours fait 89. Corriger une note vers le
+> haut sur son propre travail est le genre de rectification qu'on aimerait
+> faire discrètement — d'où ce paragraphe, plutôt qu'un chiffre remplacé en
+> silence. Aucune ligne du tableau n'a été retouchée pour y arriver.
 
 > ### Mise à jour du 23 septembre 2026, en soirée
 >
@@ -65,17 +72,18 @@ document qu'aucune lecture de code n'aurait pu établir.
 
 | Axe | Sur | Obtenu | Pourquoi |
 |---|---:|---:|---|
-| Produit et garde-fous, éprouvés à l'exécution | 30 | 30 | 41/41, dix profils sans constat |
+| Produit et garde-fous, éprouvés à l'exécution | 30 | 30 | 65/66 contrôles, dix profils sans constat ; l'article 16 est désormais tenu dans les faits (l'application s'ouvre sans réseau) |
 | Sécurité applicative (cloisonnement des comptes) | 20 | 20 | aucune lecture ni écriture croisée, profil malveillant sans prise |
 | Sécurité de l'infrastructure | 15 | 14 | surface REST fermée sur les trois bases, privilèges par défaut compris ; reste trois réglages de `supabase_admin` que l'hébergeur refuse de céder, sans effet constaté |
 | Qualité des refus et des messages | 15 | 15 | chaque refus nomme la sortie ; 413 corrigé |
 | Base de production | 10 | 10 | sauvegardée puis migrée : 50/50 tables, aucune colonne manquante, 12 lignes de conformité intactes |
 | Exploitation : hébergeur, domaine, email, paiement | 10 | 0 | rien de tout cela n'existe |
-| **Total** | **100** | **84** | |
+| **Total** | **100** | **89** | |
 
-Les 16 points manquants ne sont pas du développement, et il n'en reste qu'une
+Les 11 points manquants ne sont pas du développement, et il n'en reste qu'une
 seule sorte : **quatre comptes à ouvrir chez des tiers** — hébergeur, domaine,
-email, paiement. Tout le reste est fait.
+email, paiement (10 points), plus un point d'infrastructure que l'hébergeur ne
+cède pas. Tout le reste est fait.
 
 ---
 

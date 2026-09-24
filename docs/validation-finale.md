@@ -17,6 +17,23 @@ ce dernier disait « prêt sous réserve de vérification », celui-ci dit ce qu
 > la base est en ordre ; l'infrastructure qui porterait le tout n'existe pas
 > encore.
 
+> ### Reprise du 24 septembre 2026
+>
+> La commande a grandi depuis : **66 contrôles** au lieu de 41 — facturation,
+> Constitution, investisseur, données personnelles, partage, courrier. Relancée
+> aujourd'hui contre la même base : **65 vérifiés, 0 en échec, 1 non prouvé**.
+>
+> Le contrôle non prouvé est le même qu'hier et ne dépend pas du code : le
+> parcours complet du mot de passe oublié exige qu'un vrai courrier parte, donc
+> un fournisseur d'email. Le mécanisme, lui, est éprouvé à la main — jeton
+> d'une heure, ancien mot de passe refusé, rejeu refusé.
+>
+> Les suites ont suivi le même mouvement : **1 044** tests unitaires backend
+> (77 fichiers), **252** bout en bout, **362** frontend (39 fichiers) —
+> **1 658** au total, tous verts. S'y ajoute une commande qui n'existait pas :
+> `scripts/hors-ligne.mjs`, **6 vérifiés, 0 en échec**, qui coupe le réseau
+> pour de bon et constate que l'application s'ouvre quand même (article 16).
+
 ---
 
 ## 1. Résultats détaillés

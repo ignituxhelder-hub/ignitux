@@ -153,6 +153,12 @@ service.
 
 ### Offline First
 
+> **Note du 24 septembre 2026.** Cette section a été écrite quand le service
+> worker était hors périmètre. Il existe depuis : `frontend/public/sw.js` fait
+> démarrer l'application sans réseau, et `scripts/hors-ligne.mjs` le vérifie en
+> coupant le réseau pour de bon. Ce qui suit reste vrai — il y est question du
+> **stockage** et des **conflits**, deux sujets que le worker ne touche pas.
+
 Aujourd'hui : file d'écriture et cache de lecture daté, tous deux dans **`localStorage`**, avec
 un plafond de 60 entrées — plafond posé explicitement dans le code pour que le cache n'étouffe
 pas la file d'attente, « bien plus précieuse ».
