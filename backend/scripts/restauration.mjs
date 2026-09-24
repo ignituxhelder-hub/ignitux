@@ -79,6 +79,37 @@ const tables = readdirSync(source)
   .filter((f) => f.endsWith('.json') && f !== '_manifeste.json')
   .map((f) => f.replace(/\.json$/, ''));
 
+// ── Garde-fou : la sauvegarde vient-elle d'ici ? ───────────────────────────
+//
+// Les trois bases vivent sur la même instance et se ressemblent : `postgres`
+// pour le développement, `ignitux_test` pour les tests, `ignitux_prod` pour
+// la production. Un `--env` de travers, et l'on restaure le développement
+// par-dessus la production — avec `--ecraser`, cela réussirait en silence.
+//
+// Ce n'est pas une inquiétude abstraite : `sauvegarde.mjs .env.production`
+// a sauvegardé la base de développement pendant des semaines, sans rien
+// signaler, parce que les deux scripts voisins ne prenaient pas leur
+// argument de la même façon.
+//
+// Le manifeste sait d'où vient la sauvegarde. On le lui demande.
+const memeBase = manifeste.base === nomCible;
+if (!memeBase && !process.argv.includes('--vers-une-autre-base')) {
+  console.error('');
+  console.error(`ARRÊT. Cette sauvegarde vient de « ${manifeste.base} », la cible est « ${nomCible} ».`);
+  console.error('');
+  console.error('Restaurer une base dans une autre est parfois voulu — recopier la');
+  console.error('production vers un environnement d’essai, par exemple. Mais c’est');
+  console.error('aussi la façon la plus rapide d’écraser de vraies données avec des');
+  console.error('données de test, et rien ne le signalerait ensuite.');
+  console.error('');
+  console.error('Si c’est bien l’intention : ajouter --vers-une-autre-base.');
+  await prisma.$disconnect();
+  process.exit(1);
+}
+if (!memeBase) {
+  console.log(`(sauvegarde de « ${manifeste.base} » vers « ${nomCible} » — demandé explicitement)`);
+}
+
 // ── Garde-fou : la cible est-elle vide ? ───────────────────────────────────
 let dejaPresent = 0;
 for (const table of tables) {

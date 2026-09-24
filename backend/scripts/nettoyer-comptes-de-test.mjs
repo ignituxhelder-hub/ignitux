@@ -131,11 +131,36 @@ const prisma = new PrismaClient({
 });
 
 const adresse = new URL(process.env.DATABASE_URL);
+const base = adresse.pathname.slice(1);
+
 console.log('┌─ Nettoyage des comptes de test ───────────────────────────');
 console.log(`│ hôte    : ${adresse.hostname}`);
-console.log(`│ base    : ${adresse.pathname.slice(1)}`);
+console.log(`│ base    : ${base}`);
 console.log(`│ mode    : ${APPLIQUER ? 'APPLIQUER' : 'aperçu, rien ne sera effacé'}`);
 console.log('└───────────────────────────────────────────────────────────\n');
+
+/*
+ * Ce script efface des comptes. Il n'a rien à faire en production.
+ *
+ * Les trois bases vivent sur la même instance et portent des noms voisins :
+ * un `--env` de travers, et l'on efface chez de vraies personnes. Que
+ * `ignitux_prod` soit vide aujourd'hui ne protège rien — c'est une
+ * circonstance, pas un garde-fou.
+ *
+ * La liste fermée de préfixes en garderait la plupart, mais un compte réel
+ * nommé « sim.quelquechose@ignitux.test » passerait au travers. Deux filets
+ * valent mieux qu'un quand le second est une ligne.
+ */
+if (base === 'ignitux_prod' && !process.argv.includes('--oui-en-production')) {
+  console.error('ARRÊT. La cible est la base de PRODUCTION.');
+  console.error('');
+  console.error('Ce script efface des comptes : il est fait pour nettoyer les débris');
+  console.error('des harnais d’exécution, qui ne tournent jamais en production.');
+  console.error('');
+  console.error('Si c’est vraiment l’intention : ajouter --oui-en-production.');
+  await prisma.$disconnect();
+  process.exit(1);
+}
 
 const tous = await prisma.users.findMany({
   select: { id: true, email: true, _count: { select: { projects: true } } },
