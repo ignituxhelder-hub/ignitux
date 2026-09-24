@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { IBM_Plex_Mono, IBM_Plex_Sans, Sora } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { OfflineBanner } from '@/components/offline-banner';
+import { ServiceWorker } from '@/components/service-worker';
 import { AuthProvider } from '@/lib/auth';
 import './globals.css';
 
@@ -33,6 +34,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="fr" className={`${sora.variable} ${plexSans.variable} ${plexMono.variable}`}>
       <body>
+        {/* N'affiche rien : il pose le service worker qui rend l'ouverture
+            possible sans réseau, et sait aussi le retirer. Article 16. */}
+        <ServiceWorker />
         <AuthProvider>
           {/* Monté au niveau racine : l'état hors ligne concerne toute
               l'application, pas une page en particulier, et le bandeau ne

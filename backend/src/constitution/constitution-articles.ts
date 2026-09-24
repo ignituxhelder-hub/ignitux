@@ -188,9 +188,21 @@ export const CONSTITUTION_ARTICLES: readonly ConstitutionArticleSeed[] = [
     title: 'Offline First',
     text: 'IGNITUX doit continuer à fonctionner sans connexion.',
     principle: 'offline_first',
-    // Partiellement seulement, et c'est dit dans l'audit : les données déjà
-    // chargées restent consultables et les écritures sont mises en file,
-    // mais l'application ne démarre pas hors ligne (pas de service worker).
+    // L'application DÉMARRE désormais sans connexion : un service worker
+    // (`frontend/public/sw.js`) sert les écrans déjà visités, et pour les
+    // autres une page d'explication qu'il porte lui-même. Avec le cache de
+    // lecture et la file d'écriture qui existaient déjà, l'article est tenu
+    // dans les faits — éprouvé au navigateur, réseau coupé.
+    //
+    // Il reste `declared`, et ce n'est pas une modestie de façade : ce champ
+    // dit si **une règle du moteur** vérifie l'article, pas s'il est
+    // implémenté. Aucune règle ne peut constater depuis le serveur qu'un
+    // navigateur a bien reçu son service worker. Le marquer `enforced`
+    // laisserait croire à un dispositif de contrôle qui n'existe pas — ce
+    // que l'article 11 interdit précisément.
+    //
+    // Ce qui garde la promesse, faute de règle : `scripts/hors-ligne.mjs`,
+    // qui coupe le réseau pour de bon et vérifie que le produit s'ouvre.
     enforcement: 'declared',
   },
   {
