@@ -3,13 +3,13 @@
 Travail mené sans personne devant l'écran, à la demande du porteur. Tout est
 vérifié par exécution ; ce qui ne l'est pas est dit comme tel.
 
-> **Quatre défauts réels trouvés et corrigés, tous invisibles aux 1 648 tests
+> **Cinq défauts réels trouvés et corrigés, tous invisibles aux 1 648 tests
 > existants — parce qu'aucun d'eux ne regarde le produit avec les yeux de
 > quelqu'un qui l'utilise.**
 >
-> **Et seize propriétés déjà bonnes ont été éprouvées puis gelées** — RGPD,
+> **Et vingt propriétés déjà bonnes ont été éprouvées puis gelées** — RGPD,
 > partage d'un projet, silence des refus d'authentification, réinitialisation
-> de mot de passe, espace investisseur. Elles ne corrigent rien : elles empêchent la régression,
+> de mot de passe, espace investisseur, facturation. Elles ne corrigent rien : elles empêchent la régression,
 > parce que ce sont exactement celles qu'on casse en voulant bien faire.
 >
 > Deux constats sont laissés au porteur : ce sont des décisions de conception,
@@ -36,7 +36,7 @@ Trois harnais ont été écrits pour poser cette question-là.
 
 ---
 
-## 2. Les quatre défauts corrigés
+## 2. Les cinq défauts corrigés
 
 ### 2.1 Le mot de passe en clair dans le navigateur — *sécurité*
 
@@ -140,6 +140,37 @@ précisément celui où l'on écrivait. Le bandeau dit maintenant :
 pas encore.  [Rafraîchir l'affichage]
 ```
 
+### 2.5 Une course de numérotation rendue comme une panne — *droit*
+
+Huit factures créées exactement en même temps contre la vraie base :
+**quatre réussies, quatre en HTTP 500.** Mesuré avec un compte neuf, un
+compteur vierge et une fenêtre de limiteur vierge, pour qu'il ne reste aucun
+doute sur la cause.
+
+Le défaut n'est pas la collision — elle est prévue, et voulue. Le numéro se
+calcule depuis le maximum existant, la contrainte unique tranche, et mieux
+vaut échouer que produire deux factures portant le même numéro, ce que la loi
+ne pardonne pas.
+
+Le défaut est que **les réessais repartaient tous ensemble**. Huit requêtes
+qui lisent le même maximum, échouent ensemble, puis relisent ensemble se
+retrouvent au même endroit au coup suivant : le réessai reproduisait la course
+au lieu de la défaire. Monter le plafond seul n'aurait fait que retarder
+l'échec.
+
+Corrigé par un recul tiré au hasard entre les essais — c'est le hasard qui
+fait le travail, pas la durée. Et si le numéro reste imprenable au bout de
+huit essais, le bon mot n'est toujours pas « erreur » : c'est un conflit, il
+est passager, la personne n'a rien à réparer. Désormais **409**, avec la phrase
+qui dit quoi faire et pourquoi le produit refuse plutôt que d'inventer un
+numéro.
+
+| | avant | après |
+|---|---|---|
+| 8 créations simultanées | 4 créées, **4 en 500** | **8 créées, 0 erreur** |
+| 10 créations simultanées | — | 8 créées, 2 refusées en 409 |
+| numérotation | — | séquences 1→8 contiguës, aucun doublon |
+
 ---
 
 ## 3. Ce qui va bien, et qu'il faut dire aussi
@@ -168,8 +199,8 @@ vérifications-là sont passées du premier coup :
 
 ## 3 bis. Ce qui était déjà bon, et qui ne pourra plus se casser en silence
 
-Cinq domaines ont été joués à la main de bout en bout, trouvés corrects, puis
-figés en seize contrôles dans `validation-reelle.mjs`. Aucun n'a demandé de
+Six domaines ont été joués à la main de bout en bout, trouvés corrects, puis
+figés en vingt contrôles dans `validation-reelle.mjs`. Aucun n'a demandé de
 correction — ce qui est le meilleur résultat possible, à condition de le
 prouver plutôt que de le supposer.
 
@@ -220,6 +251,26 @@ Les deux qui comptent sont muettes. L'inscription parle, et c'est assumé : se
 taire enfermerait dehors quelqu'un qui a simplement oublié qu'il s'était
 inscrit, et la limite de cinq par minute borne l'usage détourné. C'est le
 compromis que fait tout le monde.
+
+### La facturation tient le droit
+
+Une facture est un document qui engage. Trois règles y sont des obligations et
+non des préférences, et toutes trois se cassent en silence.
+
+**L'arrondi se fait à la ligne, jamais au total.** Vérifié par un recalcul
+indépendant sur trois lignes choisies pour ne pas tomber rond : 8 633 + 1 562 =
+10 195 centimes, sans un seul flottant. Arrondir au total produirait des écarts
+d'un centime que le client trouve en recalculant — et une facture qui ne tombe
+pas juste se conteste.
+
+**Un trop-perçu reste négatif.** Après un versement excédentaire, le reste dû
+passe sous zéro au lieu d'être ramené à zéro : un trop-perçu masqué est un
+trop-perçu jamais remboursé.
+
+**Un document émis ne bouge plus.** Ni modification, ni suppression, ni retour
+en brouillon — et le refus nomme le remède : *« Pour le corriger, crée un avoir
+qui le référence. »* Sans cette phrase, la personne serait bloquée devant une
+règle qu'elle ne comprend pas.
 
 ### L'espace investisseur compte juste, et ne montre pas trop
 
@@ -334,16 +385,16 @@ règles qui en sortent :
 ## 6. État à la fin de la session
 
 ```
-Backend unitaires        1 034 verts   (77 fichiers)
+Backend unitaires        1 035 verts   (77 fichiers)
 Backend bout en bout       252 verts   (15 fichiers)
 Frontend                   362 verts   (39 fichiers)
-Validation réelle          57 vérifiés · 0 échec · 1 non prouvé
+Validation réelle          61 vérifiés · 0 échec · 1 non prouvé
 Simulation dix profils     0 critique · 0 majeur · 0 moyen · 0 mineur
 Traversée 21 écrans        0 constat au bureau
 Parcours complet           0 critique · 0 majeur · 1 moyen
 ```
 
-La validation réelle est passée de **41 à 57 contrôles** : seize de plus, tous
+La validation réelle est passée de **41 à 61 contrôles** : vingt de plus, tous
 sur des propriétés qui existaient déjà et que rien ne protégeait. Le seul
 « non prouvé » restant est le parcours complet du mot de passe oublié, qui
 attend un fournisseur d'email — et il le dit.
