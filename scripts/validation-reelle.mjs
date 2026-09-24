@@ -107,6 +107,32 @@ async function appel(chemin, options = {}) {
   return { statut: reponse.status, corps };
 }
 
+/**
+ * Le même appel, mais qui attend son tour quand le limiteur refuse.
+ *
+ * Le limiteur autorise cinq connexions par minute et par adresse. Ce script
+ * en fait déjà trois pour le compte principal, et le bloc « Données
+ * personnelles » en ajoute deux pour son compte jetable : au sixième appel —
+ * c'est-à-dire à la deuxième exécution d'affilée — tout part en échec, et le
+ * rapport accuse le produit d'un défaut qui est le nôtre.
+ *
+ * On attend plutôt que d'échouer, et on sait combien : depuis que le limiteur
+ * s'explique, la réponse porte `secondesAAttendre`. C'est le premier usage de
+ * cette correction, et il tombe bien — un harnais qui se heurte à un mur
+ * saura désormais quand revenir, exactement comme une personne devant
+ * l'écran.
+ */
+async function appelPatient(chemin, options = {}, essais = 2) {
+  for (let i = 0; i < essais; i += 1) {
+    const reponse = await appel(chemin, options);
+    if (reponse.statut !== 429 || i === essais - 1) return reponse;
+    const secondes = Number(reponse.corps?.secondesAAttendre) || 60;
+    console.log(`  (limiteur atteint — attente de ${secondes + 1} s)`);
+    await new Promise((r) => setTimeout(r, (secondes + 1) * 1000));
+  }
+  return { statut: 429, corps: null };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 
 console.log('╔═══════════════════════════════════════════════════════════════╗');
@@ -180,7 +206,7 @@ await verifier('La paternité du concept est publiée', async () => {
 titre('Compte');
 
 await verifier('Inscription', async () => {
-  const { statut } = await appel('/users/signup', {
+  const { statut } = await appelPatient('/users/signup', {
     method: 'POST',
     body: JSON.stringify({ email: EMAIL, password: MDP }),
   });
@@ -189,7 +215,7 @@ await verifier('Inscription', async () => {
 });
 
 await verifier('Connexion et jeton', async () => {
-  const { statut, corps } = await appel('/auth/login', {
+  const { statut, corps } = await appelPatient('/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email: EMAIL, password: MDP }),
   });
@@ -199,7 +225,7 @@ await verifier('Connexion et jeton', async () => {
 });
 
 await verifier('Un mot de passe faux est refusé', async () => {
-  const { statut } = await appel('/auth/login', {
+  const { statut } = await appelPatient('/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email: EMAIL, password: 'ce-n-est-pas-le-bon' }),
   });
@@ -565,7 +591,146 @@ if (!iaAllumee) {
   }
 }
 
-// ── 9. Le navigateur ───────────────────────────────────────────────────────
+// ── 9. Les droits de la personne sur ses données ──────────────────────────
+//
+// Ignitux est français et recevra de vraies personnes. Le droit d'accès et
+// le droit à l'effacement ne sont pas des options : ils doivent exister, et
+// ils doivent **tenir**. Un export qui oublie la moitié des données, ou une
+// suppression qui laisse les projets en base, valent moins que rien — ils
+// donnent à la personne la certitude d'une chose fausse.
+//
+// Ces contrôles usent un compte à part, créé et détruit ici. Le compte
+// principal de la validation sert aux sections suivantes : le supprimer
+// arrêterait tout.
+
+titre('Données personnelles');
+
+const EMAIL_RGPD = `validation.rgpd.${horodatage}@ignitux.test`;
+let jetonRgpd = null;
+let projetRgpd = null;
+
+const appelRgpd = async (chemin, options = {}, essais = 2) => {
+  for (let i = 0; i < essais; i += 1) {
+    const r = await appelRgpdUneFois(chemin, options);
+    if (r.statut !== 429 || i === essais - 1) return r;
+    const secondes = Number(r.corps?.secondesAAttendre) || 60;
+    console.log(`  (limiteur atteint — attente de ${secondes + 1} s)`);
+    await new Promise((res) => setTimeout(res, (secondes + 1) * 1000));
+  }
+  return { statut: 429, corps: null };
+};
+
+const appelRgpdUneFois = async (chemin, options = {}) => {
+  const reponse = await fetch(`${API}${chemin}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(jetonRgpd ? { Authorization: `Bearer ${jetonRgpd}` } : {}),
+      ...options.headers,
+    },
+  });
+  let corps = null;
+  try {
+    corps = await reponse.json();
+  } catch {
+    /* 204 n'a pas de corps */
+  }
+  return { statut: reponse.status, corps };
+};
+
+await verifier('Un compte à part, avec de quoi exporter', async () => {
+  await appelRgpd('/users/signup', {
+    method: 'POST',
+    body: JSON.stringify({ email: EMAIL_RGPD, password: MDP }),
+  });
+  const { corps } = await appelRgpd('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email: EMAIL_RGPD, password: MDP }),
+  });
+  jetonRgpd = corps?.accessToken;
+  if (!jetonRgpd) throw new Error('pas de jeton');
+  const projet = await appelRgpd('/projects', {
+    method: 'POST',
+    body: JSON.stringify({ title: 'Projet à effacer', description: 'Contenu personnel.' }),
+  });
+  projetRgpd = projet.corps?.id;
+  if (!projetRgpd) throw new Error('projet non créé');
+  await appelRgpd(`/projects/${projetRgpd}/tasks`, {
+    method: 'POST',
+    body: JSON.stringify({ title: 'Tâche personnelle' }),
+  });
+  return 'compte, projet et tâche prêts';
+});
+
+await verifier('L’export rend les données, et dit ce qu’il n’inclut pas', async () => {
+  const { statut, corps } = await appelRgpd('/users/me/export');
+  if (statut !== 200) throw new Error(`statut ${statut}`);
+  const brut = JSON.stringify(corps);
+  if (!brut.includes(EMAIL_RGPD)) throw new Error('l’email du compte manque');
+  if (!brut.includes('Projet à effacer')) throw new Error('le projet manque');
+  // Dire ce qui n'est PAS dans l'export vaut autant que le reste : sans
+  // cette liste, la personne croit tenir la totalité de ce qu'on détient.
+  if (!Array.isArray(corps?.non_inclus) || corps.non_inclus.length === 0) {
+    throw new Error('aucune liste de ce qui n’est pas inclus');
+  }
+  if (corps.non_inclus.some((e) => !e.pourquoi)) {
+    throw new Error('une exclusion n’est pas justifiée');
+  }
+  return `${Object.keys(corps.donnees ?? {}).length} section(s), ${corps.non_inclus.length} exclusion(s) justifiée(s)`;
+});
+
+await verifier('L’export ne contient ni mot de passe ni empreinte', async () => {
+  const { corps } = await appelRgpd('/users/me/export');
+  const brut = JSON.stringify(corps);
+  if (brut.includes(MDP)) throw new Error('mot de passe en clair dans l’export');
+  // bcrypt commence par $2a$, $2b$ ou $2y$. Remettre l'empreinte n'apprend
+  // rien à la personne et recopie du matériel de sécurité dans un fichier
+  // qui circulera par email.
+  if (/\$2[aby]\$/.test(brut)) throw new Error('empreinte du mot de passe dans l’export');
+  return 'ni l’un ni l’autre';
+});
+
+await verifier('L’aperçu de suppression annonce ce qui disparaîtra', async () => {
+  const { statut, corps } = await appelRgpd('/users/me/deletion-preview');
+  if (statut !== 200) throw new Error(`statut ${statut}`);
+  const brut = JSON.stringify(corps);
+  if (!/projet/i.test(brut)) throw new Error('les projets ne sont pas mentionnés');
+  return `${(corps?.avertissements ?? []).length} avertissement(s)`;
+});
+
+await verifier('Un mauvais mot de passe ne supprime rien', async () => {
+  const { statut } = await appelRgpd('/users/me', {
+    method: 'DELETE',
+    body: JSON.stringify({ password: 'CeNEstPasLeBon123!' }),
+  });
+  if (statut < 400) throw new Error(`suppression acceptée sans le bon mot de passe (${statut})`);
+  // Et le compte doit toujours répondre.
+  const encore = await appelRgpd('/users/me/export');
+  if (encore.statut !== 200) throw new Error('le compte a été abîmé par la tentative');
+  return `refusé en ${statut}, compte intact`;
+});
+
+await verifier('La suppression efface vraiment, projets compris', async () => {
+  const { statut } = await appelRgpd('/users/me', {
+    method: 'DELETE',
+    body: JSON.stringify({ password: MDP }),
+  });
+  if (statut !== 204 && statut !== 200) throw new Error(`statut ${statut}`);
+
+  // On ne croit pas la réponse sur parole : on essaie de se reconnecter.
+  const reconnexion = await appelRgpd('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email: EMAIL_RGPD, password: MDP }),
+  });
+  if (reconnexion.statut === 200) throw new Error('le compte répond encore après suppression');
+
+  // Et le jeton d'avant ne doit plus ouvrir le projet.
+  const projet = await appelRgpd(`/projects/${projetRgpd}`);
+  if (projet.statut === 200) throw new Error('le projet est encore lisible');
+  return `connexion ${reconnexion.statut}, projet ${projet.statut}`;
+});
+
+// ── 10. Le navigateur ───────────────────────────────────────────────────────
 
 if (AVEC_NAVIGATEUR) {
   titre('Navigateur');
