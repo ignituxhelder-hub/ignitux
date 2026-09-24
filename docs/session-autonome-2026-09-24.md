@@ -7,6 +7,11 @@ vérifié par exécution ; ce qui ne l'est pas est dit comme tel.
 > existants — parce qu'aucun d'eux ne regarde le produit avec les yeux de
 > quelqu'un qui l'utilise.**
 >
+> **Et douze propriétés déjà bonnes ont été éprouvées puis gelées** — RGPD,
+> partage d'un projet, silence des refus d'authentification, réinitialisation
+> de mot de passe. Elles ne corrigent rien : elles empêchent la régression,
+> parce que ce sont exactement celles qu'on casse en voulant bien faire.
+>
 > Deux constats sont laissés au porteur : ce sont des décisions de conception,
 > pas des défauts.
 
@@ -161,6 +166,77 @@ vérifications-là sont passées du premier coup :
 
 ---
 
+## 3 bis. Ce qui était déjà bon, et qui ne pourra plus se casser en silence
+
+Quatre domaines ont été joués à la main de bout en bout, trouvés corrects, puis
+figés en douze contrôles dans `validation-reelle.mjs`. Aucun n'a demandé de
+correction — ce qui est le meilleur résultat possible, à condition de le
+prouver plutôt que de le supposer.
+
+### Le RGPD tient
+
+L'écran `/account` est atteignable par « Tous mes outils › Mon compte ». Il
+propose « Télécharger mes données » et « Voir ce qui sera supprimé ».
+
+L'export rend un fichier nommé, en huit sections, contenant l'email et les
+projets. Il cite les CGU (§2.2) pour qu'on puisse comparer le promis au rendu.
+Il prévient la personne qu'elle devient **gardienne des données de tiers**
+qu'elle a saisies. Et — c'est rare — il liste ce qu'il **n'inclut pas**, avec
+le motif : les jetons de sécurité par exemple, parce que *« te le remettre ne
+t'apprendrait rien et reviendrait à recopier du matériel de sécurité dans un
+fichier qui circulera par email ou par clé USB »*. Ni mot de passe ni empreinte
+dedans.
+
+La suppression refuse un mauvais mot de passe sans abîmer le compte ; avec le
+bon, elle efface vraiment — compte, projets, tâches et souvenirs à zéro en
+base, et les lignes du journal des coûts ne portent plus l'identifiant. **La
+dépense reste dans les totaux, la personne disparaît.**
+
+### Le partage se referme
+
+| | |
+|---|---|
+| avant l'invitation | lecture **404**, écriture **404** |
+| après l'invitation | lit 200 · écrit 404 · supprime 404 · invite 404 |
+| après le retrait | lecture **404** |
+
+404 et non 403, et c'est le bon mot : un 403 confirmerait que le projet existe,
+ce qui est déjà un renseignement. Le collaborateur est en lecture seule. Et le
+troisième fait est celui qu'on oublie de vérifier : **inviter une fois ne
+revient pas à inviter pour toujours.**
+
+### Les refus n'apprennent rien
+
+Un message qui distingue « cet email n'existe pas » de « ce mot de passe est
+faux » transforme la page de connexion en annuaire.
+
+| Route | Distingue un compte existant ? |
+|---|---|
+| Connexion | **non** — même 401, même phrase |
+| Mot de passe oublié | **non** — même 204, même corps |
+| Inscription | oui — 409 « Un compte existe déjà » |
+
+Les deux qui comptent sont muettes. L'inscription parle, et c'est assumé : se
+taire enfermerait dehors quelqu'un qui a simplement oublié qu'il s'était
+inscrit, et la limite de cinq par minute borne l'usage détourné. C'est le
+compromis que fait tout le monde.
+
+### La réinitialisation de mot de passe marche — seul l'envoi manque
+
+Jeton de 64 caractères valable une heure, ancien mot de passe refusé après
+coup, nouveau accepté, et **le même jeton rejoué est refusé**. Le journal écrit
+d'ailleurs le lien en clair sous un avertissement explicite (« Email NON
+ENVOYÉ, transport log ») : un testeur bloqué n'est pas perdu, le lien se
+récupère à la main. Ce n'est pas tenable à l'échelle, mais ce n'est pas une
+impasse.
+
+Ce qui ne se prouve pas depuis le harnais — le parcours complet dépend d'un
+email — est marqué **non prouvé**, avec sa cause et sa conséquence. Le jour où
+`MAIL_TRANSPORT` passera à `smtp`, la même ligne deviendra une vérification
+au lieu d'un aveu.
+
+---
+
 ## 4. Les deux constats laissés au porteur
 
 Ce ne sont pas des défauts, ce sont des décisions — et elles appartiennent à
@@ -232,13 +308,18 @@ règles qui en sortent :
 Backend unitaires        1 034 verts   (77 fichiers)
 Backend bout en bout       252 verts   (15 fichiers)
 Frontend                   362 verts   (39 fichiers)
-Validation réelle          41 / 41, appels IA compris
+Validation réelle          54 vérifiés · 0 échec · 1 non prouvé
 Simulation dix profils     0 critique · 0 majeur · 0 moyen · 0 mineur
 Traversée 21 écrans        0 constat au bureau
-Parcours complet           0 critique · 0 majeur
+Parcours complet           0 critique · 0 majeur · 1 moyen
 ```
 
-**Dépense IA du mois : 1,76 € sur 50 € de plafond**, 32 appels.
+La validation réelle est passée de **41 à 54 contrôles** : treize de plus, tous
+sur des propriétés qui existaient déjà et que rien ne protégeait. Le seul
+« non prouvé » restant est le parcours complet du mot de passe oublié, qui
+attend un fournisseur d'email — et il le dit.
+
+**Dépense IA du mois : 2,16 € sur 50 € de plafond**, 40 appels.
 
 Corrigé aussi : un test intermittent (`ReadinessService`, 5 232 ms contre un
 délai de 5 000) qui aurait échoué au hasard en CI. Un échec une fois sur quatre
