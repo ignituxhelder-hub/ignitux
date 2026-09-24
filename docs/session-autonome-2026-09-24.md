@@ -482,3 +482,139 @@ Le contrôle de déploiement à blanc le dit en une commande :
 node backend/scripts/verifier-production.mjs .env.production
 → 1 bloquant : FRONTEND_URL n'est pas en https, faute de domaine
 ```
+
+---
+
+## 8. Suite de la même session — l'article 16, et le dernier trou silencieux
+
+Écrit après coup, le même jour. Trois chantiers, dans l'ordre où ils se sont
+imposés l'un l'autre.
+
+### 8.1 L'application démarre sans réseau
+
+Tu avais relevé, à juste titre, que « Offline First » n'était pas tenu : cache
+de lecture, file d'écriture, synchronisation — mais **pas de service worker**,
+donc l'application ne s'**ouvrait** pas sans connexion. Un rechargement sans
+réseau donnait la page d'erreur du navigateur.
+
+C'est fait : `frontend/public/sw.js`.
+
+- **Les navigations passent par le réseau d'abord**, le cache seulement s'il ne
+  répond pas. C'est l'inverse du réflexe habituel, et c'est voulu : un worker
+  qui sert le cache d'abord fige les gens sur une version morte, parfois des
+  jours. C'est la panne la plus pénible qu'un service worker sache produire.
+- **Les ressources de Next passent par le cache d'abord** : leur nom contient
+  leur empreinte, donc les servir depuis le cache est exact.
+- **L'API n'est jamais interceptée.** Le produit a déjà son cache de lecture et
+  sa file d'écriture ; deux caches pour la même donnée finissent toujours par
+  se contredire, et celui qu'on oublie est celui qui ment.
+- **Pas de `skipWaiting()`.** Remplacer le worker sous un onglet ouvert, au
+  milieu d'une saisie, produit des incohérences que personne ne sait
+  reproduire.
+
+**L'écran jamais visité a demandé trois essais**, et les deux ratés valent
+d'être gardés :
+
+1. Servir le HTML d'une page `/hors-ligne` sous l'adresse d'un autre écran :
+   Next hydrate alors une route qui ne correspond pas au document,
+   l'hydratation échoue, et le produit affiche « Quelque chose a échoué de
+   notre côté, pas du tien ». C'est **faux** — la personne n'a plus de réseau —
+   et c'est pire que la page du navigateur, qui au moins dit la vérité.
+2. Rediriger vers une vraie page `/hors-ligne` : même résultat. Une page Next a
+   besoin de son fragment JavaScript, et ce fragment n'est téléchargé que
+   lorsqu'on visite la page — ce que personne n'avait fait.
+
+Ce qui marche est plus simple que les deux : **une page autonome écrite dans le
+worker lui-même**, sans fragment, sans hydratation, sans redirection, servie à
+l'adresse demandée. Une pièce au lieu de trois. La route `/hors-ligne` a été
+supprimée.
+
+**L'article 16 reste `declared`, et ce n'est pas de la modestie.** Ce champ dit
+si **une règle du moteur** vérifie l'article, pas s'il est implémenté. Aucune
+règle ne peut constater depuis le serveur qu'un navigateur a reçu son worker.
+Le marquer `enforced` annoncerait un contrôle qui n'existe pas — ce que
+l'article 11 interdit. Ce qui garde la promesse à la place :
+`node scripts/hors-ligne.mjs`, **6 vérifiés, 0 en échec**.
+
+### 8.2 Le worker était le seul fichier que rien ne vérifiait
+
+`frontend/public/` ne traverse ni le lint, ni TypeScript, ni le build. Ce n'est
+pas une déduction : la faute de syntaxe a été plantée exprès, et `next lint`
+comme `next build` ont répondu « aucune erreur ».
+
+Ce qui rend l'angle mort coûteux, c'est que **le worker échoue en silence par
+conception** — son enregistrement vit dans un `catch` vide, pour qu'un worker
+cassé n'empêche pas le produit de fonctionner en ligne. Personne ne verrait
+donc la panne en production non plus.
+
+La CI fait désormais deux choses : `node --check public/sw.js`, et la vraie
+commande hors ligne dans un navigateur, réseau coupé. Le pas de CI a été
+éprouvé sur les deux navigateurs avant d'être écrit — 6/6 de part et d'autre.
+
+### 8.3 Une écriture revenue du froid ne peut plus effacer du travail
+
+`docs/outillage.md` appelait ceci « le vrai trou non résolu » et demandait un
+choix explicite. Le scénario : tu modifies un projet sur ton téléphone, sans
+réseau ; depuis ton ordinateur, tu modifies le même projet ; le téléphone
+retrouve le réseau et **écrase la version la plus récente, sans rien dire**.
+
+Le choix est fait : **détecter et le dire**. « La dernière écriture gagne »
+reviendrait à effacer le travail de quelqu'un derrière un avertissement
+général, ce qu'une devise « la vérité avant tout » supporte mal — et que
+l'article 13 supporterait encore moins le jour où le conflit porte sur la
+visibilité d'un projet. **Si tu préfères l'autre réponse, elle se remet en
+place en retirant un décorateur par route.**
+
+Le point technique qui compte, et qui aurait pu tout casser : **on transmet un
+âge, pas une date.** Une date viendrait de l'horloge du téléphone. Une montre
+en retard de dix minutes ferait refuser tout ce que la personne a fait hors
+ligne — c'est-à-dire provoquer exactement la panne qu'on veut éviter. Un âge
+est une soustraction entre deux lectures de la même horloge : le décalage
+s'annule, et le serveur reconstitue l'instant de capture sur la sienne.
+
+Le garde **détecte, il ne fusionne pas**. Fusionner supposerait savoir quelle
+version a raison, ce que personne ici ne sait. L'écriture rejoint les
+« refusées » du bandeau, avec la raison, et tu décides.
+
+Et il **se trompe toujours du même côté** : ligne introuvable, `updated_at`
+vide, en-tête illisible, route non décorée — il laisse passer. Refuser à tort
+bloque du travail réel ; laisser passer à tort ramène au comportement d'avant.
+La moitié des tests vérifient qu'il laisse passer.
+
+Couvert : `projects`, `tasks`, `billing_documents`, `crm_contacts`,
+`crm_companies` — les modèles qui portent `updated_at`, 11 sur 50, sans aucune
+migration.
+
+### 8.4 Une addition fausse dans mon propre rapport
+
+La note de préparation bêta affichait **84/100**. La colonne de droite de son
+propre tableau fait **89** : 30 + 20 + 14 + 15 + 10 + 0. Une faute d'addition,
+pas un jugement.
+
+Corriger une note vers le haut sur son propre travail est exactement le genre
+de rectification qu'on aimerait faire en silence. Le document porte donc un
+paragraphe qui l'annonce, et aucune ligne du tableau n'a bougé pour y arriver.
+Les points manquants passent de 16 à 11 : 10 pour les quatre comptes chez des
+tiers, 1 pour un réglage que l'hébergeur ne cède pas.
+
+### 8.5 Les chiffres, remesurés et non recopiés
+
+| Quoi | Résultat |
+|---|---|
+| Tests unitaires backend | 1 055 verts (78 fichiers) |
+| Bout en bout backend | 258 verts (16 fichiers) |
+| Frontend | 367 verts (39 fichiers) |
+| Validation réelle, avec IA | **69 vérifiés · 0 en échec · 1 non prouvé** |
+| Hors ligne | **6/6** |
+| Traversée des écrans | **21/21**, aucun constat |
+| Parcours premier utilisateur | 0 critique, 0 majeur, 1 moyen (connu) |
+
+Le seul contrôle non prouvé est le même qu'hier et ne dépend pas du code : le
+parcours complet du mot de passe oublié exige qu'un vrai courrier parte.
+
+**Chaque pièce livrée ici a été neutralisée exprès pour vérifier que ses tests
+tombent** — 2 unitaires et 2 e2e pour le garde, 3 côté client pour l'âge de
+capture, et la commande hors ligne contre un worker retiré. Un test qui passe
+dans les deux cas ne prouve rien.
+
+Rien n'a été déployé.
