@@ -85,6 +85,40 @@ jobs:
       - name: Build
         run: npm run build
 
+      # ── LE SERVICE WORKER ────────────────────────────────────────────────
+      #
+      # `public/` ne traverse ni le lint, ni TypeScript, ni le build : une
+      # faute de syntaxe dans `sw.js` passe la CI sans rien allumer. Ce n'est
+      # pas une supposition — la faute a été plantée exprès, et lint comme
+      # build ont répondu « aucune erreur ».
+      #
+      # Et le worker échoue en silence par conception : son enregistrement
+      # vit dans un `catch` vide, parce qu'un worker cassé ne doit pas
+      # empêcher le produit de fonctionner en ligne. Personne ne verrait donc
+      # non plus la panne en production. Sans ces deux étapes, le démarrage
+      # hors ligne pourrait disparaître pendant des semaines.
+      - name: Le service worker est-il du JavaScript valide ?
+        run: node --check public/sw.js
+
+      # La vraie vérification : on coupe le réseau dans un vrai navigateur.
+      # Elle attrape ce que `--check` ne peut pas voir — un worker qui se
+      # charge mais sert la mauvaise chose, ce qui est la panne la plus
+      # coûteuse qu'un service worker sache produire.
+      #
+      # Le serveur n'est pas nécessaire : les écrans visités ici sont publics
+      # et rendus côté client. Ce job reste donc indépendant de la base.
+      - name: Installer Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: L'application s'ouvre-t-elle sans réseau ?
+        run: |
+          npx next start -H 127.0.0.1 -p 3001 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:3001/login > /dev/null 2>&1 && break
+            sleep 2
+          done
+          node ../scripts/hors-ligne.mjs --web http://127.0.0.1:3001 --navigateur chromium
+
   # LES TESTS DE BOUT EN BOUT, SUR UNE BASE JETABLE
   #
   # Ils ne tournaient pas ici, pour une raison qui semblait close : les

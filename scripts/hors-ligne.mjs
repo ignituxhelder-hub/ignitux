@@ -3,6 +3,7 @@
  *
  *   node scripts/hors-ligne.mjs
  *   node scripts/hors-ligne.mjs --web http://127.0.0.1:3001
+ *   node scripts/hors-ligne.mjs --navigateur chromium   (intégration continue)
  *
  * ── Pourquoi une commande à part ─────────────────────────────────────────
  *
@@ -51,6 +52,17 @@ const lire = (nom, defaut) => {
 
 const WEB = lire('web', 'http://127.0.0.1:3001');
 
+/**
+ * Quel navigateur. Par défaut l'Edge du système, qui est installé sur la
+ * machine de développement et n'a rien à télécharger. En intégration
+ * continue il n'existe pas : on y passe `--navigateur chromium`, celui que
+ * Playwright installe lui-même.
+ *
+ * Le service worker est la même norme dans les deux, et c'est ce qu'on
+ * éprouve ici — pas une particularité d'Edge.
+ */
+const NAVIGATEUR = lire('navigateur', 'msedge');
+
 const resultats = [];
 const noter = (etat, libelle, detail = '') => {
   resultats.push({ etat, libelle, detail });
@@ -61,7 +73,11 @@ const pw = await import(
   new URL('../frontend/node_modules/playwright/index.js', import.meta.url).href
 );
 const chromium = pw.chromium ?? pw.default.chromium;
-const nav = await chromium.launch({ channel: 'msedge', headless: true });
+const nav = await chromium.launch(
+  NAVIGATEUR === 'chromium'
+    ? { headless: true }
+    : { channel: NAVIGATEUR, headless: true },
+);
 const ctx = await nav.newContext({ viewport: { width: 1280, height: 900 } });
 const page = await ctx.newPage();
 
