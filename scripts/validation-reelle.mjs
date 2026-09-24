@@ -735,6 +735,123 @@ await (async () => {
   }
 })();
 
+// ── Investir n'est pas collaborer ─────────────────────────────────────────
+//
+// Deux droits qu'il serait naturel de confondre, et coûteux de confondre.
+// Quelqu'un qui met 5 000 € dans un projet a toutes les raisons de vouloir
+// le lire — mais le porteur ne lui a pas ouvert son espace de travail, il a
+// reçu son argent. Ses notes, ses souvenirs, ses concepts, ses tâches
+// restent à lui.
+//
+// Le fait est facile à casser sans y penser, en « améliorant » la vue
+// investisseur pour qu'elle montre enfin quelque chose d'utile.
+
+titre('Investisseur');
+
+const EMAIL_INV = `validation.investisseur.${horodatage}@ignitux.test`;
+let jetonInv = null;
+let idInvestisseur = null;
+
+const appelInv = async (chemin, options = {}) => {
+  const reponse = await fetch(`${API}${chemin}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(jetonInv ? { Authorization: `Bearer ${jetonInv}` } : {}),
+      ...options.headers,
+    },
+  });
+  let corps = null;
+  try {
+    corps = await reponse.json();
+  } catch {
+    /* 204 */
+  }
+  if (reponse.status === 429) {
+    const secondes = Number(corps?.secondesAAttendre) || 60;
+    console.log(`  (limiteur atteint — attente de ${secondes + 1} s)`);
+    await new Promise((r) => setTimeout(r, (secondes + 1) * 1000));
+    return appelInv(chemin, options);
+  }
+  return { statut: reponse.status, corps };
+};
+
+await verifier('Un investisseur se déclare, et son portefeuille part de zéro', async () => {
+  await appelInv('/users/signup', {
+    method: 'POST',
+    body: JSON.stringify({ email: EMAIL_INV, password: MDP }),
+  });
+  const connexion = await appelInv('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email: EMAIL_INV, password: MDP }),
+  });
+  jetonInv = connexion.corps?.accessToken;
+  if (!jetonInv) throw new Error('pas de jeton');
+
+  const declaration = await appelInv('/investisseurs', {
+    method: 'POST',
+    body: JSON.stringify({ displayName: 'Fonds de validation' }),
+  });
+  if (declaration.statut !== 201) throw new Error(`déclaration refusée (${declaration.statut})`);
+  idInvestisseur = declaration.corps?.id;
+
+  const portefeuille = await appelInv('/investisseurs/moi/portefeuille');
+  if (portefeuille.statut !== 200) throw new Error(`portefeuille ${portefeuille.statut}`);
+  // Zéro, et non « — » ni un total inventé : rien n'a encore été investi.
+  if (portefeuille.corps?.global?.investedCents !== 0) {
+    throw new Error('un portefeuille neuf annonce autre chose que zéro');
+  }
+  if ((portefeuille.corps?.parProjet ?? []).length !== 0) {
+    throw new Error('un portefeuille neuf contient déjà un projet');
+  }
+  return 'déclaré, portefeuille à zéro';
+});
+
+await verifier('Un apport enregistré se voit, et le net reste négatif', async () => {
+  if (!projetId || !idInvestisseur) throw new Error('prérequis manquant');
+
+  const financement = await appel('/projets-finances', {
+    method: 'POST',
+    body: JSON.stringify({ projectId: projetId, openedOn: '2026-09-24', targetCents: 2_500_000 }),
+  });
+  if (financement.statut !== 201) throw new Error(`financement refusé (${financement.statut})`);
+
+  const apport = await appel(`/projets-finances/${financement.corps.id}/participations`, {
+    method: 'POST',
+    body: JSON.stringify({
+      investorId: idInvestisseur,
+      investedCents: 500_000,
+      shareBasisPointsGranted: 1000,
+      occurredOn: '2026-09-24',
+    }),
+  });
+  if (apport.statut !== 201) throw new Error(`apport refusé (${apport.statut})`);
+
+  const portefeuille = await appelInv('/investisseurs/moi/portefeuille');
+  const global = portefeuille.corps?.global ?? {};
+  if (global.investedCents !== 500_000) throw new Error(`investi : ${global.investedCents}`);
+  // Le net doit être NÉGATIF : 5 000 € sont sortis, rien n'est revenu.
+  // Afficher zéro, ou compter l'apport comme un actif, raconterait une
+  // histoire plus agréable et fausse.
+  if (global.netCents >= 0) {
+    throw new Error(`net à ${global.netCents} alors que rien n'est encore revenu`);
+  }
+  return `investi ${global.investedCents / 100} €, net ${global.netCents / 100} €`;
+});
+
+await verifier('Investir n’ouvre pas le projet : ni lecture, ni description', async () => {
+  const lecture = await appelInv(`/projects/${projetId}`);
+  if (lecture.statut === 200) throw new Error('l’investisseur lit le projet du porteur');
+
+  // Et la vue investisseur ne doit pas recopier ce que la lecture refuse.
+  const portefeuille = await appelInv('/investisseurs/moi/portefeuille');
+  const brut = JSON.stringify(portefeuille.corps ?? {});
+  if (brut.includes('Projet de validation créé par le script')) {
+    throw new Error('la description du projet transite par le portefeuille');
+  }
+  return `lecture directe ${lecture.statut}, portefeuille sans la description`;
+});
+
 titre('Partage d’un projet');
 
 const EMAIL_INVITE = `validation.invite.${horodatage}@ignitux.test`;
