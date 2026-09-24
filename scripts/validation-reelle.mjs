@@ -760,6 +760,86 @@ await (async () => {
 //   3. un document émis ne bouge plus. Le corriger se fait par un avoir,
 //      pas en réécrivant le passé.
 
+// ── La Constitution refuse-t-elle vraiment ? ─────────────────────────────
+//
+// Vingt-quatre articles, un moteur qui les applique, douze services qui
+// l'appellent. Tout cela peut n'être qu'un décor : un moteur qui ne refuse
+// jamais rien est indiscernable d'un moteur absent, et c'est la partie du
+// produit qui porte son identité.
+//
+// On tente donc une violation pour de bon, par l'API, sur la règle la plus
+// caractéristique : le porteur reste propriétaire principal — « y compris à
+// la demande du porteur lui-même », dit le code.
+
+titre('Constitution');
+
+let detenteurPorteur = null;
+let detenteurFonds = null;
+
+await verifier('Une répartition partielle ne déclenche rien', async () => {
+  if (!projetId) throw new Error('aucun projet');
+  const porteur = await appel(`/projects/${projetId}/financing/holders`, {
+    method: 'POST',
+    body: JSON.stringify({ name: 'Le porteur', isFounder: true }),
+  });
+  if (porteur.statut !== 201) throw new Error(`détenteur refusé (${porteur.statut})`);
+  detenteurPorteur = porteur.corps.id;
+
+  const fonds = await appel(`/projects/${projetId}/financing/holders`, {
+    method: 'POST',
+    body: JSON.stringify({ name: 'Fonds de validation', isFounder: false }),
+  });
+  if (fonds.statut !== 201) throw new Error(`détenteur refusé (${fonds.statut})`);
+  detenteurFonds = fonds.corps.id;
+
+  // Le porteur descend à 40 % : la répartition ne boucle pas encore à
+  // 100 %, donc la règle se tait. C'est voulu — trancher sur une donnée
+  // partielle empêcherait de saisir une répartition ligne par ligne, ce
+  // qui est le cas normal.
+  const baisse = await appel(`/financing/holders/${detenteurPorteur}/equity-events`, {
+    method: 'POST',
+    body: JSON.stringify({ shareBasisPoints: 4000, reason: 'Dilution', occurredAt: '2026-09-24T10:00:00.000Z' }),
+  });
+  if (baisse.statut !== 201) {
+    throw new Error(`une répartition partielle a été bloquée (${baisse.statut})`);
+  }
+  return 'porteur à 40 %, total incomplet : acceptée';
+});
+
+await verifier('Une répartition qui boucle sans majorité est refusée en 422', async () => {
+  if (!detenteurFonds) throw new Error('prérequis manquant');
+  // Le fonds monte à 60 % : le total atteint 100 %, et le porteur se
+  // retrouve minoritaire. La Constitution doit trancher.
+  const montee = await appel(`/financing/holders/${detenteurFonds}/equity-events`, {
+    method: 'POST',
+    body: JSON.stringify({ shareBasisPoints: 6000, reason: 'Entrée au capital', occurredAt: '2026-09-24T10:00:00.000Z' }),
+  });
+  if (montee.statut !== 422) {
+    throw new Error(`attendu 422, reçu ${montee.statut} — la Constitution n’a pas tranché`);
+  }
+  const message = String(montee.corps?.message ?? "");
+  // Le refus doit citer la Constitution et dire le chiffre en cause :
+  // « refusé » sans raison est un mur, pas une règle.
+  if (!/Constitution/i.test(message)) throw new Error("le refus ne cite pas la Constitution");
+  if (!/40[.,]00\s*%|majorité/i.test(message)) {
+    throw new Error(`le refus ne dit pas ce qui cloche : « ${message.slice(0, 70)} »`);
+  }
+  return `422, « ${message.slice(message.indexOf(":") + 2, message.indexOf(":") + 62)}… »`;
+});
+
+await verifier('Le refus est inscrit au journal des violations', async () => {
+  // Un refus non journalisé est un refus qu’on ne peut ni auditer ni
+  // contester. L’article violé doit être nommé.
+  const { statut, corps } = await appel('/constitution/violations');
+  if (statut !== 200) throw new Error(`journal illisible (${statut})`);
+  const lignes = Array.isArray(corps) ? corps : (corps?.violations ?? []);
+  const trace = lignes.find((v) => v.rule_id === "majorite-du-porteur");
+  if (!trace) throw new Error("le refus n’apparaît pas au journal");
+  if (!trace.article_slug) throw new Error("la violation ne nomme aucun article");
+  if (trace.severity !== "blocking") throw new Error(`gravité « ${trace.severity} »`);
+  return `article ${trace.article_slug}, règle ${trace.rule_id}, ${trace.severity}`;
+});
+
 titre('Facturation');
 
 let documentFacture = null;
