@@ -840,6 +840,28 @@ await verifier('Le refus est inscrit au journal des violations', async () => {
   return `article ${trace.article_slug}, règle ${trace.rule_id}, ${trace.severity}`;
 });
 
+await verifier('La répartition est refermée derrière nous', async () => {
+  // Ce contrôle laisse le porteur à 40 % et le fonds à 0 : une répartition
+  // qui ne boucle pas. L'audit financier global la signale, à raison —
+  // « capital-incomplet », et la garantie des 51 % est alors en sommeil.
+  //
+  // Un harnais qui laisse derrière lui un état que le produit considère
+  // comme incohérent fabrique du bruit pour l'outil suivant, et personne ne
+  // saura si le constat vient d'un vrai projet ou d'une exécution de test.
+  // On remet donc le porteur à 100 %.
+  if (!detenteurPorteur) throw new Error('prérequis manquant');
+  const retour = await appel(`/financing/holders/${detenteurPorteur}/equity-events`, {
+    method: 'POST',
+    body: JSON.stringify({
+      shareBasisPoints: 10000,
+      reason: 'Fin du contrôle : on referme la répartition',
+      occurredAt: '2026-09-24T10:00:00.000Z',
+    }),
+  });
+  if (retour.statut !== 201) throw new Error(`retour à 100 % refusé (${retour.statut})`);
+  return 'porteur remis à 100 %, la répartition boucle';
+});
+
 titre('Facturation');
 
 let documentFacture = null;
