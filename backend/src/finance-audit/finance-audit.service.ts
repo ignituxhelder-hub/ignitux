@@ -171,7 +171,7 @@ export class FinanceAuditService {
             SELECT DISTINCT ON (e.holder_id) e.project_id, e.share_basis_points
             FROM equity_events e
             WHERE e.project_id = ${projectId}::uuid
-            ORDER BY e.holder_id, e.occurred_at DESC
+            ORDER BY e.holder_id, e.occurred_at DESC, e.created_at DESC
           ) dernier
           GROUP BY dernier.project_id
           HAVING SUM(dernier.share_basis_points) <> 10000
@@ -181,7 +181,7 @@ export class FinanceAuditService {
           FROM (
             SELECT DISTINCT ON (e.holder_id) e.project_id, e.share_basis_points
             FROM equity_events e
-            ORDER BY e.holder_id, e.occurred_at DESC
+            ORDER BY e.holder_id, e.occurred_at DESC, e.created_at DESC
           ) dernier
           GROUP BY dernier.project_id
           HAVING SUM(dernier.share_basis_points) <> 10000

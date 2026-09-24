@@ -26,6 +26,93 @@ describe('répartition du capital', () => {
     expect(table.holders[0].shareBasisPoints).toBe(8000);
   });
 
+  describe('deux événements le même jour', () => {
+    // `occurred_at` est saisi par la personne, et une interface qui propose
+    // un champ « date » y met minuit. Deux changements enregistrés le même
+    // jour portent donc exactement la même valeur — et c'est très courant :
+    // un investisseur entre et le porteur est dilué, ou l'on corrige une
+    // saisie dans la foulée.
+    //
+    // La première version gardait le dernier élément *itéré*, c'est-à-dire
+    // l'ordre que la base voulait bien rendre. Constaté sur la vraie base :
+    // 4 000 puis 10 000 points de base le même jour, et la lecture retenait
+    // 4 000 — la valeur périmée.
+    const memeJour = (share: number, saisiA: string) => ({
+      holder_id: 'h1',
+      share_basis_points: share,
+      occurred_at: new Date('2026-03-01'),
+      created_at: new Date(saisiA),
+    });
+
+    it('retient celui qui a été enregistré en dernier', () => {
+      // L'ordre du tableau met volontairement la valeur PÉRIMÉE en dernier.
+      // Écrit dans l'autre sens, ce test passait même sans départage — la
+      // bonne réponse tombait par chance, ce qui est la pire façon de
+      // passer. C'est aussi ce que fait la base : elle rend les lignes dans
+      // l'ordre qu'elle veut.
+      const table = buildCapTable(
+        [PORTEUR],
+        [memeJour(10000, '2026-03-01T14:00:00Z'), memeJour(4000, '2026-03-01T10:00:00Z')],
+      );
+
+      expect(table.holders[0].shareBasisPoints).toBe(10000);
+    });
+
+    it('donne la même réponse quel que soit l’ordre de lecture', () => {
+      // Le cœur du défaut : Postgres ne promet rien sur l'ordre des
+      // égalités. Un autre plan d'exécution, un index, un VACUUM, et les
+      // lignes arrivent dans l'autre sens. La réponse ne doit pas en
+      // dépendre.
+      const tot = [memeJour(4000, '2026-03-01T10:00:00Z'), memeJour(10000, '2026-03-01T14:00:00Z')];
+      const tard = [...tot].reverse();
+
+      expect(buildCapTable([PORTEUR], tot).holders[0].shareBasisPoints).toBe(
+        buildCapTable([PORTEUR], tard).holders[0].shareBasisPoints,
+      );
+      expect(buildCapTable([PORTEUR], tard).holders[0].shareBasisPoints).toBe(10000);
+    });
+
+    it('la date de l’événement l’emporte toujours sur la date de saisie', () => {
+      // Une correction saisie aujourd'hui pour une date ancienne ne doit pas
+      // écraser un changement plus récent : c'est `occurred_at` qui dit
+      // quand la part a changé, `created_at` ne sert qu'à départager.
+      const table = buildCapTable(
+        [PORTEUR],
+        [
+          {
+            holder_id: 'h1',
+            share_basis_points: 9000,
+            occurred_at: new Date('2026-06-01'),
+            created_at: new Date('2026-06-01T08:00:00Z'),
+          },
+          {
+            holder_id: 'h1',
+            share_basis_points: 3000,
+            occurred_at: new Date('2026-01-01'),
+            created_at: new Date('2026-12-31T23:00:00Z'),
+          },
+        ],
+      );
+
+      expect(table.holders[0].shareBasisPoints).toBe(9000);
+    });
+
+    it('tient encore quand created_at est absent', () => {
+      // Les anciens appels et les jeux de test minimaux n'en fournissent
+      // pas : on ne doit pas s'effondrer, seulement retomber sur l'ancien
+      // comportement pour ces cas-là.
+      const table = buildCapTable(
+        [PORTEUR],
+        [
+          { holder_id: 'h1', share_basis_points: 4000, occurred_at: new Date('2026-01-01') },
+          { holder_id: 'h1', share_basis_points: 7000, occurred_at: new Date('2026-06-01') },
+        ],
+      );
+
+      expect(table.holders[0].shareBasisPoints).toBe(7000);
+    });
+  });
+
   it("ne se laisse pas tromper par un historique donné dans le désordre", () => {
     const table = buildCapTable(
       [PORTEUR],

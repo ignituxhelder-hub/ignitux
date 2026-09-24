@@ -91,17 +91,47 @@ export interface CapTable {
 /**
  * Construit la répartition courante à partir de l'historique : pour chaque
  * détenteur, le dernier événement dans le temps fait foi.
+ *
+ * ── Deux événements le même jour ────────────────────────────────────────
+ *
+ * `occurred_at` est saisi par la personne, et une interface qui propose un
+ * champ « date » y met minuit. Deux changements enregistrés le même jour —
+ * un investisseur entre, le porteur est dilué, ou plus simplement une
+ * correction faite dans la foulée — portent donc **exactement la même
+ * valeur**.
+ *
+ * La première version comparait ces seules dates et gardait le dernier
+ * élément *itéré*, c'est-à-dire l'ordre que la base voulait bien rendre.
+ * Postgres ne promet rien là-dessus : un autre plan d'exécution, un index,
+ * un VACUUM, et la réponse change. Constaté sur la vraie base — deux
+ * événements du même jour, 4 000 puis 10 000 points de base, et la lecture
+ * retenait **4 000**, la valeur périmée. Quelqu'un qui corrige sa
+ * répartition le jour même voyait donc sa correction ignorée, en silence,
+ * et la garantie des 51 % se calculait sur le mauvais chiffre.
+ *
+ * `created_at` départage : à date égale, c'est ce qui a été enregistré en
+ * dernier qui fait foi. C'est aussi la seule lecture qui a du sens — on ne
+ * corrige pas vers le passé.
  */
 export function buildCapTable(
   holders: ReadonlyArray<{ id: string; name: string; is_founder: boolean }>,
-  events: ReadonlyArray<{ holder_id: string; share_basis_points: number; occurred_at: Date }>,
+  events: ReadonlyArray<{
+    holder_id: string;
+    share_basis_points: number;
+    occurred_at: Date;
+    /** Optionnel : absent des anciens appels et des jeux de test minimaux. */
+    created_at?: Date | null;
+  }>,
 ): CapTable {
-  const latest = new Map<string, { share: number; at: number }>();
+  const latest = new Map<string, { share: number; at: number; saisiA: number }>();
   for (const event of events) {
     const at = event.occurred_at.getTime();
+    const saisiA = event.created_at?.getTime() ?? 0;
     const current = latest.get(event.holder_id);
-    if (!current || at >= current.at) {
-      latest.set(event.holder_id, { share: event.share_basis_points, at });
+    const plusRecent =
+      !current || at > current.at || (at === current.at && saisiA >= current.saisiA);
+    if (plusRecent) {
+      latest.set(event.holder_id, { share: event.share_basis_points, at, saisiA });
     }
   }
 
