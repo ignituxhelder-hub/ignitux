@@ -7,9 +7,9 @@ vérifié par exécution ; ce qui ne l'est pas est dit comme tel.
 > existants — parce qu'aucun d'eux ne regarde le produit avec les yeux de
 > quelqu'un qui l'utilise.**
 >
-> **Et douze propriétés déjà bonnes ont été éprouvées puis gelées** — RGPD,
+> **Et seize propriétés déjà bonnes ont été éprouvées puis gelées** — RGPD,
 > partage d'un projet, silence des refus d'authentification, réinitialisation
-> de mot de passe. Elles ne corrigent rien : elles empêchent la régression,
+> de mot de passe, espace investisseur. Elles ne corrigent rien : elles empêchent la régression,
 > parce que ce sont exactement celles qu'on casse en voulant bien faire.
 >
 > Deux constats sont laissés au porteur : ce sont des décisions de conception,
@@ -168,8 +168,8 @@ vérifications-là sont passées du premier coup :
 
 ## 3 bis. Ce qui était déjà bon, et qui ne pourra plus se casser en silence
 
-Quatre domaines ont été joués à la main de bout en bout, trouvés corrects, puis
-figés en douze contrôles dans `validation-reelle.mjs`. Aucun n'a demandé de
+Cinq domaines ont été joués à la main de bout en bout, trouvés corrects, puis
+figés en seize contrôles dans `validation-reelle.mjs`. Aucun n'a demandé de
 correction — ce qui est le meilleur résultat possible, à condition de le
 prouver plutôt que de le supposer.
 
@@ -220,6 +220,35 @@ Les deux qui comptent sont muettes. L'inscription parle, et c'est assumé : se
 taire enfermerait dehors quelqu'un qui a simplement oublié qu'il s'était
 inscrit, et la limite de cinq par minute borne l'usage détourné. C'est le
 compromis que fait tout le monde.
+
+### L'espace investisseur compte juste, et ne montre pas trop
+
+Un rôle entier, l'un des dix profils de bêta-testeurs, que personne n'avait
+parcouru. Choisir « Investisseur » mène directement à `/investisseur`, dont
+l'écran vide s'explique et propose une suite :
+
+> *« Aucun investissement n'est encore enregistré à ton nom. Te déclarer crée
+> ton identifiant d'investisseur : c'est lui que tu communiqueras au porteur
+> d'un projet pour qu'il puisse enregistrer ton apport. **Cela n'engage rien
+> et n'investit rien.** »*
+
+Le parcours complet tient — déclaration, ouverture du financement par le
+porteur, apport enregistré — et le portefeuille compte juste :
+
+```
+investedCents  500000
+netCents      -500000
+```
+
+**Le net est négatif, et c'est le bon chiffre** : cinq mille euros sont sortis,
+rien n'est revenu. Une implémentation naïve afficherait zéro, ou compterait
+l'apport comme un actif — une histoire plus agréable et fausse.
+
+Et la propriété la plus facile à casser sans y penser : **investir n'ouvre pas
+le projet**. Quelqu'un qui met 5 000 € a toutes les raisons de vouloir le lire,
+mais le porteur ne lui a pas ouvert son espace de travail — il a reçu son
+argent. Notes, souvenirs, concepts et tâches restent à lui. Vérifié : lecture
+directe 404, et la description ne transite pas par le portefeuille.
 
 ### La réinitialisation de mot de passe marche — seul l'envoi manque
 
@@ -308,13 +337,13 @@ règles qui en sortent :
 Backend unitaires        1 034 verts   (77 fichiers)
 Backend bout en bout       252 verts   (15 fichiers)
 Frontend                   362 verts   (39 fichiers)
-Validation réelle          54 vérifiés · 0 échec · 1 non prouvé
+Validation réelle          57 vérifiés · 0 échec · 1 non prouvé
 Simulation dix profils     0 critique · 0 majeur · 0 moyen · 0 mineur
 Traversée 21 écrans        0 constat au bureau
 Parcours complet           0 critique · 0 majeur · 1 moyen
 ```
 
-La validation réelle est passée de **41 à 54 contrôles** : treize de plus, tous
+La validation réelle est passée de **41 à 57 contrôles** : seize de plus, tous
 sur des propriétés qui existaient déjà et que rien ne protégeait. Le seul
 « non prouvé » restant est le parcours complet du mot de passe oublié, qui
 attend un fournisseur d'email — et il le dit.
