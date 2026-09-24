@@ -224,6 +224,72 @@ await verifier('Connexion et jeton', async () => {
   return 'jeton obtenu';
 });
 
+/**
+ * Ce que les refus ne doivent PAS apprendre.
+ *
+ * Un message d'erreur qui distingue « cet email n'existe pas » de « ce mot
+ * de passe est faux » transforme la page de connexion en annuaire : on
+ * essaie une adresse, on lit la réponse, on sait si la personne a un compte
+ * Ignitux. Pour un produit dont les comptes sont des porteurs de projet,
+ * c'est un renseignement qu'on ne doit pas donner.
+ *
+ * Ignitux fait déjà bien : la connexion rend le même 401 et la même phrase
+ * dans les deux cas, et le mot de passe oublié rend 204 que le compte existe
+ * ou non. Ces deux contrôles ne corrigent rien — ils **empêchent la
+ * régression**, parce que c'est exactement le genre de propriété qu'on casse
+ * en voulant rendre un message plus aimable.
+ *
+ * L'inscription, elle, répond 409 « Un compte existe déjà avec cet email. »
+ * et se distingue donc. C'est le compromis universel, et il est assumé : se
+ * taire enfermerait dehors quelqu'un qui a simplement oublié qu'il s'était
+ * inscrit. La limite de cinq inscriptions par minute et par adresse borne
+ * l'usage détourné.
+ */
+await verifier('La connexion ne dit pas si le compte existe', async () => {
+  const inconnu = await appelPatient('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email: `jamais.vu.${horodatage}@ignitux.test`, password: MDP }),
+  });
+  const mauvais = await appelPatient('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email: EMAIL, password: 'CeNEstPasLeBon123!' }),
+  });
+  // Deux 429 identiques feraient passer ce contrôle pour la mauvaise
+  // raison : le limiteur rend la même chose à tout le monde, ce qui prouve
+  // seulement qu'il a refusé les deux appels.
+  if (inconnu.statut === 429 || mauvais.statut === 429) {
+    throw new Error('limiteur atteint : la comparaison ne prouverait rien');
+  }
+  if (inconnu.statut !== mauvais.statut) {
+    throw new Error(`statuts différents : ${inconnu.statut} contre ${mauvais.statut}`);
+  }
+  if (JSON.stringify(inconnu.corps?.message) !== JSON.stringify(mauvais.corps?.message)) {
+    throw new Error(`messages différents : « ${inconnu.corps?.message} » contre « ${mauvais.corps?.message} »`);
+  }
+  return `même réponse : ${inconnu.statut} « ${String(inconnu.corps?.message).slice(0, 40)} »`;
+});
+
+await verifier('Le mot de passe oublié ne dit pas si le compte existe', async () => {
+  const existant = await appelPatient('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email: EMAIL }),
+  });
+  const inexistant = await appelPatient('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email: `nexiste.pas.${horodatage}@ignitux.test` }),
+  });
+  if (existant.statut === 429 || inexistant.statut === 429) {
+    throw new Error('limiteur atteint : la comparaison ne prouverait rien');
+  }
+  if (existant.statut !== inexistant.statut) {
+    throw new Error(`statuts différents : ${existant.statut} contre ${inexistant.statut}`);
+  }
+  if (JSON.stringify(existant.corps) !== JSON.stringify(inexistant.corps)) {
+    throw new Error('les corps de réponse diffèrent');
+  }
+  return `même réponse : ${existant.statut}`;
+});
+
 await verifier('Un mot de passe faux est refusé', async () => {
   const { statut } = await appelPatient('/auth/login', {
     method: 'POST',
@@ -591,7 +657,129 @@ if (!iaAllumee) {
   }
 }
 
-// ── 9. Les droits de la personne sur ses données ──────────────────────────
+// ── 9. Le partage d'un projet ─────────────────────────────────────────────
+//
+// Le chemin par lequel on accorde délibérément l'accès à quelqu'un est
+// celui où les fuites arrivent. L'audit statique a montré que rien ne
+// traverse entre comptes ; il ne dit rien de ce qui se passe quand on
+// ouvre volontairement la porte, puis qu'on la referme.
+//
+// Quatre faits à tenir, et le troisième est celui qu'on oublie :
+//
+//   1. avant l'invitation, l'autre ne voit rien ;
+//   2. après, il lit — et seulement lit ;
+//   3. **après le retrait, il ne voit plus rien** : une porte qu'on ferme
+//      doit se refermer, sinon l'inviter une fois revient à l'inviter pour
+//      toujours ;
+//   4. un tiers non invité ne voit rien à aucun moment.
+
+titre('Partage d’un projet');
+
+const EMAIL_INVITE = `validation.invite.${horodatage}@ignitux.test`;
+let jetonInvite = null;
+let projetPartage = null;
+
+const appelInvite = async (chemin, options = {}) => {
+  const reponse = await fetch(`${API}${chemin}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(jetonInvite ? { Authorization: `Bearer ${jetonInvite}` } : {}),
+      ...options.headers,
+    },
+  });
+  let corps = null;
+  try {
+    corps = await reponse.json();
+  } catch {
+    /* 204 */
+  }
+  if (reponse.status === 429) {
+    const secondes = Number(corps?.secondesAAttendre) || 60;
+    console.log(`  (limiteur atteint — attente de ${secondes + 1} s)`);
+    await new Promise((r) => setTimeout(r, (secondes + 1) * 1000));
+    return appelInvite(chemin, options);
+  }
+  return { statut: reponse.status, corps };
+};
+
+await verifier('Un second compte, et un projet à partager', async () => {
+  await appelInvite('/users/signup', {
+    method: 'POST',
+    body: JSON.stringify({ email: EMAIL_INVITE, password: MDP }),
+  });
+  const { corps } = await appelInvite('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email: EMAIL_INVITE, password: MDP }),
+  });
+  jetonInvite = corps?.accessToken;
+  if (!jetonInvite) throw new Error('pas de jeton pour l’invité');
+  projetPartage = projetId;
+  if (!projetPartage) throw new Error('aucun projet à partager');
+  return 'prêts';
+});
+
+await verifier('Avant l’invitation, l’autre ne voit rien — et l’ignore', async () => {
+  const lecture = await appelInvite(`/projects/${projetPartage}`);
+  // 404 et non 403 : un 403 confirmerait que le projet existe, ce qui est
+  // déjà un renseignement. Le produit répond « rien ici », et c'est le bon
+  // mot.
+  if (lecture.statut !== 404) throw new Error(`attendu 404, reçu ${lecture.statut}`);
+  const ecriture = await appelInvite(`/projects/${projetPartage}/tasks`, {
+    method: 'POST',
+    body: JSON.stringify({ title: 'Intrusion' }),
+  });
+  if (ecriture.statut < 400) throw new Error(`écriture acceptée (${ecriture.statut})`);
+  return `lecture ${lecture.statut}, écriture ${ecriture.statut}`;
+});
+
+await verifier('Après l’invitation, l’autre lit — et seulement lit', async () => {
+  const invitation = await appel(`/projects/${projetPartage}/collaborators`, {
+    method: 'POST',
+    body: JSON.stringify({ email: EMAIL_INVITE }),
+  });
+  if (invitation.statut !== 201) throw new Error(`invitation refusée (${invitation.statut})`);
+
+  const lecture = await appelInvite(`/projects/${projetPartage}`);
+  if (lecture.statut !== 200) throw new Error(`l’invité ne lit pas (${lecture.statut})`);
+
+  const ecriture = await appelInvite(`/projects/${projetPartage}/tasks`, {
+    method: 'POST',
+    body: JSON.stringify({ title: 'Tâche de l’invité' }),
+  });
+  const suppression = await appelInvite(`/projects/${projetPartage}`, { method: 'DELETE' });
+  const relais = await appelInvite(`/projects/${projetPartage}/collaborators`, {
+    method: 'POST',
+    body: JSON.stringify({ email: EMAIL }),
+  });
+  if (ecriture.statut < 400) throw new Error('un invité peut écrire');
+  if (suppression.statut < 400) throw new Error('un invité peut supprimer le projet');
+  if (relais.statut < 400) throw new Error('un invité peut inviter à son tour');
+  return `lit 200 · écrit ${ecriture.statut} · supprime ${suppression.statut} · invite ${relais.statut}`;
+});
+
+await verifier('Après le retrait, la porte se referme vraiment', async () => {
+  const liste = await appel(`/projects/${projetPartage}/collaborators`);
+  const ligne = (liste.corps ?? []).find(
+    (x) => x.user?.email === EMAIL_INVITE || x.email === EMAIL_INVITE,
+  );
+  const idInvite = ligne?.user_id ?? ligne?.userId ?? ligne?.user?.id;
+  if (!idInvite) throw new Error('l’invité est introuvable dans la liste');
+
+  const retrait = await appel(`/projects/${projetPartage}/collaborators/${idInvite}`, {
+    method: 'DELETE',
+  });
+  if (retrait.statut !== 204 && retrait.statut !== 200) {
+    throw new Error(`retrait refusé (${retrait.statut})`);
+  }
+
+  // Le fait qui compte : l'accès est coupé, pas seulement la ligne effacée.
+  const apres = await appelInvite(`/projects/${projetPartage}`);
+  if (apres.statut === 200) throw new Error('l’ancien invité lit encore le projet');
+  return `retrait ${retrait.statut}, lecture ensuite ${apres.statut}`;
+});
+
+// ── 10. Les droits de la personne sur ses données ──────────────────────────
 //
 // Ignitux est français et recevra de vraies personnes. Le droit d'accès et
 // le droit à l'effacement ne sont pas des options : ils doivent exister, et
@@ -730,7 +918,7 @@ await verifier('La suppression efface vraiment, projets compris', async () => {
   return `connexion ${reconnexion.statut}, projet ${projet.statut}`;
 });
 
-// ── 10. Le navigateur ───────────────────────────────────────────────────────
+// ── 11. Le navigateur ───────────────────────────────────────────────────────
 
 if (AVEC_NAVIGATEUR) {
   titre('Navigateur');
