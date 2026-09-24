@@ -3,7 +3,7 @@
 Travail mené sans personne devant l'écran, à la demande du porteur. Tout est
 vérifié par exécution ; ce qui ne l'est pas est dit comme tel.
 
-> **Cinq défauts réels trouvés et corrigés, tous invisibles aux 1 648 tests
+> **Huit défauts réels trouvés et corrigés, tous invisibles aux 1 658 tests
 > existants — parce qu'aucun d'eux ne regarde le produit avec les yeux de
 > quelqu'un qui l'utilise.**
 >
@@ -36,7 +36,7 @@ Trois harnais ont été écrits pour poser cette question-là.
 
 ---
 
-## 2. Les cinq défauts corrigés
+## 2. Les huit défauts corrigés
 
 ### 2.1 Le mot de passe en clair dans le navigateur — *sécurité*
 
@@ -170,6 +170,65 @@ numéro.
 | 8 créations simultanées | 4 créées, **4 en 500** | **8 créées, 0 erreur** |
 | 10 créations simultanées | — | 8 créées, 2 refusées en 409 |
 | numérotation | — | séquences 1→8 contiguës, aucun doublon |
+
+### 2.6 L'image Docker ne pouvait pas démarrer — *déploiement*
+
+`@prisma/client` et `dotenv` étaient rangés en `devDependencies`. L'image
+d'exécution installe `npm ci --omit=dev`, et `dist/` importe les deux :
+
+```
+Cannot find package 'dotenv' imported from /app/dist/main.js
+```
+
+**L'image se construisait parfaitement. Elle ne démarrait pas.**
+
+Et rien ne pouvait le voir : le développement installe tout, les 1 658 tests
+tournent dans ce même environnement complet, et le job CI des images s'arrête
+à la construction — son propre commentaire le disait, *« on construit sans
+pousser »*.
+
+Prouvé dans les deux sens en simulant une installation de production : avant,
+l'import échoue ; après, le serveur répond **HTTP 200 sur `/health`** sans une
+seule devDependency. Deux garde-fous depuis : un contrôle qui exige que tout ce
+que `dist/` importe soit en `dependencies`, et **la CI démarre maintenant
+l'image** au lieu de seulement la construire.
+
+### 2.7 La production ne pouvait pas démarrer non plus — *configuration*
+
+Le schéma zod ne déclarait pas `IGNITUX_RAISON_SOCIALE`, `_ADRESSE`, `_EMAIL`.
+Zod retire les clés inconnues : le contrôle de production les recevait vides et
+refusait de démarrer en annonçant *« est vide. Ignitux ne l'invente pas —
+renseigne-la »*, **devant un fichier où elles sont renseignées.**
+
+```
+avant : 4 refus au démarrage, dont 3 faux
+après : 1 refus — FRONTEND_URL, qui attend un domaine
+```
+
+Et mon propre outil de déploiement à blanc interrogeait l'environnement brut
+au lieu du chemin réel : il annonçait « 1 bloquant » quand le serveur en
+comptait quatre. **Un contrôle à blanc plus optimiste que la réalité est une
+permission de déployer quelque chose qui ne démarrera pas.** Les deux empruntent
+désormais le même schéma.
+
+Le test « ne reproche rien à une configuration saine » existait et passait : il
+donne au contrôle un objet **brut**, jamais celui que le produit lui donne.
+
+### 2.8 Une correction de capital ignorée le jour même — *argent*
+
+`occurred_at` est saisi par la personne, et un champ « date » y met minuit. Deux
+changements enregistrés le même jour portent donc la même valeur, et la lecture
+gardait le dernier élément **itéré** — l'ordre que la base voulait bien rendre.
+
+```
+un détenteur, deux événements le même jour : 4000 puis 10000
+lecture actuelle          → 4000   (le PREMIER)
+avec départage created_at → 10000  (la correction)
+```
+
+Le produit retenait la valeur périmée. Quelqu'un qui corrige sa répartition le
+jour même voyait sa correction ignorée, en silence — et la garantie des 51 % du
+porteur se calculait sur le mauvais chiffre.
 
 ---
 
@@ -385,10 +444,10 @@ règles qui en sortent :
 ## 6. État à la fin de la session
 
 ```
-Backend unitaires        1 035 verts   (77 fichiers)
+Backend unitaires        1 044 verts   (77 fichiers)
 Backend bout en bout       252 verts   (15 fichiers)
 Frontend                   362 verts   (39 fichiers)
-Validation réelle          61 vérifiés · 0 échec · 1 non prouvé
+Validation réelle          64 vérifiés · 0 échec · 1 non prouvé
 Simulation dix profils     0 critique · 0 majeur · 0 moyen · 0 mineur
 Traversée 21 écrans        0 constat au bureau
 Parcours complet           0 critique · 0 majeur · 1 moyen
