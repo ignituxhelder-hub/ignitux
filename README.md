@@ -10,12 +10,40 @@ IGNITUX est l'écosystème, IGINI est l'intelligence qui l'anime — voir [`back
 
 - [`backend/`](backend) — API NestJS + Prisma (Postgres) : comptes, authentification JWT, projets.
   - [`backend/src/igini/`](backend/src/igini) — IGINI, le cerveau : les 5 générateurs IA, le moteur Claude
-    partagé, et les 4 moteurs transverses (mémoire, connaissance, workflow, score).
+    partagé, et les 5 moteurs transverses (mémoire, connaissance, workflow, score, automatisation).
   - [`backend/src/community/`](backend/src/community) — IGNITUX (pas IGINI) : projets publics et
     encouragements entre porteurs de projet.
 - [`frontend/`](frontend) — App Next.js consommant l'API : inscription, connexion, gestion des projets.
 
-## Lancer le projet en local
+## Lancer le projet avec Docker — le plus simple
+
+Base, serveur et interface sur une seule machine, sans aucun service extérieur :
+
+```bash
+cp .env.docker.example .env.docker   # puis remplir JWT_SECRET : openssl rand -base64 48
+docker compose --env-file .env.docker up --build
+
+# une fois les services sains, poser le schéma — DEPUIS L'HÔTE :
+cd backend
+DATABASE_URL=postgresql://ignitux:ignitux@localhost:5432/ignitux npx prisma db push
+```
+
+L'interface répond sur `http://localhost:3001`, l'API sur `http://localhost:3000`.
+
+Trois choses à savoir :
+
+- **Le schéma se pose depuis l'hôte, pas dans le conteneur.** La CLI Prisma est un outil de
+  construction : l'image d'exécution installe `npm ci --omit=dev` et ne la contient pas. Le port de
+  la base est ouvert sur la boucle locale exactement pour ce geste.
+- **Cette base n'est pas faite pour des données réelles.** `docker compose down -v` l'efface sans
+  rien demander.
+- **L'email est en mode `log`** : rien ne part, et la réinitialisation de mot de passe ne fonctionne
+  donc pour personne. C'est une décision, pas un oubli — le serveur le dit au démarrage.
+
+Changer `NEXT_PUBLIC_API_URL` demande `docker compose build frontend` : l'adresse de l'API est gravée
+dans le paquet au moment de la construction, un redémarrage ne suffit pas.
+
+## Lancer le projet en local, sans Docker
 
 Deux terminaux, dans cet ordre (le frontend a besoin de l'API pour fonctionner) :
 
@@ -42,13 +70,20 @@ Le backend autorise déjà les requêtes CORS depuis `http://localhost:3001` (co
 
 **Projets**
 - Création, lecture, modification, suppression — chaque projet appartient à un utilisateur
-- Collaboration : le propriétaire peut inviter un collaborateur par email, qui peut alors consulter
-  le projet et son historique de plans générés (lecture seule — pas encore d'interface frontend)
+- Collaboration : le propriétaire peut inviter un collaborateur par email depuis la page du projet.
+  L'invité **lit** le projet et son historique — il n'écrit pas, ne supprime pas, n'invite pas à son
+  tour. Avant l'invitation et après le retrait, il reçoit un 404 : le produit ne confirme même pas
+  que le projet existe.
 
 **Générateurs IA** (Claude Opus 5), un par étape de la vision — chacun avec son historique persisté.
-**Sans `ANTHROPIC_API_KEY` configurée, chaque appel échoue avec une erreur 500** (vérifié en conditions
-réelles) : le code est complet et testé unitairement, mais la génération ne fonctionne pas de bout en
-bout tant que la clé n'est pas renseignée.
+
+**Ils sont éteints par défaut** (`IGINI_AI_ENABLED=false`). Le verrou est posé en un point unique,
+avant tout appel réseau : les cinq générateurs y passent, aucun ne peut être oublié, et aucune
+dépense n'est possible tant qu'il est fermé. Un appel refusé rend **503** avec sa raison, pas une
+erreur générique — le frontend comme la personne savent que ce n'est pas une panne.
+
+Les rallumer demande `IGINI_AI_ENABLED=true` **et** une `ANTHROPIC_API_KEY` valide. Le budget est
+plafonné par personne et par mois, et chaque appel est journalisé avec ses jetons et son coût.
 - **Analyser** — résumé, score de faisabilité, points forts, risques, prochaines étapes
 - **Construire** — plan de construction : jalons, délai estimé, ressources clés
 - **Financer** — plan de financement : budget estimé, sources, postes de dépense

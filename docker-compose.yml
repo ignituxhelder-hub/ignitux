@@ -21,10 +21,24 @@
 #   cp .env.docker.example .env.docker   puis remplir JWT_SECRET
 #   docker compose --env-file .env.docker up --build
 #
-#   # une fois les services sains, poser le schéma (geste explicite) :
-#   docker compose exec backend npx prisma db push
+#   # une fois les services sains, poser le schéma (geste explicite),
+#   # DEPUIS L'HÔTE et non dans le conteneur :
+#   cd backend
+#   DATABASE_URL=postgresql://ignitux:ignitux@localhost:5432/ignitux \
+#     npx prisma db push
 #
 # L'interface répond sur http://localhost:3001, l'API sur http://localhost:3000.
+#
+# ── Pourquoi depuis l'hôte, et pas `docker compose exec` ──────────────────
+#
+# Parce que la CLI Prisma n'est pas dans l'image, et ne doit pas y être :
+# c'est un outil de construction, et l'image d'exécution installe
+# `npm ci --omit=dev`. La commande `docker compose exec backend npx prisma
+# db push` — qui figurait ici — échouait donc silencieusement au premier
+# essai, sur un « command not found » que rien n'expliquait.
+#
+# Le port de la base est ouvert sur la boucle locale exactement pour ce
+# genre de geste : poser le schéma, ouvrir Prisma Studio, sauvegarder.
 # ═══════════════════════════════════════════════════════════════════════════
 
 services:
@@ -38,8 +52,15 @@ services:
       - donnees:/var/lib/postgresql/data
     ports:
       # Exposé pour que Prisma Studio et les scripts de sauvegarde puissent
-      # l'atteindre depuis la machine hôte.
-      - '${POSTGRES_PORT:-5432}:5432'
+      # l'atteindre depuis la machine hôte — et **seulement** depuis elle.
+      #
+      # `'5432:5432'` écoute sur toutes les interfaces : la base devient
+      # joignable depuis tout le réseau local, et depuis Internet si la
+      # machine est un serveur. Avec le mot de passe par défaut `ignitux`,
+      # cela revient à publier la base. `127.0.0.1:` la garde sur la boucle
+      # locale, ce qui suffit à tous les usages pour lesquels ce port est
+      # ouvert.
+      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
     healthcheck:
       # Les deux autres services attendent cette réponse. Sans elle, le
       # serveur démarre avant la base et échoue à la première requête —

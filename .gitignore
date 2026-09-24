@@ -3,7 +3,14 @@
 *.temp
 *_tmp.*
 *.patch
-!.git/**/*.patch
+# `!.git/**/*.patch` figurait ici : sans effet, git ne suit jamais son
+# propre dossier. Une règle qui ne fait rien se relit comme une règle qui
+# protège quelque chose, et on hésite à y toucher.
+
+# Dossiers de travail des scripts d'analyse : jamais versionnés.
+.tmp/
+backend/.tmp/
+frontend/.tmp/
 
 # OS
 .DS_Store
