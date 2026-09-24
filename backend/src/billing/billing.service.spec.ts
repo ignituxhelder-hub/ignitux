@@ -77,7 +77,12 @@ describe('BillingService', () => {
       expect(prisma.billing_documents.findFirst).toHaveBeenCalledTimes(2);
     });
 
-    it('abandonne au bout de quatre essais plutôt que de boucler', async () => {
+    it('abandonne au bout de huit essais plutôt que de boucler', async () => {
+      // Quatre à l'origine, et le raisonnement tenait pour un double-clic.
+      // Mesuré contre la vraie base : à huit créations simultanées, la
+      // moitié échouait — les réessais repartaient tous ensemble et se
+      // heurtaient au même endroit. Le recul aléatoire les désynchronise ;
+      // huit essais couvrent la traîne.
       prisma.billing_documents.findFirst.mockResolvedValue({ sequence: 4 });
       prisma.billing_documents.create.mockRejectedValue(conflit());
 
@@ -87,9 +92,32 @@ describe('BillingService', () => {
           clientName: 'Client',
           lines: [{ label: 'X', quantityMilli: 1000, unitPriceCents: 100 }],
         }),
-      ).rejects.toMatchObject({ code: 'P2002' });
+      ).rejects.toMatchObject({ status: 409 });
 
-      expect(prisma.billing_documents.create).toHaveBeenCalledTimes(4);
+      expect(prisma.billing_documents.create).toHaveBeenCalledTimes(8);
+    });
+
+    it('dit que rien n’a été enregistré, au lieu d’annoncer une panne', async () => {
+      // L'erreur Prisma brute ressortait en 500 : « erreur de notre côté »,
+      // alors que rien n'est cassé et que la personne n'a rien à réparer.
+      // Un conflit de numérotation est passager — le mot juste est 409, et
+      // la phrase doit dire quoi faire.
+      prisma.billing_documents.findFirst.mockResolvedValue({ sequence: 4 });
+      prisma.billing_documents.create.mockRejectedValue(conflit());
+
+      const erreur = await service
+        .createDocument('u1', {
+          type: 'facture',
+          clientName: 'Client',
+          lines: [{ label: 'X', quantityMilli: 1000, unitPriceCents: 100 }],
+        })
+        .catch((e: unknown) => e as { message: string; getResponse?: () => unknown });
+
+      const message = JSON.stringify(erreur.getResponse?.() ?? erreur.message);
+      expect(message).toMatch(/rien n’a été enregistré|rien n'a été enregistré/i);
+      expect(message).toMatch(/réessaie/i);
+      // Et la raison du refus, qui est une règle et non une panne.
+      expect(message).toMatch(/saute aucun numéro/i);
     });
 
     it("ne réessaie pas sur une erreur qui n'est pas un conflit", async () => {

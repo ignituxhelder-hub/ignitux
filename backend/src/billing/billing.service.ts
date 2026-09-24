@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConstitutionService } from '../constitution/constitution.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BILLING_DISCLAIMER, BILLING_ENFORCED_RULES } from './billing-legal.js';
@@ -43,12 +48,32 @@ export interface CreateDocumentInput {
  * que cela ne garantit pas.
  */
 /**
- * Nombre d'essais de numérotation avant d'abandonner. Quatre suffisent
- * largement : la course ne se produit qu'entre deux requêtes parties dans
- * la même poignée de millisecondes, pour le même propriétaire, le même
- * type et la même année.
+ * Nombre d'essais de numérotation avant d'abandonner.
+ *
+ * Quatre, c'était le chiffre d'origine, et le raisonnement tenait pour deux
+ * requêtes — un double-clic. Mesuré contre la vraie base : à deux, trois et
+ * quatre créations simultanées, tout passe. **À huit, la moitié échouait en
+ * 500.**
+ *
+ * La cause n'était pas le nombre d'essais, c'était qu'ils repartaient tous
+ * en même temps. Huit requêtes qui lisent le même maximum, échouent
+ * ensemble, puis relisent ensemble se retrouvent au même endroit au coup
+ * suivant : le réessai reproduisait la course au lieu de la défaire. Monter
+ * ce plafond seul n'aurait fait que retarder l'échec.
  */
-const MAX_NUMBERING_ATTEMPTS = 4;
+const MAX_NUMBERING_ATTEMPTS = 8;
+
+/**
+ * Le recul entre deux essais, tiré au hasard.
+ *
+ * C'est le hasard qui fait le travail, pas la durée : il désynchronise des
+ * requêtes parties ensemble, pour qu'au coup suivant elles ne lisent plus le
+ * même maximum. Quelques millisecondes suffisent — on borne bas pour qu'un
+ * double-clic reste instantané aux yeux de la personne.
+ */
+function reculAleatoireMs(essai: number): number {
+  return Math.floor(Math.random() * 12 * (essai + 1)) + 3;
+}
 
 /**
  * Prisma signale une contrainte unique violée par le code `P2002`. On le
@@ -106,10 +131,15 @@ export class BillingService {
     // refuse une. Ce refus est voulu — mieux vaut échouer que produire
     // deux documents portant le même numéro.
     //
-    // Mais échouer par une 500 devant un simple double-clic ne l'est pas.
-    // On réessaie : chaque tentative relit le maximum, donc repart d'un
-    // état à jour. Le nombre d'essais est borné pour qu'une contrainte
-    // violée pour une AUTRE raison ne tourne pas en boucle.
+    // Mais échouer par une 500 ne l'est pas. On réessaie, en s'écartant
+    // d'un délai tiré au hasard : sans lui, les requêtes qui ont perdu la
+    // course la recommencent toutes ensemble et se heurtent au même
+    // endroit. C'est ce qui se passait — huit créations simultanées, quatre
+    // réussites, quatre erreurs 500, mesurées contre la vraie base.
+    //
+    // Et si le numéro reste imprenable au bout de huit essais, le bon mot
+    // n'est toujours pas « erreur » : c'est un conflit, il est passager, et
+    // la personne n'a rien à réparer. On le dit, en 409.
     for (let attempt = 0; ; attempt += 1) {
       const sequence = await this.nextSequence(ownerId, input.type, year);
 
@@ -141,7 +171,16 @@ export class BillingService {
           include: { lines: { orderBy: { position: 'asc' } } },
         });
       } catch (error) {
-        if (attempt >= MAX_NUMBERING_ATTEMPTS - 1 || !isUniqueViolation(error)) throw error;
+        if (!isUniqueViolation(error)) throw error;
+        if (attempt >= MAX_NUMBERING_ATTEMPTS - 1) {
+          throw new ConflictException(
+            'Plusieurs documents ont été créés exactement en même temps, et le numéro ' +
+              "suivant n'a pas pu être attribué. Rien n'a été enregistré : réessaie, ce " +
+              'sera immédiat. La numérotation ne saute aucun numéro — c’est pour cela ' +
+              'qu’elle refuse plutôt que d’en inventer un.',
+          );
+        }
+        await new Promise((resoudre) => setTimeout(resoudre, reculAleatoireMs(attempt)));
       }
     }
   }

@@ -746,6 +746,157 @@ await (async () => {
 // Le fait est facile à casser sans y penser, en « améliorant » la vue
 // investisseur pour qu'elle montre enfin quelque chose d'utile.
 
+// ── La facturation : de l'argent et du droit ──────────────────────────────
+//
+// Une facture est un document qui engage. Trois règles y sont des
+// obligations et non des préférences, et toutes trois se cassent en
+// silence :
+//
+//   1. l'arrondi se fait à la ligne, jamais au total. Arrondir au total
+//      produit des écarts d'un centime que le client trouve en
+//      recalculant, et une facture qui ne tombe pas juste se conteste ;
+//   2. la numérotation ne saute aucun numéro, y compris quand plusieurs
+//      documents naissent dans la même milliseconde ;
+//   3. un document émis ne bouge plus. Le corriger se fait par un avoir,
+//      pas en réécrivant le passé.
+
+titre('Facturation');
+
+let documentFacture = null;
+
+await verifier('L’arrondi se fait à la ligne, et les totaux concordent', async () => {
+  // Trois lignes choisies pour que le calcul ne tombe pas rond : 7 × 1,05 €
+  // à 5,5 %, 3 × 1,33 € à 5,5 %, 1,5 × 49,99 € à 20 %.
+  const lignes = [
+    [7000, 105, 550],
+    [3000, 133, 550],
+    [1500, 4999, 2000],
+  ];
+  const { statut, corps } = await appel('/billing/documents', {
+    method: 'POST',
+    body: JSON.stringify({
+      type: 'facture',
+      clientName: 'Contrôle de validation',
+      lines: lignes.map(([q, prix, tva], i) => ({
+        label: `Ligne ${i + 1}`,
+        quantityMilli: q,
+        unitPriceCents: prix,
+        vatRateBasisPoints: tva,
+      })),
+    }),
+  });
+  if (statut !== 201) throw new Error(`création refusée (${statut})`);
+  documentFacture = corps.id;
+
+  const lu = await appel(`/billing/documents/${corps.id}`);
+  const totaux = lu.corps?.totals;
+  if (!totaux) throw new Error('le document ne porte aucun total');
+
+  // Recalcul indépendant, ligne par ligne, sans un seul flottant.
+  const sousTotal = lignes.reduce((a, [q, prix]) => a + Math.round((q * prix) / 1000), 0);
+  const tva = lignes.reduce(
+    (a, [q, prix, taux]) => a + Math.round((Math.round((q * prix) / 1000) * taux) / 10000),
+    0,
+  );
+  if (totaux.subtotalCents !== sousTotal) {
+    throw new Error(`sous-total ${totaux.subtotalCents} contre ${sousTotal} recalculé`);
+  }
+  if (totaux.vatCents !== tva) throw new Error(`TVA ${totaux.vatCents} contre ${tva}`);
+  if (totaux.totalCents !== sousTotal + tva) {
+    throw new Error('le total ne vaut pas la somme de ses parts');
+  }
+  return `${sousTotal} + ${tva} = ${totaux.totalCents} centimes`;
+});
+
+await verifier('Un trop-perçu reste visible au lieu d’être ramené à zéro', async () => {
+  if (!documentFacture) throw new Error('aucun document');
+  // Un brouillon ne reçoit pas de règlement : il faut l’émettre d’abord,
+  // et c’est une bonne règle.
+  const emission = await appel(`/billing/documents/${documentFacture}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status: 'emis' }),
+  });
+  if (emission.statut !== 200) throw new Error(`émission refusée (${emission.statut})`);
+
+  await appel(`/billing/documents/${documentFacture}/payments`, {
+    method: 'POST',
+    body: JSON.stringify({ amountCents: 999_999, method: 'virement', receivedAt: '2026-09-24T10:00:00.000Z' }),
+  });
+  const lu = await appel(`/billing/documents/${documentFacture}`);
+  // Négatif, et non zéro : un trop-perçu masqué est un trop-perçu jamais
+  // remboursé.
+  if (!(lu.corps.remainingCents < 0)) {
+    throw new Error(`reste dû à ${lu.corps.remainingCents} après un versement excédentaire`);
+  }
+  return `reste dû ${lu.corps.remainingCents} centimes`;
+});
+
+await verifier('Un document émis ne bouge plus, et le dit', async () => {
+  if (!documentFacture) throw new Error('aucun document');
+  const modification = await appel(`/billing/documents/${documentFacture}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ clientName: 'Nom réécrit après coup' }),
+  });
+  if (modification.statut < 400) throw new Error('un document émis a été modifié');
+  const suppression = await appel(`/billing/documents/${documentFacture}`, {
+    method: 'DELETE',
+  });
+  if (suppression.statut < 400) throw new Error('un document émis a été supprimé');
+  const retour = await appel(`/billing/documents/${documentFacture}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status: 'brouillon' }),
+  });
+  if (retour.statut < 400) throw new Error('un document émis est redevenu brouillon');
+  // Et le refus doit nommer le remède, sinon la personne est bloquée.
+  const message = String(modification.corps?.message ?? "");
+  if (!/avoir/i.test(message)) throw new Error(`refus sans remède : « ${message.slice(0, 60)} »`);
+  return `modification ${modification.statut}, suppression ${suppression.statut}, retour ${retour.statut}`;
+});
+
+await verifier('Huit documents nés ensemble : aucun doublon, aucun trou', async () => {
+  // La course la plus coûteuse du produit. Sans recul aléatoire entre les
+  // réessais, la moitié de ces créations rendait un 500 — mesuré contre la
+  // vraie base. Ce qu'on refuse ici : un numéro en double (illégal), un
+  // trou dans la suite (illégal), et une erreur 500 (un conflit passager
+  // présenté comme une panne).
+  const reponses = await Promise.all(
+    Array.from({ length: 8 }, (_, i) =>
+      appel('/billing/documents', {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'devis',
+          clientName: `Client ${i}`,
+          lines: [{ label: 'Ligne', quantityMilli: 1000, unitPriceCents: 1000, vatRateBasisPoints: 2000 }],
+        }),
+      }),
+    ),
+  );
+
+  const cinqCents = reponses.filter((r) => r.statut >= 500);
+  if (cinqCents.length) {
+    throw new Error(`${cinqCents.length} création(s) en 500 : un conflit rendu comme une panne`);
+  }
+
+  const crees = reponses.filter((r) => r.statut === 201).map((r) => r.corps);
+  // Le limiteur peut en refuser certaines (429) : c’est son travail, et
+  // cela ne dit rien de la numérotation. Seul ce qui est créé se juge.
+  if (crees.length < 2) throw new Error('trop peu de créations pour juger de la course');
+
+  const numeros = crees.map((d) => d.number);
+  if (new Set(numeros).size !== numeros.length) {
+    throw new Error('deux documents portent le même numéro');
+  }
+  const suite = crees.map((d) => d.sequence).sort((a, b) => a - b);
+  for (let i = 1; i < suite.length; i += 1) {
+    if (suite[i] !== suite[i - 1] + 1) {
+      throw new Error(`trou dans la numérotation : ${suite[i - 1]} puis ${suite[i]}`);
+    }
+  }
+  const refuses = reponses.length - crees.length;
+  const mention = refuses > 0 ? `, ${refuses} refusé(s) proprement` : "";
+  return `${crees.length} créés, suite ${suite[0]}→${suite[suite.length - 1]}${mention}`;
+});
+
 titre('Investisseur');
 
 const EMAIL_INV = `validation.investisseur.${horodatage}@ignitux.test`;
