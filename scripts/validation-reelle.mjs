@@ -245,6 +245,42 @@ await verifier('Connexion et jeton', async () => {
  * inscrit. La limite de cinq inscriptions par minute et par adresse borne
  * l'usage détourné.
  */
+/**
+ * Le mot de passe oublié — ce qui se prouve d'ici, et ce qui ne s'y prouve
+ * pas.
+ *
+ * Le parcours complet a été joué à la main : le jeton fait 64 caractères,
+ * vaut une heure, l'ancien mot de passe est refusé après coup, le nouveau
+ * accepté, et **le même jeton rejoué est refusé**. Le mécanisme est intact.
+ *
+ * Il n'est pas rejouable ici : le jeton n'existe que dans l'email, et avec
+ * `MAIL_TRANSPORT=log` l'email n'est qu'une ligne du journal du serveur —
+ * que ce script ne lit pas, et n'a pas à lire. Ce qui reste vérifiable, ce
+ * sont les refus, et ils comptent : un jeton inventé qui passerait ouvrirait
+ * tous les comptes.
+ */
+await verifier('Un jeton de réinitialisation inventé ne change rien', async () => {
+  const bidon = await appelPatient('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token: 'a'.repeat(64), newPassword: 'UnAutreMotDePasse789!' }),
+  });
+  if (bidon.statut < 400) throw new Error(`jeton inventé accepté (${bidon.statut})`);
+
+  const vide = await appelPatient('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token: '', newPassword: 'UnAutreMotDePasse789!' }),
+  });
+  if (vide.statut < 400) throw new Error(`jeton vide accepté (${vide.statut})`);
+
+  // Et le compte doit toujours répondre à son vrai mot de passe.
+  const toujours = await appelPatient('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email: EMAIL, password: MDP }),
+  });
+  if (toujours.statut !== 200) throw new Error('le compte a été abîmé par la tentative');
+  return `inventé ${bidon.statut}, vide ${vide.statut}, compte intact`;
+});
+
 await verifier('La connexion ne dit pas si le compte existe', async () => {
   const inconnu = await appelPatient('/auth/login', {
     method: 'POST',
@@ -672,6 +708,32 @@ if (!iaAllumee) {
 //      doit se refermer, sinon l'inviter une fois revient à l'inviter pour
 //      toujours ;
 //   4. un tiers non invité ne voit rien à aucun moment.
+
+titre('Courrier');
+
+await (async () => {
+  // Une ligne « non prouvée » plutôt qu'un silence : le parcours complet du
+  // mot de passe oublié dépend d'un email, et un email qui ne part pas
+  // enferme dehors la première personne qui oublie son mot de passe.
+  const { corps } = await appel('/ready');
+  const mail = corps?.verifications?.mail;
+  const transport = String(mail?.detail ?? '');
+  if (/smtp/i.test(transport)) {
+    await verifier('Le courrier part réellement', async () => {
+      if (mail?.etat !== 'ok') throw new Error(transport.slice(0, 80));
+      return transport.slice(0, 60);
+    });
+  } else {
+    noter(
+      'ignore',
+      'Le parcours complet du mot de passe oublié',
+      'MAIL_TRANSPORT n’est pas « smtp » : le lien s’écrit dans le journal du ' +
+        'serveur au lieu de partir. Le mécanisme est bon — éprouvé à la main : ' +
+        'jeton d’une heure, ancien mot de passe refusé, rejeu refusé — mais ' +
+        'personne ne recevra le lien tant qu’un fournisseur d’email n’est pas branché.',
+    );
+  }
+})();
 
 titre('Partage d’un projet');
 
