@@ -67,6 +67,48 @@ describe('PasswordResetService', () => {
     });
   });
 
+  /**
+   * Tant que `MAIL_TRANSPORT` vaut `log`, aucun email ne part et la
+   * première personne qui oublie son mot de passe est enfermée dehors.
+   * `createResetLink` existe pour qu'un exploitant lui fabrique un lien et
+   * le lui transmette autrement — voir `scripts/lien-mot-de-passe.mjs`.
+   */
+  describe('createResetLink', () => {
+    it('rend le lien sans envoyer d’email', async () => {
+      prisma.users.findUnique.mockResolvedValue({ id: 'u1', email: 'a@b.com' });
+      authTokenService.issue.mockResolvedValue('le-token-en-clair');
+
+      const lien = await service.createResetLink('a@b.com');
+
+      expect(lien?.url).toContain('/reset-password?token=le-token-en-clair');
+      expect(lien?.email).toBe('a@b.com');
+      // Le facteur, c'est la console : rien ne doit partir d'ici.
+      expect(mailService.send).not.toHaveBeenCalled();
+    });
+
+    it('émet un jeton de la même durée que celui de l’email', async () => {
+      // Le lien de la console et celui de l'email doivent être le même
+      // objet : une durée recopiée dans un script dériverait le jour où
+      // l'une des deux change, et l'on enverrait un lien déjà mort.
+      prisma.users.findUnique.mockResolvedValue({ id: 'u1', email: 'a@b.com' });
+      authTokenService.issue.mockResolvedValue('t');
+
+      await service.createResetLink('a@b.com');
+
+      expect(authTokenService.issue).toHaveBeenCalledWith('u1', 'password_reset', 60 * 60 * 1000);
+    });
+
+    it('rend null sur un email inconnu, et laisse l’appelant décider', async () => {
+      // La route publique se tait pour ne pas devenir un annuaire ; la
+      // console, elle, doit le dire, sinon on cherche un lien qui n'arrivera
+      // jamais. Le service ne tranche pas à leur place.
+      prisma.users.findUnique.mockResolvedValue(null);
+
+      expect(await service.createResetLink('inconnu@example.com')).toBeNull();
+      expect(authTokenService.issue).not.toHaveBeenCalled();
+    });
+  });
+
   describe('resetPassword', () => {
     it('renvoie false si le token est invalide', async () => {
       authTokenService.consume.mockResolvedValue(null);

@@ -202,6 +202,9 @@ Tout est reproductible en une commande, sans préparation.
 | L'état de la surface REST | `node backend/scripts/fermer-surface-rest.mjs [fichier]` (aperçu, n'écrit rien) |
 | Migrer la production sans pouvoir viser la mauvaise base | `node backend/scripts/migrer-prod.mjs` (aperçu, n'écrit rien) |
 | Le déploiement à blanc | `node backend/scripts/verifier-production.mjs .env.production` |
+| Un lien de mot de passe oublié, sans email | `node backend/scripts/lien-mot-de-passe.mjs <email>` |
+| L'audit financier de toute la base | `node backend/scripts/audit-financier.mjs [fichier]` |
+| Ce que `dist/` importe est-il installé en production | `node backend/scripts/verifier-dependances.mjs` |
 | Les 21 écrans, vus comme un premier utilisateur | `node scripts/traversee-ecrans.mjs [--telephone]` |
 | Le parcours complet, sans jamais taper une adresse | `node scripts/parcours-premier-utilisateur.mjs [--telephone]` |
 
@@ -313,11 +316,31 @@ de ces chiffres. C'est un choix d'hébergement, pas un travail de code.
 |---|---|
 | **Un hébergeur** | le produit tourne sur un ordinateur portable ; il s'arrête quand il se ferme |
 | **Un domaine** | pas d'adresse https, donc pas de lien à envoyer |
-| **Un fournisseur d'email** | `MAIL_TRANSPORT=log` : les mots de passe oubliés s'écrivent dans un journal au lieu de partir |
+| **Un fournisseur d'email** | `MAIL_TRANSPORT=log` : les mots de passe oubliés s'écrivent dans un journal au lieu de partir — **contournable à la main**, voir ci-dessous |
 | **Un fournisseur de paiement** | aucune offre payante ne peut être encaissée — sans SIRET, aucun fournisseur n'ouvre de compte |
 
 L'absence de paiement **n'est pas un blocage pour une bêta privée** : une bêta
 privée n'a rien à vendre. C'est un blocage pour ouvrir les offres.
+
+### L'email non plus, pour trente personnes
+
+Le mécanisme de réinitialisation est intact — jeton de 64 caractères, valable
+une heure, à usage unique, refusé s'il est rejoué. **Seul le facteur manque.**
+
+Une commande le remplace :
+
+```
+node backend/scripts/lien-mot-de-passe.mjs quelquun@exemple.fr
+```
+
+Elle appelle le code que l'API emploie elle-même — même durée, même forme
+d'adresse, même usage unique — et affiche le lien au lieu de l'envoyer. On le
+transmet par le moyen dont on dispose.
+
+Ce n'est pas une solution à l'échelle : à mille personnes, c'est intenable. À
+trente, c'est ce qui évite qu'un bêta-testeur reste enfermé dehors en attendant
+qu'un fournisseur d'email soit branché. **L'email cesse donc de bloquer la bêta
+privée ; il reste bloquant pour une ouverture publique.**
 
 ### La réserve technique qui reste
 
