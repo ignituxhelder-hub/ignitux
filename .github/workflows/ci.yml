@@ -46,6 +46,13 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Ce que `dist/` importe doit être installé par `npm ci --omit=dev`,
+      # sinon l'image Docker ne démarre pas. Deux paquets y manquaient —
+      # @prisma/client et dotenv — et rien ne pouvait le voir : le
+      # développement et les tests tournent avec toutes les dépendances.
+      - name: Les dépendances de production suffisent-elles ?
+        run: node scripts/verifier-dependances.mjs
+
   frontend:
     name: Frontend
     runs-on: ubuntu-latest
@@ -178,3 +185,48 @@ jobs:
         run: docker compose config --quiet
         env:
           JWT_SECRET: secret-de-ci-sans-valeur-hors-de-ce-job-mais-assez-long
+
+      # ── L'IMAGE DÉMARRE-T-ELLE ? ────────────────────────────────────────
+      #
+      # Construire n'est pas démarrer, et la différence a coûté cher :
+      # @prisma/client et dotenv étaient rangés en devDependencies, donc
+      # absents après `npm ci --omit=dev`. L'image se construisait très bien
+      # et s'arrêtait au premier import :
+      #
+      #     Cannot find package 'dotenv' imported from /app/dist/main.js
+      #
+      # Personne ne pouvait le voir : le développement installe tout, les
+      # tests aussi, et ce job s'arrêtait à la construction. On la démarre
+      # donc pour de vrai, contre une base jetable.
+      - name: Démarrer une base jetable
+        run: |
+          docker run -d --name base-fumee             -e POSTGRES_USER=ignitux -e POSTGRES_PASSWORD=ignitux -e POSTGRES_DB=ignitux             -p 5432:5432 postgres:17
+          for i in $(seq 1 30); do
+            docker exec base-fumee pg_isready -U ignitux && break
+            sleep 2
+          done
+
+      - name: Poser le schéma
+        run: |
+          docker run --rm --network host             -e DATABASE_URL=postgresql://ignitux:ignitux@localhost:5432/ignitux             -v "$PWD/backend:/w" -w /w node:24-slim             sh -c "npm ci --silent && npx prisma db push --skip-generate"
+
+      - name: L'image du serveur répond-elle ?
+        run: |
+          docker run -d --name serveur-fumee --network host             -e DATABASE_URL=postgresql://ignitux:ignitux@localhost:5432/ignitux             -e JWT_SECRET=secret-de-ci-sans-valeur-hors-de-ce-job-mais-assez-long             -e FRONTEND_URL=http://localhost:3001             -e TRUST_PROXY=false -e MAIL_TRANSPORT=log -e IGINI_AI_ENABLED=false             -e PORT=3000             ignitux-backend:ci
+
+          for i in $(seq 1 45); do
+            if curl -fsS http://localhost:3000/health > /dev/null 2>&1; then
+              echo "le serveur répond"
+              curl -s http://localhost:3000/health
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "::error::l'image démarre mais ne répond pas sur /health"
+          docker logs serveur-fumee | tail -40
+          exit 1
+
+      - name: Journaux du serveur, quoi qu'il arrive
+        if: always()
+        run: docker logs serveur-fumee 2>&1 | tail -30 || true
