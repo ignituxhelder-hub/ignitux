@@ -33,7 +33,7 @@ ce dernier disait « prêt sous réserve de vérification », celui-ci dit ce qu
 > (78 fichiers), **258** bout en bout (16 fichiers), **367** frontend
 > (39 fichiers) — **1 680** au total, tous verts. S'y ajoute une commande qui
 > n'existait pas :
-> `scripts/hors-ligne.mjs`, **6 vérifiés, 0 en échec**, qui coupe le réseau
+> `scripts/hors-ligne.mjs`, **7 vérifiés, 0 en échec**, qui coupe le réseau
 > pour de bon et constate que l'application s'ouvre quand même (article 16).
 
 ---

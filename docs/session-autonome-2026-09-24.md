@@ -534,7 +534,7 @@ si **une règle du moteur** vérifie l'article, pas s'il est implémenté. Aucun
 règle ne peut constater depuis le serveur qu'un navigateur a reçu son worker.
 Le marquer `enforced` annoncerait un contrôle qui n'existe pas — ce que
 l'article 11 interdit. Ce qui garde la promesse à la place :
-`node scripts/hors-ligne.mjs`, **6 vérifiés, 0 en échec**.
+`node scripts/hors-ligne.mjs`, **7 vérifiés, 0 en échec**.
 
 ### 8.2 Le worker était le seul fichier que rien ne vérifiait
 
@@ -549,7 +549,8 @@ donc la panne en production non plus.
 
 La CI fait désormais deux choses : `node --check public/sw.js`, et la vraie
 commande hors ligne dans un navigateur, réseau coupé. Le pas de CI a été
-éprouvé sur les deux navigateurs avant d'être écrit — 6/6 de part et d'autre.
+éprouvé sur les deux navigateurs avant d'être écrit, avec le même résultat
+de part et d'autre.
 
 ### 8.3 Une écriture revenue du froid ne peut plus effacer du travail
 
@@ -605,7 +606,7 @@ tiers, 1 pour un réglage que l'hébergeur ne cède pas.
 | Bout en bout backend | 258 verts (16 fichiers) |
 | Frontend | 367 verts (39 fichiers) |
 | Validation réelle, avec IA | **69 vérifiés · 0 en échec · 1 non prouvé** |
-| Hors ligne | **6/6** |
+| Hors ligne | **7/7** |
 | Traversée des écrans | **21/21**, aucun constat |
 | Parcours premier utilisateur | 0 critique, 0 majeur, 1 moyen (connu) |
 
@@ -616,5 +617,29 @@ parcours complet du mot de passe oublié exige qu'un vrai courrier parte.
 tombent** — 2 unitaires et 2 e2e pour le garde, 3 côté client pour l'âge de
 capture, et la commande hors ligne contre un worker retiré. Un test qui passe
 dans les deux cas ne prouve rien.
+
+### 8.6 Ce que le cache du worker retient d'une session
+
+Un service worker garde les pages visitées, y compris celles d'une personne
+connectée, et **ce cache survit à la déconnexion**. Sur un téléphone prêté, la
+question « que reste-t-il de la session précédente ? » a une réponse, et il
+vaut mieux qu'elle soit mesurée plutôt que déduite.
+
+Le raisonnement disait que non : le jeton vit dans `localStorage` et jamais
+dans un cookie, donc le serveur ne peut pas savoir qui demande la page ; les
+données arrivent ensuite par l'API, que le worker n'intercepte jamais.
+
+Un raisonnement se vérifie. Le septième contrôle crée un compte, un projet au
+titre reconnaissable, visite les écrans connectés, puis relit **chaque entrée**
+du cache et y cherche l'adresse et le titre. Rien.
+
+Et il sait trouver : en remplaçant le titre par une chaîne forcément présente,
+il signale seize entrées. Un contrôle qui ne trouve rien peut simplement être
+aveugle ; celui-ci ne l'est pas.
+
+C'est le seul des sept qui ait besoin du serveur. Sans serveur il s'écrit
+**IGNORÉ** et n'échoue pas — en intégration continue seule l'interface tourne,
+et accuser le produit d'un manque du banc d'essai serait la pire façon de
+rendre une commande inutile.
 
 Rien n'a été déployé.
