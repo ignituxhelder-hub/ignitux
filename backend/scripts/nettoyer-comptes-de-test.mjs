@@ -66,6 +66,17 @@ if (!process.env.DATABASE_URL) {
  */
 const PREFIXES = [
   'validation',
+  // `scripts/hors-ligne.mjs` — il rend le compte qu'il crée, mais un harnais
+  // interrompu en laisse un derrière lui, et il faut pouvoir le ramasser.
+  'horsligne',
+  // Comptes de sondage créés à la main pendant une mise au point : mise au
+  // point du service worker (`sw`), du lien de mot de passe (`lien`), et
+  // sondages ponctuels de la forme des réponses (`sonde`).
+  'sw',
+  'lien',
+  'sonde',
+  'sonde2',
+  'sonde3',
   'sim',
   'traversee',
   'parcours',
