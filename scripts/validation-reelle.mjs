@@ -727,10 +727,13 @@ await (async () => {
     noter(
       'ignore',
       'Le parcours complet du mot de passe oublié',
-      'MAIL_TRANSPORT n’est pas « smtp » : le lien s’écrit dans le journal du ' +
-        'serveur au lieu de partir. Le mécanisme est bon — éprouvé à la main : ' +
-        'jeton d’une heure, ancien mot de passe refusé, rejeu refusé — mais ' +
-        'personne ne recevra le lien tant qu’un fournisseur d’email n’est pas branché.',
+      'MAIL_TRANSPORT n’est pas « smtp » ici : le lien s’écrit dans le journal ' +
+        'du serveur au lieu de partir. Ce n’est plus une inconnue pour autant — ' +
+        '« node scripts/courrier-reel.mjs » démarre le serveur en SMTP contre une ' +
+        'boîte aux lettres locale et prouve les deux parcours de bout en bout, ' +
+        'confirmation d’adresse comprise : 11 vérifiés. Ce qui manque n’est donc ' +
+        'plus du code, c’est un fournisseur — et la réputation d’expéditeur qui ' +
+        'décide si le message arrive ou finit en indésirable.',
     );
   }
 })();

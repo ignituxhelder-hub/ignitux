@@ -191,6 +191,26 @@ jobs:
       - name: Tests de bout en bout
         run: npm run test:e2e
 
+      # ── LE COURRIER PART-IL VRAIMENT ? ──────────────────────────────────
+      #
+      # Tout ce qui touche à l'email était simulé : les tests unitaires
+      # remplacent `nodemailer`, donc ils vérifient nos décisions et jamais
+      # notre capacité à poser un message sur une socket. Le jour où un
+      # fournisseur sera branché serait le premier où quelqu'un le découvre.
+      #
+      # `courrier-reel.mjs` ouvre une boîte aux lettres SMTP locale, démarre le
+      # serveur en transport « smtp » contre elle, et suit les deux parcours
+      # jusqu'au bout : confirmation d'adresse et mot de passe oublié. Aucun
+      # fournisseur, aucun secret, aucun message vers l'extérieur.
+      #
+      # Ce que ça ne couvre pas, et que rien ici ne peut couvrir : qu'un
+      # message arrive dans une vraie boîte sans finir en indésirable.
+      - name: Construire le serveur
+        run: npm run build
+
+      - name: Le courrier part-il vraiment ?
+        run: node ../scripts/courrier-reel.mjs --port 3002
+
   # LES IMAGES SE CONSTRUISENT-ELLES ?
   #
   # Les Dockerfiles ont été écrits sur une machine sans Docker : ils sont

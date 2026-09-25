@@ -365,6 +365,18 @@ Ce qui manquera au moment de verser pour de vrai :
 - **Effort** : deux heures pour le branchement, une demi-journée avec SPF, DKIM et DMARC. Ces
   trois-là ne sont pas optionnels : sans eux, les courriels partent en indésirables.
 
+> **Mise à jour du 25 septembre 2026.** Le branchement ne se fait plus à
+> l'aveugle. `node scripts/courrier-reel.mjs` ouvre une boîte aux lettres SMTP
+> locale, démarre le serveur en transport « smtp » contre elle, et suit les
+> **deux** parcours jusqu'au bout — confirmation d'adresse et mot de passe
+> oublié : **11 vérifiés, 0 en échec**, et le pas est dans la CI.
+>
+> Ce que ça change pour l'estimation : les deux heures de branchement ne sont
+> plus deux heures de découverte. Le chemin SMTP est éprouvé ; il ne reste que
+> l'hôte, le port et les identifiants à écrire. La demi-journée SPF/DKIM/DMARC,
+> elle, reste entière — c'est de la réputation d'expéditeur, et aucune commande
+> lancée d'ici ne peut y répondre.
+
 ### Stripe, abonnement seul — **importante**
 
 - **Quand** : avant le premier euro.

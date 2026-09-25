@@ -69,6 +69,10 @@ const PREFIXES = [
   // `scripts/hors-ligne.mjs` — il rend le compte qu'il crée, mais un harnais
   // interrompu en laisse un derrière lui, et il faut pouvoir le ramasser.
   'horsligne',
+  // `scripts/courrier-reel.mjs` — le compte du parcours, et l'adresse
+  // inconnue qu'il interroge pour vérifier qu'elle ne se distingue pas.
+  'courrier',
+  'personne',
   // Comptes de sondage créés à la main pendant une mise au point : mise au
   // point du service worker (`sw`), du lien de mot de passe (`lien`), et
   // sondages ponctuels de la forme des réponses (`sonde`).

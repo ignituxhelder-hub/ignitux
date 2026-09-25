@@ -669,3 +669,74 @@ montré cette instabilité, et ses questions ne portent pas sur le vide d'un
 bonne façon de casser quelque chose.
 
 Rien n'a été déployé.
+
+---
+
+## 9. Le lendemain — Ignitux sait-il vraiment envoyer un courrier ?
+
+25 septembre. Il restait **un** contrôle « non prouvé » dans la validation :
+le parcours complet du mot de passe oublié. La raison donnée depuis des jours
+était qu'il faut un fournisseur d'email pour le savoir.
+
+C'était faux. Il faut quelqu'un qui **écoute en SMTP**, et quatre-vingts lignes
+suffisent à l'écrire.
+
+### 9.1 Ce qui n'avait jamais été éprouvé
+
+Tout ce qui touche à l'email était simulé. `MailService` est bien écrit et ses
+tests sont bons, mais ils remplacent `nodemailer` : ils vérifient **nos
+décisions**, jamais notre capacité à poser un message sur une socket. Le jour
+où tu branches un fournisseur aurait été le premier où quelqu'un le découvre —
+et ce jour-là, tu aurais cherché la panne du côté du fournisseur.
+
+`scripts/courrier-reel.mjs` ouvre une boîte aux lettres SMTP locale, démarre le
+serveur en transport « smtp » contre elle, et regarde ce qui arrive. Aucun
+fournisseur, aucun secret, aucun message vers l'extérieur.
+
+### 9.2 Ce que la commande a trouvé en s'écrivant
+
+**Deux courriers partent, pas un.** L'inscription envoie une confirmation
+d'adresse, et ce parcours-là n'avait jamais été suivi de bout en bout non plus.
+La première version cherchait le lien de réinitialisation et tombait sur celui
+de confirmation, parce qu'elle prenait le premier message adressé à la bonne
+personne. Les deux sont couverts désormais.
+
+**Le corps d'un courrier n'est pas le texte qu'on a écrit.** nodemailer encode
+en *quoted-printable* et replie à 76 colonnes : le lien est coupé en deux, et
+le `=` de `?token=` devient `=3D`. La commande cherchait une chaîne que
+personne n'avait jamais écrite. Ce que lit une vraie boîte aux lettres est le
+texte **décodé** ; c'est donc lui qu'on examine.
+
+### 9.3 Les onze faits, maintenant vérifiés
+
+Le transport se déclare au démarrage · `/ready` constate qu'il répond — le
+chemin `verify()`, jamais exercé pour de vrai jusqu'ici · l'inscription fait
+partir une confirmation · complète, expéditeur, objet et lien · le lien
+confirme réellement l'adresse · l'oubli fait partir un second courrier ·
+complet lui aussi · le lien change réellement le mot de passe · l'ancien ne
+marche plus, le nouveau oui · le même lien rejoué est refusé · **une adresse
+inconnue ne fait partir aucun message, et répond exactement pareil**.
+
+Le dernier compte autant que les autres : si une demande sur une adresse
+inconnue se comportait différemment, n'importe qui pourrait savoir qui a un
+compte chez Ignitux.
+
+**11 vérifiés, 0 en échec** — contre la base de développement et contre
+`ignitux_test`, dans les conditions de la CI. Et la commande sait échouer : en
+remettant le transport sur « log », quatre contrôles tombent immédiatement.
+
+Le pas est dans la CI, greffé sur le job de bout en bout qui a déjà une base
+jetable.
+
+### 9.4 Ce que ça ne prouve pas
+
+Qu'un message **arrive** dans une vraie boîte sans finir en indésirable. Cela
+dépend de SPF, DKIM et DMARC sur un domaine réel — de la réputation
+d'expéditeur, pas du code. Aucune commande lancée d'ici ne peut y répondre, et
+celle-ci le dit en terminant plutôt que de laisser croire que tout est couvert.
+
+Ce qui change pour toi : les deux heures de branchement d'un fournisseur ne
+sont plus deux heures de découverte. Le chemin SMTP est éprouvé ; il ne reste
+que l'hôte, le port et les identifiants à écrire.
+
+Rien n'a été déployé.

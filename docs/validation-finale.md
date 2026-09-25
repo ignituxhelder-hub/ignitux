@@ -24,10 +24,21 @@ ce dernier disait « prêt sous réserve de vérification », celui-ci dit ce qu
 > écritures revenues du froid. Relancée aujourd'hui contre la même base :
 > **69 vérifiés, 0 en échec, 1 non prouvé**.
 >
-> Le contrôle non prouvé est le même qu'hier et ne dépend pas du code : le
-> parcours complet du mot de passe oublié exige qu'un vrai courrier parte, donc
-> un fournisseur d'email. Le mécanisme, lui, est éprouvé à la main — jeton
-> d'une heure, ancien mot de passe refusé, rejeu refusé.
+> Le contrôle non prouvé est le même qu'hier : cette commande-là tourne contre
+> un serveur en transport « log », où aucun courrier ne part.
+>
+> **Mais ce n'est plus une inconnue** (25 septembre). `scripts/courrier-reel.mjs`
+> ouvre une boîte aux lettres SMTP locale — quatre-vingts lignes, pas de
+> fournisseur, pas de secret — démarre le serveur en transport « smtp » contre
+> elle, et suit les **deux** parcours de bout en bout : **11 vérifiés, 0 en
+> échec**. Elle a trouvé en s'écrivant que deux courriers partent, pas un :
+> l'inscription envoie une confirmation d'adresse, et ce parcours-là n'avait
+> jamais été éprouvé non plus.
+>
+> Ce qui manque n'est donc plus du code. C'est un fournisseur, et la réputation
+> d'expéditeur — SPF, DKIM, DMARC sur un domaine réel — qui décide si le
+> message arrive ou finit en indésirable. Aucune commande lancée d'ici ne peut
+> y répondre, et la commande le dit elle-même en terminant.
 >
 > Les suites ont suivi le même mouvement : **1 055** tests unitaires backend
 > (78 fichiers), **258** bout en bout (16 fichiers), **367** frontend
