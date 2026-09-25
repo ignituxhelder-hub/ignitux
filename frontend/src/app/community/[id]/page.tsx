@@ -84,6 +84,11 @@ export default function CommunityProjectPage() {
       {project && (
         <div className="card" style={{ marginTop: '1.5rem' }}>
           <h1 style={{ marginTop: 0 }}>{project.title}</h1>
+          {/* Article 21 : les créateurs conservent la reconnaissance de leurs
+              idées. Le nom d'affichage seulement — l'adresse reste privée. */}
+          <p className="muted" style={{ marginTop: 0 }}>
+            {project.porteur ? `Porté par ${project.porteur}` : 'Porteur sans nom affiché'}
+          </p>
           {project.description && <p>{project.description}</p>}
         </div>
       )}
@@ -109,7 +114,14 @@ export default function CommunityProjectPage() {
             {comments.map((comment) => (
               <div className="project-item" style={{ cursor: 'default' }} key={comment.id}>
                 <p style={{ margin: 0 }}>{comment.content}</p>
-                <span className="muted">{new Date(comment.created_at).toLocaleString('fr-FR')}</span>
+                {/* Avant, un encouragement n'était signé que d'une date : son
+                    auteur partait sous forme d'identifiant technique, que
+                    personne ne peut lire. Un mot de soutien anonyme soutient
+                    moins bien. */}
+                <span className="muted">
+                  {comment.auteur ?? 'Sans nom affiché'} —{' '}
+                  {new Date(comment.created_at).toLocaleString('fr-FR')}
+                </span>
               </div>
             ))}
           </div>

@@ -245,7 +245,21 @@ export const CONSTITUTION_ARTICLES: readonly ConstitutionArticleSeed[] = [
     title: 'Protection des Idées',
     text: 'Les créateurs conservent la reconnaissance de leurs idées.',
     principle: 'protection_des_idees',
-    enforcement: 'declared',
+    // Passé de 'declared' à 'enforced' le 25/09/2026, et cette fois le
+    // produit a changé en même temps que l'étiquette.
+    //
+    // Un projet rendu public n'arrivait qu'avec son titre, sa description et
+    // sa date : aucun auteur. Une idée exposée sans son porteur ne lui laisse
+    // aucune reconnaissance — c'est exactement ce que l'article interdit, et
+    // personne ne l'avait vu parce que rien ne regardait.
+    //
+    // La règle 'projet-public-sans-porteur' refuse désormais de servir un
+    // projet public dont la requête n'a pas ramené son porteur. Elle ne
+    // vérifie pas que le nom existe : quelqu'un qui n'a pas rempli son nom
+    // d'affichage n'est pas une violation, c'est une information manquante,
+    // et l'écran le dit. Ce qu'elle empêche, c'est que l'attribution
+    // disparaisse du code sans que rien ne s'y oppose.
+    enforcement: 'enforced',
   },
   {
     slug: 'v1-22-financement-ethique',

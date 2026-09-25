@@ -223,6 +223,15 @@ export default function MarketplacePage() {
               <h3 style={{ margin: 0 }}>{profile.headline}</h3>
               <span className="muted">{ROLE_LABELS[profile.role]}</span>
             </div>
+            {/* Le nom, quand la personne en a renseigné un. L'annuaire
+                transportait jusqu'ici son adresse email — à tous les clients,
+                et sans jamais l'afficher. Elle ne sert pas : on écrit par le
+                formulaire ci-dessous, sans connaître l'adresse. */}
+            {profile.user?.profile?.display_name && (
+              <p className="muted" style={{ margin: '0.15rem 0 0' }}>
+                {profile.user.profile.display_name}
+              </p>
+            )}
             {profile.bio && <p>{profile.bio}</p>}
             {profile.expertise.length > 0 && (
               <p className="muted">{profile.expertise.join(' · ')}</p>
@@ -245,6 +254,22 @@ export default function MarketplacePage() {
                   {sendingTo === profile.id ? 'Envoi…' : 'Contacter'}
                 </button>
               </div>
+            )}
+            {/* Dit avant, pas après.
+
+                Le destinataire voit l'adresse de qui lui écrit — c'est le
+                seul canal de retour, le produit n'ayant pas de messagerie
+                interne. C'est défendable, à une condition : que la personne
+                le sache au moment d'écrire. Une adresse donnée et une adresse
+                prise ne sont pas la même chose. */}
+            {profile.user_id !== user?.id && (
+              <p
+                className="muted"
+                style={{ fontSize: 'var(--texte-etiquette)', margin: '0.4rem 0 0' }}
+              >
+                En écrivant, tu lui donnes ton adresse email : c&apos;est par là
+                qu&apos;il ou elle pourra te répondre.
+              </p>
             )}
           </div>
         ))}

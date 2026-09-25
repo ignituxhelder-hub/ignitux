@@ -19,10 +19,12 @@ ce dernier disait « prêt sous réserve de vérification », celui-ci dit ce qu
 
 > ### Reprise du 24 septembre 2026
 >
-> La commande a grandi depuis : **70 contrôles** au lieu de 41 — facturation,
-> Constitution, investisseur, données personnelles, partage, courrier, et les
-> écritures revenues du froid. Relancée aujourd'hui contre la même base :
-> **69 vérifiés, 0 en échec, 1 non prouvé**.
+> La commande a grandi depuis : **75 contrôles** au lieu de 41 — facturation,
+> Constitution, investisseur, données personnelles, partage, courrier, les
+> écritures revenues du froid, et l'attribution des projets publics. Relancée
+> le 25 septembre contre la même base : **70 vérifiés, 0 en échec, 2 non
+> prouvés** sans l'IA — le second non prouvé n'étant que l'analyse réelle,
+> qu'on ne lance pas à chaque fois parce qu'elle coûte.
 >
 > Le contrôle non prouvé est le même qu'hier : cette commande-là tourne contre
 > un serveur en transport « log », où aucun courrier ne part.
@@ -40,10 +42,12 @@ ce dernier disait « prêt sous réserve de vérification », celui-ci dit ce qu
 > message arrive ou finit en indésirable. Aucune commande lancée d'ici ne peut
 > y répondre, et la commande le dit elle-même en terminant.
 >
-> Les suites ont suivi le même mouvement : **1 055** tests unitaires backend
-> (78 fichiers), **258** bout en bout (16 fichiers), **367** frontend
-> (39 fichiers) — **1 680** au total, tous verts. S'y ajoute une commande qui
-> n'existait pas :
+> Les suites ont suivi le même mouvement : **1 060** tests unitaires backend,
+> **264** bout en bout (17 fichiers), **373** frontend (40 fichiers) —
+> **1 697** au total, tous verts. S'y ajoutent trois commandes qui n'existaient
+> pas : `scripts/courrier-reel.mjs` (11/11, le SMTP éprouvé sans fournisseur),
+> `backend/scripts/verifier-sauvegarde.mjs` (2 206 références suivies, aucune
+> perdue) et
 > `scripts/hors-ligne.mjs`, **7 vérifiés, 0 en échec**, qui coupe le réseau
 > pour de bon et constate que l'application s'ouvre quand même (article 16).
 

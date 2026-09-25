@@ -66,6 +66,26 @@ describe('MarketplaceService', () => {
         expect.objectContaining({ where: undefined }),
       );
     });
+
+    it('ne demande jamais l’adresse email des inscrits', async () => {
+      // L'annuaire renvoyait l'adresse de chaque mentor et de chaque
+      // investisseur à n'importe quelle personne connectée — une requête,
+      // tout l'annuaire — et l'interface ne l'affichait nulle part. Une
+      // exposition sans usage, contraire à l'article 13.
+      //
+      // Elle n'est pas nécessaire : le produit a une mise en relation interne
+      // pour écrire à quelqu'un sans connaître son adresse. Ce test existe
+      // pour le jour où quelqu'un la remettra « juste pour déboguer ».
+      prisma.marketplace_profiles.findMany.mockResolvedValue([]);
+
+      await service.listProfiles();
+
+      const appel = prisma.marketplace_profiles.findMany.mock.calls[0][0];
+      expect(JSON.stringify(appel.include)).not.toContain('email');
+      // Le nom d'affichage, lui, doit passer : sans lui l'annuaire ne dit
+      // plus qui est qui.
+      expect(JSON.stringify(appel.include)).toContain('display_name');
+    });
   });
 
   describe('contactProfile', () => {

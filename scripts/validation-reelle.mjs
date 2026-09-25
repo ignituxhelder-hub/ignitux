@@ -1214,6 +1214,111 @@ await verifier('Après le retrait, la porte se referme vraiment', async () => {
   return `retrait ${retrait.statut}, lecture ensuite ${apres.statut}`;
 });
 
+// ── La communauté : qui a fait quoi ────────────────────────────────────────
+//
+// Un projet rendu public n'arrivait qu'avec son titre, sa description et sa
+// date. Aucun auteur. L'article 21 dit pourtant que « les créateurs
+// conservent la reconnaissance de leurs idées » — une idée montrée sans son
+// porteur ne lui en laisse aucune.
+//
+// Et l'inverse compte autant : le nom d'affichage, oui ; l'adresse email,
+// jamais. Elle est privée par défaut (article 13).
+
+titre('Communauté : qui a fait quoi');
+
+await verifier('Un projet rendu public porte le nom de son porteur', async () => {
+  if (!projetId) throw new Error('aucun projet');
+
+  const nom = `Porteur ${Date.now()}`;
+  const profil = await appel('/profil', {
+    method: 'PUT',
+    body: JSON.stringify({ values: { display_name: nom } }),
+  });
+  if (profil.statut >= 400) throw new Error(`profil HTTP ${profil.statut}`);
+
+  const rendu = await appel(`/projects/${projetId}/visibility`, {
+    method: 'PATCH',
+    body: JSON.stringify({ isPublic: true }),
+  });
+  if (rendu.statut !== 200) throw new Error(`visibilité HTTP ${rendu.statut}`);
+
+  const liste = await appel('/community/projects');
+  const mien = (liste.corps ?? []).find((projet) => projet.id === projetId);
+  if (!mien) throw new Error('le projet public ne figure pas dans la communauté');
+  if (mien.porteur !== nom) throw new Error(`porteur « ${mien.porteur} » au lieu de « ${nom} »`);
+
+  const detail = await appel(`/community/projects/${projetId}`);
+  if (detail.corps?.porteur !== nom) throw new Error('le détail ne porte pas le porteur');
+  return `« ${nom} » sur la liste et sur le détail`;
+});
+
+await verifier('La communauté ne laisse filtrer aucune adresse email', async () => {
+  // Le contrôle le plus utile du lot : il échouerait le jour où quelqu'un
+  // rajoute l'email « pour déboguer » et oublie de le retirer.
+  const liste = await appel('/community/projects');
+  const brut = JSON.stringify(liste.corps ?? []);
+  if (brut.includes('@')) throw new Error('une adresse apparaît dans la liste publique');
+  return `${(liste.corps ?? []).length} projet(s) public(s), aucune adresse`;
+});
+
+await verifier('L’annuaire des mentors ne distribue pas les adresses', async () => {
+  // Il renvoyait l'adresse de chaque inscrit à toute personne connectée — une
+  // requête, tout l'annuaire — et l'interface ne l'affichait nulle part.
+  //
+  // On s'y inscrit d'abord : un annuaire vide ne prouverait rien, et un
+  // contrôle qui ne trouve rien parce qu'il n'y a rien à trouver est un
+  // contrôle qui ment sur ce qu'il a vérifié.
+  const inscrit = await appel('/marketplace/profile', {
+    method: 'POST',
+    body: JSON.stringify({
+      role: 'mentor',
+      headline: 'Mentor de validation',
+      bio: 'Profil créé par le harnais.',
+      expertise: ['validation'],
+    }),
+  });
+  if (inscrit.statut >= 400) throw new Error(`inscription HTTP ${inscrit.statut}`);
+
+  const annuaire = await appel('/marketplace/profiles');
+  if (annuaire.statut !== 200) throw new Error(`HTTP ${annuaire.statut}`);
+  const profils = annuaire.corps ?? [];
+  if (profils.length === 0) throw new Error('l’annuaire est vide alors qu’on vient de s’y inscrire');
+  if (/"email"/.test(JSON.stringify(profils))) {
+    throw new Error('l’annuaire porte encore des adresses');
+  }
+
+  // Et on se retire : la validation ne laisse pas un mentor fictif derrière
+  // elle dans un annuaire que de vraies personnes liront.
+  await appel('/marketplace/profile', { method: 'DELETE' });
+  return `${profils.length} profil(s) examiné(s), aucune adresse`;
+});
+
+await verifier('Un encouragement est signé d’un nom, pas d’un identifiant', async () => {
+  if (!projetId) throw new Error('aucun projet');
+  const ecrit = await appel(`/community/projects/${projetId}/comments`, {
+    method: 'POST',
+    body: JSON.stringify({ content: 'Bravo pour ce projet.' }),
+  });
+  if (ecrit.statut !== 201) throw new Error(`écriture HTTP ${ecrit.statut}`);
+  if (!ecrit.corps?.auteur) throw new Error('le commentaire créé revient sans auteur');
+
+  const liste = await appel(`/community/projects/${projetId}/comments`);
+  const premier = (liste.corps ?? [])[0];
+  if (!premier?.auteur) throw new Error('la liste des commentaires revient sans auteur');
+  return `signé « ${premier.auteur} »`;
+});
+
+// On remet le projet privé : la validation ne doit pas laisser derrière elle
+// un projet public de plus dans la communauté.
+await verifier('Le projet redevient privé après le contrôle', async () => {
+  if (!projetId) throw new Error('aucun projet');
+  const { statut } = await appel(`/projects/${projetId}/visibility`, {
+    method: 'PATCH',
+    body: JSON.stringify({ isPublic: false }),
+  });
+  return statut === 200 ? 'remis privé' : false;
+});
+
 // ── Les écritures revenues du froid ────────────────────────────────────────
 //
 // Une modification faite sans réseau part en file d'attente et n'arrive au

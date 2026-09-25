@@ -377,12 +377,23 @@ export interface PublicProject {
   title: string;
   description: string | null;
   created_at: string;
+  /**
+   * Le nom du porteur, tel qu'il a choisi de l'afficher — jamais son adresse.
+   *
+   * `null` quand il n'en a pas renseigné. Ce n'est pas « Anonyme » : il n'a
+   * pas choisi l'anonymat, il n'a pas rempli le champ. L'écran le dit avec ses
+   * mots plutôt que d'inventer une intention (article 21).
+   */
+  porteur: string | null;
 }
 
 export interface CommunityComment {
   id: string;
   project_id: string;
+  /** Sert à reconnaître ses propres commentaires, pas à les afficher. */
   author_id: string;
+  /** Le nom de l'auteur, ou null s'il n'en a pas renseigné. */
+  auteur: string | null;
   content: string;
   created_at: string;
 }
@@ -855,7 +866,12 @@ export interface MarketplaceProfile {
   expertise: string[];
   created_at: string;
   updated_at: string;
-  user?: { id: string; email: string };
+  /**
+   * L'annuaire ne porte plus l'adresse email : une requête livrait tous les
+   * inscrits, et rien ne l'affichait. On écrit à quelqu'un par la mise en
+   * relation interne, pas en lui prenant son adresse (article 13).
+   */
+  user?: { id: string; profile: { display_name: string | null } | null };
 }
 
 export interface MarketplaceContact {

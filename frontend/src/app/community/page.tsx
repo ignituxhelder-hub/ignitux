@@ -73,6 +73,12 @@ export default function CommunityPage() {
         {projects.map((project) => (
           <Link className="project-item" href={`/community/${project.id}`} key={project.id}>
             <h3>{project.title}</h3>
+            {/* Le porteur, parce qu'une idée exposée sans son auteur ne lui
+                laisse aucune reconnaissance (article 21). Son nom d'affichage
+                seulement — jamais son adresse, qui reste privée. */}
+            <p className="muted" style={{ fontSize: 'var(--texte-etiquette)', margin: '0 0 0.35rem' }}>
+              {project.porteur ? `Porté par ${project.porteur}` : 'Porteur sans nom affiché'}
+            </p>
             {project.description && <p>{project.description}</p>}
           </Link>
         ))}

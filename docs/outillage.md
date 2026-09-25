@@ -281,7 +281,27 @@ Ce qui manquera au moment de verser pour de vrai :
 | **Collecteur d'erreurs** | les `Logger.error` déjà écrits ne sont lus par personne | non |
 | **Fournisseur d'email** | réinitialisation de mot de passe et vérification d'adresse n'aboutissent pas | non |
 | **Stripe** | encaisser les 20 €/mois | non |
-| **Sauvegardes vérifiées** | une restauration jamais testée n'est pas une sauvegarde | à confirmer dans la console |
+| **Sauvegardes vérifiées** | une restauration jamais testée n'est pas une sauvegarde | à confirmer dans la console — voir la note ci-dessous |
+
+> **Note du 25 septembre 2026 — ce qui a été fait, et ce qui ne peut pas l'être
+> d'ici.** `node backend/scripts/verifier-sauvegarde.mjs` lit une sauvegarde
+> sans aucune base : manifeste, présence et lisibilité des 50 fichiers,
+> décomptes conformes, et surtout **fermeture référentielle** — chaque clé
+> étrangère pointe-t-elle vers une ligne présente ? Sur la dernière sauvegarde :
+> 2 206 références suivies, aucune perdue. Éprouvé contre une sauvegarde abîmée
+> exprès, qui est bien refusée.
+>
+> C'est le contrôle qui décide, parce que `restauration.mjs` insère par tours
+> successifs : une référence orpheline fait échouer la restauration pendant un
+> incident, au moment où personne n'a le temps de comprendre.
+>
+> Ce que ça ne remplace pas : une restauration réelle, qui demande une base
+> jetable. Il n'y en a pas ici — ni Docker, ni Postgres local — et créer une
+> quatrième base sur l'instance partagée est une décision qui appartient au
+> porteur. Une restauration a été exercée une fois (185 lignes, zéro écart).
+>
+> Et les sauvegardes de l'hébergeur restent à vérifier dans sa console : c'est
+> une autre question, et elle n'est pas dans le code.
 
 ## 4. Outils facultatifs — plus tard, et pour une raison précise
 

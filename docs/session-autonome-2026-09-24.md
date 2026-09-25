@@ -829,3 +829,117 @@ Annulé, puis mes changements réappliqués à la main : **52 lignes** au lieu d
 434.
 
 Rien n'a été déployé.
+
+---
+
+## 11. L'inventaire de ce qui manque, et ce qui a été résolu
+
+25 septembre, sur demande : regarder tout ce qui manque encore, et le régler.
+La première moitié du travail a été de chercher pour de vrai, plutôt que de
+relire la liste que les documents portaient déjà.
+
+### 11.1 Ce que l'inventaire a donné
+
+Le code ne porte **aucun** `TODO`, `FIXME` ni `pas encore implémenté` — vérifié
+sur les deux moitiés du produit. Les documents, eux, listaient cinq manques :
+hébergement, collecteur d'erreurs, fournisseur d'email, paiement, sauvegardes
+vérifiées.
+
+Quatre des cinq demandent un compte chez un tiers, et ne sont donc pas de mon
+ressort. Le cinquième l'était à moitié, et c'est traité plus bas.
+
+**Mais chercher dans le code a donné trois choses que la liste ne portait
+pas**, et elles étaient plus graves que ce qu'elle portait.
+
+### 11.2 Un projet public s'affichait sans son porteur
+
+`GET /community/projects` rendait un titre, une description et une date.
+**Aucun auteur.** L'article 21 dit pourtant : « Les créateurs conservent la
+reconnaissance de leurs idées. » Une idée exposée sans son porteur ne lui en
+laisse aucune.
+
+Les commentaires souffraient du trou inverse : ils partaient avec un
+`author_id`, c'est-à-dire un identifiant technique que personne ne peut lire.
+Un encouragement signé d'un UUID n'encourage personne.
+
+Ce qui est exposé désormais : le **nom d'affichage**, et lui seul — jamais
+l'adresse. Et quand la personne n'en a pas renseigné, on rend `null`, pas
+« Anonyme » : elle n'a pas choisi de se cacher, elle n'a pas rempli le champ.
+L'écran le dit avec ses mots.
+
+**L'article 21 passe de `declared` à `enforced`**, et cette fois le produit a
+changé en même temps que l'étiquette. La règle `projet-public-sans-porteur`
+refuse de servir un projet public dont la requête n'a pas ramené son porteur.
+Elle ne vérifie pas que le nom existe — une personne sans nom d'affichage n'est
+pas une violation ; elle empêche que l'attribution disparaisse du code sans que
+rien ne s'y oppose.
+
+### 11.3 L'annuaire distribuait les adresses email
+
+`GET /marketplace/profiles` renvoyait l'**adresse email** de chaque mentor et
+de chaque investisseur inscrit, à n'importe quelle personne connectée. Une
+requête, tout l'annuaire.
+
+Et l'interface ne l'affichait **nulle part**. Une exposition sans le moindre
+usage, ce qui est la pire des deux moitiés : tout le risque, aucun bénéfice.
+Elle n'est d'ailleurs pas nécessaire — le produit a une mise en relation
+interne pour écrire à quelqu'un sans connaître son adresse.
+
+Retirée. Ce qui reste : l'identifiant, et le nom d'affichage.
+
+### 11.4 Une adresse était transmise sans que personne le dise
+
+Le destinataire d'un message voit l'adresse de qui lui écrit. C'est
+défendable : c'est le seul canal de retour, le produit n'ayant pas de
+messagerie interne. Mais la personne qui écrivait ne l'apprenait nulle part.
+
+L'écran le dit maintenant **avant** d'écrire : « En écrivant, tu lui donnes ton
+adresse email : c'est par là qu'il ou elle pourra te répondre. » Une adresse
+donnée et une adresse prise ne sont pas la même chose.
+
+### 11.5 Une sauvegarde qu'on peut enfin vérifier
+
+`node backend/scripts/verifier-sauvegarde.mjs` lit une sauvegarde **sans
+aucune base** : manifeste, présence et lisibilité des 50 fichiers, décomptes
+conformes, et surtout la **fermeture référentielle** — chaque clé étrangère
+pointe-t-elle vers une ligne présente dans la même sauvegarde ?
+
+C'est le contrôle qui décide, parce que `restauration.mjs` insère par tours
+successifs : une référence orpheline fait échouer la restauration pendant un
+incident, au moment où personne n'a le temps de comprendre. Sur la dernière
+sauvegarde : **2 206 références suivies, aucune perdue**. Et la commande sait
+refuser — éprouvée contre une sauvegarde abîmée exprès, elle nomme les deux
+relations cassées.
+
+Le graphe des 58 relations est lu sur `schema.prisma`, pas recopié : écrit à la
+main, il se tromperait en silence le jour où quelqu'un ajoute une relation.
+
+Ce qu'elle ne remplace pas : une restauration réelle, qui demande une base
+jetable. Il n'y en a pas ici — ni Docker, ni Postgres local — et créer une
+quatrième base sur l'instance partagée est une décision qui t'appartient.
+
+### 11.6 Une faute de ma part, et ce qui l'a attrapée
+
+La relation s'appelle `owner` sur `projects`. J'ai écrit `user`. **Toute la
+communauté a répondu 500**, et les tests unitaires sont restés au vert — ils
+simulent Prisma, donc ils vérifiaient consciencieusement la forme que je venais
+d'inventer.
+
+Ce qui l'a vu est un appel contre une vraie base. J'en ai fait six tests de
+bout en bout (`test/communaute.e2e-spec.ts`), pour que la prochaine fois ce
+soit la CI qui le dise et non une commande qu'il faut penser à lancer.
+
+### 11.7 Ce qui reste, et qui ne dépend pas de moi
+
+| Ce qui manque | Pourquoi ce n'est pas de mon ressort |
+|---|---|
+| Hébergement | un compte, une carte, une décision |
+| Domaine | idem |
+| Fournisseur d'email | idem — mais le chemin SMTP est éprouvé, 11/11 |
+| Paiement | demande un SIRET |
+| Collecteur d'erreurs | un compte chez un tiers |
+| Sauvegardes de l'hébergeur | se vérifient dans sa console |
+| Les « Gardiens » (article 17) | une décision de gouvernance, pas du code |
+| Une restauration réellement rejouée | demande une base jetable — à créer, ou pas |
+
+Rien n'a été déployé.

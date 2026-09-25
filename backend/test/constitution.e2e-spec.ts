@@ -43,7 +43,7 @@ describe('Constitution et données personnelles (e2e)', () => {
       expect([...new Set(response.body.map((a: { version: string }) => a.version))]).toEqual(['v1']);
     });
 
-    it('déclare 11 articles appliqués, chacun couvert par une règle', async () => {
+    it('déclare 12 articles appliqués, chacun couvert par une règle', async () => {
       const [articles, rules] = await Promise.all([
         api(app).get('/constitution/articles').set(...auth(account)).expect(200),
         api(app).get('/constitution/rules').set(...auth(account)).expect(200),
@@ -54,7 +54,13 @@ describe('Constitution et données personnelles (e2e)', () => {
       );
       const covered = new Set(rules.body.map((r: { articleSlug: string }) => r.articleSlug));
 
-      expect(enforced).toHaveLength(11);
+      // Le nombre est écrit en dur, et c'est voulu : il rend le passage d'un
+      // article de « déclaré » à « appliqué » visible dans une revue, au lieu
+      // de le laisser glisser. Le 25/09/2026 il passe de 11 à 12 —
+      // l'article 21 (Protection des Idées), désormais tenu par la règle
+      // `projet-public-sans-porteur`, après qu'on a découvert qu'un projet
+      // public s'affichait sans son porteur.
+      expect(enforced).toHaveLength(12);
       for (const article of enforced) {
         // L'article 24 se vérifie par un test du corpus, pas par une
         // règle d'exécution : il porte sur la Constitution elle-même.

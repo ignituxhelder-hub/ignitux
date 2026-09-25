@@ -36,6 +36,8 @@ export type ConstitutionAction =
   | { kind: 'persist_memory'; hasAuthor: boolean }
   /** Un projet est créé : il doit naître privé. (art. 13) */
   | { kind: 'create_project'; isPublic: boolean }
+  /** Un projet public s'apprête à être servi à d'autres personnes. (art. 21) */
+  | { kind: 'expose_public_project'; carriesAuthor: boolean }
   /** Une règle propre à un pays s'apprête à être semée. (art. 15) */
   | { kind: 'publish_local_rule'; country: string; slug: string; sourceUrl: string | null }
   /** La répartition du capital s'apprête à changer. (art. 22) */
@@ -238,6 +240,21 @@ export const CONSTITUTION_RULES: readonly ConstitutionRule[] = [
       if (action.kind !== 'persist_memory') return null;
       if (!action.hasAuthor) {
         return "Un souvenir s'apprête à être enregistré sans auteur identifié.";
+      }
+      return null;
+    },
+  },
+  {
+    id: 'projet-public-sans-porteur',
+    articleSlug: 'v1-21-protection-des-idees',
+    severity: 'blocking',
+    description:
+      "Un projet exposé publiquement porte le nom de son porteur. Une idée montrée sans " +
+      "son auteur ne lui laisse aucune reconnaissance.",
+    check(action) {
+      if (action.kind !== 'expose_public_project') return null;
+      if (!action.carriesAuthor) {
+        return "Un projet public s'apprête à être servi sans l'attribution de son porteur.";
       }
       return null;
     },
