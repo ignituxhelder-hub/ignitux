@@ -163,9 +163,26 @@ export default function InvestorSpacePage() {
           <div className="card" style={{ marginTop: '1.5rem' }}>
             <h2 style={{ marginTop: 0 }}>Mes investissements</h2>
             {space.lines.length === 0 ? (
-              <p className="muted" style={{ marginBottom: 0 }}>
-                Aucun investissement enregistré pour l&apos;instant.
-              </p>
+              /*
+               * L'état vide disait « Aucun investissement enregistré » et
+               * s'arrêtait là. L'explication existe bien — dans la carte
+               * « Mon identifiant », juste au-dessus — mais elle est lue
+               * avant qu'on se pose la question. Quelqu'un qui arrive ici
+               * voit un portefeuille vide et aucune liste de projets : sans
+               * ce rappel, la lecture la plus naturelle est « le produit ne
+               * marche pas », pas « personne ne m'a encore enregistré ».
+               */
+              <>
+                <p className="muted" style={{ marginTop: 0 }}>
+                  Aucun investissement enregistré pour l&apos;instant.
+                </p>
+                <p className="muted" style={{ marginBottom: 0 }}>
+                  C&apos;est normal tant que personne ne t&apos;a inscrit : Ignitux tient le
+                  registre de tes investissements, il ne les organise pas. Un apport apparaît
+                  ici quand le porteur du projet l&apos;enregistre, avec l&apos;identifiant
+                  ci-dessus.
+                </p>
+              </>
             ) : (
               <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                 {space.lines.map((ligne) => (

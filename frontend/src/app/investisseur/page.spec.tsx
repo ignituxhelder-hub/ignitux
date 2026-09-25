@@ -87,6 +87,51 @@ describe('InvestorSpacePage', () => {
     expect(within(global).getByText('-3 450,00 €')).toBeInTheDocument();
   });
 
+  /**
+   * LE PORTEFEUILLE VIDE.
+   *
+   * Un investisseur qui arrive voit un portefeuille à zéro et aucune liste de
+   * projets — parce qu'Ignitux tient le registre des investissements, il ne
+   * les organise pas : c'est le porteur du projet qui enregistre un apport.
+   *
+   * L'explication existe dans la carte « Mon identifiant », juste au-dessus,
+   * mais elle se lit AVANT qu'on se pose la question. Sans rappel à l'endroit
+   * du vide, la lecture la plus naturelle est « le produit ne marche pas ».
+   */
+  it('explique le portefeuille vide au lieu de le constater', async () => {
+    mockApiRoutes(
+      routes({
+        'GET /espaces/investisseur': {
+          status: 200,
+          body: espace({
+            lines: [],
+            global: {
+              investedCents: 0,
+              repaidCents: 0,
+              dividendsCents: 0,
+              gainsCents: 0,
+              netCents: 0,
+              projectCount: 0,
+            },
+          }),
+        },
+      }),
+    );
+
+    render(
+      <AuthProvider>
+        <InvestorSpacePage />
+      </AuthProvider>,
+    );
+
+    expect(
+      await screen.findByText(/Aucun investissement enregistré pour l'instant/),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/le porteur du projet l'enregistre/)).toBeInTheDocument();
+    // Et il dit que c'est normal : sans cela, le vide se lit comme une panne.
+    expect(screen.getByText(/C'est normal tant que personne ne t'a inscrit/)).toBeInTheDocument();
+  });
+
   it('montre la part détenue en pourcentage', async () => {
     mockApiRoutes(routes());
 

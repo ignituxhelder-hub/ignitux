@@ -3,26 +3,96 @@
 25 septembre 2026. Commandé en cinq étapes, avec une consigne que ce document
 prend au sérieux : **ne rien supposer, vérifier le code.**
 
-C'est pourquoi il commence en corrigeant les chiffres de la commande elle-même.
+C'est pourquoi il commence en corrigeant les chiffres de la commande elle-même,
+et pourquoi chaque affirmation porte la marque de ce qui l'établit.
+
+## Comment lire ce document
+
+Chaque fait porte l'une de ces trois marques :
+
+| Marque | Sens |
+|---|---|
+| **[mesuré]** | exécuté aujourd'hui, 25 septembre 2026 |
+| **[lu]** | lu dans le code aujourd'hui, sans l'exécuter |
+| **[consigné]** | mesuré lors d'une session antérieure et écrit dans `docs/` |
+
+Ce qui ne porte aucune marque est un **jugement** : une estimation d'effort,
+une priorité, une date. Ils sont discutables, et c'est voulu.
+
+### Sommaire
+
+1. [Les chiffres, corrigés](#préambule--les-chiffres-corrigés)
+2. [Étape 1 — Audit des bloquants](#étape-1--audit-des-bloquants)
+3. [Étape 2 — Expérience utilisateur](#étape-2--expérience-utilisateur)
+4. [Étape 3 — Données à l'inscription](#étape-3--données-à-linscription)
+5. [Étape 4 — Investisseurs à 10 000](#étape-4--le-module-investisseurs-à-10 000-investisseurs)
+6. [Étape 5 — Plan de lancement](#étape-5--plan-de-lancement)
+7. [Les réponses demandées](#les-réponses-demandées)
+8. [Ce que cet audit n'a pas pu vérifier](#ce-que-cet-audit-na-pas-pu-vérifier)
 
 ---
 
-## Préambule — les chiffres, mesurés
+## En une page
 
-| | Annoncé | Mesuré aujourd'hui |
+**Un seul bloquant absolu** pour une bêta privée : l'hébergement, et le `https`
+qui vient avec. L'email n'en est pas un — **[lu]** aucune garde ne lit
+`email_verified_at`, un compte non vérifié a le produit entier.
+
+**Le parcours entrepreneur tient.** **[mesuré]** douze étapes, aucun constat.
+
+**Le parcours investisseur n'existe pas**, et c'est structurel. Le module est un
+registre tenu par le porteur ; un investisseur ne peut ni découvrir un projet ni
+investir. Le code a raison d'être prudent — c'est réglementé — et il l'explique
+déjà à l'écran. Ce qui manque est le chemin, pas l'explication.
+
+**Une contradiction chiffrée bloque la phase payante.** **[lu]** Construction
+vend 150 analyses pour 59 € ; le plafond de coût par utilisateur vaut 2 €/mois.
+Le garde-fou coupe vers la 34ᵉ.
+
+**À 10 000 investisseurs**, la première chose qui casse est l'écran du porteur,
+pas celui de l'investisseur.
+
+---
+
+## Préambule — les chiffres, corrigés
+
+**[mesuré]** aujourd'hui, par comptage direct. Les totaux incluent les sept
+tests écrits pendant cet audit même — six pour le cas hybride, un pour l'état
+vide du portefeuille :
+
+| | Annoncé dans la commande | Réel |
 |---|---:|---:|
 | Modèles Prisma | 47 | **50** |
-| Tests backend | 765 | **1 069** unitaires + **264** bout en bout |
-| Tests frontend | 272 | **373** |
-| Écrans | — | 24 |
+| Tests backend | 765 | **1 069** unitaires + **270** bout en bout |
+| Tests frontend | 272 | **374** |
+| **Total des tests** | — | **1 713** |
+| Écrans (`page.tsx`) | — | 24 |
 | Routes HTTP | — | 165 |
 
 L'écart n'est pas anodin : il dit que le projet est **plus avancé** que la
 mémoire qu'on en a. C'est une bonne nouvelle et un piège — on refait parfois ce
 qui existe déjà.
 
-Tout ce qui suit a été lu dans le code ou exécuté. Quand je n'ai pas pu
-vérifier, je l'écris.
+### L'état des harnais, aujourd'hui
+
+**[mesuré]** Six commandes exécutent le produit pour de vrai, dont quatre
+pilotent un navigateur :
+
+| Commande | Verdict du jour |
+|---|---|
+| `validation-reelle.mjs` | **70 vérifiés · 0 échec · 2 non prouvés** (sur 75) |
+| `simulation-beta.mjs --sans-ia` | 0 critique · 0 majeur · **1 moyen** |
+| `traversee-ecrans.mjs` | 0 constat |
+| `traversee-ecrans.mjs --telephone` | 0 moyen · 3 mineurs, laissés exprès |
+| `parcours-premier-utilisateur.mjs` | 0 constat |
+| `hors-ligne.mjs` | 7/7 |
+| `courrier-reel.mjs` | 11/11 |
+| `verifier-sauvegarde.mjs` | 4/4 — 2 206 références, aucune perdue |
+
+Les deux « non prouvés » de la validation : l'analyse IA, qu'on ne lance pas à
+chaque fois parce qu'elle coûte, et le parcours complet du mot de passe oublié,
+qui exige un fournisseur. Le moyen de la simulation est le même sujet : sans
+budget IA, le refus d'une hypothèse absurde n'est pas éprouvé.
 
 ---
 
@@ -30,190 +100,184 @@ vérifier, je l'écris.
 
 ### A. Bloquant absolu pour une bêta privée
 
-**A1. Aucun hébergement.**
-*Impact* : le produit n'existe pas en dehors de ce portable. C'est le seul
-élément de tout ce document qui empêche littéralement quelqu'un d'ouvrir
-Ignitux. *Risque* : nul, techniquement — les deux images Docker se construisent
-en CI et l'image du serveur démarre pour de vrai (test de fumée). *Effort* : une
-demi-journée. *Priorité* : 1.
+| # | Élément | Impact | Risque | Effort | Priorité |
+|---|---|---|---|---|---|
+| A1 | **Aucun hébergement** | le produit n'existe pas hors de ce portable | nul techniquement : les deux images se construisent en CI et le serveur démarre pour de vrai **[consigné]** | ½ journée | **1** |
+| A2 | **`FRONTEND_URL` en `https`** | le préflight **refuse de démarrer** **[mesuré]** | aucun — c'est un refus volontaire | inclus dans A1 | **1** |
 
-**A2. `FRONTEND_URL` doit être en `https`.**
-*Impact* : le préflight de production **refuse de démarrer** sans. Ce n'est pas
-une pédanterie : un jeton de session en clair s'intercepte sur n'importe quel
-réseau partagé. *Risque* : aucun, c'est un refus volontaire. *Effort* : inclus
-dans A1 (domaine + certificat). *Priorité* : 1.
+**Et c'est tout.** Deux éléments, un seul obstacle réel.
 
-**Et c'est tout.** L'email n'en fait pas partie, et c'est vérifié : `grep` sur
-tout le backend montre que `email_verified_at` n'est **lu par aucune garde**. Un
-compte non vérifié a le produit entier. La bêta privée peut donc s'ouvrir avec
-`MAIL_TRANSPORT="log"` et `backend/scripts/lien-mot-de-passe.mjs` pour les
-oublis de mot de passe.
+**Pourquoi l'email n'y figure pas** — **[lu]** `email_verified_at` n'est lu par
+aucune garde du backend : un compte non vérifié accède au produit entier. La
+bêta peut donc s'ouvrir en `MAIL_TRANSPORT="log"`, avec
+`backend/scripts/lien-mot-de-passe.mjs` pour les oublis de mot de passe.
 
 ### B. Important, mais non bloquant
 
-**B1. Collecteur d'erreurs.** Les `Logger.error` existent, écrits avec soin,
-avec une référence pour chaque erreur. Personne ne les lit. *Risque* : le
-premier bogue en production se découvrira par un message d'un utilisateur, pas
-par une alerte. *Effort* : 2 h. *Priorité* : 2 — à poser **le jour** de la mise
-en ligne, pas après.
+| # | Élément | Impact | Risque | Effort | Priorité |
+|---|---|---|---|---|---|
+| B1 | **Collecteur d'erreurs** | les `Logger.error` existent, avec une référence par erreur ; personne ne les lit | le premier bogue se découvre par un message d'utilisateur | 2 h | **2** — le jour de la mise en ligne |
+| B2 | **Fournisseur d'email** | deux parcours s'arrêtent net sans lui | tenable à 30 personnes avec la commande de secours, intenable au-delà | 2 h + ½ journée SPF/DKIM/DMARC | **2** |
+| B3 | **Sauvegarde planifiée** | les scripts existent, **rien ne les lance** | une sauvegarde qu'on doit penser à faire n'existe pas le jour venu | 1 h après A1 | **2** |
+| B4 | **Suite de tests non déterministe** | une exécution a rendu 2 échecs, la suivante 0, sans rien changer **[mesuré]** | le jour où deux échecs sont réels, ils passeront pour du bruit | ½ journée | **2** |
+| B5 | **Personne ne prouve son adresse** | on s'inscrit avec l'adresse d'un autre | acceptable entre gens qu'on connaît ; porte ouverte en public | 2 h — la vérification existe, il suffit de l'exiger | **3**, mais bloquant en phase 3 |
+| B6 | **L'investisseur ne peut rien faire** | voir étape 2 | abandon au premier écran — atténué le 25 septembre : l'état vide s'explique | ½ journée pour l'écran par projet | **2** si la bêta a des investisseurs, **4** sinon |
 
-**B2. Fournisseur d'email.** Le chemin SMTP est éprouvé de bout en bout sans
-fournisseur (`scripts/courrier-reel.mjs`, 11/11, dans la CI) : il ne reste
-qu'un compte et un mot de passe. *Risque* : tenable à 30 personnes avec la
-commande de secours ; intenable au-delà. *Effort* : 2 h de branchement, une
-demi-journée avec SPF/DKIM/DMARC. *Priorité* : 2.
-
-**B3. Aucune sauvegarde planifiée.** `sauvegarde.mjs` existe et
-`verifier-sauvegarde.mjs` prouve qu'une sauvegarde est restaurable (2 206
-références suivies, aucune perdue). **Rien ne les lance.** *Risque* : une
-sauvegarde qu'on doit penser à faire n'existe pas le jour où on en a besoin.
-*Effort* : 1 h une fois l'hébergement en place. *Priorité* : 2.
-
-**B4. La suite de tests n'est pas déterministe.** Une exécution a rendu
-« 2 échecs / 1 067 » ; la suivante, sans rien changer, « 1 069 / 1 069 ».
-*Impact* : une suite qui ne se reproduit pas cesse d'être une preuve — et on
-prend l'habitude de relancer au lieu de regarder. *Risque* : le jour où deux
-échecs sont réels, ils passeront pour du bruit. *Effort* : une demi-journée
-d'instrumentation. *Priorité* : 2. **C'est le point le plus sous-estimé de
-cette liste.**
-
-**B5. Personne ne prouve son adresse.** Aucune route n'exige la vérification.
-En bêta privée entre gens qu'on connaît, c'est le bon réglage. À l'ouverture
-publique, c'est une porte : on s'inscrit avec l'adresse de quelqu'un d'autre.
-*Effort* : 2 h (la vérification existe, il suffit de l'exiger). *Priorité* : 3,
-mais **bloquante pour la phase 3**.
-
-**B6. L'investisseur ne peut rien faire.** Détaillé à l'étape 2. *Priorité* : 2
-si la bêta comprend des investisseurs, 4 sinon.
+**B4 est le plus sous-estimé de cette liste.** Une suite qui ne se reproduit pas
+cesse d'être une preuve, et on prend l'habitude de relancer au lieu de regarder.
 
 ### C. Peut attendre après le lancement
 
-`localStorage` → IndexedDB (plafond de 60 entrées, déclencheur écrit) ·
-`pg_trgm`/`unaccent` (au premier ralentissement de recherche) · `pg_cron` ·
-`vector` (au-delà de ~100 souvenirs par projet) · stockage objet (première pièce
-jointe) · les « Gardiens » de l'article 17 (décision de gouvernance, pas du
-code) · pagination du module investisseurs (voir étape 4 : déclenchée par le
-succès, pas par le temps).
+Chacun a un **déclencheur écrit**, pas une date :
+
+| Élément | Déclencheur |
+|---|---|
+| `localStorage` → IndexedDB | quand 60 entrées de cache gênent |
+| `pg_trgm` / `unaccent` | au premier ralentissement de recherche |
+| `pg_cron` | à la première relance automatique |
+| `vector` | au-delà de ~100 souvenirs par projet |
+| Stockage objet | à la première pièce jointe |
+| Pagination du module investisseurs | voir étape 4 — déclenchée par le succès |
+| Les « Gardiens » (article 17) | décision de gouvernance, pas du code |
 
 ---
 
 ## ÉTAPE 2 — Expérience utilisateur
 
-### Cas 1 — Entrepreneur : **le parcours tient**
+### Cas 1 — Entrepreneur : le parcours tient
 
-Mesuré, pas supposé : `scripts/parcours-premier-utilisateur.mjs` suit douze
-étapes en ne cliquant **que ce qui est visible** — aucun appel d'API, aucune
-URL tapée. Verdict actuel : **0 critique, 0 majeur, 0 moyen**.
+**[mesuré]** `parcours-premier-utilisateur.mjs` suit douze étapes en ne cliquant
+**que ce qui est visible** — aucun appel d'API, aucune URL tapée. Verdict :
+**0 critique, 0 majeur, 0 moyen**.
 
-Inscription → rôle → premier projet → ouverture du projet → prochaine étape
-nommée → ajout d'une tâche → retour aux projets → offres. Tout passe.
+| Ce qui existe | Ce qui manque | Ce qui est confus | Risque d'abandon |
+|---|---|---|---|
+| Inscription, rôle, projet, analyse, tâches, offres — bout en bout | rien que les harnais détectent | rien qui subsiste | aucun mesuré |
 
-L'analyse IGINI fonctionne avec de vrais appels Claude (0,046 € l'unité), et
-dit la vérité quand le projet ne tient pas : le profil de test « entreprise
-spatiale avec 500 € et aucune formation » reçoit **2/10 et cinq risques**.
+**[consigné]** L'analyse IGINI fonctionne avec de vrais appels Claude et dit la
+vérité quand le projet ne tient pas. **Non remesuré aujourd'hui** : cela coûte
+du budget, et c'est précisément le « non prouvé » de la validation.
 
-**Ce qui reste confus** : rien que les harnais détectent encore. Les trois
-derniers constats sont des liens de navigation dans une phrase, laissés
-volontairement.
-
-### Cas 2 — Investisseur : **le parcours n'existe pas**
+### Cas 2 — Investisseur : le parcours n'existe pas
 
 C'est la trouvaille principale de cet audit, et elle est structurelle.
 
-| Étape demandée | État réel |
-|---|---|
-| Inscription | ✅ identique à l'entrepreneur |
-| Activation du rôle investisseur | ✅ écran `/roles`, puis `/investisseur` |
-| **Découverte des projets** | ❌ **aucune route, aucun écran** |
-| **Investissement** | ❌ **impossible depuis le produit** |
-| Suivi des participations | ✅ `/investisseur` |
-| Remboursements | ⚠️ visibles, jamais reçus |
-| Dividendes | ⚠️ visibles, jamais reçus |
+| Étape demandée | État | Établi par |
+|---|---|---|
+| Inscription | ✅ identique à l'entrepreneur | [mesuré] |
+| Activation du rôle | ✅ `/roles` puis `/investisseur` | [mesuré] |
+| **Découverte des projets** | ❌ **aucune route, aucun écran** | [lu] |
+| **Investissement** | ❌ **impossible depuis le produit** | [lu] |
+| Suivi des participations | ✅ `/investisseur` | [lu] |
+| Remboursements | ⚠️ visibles, jamais reçus | [lu] |
+| Dividendes | ⚠️ visibles, jamais reçus | [lu] |
 
-Le module est un **registre**, pas une place d'investissement. Toutes les
-écritures sont réservées au **porteur du projet** :
-`POST /projets-finances/:id/participations` s'appuie sur
-`requireOwnedFinancedProject(ownerId, …)` — c'est l'entrepreneur qui
-*enregistre* qui a investi, après un accord conclu ailleurs. L'investisseur est
-un **lecteur de son propre registre**.
+**[lu]** Le module est un **registre**, pas une place d'investissement. Toutes
+les écritures sont réservées au porteur : `POST /projets-finances/:id/participations`
+s'appuie sur `requireOwnedFinancedProject(ownerId, …)`. C'est l'entrepreneur qui
+*enregistre* qui a investi, après un accord conclu ailleurs.
+
+**[mesuré]** La simulation le confirme sans le vouloir : le profil 10, un
+investisseur, obtient « rôle investisseur pris » puis
+« **0 projet(s) visibles publiquement** ».
 
 **Est-ce un défaut ?** Non, si c'est assumé : proposer d'investir en ligne est
 une activité réglementée (statut CIF ou PSFP en France), et `docs/outillage.md`
-range Mangopay/Lemonway sous « après la réponse juridique ». Le code est donc
-prudent, et il a raison de l'être.
+range Mangopay/Lemonway sous « après la réponse juridique ». Le code est prudent,
+et il a raison.
 
-**Mais le produit ne le dit nulle part.** Un investisseur qui arrive sur
-`/investisseur`, voit « Mon portefeuille » vide et aucune liste de projets,
-conclut que le produit est cassé. **C'est le premier risque d'abandon du
-parcours investisseur, et il se règle avec une phrase, pas avec un module.**
+| Ce qui existe | Ce qui manque | Ce qui est confus | Risque d'abandon |
+|---|---|---|---|
+| Portefeuille global et par projet, historique complet, corrections tracées, **et une carte « Mon identifiant » qui explique que le porteur enregistre l'apport** | la découverte, l'investissement, l'écran par projet | l'explication se lit **avant** qu'on se pose la question ; l'état vide ne la rappelait pas | **moyen** : un portefeuille vide sans liste de projets peut se lire comme un produit cassé |
 
-**Écrans manquants, par ordre d'utilité :**
+> **Correction du 25 septembre, en cours d'audit.** Une première version de ce
+> document affirmait que « le produit ne dit nulle part » comment un
+> investissement entre au registre. **C'était faux**, et la lecture du code l'a
+> montré : la carte « Mon identifiant » l'explique — « Communique cet
+> identifiant au porteur d'un projet pour qu'il enregistre ton apport » — et
+> elle s'affiche **avant** le portefeuille.
+>
+> Ce qui restait vrai est plus petit : l'état vide se contentait de constater
+> « Aucun investissement enregistré ». C'est corrigé, avec un test.
+>
+> L'erreur vaut d'être gardée ici : un audit qui ne relit pas ses propres
+> conclusions produit exactement le genre de constat qui fait refaire ce qui
+> existe déjà.
 
-1. **Une phrase sur `/investisseur` vide** qui dit comment un investissement
-   entre dans le registre (« c'est le porteur du projet qui l'enregistre »).
-   *Effort : 1 h.* C'est le meilleur rapport valeur/effort de tout ce document.
-2. **`/investisseur/projets/[id]`** — le détail d'un projet financé.
-   `GET /investisseurs/moi/projets/:financedProjectId` **existe déjà** et
-   n'est servi par aucun écran. *Effort : une demi-journée.*
+**Écrans manquants, par rapport valeur/effort :**
+
+1. ~~Une phrase sur `/investisseur` vide~~ — **fait le 25 septembre.** L'état
+   vide dit désormais que c'est normal, et pourquoi.
+2. **`/investisseur/projets/[id]`** — **[lu]**
+   `GET /investisseurs/moi/projets/:financedProjectId` existe déjà et n'est
+   servi par aucun écran. *½ journée.* **C'est désormais le premier manque.**
 3. Un accusé lisible quand un remboursement ou un dividende est enregistré.
-   *Effort : une demi-journée.*
+   *½ journée.*
 
-### Cas 3 — Hybride : **la règle existe, la preuve manque**
+### Cas 3 — Hybride : la règle existe, la preuve manque
 
-La séparation est tenue par une règle **bloquante** du moteur
-constitutionnel, `roles-separes` (article 13), appelée depuis
-`roles.service.ts` : une vue servie sous un rôle ne peut contenir que les
-domaines de ce rôle, et le catalogue garantit que deux rôles n'en partagent
-aucun.
+**[lu]** La séparation est tenue par une règle **bloquante**, `roles-separes`
+(article 13), appelée depuis `roles.service.ts` : une vue servie sous un rôle ne
+peut contenir que les domaines de ce rôle, et le catalogue garantit que deux
+rôles n'en partagent aucun.
 
-Vérifié aussi côté données : « investir n'ouvre pas le projet — ni lecture, ni
-description » est un contrôle de `validation-reelle.mjs`, vert.
+**[mesuré]** Côté données : « investir n'ouvre pas le projet — ni lecture, ni
+description » est un contrôle vert de la validation.
 
-**Ce qui manque est la preuve du cas hybride lui-même** : aucun test de bout en
-bout ne fait tenir les deux rôles à **la même personne** en même temps pour
-vérifier que son portefeuille n'additionne pas ses propres projets. La règle
-dit que ça ne peut pas arriver ; rien ne le constate. *Effort : 2 h.*
-*Priorité : 2* — c'est bon marché, et c'est exactement le genre de chose dont
-on veut la preuve avant d'ouvrir.
+| Ce qui existe | Ce qui manque | Ce qui est confus | Risque d'abandon |
+|---|---|---|---|
+| La règle, bloquante, son catalogue, **et depuis le 25 septembre six tests de bout en bout** | plus rien sur ce point | rien | faible |
+
+> **Fait le 25 septembre, en cours d'audit.** `test/roles-hybride.e2e-spec.ts`
+> **[mesuré, 6/6]** fait tenir les deux casquettes à la même personne : elle
+> porte un projet **et** a réellement investi 2 000 € dans celui de quelqu'un
+> d'autre.
+>
+> Les deux sens sont vérifiés, et c'est le point : l'espace investisseur compte
+> **un** projet — celui financé, pas celui porté — et l'espace entrepreneur
+> compte **un** projet — celui porté, pas celui financé. Aucun des deux ne
+> porte les mots de l'autre.
+>
+> La première version de ce test se contentait d'un portefeuille vide. Elle
+> passait, et ne prouvait rien : un zéro reste un zéro même quand la séparation
+> est cassée. C'est en la relisant que je l'ai vu.
 
 ---
 
 ## ÉTAPE 3 — Données à l'inscription
 
-**La stratégie progressive demandée existe déjà**, et elle est mieux faite que
-ce que la question suppose.
+**La stratégie progressive demandée existe déjà**, et elle est mieux faite que ce
+que la question suppose.
 
-L'inscription demande **deux choses** : une adresse et un mot de passe.
-`POST /users/signup` ne prend rien d'autre — vérifié.
+**[lu]** L'inscription demande **deux choses** : une adresse et un mot de passe.
+`POST /users/signup` ne prend rien d'autre.
 
-Le reste vit dans `backend/src/profile/profile-fields.ts`, où **chaque champ
-porte son moment** :
+**[lu]** Le reste vit dans `backend/src/profile/profile-fields.ts`, où **chaque
+champ porte son moment** :
 
-| Niveau | Moment déclaré | Champs |
+| Niveau demandé | Moment déclaré dans le code | Champs |
 |---|---|---|
-| 1 — Inscription | *(rien)* | email, mot de passe |
+| 1 — Inscription rapide | *(hors profil)* | email, mot de passe |
 | 2 — Complément profil | `accueil` | `display_name`, `investor_kind` |
 | 3 — Données métier | `premier-projet` | `activity_country`, `sectors`, `experience`, `availability` |
 | 4 — Données avancées | `au-besoin` | `has_founded_before`, `motivation`, `skills`, `investment_horizon`, `risk_level`, `preferred_sectors` |
 
 Chaque champ porte aussi une **question rédigée** (« Comment veux-tu qu'on
-t'appelle ? ») plutôt qu'une étiquette, et `GET /profil/a-demander/:moment`
-rend la liste du moment — un moment inconnu rend une liste vide plutôt qu'une
-erreur.
+t'appelle ? ») plutôt qu'une étiquette, et `GET /profil/a-demander/:moment` rend
+la liste du moment — un moment inconnu rend une liste vide plutôt qu'une erreur.
 
-Le principe « demander uniquement ce qui est nécessaire au moment où cela
-devient utile » est donc **déjà implémenté**, pas à construire.
+Le principe « demander uniquement ce qui est nécessaire au moment où cela devient
+utile » est donc **déjà implémenté**, pas à construire.
 
-**Les deux seules choses que je changerais :**
+### Les deux seules choses que je changerais
 
-1. **`display_name` mérite de monter au niveau 1.** Il est au moment `accueil`,
-   donc facultatif — et depuis hier, un projet rendu public affiche « Porteur
-   sans nom affiché » quand il manque. Le demander à l'inscription coûte un
-   champ et évite une reconnaissance perdue (article 21).
-2. **Rien d'autre.** La tentation à ce stade est d'ajouter des champs « utiles
-   plus tard ». Chacun coûte un abandon à l'inscription et ne sert que si
-   quelqu'un les lit. Aucun des champs existants n'est inutile ; aucun
-   manquant ne m'a paru nécessaire.
+1. **`display_name` mérite le niveau 1.** Il est au moment `accueil`, donc
+   facultatif — et depuis le 25 septembre, un projet rendu public affiche
+   « Porteur sans nom affiché » quand il manque. Le demander à l'inscription
+   coûte un champ et évite une reconnaissance perdue (article 21).
+2. **Rien d'autre.** La tentation est d'ajouter des champs « utiles plus tard ».
+   Chacun coûte un abandon et ne sert que si quelqu'un les lit. Aucun champ
+   existant n'est inutile ; aucun manquant ne m'a paru nécessaire.
 
 ---
 
@@ -221,120 +285,103 @@ devient utile » est donc **déjà implémenté**, pas à construire.
 
 ### Ce qui tient sans discussion
 
-**L'argent.** Tout en centimes entiers, aucun flottant nulle part. Les totaux
-sont **dérivés des lignes**, jamais stockés — le commentaire du code le dit :
-« un total qui se calcule deux fois finit par donner deux réponses ». C'est le
-bon choix comptable, et il tient à n'importe quelle échelle.
+| Sujet | État | Établi par |
+|---|---|---|
+| **L'argent** | centimes entiers, aucun flottant ; totaux **dérivés des lignes**, jamais stockés | [lu] |
+| **La séparation** | quatre règles bloquantes sur l'article 22 : `caisses-separees`, `rapprochement-dans-la-meme-caisse`, `investissements-non-melanges`, `majorite-du-porteur` | [lu] |
+| **Les index** | posés sur tous les chemins réels : `participations(investor_id, financed_project_id)`, `investor_movements(financed_project_id, occurred_on)` et `(investor_id, occurred_on)` | [lu] |
+| **L'irréversible** | rien ne s'efface : une correction est un mouvement qui en corrige un autre ; un investisseur qui part est détaché | [lu] |
 
-**La séparation.** Quatre règles bloquantes sur l'article 22 :
-`caisses-separees`, `rapprochement-dans-la-meme-caisse`,
-`investissements-non-melanges`, `majorite-du-porteur`. Un investisseur traverse
-les projets ; son argent, jamais.
-
-**Les index.** Correctement posés sur tous les chemins d'accès réels :
-`participations(investor_id, financed_project_id)`,
-`investor_movements(financed_project_id, occurred_on)` et
-`(investor_id, occurred_on)`. Rien à ajouter.
-
-**L'irréversible.** Rien ne s'efface : une correction est un mouvement qui en
-corrige un autre (`corrects_movement_id`). Un investisseur qui part est
-détaché, pas supprimé. Le registre d'un projet survit au projet.
+Le commentaire du code dit pourquoi les totaux ne sont pas stockés : « un total
+qui se calcule deux fois finit par donner deux réponses ». C'est le bon choix
+comptable, et il tient à n'importe quelle échelle.
 
 ### Ce qui casse à 10 000 — et c'est précis
 
-**Aucune pagination dans tout le module.** `grep` sur `take:`, `skip:`,
-`cursor:` dans `investors.service.ts` : **zéro**. Deux lectures en souffrent,
-et pas également :
+**[lu]** Aucune pagination dans tout le module : `grep` sur `take:`, `skip:`,
+`cursor:` dans `investors.service.ts` rend **zéro**. Deux lectures en souffrent,
+et pas également.
 
-**`projectRegister(...)` est le mur.** Elle charge *toutes* les participations
-d'un projet avec `include: { investor: true }`, *plus* tous ses mouvements. Un
-projet à 10 000 investisseurs, c'est 10 000 participations + 10 000 lignes
-d'investisseur + l'historique complet, dans une seule réponse. C'est l'écran du
-**porteur**, celui qu'il ouvrira le plus souvent.
-
-**`portfolio(investorId)` est le plafond.** Elle charge tous les mouvements de
-l'investisseur pour en dériver les totaux, à chaque affichage. Correct, et
-linéaire pour toujours : à 600 mouvements par an, un investisseur de dix ans
-recharge 6 000 lignes pour voir trois chiffres.
+| Lecture | Ce qu'elle charge | Gravité |
+|---|---|---|
+| `projectRegister(...)` | **toutes** les participations d'un projet avec `include: { investor: true }`, **plus** tous ses mouvements | **le mur** — et c'est l'écran du **porteur**, celui qu'il ouvre le plus souvent |
+| `portfolio(investorId)` | tous les mouvements de l'investisseur, à chaque affichage | **le plafond** — linéaire pour toujours : 6 000 lignes après dix ans pour afficher trois chiffres |
 
 **Le remède n'est pas de stocker les totaux** — ce serait défaire la seule
 décision comptable qui compte. C'est :
-- agréger **en base** (`groupBy`/`aggregate`) pour les chiffres ;
-- **paginer** les lignes, avec un curseur sur `(occurred_on, created_at)`, qui
-  est déjà l'ordre de tri et déjà indexé.
 
-*Effort : deux jours. Priorité : déclenchée par le succès, pas par le
-calendrier.* En dessous de ~200 investisseurs par projet, il n'y a rien à
-faire.
+- **agréger en base** (`groupBy` / `aggregate`) pour les chiffres ;
+- **paginer** les lignes, avec un curseur sur `(occurred_on, created_at)`, qui
+  est déjà l'ordre de tri **et déjà indexé**.
+
+*Effort : deux jours. Déclenché par le succès, pas par le calendrier* — en
+dessous de ~200 investisseurs par projet, il n'y a rien à faire.
 
 ### Ce qui manque pour qu'un investisseur suive son argent
 
-| Besoin | État |
+| Besoin exprimé | État |
 |---|---|
-| Comprendre son portefeuille | ✅ `/investisseur` : global + par projet, net négatif après investissement |
-| Comprendre chaque projet | ⚠️ **API oui, écran non** |
+| Comprendre son portefeuille | ✅ global et par projet ; le net passe **négatif** après un investissement, ce qui est juste |
+| Comprendre chaque projet | ⚠️ **l'API existe, l'écran non** |
 | Suivre son argent | ✅ historique complet, corrections tracées |
 | Recevoir ses remboursements | ❌ enregistrés, jamais versés |
-| Recevoir ses dividendes | ❌ idem — répartition au centime exact (méthode du plus fort reste), mais aucun versement |
+| Recevoir ses dividendes | ❌ idem — répartition au centime exact (plus fort reste), aucun versement |
 
-Les deux derniers ne sont pas des manques de code : ils demandent un
-prestataire de paiement, lui-même suspendu à une réponse juridique.
+Les deux derniers ne sont pas des manques de code : ils demandent un prestataire
+de paiement, lui-même suspendu à une réponse juridique.
 
 ---
 
 ## ÉTAPE 5 — Plan de lancement
 
-### Phase 0 — Préparation *(1 à 2 jours)*
+### Phase 0 — Préparation · *1 à 2 jours*
 
-**Objectif** : qu'Ignitux existe à une adresse.
-**Prérequis** : hébergement, domaine, certificat.
-**Fait dans la foulée** : collecteur d'erreurs, sauvegarde planifiée,
-fournisseur d'email.
-**Risque** : aucun risque technique. Le seul risque est de partir sans le
-collecteur d'erreurs et de déboguer à l'aveugle.
-**Sortie** : `verifier-production.mjs` rend 0 bloquant.
+| | |
+|---|---|
+| **Objectif** | qu'Ignitux existe à une adresse |
+| **Prérequis** | hébergement, domaine, certificat |
+| **Fait dans la foulée** | collecteur d'erreurs, sauvegarde planifiée, fournisseur d'email |
+| **Risque** | aucun risque technique. Le seul est de partir sans le collecteur d'erreurs et de déboguer à l'aveugle |
+| **Sortie** | `verifier-production.mjs` rend 0 bloquant |
 
-### Phase 1 — Bêta privée *(3 à 6 semaines)*
+### Phase 1 — Bêta privée · *3 à 6 semaines*
 
-**Objectif** : que 10 à 30 personnes utilisent le produit et disent où ça
-coince. **Entrepreneurs uniquement** — voir étape 2.
-**Prérequis** : phase 0, plus la phrase d'explication sur l'écran investisseur
-(pour ceux qui y passeront quand même) et le test hybride.
-**Risque principal** : un défaut d'expérience que ni les harnais ni moi n'avons
-vu, parce qu'ils mesurent ce qu'ils savent mesurer.
-**Sortie** : dix personnes ont créé un projet et lancé une analyse ; aucune
-n'est restée bloquée sans recours.
+| | |
+|---|---|
+| **Objectif** | que 10 à 30 personnes utilisent le produit et disent où ça coince — **entrepreneurs uniquement**, voir étape 2 |
+| **Prérequis** | phase 0, la phrase sur l'écran investisseur, le test hybride |
+| **Risque** | un défaut d'expérience que ni les harnais ni moi n'avons vu, parce qu'ils mesurent ce qu'ils savent mesurer |
+| **Sortie** | dix personnes ont créé un projet et lancé une analyse ; aucune n'est restée bloquée sans recours |
 
-### Phase 2 — Premiers clients payants *(4 à 8 semaines après la phase 1)*
+### Phase 2 — Premiers clients payants · *4 à 8 semaines après la phase 1*
 
-**Objectif** : encaisser.
-**Prérequis** : un SIRET, puis Stripe pour l'abonnement seul. Le code est
-prêt : les offres payantes sont **refusées sans référence d'encaissement**, et
-ce refus est volontaire — il ne reste qu'à brancher qui confirme le paiement.
-**Risque — et c'est un bloquant de phase, pas un arbitrage** : l'offre
-Construction vend **150 analyses** pour 59 € (`offres-catalogue.ts`,
-`appelsIaParMois: 150`), tandis que le plafond de coût par utilisateur vaut
-**2 €/mois** (`DEFAULT_COST_MICRO_EUR_PER_MONTH`). À 0,059 € l'appel en
-moyenne, le garde-fou coupe vers la **34ᵉ analyse** — soit moins du quart de ce
-qui a été payé.
+| | |
+|---|---|
+| **Objectif** | encaisser |
+| **Prérequis** | un SIRET, puis Stripe pour l'abonnement seul. **[lu]** Le code est prêt : les offres payantes sont refusées sans référence d'encaissement, et ce refus est volontaire |
+| **Risque** | voir ci-dessous — il est chiffré, et il bloque |
+| **Sortie** | un abonnement encaissé, une facture émise conforme |
 
-Ce n'est pas une question de marge : c'est le produit qui refuse ce qu'il a
-vendu, et la personne qui l'apprend est celle qui vient de payer. Il faut
-choisir avant le premier abonnement : relever le plafond pour les offres
+**Le risque, chiffré.** **[lu]** L'offre Construction vend **150 analyses** pour
+59 € (`offres-catalogue.ts`, `appelsIaParMois: 150`), tandis que le plafond de
+coût par utilisateur vaut **2 €/mois** (`DEFAULT_COST_MICRO_EUR_PER_MONTH`).
+**[consigné]** À 0,059 € l'appel en moyenne, le garde-fou coupe vers la
+**34ᵉ analyse** — moins du quart de ce qui a été payé.
+
+Ce n'est pas une question de marge : **c'est le produit qui refuse ce qu'il a
+vendu**, et la personne qui l'apprend est celle qui vient de payer. Trois issues,
+à choisir avant le premier abonnement : relever le plafond pour les offres
 payantes, baisser le nombre d'analyses promises, ou monter le prix. Aujourd'hui
 les deux chiffres se contredisent, et rien dans le code ne les rapproche.
-**Sortie** : un abonnement encaissé, une facture émise conforme.
 
-### Phase 3 — Lancement public *(3 à 6 mois après la phase 2)*
+### Phase 3 — Lancement public · *3 à 6 mois après la phase 2*
 
-**Objectif** : ouvrir.
-**Prérequis** : exiger la vérification d'adresse (B5) ; un budget IA qui n'est
-plus le plafond (aujourd'hui **~360 utilisateurs gratuits par mois** à
-0,14 €/utilisateur pour 50 €) ; la pagination du module investisseurs si des
-projets dépassent quelques centaines d'investisseurs.
-**Risque** : le budget IA est la vraie limite de capacité — ni la base, ni les
-connexions, ni le débit, tous un ordre de grandeur au-dessus.
-**Sortie** : la croissance ne dépend plus d'un plafond de dépense.
+| | |
+|---|---|
+| **Objectif** | ouvrir |
+| **Prérequis** | exiger la vérification d'adresse (B5) ; un budget IA qui n'est plus le plafond ; la pagination si des projets dépassent quelques centaines d'investisseurs |
+| **Risque** | **[consigné]** le budget IA est la vraie limite : ~360 utilisateurs gratuits par mois à 0,14 €/utilisateur pour 50 €. Base, connexions et débit sont tous un ordre de grandeur au-dessus |
+| **Sortie** | la croissance ne dépend plus d'un plafond de dépense |
 
 ---
 
@@ -342,35 +389,35 @@ connexions, ni le débit, tous un ordre de grandeur au-dessus.
 
 ### 1. Le pourcentage réel de préparation
 
-**Produit : 95 %.** Éprouvé par 1 706 tests, sept harnais qui manipulent un
-vrai navigateur et une vraie base, et 70 contrôles réels sans échec.
+Trois chiffres, parce qu'un seul serait malhonnête : ils ne se moyennent pas. On
+peut ouvrir une bêta d'entrepreneurs avec 95 % de produit et 0 % de parcours
+investisseur.
 
-**Ouverture à de vrais utilisateurs : 70 %.** Les 30 % manquants ne sont
-presque pas du code — ce sont quatre comptes chez des tiers et une adresse en
-`https`.
+| Axe | Préparation | Sur quoi repose le chiffre |
+|---|---:|---|
+| **Produit** | **95 %** | 1 713 tests, six harnais d'exécution réelle, 70 contrôles sans échec |
+| **Ouverture à de vrais utilisateurs** | **70 %** | les 30 % manquants ne sont presque pas du code : quatre comptes chez des tiers et une adresse en `https` |
+| **Parcours investisseur** | **40 %** | le registre est excellent ; le chemin par lequel un investisseur arrive n'existe pas |
 
-**Parcours investisseur : 40 %.** Le registre est excellent ; le chemin par
-lequel un investisseur arrive n'existe pas.
-
-Un chiffre unique serait malhonnête, parce que ces trois-là ne se moyennent
-pas : on peut ouvrir une bêta d'entrepreneurs à 95 % de produit et 0 % de
-parcours investisseur.
+Ces trois pourcentages sont des **jugements**, pas des mesures. Ce qui est mesuré
+est ce qui les soutient.
 
 ### 2. Les dix prochaines actions, par ordre
 
-1. Prendre un hébergement et un domaine *(A1, A2 — c'est le seul vrai verrou)*
-2. Brancher un collecteur d'erreurs **avant** le premier utilisateur
-3. Brancher le fournisseur d'email *(2 h : le chemin est déjà éprouvé)*
-4. Planifier la sauvegarde, et vérifier la rétention chez l'hébergeur
-5. Écrire la phrase qui explique l'écran investisseur vide *(1 h)*
-6. Écrire le test de bout en bout du cas hybride *(2 h)*
-7. Rendre la suite de tests déterministe *(B4)*
-8. Construire `/investisseur/projets/[id]` *(l'API existe déjà)*
-9. **Résoudre la contradiction Construction** : 150 analyses vendues, ~34
-   permises par le plafond de coût. Bloquant pour la phase 2.
-10. Exiger la vérification d'adresse — **avant** la phase 3, pas avant la bêta
+| # | Action | Effort | Pourquoi maintenant |
+|---|---|---|---|
+| 1 | Prendre un hébergement et un domaine | ½ j | le seul vrai verrou |
+| 2 | Brancher un collecteur d'erreurs | 2 h | **avant** le premier utilisateur, pas après |
+| 3 | Brancher le fournisseur d'email | 2 h | le chemin est déjà éprouvé, 11/11 |
+| 4 | Planifier la sauvegarde, vérifier la rétention chez l'hébergeur | 1 h | une sauvegarde manuelle n'existe pas |
+| 5 | ~~Expliquer l'écran investisseur vide~~ | — | **fait le 25 septembre** |
+| 6 | ~~Test de bout en bout du cas hybride~~ | — | **fait le 25 septembre**, 6/6 |
+| 7 | Rendre la suite de tests déterministe | ½ j | sinon elle cesse d'être une preuve |
+| 8 | Construire `/investisseur/projets/[id]` | ½ j | l'API existe déjà |
+| 9 | **Résoudre la contradiction Construction** | décision | 150 vendues, ~34 permises — bloquant phase 2 |
+| 10 | Exiger la vérification d'adresse | 2 h | avant la phase 3, pas avant la bêta |
 
-Les six premières font **moins de deux jours** cumulés.
+**Les six premières font moins de deux jours cumulés.**
 
 ### 3. Date la plus optimiste
 
@@ -379,34 +426,32 @@ domaine qui propage vite, et les actions 1 à 5 enchaînées sans obstacle.
 
 ### 4. Date réaliste
 
-**Bêta privée : 13 octobre 2026.** Laisse la place aux frictions
-d'hébergement, à un refus de Microsoft sur l'authentification SMTP, et aux
-deux ou trois défauts que dix vrais utilisateurs trouveront en une semaine.
+**Bêta privée : 13 octobre 2026.** Laisse la place aux frictions d'hébergement,
+à un refus de Microsoft sur l'authentification SMTP, et aux deux ou trois défauts
+que dix vrais utilisateurs trouveront en une semaine.
 
-**Premiers clients payants : fin novembre 2026**, conditionné au SIRET.
+**Premiers clients payants : fin novembre 2026**, conditionné au SIRET et à la
+décision n° 9.
 
 ### 5. Date prudente
 
 **Bêta privée : 3 novembre 2026.** Suppose que le SMTP Outlook soit refusé et
-qu'il faille un vrai fournisseur et un domaine propre (SPF, DKIM, DMARC), que
-la suite de tests réserve une surprise, et que les dix premiers utilisateurs
-trouvent un défaut structurel plutôt que cosmétique.
+qu'il faille un vrai fournisseur et un domaine propre, que la suite de tests
+réserve une surprise, et que les dix premiers utilisateurs trouvent un défaut
+structurel plutôt que cosmétique.
 
-**Lancement public : deuxième trimestre 2027**, dominé par le budget IA et par
-le statut réglementaire du volet investissement — deux choses qui ne
-s'accélèrent pas en écrivant du code.
+**Lancement public : deuxième trimestre 2027**, dominé par le budget IA et par le
+statut réglementaire du volet investissement — deux choses qui ne s'accélèrent
+pas en écrivant du code.
 
 ---
 
 ## Ce que cet audit n'a pas pu vérifier
 
-- **Qu'Ignitux démarre chez un hébergeur.** L'image démarre en CI contre une
-  base jetable ; ce n'est pas la même chose qu'un vrai hébergeur.
-- **Qu'un courrier arrive.** Le chemin SMTP est prouvé contre une boîte aux
-  lettres locale. Qu'un message atteigne une vraie boîte sans finir en
-  indésirable dépend de SPF/DKIM/DMARC sur un domaine réel.
-- **Que le compte Outlook accepte l'authentification par mot de passe.** Le
-  serveur l'annonce (`AUTH LOGIN XOAUTH2` après STARTTLS, vérifié) ; que
-  Microsoft l'autorise pour *ce* compte ne se saura qu'avec un identifiant.
-- **Le comportement à 10 000 investisseurs.** Les conclusions de l'étape 4
-  viennent de la lecture des requêtes, pas d'une mesure sous charge.
+| Ce qui reste inconnu | Pourquoi |
+|---|---|
+| **Qu'Ignitux démarre chez un hébergeur** | l'image démarre en CI contre une base jetable ; ce n'est pas la même chose |
+| **Qu'un courrier arrive dans une vraie boîte** | le chemin SMTP est prouvé contre une boîte locale ; l'arrivée dépend de SPF/DKIM/DMARC sur un domaine réel |
+| **Que le compte Outlook accepte le mot de passe** | **[mesuré]** le serveur annonce `AUTH LOGIN XOAUTH2` après STARTTLS ; que Microsoft l'autorise pour *ce* compte ne se saura qu'avec un identifiant |
+| **Le comportement à 10 000 investisseurs** | les conclusions de l'étape 4 viennent de la lecture des requêtes, pas d'une mesure sous charge |
+| **Le jugement d'IGINI sur un projet absurde** | **[consigné]** éprouvé lors d'une session antérieure ; non remesuré aujourd'hui faute de budget IA — c'est le « moyen » de la simulation |
