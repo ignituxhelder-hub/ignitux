@@ -272,19 +272,43 @@ if (idProjet) {
   note('Page projet', 'MAJEUR', 'aucun projet n’a pu être créé par l’interface');
 }
 
+/**
+ * Attendre que l'écran soit là, au lieu d'attendre un nombre de secondes.
+ *
+ * La version précédente posait `waitForTimeout(1200)` après chaque
+ * navigation. Un jour où la base a répondu un peu plus lentement, la page
+ * projet a été mesurée avant l'arrivée de ses données : le harnais a annoncé
+ * « aucun titre » et « écran vide qui ne dit ni pourquoi ni quoi faire », et
+ * la relance suivante était propre.
+ *
+ * Deux constats inventés valent moins que zéro : un harnais qui dit deux
+ * choses différentes du même écran apprend à ne plus le croire, et le jour
+ * où il aura raison, personne ne regardera.
+ *
+ * On attend donc le silence du réseau — c'est-à-dire les appels d'API que la
+ * page déclenche APRÈS son montage, que `domcontentloaded` ne couvre pas — et
+ * on garde un délai court derrière, pour le rendu qui suit la dernière
+ * réponse. La borne existe parce qu'une page qui interroge en boucle ne se
+ * tait jamais : mieux vaut mesurer un écran imparfait que rester bloqué.
+ */
+async function attendreEcranPret(page, apresRendu = 400) {
+  await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+  await page.waitForTimeout(apresRendu);
+}
+
 for (const ecran of ECRANS) {
   erreursJs = [];
   reponses5xx = [];
 
   await page.goto(`${WEB}${ecran.chemin}`, { waitUntil: 'domcontentloaded' }).catch(() => {});
-  await page.waitForTimeout(1200);
+  await attendreEcranPret(page);
 
   // La vue avancée d'un projet est un autre écran, pas un détail du même.
   if (ecran.deplier) {
     const bouton = page.locator('button').filter({ hasText: /vue avancée/i }).first();
     if ((await bouton.count()) > 0) {
       await bouton.click();
-      await page.waitForTimeout(1500);
+      await attendreEcranPret(page, 700);
     }
   }
 

@@ -642,4 +642,30 @@ C'est le seul des sept qui ait besoin du serveur. Sans serveur il s'écrit
 et accuser le produit d'un manque du banc d'essai serait la pire façon de
 rendre une commande inutile.
 
+### 8.7 Le harnais qui a inventé deux défauts
+
+Dernière exécution de la traversée, juste avant de clore : **deux constats sur
+l'écran d'un projet** — « aucun titre : on ne sait pas où on est » et « écran
+vide qui ne dit ni pourquoi ni quoi faire ». La relance suivante : **rien**.
+
+Le produit n'avait pas changé. Le harnais posait `waitForTimeout(1200)` après
+chaque navigation, et ce jour-là la base a répondu un peu plus lentement que
+d'habitude : l'écran a été mesuré avant l'arrivée de ses données.
+
+C'est la onzième fois de cette série qu'un harnais mesure sa propre ignorance
+et l'appelle défaut du produit. Deux constats inventés valent moins que zéro :
+un harnais qui dit deux choses différentes du même écran apprend à ne plus le
+croire, et le jour où il aura raison, personne ne regardera.
+
+Corrigé en attendant **le silence du réseau** plutôt qu'un nombre de secondes —
+c'est-à-dire les appels d'API que la page déclenche après son montage, que
+`domcontentloaded` ne couvre pas. Une borne de huit secondes derrière, parce
+qu'une page qui interroge en boucle ne se tait jamais. Trois exécutions
+consécutives propres, durée inchangée (~50 s).
+
+Le harnais du parcours utilise lui aussi des attentes fixes, mais n'a jamais
+montré cette instabilité, et ses questions ne portent pas sur le vide d'un
+écran. Il n'a pas été touché : corriger ce qui marche par symétrie est une
+bonne façon de casser quelque chose.
+
 Rien n'a été déployé.
