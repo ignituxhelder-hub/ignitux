@@ -230,7 +230,7 @@ export default function ProjectsPage() {
                       « j'en étais où ? ». */}
                   {etape?.nextStep ? (
                     <p style={{ margin: 0 }}>
-                      <span className="muted" style={{ fontSize: '0.75rem' }}>
+                      <span className="muted" style={{ fontSize: 'var(--texte-etiquette)' }}>
                         {etape.phase} · prochaine étape
                       </span>
                       <br />

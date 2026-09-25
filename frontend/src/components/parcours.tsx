@@ -52,7 +52,7 @@ export function Progression({ phase }: { phase: JourneyPhase }) {
           >
             <span
               className="muted"
-              style={{ fontSize: '0.7rem', display: 'block', letterSpacing: '0.04em' }}
+              style={{ fontSize: 'var(--texte-etiquette)', display: 'block', letterSpacing: '0.04em' }}
             >
               {franchie ? 'Fait' : courante ? 'En cours' : 'À venir'}
             </span>
@@ -75,7 +75,25 @@ export function Progression({ phase }: { phase: JourneyPhase }) {
  * C'est la même règle que pour les scores : un projet sans analyse n'a pas
  * une étincelle nulle, il n'en a pas.
  */
-export function TableauDeBord({ reperes }: { reperes: JourneyRepere[] | undefined }) {
+export function TableauDeBord({
+  reperes,
+  surTacheVide,
+}: {
+  reperes: JourneyRepere[] | undefined;
+  /**
+   * Quoi faire quand la tuile « Tâches » est vide.
+   *
+   * Sans cela, la tuile annonçait « Aucune tâche encore. » et s'arrêtait là.
+   * Le bouton pour en ajouter une existait, mais derrière « Vue avancée » —
+   * un libellé qui ne l'annonce pas. Un écran qui constate un vide sans
+   * offrir de le combler renvoie la personne chercher elle-même, et c'est
+   * exactement ce qu'un guide ne doit pas faire.
+   *
+   * Optionnel : la tuile s'affiche sans, simplement sans l'action. Une
+   * personne qui consulte le projet de quelqu'un d'autre n'a rien à ajouter.
+   */
+  surTacheVide?: () => void;
+}) {
   // Un serveur qui précède ce champ renvoie un parcours sans repères : la
   // fiche doit s'afficher quand même, sans tableau de bord.
   if (!reperes || reperes.length === 0) return null;
@@ -102,7 +120,7 @@ export function TableauDeBord({ reperes }: { reperes: JourneyRepere[] | undefine
         >
           <dt
             className="muted"
-            style={{ fontSize: '0.7rem', letterSpacing: '0.04em', margin: 0 }}
+            style={{ fontSize: 'var(--texte-etiquette)', letterSpacing: '0.04em', margin: 0 }}
           >
             {repere.label}
           </dt>
@@ -118,10 +136,41 @@ export function TableauDeBord({ reperes }: { reperes: JourneyRepere[] | undefine
             </strong>
             <span
               className="muted"
-              style={{ display: 'block', fontSize: '0.75rem', marginTop: '0.15rem' }}
+              style={{ display: 'block', fontSize: 'var(--texte-etiquette)', marginTop: '0.15rem' }}
             >
               {repere.precision}
             </span>
+            {repere.cle === 'taches' && repere.valeur === null && surTacheVide && (
+              <button
+                type="button"
+                onClick={surTacheVide}
+                style={{
+                  /*
+                   * Une action, donc une zone qu'un doigt atteint : 2,5 rem,
+                   * la même que les liens d'action ailleurs dans le produit.
+                   * Écrit d'abord sans, et `traversee-ecrans --telephone` l'a
+                   * relevé aussitôt — 99×19 points, sous le seuil. La tuile
+                   * grandit d'une vingtaine de points, et seulement dans l'état
+                   * vide, qui est justement celui où il n'y a rien d'autre à
+                   * regarder.
+                   */
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  minHeight: '2.5rem',
+                  marginTop: '0.25rem',
+                  padding: 0,
+                  border: 'none',
+                  background: 'none',
+                  color: 'var(--flame)',
+                  font: 'inherit',
+                  fontSize: 'var(--texte-etiquette)',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                }}
+              >
+                Ajouter une tâche
+              </button>
+            )}
           </dd>
         </dl>
       ))}
@@ -184,7 +233,7 @@ export function ProchaineEtape({
     <div className="card" style={{ marginBottom: '1.5rem' }}>
       <p
         className="muted"
-        style={{ margin: 0, fontSize: '0.75rem', letterSpacing: '0.06em' }}
+        style={{ margin: 0, fontSize: 'var(--texte-etiquette)', letterSpacing: '0.06em' }}
       >
         PROCHAINE ÉTAPE
       </p>

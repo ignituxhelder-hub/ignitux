@@ -61,7 +61,10 @@ export default function LoginPage() {
           {isSubmitting ? 'Connexion…' : 'Se connecter'}
         </button>
       </form>
-      <p className="muted" style={{ marginTop: '1rem' }}>
+      {/* `lien-action` : ce lien est seul dans son paragraphe, donc c'est une
+          action et non un mot dans une phrase. La classe lui donne une zone
+          sensible qu'un doigt atteint. */}
+      <p className="muted lien-action" style={{ marginTop: '1rem' }}>
         <Link href="/forgot-password">Mot de passe oublié ?</Link>
       </p>
       <p className="muted" style={{ marginTop: '0.5rem' }}>

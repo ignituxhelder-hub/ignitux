@@ -78,6 +78,27 @@
   --warn: #ffc247;
   --warn-soft: #2b2210;
 
+  /**
+   * LA TAILLE DES PETITES ÉTIQUETTES.
+   *
+   * Un seul jeton, parce qu'il y en avait quatre : 0.68, 0.7, 0.72 et 0.75rem
+   * faisaient le même travail — l'intitulé au-dessus d'un chiffre, le titre
+   * d'une colonne, le surtitre d'une section. Quatre tailles pour un rôle,
+   * c'est une décision qui n'a jamais été prise.
+   *
+   * 0.78rem, soit 12,5 px. En dessous de 12 px un texte devient pénible à
+   * lire sur un téléphone, et `traversee-ecrans.mjs --telephone` le signalait
+   * sur les tuiles d'un projet : « Étincelle », « Tâches » et « Étapes »
+   * s'affichaient à 11,2 px. Ce n'est pas un seuil inventé — c'est celui en
+   * dessous duquel le harnais refuse de dire que tout va bien.
+   *
+   * Ce qui reste volontairement en dehors : le chiffre dans la pastille ronde
+   * du parcours. Son cercle fait 2,1 rem de côté ; agrandir le texte le ferait
+   * déborder, et un chiffre isolé dans un cercle ne se lit pas comme une
+   * étiquette.
+   */
+  --texte-etiquette: 0.78rem;
+
   --radius-sm: 9px;
   --radius-md: 14px;
   --radius-lg: 20px;
@@ -338,7 +359,15 @@ a:hover {
   font-family: inherit;
   /* Jamais moins de 16px : en dessous, iOS zoome à la saisie. */
   font-size: max(1rem, 16px);
-  padding: 0.5rem 0.65rem;
+  /*
+   * Le même rembourrage que `.field input`, et ce n'est pas une coquetterie.
+   * Le socle était plus serré que la classe qu'il est censé sous-tendre : un
+   * champ sans classe faisait 38 points de haut, un champ dans un `.field`
+   * en faisait 43. Deux hauteurs de champ dans le même produit, et la plus
+   * petite passait sous les 40 points en dessous desquels un doigt rate sa
+   * cible — relevé sur quatre champs par `traversee-ecrans.mjs --telephone`.
+   */
+  padding: 0.65rem 0.8rem;
   color: var(--text);
   background: var(--bg-deep);
   border: 1px solid var(--border);
@@ -427,7 +456,15 @@ button.primary:disabled {
 }
 
 button.secondary {
-  padding: 0.5rem 0.95rem;
+  /*
+   * 0.65rem et non 0.5 : à 0.5 le bouton faisait 37 points de haut, sous les
+   * 40 en dessous desquels un doigt rate sa cible. Onze boutons du produit
+   * étaient concernés — « Se déconnecter », « Tous mes outils », « Analyser ce
+   * projet »… — c'est-à-dire onze constats pour une seule cause, et une seule
+   * ligne pour les faire disparaître. Le même rembourrage vertical que les
+   * champs de saisie, pour que boutons et champs s'alignent.
+   */
+  padding: 0.65rem 0.95rem;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   background: var(--surface-3);
@@ -450,6 +487,101 @@ button.secondary:hover:not(:disabled) {
 button.secondary:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+/*
+ * UN LIEN QUI SE PRÉSENTE COMME UN BOUTON.
+ *
+ * La feuille ne connaissait que `button.primary` et `button.secondary`.
+ * Quatre endroits du produit écrivent pourtant `<Link className="secondary">`
+ * ou `className="primary"` — et y ajoutent même `display: inline-block`,
+ * preuve que l'intention était bien un bouton. Ils s'affichaient en texte nu :
+ * « Voir mon profil » faisait 105×25 points au lieu d'un bouton, donc une
+ * cible que le doigt rate sur un téléphone.
+ *
+ * Pas de `width: 100%` ici, contrairement au bouton : celui-là occupe toute
+ * la largeur parce qu'il termine un formulaire. Un lien posé dans une carte
+ * n'a aucune raison de s'étirer.
+ */
+a.primary,
+a.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  text-decoration: none;
+  transition:
+    filter 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+a.primary {
+  padding: 0.72rem 1.15rem;
+  border: none;
+  background: var(--grad-fire-solid);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: var(--glow-fire);
+}
+
+a.primary:hover {
+  filter: brightness(1.08);
+}
+
+a.secondary {
+  padding: 0.65rem 0.95rem;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: 0.925rem;
+}
+
+a.secondary:hover {
+  border-color: var(--flame);
+}
+
+/*
+ * LE LIEN DE RETOUR, EN HAUT DE PRESQUE CHAQUE ÉCRAN.
+ *
+ * « ← Retour aux projets » faisait 19 à 25 points de haut : la hauteur du
+ * texte, et rien de plus. Sur un téléphone c'est une cible qu'on rate, et
+ * c'est le lien le plus utilisé du produit — celui par lequel on s'en va.
+ *
+ * On agrandit la zone sensible sans déplacer le texte : la barre est déjà en
+ * `flex` centré verticalement, donc une hauteur minimale suffit.
+ */
+.top-bar a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+}
+
+/*
+ * UN LIEN SEUL DANS SON PARAGRAPHE EST UNE ACTION.
+ *
+ * « Mot de passe oublié ? » et « ← Retour à la connexion » faisaient 19 points
+ * de haut. Ce sont pourtant des actions à part entière, pas des mots au milieu
+ * d'une phrase.
+ *
+ * Pourquoi une classe et non un sélecteur : CSS ne sait pas distinguer un lien
+ * qui EST le paragraphe d'un lien qui s'y trouve. `p > a:only-child`
+ * attraperait aussi le « S'inscrire » de « Pas encore de compte ? S'inscrire »,
+ * parce que `:only-child` ne compte que les éléments et ignore le texte
+ * autour. La distinction est une intention d'auteur ; elle s'écrit donc dans
+ * le balisage.
+ *
+ * Ce qui reste volontairement petit : les liens à l'intérieur d'une phrase —
+ * « S'inscrire », « Se connecter », « Le choisir ». Les grossir casserait la
+ * ligne et l'espacement du paragraphe pour un gain douteux : devant un mot
+ * souligné au milieu d'un texte, on vise le mot.
+ */
+.lien-action a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -500,7 +632,7 @@ button.secondary:disabled {
   background: var(--surface-3);
   color: var(--text-muted);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.68rem;
+  font-size: var(--texte-etiquette);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -665,7 +797,7 @@ button.secondary:disabled {
   gap: 0.5rem;
   margin: 0;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.7rem;
+  font-size: var(--texte-etiquette);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-faint);
@@ -699,7 +831,7 @@ button.secondary:disabled {
   align-items: center;
   gap: 0.6rem;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.72rem;
+  font-size: var(--texte-etiquette);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--text-muted);
@@ -827,7 +959,7 @@ td {
 
 th {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.7rem;
+  font-size: var(--texte-etiquette);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-muted);

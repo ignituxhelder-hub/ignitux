@@ -229,7 +229,7 @@ export default function BanquePage() {
 function Chiffre({ libelle, valeur }: { libelle: string; valeur: string }) {
   return (
     <div>
-      <span className="muted" style={{ fontSize: '0.7rem', letterSpacing: '0.04em' }}>
+      <span className="muted" style={{ fontSize: 'var(--texte-etiquette)', letterSpacing: '0.04em' }}>
         {libelle}
       </span>
       <strong style={{ display: 'block', fontSize: '1.3rem', fontVariantNumeric: 'tabular-nums' }}>

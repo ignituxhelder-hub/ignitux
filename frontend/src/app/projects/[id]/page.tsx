@@ -165,6 +165,29 @@ export default function ProjectDetailPage() {
   const [aDemander, setADemander] = useState<ProfileField[]>([]);
   const onGenerated = () => setRefreshSignal((n) => n + 1);
 
+  /**
+   * ALLER AUX TÂCHES DEPUIS LA TUILE QUI DIT QU'IL N'Y EN A PAS.
+   *
+   * La tuile « Tâches » annonçait « Aucune tâche encore. » et s'arrêtait là.
+   * Le bouton pour en ajouter une existe, mais dans une section que la vue
+   * simple ne montre pas — donc derrière « Vue avancée », dont le libellé ne
+   * l'annonce pas. Constater un vide sans offrir de le combler renvoie la
+   * personne chercher elle-même.
+   *
+   * Deux temps sont nécessaires : la section n'existe pas au moment du clic,
+   * elle naît du passage en vue avancée. On lève donc un drapeau, et on défile
+   * une fois qu'elle est montée.
+   */
+  const [allerAuxTaches, setAllerAuxTaches] = useState(false);
+  useEffect(() => {
+    if (!allerAuxTaches) return;
+    const cible = document.getElementById('taches');
+    if (!cible) return;
+    const sansAnimation = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    cible.scrollIntoView({ behavior: sansAnimation ? 'auto' : 'smooth', block: 'start' });
+    setAllerAuxTaches(false);
+  }, [allerAuxTaches, vueAvancee]);
+
   const iginiStatus = useIginiStatus();
 
   const [analyses, setAnalyses] = usePlanList<Analysis>(token, id, api.listAnalyses);
@@ -384,7 +407,31 @@ export default function ProjectDetailPage() {
               générique ne faisait ni l'un ni l'autre. */}
           {/* Les chiffres d'abord : « où en est ce projet ? » se lisait
               jusqu'ici en faisant défiler jusqu'au score, tout en bas. */}
-          {parcours && <TableauDeBord reperes={parcours.reperes} />}
+          {parcours && (
+            <TableauDeBord
+              reperes={parcours.reperes}
+              /* Deux conditions, et chacune a coûté quelque chose.
+
+                 Réservé au porteur : quelqu'un qui consulte le projet d'un
+                 autre n'a pas de tâche à y ajouter, et lui proposer serait
+                 promettre une porte qui se refermera.
+
+                 Et seulement tant que la section des tâches n'est pas déjà à
+                 l'écran. Sans cette seconde condition, la page portait deux
+                 contrôles nommés « Ajouter… » dont un seul agissait — le
+                 raccourci de la tuile restait affiché au-dessus du formulaire
+                 qu'il venait d'ouvrir. Un raccourci vers un endroit où l'on se
+                 trouve déjà n'est plus un raccourci. */
+              surTacheVide={
+                isOwner && !montrer('taches')
+                  ? () => {
+                      setVueAvancee(true);
+                      setAllerAuxTaches(true);
+                    }
+                  : undefined
+              }
+            />
+          )}
           {parcours && <Progression phase={parcours.phase} />}
           {parcours && isOwner && (
             <ProchaineEtape
@@ -593,18 +640,22 @@ export default function ProjectDetailPage() {
           (readOnly). La gestion des collaborateurs et le déclenchement manuel
           de l'automatisation restent réservés au propriétaire. */}
       {montrer('score') && <ScoreSection token={token} projectId={id} refreshSignal={refreshSignal} />}
+      {/* Nommée pour que le raccourci de la tuile « Tâches » puisse amener
+          ici — voir `allerAuxTaches` plus haut. */}
       {montrer('taches') && (
-        <TasksSection
-          token={token}
-          projectId={id}
-          readOnly={!isOwner}
-          refreshSignal={refreshSignal}
-          /* Même signal que les générateurs : une tâche cochée à la main
-             doit rafraîchir le score et le parcours exactement comme une
-             analyse le ferait. Ce qui compte est le changement, pas ce qui
-             l'a provoqué. */
-          onChanged={onGenerated}
-        />
+        <div id="taches">
+          <TasksSection
+            token={token}
+            projectId={id}
+            readOnly={!isOwner}
+            refreshSignal={refreshSignal}
+            /* Même signal que les générateurs : une tâche cochée à la main
+               doit rafraîchir le score et le parcours exactement comme une
+               analyse le ferait. Ce qui compte est le changement, pas ce qui
+               l'a provoqué. */
+            onChanged={onGenerated}
+          />
+        </div>
       )}
       {montrer('memoire') && <MemorySection token={token} projectId={id} readOnly={!isOwner} />}
       {montrer('connaissances') && (

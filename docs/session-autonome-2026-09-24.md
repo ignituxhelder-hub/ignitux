@@ -740,3 +740,92 @@ sont plus deux heures de découverte. Le chemin SMTP est éprouvé ; il ne reste
 que l'hôte, le port et les identifiants à écrire.
 
 Rien n'a été déployé.
+
+---
+
+## 10. Les deux constats qui t'étaient laissés
+
+Ils traînaient depuis plusieurs jours sous l'étiquette « arbitrages laissés au
+porteur ». En les regardant de près, ce n'en étaient pas : c'étaient des
+défauts ordinaires, et rien à arbitrer.
+
+### 10.1 Quatre tailles pour un même rôle
+
+Les tuiles d'un projet affichaient « Étincelle », « Tâches » et « Étapes » à
+**11,2 px** sur téléphone. En cherchant d'où venait ce chiffre, on trouve
+quatre tailles différentes — 0,68 · 0,70 · 0,72 · 0,75 rem — pour exactement le
+même rôle : l'intitulé au-dessus d'un chiffre, le titre d'une colonne, le
+surtitre d'une section. Quatre tailles pour un rôle, c'est une décision que
+personne n'a jamais prise.
+
+Un seul jeton désormais, `--texte-etiquette`, à 0,78 rem (12,5 px). Reste
+volontairement en dehors : le chiffre dans la pastille ronde du parcours, dont
+le cercle fait 2,1 rem — l'agrandir le ferait déborder, et un chiffre isolé
+dans un cercle ne se lit pas comme une étiquette.
+
+### 10.2 La tuile qui constatait un vide sans offrir de le combler
+
+« Aucune tâche encore. » et rien d'autre. Le bouton existait, derrière « Vue
+avancée », dont le libellé ne l'annonce pas.
+
+La tuile propose maintenant « Ajouter une tâche », qui ouvre la vue avancée et
+défile jusqu'au formulaire — sans animation si le système la refuse.
+
+**Et la première version a introduit un défaut** que le harnais a attrapé dans
+la foulée : le raccourci restait affiché au-dessus du formulaire qu'il venait
+d'ouvrir. Deux contrôles nommés « Ajouter… » sur le même écran, dont un seul
+agissait. Il ne s'affiche plus quand la section est déjà là — un raccourci vers
+un endroit où l'on se trouve déjà n'est plus un raccourci.
+
+### 10.3 Ce que la même passe a trouvé en chemin
+
+**`a.secondary` n'existait pas.** La feuille de style ne connaissait que
+`button.secondary`. Quatre endroits écrivaient pourtant `<Link
+className="secondary">` — en ajoutant même `display: inline-block`, preuve de
+l'intention. Ils s'affichaient en texte nu : « Voir mon profil » faisait 105×25
+points au lieu d'un bouton.
+
+**Le socle des champs était plus serré que la classe qu'il sous-tend.** Un
+champ sans classe faisait 38 points de haut, un champ dans un `.field` en
+faisait 43. Deux hauteurs de champ dans le même produit, et la plus petite sous
+le seuil où un doigt rate sa cible.
+
+**Onze boutons pour une seule cause.** `button.secondary` faisait 37 points :
+« Se déconnecter », « Tous mes outils », « Analyser ce projet »… Onze constats,
+une ligne de correction. C'est exactement le cas que la règle écrite plus haut
+décrit — un rapport qui multiplie une cause par le nombre d'écrans gâche le
+temps qu'il prétend faire gagner.
+
+### 10.4 Ce qui reste petit, et pourquoi
+
+Trois liens : « S'inscrire », « Se connecter », « Le choisir ». Tous les trois
+sont des **mots à l'intérieur d'une phrase** — « Pas encore de compte ?
+S'inscrire ». Les grossir casserait la ligne et l'espacement du paragraphe pour
+un gain douteux : devant un mot souligné au milieu d'un texte, on vise le mot.
+
+CSS ne sait pas distinguer un lien qui **est** le paragraphe d'un lien qui s'y
+trouve — `p > a:only-child` attraperait les deux, parce que `:only-child` ne
+compte que les éléments et ignore le texte autour. La distinction est une
+intention d'auteur ; elle s'écrit donc dans le balisage, avec une classe.
+
+### 10.5 Le compte
+
+| | Avant | Après |
+|---|---:|---:|
+| Traversée téléphone | 6 moyens · 22 mineurs | **0 · 3** |
+| Traversée bureau | 0 | **0** |
+| Parcours premier utilisateur | 1 moyen | **0** |
+
+Les trois mineurs restants sont exactement les trois liens ci-dessus, et la
+raison de les laisser est écrite dans la feuille de style, à l'endroit où
+quelqu'un la cherchera.
+
+### 10.6 Une erreur de ma part, et ce qu'elle a coûté
+
+J'ai lancé `prettier --write` sur la page projet. L'interface n'a aucune
+configuration prettier — c'est le serveur qui en a une — et la commande a
+reformaté 434 lignes en guillemets doubles, contre le style de tout le dépôt.
+Annulé, puis mes changements réappliqués à la main : **52 lignes** au lieu de
+434.
+
+Rien n'a été déployé.

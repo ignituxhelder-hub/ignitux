@@ -457,7 +457,7 @@ function Chiffre({ libelle, valeur }: { libelle: string; valeur: string }) {
 function Poste({ libelle, valeur }: { libelle: string; valeur: string }) {
   return (
     <div>
-      <dt className="muted" style={{ fontSize: '0.75rem' }}>
+      <dt className="muted" style={{ fontSize: 'var(--texte-etiquette)' }}>
         {libelle}
       </dt>
       <dd style={{ margin: 0, fontVariantNumeric: 'tabular-nums' }}>{valeur}</dd>

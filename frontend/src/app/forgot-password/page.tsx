@@ -52,7 +52,7 @@ export default function ForgotPasswordPage() {
           </form>
         )}
       </div>
-      <p className="muted" style={{ marginTop: '1rem' }}>
+      <p className="muted lien-action" style={{ marginTop: '1rem' }}>
         <Link href="/login">← Retour à la connexion</Link>
       </p>
     </main>
