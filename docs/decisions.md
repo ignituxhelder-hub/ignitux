@@ -863,3 +863,59 @@ Le calcul réutilise `perpetualShareCents` du modèle économique plutôt que de
 une seconde implémentation de la même règle finit toujours par diverger de la première.
 
 **Où** — `backend/src/investors/distribution.ts` (`splitDividend`).
+
+---
+
+## L'adresse qui reçoit et l'adresse qui écrit sont la même, et elle est réelle
+
+**Quand** — 25 septembre 2026.
+
+**Ce qui existait** — `ignitux@outlook.com` était déjà l'adresse de contact
+publiée : `IGNITUX_EMAIL`, servie par `/mentions-legales` et reprise sur les
+factures. Elle était renseignée en développement comme en production.
+
+Mais l'adresse d'**expédition** était restée celle du fichier d'exemple :
+`Ignitux <bonjour@exemple.test>`. Deux adresses différentes, dont une qui ne
+peut pas exister — `.test` est réservé par la RFC 2606 et ne sera jamais
+délégué.
+
+**Pourquoi c'était grave, et pas cosmétique** — un courrier expédié depuis une
+adresse inexistante *part quand même*, et arrive parfois. C'est la **réponse**
+qui tombe dans le vide. La personne croit avoir répondu. La panne se découvre
+au silence de quelqu'un qui attendait, des semaines plus tard — et le produit
+qui dit « écris-nous à ignitux@outlook.com » aurait écrit depuis une autre
+adresse, ce qui est précisément le motif que les filtres anti-indésirables
+regardent.
+
+**Ce qui a été décidé** — la même adresse des deux côtés. `MAIL_FROM` vaut
+désormais `Ignitux <ignitux@outlook.com>`, avec `smtp-mail.outlook.com:587`.
+
+**Et un garde-fou, parce qu'une valeur d'exemple oubliée se reproduira** — le
+préflight de production refuse désormais un `MAIL_FROM` dont le domaine ne peut
+pas exister : `.test`, `.invalid`, `.example`, `.localhost` (RFC 2606 et 6761)
+et les valeurs `exemple.`/`example.` du fichier modèle. Le même motif existait
+déjà pour `JWT_SECRET` ; il manquait ici.
+
+Le point est échappé dans les motifs : sans cela, `contact@exemplaire-conseil.fr`
+serait refusé alors qu'il peut parfaitement exister. Un test le tient.
+
+**Ce qui reste, et qui n'est pas du code** — le mot de passe applicatif. Il
+n'est écrit nulle part dans le dépôt, et il n'a pas à l'être. Tant que
+`SMTP_PASSWORD` est vide, `MAIL_TRANSPORT` reste `log` : aucun courrier ne
+part, et le préflight le dit.
+
+**Ce qu'il faudra vérifier le jour venu** — Microsoft restreint
+l'authentification par mot de passe sur les comptes Outlook personnels.
+Le serveur annonce bien `AUTH LOGIN XOAUTH2` après STARTTLS (vérifié), donc le
+mécanisme existe au niveau du protocole ; que *ce compte* l'accepte ne se saura
+qu'avec un vrai identifiant. Si Microsoft refuse, les deux issues sont un mot
+de passe d'application, ou OAuth2 — que `MailService` n'implémente pas
+aujourd'hui.
+
+**Et une réserve sur la délivrabilité** — expédier depuis `@outlook.com`
+signifie que SPF et DKIM appartiennent à Microsoft, pas à Ignitux, et qu'aucun
+DMARC ne peut être posé sur un domaine qu'on ne possède pas. Acceptable pour
+une bêta de trente personnes ; à revoir avec le domaine.
+
+**Où** — `backend/src/config/production-preflight.ts`
+(`DOMAINES_IMPOSSIBLES`), et les fichiers d'environnement, non versionnés.

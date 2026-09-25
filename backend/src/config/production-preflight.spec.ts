@@ -188,6 +188,40 @@ describe('préflight de production', () => {
     it('refuse un port invalide', () => {
       expect(problemesSur({ SMTP_PORT: '70000' })).toContain('SMTP_PORT');
     });
+
+    /**
+     * L'expéditeur impossible.
+     *
+     * Le fichier de production portait « Ignitux <bonjour@exemple.test> » —
+     * la valeur d'exemple, jamais remplacée. `.test` est réservé par la
+     * RFC 2606 : ce domaine ne sera jamais délégué, donc cette adresse
+     * n'existe pas et n'existera pas.
+     *
+     * Ce n'est pas un détail cosmétique. Les courriers partent quand même et
+     * arrivent parfois ; c'est la RÉPONSE qui tombe dans le vide. La personne
+     * croit avoir répondu. La panne se découvre au silence de quelqu'un qui
+     * attendait, des semaines plus tard.
+     */
+    it.each([
+      'Ignitux <bonjour@exemple.test>',
+      'bonjour@exemple.com',
+      'Ignitux <no-reply@ignitux.invalid>',
+      'contact@monsite.example',
+      'root@localhost.localhost',
+    ])('refuse un expéditeur dont le domaine ne peut pas exister : %s', (adresse) => {
+      expect(problemesSur({ MAIL_FROM: adresse })).toContain('MAIL_FROM');
+    });
+
+    it.each([
+      'Ignitux <ignitux@outlook.com>',
+      'ignitux@outlook.com',
+      'Ignitux <no-reply@ignitux.fr>',
+      // Un domaine qui CONTIENT « exemple » sans en être un : le contrôle ne
+      // doit pas refuser une vraie adresse par excès de zèle.
+      'contact@exemplaire-conseil.fr',
+    ])('laisse passer une adresse qui peut exister : %s', (adresse) => {
+      expect(problemesSur({ MAIL_FROM: adresse })).not.toContain('MAIL_FROM');
+    });
   });
 
   it('accumule les problèmes au lieu de s’arrêter au premier', () => {

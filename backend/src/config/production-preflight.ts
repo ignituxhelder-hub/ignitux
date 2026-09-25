@@ -51,6 +51,33 @@ const SECRETS_D_EXEMPLE = [
   'development-secret-at-least-32-characters',
 ];
 
+/**
+ * Les domaines qui ne peuvent pas recevoir de courrier, jamais.
+ *
+ * `.test`, `.invalid`, `.example` et `.localhost` sont réservés par les
+ * RFC 2606 et 6761 : ils ne seront jamais délégués, donc aucune adresse qui
+ * s'y termine n'existe ni n'existera. `exemple.` et `example.` attrapent les
+ * valeurs du fichier d'exemple laissées en place.
+ *
+ * Pourquoi c'est un refus et non un avertissement : un courrier expédié depuis
+ * une adresse inexistante part quand même, arrive parfois — et la personne qui
+ * y répond écrit dans le vide. Elle croit avoir répondu. C'est la panne la
+ * plus discrète de tout le dispositif d'email, et elle se découvre par le
+ * silence de quelqu'un qui attendait.
+ */
+const DOMAINES_IMPOSSIBLES = [
+  // Les TLD réservés, ancrés en fin d adresse : on refuse le domaine
+  // `monsite.test`, pas un mot `test` qui traînerait ailleurs dans la ligne.
+  /@[^@\s>]*\.test>?\s*$/i,
+  /@[^@\s>]*\.invalid>?\s*$/i,
+  /@[^@\s>]*\.example>?\s*$/i,
+  /@[^@\s>]*\.localhost>?\s*$/i,
+  // Les valeurs du fichier d exemple. Le point est échappé : sans lui,
+  // `@exemplaire-conseil.fr` serait refusé alors qu il peut exister.
+  /@exemple\./i,
+  /@example\./i,
+];
+
 export function isProduction(env: PreflightInput): boolean {
   return env.NODE_ENV === 'production';
 }
@@ -193,6 +220,17 @@ export function productionProblems(env: PreflightInput): PreflightProblem[] {
     const port = Number(env.SMTP_PORT ?? '');
     if (env.SMTP_PORT !== undefined && (!Number.isInteger(port) || port <= 0 || port > 65535)) {
       probleme('SMTP_PORT', `« ${env.SMTP_PORT} » n'est pas un port valide.`);
+    }
+
+    const expediteur = env.MAIL_FROM ?? '';
+    if (expediteur.trim() !== '' && DOMAINES_IMPOSSIBLES.some((motif) => motif.test(expediteur))) {
+      probleme(
+        'MAIL_FROM',
+        `vaut « ${expediteur} », dont le domaine ne peut pas exister — il est réservé ` +
+          'par les RFC, ou vient du fichier d’exemple. Les courriers partiraient quand même, ' +
+          'et toute réponse tomberait dans le vide : la personne croirait avoir répondu. ' +
+          "Mets l'adresse réelle depuis laquelle Ignitux écrit.",
+      );
     }
   }
 
