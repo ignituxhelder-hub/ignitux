@@ -1,0 +1,99 @@
+name: Sauvegarde
+
+# Sauvegarde planifiée de la base de production (point 9 de
+# docs/reste-a-faire.md). Les scripts existent et fonctionnent depuis
+# longtemps (backend/scripts/sauvegarde.mjs, verifier-sauvegarde.mjs) ; ce
+# qui manquait était le déclenchement automatique.
+#
+# ── Pourquoi l'export est chiffré avant d'être conservé ────────────────────
+#
+# Ce dépôt est PUBLIC. Un artefact déposé par `actions/upload-artifact` sur
+# un dépôt public est visible par n'importe qui, pas seulement par les
+# personnes autorisées à y écrire. Déposer l'export en clair reviendrait à
+# publier les données personnelles réelles de la production. Il est donc
+# chiffré avec OpenSSL (AES-256-CBC, dérivation PBKDF2) à partir d'un secret
+# GitHub, avant tout envoi — et le job refuse d'envoyer quoi que ce soit si
+# ce secret manque.
+#
+# ── Secrets requis (Settings → Secrets and variables → Actions) ───────────
+#
+#   SAUVEGARDE_DATABASE_URL   la chaîne DATABASE_URL de production
+#   SAUVEGARDE_PASSPHRASE     une phrase de passe longue, générée une fois
+#
+# GitHub ne réaffiche jamais la valeur d'un secret après sa création :
+# conserver SAUVEGARDE_PASSPHRASE ailleurs (gestionnaire de mots de passe)
+# avant de la poser ici — sinon les sauvegardes chiffrées deviennent
+# illisibles pour tout le monde, y compris pour Helder. Tant que ces deux
+# secrets ne sont pas posés, ce workflow échoue proprement (message clair),
+# il ne fait rien de silencieux.
+#
+# ── Restaurer un export téléchargé ─────────────────────────────────────────
+#
+#   openssl enc -d -aes-256-cbc -pbkdf2 -salt -in sauvegarde.tar.gz.enc \
+#     -out sauvegarde.tar.gz -pass pass:LA_PHRASE_DE_PASSE
+#   mkdir -p dossier-restaure && tar xzf sauvegarde.tar.gz -C dossier-restaure
+#   # Le tar s'ouvre sur un seul sous-dossier nommé <base>-<horodatage> :
+#   node scripts/verifier-sauvegarde.mjs --depuis ./dossier-restaure/<base>-<horodatage>
+
+on:
+  schedule:
+    # 03h10 UTC, tous les jours.
+    - cron: '10 3 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  sauvegarde:
+    name: Sauvegarde chiffrée de la production
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      # Nécessaire dès `prisma generate` : le schéma référence
+      # env("DATABASE_URL") et refuse de se lire sans elle, même quand
+      # aucune connexion n'est encore ouverte.
+      DATABASE_URL: ${{ secrets.SAUVEGARDE_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+
+      # Seul le client est nécessaire ici, jamais un changement de schéma :
+      # cette tâche lit la production, elle ne doit rien lui écrire.
+      - name: Générer le client Prisma
+        run: npx prisma generate
+
+      - name: Construire (dist/generated/prisma requis par sauvegarde.mjs)
+        run: npm run build
+
+      - name: Exporter les données de production
+        run: node scripts/sauvegarde.mjs
+
+      - name: Vérifier que l'export est restaurable
+        run: node scripts/verifier-sauvegarde.mjs
+
+      - name: Chiffrer avant tout envoi (dépôt public — voir l'en-tête de ce fichier)
+        env:
+          SAUVEGARDE_PASSPHRASE: ${{ secrets.SAUVEGARDE_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SAUVEGARDE_PASSPHRASE:-}" ]; then
+            echo "SAUVEGARDE_PASSPHRASE n'est pas posé : refus d'envoyer l'export en clair." >&2
+            exit 1
+          fi
+          tar czf sauvegarde.tar.gz -C sauvegardes .
+          openssl enc -aes-256-cbc -pbkdf2 -salt -in sauvegarde.tar.gz \
+            -out sauvegarde.tar.gz.enc -pass env:SAUVEGARDE_PASSPHRASE
+          rm sauvegarde.tar.gz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sauvegarde-${{ github.run_id }}
+          path: backend/sauvegarde.tar.gz.enc
+          retention-days: 90
