@@ -52,6 +52,20 @@ EXPOSE 3001
 # Next ne sert pas de route de santé : on interroge la page de connexion,
 # qui est publique et rendue sans base.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD node -e "fetch('http://127.0.0.1:3001/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3001)+'/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
-CMD ["npx", "next", "start", "-H", "0.0.0.0", "-p", "3001"]
+# LE PORT VIENT DE L ENVIRONNEMENT, AVEC 3001 EN REPLI.
+#
+# Il etait ecrit en dur. Le serveur, lui, lisait deja `PORT` — donc les deux
+# moities du produit ne se deployaient pas de la meme facon, et seule celle
+# qui avait tort aurait echoue.
+#
+# Toutes les plateformes de conteneurs (Scalingo, Railway, Render, Fly)
+# injectent `PORT` et routent le trafic dessus. Une application qui ecoute
+# ailleurs ne recoit rien : le controle de sante echoue, la plateforme
+# redemarre, et le journal ne montre qu un demarrage reussi — la panne la
+# plus deroutante d un premier deploiement.
+#
+# `sh -c` est necessaire : sans shell, ${PORT:-3001} serait passe a Next tel
+# quel, comme un texte.
+CMD ["sh", "-c", "npx next start -H 0.0.0.0 -p ${PORT:-3001}"]

@@ -57,8 +57,12 @@
 
 ## 1. Hébergement
 
-**État : inexistant.** Aucun `Dockerfile`, aucun `vercel.json`, aucun `fly.toml`, aucun
-`Procfile`. Le produit tourne sur un portable, servi en réseau local à deux testeurs.
+**État au 20 septembre : inexistant.** Aucun `Dockerfile`, aucun `vercel.json`, aucun
+`fly.toml`, aucun `Procfile`. Le produit tourne sur un portable, servi en réseau local à deux
+testeurs.
+
+> **Plus vrai depuis.** Les deux `Dockerfile` existent, se construisent en CI, et celle du
+> serveur démarre pour de vrai contre une base jetable. Voir [`deployer.md`](deployer.md).
 
 Ce que le code fait déjà bien, et qui rend l'hébergement facile :
 
@@ -328,6 +332,18 @@ personnes.
 ---
 
 # Étapes de déploiement
+
+> **Périmé depuis le 26 septembre 2026 — voir [`deployer.md`](deployer.md).**
+>
+> Les trois premières étapes ci-dessous sont faites : `trust proxy` se lit
+> dans l'environnement, Swagger ne se monte que sur `ENABLE_API_DOCS=true`, le
+> filtre d'exception global existe. L'étape 2 aussi : `ignitux_prod` est
+> migrée, 50/50 tables. Et l'étape 4 a cessé d'être un chantier : les deux
+> `Dockerfile` existent et se construisent en CI, celle du serveur démarrant
+> pour de vrai contre une base jetable.
+>
+> Ce qui suit est conservé comme trace de l'audit du 20 septembre. La
+> procédure à suivre est l'autre document.
 
 Dans cet ordre. Chaque étape est vérifiable avant de passer à la suivante.
 
