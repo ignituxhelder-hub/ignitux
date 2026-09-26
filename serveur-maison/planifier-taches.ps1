@@ -48,9 +48,12 @@ function Planifier-Repetitive {
     $action = New-ScheduledTaskAction -Execute 'powershell.exe' `
         -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$CheminScript`""
 
+    # [TimeSpan]::MaxValue ne se sérialise pas correctement dans le XML de
+    # tâche planifiée (« valeur hors limites ») — 10 ans est largement
+    # suffisant en pratique et reste dans les bornes acceptées.
     $declencheur = New-ScheduledTaskTrigger -Once -At (Get-Date) `
         -RepetitionInterval (New-TimeSpan -Minutes $IntervalleMinutes) `
-        -RepetitionDuration ([TimeSpan]::MaxValue)
+        -RepetitionDuration (New-TimeSpan -Days 3650)
     # S'ajoute un déclencheur « à la connexion » pour repartir dès la
     # session ouverte, sans attendre le premier passage des 5 minutes.
     $declencheurConnexion = New-ScheduledTaskTrigger -AtLogOn -User $utilisateurActuel
@@ -58,10 +61,14 @@ function Planifier-Repetitive {
     $principal = New-ScheduledTaskPrincipal -UserId $utilisateurActuel -LogonType Interactive -RunLevel Highest
     $parametres = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
 
-    Register-ScheduledTask -TaskName $Nom -Action $action `
-        -Trigger @($declencheur, $declencheurConnexion) -Principal $principal -Settings $parametres | Out-Null
-
-    Write-Host "Planifiée : $Nom (toutes les $IntervalleMinutes min, sous $utilisateurActuel)"
+    try {
+        Register-ScheduledTask -TaskName $Nom -Action $action `
+            -Trigger @($declencheur, $declencheurConnexion) -Principal $principal -Settings $parametres `
+            -ErrorAction Stop | Out-Null
+        Write-Host "Planifiée : $Nom (toutes les $IntervalleMinutes min, sous $utilisateurActuel)"
+    } catch {
+        Write-Error "Échec de la planification de « $Nom » : $_"
+    }
 }
 
 function Planifier-Quotidienne {
@@ -81,10 +88,14 @@ function Planifier-Quotidienne {
     $principal = New-ScheduledTaskPrincipal -UserId $utilisateurActuel -LogonType Interactive -RunLevel Highest
     $parametres = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
 
-    Register-ScheduledTask -TaskName $Nom -Action $action `
-        -Trigger $declencheur -Principal $principal -Settings $parametres | Out-Null
-
-    Write-Host "Planifiée : $Nom (chaque jour à $Heure, sous $utilisateurActuel)"
+    try {
+        Register-ScheduledTask -TaskName $Nom -Action $action `
+            -Trigger $declencheur -Principal $principal -Settings $parametres `
+            -ErrorAction Stop | Out-Null
+        Write-Host "Planifiée : $Nom (chaque jour à $Heure, sous $utilisateurActuel)"
+    } catch {
+        Write-Error "Échec de la planification de « $Nom » : $_"
+    }
 }
 
 Planifier-Repetitive -Nom 'Ignitux - Mise a jour automatique' `
