@@ -6,6 +6,13 @@
 # — un seul endroit à modifier si un chemin, un port ou un délai doit changer.
 # ═══════════════════════════════════════════════════════════════════════════
 
+# Une erreur inattendue (méthode .NET absente, chemin invalide...) arrête le
+# script au lieu de continuer avec un résultat corrompu — c'est exactement
+# ce qui s'est produit une fois : un échec silencieux avait laissé passer un
+# secret non aléatoire. Les appels volontairement tolérants gardent leur
+# propre -ErrorAction SilentlyContinue, qui prime toujours sur ce réglage.
+$ErrorActionPreference = 'Stop'
+
 # Racine du dépôt : ce dossier (serveur-maison) est directement sous elle.
 $RacineDepot = Split-Path -Parent $PSScriptRoot
 
@@ -62,10 +69,18 @@ if (-not $OpenSSL) {
 }
 
 # Génère un secret aléatoire, sans dépendre d'openssl (JWT_SECRET, passphrase
-# de sauvegarde) — uniquement du .NET, présent partout où PowerShell tourne.
+# de sauvegarde). RNGCryptoServiceProvider, pas RandomNumberGenerator::Fill
+# (statique, .NET 5+ seulement) : Windows PowerShell 5.1 tourne sur le .NET
+# Framework classique, où Fill n'existe pas — l'appel échouait sans arrêter
+# le script, et le secret produit était en réalité des octets à zéro.
 function Nouveau-SecretAleatoire {
     param([int]$Octets = 48)
     $tampon = New-Object byte[] $Octets
-    [System.Security.Cryptography.RandomNumberGenerator]::Fill($tampon)
+    $generateur = [System.Security.Cryptography.RNGCryptoServiceProvider]::new()
+    try {
+        $generateur.GetBytes($tampon)
+    } finally {
+        $generateur.Dispose()
+    }
     return [Convert]::ToBase64String($tampon)
 }
