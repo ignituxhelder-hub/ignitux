@@ -39,6 +39,9 @@ try {
     if (-not (Test-Path $FichierPassePhrase)) {
         throw "Passphrase absente : $FichierPassePhrase — voir docs/serveur-maison-installation.md pour la créer avant la première sauvegarde."
     }
+    if (-not $OpenSSL) {
+        throw "openssl introuvable (ni sur le PATH, ni dans l'installation Git) — impossible de chiffrer la sauvegarde."
+    }
 
     New-Item -ItemType Directory -Path $dossierJour -Force | Out-Null
 
@@ -64,7 +67,7 @@ try {
     Compress-Archive -Path $dossierJour -DestinationPath $archive -Force
 
     $chiffre = "$archive.enc"
-    & openssl enc -aes-256-cbc -pbkdf2 -salt -in $archive -out $chiffre -pass "file:$FichierPassePhrase"
+    & $OpenSSL enc -aes-256-cbc -pbkdf2 -salt -in $archive -out $chiffre -pass "file:$FichierPassePhrase"
     if ($LASTEXITCODE -ne 0) { throw "Le chiffrement OpenSSL a échoué — l'archive non chiffrée $archive est conservée pour inspection." }
 
     Remove-Item $dossierJour -Recurse -Force

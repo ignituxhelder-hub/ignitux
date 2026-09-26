@@ -58,23 +58,24 @@ Si Docker Desktop vient d'être installé, une fenêtre PowerShell **relance**
 est nécessaire (`.\installer.ps1` de nouveau) pour que son PATH soit pris en
 compte.
 
-## 3. Remplir la configuration
+## 3. La configuration (remplie automatiquement par `installer.ps1`)
 
-Deux fichiers, jamais versionnés (voir `.gitignore`) :
+`installer.ps1` crée `.env.docker` et `backend\.env` (jamais versionnés, voir
+`.gitignore`) et remplit lui-même :
+- `JWT_SECRET` — généré aléatoirement (sans dépendre d'openssl).
+- `NEXT_PUBLIC_API_URL`/`FRONTEND_URL` — posés sur l'adresse **Tailscale**
+  détectée de ce PC (`tailscale ip -4`), **si Tailscale est déjà connecté**
+  au moment où tu lances le script. `NEXT_PUBLIC_API_URL` est **gravée dans
+  le paquet au moment du build** (voir `frontend/Dockerfile`) : si Tailscale
+  n'était pas encore connecté, le script te le dit et il faut alors remplir
+  ces deux valeurs à la main dans `.env.docker`, avec le résultat de
+  `tailscale ip -4` — jamais `http://localhost:3000`, sinon l'interface
+  s'appellera elle-même en boucle dès qu'elle sera ouverte depuis un autre
+  appareil du tailnet.
+- `backend\.env` reçoit les mêmes valeurs (`DATABASE_URL`, `JWT_SECRET`).
 
-**`.env.docker`** (racine du dépôt) :
-- `JWT_SECRET` — générer avec `openssl rand -base64 48`.
-- `NEXT_PUBLIC_API_URL` — l'adresse à laquelle l'interface ira chercher
-  l'API, **gravée dans le paquet au moment du build** (voir
-  `frontend/Dockerfile` — la changer après coup ne suffit pas, il faut
-  reconstruire l'image). Mets ici l'adresse **Tailscale** de ce PC, par
-  exemple `http://100.x.x.x:3000` (trouver l'adresse : `tailscale ip -4` une
-  fois Tailscale connecté) — jamais `http://localhost:3000`, sinon
-  l'interface s'appellera elle-même en boucle dès qu'elle sera ouverte
-  depuis un autre appareil du tailnet.
-
-**`backend\.env`** : les mêmes `DATABASE_URL`/`JWT_SECRET` que ci-dessus
-(voir les commentaires du fichier).
+Si l'un des deux fichiers existe déjà (relance de l'installateur), il n'est
+pas touché.
 
 ## 4. Premier démarrage
 
@@ -105,17 +106,18 @@ npm run build
 cd ..
 ```
 
-## 5. Créer la passphrase de sauvegarde
+## 5. La passphrase de sauvegarde (générée automatiquement)
+
+`installer.ps1` la génère lui-même si elle n'existe pas encore
+(`..\ignitux-sauvegardes\.passphrase`, jamais versionnée). Pour la voir :
 
 ```powershell
-$dossier = Join-Path (Split-Path (Get-Location) -Parent) 'ignitux-sauvegardes'
-New-Item -ItemType Directory -Path $dossier -Force
-openssl rand -base64 48 | Out-File -Encoding ascii -NoNewline (Join-Path $dossier '.passphrase')
+Get-Content ..\ignitux-sauvegardes\.passphrase
 ```
 
-**Mets une copie de cette passphrase ailleurs aussi** (un gestionnaire de
-mots de passe, une clé USB séparée). Sans elle, une sauvegarde chiffrée
-perdue en même temps qu'elle est illisible pour toujours.
+**Mets-en une copie ailleurs aussi** (un gestionnaire de mots de passe, une
+clé USB séparée). Sans elle, une sauvegarde chiffrée perdue en même temps
+qu'elle est illisible pour toujours.
 
 ## 6. Installer le tableau de bord
 

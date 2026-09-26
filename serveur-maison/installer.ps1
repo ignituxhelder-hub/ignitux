@@ -58,16 +58,37 @@ if (Test-Path (Join-Path $RacineDepot '.git')) {
 Write-Host ""
 Write-Host "── 3. Configuration ───────────────────────────────────────────────"
 
+$secretJwt = Nouveau-SecretAleatoire
+
+# Détectée une seule fois ici : sert à la fois à l'interface (build) et à
+# l'API (CORS) — si le navigateur ouvre http://<IP>:3001, l'API doit
+# accepter cette même origine, pas « localhost ».
+$adresseTailscale = $null
+try {
+    $sortie = & tailscale ip -4 2>$null
+    if ($LASTEXITCODE -eq 0 -and $sortie) { $adresseTailscale = ($sortie | Select-Object -First 1).Trim() }
+} catch {}
+
 $envDocker = Join-Path $RacineDepot '.env.docker'
 if (Test-Path $envDocker) {
     Write-Host ".env.docker déjà présent — pas touché."
 } else {
     Copy-Item (Join-Path $RacineDepot '.env.docker.example') $envDocker
-    Write-Host "CRÉÉ : .env.docker — à REMPLIR à la main avant de continuer :"
-    Write-Host "  - JWT_SECRET (générer avec : openssl rand -base64 48)"
-    Write-Host "  - NEXT_PUBLIC_API_URL : l'adresse Tailscale de CE PC, ex. http://100.x.x.x:3000"
-    Write-Host "    (jamais http://localhost:3000 — sinon l'interface s'appellera elle-même en boucle"
-    Write-Host "     une fois ouverte depuis un autre appareil du tailnet)"
+    $contenu = Get-Content -Raw -Path $envDocker
+    $contenu = $contenu -replace 'JWT_SECRET=""', "JWT_SECRET=`"$secretJwt`""
+    if ($adresseTailscale) {
+        $contenu = $contenu -replace 'NEXT_PUBLIC_API_URL="http://localhost:3000"', "NEXT_PUBLIC_API_URL=`"http://${adresseTailscale}:3000`""
+        $contenu = $contenu -replace 'FRONTEND_URL="http://localhost:3001"', "FRONTEND_URL=`"http://${adresseTailscale}:3001`""
+    }
+    Set-Content -Path $envDocker -Value $contenu -Encoding UTF8
+    Write-Host "CRÉÉ ET REMPLI : .env.docker (JWT_SECRET généré automatiquement)."
+    if ($adresseTailscale) {
+        Write-Host "  Adresse Tailscale détectée et posée : $adresseTailscale"
+    } else {
+        Write-Host "  Adresse Tailscale NON détectée (Tailscale bien connecté ?) — à remplir"
+        Write-Host "  à la main dans .env.docker : NEXT_PUBLIC_API_URL et FRONTEND_URL,"
+        Write-Host "  avec le résultat de 'tailscale ip -4'."
+    }
 }
 
 $envBackend = Join-Path $RacineDepot 'backend\.env'
@@ -75,17 +96,22 @@ if (Test-Path $envBackend) {
     Write-Host "backend\.env déjà présent — pas touché."
 } else {
     Copy-Item (Join-Path $RacineDepot 'backend\.env.example') $envBackend
-    Write-Host "CRÉÉ : backend\.env — à REMPLIR à la main (DATABASE_URL, JWT_SECRET — les mêmes valeurs que .env.docker)."
+    $contenu = Get-Content -Raw -Path $envBackend
+    # Mêmes identifiants que les valeurs par défaut de .env.docker
+    # (POSTGRES_USER/PASSWORD/DB) — à ajuster à la main si tu les as changées.
+    $contenu = $contenu -replace 'DATABASE_URL="postgresql://user:password@host:5432/postgres"', 'DATABASE_URL="postgresql://ignitux:ignitux@localhost:5432/ignitux"'
+    $contenu = $contenu -replace 'JWT_SECRET="change-me-generate-a-long-random-secret"', "JWT_SECRET=`"$secretJwt`""
+    Set-Content -Path $envBackend -Value $contenu -Encoding UTF8
+    Write-Host "CRÉÉ ET REMPLI : backend\.env (mêmes valeurs que .env.docker)."
 }
 
 if (-not (Test-Path $FichierPassePhrase)) {
+    Nouveau-SecretAleatoire | Out-File -Encoding ascii -NoNewline $FichierPassePhrase
     Write-Host ""
-    Write-Host "Passphrase de sauvegarde absente : $FichierPassePhrase"
-    Write-Host "Génère-la et mets-la en sûreté AILLEURS aussi (gestionnaire de mots de"
-    Write-Host "passe, clé USB séparée) — sans copie de secours, une sauvegarde chiffrée"
-    Write-Host "perdue avec elle est illisible pour toujours :"
-    Write-Host '  openssl rand -base64 48 | Out-File -Encoding ascii -NoNewline "' -NoNewline
-    Write-Host "$FichierPassePhrase`""
+    Write-Host "Passphrase de sauvegarde générée : $FichierPassePhrase"
+    Write-Host "Mets-en une copie ailleurs aussi (gestionnaire de mots de passe, clé USB"
+    Write-Host "séparée) — sans copie de secours, une sauvegarde chiffrée perdue avec"
+    Write-Host "elle est illisible pour toujours. La voir : Get-Content `"$FichierPassePhrase`""
 }
 
 Write-Host ""
@@ -103,9 +129,11 @@ Write-Host "── 6. Tâches planifiées ────────────�
 Write-Host ""
 Write-Host "══════════════════════════════════════════════════════════════════"
 Write-Host "PROCHAINES ÉTAPES À FAIRE À LA MAIN (voir docs/serveur-maison-installation.md) :"
-Write-Host "  1. Remplir .env.docker et backend\.env si ce n'est pas déjà fait."
+Write-Host "  1. Si l'adresse Tailscale n'a pas été détectée plus haut : la remplir"
+Write-Host "     à la main dans .env.docker (NEXT_PUBLIC_API_URL, FRONTEND_URL)."
 Write-Host "  2. Premier démarrage : docker compose --env-file .env.docker up -d --build"
 Write-Host "  3. Poser le schéma : cd backend; npx prisma db push"
-Write-Host "  4. Installer le tableau de bord : cd tableau-de-bord; npm install; npm run installer-service"
-Write-Host "  5. Vérifier depuis un autre appareil du tailnet : http://<IP-Tailscale>:3001"
+Write-Host "  4. npm ci; npm run build (dans backend\ — nécessaire à la sauvegarde nocturne)"
+Write-Host "  5. Installer le tableau de bord : cd tableau-de-bord; npm install; npm run installer-service"
+Write-Host "  6. Vérifier depuis un autre appareil du tailnet : http://<IP-Tailscale>:3001"
 Write-Host "══════════════════════════════════════════════════════════════════"

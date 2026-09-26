@@ -68,10 +68,12 @@ Les sauvegardes chiffrées vivent dans `..\ignitux-sauvegardes\` (hors du
 dépôt). Pour en lire une :
 
 ```powershell
-$dossier = '..\ignitux-sauvegardes'
-$plusRecente = Get-ChildItem $dossier -Filter '*.zip.enc' | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+cd serveur-maison
+. .\configuration.ps1   # résout $OpenSSL et $DossierSauvegardes, même sans openssl sur le PATH
 
-openssl enc -d -aes-256-cbc -pbkdf2 -in $plusRecente.FullName -out restauree.zip -pass "file:$dossier\.passphrase"
+$plusRecente = Get-ChildItem $DossierSauvegardes -Filter '*.zip.enc' | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+
+& $OpenSSL enc -d -aes-256-cbc -pbkdf2 -in $plusRecente.FullName -out restauree.zip -pass "file:$FichierPassePhrase"
 Expand-Archive restauree.zip -DestinationPath restauree
 ```
 

@@ -47,3 +47,25 @@ $PlageTailscale = '100.64.0.0/10'
 # sauvegardes, pour qu'un `git pull`/`git clean` ne le touche jamais.
 $DossierPartage = 'C:\Partage-Ignitux'
 $NomPartageSMB = 'Ignitux'
+
+# openssl n'est pas garanti sur le PATH d'un Windows tout neuf (il ne l'était
+# pas ici) — seule sauvegarde-quotidienne.ps1 en a besoin, pour chiffrer les
+# sauvegardes. Git pour Windows l'embarque toujours dans ses outils Unix :
+# on le réutilise plutôt que d'exiger une installation séparée.
+$OpenSSL = (Get-Command openssl -ErrorAction SilentlyContinue).Source
+if (-not $OpenSSL) {
+    foreach ($base in @($env:ProgramFiles, ${env:ProgramFiles(x86)})) {
+        if (-not $base) { continue }
+        $candidat = Join-Path $base 'Git\usr\bin\openssl.exe'
+        if (Test-Path $candidat) { $OpenSSL = $candidat; break }
+    }
+}
+
+# Génère un secret aléatoire, sans dépendre d'openssl (JWT_SECRET, passphrase
+# de sauvegarde) — uniquement du .NET, présent partout où PowerShell tourne.
+function Nouveau-SecretAleatoire {
+    param([int]$Octets = 48)
+    $tampon = New-Object byte[] $Octets
+    [System.Security.Cryptography.RandomNumberGenerator]::Fill($tampon)
+    return [Convert]::ToBase64String($tampon)
+}
