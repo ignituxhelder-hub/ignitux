@@ -157,7 +157,37 @@ export const CATALOGUE: readonly Offre[] = [
     capacites: {
       projets: null,
       generateurs: [...GENERATOR_NAMES],
-      appelsIaParMois: 150,
+      /*
+       * 35 et non 150, depuis le 26 septembre 2026.
+       *
+       * Le catalogue vendait 150 analyses tandis que le plafond de coût par
+       * utilisateur — `DEFAULT_COST_MICRO_EUR_PER_MONTH`, 2 €/mois — coupait
+       * bien avant. Le produit ne mentait pas à l'usage : il nomme le plafond
+       * qui mord (`analyses_selon`). Mais il vendait un chiffre qu'il ne
+       * pouvait pas tenir, et la personne qui l'apprenait était celle qui
+       * venait de payer.
+       *
+       * D'où vient 35, et pas un chiffre rond. Deux contraintes le serrent :
+       *
+       *   — le plafond de coût. 55 appels réels mesurés donnent 0,0511 € de
+       *     moyenne ; 35 × 0,0511 = 1,79 €, sous les 2 €, avec de la marge.
+       *     Le maximum théorique serait 39 ;
+       *   — le catalogue lui-même. Un test exige qu'une offre plus chère ne
+       *     donne JAMAIS moins que la précédente, et Entrepreneur en promet
+       *     30. Descendre à 30 aurait cassé cette échelle : on aurait payé
+       *     59 € pour le même quota que 9,90 €.
+       *
+       * Ce que 35 ne garantit PAS, et il vaut mieux l'écrire : l'appel le plus
+       * cher observé coûte 0,0914 € (`construire`). Quelqu'un qui n'utiliserait
+       * que celui-là serait coupé vers la 22ᵉ. L'offre Entrepreneur a
+       * exactement la même propriété, et depuis plus longtemps — c'est le
+       * plafond qui est commun aux deux, pas un défaut de cette offre-ci.
+       *
+       * Construction ne vend d'ailleurs pas des analyses : elle vend la
+       * comptabilité, la facturation, la banque, les investisseurs et les
+       * collaborateurs. Les trois lignes ci-dessous sont ce qu'on paie.
+       */
+      appelsIaParMois: 35,
       outilsDeGestion: true,
       investisseurs: true,
       collaborateurs: null,

@@ -85,13 +85,28 @@ exactement la promesse du parcours.
 | Prix par défaut | gratuit | 9,90 € | 59,00 € |
 | Projets | 1 | sans limite | sans limite |
 | Générateurs | Analyser | les cinq | les cinq |
-| Générations/mois | 3 | 30 | 150 |
+| Générations/mois | 3 | 30 | 35 |
 | Comptabilité, facturation, banque | — | — | oui |
 | Financement, investisseurs | — | — | oui |
 | Collaborateurs | — | — | sans limite |
 
 Trois analyses en gratuit, pas une : une seule rendrait impossible de retravailler son idée et
 de la relancer, ce qui est précisément le geste à encourager.
+
+**Construction est passée de 150 à 35 générations le 26 septembre 2026**, et ce n'est pas une
+dévaluation : c'est la fin d'une promesse que le produit ne pouvait pas tenir. Le plafond de coût
+par utilisateur vaut 2 €/mois, et 55 appels réels donnent 0,0511 € de moyenne — le plafond coupait
+donc vers la 39ᵉ, bien avant la 150ᵉ. Le produit ne mentait pas à l'usage (il nomme le plafond qui
+mord), mais il vendait un chiffre qu'il ne pouvait pas honorer, et la personne qui l'apprenait
+était celle qui venait de payer.
+
+35 et non 30 parce qu'une offre plus chère ne doit jamais donner moins que la précédente — un test
+du catalogue l'exige, et Entrepreneur en promet 30. Un second test attache désormais le quota au
+plafond : relever l'un sans l'autre fait échouer la suite.
+
+**Ce que Construction vend n'a jamais été des analyses** : c'est la comptabilité, la facturation,
+la banque, les investisseurs et les collaborateurs. Les trois lignes du tableau qui la
+distinguent sont toujours là.
 
 **L'évaluation de financement (99 €) n'est pas un abonnement,** et le code refuse de la ranger
 comme tel. Un test vérifie que son montant ne s'affiche jamais sans la phrase qui dit ce qu'il

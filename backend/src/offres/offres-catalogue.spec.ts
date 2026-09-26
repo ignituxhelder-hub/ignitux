@@ -9,6 +9,8 @@ import {
   prixCentimes,
   OFFRES,
 } from './offres-catalogue.js';
+import { MICRO_EUR_PER_EUR } from '../igini/usage/ai-pricing.js';
+import { DEFAULT_COST_MICRO_EUR_PER_MONTH } from '../igini/usage/ai-quota.js';
 
 describe('catalogue des offres', () => {
   it('expose une offre par identifiant déclaré, et pas davantage', () => {
@@ -70,6 +72,41 @@ describe('catalogue des offres', () => {
         const apres = CATALOGUE[i].capacites.appelsIaParMois;
         if (avant === null) continue;
         expect(apres === null || apres > avant, `${CATALOGUE[i].id}`).toBe(true);
+      }
+    });
+
+    /**
+     * UNE OFFRE NE PROMET PAS PLUS QUE LE PLAFOND NE PERMET.
+     *
+     * Le catalogue a vendu 150 analyses pendant des semaines, tandis que le
+     * plafond de coût par utilisateur — 2 €/mois — coupait vers la 39ᵉ. Le
+     * produit ne mentait pas à l'usage : il nomme le plafond qui mord. Mais il
+     * vendait un chiffre qu'il ne pouvait pas tenir, et la personne qui
+     * l'apprenait était celle qui venait de payer.
+     *
+     * Ce test attache les deux nombres l'un à l'autre. Relever un quota sans
+     * relever le plafond le fait échouer, et inversement — c'est le seul
+     * moyen de ne pas redécouvrir la contradiction chez un client.
+     *
+     * 0,0511 € est le coût moyen mesuré sur 55 appels réels (26/09/2026). Il
+     * ne couvre pas le pire cas : l'appel le plus cher observé, `construire`
+     * à 0,0914 €, coupe plus tôt. C'est assumé et écrit dans le catalogue —
+     * viser le pire cas descendrait les offres payantes à 21 analyses, sous
+     * ce que l'offre précédente promet déjà.
+     */
+    it('ne promet jamais plus d’analyses que le plafond de coût n’en permet', () => {
+      const COUT_MOYEN_MESURE_EUR = 0.0511;
+      const plafondEuros = DEFAULT_COST_MICRO_EUR_PER_MONTH / MICRO_EUR_PER_EUR;
+      const permises = Math.floor(plafondEuros / COUT_MOYEN_MESURE_EUR);
+
+      for (const o of CATALOGUE) {
+        const promises = o.capacites.appelsIaParMois;
+        if (promises === null) continue;
+        expect(
+          promises,
+          `${o.id} promet ${promises} analyses ; le plafond de ${plafondEuros} € n'en ` +
+            `permet que ${permises} au coût moyen mesuré`,
+        ).toBeLessThanOrEqual(permises);
       }
     });
 

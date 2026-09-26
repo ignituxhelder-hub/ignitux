@@ -35,19 +35,28 @@ une priorité, une date. Ils sont discutables, et c'est voulu.
 ## En une page
 
 **Un seul bloquant absolu** pour une bêta privée : l'hébergement, et le `https`
-qui vient avec. L'email n'en est pas un — **[lu]** aucune garde ne lit
+qui vient avec — comparaison chiffrée dans [`hebergement.md`](hebergement.md). L'email n'en est pas un — **[lu]** aucune garde ne lit
 `email_verified_at`, un compte non vérifié a le produit entier.
 
 **Le parcours entrepreneur tient.** **[mesuré]** douze étapes, aucun constat.
 
-**Le parcours investisseur n'existe pas**, et c'est structurel. Le module est un
-registre tenu par le porteur ; un investisseur ne peut ni découvrir un projet ni
-investir. Le code a raison d'être prudent — c'est réglementé — et il l'explique
-déjà à l'écran. Ce qui manque est le chemin, pas l'explication.
+**L'investisseur ne peut pas investir**, et c'est structurel : le registre est
+tenu par le porteur. Le code a raison d'être prudent — c'est réglementé — et il
+l'explique déjà à l'écran. Ce qui manque est **le chemin d'entrée**, pas le
+suivi : une fois inscrit au registre, un investisseur voit tout, jusqu'au
+dernier mouvement.
 
-**Une contradiction chiffrée bloque la phase payante.** **[lu]** Construction
-vend 150 analyses pour 59 € ; le plafond de coût par utilisateur vaut 2 €/mois.
-Le garde-fou coupe vers la 34ᵉ.
+> **Deux corrections de cet audit, les 25 et 26 septembre.** J'ai d'abord écrit
+> que le produit n'expliquait nulle part comment un investissement entre au
+> registre, puis que l'écran par projet manquait. **Les deux étaient faux.**
+> Le module investisseur est plus complet qu'il n'en a l'air depuis l'extérieur,
+> et c'est précisément le piège que le préambule annonçait : on refait ce qui
+> existe déjà.
+
+~~**Une contradiction chiffrée bloque la phase payante.**~~ **Résolue le
+26 septembre** : Construction vendait 150 analyses quand le plafond de 2 €/mois
+n'en permettait que 39. La promesse est passée à 35, et un test lie désormais
+les deux chiffres.
 
 **À 10 000 investisseurs**, la première chose qui casse est l'écran du porteur,
 pas celui de l'investisseur.
@@ -169,6 +178,7 @@ C'est la trouvaille principale de cet audit, et elle est structurelle.
 | **Découverte des projets** | ❌ **aucune route, aucun écran** | [lu] |
 | **Investissement** | ❌ **impossible depuis le produit** | [lu] |
 | Suivi des participations | ✅ `/investisseur` | [lu] |
+| Détail d'un projet financé | ✅ déplié dans la ligne, historique compris | [lu] |
 | Remboursements | ⚠️ visibles, jamais reçus | [lu] |
 | Dividendes | ⚠️ visibles, jamais reçus | [lu] |
 
@@ -208,11 +218,22 @@ et il a raison.
 
 1. ~~Une phrase sur `/investisseur` vide~~ — **fait le 25 septembre.** L'état
    vide dit désormais que c'est normal, et pourquoi.
-2. **`/investisseur/projets/[id]`** — **[lu]**
-   `GET /investisseurs/moi/projets/:financedProjectId` existe déjà et n'est
-   servi par aucun écran. *½ journée.* **C'est désormais le premier manque.**
-3. Un accusé lisible quand un remboursement ou un dividende est enregistré.
-   *½ journée.*
+2. ~~`/investisseur/projets/[id]`~~ — **seconde erreur de cet audit, corrigée
+   le 26 septembre.** J'avais écrit que l'API n'était servie par aucun écran.
+   **Elle l'est** : le composant `LigneProjet` de `/investisseur` déplie, pour
+   chaque projet, le titre, le statut, les quatre montants, et un bouton
+   « Voir l'historique » qui appelle exactement `getMyProjectHistory` et
+   liste chaque mouvement avec sa date, son libellé, sa référence et la
+   mention des rectifications.
+
+   Un écran séparé n'ajouterait qu'une URL partageable, au prix d'un
+   composant dupliqué. **Ne pas le construire** est la bonne décision, et
+   elle est conforme à la consigne : l'objectif n'est plus d'ajouter des
+   modules.
+3. Un accusé quand un remboursement ou un dividende est enregistré — **[lu]**
+   il n'existe aucun mécanisme de notification dans tout le produit. Ce serait
+   donc un module neuf, et il n'aurait nulle part où écrire tant que l'email
+   n'est pas branché. *À ne pas faire maintenant.*
 
 ### Cas 3 — Hybride : la règle existe, la preuve manque
 
@@ -322,7 +343,7 @@ dessous de ~200 investisseurs par projet, il n'y a rien à faire.
 | Besoin exprimé | État |
 |---|---|
 | Comprendre son portefeuille | ✅ global et par projet ; le net passe **négatif** après un investissement, ce qui est juste |
-| Comprendre chaque projet | ⚠️ **l'API existe, l'écran non** |
+| Comprendre chaque projet | ✅ replié dans la ligne de portefeuille : montants, statut, et l'historique complet à un clic |
 | Suivre son argent | ✅ historique complet, corrections tracées |
 | Recevoir ses remboursements | ❌ enregistrés, jamais versés |
 | Recevoir ses dividendes | ❌ idem — répartition au centime exact (plus fort reste), aucun versement |
@@ -362,17 +383,27 @@ de paiement, lui-même suspendu à une réponse juridique.
 | **Risque** | voir ci-dessous — il est chiffré, et il bloque |
 | **Sortie** | un abonnement encaissé, une facture émise conforme |
 
-**Le risque, chiffré.** **[lu]** L'offre Construction vend **150 analyses** pour
-59 € (`offres-catalogue.ts`, `appelsIaParMois: 150`), tandis que le plafond de
-coût par utilisateur vaut **2 €/mois** (`DEFAULT_COST_MICRO_EUR_PER_MONTH`).
-**[consigné]** À 0,059 € l'appel en moyenne, le garde-fou coupe vers la
-**34ᵉ analyse** — moins du quart de ce qui a été payé.
+**Le risque, chiffré — et résolu le 26 septembre.** L'offre Construction vendait
+**150 analyses** pour 59 € tandis que le plafond de coût par utilisateur vaut
+**2 €/mois**. **[mesuré]** 55 appels réels donnent **0,0511 €** de moyenne : le
+garde-fou coupait donc vers la **39ᵉ**, moins du tiers de ce qui était payé.
 
-Ce n'est pas une question de marge : **c'est le produit qui refuse ce qu'il a
-vendu**, et la personne qui l'apprend est celle qui vient de payer. Trois issues,
-à choisir avant le premier abonnement : relever le plafond pour les offres
-payantes, baisser le nombre d'analyses promises, ou monter le prix. Aujourd'hui
-les deux chiffres se contredisent, et rien dans le code ne les rapproche.
+Ce n'était pas une question de marge : **c'était le produit qui refusait ce
+qu'il avait vendu**, et la personne qui l'apprenait était celle qui venait de
+payer.
+
+**La promesse a été alignée sur ce que le plafond permet : 35 analyses.** Pas 30,
+parce qu'un test du catalogue exige qu'une offre plus chère ne donne jamais moins
+que la précédente — et Entrepreneur en promet 30. Un second test attache
+désormais le quota au plafond : relever l'un sans l'autre fait échouer la suite,
+avec le message qui nomme les deux chiffres.
+
+**Ce que 35 ne garantit pas**, et c'est écrit dans le catalogue : l'appel le plus
+cher observé coûte **0,0914 €** (`construire`). Quelqu'un qui n'utiliserait que
+celui-là serait coupé vers la 22ᵉ. L'offre Entrepreneur a exactement la même
+propriété, depuis plus longtemps : c'est le plafond qui est commun, pas un défaut
+de cette offre-ci. Viser le pire cas descendrait les deux offres payantes à 21
+analyses, sous ce que la précédente promet déjà.
 
 ### Phase 3 — Lancement public · *3 à 6 mois après la phase 2*
 
@@ -406,15 +437,15 @@ est ce qui les soutient.
 
 | # | Action | Effort | Pourquoi maintenant |
 |---|---|---|---|
-| 1 | Prendre un hébergement et un domaine | ½ j | le seul vrai verrou |
+| 1 | Prendre un hébergement et un domaine | ½ j | le seul vrai verrou — comparaison chiffrée dans [`hebergement.md`](hebergement.md) |
 | 2 | Brancher un collecteur d'erreurs | 2 h | **avant** le premier utilisateur, pas après |
 | 3 | Brancher le fournisseur d'email | 2 h | le chemin est déjà éprouvé, 11/11 |
 | 4 | Planifier la sauvegarde, vérifier la rétention chez l'hébergeur | 1 h | une sauvegarde manuelle n'existe pas |
 | 5 | ~~Expliquer l'écran investisseur vide~~ | — | **fait le 25 septembre** |
 | 6 | ~~Test de bout en bout du cas hybride~~ | — | **fait le 25 septembre**, 6/6 |
 | 7 | Rendre la suite de tests déterministe | ½ j | sinon elle cesse d'être une preuve |
-| 8 | Construire `/investisseur/projets/[id]` | ½ j | l'API existe déjà |
-| 9 | **Résoudre la contradiction Construction** | décision | 150 vendues, ~34 permises — bloquant phase 2 |
+| 8 | ~~Construire `/investisseur/projets/[id]`~~ | — | **inutile** : l'écran existe déjà, replié dans la ligne de portefeuille (26/09) |
+| 9 | ~~Contradiction Construction~~ | — | **tranchée le 26 septembre** : 150 → 35, et un test attache le quota au plafond |
 | 10 | Exiger la vérification d'adresse | 2 h | avant la phase 3, pas avant la bêta |
 
 **Les six premières font moins de deux jours cumulés.**

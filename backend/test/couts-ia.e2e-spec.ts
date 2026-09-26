@@ -128,7 +128,7 @@ describe('Coûts IA (e2e)', () => {
     //
     // Ces tests disaient « 5 analyses », parce qu'à l'époque le produit
     // n'avait qu'une offre, à 20 €/mois pour 5 analyses. Le catalogue est
-    // arrivé depuis — 3 en Découverte, 30 en Entrepreneur, 150 en
+    // arrivé depuis — 3 en Découverte, 30 en Entrepreneur, 35 en
     // Construction — et le 5 lui a survécu, dans une constante technique
     // que plus personne ne relisait. Il serait tombé **avant** l'offre pour
     // tout abonné payant : coupé à la cinquième analyse après en avoir
