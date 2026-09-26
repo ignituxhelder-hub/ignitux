@@ -1,4 +1,4 @@
-# ═══════════════════════════════════════════════════════════════════════════
+﻿# ═══════════════════════════════════════════════════════════════════════════
 # PARE-FEU — n'ouvrir ces ports qu'au tailnet
 #
 # Ignitux se rend accessible à distance par Tailscale, jamais par une

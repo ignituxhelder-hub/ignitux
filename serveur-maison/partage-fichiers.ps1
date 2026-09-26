@@ -1,4 +1,4 @@
-# ═══════════════════════════════════════════════════════════════════════════
+﻿# ═══════════════════════════════════════════════════════════════════════════
 # PARTAGE DE FICHIERS — un dossier réseau réservé à Ignitux, JAMAIS aux
 # fichiers personnels ou familiaux. Rien d'autre ne doit y être déposé.
 #

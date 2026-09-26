@@ -1,4 +1,4 @@
-# ═══════════════════════════════════════════════════════════════════════════
+﻿# ═══════════════════════════════════════════════════════════════════════════
 # SAUVEGARDE QUOTIDIENNE — appelé chaque jour à 02h00 par la tâche planifiée
 # « Ignitux - Sauvegarde quotidienne » (voir planifier-taches.ps1).
 #

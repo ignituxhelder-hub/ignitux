@@ -1,4 +1,4 @@
-# ═══════════════════════════════════════════════════════════════════════════
+﻿# ═══════════════════════════════════════════════════════════════════════════
 # MISE À JOUR AUTOMATIQUE — appelé toutes les 5 minutes par la tâche planifiée
 # « Ignitux - Mise a jour automatique » (voir planifier-taches.ps1).
 #

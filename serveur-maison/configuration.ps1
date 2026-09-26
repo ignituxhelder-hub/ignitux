@@ -1,4 +1,4 @@
-# ═══════════════════════════════════════════════════════════════════════════
+﻿# ═══════════════════════════════════════════════════════════════════════════
 # CONFIGURATION PARTAGÉE DU SERVEUR MAISON
 #
 # Tous les autres scripts de ce dossier commencent par :

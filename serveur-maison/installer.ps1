@@ -1,4 +1,4 @@
-# ═══════════════════════════════════════════════════════════════════════════
+﻿# ═══════════════════════════════════════════════════════════════════════════
 # INSTALLATEUR — geste unique, à exécuter SUR LE PC SERVEUR, dans un
 # PowerShell VRAIMENT ouvert en administrateur.
 #

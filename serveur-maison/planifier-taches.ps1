@@ -1,4 +1,4 @@
-# ═══════════════════════════════════════════════════════════════════════════
+﻿# ═══════════════════════════════════════════════════════════════════════════
 # PLANIFICATION — enregistre les tâches planifiées Windows de la mise à jour
 # automatique et de la sauvegarde quotidienne. Ré-exécutable sans risque :
 # une tâche déjà enregistrée est remplacée, jamais dupliquée.
