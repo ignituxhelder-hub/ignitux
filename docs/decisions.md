@@ -467,12 +467,15 @@ passerait pour une mauvaise raison.
 
 ## `NEXT_DIST_DIR` : vérifier un build sans casser ce qui tourne
 
-**Quoi** — `next.config.ts` lit `distDir` depuis `NEXT_DIST_DIR`, par défaut `.next`.
+**Quoi** — `next.config.js` lit `distDir` depuis `NEXT_DIST_DIR`, par défaut `.next`.
 **Pourquoi** — lancer `next build` pendant qu'un `next dev` ou `next start` sert le même `.next`
 corrompt le répertoire en cours de lecture et fait répondre 500, y compris à quelqu'un en train
 d'utiliser le site. Le piège a déjà coûté une panne sur ce projet. Une variable d'environnement
 d'une ligne suffit à rendre l'erreur impossible pendant une session de test ou une démonstration.
-**Où** — `frontend/next.config.ts`.
+En `.js` et non `.ts` : l'image d'exécution n'embarque pas TypeScript, et un `next.config.ts`
+faisait boucler le conteneur en redémarrage permanent au premier déploiement réel (Next tente
+d'installer TypeScript lui-même, sans le droit d'écrire dans `node_modules`).
+**Où** — `frontend/next.config.js`.
 
 ## Le rachat : le porteur écrit la règle, Ignitux ne fait que compter
 

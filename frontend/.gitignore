@@ -1,7 +1,7 @@
 /node_modules
 /.next
 # Build de verification lance pendant qu'une instance sert deja .next
-# (voir distDir dans next.config.ts).
+# (voir distDir dans next.config.js).
 /.next-*
 /out
 *.tsbuildinfo
