@@ -41,3 +41,9 @@ $PortTableauDeBord = 3210
 # n'ouvrir ces ports qu'au tailnet et jamais au reste du réseau local ou
 # d'Internet.
 $PlageTailscale = '100.64.0.0/10'
+
+# Partage de fichiers — réservé à Ignitux, jamais aux fichiers personnels ou
+# familiaux (voir partage-fichiers.ps1). Un dossier frère du dépôt, comme les
+# sauvegardes, pour qu'un `git pull`/`git clean` ne le touche jamais.
+$DossierPartage = 'C:\Partage-Ignitux'
+$NomPartageSMB = 'Ignitux'

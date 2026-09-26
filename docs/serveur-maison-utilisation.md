@@ -8,6 +8,21 @@ Tableau de bord : `http://<adresse-Tailscale-du-serveur>:3210` — version
 déployée, dernier commit, date de la dernière mise à jour automatique, état
 des conteneurs, CPU, RAM.
 
+## Utiliser le partage de fichiers
+
+Depuis un appareil connecté à Tailscale :
+
+- Windows : ouvrir `\\<adresse-Tailscale-du-serveur>\Ignitux` dans
+  l'Explorateur (ou le lecteur réseau de ton choix).
+- macOS : Finder → **Aller** → **Se connecter au serveur** →
+  `smb://<adresse-Tailscale-du-serveur>/Ignitux`.
+- Identifiants demandés : ceux du compte Windows utilisé lors de
+  l'installation, sur le PC serveur.
+
+**Ce dossier est réservé à Ignitux** — jamais de photos, documents ou
+fichiers personnels/familiaux dedans. Il n'est joignable que depuis le
+tailnet : ni depuis le Wi-Fi de la maison, ni depuis Internet.
+
 ## Lire les journaux
 
 Sur le PC serveur, dans `serveur-maison\journaux\` :

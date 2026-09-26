@@ -30,6 +30,10 @@ $regles = @(
     @{ Nom = 'Ignitux - API (Tailscale)'; Port = 3000 }
     @{ Nom = 'Ignitux - Interface (Tailscale)'; Port = 3001 }
     @{ Nom = 'Ignitux - Tableau de bord (Tailscale)'; Port = $PortTableauDeBord }
+    # SMB (partage de fichiers, voir partage-fichiers.ps1). Ne JAMAIS élargir
+    # cette règle au réseau local ou rediriger ce port sur la box internet :
+    # SMB exposé publiquement est une porte d'entrée classique (rançongiciels).
+    @{ Nom = 'Ignitux - Partage de fichiers (Tailscale)'; Port = 445 }
 )
 
 foreach ($regle in $regles) {

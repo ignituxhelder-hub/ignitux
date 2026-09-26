@@ -89,11 +89,15 @@ if (-not (Test-Path $FichierPassePhrase)) {
 }
 
 Write-Host ""
-Write-Host "── 4. Pare-feu ────────────────────────────────────────────────────"
+Write-Host "── 4. Partage de fichiers (Ignitux uniquement) ──────────────────────"
+& "$PSScriptRoot\partage-fichiers.ps1"
+
+Write-Host ""
+Write-Host "── 5. Pare-feu ────────────────────────────────────────────────────"
 & "$PSScriptRoot\pare-feu.ps1"
 
 Write-Host ""
-Write-Host "── 5. Tâches planifiées ────────────────────────────────────────────"
+Write-Host "── 6. Tâches planifiées ────────────────────────────────────────────"
 & "$PSScriptRoot\planifier-taches.ps1"
 
 Write-Host ""

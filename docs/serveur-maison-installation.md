@@ -128,19 +128,33 @@ cd ..\..
 
 Il tourne alors comme service Windows, sur le port 3210.
 
-## 7. Vérifier depuis un autre appareil du tailnet
+## 7. Partage de fichiers (Ignitux uniquement)
+
+```powershell
+cd serveur-maison
+.\partage-fichiers.ps1
+```
+
+Crée `C:\Partage-Ignitux` et le partage réseau qui va avec — accessible
+seulement via Tailscale, jamais depuis le Wi-Fi de la maison ni Internet.
+**Ce dossier n'est réservé qu'aux fichiers liés à Ignitux** — jamais de
+fichiers personnels ou familiaux dedans.
+
+## 8. Vérifier depuis un autre appareil du tailnet
 
 Une fois Tailscale connecté sur ton PC portable ou ton téléphone :
 
 - Interface : `http://<adresse-Tailscale-du-serveur>:3001`
 - Tableau de bord : `http://<adresse-Tailscale-du-serveur>:3210`
+- Partage de fichiers : `\\<adresse-Tailscale-du-serveur>\Ignitux` (Windows)
+  ou `smb://<adresse-Tailscale-du-serveur>/Ignitux` (macOS)
 
 Si ça ne répond pas : vérifier que Tailscale est bien connecté des deux
 côtés, puis relire `pare-feu.ps1` (les règles sont bornées à `100.64.0.0/10`
 — l'adresse d'où tu testes doit être une adresse Tailscale, pas ton Wi-Fi
 local).
 
-## 8. Redémarrage automatique — un compromis à connaître
+## 9. Redémarrage automatique — un compromis à connaître
 
 Docker Desktop tourne dans **la session de l'utilisateur connecté** ; les
 tâches planifiées se lancent donc « à la connexion de cet utilisateur », pas

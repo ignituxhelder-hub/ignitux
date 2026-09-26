@@ -20,6 +20,7 @@ quotidien, une fois installé).
 | `installer.ps1` | Geste unique : outils, dépôt, configuration, pare-feu, tâches planifiées. |
 | `configuration.ps1` | Chemins et réglages partagés par tous les autres scripts. |
 | `pare-feu.ps1` | Règles de pare-feu Windows, bornées au tailnet Tailscale. |
+| `partage-fichiers.ps1` | Dossier réseau réservé à Ignitux (jamais aux fichiers personnels), accessible seulement via Tailscale. |
 | `planifier-taches.ps1` | Enregistre les tâches planifiées (mise à jour, sauvegarde). |
 | `maj-automatique.ps1` | Vérifie GitHub, tire les nouveaux commits, reconstruit et redémarre Docker. |
 | `sauvegarde-quotidienne.ps1` | Sauvegarde chiffrée quotidienne (base + configuration). |
