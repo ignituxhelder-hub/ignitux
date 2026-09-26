@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<title>Serveur Ignitux</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: system-ui, sans-serif;
+    max-width: 720px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.4rem; }
+  .carte {
+    border: 1px solid #8884;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  .carte h2 { margin-top: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.03em; opacity: 0.7; }
+  .ligne { display: flex; justify-content: space-between; gap: 1rem; padding: 0.15rem 0; }
+  .muted { opacity: 0.65; }
+  .ok { color: #2a9d5c; }
+  .attention { color: #d1902b; }
+  .erreur { color: #d1453b; }
+  code { font-size: 0.85em; }
+</style>
+</head>
+<body>
+  <h1>Serveur maison Ignitux</h1>
+  <p class="muted" id="horodatage">Chargement…</p>
+
+  <div class="carte">
+    <h2>Déploiement</h2>
+    <div class="ligne"><span>Version déployée</span><strong id="version">—</strong></div>
+    <div class="ligne"><span>Dernier commit</span><span id="commit">—</span></div>
+    <div class="ligne"><span>Dernière mise à jour automatique</span><span id="derniere-maj">—</span></div>
+  </div>
+
+  <div class="carte">
+    <h2>Conteneurs Docker</h2>
+    <div id="conteneurs">—</div>
+  </div>
+
+  <div class="carte">
+    <h2>Ressources</h2>
+    <div class="ligne"><span>CPU</span><span id="cpu">—</span></div>
+    <div class="ligne"><span>RAM</span><span id="ram">—</span></div>
+  </div>
+
+  <script>
+    async function rafraichir() {
+      try {
+        const reponse = await fetch('/api/etat');
+        const etat = await reponse.json();
+
+        document.getElementById('horodatage').textContent =
+          'Mis à jour ' + new Date(etat.horodatage).toLocaleTimeString('fr-FR');
+
+        document.getElementById('version').textContent = etat.depot?.version ?? 'N/D';
+        document.getElementById('commit').textContent = etat.depot?.message
+          ? etat.depot.message + ' — ' + etat.depot.auteur + ' (' + new Date(etat.depot.date).toLocaleString('fr-FR') + ')'
+          : 'N/D';
+
+        const maj = etat.derniereMaj;
+        document.getElementById('derniere-maj').innerHTML = maj
+          ? new Date(maj.derniereMaj).toLocaleString('fr-FR') +
+            ' — <span class="' + (maj.succes ? 'ok' : 'erreur') + '">' + (maj.succes ? 'réussie' : 'échouée') + '</span>'
+          : '<span class="muted">aucune encore</span>';
+
+        const conteneursDiv = document.getElementById('conteneurs');
+        if (Array.isArray(etat.conteneurs)) {
+          conteneursDiv.innerHTML = etat.conteneurs.length
+            ? etat.conteneurs.map((c) =>
+                '<div class="ligne"><code>' + c.nom + '</code><span class="' +
+                (c.etat === 'running' ? 'ok' : 'attention') + '">' + c.statut + '</span></div>'
+              ).join('')
+            : '<span class="muted">aucun conteneur ignitux trouvé</span>';
+        } else {
+          conteneursDiv.innerHTML = '<span class="erreur">' + (etat.conteneurs?.erreur ?? 'inconnu') + '</span>';
+        }
+
+        document.getElementById('cpu').textContent = etat.ressources?.cpuPourcent + ' %';
+        document.getElementById('ram').textContent =
+          etat.ressources?.ramUtiliseeMo + ' / ' + etat.ressources?.ramTotaleMo + ' Mo';
+      } catch (erreur) {
+        document.getElementById('horodatage').textContent = 'Tableau de bord inaccessible : ' + erreur.message;
+      }
+    }
+
+    rafraichir();
+    setInterval(rafraichir, 10000);
+  </script>
+</body>
+</html>

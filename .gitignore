@@ -30,3 +30,8 @@ npm-debug.log*
 
 # Configuration de la composition Docker (voir .env.docker.example)
 .env.docker
+
+# Serveur maison (voir serveur-maison/) : journaux, état et dépendances
+# générés à l'exécution — jamais versionnés.
+serveur-maison/journaux/
+serveur-maison/tableau-de-bord/node_modules/

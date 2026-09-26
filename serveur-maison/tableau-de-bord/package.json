@@ -1,0 +1,20 @@
+{
+  "name": "ignitux-serveur-maison-tableau-de-bord",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Petit tableau de bord local : version déployée, dernier commit, état des conteneurs Docker, CPU, RAM — pour le serveur maison Ignitux.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node serveur.mjs",
+    "installer-service": "node installer-service.mjs",
+    "desinstaller-service": "node desinstaller-service.mjs"
+  },
+  "dependencies": {
+    "dockerode": "^4.0.3",
+    "node-windows": "^1.0.0-beta.8",
+    "systeminformation": "^5.23.5"
+  }
+}
