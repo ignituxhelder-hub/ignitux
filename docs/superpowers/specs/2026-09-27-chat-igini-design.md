@@ -92,8 +92,17 @@ Nouvelle méthode à côté de `generateStructuredOutput`, dans
   nouveau générateur `'discuter'` ajouté à `GENERATOR_NAMES`
   (`backend/src/igini/usage/generator-names.ts`) — uniquement pour la
   traçabilité des coûts (le générateur apparaît dans les totaux/répartition
-  déjà existants), sans lien avec le catalogue des offres : `'discuter'`
-  n'est ajouté à aucune liste `capacites.generateurs` d'aucune offre.
+  déjà existants).
+
+  **Effet de bord vérifié, et sans conséquence** : `offres-catalogue.ts`
+  construit les capacités d'Entrepreneur/Construction par
+  `generateurs: [...GENERATOR_NAMES]` — `'discuter'` y apparaîtra donc
+  mécaniquement (Découverte, listé explicitement en `['analyser']`, ne
+  l'aura pas). Ça ne change rien en pratique : `generateChatReply()`
+  n'appelle jamais `OffresService.exiger()`, donc cette liste n'est jamais
+  consultée pour le chat. La garantie que le chat reste hors du système
+  d'offres tient au code (`exiger` jamais appelé), pas à l'absence de
+  `'discuter'` dans une liste.
 
 **Ajustement de type nécessaire** : `GenerationAttribution.projectId`
 (`backend/src/igini/usage/ai-usage.service.ts`) passe de `string` à
@@ -167,11 +176,12 @@ protégée par le même interrupteur.
 ## Tests à prévoir
 
 - `generator-names.spec.ts` (ou équivalent) — `'discuter'` reconnu par
-  `estGenerateur`, absent de toute liste `capacites.generateurs` du
-  catalogue des offres (garantit que l'intégration reste hors offres).
+  `estGenerateur`.
 - `claude.service.spec.ts` — `generateChatReply()` : disponibilité
   coupée, plafond de coût atteint, appel réussi, `projectId: null`
-  correctement journalisé.
+  correctement journalisé, et surtout **`offres.exiger` jamais appelé**
+  (c'est cette assertion, pas la composition du catalogue, qui garantit
+  que le chat reste hors du système d'offres).
 - `chat.service.spec.ts` — persistance des deux messages, fenêtre des ~20
   derniers messages envoyée en contexte, pagination de l'historique.
 - `chat-igini.spec.tsx` — affichage de l'icône seulement connecté, envoi
