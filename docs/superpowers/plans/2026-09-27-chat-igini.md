@@ -1,5 +1,13 @@
 # Chat avec Igini Implementation Plan
 
+> **Superseded on 2026-09-27, zero tasks dispatched.** The spec this plan
+> implements (`docs/superpowers/specs/2026-09-27-chat-igini-design.md`) was
+> itself superseded by
+> [`2026-09-27-igini-conversationnel-design.md`](../specs/2026-09-27-igini-conversationnel-design.md)
+> (tool-orchestrating chat instead of plain text). See
+> [`2026-09-27-igini-conversationnel.md`](2026-09-27-igini-conversationnel.md)
+> for the plan actually being executed. Do not dispatch tasks from this file.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add a persistent chat icon (visible everywhere in the app once logged in) that opens a free-form conversation with Igini, backed by a new backend endpoint and a per-user message history in Postgres.
