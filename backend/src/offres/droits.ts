@@ -37,7 +37,7 @@ import {
 export type Action =
   | { kind: 'creer_projet'; projetsActuels: number }
   | { kind: 'generer'; generateur: GenerateurId; appelsCeMois: number }
-  | { kind: 'outil_de_gestion'; outil: 'comptabilite' | 'facturation' | 'banque' }
+  | { kind: 'outil_de_gestion'; outil: 'comptabilite' | 'facturation' | 'banque' | 'boutique_en_ligne' }
   | { kind: 'ouvrir_financement' }
   | { kind: 'inviter_collaborateur'; collaborateursActuels: number };
 
