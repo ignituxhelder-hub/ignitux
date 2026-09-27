@@ -12,6 +12,10 @@
 backend/.tmp/
 frontend/.tmp/
 
+# Espace de travail des plans superpowers (ledger, briefs de tâches) :
+# scratch propre à une exécution locale, jamais versionné.
+.superpowers/
+
 # OS
 .DS_Store
 Thumbs.db
