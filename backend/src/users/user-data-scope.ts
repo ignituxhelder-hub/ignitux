@@ -48,6 +48,10 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   // detiennent rien et disparaissent en cascade avec lui. Les exporter reste
   // utile — ils disent sous quelles casquettes la personne a travaille.
   user_roles: exported('compte'),
+  // Le bureau : les applications que la personne a ajoutées ou retirées.
+  // Même nature que les rôles — une préférence d'affichage, qui ne détient
+  // rien — et exportée pour la même raison : elle l'a choisie.
+  user_applications: exported('compte'),
   // Le profil est la donnée la plus personnelle du produit — parcours,
   // motivations, disponibilité. Elle appartient à la personne de la façon
   // la plus directe qui soit : elle l'a écrite sur elle-même.
@@ -72,6 +76,17 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   // racontent son evolution, qui est le travail de la personne autant que
   // les taches qu elle a cochees.
   score_snapshots: exported('projets_et_contenus'),
+
+  // Stocks et agenda sont des contenus de travail au même titre que les
+  // tâches : mêmes conventions, même groupe, pas de raison d'en distinguer
+  // la finalité (fournir le service lui-même) de celle de `tasks`.
+  stock_items: exported('projets_et_contenus'),
+  stock_movements: exported('projets_et_contenus'),
+  agenda_events: exported('projets_et_contenus'),
+  // Suivi de flotte : même nature que stocks/agenda, la dépense d'entretien
+  // n'en fait pas un enregistrement financier au sens des CGU.
+  fleet_vehicles: exported('projets_et_contenus'),
+  fleet_entries: exported('projets_et_contenus'),
 
   analyses: exported('contenus_generes_par_igini'),
   build_plans: exported('contenus_generes_par_igini'),
@@ -100,6 +115,17 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   ledger_lines: exported('facturation'),
   bank_accounts: exported('facturation'),
   bank_transactions: exported('facturation'),
+  // Relevé manuel d'une caisse certifiée externe, lié à l'écriture comptable
+  // qu'il produit : même nature, même groupe que le reste de la compta.
+  cash_register_entries: exported('facturation'),
+  // Loyers perçus et charges payées sont de vrais mouvements d'argent, au
+  // même titre que la caisse ou la banque.
+  real_estate_properties: exported('facturation'),
+  real_estate_movements: exported('facturation'),
+  // Le budget publicitaire dépensé est un enregistrement financier, même
+  // motif.
+  ad_campaigns: exported('facturation'),
+  ad_campaign_entries: exported('facturation'),
 
   financing_rounds: exported('financement'),
   equity_holders: exported('financement'),

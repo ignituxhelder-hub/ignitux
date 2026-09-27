@@ -9,6 +9,9 @@ import { PasswordResetService } from './password-reset.service.js';
   imports: [MailModule],
   controllers: [AuthTokensController],
   providers: [AuthTokenService, PasswordResetService, EmailVerificationService],
-  exports: [EmailVerificationService],
+  // AuthTokenService est aussi exporté : AuthModule s'en sert pour émettre
+  // et consommer les jetons de rafraîchissement (purpose 'refresh'), même
+  // mécanisme que la réinitialisation de mot de passe.
+  exports: [EmailVerificationService, AuthTokenService],
 })
 export class AuthTokensModule {}

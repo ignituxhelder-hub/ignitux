@@ -245,6 +245,36 @@ export type crm_contacts = Prisma.crm_contactsModel
  */
 export type crm_interactions = Prisma.crm_interactionsModel
 /**
+ * Model stock_items
+ * STOCKS — un article suivi en réserve. `quantity` est un solde
+ * dénormalisé, recalculé à chaque mouvement plutôt qu'à la lecture : voir
+ * stocks.service.ts pour pourquoi (le nombre de mouvements d'un article
+ * actif rendrait un `aggregate` à chaque lecture coûteux sans raison).
+ */
+export type stock_items = Prisma.stock_itemsModel
+/**
+ * Model stock_movements
+ * STOCKS — une entrée ou une sortie sur un article. `quantity` est signée :
+ * positive pour une entrée, négative pour une sortie. Historique immuable
+ * une fois créé (pas d'update/delete) : corriger une erreur se fait par un
+ * mouvement inverse, jamais en réécrivant l'histoire.
+ */
+export type stock_movements = Prisma.stock_movementsModel
+/**
+ * Model agenda_events
+ * AGENDA — un rendez-vous. Distinct des `tasks` à échéance (voir
+ * tasks.due_date) : un rendez-vous et une tâche restent deux idées
+ * différentes même si la page Agenda les affiche dans une même liste.
+ */
+export type agenda_events = Prisma.agenda_eventsModel
+/**
+ * Model cash_register_entries
+ * CAISSE — le relevé de fin de journée d'une vraie caisse certifiée,
+ * saisi à la main. IGNITUX n'encaisse jamais lui-même : voir
+ * caisse.service.ts pour ce que ce module fait et ne fait pas.
+ */
+export type cash_register_entries = Prisma.cash_register_entriesModel
+/**
  * Model workflow_definitions
  * WORKFLOW — définition d'un processus réutilisable pour un projet.
  * Une définition décrit ce qui DOIT arriver, dans quel ordre ; une
@@ -434,6 +464,20 @@ export type investor_movements = Prisma.investor_movementsModel
  */
 export type user_roles = Prisma.user_rolesModel
 /**
+ * Model user_applications
+ * BUREAU — les applications qu'une personne a posées sur son bureau Ignitux,
+ * ou qu'elle en a retirées.
+ * 
+ * Une ligne n'existe que pour un choix explicite : sans ligne, c'est le
+ * moteur d'activation qui décide (`applications/activation.ts`). En base
+ * plutôt que dans le navigateur pour que le bureau soit le même sur le
+ * téléphone et sur l'ordinateur.
+ * 
+ * Comme un rôle, un choix est une vue : retirer Facturation ne touche à
+ * aucune facture.
+ */
+export type user_applications = Prisma.user_applicationsModel
+/**
  * Model user_profiles
  * PROFIL — ce qu'Ignitux sait de la personne, et pourquoi il le sait.
  * 
@@ -483,3 +527,39 @@ export type subscriptions = Prisma.subscriptionsModel
  * partirait de zero raconterait une progression qui n'a pas eu lieu.
  */
 export type score_snapshots = Prisma.score_snapshotsModel
+/**
+ * Model real_estate_properties
+ * IMMOBILIER — un bien, et ses mouvements (loyer perçu / charge payée),
+ * même patron que stock_items/stock_movements : le solde ne s'incrémente
+ * jamais à la main, il se recalcule depuis la somme des mouvements.
+ */
+export type real_estate_properties = Prisma.real_estate_propertiesModel
+/**
+ * Model real_estate_movements
+ * 
+ */
+export type real_estate_movements = Prisma.real_estate_movementsModel
+/**
+ * Model fleet_vehicles
+ * VÉHICULES — une flotte, et ses dépenses d'entretien datées et relevées au
+ * compteur. Le coût au kilomètre se calcule à la lecture (dépenses ÷
+ * kilomètres parcourus entre deux relevés), jamais stocké : un relevé
+ * modifié après coup ne doit pas laisser un coût au kilomètre périmé.
+ */
+export type fleet_vehicles = Prisma.fleet_vehiclesModel
+/**
+ * Model fleet_entries
+ * 
+ */
+export type fleet_entries = Prisma.fleet_entriesModel
+/**
+ * Model ad_campaigns
+ * PUBLICITÉ — une campagne, et ses dépenses/retombées datées (dépense et
+ * prospects amenés, jour par jour).
+ */
+export type ad_campaigns = Prisma.ad_campaignsModel
+/**
+ * Model ad_campaign_entries
+ * 
+ */
+export type ad_campaign_entries = Prisma.ad_campaign_entriesModel

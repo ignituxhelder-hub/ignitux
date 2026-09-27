@@ -14,6 +14,7 @@ import { FinancingModule } from './financing/financing.module.js';
 import { FinanceAuditModule } from './finance-audit/finance-audit.module.js';
 import { InvestorsModule } from './investors/investors.module.js';
 import { RolesModule } from './roles/roles.module.js';
+import { ApplicationsModule } from './applications/applications.module.js';
 import { ObservabilityModule } from './observability/observability.module.js';
 import { JourneyModule } from './journey/journey.module.js';
 import { ProfileModule } from './profile/profile.module.js';
@@ -28,6 +29,12 @@ import { OffresModule } from './offres/offres.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { ProjectsModule } from './projects/projects.module.js';
 import { UsersModule } from './users/users.module.js';
+import { StocksModule } from './stocks/stocks.module.js';
+import { AgendaModule } from './agenda/agenda.module.js';
+import { CaisseModule } from './caisse/caisse.module.js';
+import { ImmobilierModule } from './immobilier/immobilier.module.js';
+import { VehiculesModule } from './vehicules/vehicules.module.js';
+import { PubliciteModule } from './publicite/publicite.module.js';
 
 @Module({
   imports: [
@@ -54,11 +61,18 @@ import { UsersModule } from './users/users.module.js';
     BankingModule,
     InvestorsModule,
     RolesModule,
+    ApplicationsModule,
     ObservabilityModule,
     JourneyModule,
     ProfileModule,
     FinanceAuditModule,
     MarketplaceModule,
+    StocksModule,
+    AgendaModule,
+    CaisseModule,
+    ImmobilierModule,
+    VehiculesModule,
+    PubliciteModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: LimiteurQuiSExplique }],

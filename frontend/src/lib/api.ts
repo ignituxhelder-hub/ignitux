@@ -130,6 +130,23 @@ async function request<T>(
 }
 
 /**
+ * Le CSV n'est jamais du JSON : on ne peut pas réutiliser `request`, qui
+ * appelle systématiquement `res.json()`.
+ */
+async function requestCsv(path: string, token: string): Promise<string> {
+  const res = await fetch(`${API_URL}${path}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    const message =
+      body && typeof body.message === 'string' ? body.message : 'Une erreur est survenue.';
+    throw new ApiError(message, res.status);
+  }
+  return res.text();
+}
+
+/**
  * Le stockage utilisé pour le cache et la file d'attente. Injecté par
  * AuthProvider au montage plutôt que lu depuis `window` : ce module est
  * importé côté serveur par Next.js, où `localStorage` n'existe pas.
@@ -525,7 +542,7 @@ export interface TransmissionPlan {
   created_at: string;
 }
 
-export type MemoryCategory = 'decision' | 'preference' | 'learning' | 'fact';
+export type MemoryCategory = 'decision' | 'preference' | 'learning' | 'fact' | 'error';
 
 export interface Memory {
   id: string;
@@ -562,6 +579,13 @@ export interface ConceptGraph {
   isolated: string[];
 }
 
+export interface ConceptNeighbourhood {
+  center: Concept;
+  depth: number;
+  nodes: Concept[];
+  edges: ConceptLink[];
+}
+
 export interface ConceptPath {
   from: Concept;
   to: Concept;
@@ -592,6 +616,12 @@ export interface ScoreCard {
   // null tant qu'aucune étape n'a démarré : un 0 affiché se lirait
   // « fiabilité nulle » alors qu'il n'y a simplement rien à mesurer.
   confiance: number | null;
+}
+
+/** Un relevé passé, tel qu'il a été observé ce jour-là. */
+export interface ScoreSnapshot extends ScoreCard {
+  /** Le jour du relevé, au format ISO (AAAA-MM-JJ). */
+  jour: string;
 }
 
 export interface ConstitutionArticle {
@@ -931,6 +961,15 @@ export interface DividendDistribution {
   holder?: { id: string; name: string };
 }
 
+export interface EquityEvent {
+  id: string;
+  holder_id: string;
+  share_basis_points: number;
+  reason: string;
+  occurred_at: string;
+  holder?: { id: string; name: string };
+}
+
 export type BillingType = 'devis' | 'facture' | 'avoir';
 export type BillingStatus = 'brouillon' | 'emis' | 'paye' | 'annule' | 'refuse';
 export type BillingMethod = 'virement' | 'especes' | 'carte' | 'cheque' | 'autre';
@@ -1024,6 +1063,152 @@ export interface CrmInteraction {
 export interface CrmPipeline {
   total: number;
   stages: Array<{ stage: CrmStage; label: string; count: number }>;
+}
+
+export const STOCK_UNITS = ['unite', 'kg', 'litre', 'heure', 'autre'] as const;
+export type StockUnit = (typeof STOCK_UNITS)[number];
+
+export interface StockItem {
+  id: string;
+  owner_id: string;
+  project_id: string | null;
+  name: string;
+  unit: string;
+  // Prisma sérialise un Decimal en chaîne (via son toJSON) : jamais un number.
+  quantity: string;
+  alert_below: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface StockMovement {
+  id: string;
+  item_id: string;
+  quantity: string;
+  reason: string | null;
+  occurred_on: string;
+  created_at: string;
+}
+
+export interface AgendaEvent {
+  id: string;
+  owner_id: string;
+  project_id: string | null;
+  contact_id: string | null;
+  title: string;
+  location: string | null;
+  note: string | null;
+  occurred_at: string;
+  created_at: string;
+  updated_at: string | null;
+}
+
+// Un rendez-vous et une échéance de tâche sont deux concepts différents —
+// `GET /agenda` les fusionne dans une seule liste triée par date, mais
+// chaque item garde son `type` et son id d'origine (jamais fusionnés en un
+// seul modèle).
+export type AgendaItem =
+  | {
+      type: 'evenement';
+      id: string;
+      title: string;
+      date: string;
+      location: string | null;
+      note: string | null;
+      projectId: string | null;
+      contactId: string | null;
+    }
+  | {
+      type: 'echeance';
+      id: string;
+      title: string;
+      date: string;
+      projectId: string;
+      status: string;
+    };
+
+export interface CashRegisterEntry {
+  id: string;
+  owner_id: string;
+  occurred_on: string;
+  cash_cents: number;
+  card_cents: number;
+  vat_cents: number;
+  note: string | null;
+  source: string;
+  ledger_entry_id: string | null;
+  created_at: string;
+}
+
+export interface RealEstateProperty {
+  id: string;
+  owner_id: string;
+  project_id: string | null;
+  label: string;
+  address: string | null;
+  balance_cents: number;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface RealEstateMovement {
+  id: string;
+  property_id: string;
+  amount_cents: number;
+  reason: string | null;
+  occurred_on: string;
+  created_at: string;
+}
+
+export interface FleetVehicle {
+  id: string;
+  owner_id: string;
+  label: string;
+  plate: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface FleetEntry {
+  id: string;
+  vehicle_id: string;
+  cost_cents: number;
+  odometer_km: number | null;
+  reason: string | null;
+  occurred_on: string;
+  created_at: string;
+}
+
+export interface FleetEntries {
+  entries: FleetEntry[];
+  totalCostCents: number;
+  costPerKmCents: number | null;
+}
+
+export interface AdCampaign {
+  id: string;
+  owner_id: string;
+  label: string;
+  channel: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface AdCampaignEntry {
+  id: string;
+  campaign_id: string;
+  spent_cents: number;
+  leads: number;
+  note: string | null;
+  occurred_on: string;
+  created_at: string;
+}
+
+export interface AdCampaignEntries {
+  entries: AdCampaignEntry[];
+  totalSpentCents: number;
+  totalLeads: number;
+  costPerLeadCents: number | null;
 }
 
 export type WorkflowConditionType = 'always' | 'stage_exists' | 'tasks_done' | 'manual';
@@ -1131,6 +1316,49 @@ export interface MyRoles {
   suggestions: RoleSuggestion[];
   catalogue: RoleDefinition[];
 }
+
+// ── APPLICATIONS ────────────────────────────────────────────────────────────
+// Le lanceur : ce qu'une personne voit en ouvrant Ignitux. Calculé par le
+// serveur (`backend/src/applications/activation.ts`) ; l'interface l'affiche
+// tel quel et ne décide de rien.
+
+export type ApplicationCategorie =
+  | 'creer'
+  | 'vendre'
+  | 'gerer'
+  | 'investir'
+  | 'reseau'
+  | 'reglages';
+
+export interface ApplicationVue {
+  id: string;
+  nom: string;
+  resume: string;
+  categorie: ApplicationCategorie;
+  route: string | null;
+  horsOffre: boolean;
+}
+
+export interface ApplicationSuggeree extends ApplicationVue {
+  raison: string;
+}
+
+export interface ApplicationPrevue extends ApplicationVue {
+  pourToi: boolean;
+  cadre: string | null;
+}
+
+export interface Lanceur {
+  applications: ApplicationVue[];
+  suggestions: ApplicationSuggeree[];
+  reglages: ApplicationVue[];
+  prevues: ApplicationPrevue[];
+  /** Les applications disponibles qui ne sont pas sur le bureau. */
+  boutique: ApplicationVue[];
+  rolesRetenus: RoleId[];
+}
+
+export type ChoixBureau = 'ajoutee' | 'retiree';
 
 export interface InvestorSpaceLine {
   financedProjectId: string;
@@ -1244,6 +1472,30 @@ export interface ProjectFinancingRegister {
     gainsCents: number;
     netCents: number;
   };
+}
+
+export interface PortfolioTotals {
+  investedCents: number;
+  repaidCents: number;
+  dividendsCents: number;
+  gainsCents: number;
+  netCents: number;
+}
+
+export interface ProjectPortfolioLine {
+  financedProjectId: string;
+  projectId: string | null;
+  projectTitle: string;
+  status: string;
+  participations: number;
+  totals: PortfolioTotals;
+}
+
+export interface InvestorPortfolio {
+  investorId: string;
+  displayName: string;
+  global: PortfolioTotals;
+  parProjet: ProjectPortfolioLine[];
 }
 
 // ── CONSOMMATION IA ─────────────────────────────────────────────────────────
@@ -1438,9 +1690,26 @@ export const api = {
     request<User>('/users/signup', { method: 'POST', body: JSON.stringify({ email, password }) }),
 
   login: (email: string, password: string) =>
-    request<{ accessToken: string; user: User }>('/auth/login', {
+    request<{ accessToken: string; refreshToken: string; user: User }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
+    }),
+
+  // Échange un jeton de rafraîchissement (30 jours) contre une nouvelle
+  // paire — pour qu'un client (l'application mobile, à venir) puisse
+  // regagner un jeton d'accès sans redemander le mot de passe. Pas encore
+  // appelé automatiquement par `lib/auth.tsx` : câblage laissé au client qui
+  // en aura l'usage.
+  refreshAccessToken: (refreshToken: string) =>
+    request<{ accessToken: string; refreshToken: string; user: User }>('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken }),
+    }),
+
+  logout: (refreshToken: string) =>
+    request<void>('/auth/logout', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken }),
     }),
 
   forgotPassword: async (email: string) => {
@@ -1635,6 +1904,11 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     }),
 
+  recallMemories: (token: string, projectId: string) =>
+    request<Memory[]>(`/memory/recall/${projectId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
   createConcept: (token: string, projectId: string, name: string, description?: string) =>
     request<Concept>('/knowledge/concepts', {
       method: 'POST',
@@ -1659,6 +1933,11 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     }),
 
+  getConceptNeighbourhood: (token: string, conceptId: string) =>
+    request<ConceptNeighbourhood>(`/knowledge/concepts/${conceptId}/neighbourhood`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
   createTask: (token: string, projectId: string, title: string) =>
     request<Task>(`/projects/${projectId}/tasks`, {
       method: 'POST',
@@ -1680,6 +1959,11 @@ export const api = {
 
   getScoreCard: (token: string, projectId: string) =>
     request<ScoreCard>(`/projects/${projectId}/scores`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getScoreHistory: (token: string, projectId: string) =>
+    request<ScoreSnapshot[]>(`/projects/${projectId}/scores/historique`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
 
@@ -1925,6 +2209,12 @@ export const api = {
       body: JSON.stringify(round),
     }),
 
+  deleteFinancingRound: (token: string, roundId: string) =>
+    request<void>(`/financing/rounds/${roundId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
   getCapTable: (token: string, projectId: string) =>
     request<CapTable>(`/projects/${projectId}/financing/cap-table`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -1935,6 +2225,12 @@ export const api = {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify({ name, isFounder }),
+    }),
+
+  removeHolder: (token: string, holderId: string) =>
+    request<void>(`/financing/holders/${holderId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
     }),
 
   recordEquityChange: (
@@ -1948,11 +2244,27 @@ export const api = {
       body: JSON.stringify(change),
     }),
 
+  listEquityEvents: (token: string, projectId: string) =>
+    request<EquityEvent[]>(`/projects/${projectId}/financing/equity-events`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
   listDividends: (token: string, projectId: string) =>
     request<{ dividends: DividendDistribution[]; totalCents: number }>(
       `/projects/${projectId}/financing/dividends`,
       { headers: { Authorization: `Bearer ${token}` } },
     ),
+
+  recordDividend: (
+    token: string,
+    holderId: string,
+    dividend: { amountCents: number; occurredAt: string; note?: string },
+  ) =>
+    request<DividendDistribution>(`/financing/holders/${holderId}/dividends`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(dividend),
+    }),
 
   getBillingLegalNotice: (token: string) =>
     request<BillingLegalNotice>('/billing/legal-notice', {
@@ -1968,6 +2280,8 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     });
   },
+
+  exportBillingCsv: (token: string) => requestCsv('/billing/documents/export', token),
 
   createBillingDocument: (
     token: string,
@@ -2004,6 +2318,28 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     }),
 
+  updateBillingDraft: (
+    token: string,
+    id: string,
+    patch: {
+      clientName?: string;
+      clientDetails?: string;
+      notes?: string;
+      dueAt?: string;
+      lines?: Array<{
+        label: string;
+        quantityMilli: number;
+        unitPriceCents: number;
+        vatRateBasisPoints?: number;
+      }>;
+    },
+  ) =>
+    request<BillingDocument>(`/billing/documents/${id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(patch),
+    }),
+
   addBillingPayment: (
     token: string,
     id: string,
@@ -2014,6 +2350,38 @@ export const api = {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify({ amountCents, method }),
+    }),
+
+  listCrmCompanies: (token: string) =>
+    request<CrmCompany[]>('/crm/companies', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  createCrmCompany: (
+    token: string,
+    company: { name: string; sector?: string; website?: string; notes?: string },
+  ) =>
+    request<CrmCompany>('/crm/companies', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(company),
+    }),
+
+  updateCrmCompany: (
+    token: string,
+    id: string,
+    data: { name: string; sector?: string; website?: string; notes?: string },
+  ) =>
+    request<CrmCompany>(`/crm/companies/${id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
+    }),
+
+  deleteCrmCompany: (token: string, id: string) =>
+    request<void>(`/crm/companies/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
     }),
 
   createCrmContact: (
@@ -2085,6 +2453,233 @@ export const api = {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify({ channel, summary, occurredAt }),
+    }),
+
+  listStockItems: (token: string) =>
+    request<StockItem[]>('/stocks', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  createStockItem: (
+    token: string,
+    item: { name: string; unit?: StockUnit; alertBelow?: number; projectId?: string },
+  ) =>
+    request<StockItem>('/stocks', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(item),
+    }),
+
+  updateStockItem: (
+    token: string,
+    id: string,
+    data: { name?: string; unit?: StockUnit; alertBelow?: number; projectId?: string },
+  ) =>
+    request<StockItem>(`/stocks/${id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
+    }),
+
+  deleteStockItem: (token: string, id: string) =>
+    request<void>(`/stocks/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  recordStockMovement: (
+    token: string,
+    itemId: string,
+    movement: { quantity: number; reason?: string; occurredOn?: string },
+  ) =>
+    request<StockItem>(`/stocks/${itemId}/mouvements`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(movement),
+    }),
+
+  listStockMovements: (token: string, itemId: string) =>
+    request<StockMovement[]>(`/stocks/${itemId}/mouvements`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listAgenda: (token: string, range?: { depuis?: string; jusqua?: string }) => {
+    const params = new URLSearchParams();
+    if (range?.depuis) params.set('depuis', range.depuis);
+    if (range?.jusqua) params.set('jusqua', range.jusqua);
+    const suffix = params.toString();
+    return request<AgendaItem[]>(`/agenda${suffix ? `?${suffix}` : ''}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+
+  createAgendaEvent: (
+    token: string,
+    event: { title: string; occurredAt: string; location?: string; note?: string; projectId?: string; contactId?: string },
+  ) =>
+    request<AgendaEvent>('/agenda', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(event),
+    }),
+
+  updateAgendaEvent: (
+    token: string,
+    id: string,
+    data: { title?: string; occurredAt?: string; location?: string; note?: string; projectId?: string; contactId?: string },
+  ) =>
+    request<AgendaEvent>(`/agenda/${id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
+    }),
+
+  deleteAgendaEvent: (token: string, id: string) =>
+    request<void>(`/agenda/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listCaisseJournees: (token: string) =>
+    request<CashRegisterEntry[]>('/caisse/journees', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  recordCaisseJournee: (
+    token: string,
+    journee: { occurredOn: string; cashCents: number; cardCents: number; vatCents: number; note?: string },
+  ) =>
+    request<CashRegisterEntry>('/caisse/journees', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(journee),
+    }),
+
+  listProperties: (token: string) =>
+    request<RealEstateProperty[]>('/immobilier', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  createProperty: (token: string, property: { label: string; address?: string; projectId?: string }) =>
+    request<RealEstateProperty>('/immobilier', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(property),
+    }),
+
+  updateProperty: (
+    token: string,
+    id: string,
+    data: { label?: string; address?: string; projectId?: string },
+  ) =>
+    request<RealEstateProperty>(`/immobilier/${id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
+    }),
+
+  deleteProperty: (token: string, id: string) =>
+    request<void>(`/immobilier/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  recordPropertyMovement: (
+    token: string,
+    propertyId: string,
+    movement: { amountCents: number; reason?: string; occurredOn?: string },
+  ) =>
+    request<RealEstateProperty>(`/immobilier/${propertyId}/mouvements`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(movement),
+    }),
+
+  listPropertyMovements: (token: string, propertyId: string) =>
+    request<RealEstateMovement[]>(`/immobilier/${propertyId}/mouvements`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listVehicles: (token: string) =>
+    request<FleetVehicle[]>('/vehicules', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  createVehicle: (token: string, vehicle: { label: string; plate?: string }) =>
+    request<FleetVehicle>('/vehicules', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(vehicle),
+    }),
+
+  updateVehicle: (token: string, id: string, data: { label?: string; plate?: string }) =>
+    request<FleetVehicle>(`/vehicules/${id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
+    }),
+
+  deleteVehicle: (token: string, id: string) =>
+    request<void>(`/vehicules/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  recordVehicleEntry: (
+    token: string,
+    vehicleId: string,
+    entry: { costCents: number; odometerKm?: number; reason?: string; occurredOn?: string },
+  ) =>
+    request<FleetEntry>(`/vehicules/${vehicleId}/entretien`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(entry),
+    }),
+
+  listVehicleEntries: (token: string, vehicleId: string) =>
+    request<FleetEntries>(`/vehicules/${vehicleId}/entretien`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listCampaigns: (token: string) =>
+    request<AdCampaign[]>('/publicite', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  createCampaign: (token: string, campaign: { label: string; channel?: string }) =>
+    request<AdCampaign>('/publicite', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(campaign),
+    }),
+
+  updateCampaign: (token: string, id: string, data: { label?: string; channel?: string }) =>
+    request<AdCampaign>(`/publicite/${id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
+    }),
+
+  deleteCampaign: (token: string, id: string) =>
+    request<void>(`/publicite/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  recordCampaignEntry: (
+    token: string,
+    campaignId: string,
+    entry: { spentCents: number; leads?: number; note?: string; occurredOn?: string },
+  ) =>
+    request<AdCampaignEntry>(`/publicite/${campaignId}/entrees`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(entry),
+    }),
+
+  listCampaignEntries: (token: string, campaignId: string) =>
+    request<AdCampaignEntries>(`/publicite/${campaignId}/entrees`, {
+      headers: { Authorization: `Bearer ${token}` },
     }),
 
   listWorkflowTemplates: (token: string) =>
@@ -2230,6 +2825,16 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     }),
 
+  getMyApplications: (token: string) =>
+    request<Lanceur>('/me/applications', { headers: { Authorization: `Bearer ${token}` } }),
+
+  setChoixApplication: (token: string, id: string, choix: ChoixBureau) =>
+    request<Lanceur>(`/me/applications/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ choix }),
+    }),
+
   getInvestorSpace: (token: string) =>
     request<InvestorSpace>('/espaces/investisseur', {
       headers: { Authorization: `Bearer ${token}` },
@@ -2297,12 +2902,29 @@ export const api = {
       body: JSON.stringify(input),
     }),
 
+  /** La seule façon d'annuler quoi que ce soit : le mouvement d'origine reste, une correction s'ajoute. */
+  correctInvestorMovement: (
+    token: string,
+    movementId: string,
+    input: { amountCents: number; occurredOn: string; note: string },
+  ) =>
+    request<InvestorMovement>(`/mouvements-investisseurs/${movementId}/correction`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(input),
+    }),
+
   // ── CÔTÉ INVESTISSEUR ─────────────────────────────────────────────────────
   registerAsInvestor: (token: string, displayName: string, kind = 'personne') =>
     request<InvestorRow>('/investisseurs', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify({ displayName, kind }),
+    }),
+
+  getMyPortfolio: (token: string) =>
+    request<InvestorPortfolio>('/investisseurs/moi/portefeuille', {
+      headers: { Authorization: `Bearer ${token}` },
     }),
 
   listMyParticipations: (token: string) =>

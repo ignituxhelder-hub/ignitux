@@ -80,6 +80,10 @@ export const ModelName = {
   crm_companies: 'crm_companies',
   crm_contacts: 'crm_contacts',
   crm_interactions: 'crm_interactions',
+  stock_items: 'stock_items',
+  stock_movements: 'stock_movements',
+  agenda_events: 'agenda_events',
+  cash_register_entries: 'cash_register_entries',
   workflow_definitions: 'workflow_definitions',
   workflow_steps: 'workflow_steps',
   workflow_runs: 'workflow_runs',
@@ -98,9 +102,16 @@ export const ModelName = {
   participations: 'participations',
   investor_movements: 'investor_movements',
   user_roles: 'user_roles',
+  user_applications: 'user_applications',
   user_profiles: 'user_profiles',
   subscriptions: 'subscriptions',
-  score_snapshots: 'score_snapshots'
+  score_snapshots: 'score_snapshots',
+  real_estate_properties: 'real_estate_properties',
+  real_estate_movements: 'real_estate_movements',
+  fleet_vehicles: 'fleet_vehicles',
+  fleet_entries: 'fleet_entries',
+  ad_campaigns: 'ad_campaigns',
+  ad_campaign_entries: 'ad_campaign_entries'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -265,6 +276,7 @@ export const TasksScalarFieldEnum = {
   status: 'status',
   assignee: 'assignee',
   source: 'source',
+  due_date: 'due_date',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
@@ -518,6 +530,65 @@ export const Crm_interactionsScalarFieldEnum = {
 } as const
 
 export type Crm_interactionsScalarFieldEnum = (typeof Crm_interactionsScalarFieldEnum)[keyof typeof Crm_interactionsScalarFieldEnum]
+
+
+export const Stock_itemsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  project_id: 'project_id',
+  name: 'name',
+  unit: 'unit',
+  quantity: 'quantity',
+  alert_below: 'alert_below',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Stock_itemsScalarFieldEnum = (typeof Stock_itemsScalarFieldEnum)[keyof typeof Stock_itemsScalarFieldEnum]
+
+
+export const Stock_movementsScalarFieldEnum = {
+  id: 'id',
+  item_id: 'item_id',
+  quantity: 'quantity',
+  reason: 'reason',
+  occurred_on: 'occurred_on',
+  created_at: 'created_at'
+} as const
+
+export type Stock_movementsScalarFieldEnum = (typeof Stock_movementsScalarFieldEnum)[keyof typeof Stock_movementsScalarFieldEnum]
+
+
+export const Agenda_eventsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  project_id: 'project_id',
+  contact_id: 'contact_id',
+  title: 'title',
+  location: 'location',
+  note: 'note',
+  occurred_at: 'occurred_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Agenda_eventsScalarFieldEnum = (typeof Agenda_eventsScalarFieldEnum)[keyof typeof Agenda_eventsScalarFieldEnum]
+
+
+export const Cash_register_entriesScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  occurred_on: 'occurred_on',
+  cash_cents: 'cash_cents',
+  card_cents: 'card_cents',
+  vat_cents: 'vat_cents',
+  note: 'note',
+  source: 'source',
+  ledger_entry_id: 'ledger_entry_id',
+  created_at: 'created_at'
+} as const
+
+export type Cash_register_entriesScalarFieldEnum = (typeof Cash_register_entriesScalarFieldEnum)[keyof typeof Cash_register_entriesScalarFieldEnum]
 
 
 export const Workflow_definitionsScalarFieldEnum = {
@@ -778,6 +849,17 @@ export const User_rolesScalarFieldEnum = {
 export type User_rolesScalarFieldEnum = (typeof User_rolesScalarFieldEnum)[keyof typeof User_rolesScalarFieldEnum]
 
 
+export const User_applicationsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  app_id: 'app_id',
+  choix: 'choix',
+  updated_at: 'updated_at'
+} as const
+
+export type User_applicationsScalarFieldEnum = (typeof User_applicationsScalarFieldEnum)[keyof typeof User_applicationsScalarFieldEnum]
+
+
 export const User_profilesScalarFieldEnum = {
   user_id: 'user_id',
   display_name: 'display_name',
@@ -827,6 +909,84 @@ export const Score_snapshotsScalarFieldEnum = {
 } as const
 
 export type Score_snapshotsScalarFieldEnum = (typeof Score_snapshotsScalarFieldEnum)[keyof typeof Score_snapshotsScalarFieldEnum]
+
+
+export const Real_estate_propertiesScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  project_id: 'project_id',
+  label: 'label',
+  address: 'address',
+  balance_cents: 'balance_cents',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Real_estate_propertiesScalarFieldEnum = (typeof Real_estate_propertiesScalarFieldEnum)[keyof typeof Real_estate_propertiesScalarFieldEnum]
+
+
+export const Real_estate_movementsScalarFieldEnum = {
+  id: 'id',
+  property_id: 'property_id',
+  amount_cents: 'amount_cents',
+  reason: 'reason',
+  occurred_on: 'occurred_on',
+  created_at: 'created_at'
+} as const
+
+export type Real_estate_movementsScalarFieldEnum = (typeof Real_estate_movementsScalarFieldEnum)[keyof typeof Real_estate_movementsScalarFieldEnum]
+
+
+export const Fleet_vehiclesScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  project_id: 'project_id',
+  label: 'label',
+  plate: 'plate',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Fleet_vehiclesScalarFieldEnum = (typeof Fleet_vehiclesScalarFieldEnum)[keyof typeof Fleet_vehiclesScalarFieldEnum]
+
+
+export const Fleet_entriesScalarFieldEnum = {
+  id: 'id',
+  vehicle_id: 'vehicle_id',
+  cost_cents: 'cost_cents',
+  odometer_km: 'odometer_km',
+  reason: 'reason',
+  occurred_on: 'occurred_on',
+  created_at: 'created_at'
+} as const
+
+export type Fleet_entriesScalarFieldEnum = (typeof Fleet_entriesScalarFieldEnum)[keyof typeof Fleet_entriesScalarFieldEnum]
+
+
+export const Ad_campaignsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  project_id: 'project_id',
+  label: 'label',
+  channel: 'channel',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Ad_campaignsScalarFieldEnum = (typeof Ad_campaignsScalarFieldEnum)[keyof typeof Ad_campaignsScalarFieldEnum]
+
+
+export const Ad_campaign_entriesScalarFieldEnum = {
+  id: 'id',
+  campaign_id: 'campaign_id',
+  spent_cents: 'spent_cents',
+  leads: 'leads',
+  note: 'note',
+  occurred_on: 'occurred_on',
+  created_at: 'created_at'
+} as const
+
+export type Ad_campaign_entriesScalarFieldEnum = (typeof Ad_campaign_entriesScalarFieldEnum)[keyof typeof Ad_campaign_entriesScalarFieldEnum]
 
 
 export const SortOrder = {

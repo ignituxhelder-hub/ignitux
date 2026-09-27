@@ -262,6 +262,7 @@ export type crm_contactsWhereInput = {
   project?: Prisma.XOR<Prisma.ProjectsNullableScalarRelationFilter, Prisma.projectsWhereInput> | null
   interactions?: Prisma.Crm_interactionsListRelationFilter
   billing_documents?: Prisma.Billing_documentsListRelationFilter
+  agenda_events?: Prisma.Agenda_eventsListRelationFilter
 }
 
 export type crm_contactsOrderByWithRelationInput = {
@@ -284,6 +285,7 @@ export type crm_contactsOrderByWithRelationInput = {
   project?: Prisma.projectsOrderByWithRelationInput
   interactions?: Prisma.crm_interactionsOrderByRelationAggregateInput
   billing_documents?: Prisma.billing_documentsOrderByRelationAggregateInput
+  agenda_events?: Prisma.agenda_eventsOrderByRelationAggregateInput
 }
 
 export type crm_contactsWhereUniqueInput = Prisma.AtLeast<{
@@ -309,6 +311,7 @@ export type crm_contactsWhereUniqueInput = Prisma.AtLeast<{
   project?: Prisma.XOR<Prisma.ProjectsNullableScalarRelationFilter, Prisma.projectsWhereInput> | null
   interactions?: Prisma.Crm_interactionsListRelationFilter
   billing_documents?: Prisma.Billing_documentsListRelationFilter
+  agenda_events?: Prisma.Agenda_eventsListRelationFilter
 }, "id">
 
 export type crm_contactsOrderByWithAggregationInput = {
@@ -368,6 +371,7 @@ export type crm_contactsCreateInput = {
   project?: Prisma.projectsCreateNestedOneWithoutCrm_contactsInput
   interactions?: Prisma.crm_interactionsCreateNestedManyWithoutContactInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutContactInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutContactInput
 }
 
 export type crm_contactsUncheckedCreateInput = {
@@ -387,6 +391,7 @@ export type crm_contactsUncheckedCreateInput = {
   updated_at?: Date | string | null
   interactions?: Prisma.crm_interactionsUncheckedCreateNestedManyWithoutContactInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutContactInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutContactInput
 }
 
 export type crm_contactsUpdateInput = {
@@ -406,6 +411,7 @@ export type crm_contactsUpdateInput = {
   project?: Prisma.projectsUpdateOneWithoutCrm_contactsNestedInput
   interactions?: Prisma.crm_interactionsUpdateManyWithoutContactNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutContactNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutContactNestedInput
 }
 
 export type crm_contactsUncheckedUpdateInput = {
@@ -425,6 +431,7 @@ export type crm_contactsUncheckedUpdateInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   interactions?: Prisma.crm_interactionsUncheckedUpdateManyWithoutContactNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutContactNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutContactNestedInput
 }
 
 export type crm_contactsCreateManyInput = {
@@ -702,6 +709,22 @@ export type crm_contactsUpdateOneRequiredWithoutInteractionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.crm_contactsUpdateToOneWithWhereWithoutInteractionsInput, Prisma.crm_contactsUpdateWithoutInteractionsInput>, Prisma.crm_contactsUncheckedUpdateWithoutInteractionsInput>
 }
 
+export type crm_contactsCreateNestedOneWithoutAgenda_eventsInput = {
+  create?: Prisma.XOR<Prisma.crm_contactsCreateWithoutAgenda_eventsInput, Prisma.crm_contactsUncheckedCreateWithoutAgenda_eventsInput>
+  connectOrCreate?: Prisma.crm_contactsCreateOrConnectWithoutAgenda_eventsInput
+  connect?: Prisma.crm_contactsWhereUniqueInput
+}
+
+export type crm_contactsUpdateOneWithoutAgenda_eventsNestedInput = {
+  create?: Prisma.XOR<Prisma.crm_contactsCreateWithoutAgenda_eventsInput, Prisma.crm_contactsUncheckedCreateWithoutAgenda_eventsInput>
+  connectOrCreate?: Prisma.crm_contactsCreateOrConnectWithoutAgenda_eventsInput
+  upsert?: Prisma.crm_contactsUpsertWithoutAgenda_eventsInput
+  disconnect?: Prisma.crm_contactsWhereInput | boolean
+  delete?: Prisma.crm_contactsWhereInput | boolean
+  connect?: Prisma.crm_contactsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.crm_contactsUpdateToOneWithWhereWithoutAgenda_eventsInput, Prisma.crm_contactsUpdateWithoutAgenda_eventsInput>, Prisma.crm_contactsUncheckedUpdateWithoutAgenda_eventsInput>
+}
+
 export type crm_contactsCreateWithoutOwnerInput = {
   id?: string
   first_name: string
@@ -718,6 +741,7 @@ export type crm_contactsCreateWithoutOwnerInput = {
   project?: Prisma.projectsCreateNestedOneWithoutCrm_contactsInput
   interactions?: Prisma.crm_interactionsCreateNestedManyWithoutContactInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutContactInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutContactInput
 }
 
 export type crm_contactsUncheckedCreateWithoutOwnerInput = {
@@ -736,6 +760,7 @@ export type crm_contactsUncheckedCreateWithoutOwnerInput = {
   updated_at?: Date | string | null
   interactions?: Prisma.crm_interactionsUncheckedCreateNestedManyWithoutContactInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutContactInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutContactInput
 }
 
 export type crm_contactsCreateOrConnectWithoutOwnerInput = {
@@ -800,6 +825,7 @@ export type crm_contactsCreateWithoutProjectInput = {
   company?: Prisma.crm_companiesCreateNestedOneWithoutContactsInput
   interactions?: Prisma.crm_interactionsCreateNestedManyWithoutContactInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutContactInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutContactInput
 }
 
 export type crm_contactsUncheckedCreateWithoutProjectInput = {
@@ -818,6 +844,7 @@ export type crm_contactsUncheckedCreateWithoutProjectInput = {
   updated_at?: Date | string | null
   interactions?: Prisma.crm_interactionsUncheckedCreateNestedManyWithoutContactInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutContactInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutContactInput
 }
 
 export type crm_contactsCreateOrConnectWithoutProjectInput = {
@@ -862,6 +889,7 @@ export type crm_contactsCreateWithoutBilling_documentsInput = {
   company?: Prisma.crm_companiesCreateNestedOneWithoutContactsInput
   project?: Prisma.projectsCreateNestedOneWithoutCrm_contactsInput
   interactions?: Prisma.crm_interactionsCreateNestedManyWithoutContactInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutContactInput
 }
 
 export type crm_contactsUncheckedCreateWithoutBilling_documentsInput = {
@@ -880,6 +908,7 @@ export type crm_contactsUncheckedCreateWithoutBilling_documentsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   interactions?: Prisma.crm_interactionsUncheckedCreateNestedManyWithoutContactInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutContactInput
 }
 
 export type crm_contactsCreateOrConnectWithoutBilling_documentsInput = {
@@ -914,6 +943,7 @@ export type crm_contactsUpdateWithoutBilling_documentsInput = {
   company?: Prisma.crm_companiesUpdateOneWithoutContactsNestedInput
   project?: Prisma.projectsUpdateOneWithoutCrm_contactsNestedInput
   interactions?: Prisma.crm_interactionsUpdateManyWithoutContactNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutContactNestedInput
 }
 
 export type crm_contactsUncheckedUpdateWithoutBilling_documentsInput = {
@@ -932,6 +962,7 @@ export type crm_contactsUncheckedUpdateWithoutBilling_documentsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   interactions?: Prisma.crm_interactionsUncheckedUpdateManyWithoutContactNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutContactNestedInput
 }
 
 export type crm_contactsCreateWithoutCompanyInput = {
@@ -950,6 +981,7 @@ export type crm_contactsCreateWithoutCompanyInput = {
   project?: Prisma.projectsCreateNestedOneWithoutCrm_contactsInput
   interactions?: Prisma.crm_interactionsCreateNestedManyWithoutContactInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutContactInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutContactInput
 }
 
 export type crm_contactsUncheckedCreateWithoutCompanyInput = {
@@ -968,6 +1000,7 @@ export type crm_contactsUncheckedCreateWithoutCompanyInput = {
   updated_at?: Date | string | null
   interactions?: Prisma.crm_interactionsUncheckedCreateNestedManyWithoutContactInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutContactInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutContactInput
 }
 
 export type crm_contactsCreateOrConnectWithoutCompanyInput = {
@@ -1012,6 +1045,7 @@ export type crm_contactsCreateWithoutInteractionsInput = {
   company?: Prisma.crm_companiesCreateNestedOneWithoutContactsInput
   project?: Prisma.projectsCreateNestedOneWithoutCrm_contactsInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutContactInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutContactInput
 }
 
 export type crm_contactsUncheckedCreateWithoutInteractionsInput = {
@@ -1030,6 +1064,7 @@ export type crm_contactsUncheckedCreateWithoutInteractionsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutContactInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutContactInput
 }
 
 export type crm_contactsCreateOrConnectWithoutInteractionsInput = {
@@ -1064,6 +1099,7 @@ export type crm_contactsUpdateWithoutInteractionsInput = {
   company?: Prisma.crm_companiesUpdateOneWithoutContactsNestedInput
   project?: Prisma.projectsUpdateOneWithoutCrm_contactsNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutContactNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutContactNestedInput
 }
 
 export type crm_contactsUncheckedUpdateWithoutInteractionsInput = {
@@ -1081,6 +1117,99 @@ export type crm_contactsUncheckedUpdateWithoutInteractionsInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutContactNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutContactNestedInput
+}
+
+export type crm_contactsCreateWithoutAgenda_eventsInput = {
+  id?: string
+  first_name: string
+  last_name: string
+  email?: string | null
+  phone?: string | null
+  role?: string | null
+  kind?: string
+  stage?: string
+  notes?: string | null
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  owner: Prisma.usersCreateNestedOneWithoutCrm_contactsInput
+  company?: Prisma.crm_companiesCreateNestedOneWithoutContactsInput
+  project?: Prisma.projectsCreateNestedOneWithoutCrm_contactsInput
+  interactions?: Prisma.crm_interactionsCreateNestedManyWithoutContactInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutContactInput
+}
+
+export type crm_contactsUncheckedCreateWithoutAgenda_eventsInput = {
+  id?: string
+  owner_id: string
+  company_id?: string | null
+  project_id?: string | null
+  first_name: string
+  last_name: string
+  email?: string | null
+  phone?: string | null
+  role?: string | null
+  kind?: string
+  stage?: string
+  notes?: string | null
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  interactions?: Prisma.crm_interactionsUncheckedCreateNestedManyWithoutContactInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutContactInput
+}
+
+export type crm_contactsCreateOrConnectWithoutAgenda_eventsInput = {
+  where: Prisma.crm_contactsWhereUniqueInput
+  create: Prisma.XOR<Prisma.crm_contactsCreateWithoutAgenda_eventsInput, Prisma.crm_contactsUncheckedCreateWithoutAgenda_eventsInput>
+}
+
+export type crm_contactsUpsertWithoutAgenda_eventsInput = {
+  update: Prisma.XOR<Prisma.crm_contactsUpdateWithoutAgenda_eventsInput, Prisma.crm_contactsUncheckedUpdateWithoutAgenda_eventsInput>
+  create: Prisma.XOR<Prisma.crm_contactsCreateWithoutAgenda_eventsInput, Prisma.crm_contactsUncheckedCreateWithoutAgenda_eventsInput>
+  where?: Prisma.crm_contactsWhereInput
+}
+
+export type crm_contactsUpdateToOneWithWhereWithoutAgenda_eventsInput = {
+  where?: Prisma.crm_contactsWhereInput
+  data: Prisma.XOR<Prisma.crm_contactsUpdateWithoutAgenda_eventsInput, Prisma.crm_contactsUncheckedUpdateWithoutAgenda_eventsInput>
+}
+
+export type crm_contactsUpdateWithoutAgenda_eventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  first_name?: Prisma.StringFieldUpdateOperationsInput | string
+  last_name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  stage?: Prisma.StringFieldUpdateOperationsInput | string
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  owner?: Prisma.usersUpdateOneRequiredWithoutCrm_contactsNestedInput
+  company?: Prisma.crm_companiesUpdateOneWithoutContactsNestedInput
+  project?: Prisma.projectsUpdateOneWithoutCrm_contactsNestedInput
+  interactions?: Prisma.crm_interactionsUpdateManyWithoutContactNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutContactNestedInput
+}
+
+export type crm_contactsUncheckedUpdateWithoutAgenda_eventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_id?: Prisma.StringFieldUpdateOperationsInput | string
+  company_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  project_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  first_name?: Prisma.StringFieldUpdateOperationsInput | string
+  last_name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  stage?: Prisma.StringFieldUpdateOperationsInput | string
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  interactions?: Prisma.crm_interactionsUncheckedUpdateManyWithoutContactNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutContactNestedInput
 }
 
@@ -1116,6 +1245,7 @@ export type crm_contactsUpdateWithoutOwnerInput = {
   project?: Prisma.projectsUpdateOneWithoutCrm_contactsNestedInput
   interactions?: Prisma.crm_interactionsUpdateManyWithoutContactNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutContactNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutContactNestedInput
 }
 
 export type crm_contactsUncheckedUpdateWithoutOwnerInput = {
@@ -1134,6 +1264,7 @@ export type crm_contactsUncheckedUpdateWithoutOwnerInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   interactions?: Prisma.crm_interactionsUncheckedUpdateManyWithoutContactNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutContactNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutContactNestedInput
 }
 
 export type crm_contactsUncheckedUpdateManyWithoutOwnerInput = {
@@ -1184,6 +1315,7 @@ export type crm_contactsUpdateWithoutProjectInput = {
   company?: Prisma.crm_companiesUpdateOneWithoutContactsNestedInput
   interactions?: Prisma.crm_interactionsUpdateManyWithoutContactNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutContactNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutContactNestedInput
 }
 
 export type crm_contactsUncheckedUpdateWithoutProjectInput = {
@@ -1202,6 +1334,7 @@ export type crm_contactsUncheckedUpdateWithoutProjectInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   interactions?: Prisma.crm_interactionsUncheckedUpdateManyWithoutContactNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutContactNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutContactNestedInput
 }
 
 export type crm_contactsUncheckedUpdateManyWithoutProjectInput = {
@@ -1252,6 +1385,7 @@ export type crm_contactsUpdateWithoutCompanyInput = {
   project?: Prisma.projectsUpdateOneWithoutCrm_contactsNestedInput
   interactions?: Prisma.crm_interactionsUpdateManyWithoutContactNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutContactNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutContactNestedInput
 }
 
 export type crm_contactsUncheckedUpdateWithoutCompanyInput = {
@@ -1270,6 +1404,7 @@ export type crm_contactsUncheckedUpdateWithoutCompanyInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   interactions?: Prisma.crm_interactionsUncheckedUpdateManyWithoutContactNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutContactNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutContactNestedInput
 }
 
 export type crm_contactsUncheckedUpdateManyWithoutCompanyInput = {
@@ -1296,11 +1431,13 @@ export type crm_contactsUncheckedUpdateManyWithoutCompanyInput = {
 export type Crm_contactsCountOutputType = {
   interactions: number
   billing_documents: number
+  agenda_events: number
 }
 
 export type Crm_contactsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   interactions?: boolean | Crm_contactsCountOutputTypeCountInteractionsArgs
   billing_documents?: boolean | Crm_contactsCountOutputTypeCountBilling_documentsArgs
+  agenda_events?: boolean | Crm_contactsCountOutputTypeCountAgenda_eventsArgs
 }
 
 /**
@@ -1327,6 +1464,13 @@ export type Crm_contactsCountOutputTypeCountBilling_documentsArgs<ExtArgs extend
   where?: Prisma.billing_documentsWhereInput
 }
 
+/**
+ * Crm_contactsCountOutputType without action
+ */
+export type Crm_contactsCountOutputTypeCountAgenda_eventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.agenda_eventsWhereInput
+}
+
 
 export type crm_contactsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1348,6 +1492,7 @@ export type crm_contactsSelect<ExtArgs extends runtime.Types.Extensions.Internal
   project?: boolean | Prisma.crm_contacts$projectArgs<ExtArgs>
   interactions?: boolean | Prisma.crm_contacts$interactionsArgs<ExtArgs>
   billing_documents?: boolean | Prisma.crm_contacts$billing_documentsArgs<ExtArgs>
+  agenda_events?: boolean | Prisma.crm_contacts$agenda_eventsArgs<ExtArgs>
   _count?: boolean | Prisma.Crm_contactsCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["crm_contacts"]>
 
@@ -1415,6 +1560,7 @@ export type crm_contactsInclude<ExtArgs extends runtime.Types.Extensions.Interna
   project?: boolean | Prisma.crm_contacts$projectArgs<ExtArgs>
   interactions?: boolean | Prisma.crm_contacts$interactionsArgs<ExtArgs>
   billing_documents?: boolean | Prisma.crm_contacts$billing_documentsArgs<ExtArgs>
+  agenda_events?: boolean | Prisma.crm_contacts$agenda_eventsArgs<ExtArgs>
   _count?: boolean | Prisma.Crm_contactsCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type crm_contactsIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1436,6 +1582,7 @@ export type $crm_contactsPayload<ExtArgs extends runtime.Types.Extensions.Intern
     project: Prisma.$projectsPayload<ExtArgs> | null
     interactions: Prisma.$crm_interactionsPayload<ExtArgs>[]
     billing_documents: Prisma.$billing_documentsPayload<ExtArgs>[]
+    agenda_events: Prisma.$agenda_eventsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1851,6 +1998,7 @@ export interface Prisma__crm_contactsClient<T, Null = never, ExtArgs extends run
   project<T extends Prisma.crm_contacts$projectArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.crm_contacts$projectArgs<ExtArgs>>): Prisma.Prisma__projectsClient<runtime.Types.Result.GetResult<Prisma.$projectsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   interactions<T extends Prisma.crm_contacts$interactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.crm_contacts$interactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$crm_interactionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   billing_documents<T extends Prisma.crm_contacts$billing_documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.crm_contacts$billing_documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$billing_documentsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  agenda_events<T extends Prisma.crm_contacts$agenda_eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.crm_contacts$agenda_eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$agenda_eventsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2378,6 +2526,30 @@ export type crm_contacts$billing_documentsArgs<ExtArgs extends runtime.Types.Ext
   take?: number
   skip?: number
   distinct?: Prisma.Billing_documentsScalarFieldEnum | Prisma.Billing_documentsScalarFieldEnum[]
+}
+
+/**
+ * crm_contacts.agenda_events
+ */
+export type crm_contacts$agenda_eventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the agenda_events
+   */
+  select?: Prisma.agenda_eventsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the agenda_events
+   */
+  omit?: Prisma.agenda_eventsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.agenda_eventsInclude<ExtArgs> | null
+  where?: Prisma.agenda_eventsWhereInput
+  orderBy?: Prisma.agenda_eventsOrderByWithRelationInput | Prisma.agenda_eventsOrderByWithRelationInput[]
+  cursor?: Prisma.agenda_eventsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Agenda_eventsScalarFieldEnum | Prisma.Agenda_eventsScalarFieldEnum[]
 }
 
 /**

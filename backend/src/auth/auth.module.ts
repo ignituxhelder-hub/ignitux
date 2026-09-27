@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { getEnv } from '../config/env.js';
+import { AuthTokensModule } from '../auth-tokens/auth-tokens.module.js';
 import { UsersModule } from '../users/users.module.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
@@ -10,6 +11,7 @@ import { JwtStrategy } from './jwt.strategy.js';
 @Module({
   imports: [
     UsersModule,
+    AuthTokensModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     // registerAsync (plutôt que register) pour que getEnv() ne s'exécute
     // qu'à l'instanciation réelle du module par Nest, pas au simple import
