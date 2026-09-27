@@ -6,12 +6,16 @@ import { JwtAuthGuard } from './jwt-auth.guard.js';
 
 describe('AuthController', () => {
   let controller: AuthController;
-  let authService: { login: ReturnType<typeof vi.fn> };
+  let authService: {
+    login: ReturnType<typeof vi.fn>;
+    refresh: ReturnType<typeof vi.fn>;
+    logout: ReturnType<typeof vi.fn>;
+  };
   let usersService: { changePassword: ReturnType<typeof vi.fn> };
   const currentUser = { id: 'u1', email: 'a@b.com' };
 
   beforeEach(async () => {
-    authService = { login: vi.fn() };
+    authService = { login: vi.fn(), refresh: vi.fn(), logout: vi.fn() };
     usersService = { changePassword: vi.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -39,6 +43,29 @@ describe('AuthController', () => {
 
     expect(authService.login).toHaveBeenCalledWith('a@b.com', 'motdepasse');
     expect(result).toEqual({ accessToken: 'token', user: { id: '1', email: 'a@b.com' } });
+  });
+
+  it('refresh délègue au service et renvoie la nouvelle paire de jetons', async () => {
+    authService.refresh.mockResolvedValue({
+      accessToken: 'nouveau',
+      refreshToken: 'nouveau-refresh',
+      user: { id: '1', email: 'a@b.com' },
+    });
+
+    const result = await controller.refresh({ refreshToken: 'ancien' });
+
+    expect(authService.refresh).toHaveBeenCalledWith('ancien');
+    expect(result).toEqual({
+      accessToken: 'nouveau',
+      refreshToken: 'nouveau-refresh',
+      user: { id: '1', email: 'a@b.com' },
+    });
+  });
+
+  it('logout délègue au service', async () => {
+    await controller.logout({ refreshToken: 'un-jeton' });
+
+    expect(authService.logout).toHaveBeenCalledWith('un-jeton');
   });
 
   it('changePassword délègue au service avec l\'utilisateur courant', async () => {

@@ -201,7 +201,14 @@ export type usersWhereInput = {
   crm_companies?: Prisma.Crm_companiesListRelationFilter
   crm_contacts?: Prisma.Crm_contactsListRelationFilter
   billing_documents?: Prisma.Billing_documentsListRelationFilter
+  stock_items?: Prisma.Stock_itemsListRelationFilter
+  agenda_events?: Prisma.Agenda_eventsListRelationFilter
+  cash_register_entries?: Prisma.Cash_register_entriesListRelationFilter
+  real_estate_properties?: Prisma.Real_estate_propertiesListRelationFilter
+  fleet_vehicles?: Prisma.Fleet_vehiclesListRelationFilter
+  ad_campaigns?: Prisma.Ad_campaignsListRelationFilter
   roles?: Prisma.User_rolesListRelationFilter
+  applications?: Prisma.User_applicationsListRelationFilter
   profile?: Prisma.XOR<Prisma.User_profilesNullableScalarRelationFilter, Prisma.user_profilesWhereInput> | null
   subscription?: Prisma.XOR<Prisma.SubscriptionsNullableScalarRelationFilter, Prisma.subscriptionsWhereInput> | null
 }
@@ -224,7 +231,14 @@ export type usersOrderByWithRelationInput = {
   crm_companies?: Prisma.crm_companiesOrderByRelationAggregateInput
   crm_contacts?: Prisma.crm_contactsOrderByRelationAggregateInput
   billing_documents?: Prisma.billing_documentsOrderByRelationAggregateInput
+  stock_items?: Prisma.stock_itemsOrderByRelationAggregateInput
+  agenda_events?: Prisma.agenda_eventsOrderByRelationAggregateInput
+  cash_register_entries?: Prisma.cash_register_entriesOrderByRelationAggregateInput
+  real_estate_properties?: Prisma.real_estate_propertiesOrderByRelationAggregateInput
+  fleet_vehicles?: Prisma.fleet_vehiclesOrderByRelationAggregateInput
+  ad_campaigns?: Prisma.ad_campaignsOrderByRelationAggregateInput
   roles?: Prisma.user_rolesOrderByRelationAggregateInput
+  applications?: Prisma.user_applicationsOrderByRelationAggregateInput
   profile?: Prisma.user_profilesOrderByWithRelationInput
   subscription?: Prisma.subscriptionsOrderByWithRelationInput
 }
@@ -250,7 +264,14 @@ export type usersWhereUniqueInput = Prisma.AtLeast<{
   crm_companies?: Prisma.Crm_companiesListRelationFilter
   crm_contacts?: Prisma.Crm_contactsListRelationFilter
   billing_documents?: Prisma.Billing_documentsListRelationFilter
+  stock_items?: Prisma.Stock_itemsListRelationFilter
+  agenda_events?: Prisma.Agenda_eventsListRelationFilter
+  cash_register_entries?: Prisma.Cash_register_entriesListRelationFilter
+  real_estate_properties?: Prisma.Real_estate_propertiesListRelationFilter
+  fleet_vehicles?: Prisma.Fleet_vehiclesListRelationFilter
+  ad_campaigns?: Prisma.Ad_campaignsListRelationFilter
   roles?: Prisma.User_rolesListRelationFilter
+  applications?: Prisma.User_applicationsListRelationFilter
   profile?: Prisma.XOR<Prisma.User_profilesNullableScalarRelationFilter, Prisma.user_profilesWhereInput> | null
   subscription?: Prisma.XOR<Prisma.SubscriptionsNullableScalarRelationFilter, Prisma.subscriptionsWhereInput> | null
 }, "id" | "email">
@@ -297,7 +318,14 @@ export type usersCreateInput = {
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
 }
@@ -320,7 +348,14 @@ export type usersUncheckedCreateInput = {
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
 }
@@ -343,7 +378,14 @@ export type usersUpdateInput = {
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
 }
@@ -366,7 +408,14 @@ export type usersUncheckedUpdateInput = {
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -596,6 +645,48 @@ export type usersUpdateOneRequiredWithoutCrm_contactsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutCrm_contactsInput, Prisma.usersUpdateWithoutCrm_contactsInput>, Prisma.usersUncheckedUpdateWithoutCrm_contactsInput>
 }
 
+export type usersCreateNestedOneWithoutStock_itemsInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutStock_itemsInput, Prisma.usersUncheckedCreateWithoutStock_itemsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutStock_itemsInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutStock_itemsNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutStock_itemsInput, Prisma.usersUncheckedCreateWithoutStock_itemsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutStock_itemsInput
+  upsert?: Prisma.usersUpsertWithoutStock_itemsInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutStock_itemsInput, Prisma.usersUpdateWithoutStock_itemsInput>, Prisma.usersUncheckedUpdateWithoutStock_itemsInput>
+}
+
+export type usersCreateNestedOneWithoutAgenda_eventsInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutAgenda_eventsInput, Prisma.usersUncheckedCreateWithoutAgenda_eventsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutAgenda_eventsInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutAgenda_eventsNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutAgenda_eventsInput, Prisma.usersUncheckedCreateWithoutAgenda_eventsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutAgenda_eventsInput
+  upsert?: Prisma.usersUpsertWithoutAgenda_eventsInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutAgenda_eventsInput, Prisma.usersUpdateWithoutAgenda_eventsInput>, Prisma.usersUncheckedUpdateWithoutAgenda_eventsInput>
+}
+
+export type usersCreateNestedOneWithoutCash_register_entriesInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutCash_register_entriesInput, Prisma.usersUncheckedCreateWithoutCash_register_entriesInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutCash_register_entriesInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutCash_register_entriesNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutCash_register_entriesInput, Prisma.usersUncheckedCreateWithoutCash_register_entriesInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutCash_register_entriesInput
+  upsert?: Prisma.usersUpsertWithoutCash_register_entriesInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutCash_register_entriesInput, Prisma.usersUpdateWithoutCash_register_entriesInput>, Prisma.usersUncheckedUpdateWithoutCash_register_entriesInput>
+}
+
 export type usersCreateNestedOneWithoutRolesInput = {
   create?: Prisma.XOR<Prisma.usersCreateWithoutRolesInput, Prisma.usersUncheckedCreateWithoutRolesInput>
   connectOrCreate?: Prisma.usersCreateOrConnectWithoutRolesInput
@@ -608,6 +699,20 @@ export type usersUpdateOneRequiredWithoutRolesNestedInput = {
   upsert?: Prisma.usersUpsertWithoutRolesInput
   connect?: Prisma.usersWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutRolesInput, Prisma.usersUpdateWithoutRolesInput>, Prisma.usersUncheckedUpdateWithoutRolesInput>
+}
+
+export type usersCreateNestedOneWithoutApplicationsInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutApplicationsInput, Prisma.usersUncheckedCreateWithoutApplicationsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutApplicationsInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutApplicationsNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutApplicationsInput, Prisma.usersUncheckedCreateWithoutApplicationsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutApplicationsInput
+  upsert?: Prisma.usersUpsertWithoutApplicationsInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutApplicationsInput, Prisma.usersUpdateWithoutApplicationsInput>, Prisma.usersUncheckedUpdateWithoutApplicationsInput>
 }
 
 export type usersCreateNestedOneWithoutProfileInput = {
@@ -638,6 +743,48 @@ export type usersUpdateOneRequiredWithoutSubscriptionNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutSubscriptionInput, Prisma.usersUpdateWithoutSubscriptionInput>, Prisma.usersUncheckedUpdateWithoutSubscriptionInput>
 }
 
+export type usersCreateNestedOneWithoutReal_estate_propertiesInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutReal_estate_propertiesInput, Prisma.usersUncheckedCreateWithoutReal_estate_propertiesInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutReal_estate_propertiesInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutReal_estate_propertiesNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutReal_estate_propertiesInput, Prisma.usersUncheckedCreateWithoutReal_estate_propertiesInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutReal_estate_propertiesInput
+  upsert?: Prisma.usersUpsertWithoutReal_estate_propertiesInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutReal_estate_propertiesInput, Prisma.usersUpdateWithoutReal_estate_propertiesInput>, Prisma.usersUncheckedUpdateWithoutReal_estate_propertiesInput>
+}
+
+export type usersCreateNestedOneWithoutFleet_vehiclesInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutFleet_vehiclesInput, Prisma.usersUncheckedCreateWithoutFleet_vehiclesInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutFleet_vehiclesInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutFleet_vehiclesNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutFleet_vehiclesInput, Prisma.usersUncheckedCreateWithoutFleet_vehiclesInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutFleet_vehiclesInput
+  upsert?: Prisma.usersUpsertWithoutFleet_vehiclesInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutFleet_vehiclesInput, Prisma.usersUpdateWithoutFleet_vehiclesInput>, Prisma.usersUncheckedUpdateWithoutFleet_vehiclesInput>
+}
+
+export type usersCreateNestedOneWithoutAd_campaignsInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutAd_campaignsInput, Prisma.usersUncheckedCreateWithoutAd_campaignsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutAd_campaignsInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutAd_campaignsNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutAd_campaignsInput, Prisma.usersUncheckedCreateWithoutAd_campaignsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutAd_campaignsInput
+  upsert?: Prisma.usersUpsertWithoutAd_campaignsInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutAd_campaignsInput, Prisma.usersUpdateWithoutAd_campaignsInput>, Prisma.usersUncheckedUpdateWithoutAd_campaignsInput>
+}
+
 export type usersCreateWithoutAuth_tokensInput = {
   id?: string
   email: string
@@ -655,7 +802,14 @@ export type usersCreateWithoutAuth_tokensInput = {
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
 }
@@ -677,7 +831,14 @@ export type usersUncheckedCreateWithoutAuth_tokensInput = {
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
 }
@@ -715,7 +876,14 @@ export type usersUpdateWithoutAuth_tokensInput = {
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
 }
@@ -737,7 +905,14 @@ export type usersUncheckedUpdateWithoutAuth_tokensInput = {
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -759,7 +934,14 @@ export type usersCreateWithoutProjectsInput = {
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
 }
@@ -781,7 +963,14 @@ export type usersUncheckedCreateWithoutProjectsInput = {
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
 }
@@ -819,7 +1008,14 @@ export type usersUpdateWithoutProjectsInput = {
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
 }
@@ -841,7 +1037,14 @@ export type usersUncheckedUpdateWithoutProjectsInput = {
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -863,7 +1066,14 @@ export type usersCreateWithoutMemoriesInput = {
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
 }
@@ -885,7 +1095,14 @@ export type usersUncheckedCreateWithoutMemoriesInput = {
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
 }
@@ -923,7 +1140,14 @@ export type usersUpdateWithoutMemoriesInput = {
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
 }
@@ -945,7 +1169,14 @@ export type usersUncheckedUpdateWithoutMemoriesInput = {
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -967,7 +1198,14 @@ export type usersCreateWithoutConceptsInput = {
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
 }
@@ -989,7 +1227,14 @@ export type usersUncheckedCreateWithoutConceptsInput = {
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
 }
@@ -1027,7 +1272,14 @@ export type usersUpdateWithoutConceptsInput = {
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
 }
@@ -1049,7 +1301,14 @@ export type usersUncheckedUpdateWithoutConceptsInput = {
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -1071,7 +1330,14 @@ export type usersCreateWithoutCommunity_commentsInput = {
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
 }
@@ -1093,7 +1359,14 @@ export type usersUncheckedCreateWithoutCommunity_commentsInput = {
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
 }
@@ -1131,7 +1404,14 @@ export type usersUpdateWithoutCommunity_commentsInput = {
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
 }
@@ -1153,7 +1433,14 @@ export type usersUncheckedUpdateWithoutCommunity_commentsInput = {
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -1175,7 +1462,14 @@ export type usersCreateWithoutCollaborationsInput = {
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
 }
@@ -1197,7 +1491,14 @@ export type usersUncheckedCreateWithoutCollaborationsInput = {
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
 }
@@ -1235,7 +1536,14 @@ export type usersUpdateWithoutCollaborationsInput = {
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
 }
@@ -1257,7 +1565,14 @@ export type usersUncheckedUpdateWithoutCollaborationsInput = {
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -1279,7 +1594,14 @@ export type usersCreateWithoutMarketplace_profileInput = {
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
 }
@@ -1301,7 +1623,14 @@ export type usersUncheckedCreateWithoutMarketplace_profileInput = {
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
 }
@@ -1339,7 +1668,14 @@ export type usersUpdateWithoutMarketplace_profileInput = {
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
 }
@@ -1361,7 +1697,14 @@ export type usersUncheckedUpdateWithoutMarketplace_profileInput = {
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -1383,7 +1726,14 @@ export type usersCreateWithoutMarketplace_contacts_sentInput = {
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
 }
@@ -1405,7 +1755,14 @@ export type usersUncheckedCreateWithoutMarketplace_contacts_sentInput = {
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
 }
@@ -1443,7 +1800,14 @@ export type usersUpdateWithoutMarketplace_contacts_sentInput = {
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
 }
@@ -1465,7 +1829,14 @@ export type usersUncheckedUpdateWithoutMarketplace_contacts_sentInput = {
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -1487,7 +1858,14 @@ export type usersCreateWithoutBilling_documentsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
 }
@@ -1509,7 +1887,14 @@ export type usersUncheckedCreateWithoutBilling_documentsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
 }
@@ -1547,7 +1932,14 @@ export type usersUpdateWithoutBilling_documentsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
 }
@@ -1569,7 +1961,14 @@ export type usersUncheckedUpdateWithoutBilling_documentsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -1591,7 +1990,14 @@ export type usersCreateWithoutCrm_companiesInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
 }
@@ -1613,7 +2019,14 @@ export type usersUncheckedCreateWithoutCrm_companiesInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
 }
@@ -1651,7 +2064,14 @@ export type usersUpdateWithoutCrm_companiesInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
 }
@@ -1673,7 +2093,14 @@ export type usersUncheckedUpdateWithoutCrm_companiesInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -1695,7 +2122,14 @@ export type usersCreateWithoutCrm_contactsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
 }
@@ -1717,7 +2151,14 @@ export type usersUncheckedCreateWithoutCrm_contactsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
 }
@@ -1755,7 +2196,14 @@ export type usersUpdateWithoutCrm_contactsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
 }
@@ -1777,7 +2225,410 @@ export type usersUncheckedUpdateWithoutCrm_contactsInput = {
   marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type usersCreateWithoutStock_itemsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
+}
+
+export type usersUncheckedCreateWithoutStock_itemsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type usersCreateOrConnectWithoutStock_itemsInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutStock_itemsInput, Prisma.usersUncheckedCreateWithoutStock_itemsInput>
+}
+
+export type usersUpsertWithoutStock_itemsInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutStock_itemsInput, Prisma.usersUncheckedUpdateWithoutStock_itemsInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutStock_itemsInput, Prisma.usersUncheckedCreateWithoutStock_itemsInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutStock_itemsInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutStock_itemsInput, Prisma.usersUncheckedUpdateWithoutStock_itemsInput>
+}
+
+export type usersUpdateWithoutStock_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
+}
+
+export type usersUncheckedUpdateWithoutStock_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type usersCreateWithoutAgenda_eventsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
+}
+
+export type usersUncheckedCreateWithoutAgenda_eventsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type usersCreateOrConnectWithoutAgenda_eventsInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutAgenda_eventsInput, Prisma.usersUncheckedCreateWithoutAgenda_eventsInput>
+}
+
+export type usersUpsertWithoutAgenda_eventsInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutAgenda_eventsInput, Prisma.usersUncheckedUpdateWithoutAgenda_eventsInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutAgenda_eventsInput, Prisma.usersUncheckedCreateWithoutAgenda_eventsInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutAgenda_eventsInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutAgenda_eventsInput, Prisma.usersUncheckedUpdateWithoutAgenda_eventsInput>
+}
+
+export type usersUpdateWithoutAgenda_eventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
+}
+
+export type usersUncheckedUpdateWithoutAgenda_eventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type usersCreateWithoutCash_register_entriesInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
+}
+
+export type usersUncheckedCreateWithoutCash_register_entriesInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type usersCreateOrConnectWithoutCash_register_entriesInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutCash_register_entriesInput, Prisma.usersUncheckedCreateWithoutCash_register_entriesInput>
+}
+
+export type usersUpsertWithoutCash_register_entriesInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutCash_register_entriesInput, Prisma.usersUncheckedUpdateWithoutCash_register_entriesInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutCash_register_entriesInput, Prisma.usersUncheckedCreateWithoutCash_register_entriesInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutCash_register_entriesInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutCash_register_entriesInput, Prisma.usersUncheckedUpdateWithoutCash_register_entriesInput>
+}
+
+export type usersUpdateWithoutCash_register_entriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
+}
+
+export type usersUncheckedUpdateWithoutCash_register_entriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -1800,6 +2651,13 @@ export type usersCreateWithoutRolesInput = {
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
 }
@@ -1822,6 +2680,13 @@ export type usersUncheckedCreateWithoutRolesInput = {
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
 }
@@ -1860,6 +2725,13 @@ export type usersUpdateWithoutRolesInput = {
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
 }
@@ -1882,6 +2754,145 @@ export type usersUncheckedUpdateWithoutRolesInput = {
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type usersCreateWithoutApplicationsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
+}
+
+export type usersUncheckedCreateWithoutApplicationsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type usersCreateOrConnectWithoutApplicationsInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutApplicationsInput, Prisma.usersUncheckedCreateWithoutApplicationsInput>
+}
+
+export type usersUpsertWithoutApplicationsInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutApplicationsInput, Prisma.usersUncheckedUpdateWithoutApplicationsInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutApplicationsInput, Prisma.usersUncheckedCreateWithoutApplicationsInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutApplicationsInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutApplicationsInput, Prisma.usersUncheckedUpdateWithoutApplicationsInput>
+}
+
+export type usersUpdateWithoutApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
+}
+
+export type usersUncheckedUpdateWithoutApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -1904,7 +2915,14 @@ export type usersCreateWithoutProfileInput = {
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
 }
 
@@ -1926,7 +2944,14 @@ export type usersUncheckedCreateWithoutProfileInput = {
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
 }
 
@@ -1964,7 +2989,14 @@ export type usersUpdateWithoutProfileInput = {
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
 }
 
@@ -1986,7 +3018,14 @@ export type usersUncheckedUpdateWithoutProfileInput = {
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
 }
 
@@ -2008,7 +3047,14 @@ export type usersCreateWithoutSubscriptionInput = {
   crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
 }
 
@@ -2030,7 +3076,14 @@ export type usersUncheckedCreateWithoutSubscriptionInput = {
   crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
 }
 
@@ -2068,7 +3121,14 @@ export type usersUpdateWithoutSubscriptionInput = {
   crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
 }
 
@@ -2090,8 +3150,411 @@ export type usersUncheckedUpdateWithoutSubscriptionInput = {
   crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type usersCreateWithoutReal_estate_propertiesInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
+}
+
+export type usersUncheckedCreateWithoutReal_estate_propertiesInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type usersCreateOrConnectWithoutReal_estate_propertiesInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutReal_estate_propertiesInput, Prisma.usersUncheckedCreateWithoutReal_estate_propertiesInput>
+}
+
+export type usersUpsertWithoutReal_estate_propertiesInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutReal_estate_propertiesInput, Prisma.usersUncheckedUpdateWithoutReal_estate_propertiesInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutReal_estate_propertiesInput, Prisma.usersUncheckedCreateWithoutReal_estate_propertiesInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutReal_estate_propertiesInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutReal_estate_propertiesInput, Prisma.usersUncheckedUpdateWithoutReal_estate_propertiesInput>
+}
+
+export type usersUpdateWithoutReal_estate_propertiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
+}
+
+export type usersUncheckedUpdateWithoutReal_estate_propertiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type usersCreateWithoutFleet_vehiclesInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
+}
+
+export type usersUncheckedCreateWithoutFleet_vehiclesInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type usersCreateOrConnectWithoutFleet_vehiclesInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutFleet_vehiclesInput, Prisma.usersUncheckedCreateWithoutFleet_vehiclesInput>
+}
+
+export type usersUpsertWithoutFleet_vehiclesInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutFleet_vehiclesInput, Prisma.usersUncheckedUpdateWithoutFleet_vehiclesInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutFleet_vehiclesInput, Prisma.usersUncheckedCreateWithoutFleet_vehiclesInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutFleet_vehiclesInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutFleet_vehiclesInput, Prisma.usersUncheckedUpdateWithoutFleet_vehiclesInput>
+}
+
+export type usersUpdateWithoutFleet_vehiclesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
+}
+
+export type usersUncheckedUpdateWithoutFleet_vehiclesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type usersCreateWithoutAd_campaignsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
+}
+
+export type usersUncheckedCreateWithoutAd_campaignsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type usersCreateOrConnectWithoutAd_campaignsInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutAd_campaignsInput, Prisma.usersUncheckedCreateWithoutAd_campaignsInput>
+}
+
+export type usersUpsertWithoutAd_campaignsInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutAd_campaignsInput, Prisma.usersUncheckedUpdateWithoutAd_campaignsInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutAd_campaignsInput, Prisma.usersUncheckedCreateWithoutAd_campaignsInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutAd_campaignsInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutAd_campaignsInput, Prisma.usersUncheckedUpdateWithoutAd_campaignsInput>
+}
+
+export type usersUpdateWithoutAd_campaignsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
+}
+
+export type usersUncheckedUpdateWithoutAd_campaignsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
 }
 
 
@@ -2110,7 +3573,14 @@ export type UsersCountOutputType = {
   crm_companies: number
   crm_contacts: number
   billing_documents: number
+  stock_items: number
+  agenda_events: number
+  cash_register_entries: number
+  real_estate_properties: number
+  fleet_vehicles: number
+  ad_campaigns: number
   roles: number
+  applications: number
 }
 
 export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2124,7 +3594,14 @@ export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   crm_companies?: boolean | UsersCountOutputTypeCountCrm_companiesArgs
   crm_contacts?: boolean | UsersCountOutputTypeCountCrm_contactsArgs
   billing_documents?: boolean | UsersCountOutputTypeCountBilling_documentsArgs
+  stock_items?: boolean | UsersCountOutputTypeCountStock_itemsArgs
+  agenda_events?: boolean | UsersCountOutputTypeCountAgenda_eventsArgs
+  cash_register_entries?: boolean | UsersCountOutputTypeCountCash_register_entriesArgs
+  real_estate_properties?: boolean | UsersCountOutputTypeCountReal_estate_propertiesArgs
+  fleet_vehicles?: boolean | UsersCountOutputTypeCountFleet_vehiclesArgs
+  ad_campaigns?: boolean | UsersCountOutputTypeCountAd_campaignsArgs
   roles?: boolean | UsersCountOutputTypeCountRolesArgs
+  applications?: boolean | UsersCountOutputTypeCountApplicationsArgs
 }
 
 /**
@@ -2210,8 +3687,57 @@ export type UsersCountOutputTypeCountBilling_documentsArgs<ExtArgs extends runti
 /**
  * UsersCountOutputType without action
  */
+export type UsersCountOutputTypeCountStock_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.stock_itemsWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountAgenda_eventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.agenda_eventsWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountCash_register_entriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.cash_register_entriesWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountReal_estate_propertiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.real_estate_propertiesWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountFleet_vehiclesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.fleet_vehiclesWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountAd_campaignsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ad_campaignsWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
 export type UsersCountOutputTypeCountRolesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.user_rolesWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.user_applicationsWhereInput
 }
 
 
@@ -2233,7 +3759,14 @@ export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   crm_companies?: boolean | Prisma.users$crm_companiesArgs<ExtArgs>
   crm_contacts?: boolean | Prisma.users$crm_contactsArgs<ExtArgs>
   billing_documents?: boolean | Prisma.users$billing_documentsArgs<ExtArgs>
+  stock_items?: boolean | Prisma.users$stock_itemsArgs<ExtArgs>
+  agenda_events?: boolean | Prisma.users$agenda_eventsArgs<ExtArgs>
+  cash_register_entries?: boolean | Prisma.users$cash_register_entriesArgs<ExtArgs>
+  real_estate_properties?: boolean | Prisma.users$real_estate_propertiesArgs<ExtArgs>
+  fleet_vehicles?: boolean | Prisma.users$fleet_vehiclesArgs<ExtArgs>
+  ad_campaigns?: boolean | Prisma.users$ad_campaignsArgs<ExtArgs>
   roles?: boolean | Prisma.users$rolesArgs<ExtArgs>
+  applications?: boolean | Prisma.users$applicationsArgs<ExtArgs>
   profile?: boolean | Prisma.users$profileArgs<ExtArgs>
   subscription?: boolean | Prisma.users$subscriptionArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
@@ -2279,7 +3812,14 @@ export type usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   crm_companies?: boolean | Prisma.users$crm_companiesArgs<ExtArgs>
   crm_contacts?: boolean | Prisma.users$crm_contactsArgs<ExtArgs>
   billing_documents?: boolean | Prisma.users$billing_documentsArgs<ExtArgs>
+  stock_items?: boolean | Prisma.users$stock_itemsArgs<ExtArgs>
+  agenda_events?: boolean | Prisma.users$agenda_eventsArgs<ExtArgs>
+  cash_register_entries?: boolean | Prisma.users$cash_register_entriesArgs<ExtArgs>
+  real_estate_properties?: boolean | Prisma.users$real_estate_propertiesArgs<ExtArgs>
+  fleet_vehicles?: boolean | Prisma.users$fleet_vehiclesArgs<ExtArgs>
+  ad_campaigns?: boolean | Prisma.users$ad_campaignsArgs<ExtArgs>
   roles?: boolean | Prisma.users$rolesArgs<ExtArgs>
+  applications?: boolean | Prisma.users$applicationsArgs<ExtArgs>
   profile?: boolean | Prisma.users$profileArgs<ExtArgs>
   subscription?: boolean | Prisma.users$subscriptionArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
@@ -2301,7 +3841,14 @@ export type $usersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     crm_companies: Prisma.$crm_companiesPayload<ExtArgs>[]
     crm_contacts: Prisma.$crm_contactsPayload<ExtArgs>[]
     billing_documents: Prisma.$billing_documentsPayload<ExtArgs>[]
+    stock_items: Prisma.$stock_itemsPayload<ExtArgs>[]
+    agenda_events: Prisma.$agenda_eventsPayload<ExtArgs>[]
+    cash_register_entries: Prisma.$cash_register_entriesPayload<ExtArgs>[]
+    real_estate_properties: Prisma.$real_estate_propertiesPayload<ExtArgs>[]
+    fleet_vehicles: Prisma.$fleet_vehiclesPayload<ExtArgs>[]
+    ad_campaigns: Prisma.$ad_campaignsPayload<ExtArgs>[]
     roles: Prisma.$user_rolesPayload<ExtArgs>[]
+    applications: Prisma.$user_applicationsPayload<ExtArgs>[]
     profile: Prisma.$user_profilesPayload<ExtArgs> | null
     subscription: Prisma.$subscriptionsPayload<ExtArgs> | null
   }
@@ -2722,7 +4269,14 @@ export interface Prisma__usersClient<T, Null = never, ExtArgs extends runtime.Ty
   crm_companies<T extends Prisma.users$crm_companiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$crm_companiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$crm_companiesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   crm_contacts<T extends Prisma.users$crm_contactsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$crm_contactsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$crm_contactsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   billing_documents<T extends Prisma.users$billing_documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$billing_documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$billing_documentsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stock_items<T extends Prisma.users$stock_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$stock_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$stock_itemsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  agenda_events<T extends Prisma.users$agenda_eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$agenda_eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$agenda_eventsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  cash_register_entries<T extends Prisma.users$cash_register_entriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$cash_register_entriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$cash_register_entriesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  real_estate_properties<T extends Prisma.users$real_estate_propertiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$real_estate_propertiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$real_estate_propertiesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  fleet_vehicles<T extends Prisma.users$fleet_vehiclesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$fleet_vehiclesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$fleet_vehiclesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ad_campaigns<T extends Prisma.users$ad_campaignsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$ad_campaignsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ad_campaignsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   roles<T extends Prisma.users$rolesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$rolesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$user_rolesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  applications<T extends Prisma.users$applicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$applicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$user_applicationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   profile<T extends Prisma.users$profileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$profileArgs<ExtArgs>>): Prisma.Prisma__user_profilesClient<runtime.Types.Result.GetResult<Prisma.$user_profilesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   subscription<T extends Prisma.users$subscriptionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$subscriptionArgs<ExtArgs>>): Prisma.Prisma__subscriptionsClient<runtime.Types.Result.GetResult<Prisma.$subscriptionsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
@@ -3412,6 +4966,150 @@ export type users$billing_documentsArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 /**
+ * users.stock_items
+ */
+export type users$stock_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the stock_items
+   */
+  select?: Prisma.stock_itemsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the stock_items
+   */
+  omit?: Prisma.stock_itemsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.stock_itemsInclude<ExtArgs> | null
+  where?: Prisma.stock_itemsWhereInput
+  orderBy?: Prisma.stock_itemsOrderByWithRelationInput | Prisma.stock_itemsOrderByWithRelationInput[]
+  cursor?: Prisma.stock_itemsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Stock_itemsScalarFieldEnum | Prisma.Stock_itemsScalarFieldEnum[]
+}
+
+/**
+ * users.agenda_events
+ */
+export type users$agenda_eventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the agenda_events
+   */
+  select?: Prisma.agenda_eventsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the agenda_events
+   */
+  omit?: Prisma.agenda_eventsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.agenda_eventsInclude<ExtArgs> | null
+  where?: Prisma.agenda_eventsWhereInput
+  orderBy?: Prisma.agenda_eventsOrderByWithRelationInput | Prisma.agenda_eventsOrderByWithRelationInput[]
+  cursor?: Prisma.agenda_eventsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Agenda_eventsScalarFieldEnum | Prisma.Agenda_eventsScalarFieldEnum[]
+}
+
+/**
+ * users.cash_register_entries
+ */
+export type users$cash_register_entriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the cash_register_entries
+   */
+  select?: Prisma.cash_register_entriesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the cash_register_entries
+   */
+  omit?: Prisma.cash_register_entriesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.cash_register_entriesInclude<ExtArgs> | null
+  where?: Prisma.cash_register_entriesWhereInput
+  orderBy?: Prisma.cash_register_entriesOrderByWithRelationInput | Prisma.cash_register_entriesOrderByWithRelationInput[]
+  cursor?: Prisma.cash_register_entriesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Cash_register_entriesScalarFieldEnum | Prisma.Cash_register_entriesScalarFieldEnum[]
+}
+
+/**
+ * users.real_estate_properties
+ */
+export type users$real_estate_propertiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the real_estate_properties
+   */
+  select?: Prisma.real_estate_propertiesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the real_estate_properties
+   */
+  omit?: Prisma.real_estate_propertiesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.real_estate_propertiesInclude<ExtArgs> | null
+  where?: Prisma.real_estate_propertiesWhereInput
+  orderBy?: Prisma.real_estate_propertiesOrderByWithRelationInput | Prisma.real_estate_propertiesOrderByWithRelationInput[]
+  cursor?: Prisma.real_estate_propertiesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Real_estate_propertiesScalarFieldEnum | Prisma.Real_estate_propertiesScalarFieldEnum[]
+}
+
+/**
+ * users.fleet_vehicles
+ */
+export type users$fleet_vehiclesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the fleet_vehicles
+   */
+  select?: Prisma.fleet_vehiclesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the fleet_vehicles
+   */
+  omit?: Prisma.fleet_vehiclesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.fleet_vehiclesInclude<ExtArgs> | null
+  where?: Prisma.fleet_vehiclesWhereInput
+  orderBy?: Prisma.fleet_vehiclesOrderByWithRelationInput | Prisma.fleet_vehiclesOrderByWithRelationInput[]
+  cursor?: Prisma.fleet_vehiclesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Fleet_vehiclesScalarFieldEnum | Prisma.Fleet_vehiclesScalarFieldEnum[]
+}
+
+/**
+ * users.ad_campaigns
+ */
+export type users$ad_campaignsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ad_campaigns
+   */
+  select?: Prisma.ad_campaignsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ad_campaigns
+   */
+  omit?: Prisma.ad_campaignsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ad_campaignsInclude<ExtArgs> | null
+  where?: Prisma.ad_campaignsWhereInput
+  orderBy?: Prisma.ad_campaignsOrderByWithRelationInput | Prisma.ad_campaignsOrderByWithRelationInput[]
+  cursor?: Prisma.ad_campaignsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Ad_campaignsScalarFieldEnum | Prisma.Ad_campaignsScalarFieldEnum[]
+}
+
+/**
  * users.roles
  */
 export type users$rolesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3433,6 +5131,30 @@ export type users$rolesArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   distinct?: Prisma.User_rolesScalarFieldEnum | Prisma.User_rolesScalarFieldEnum[]
+}
+
+/**
+ * users.applications
+ */
+export type users$applicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the user_applications
+   */
+  select?: Prisma.user_applicationsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the user_applications
+   */
+  omit?: Prisma.user_applicationsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.user_applicationsInclude<ExtArgs> | null
+  where?: Prisma.user_applicationsWhereInput
+  orderBy?: Prisma.user_applicationsOrderByWithRelationInput | Prisma.user_applicationsOrderByWithRelationInput[]
+  cursor?: Prisma.user_applicationsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.User_applicationsScalarFieldEnum | Prisma.User_applicationsScalarFieldEnum[]
 }
 
 /**

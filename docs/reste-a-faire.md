@@ -149,9 +149,11 @@ de la bêta actuelle. Le plan est dans [`ignitux-os.md`](ignitux-os.md).
 
 **Premier pas fait (26/09/2026), sans toucher à la base :**
 
-- Catalogue des applications en code (`backend/src/applications/`), 13
-  disponibles et 7 prévues (caisse, stocks, agenda, équipe, immobilier,
-  véhicules, publicité), chacune avec son cadre légal quand il existe.
+- Catalogue des applications en code (`backend/src/applications/`), 19
+  disponibles et 1 prévue (équipe — reportée, voir ci-dessous), chacune avec
+  son cadre légal quand il existe. Stocks, Agenda, Caisse (point
+  d'intégration manuel), Immobilier, Véhicules et Publicité sont passées de
+  « prévue » à « disponible » le 27/09/2026.
 - Moteur d'activation pur : ce qui sert est affiché, IGINI propose au plus
   deux applications au bon moment, le reste attend. `GET /me/applications`.
 - Lanceur `/accueil` : c'est là qu'on arrive après la connexion.

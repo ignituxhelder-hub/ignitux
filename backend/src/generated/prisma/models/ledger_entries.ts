@@ -216,6 +216,7 @@ export type ledger_entriesWhereInput = {
   counterpart_entry_id?: Prisma.UuidNullableFilter<"ledger_entries"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"ledger_entries"> | Date | string | null
   lines?: Prisma.Ledger_linesListRelationFilter
+  cash_register_entries?: Prisma.Cash_register_entriesListRelationFilter
 }
 
 export type ledger_entriesOrderByWithRelationInput = {
@@ -229,6 +230,7 @@ export type ledger_entriesOrderByWithRelationInput = {
   counterpart_entry_id?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   lines?: Prisma.ledger_linesOrderByRelationAggregateInput
+  cash_register_entries?: Prisma.cash_register_entriesOrderByRelationAggregateInput
 }
 
 export type ledger_entriesWhereUniqueInput = Prisma.AtLeast<{
@@ -245,6 +247,7 @@ export type ledger_entriesWhereUniqueInput = Prisma.AtLeast<{
   counterpart_entry_id?: Prisma.UuidNullableFilter<"ledger_entries"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"ledger_entries"> | Date | string | null
   lines?: Prisma.Ledger_linesListRelationFilter
+  cash_register_entries?: Prisma.Cash_register_entriesListRelationFilter
 }, "id">
 
 export type ledger_entriesOrderByWithAggregationInput = {
@@ -288,6 +291,7 @@ export type ledger_entriesCreateInput = {
   counterpart_entry_id?: string | null
   created_at?: Date | string | null
   lines?: Prisma.ledger_linesCreateNestedManyWithoutEntryInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutLedger_entryInput
 }
 
 export type ledger_entriesUncheckedCreateInput = {
@@ -301,6 +305,7 @@ export type ledger_entriesUncheckedCreateInput = {
   counterpart_entry_id?: string | null
   created_at?: Date | string | null
   lines?: Prisma.ledger_linesUncheckedCreateNestedManyWithoutEntryInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutLedger_entryInput
 }
 
 export type ledger_entriesUpdateInput = {
@@ -314,6 +319,7 @@ export type ledger_entriesUpdateInput = {
   counterpart_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lines?: Prisma.ledger_linesUpdateManyWithoutEntryNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutLedger_entryNestedInput
 }
 
 export type ledger_entriesUncheckedUpdateInput = {
@@ -327,6 +333,7 @@ export type ledger_entriesUncheckedUpdateInput = {
   counterpart_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lines?: Prisma.ledger_linesUncheckedUpdateManyWithoutEntryNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutLedger_entryNestedInput
 }
 
 export type ledger_entriesCreateManyInput = {
@@ -363,6 +370,11 @@ export type ledger_entriesUncheckedUpdateManyInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   counterpart_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type Ledger_entriesNullableScalarRelationFilter = {
+  is?: Prisma.ledger_entriesWhereInput | null
+  isNot?: Prisma.ledger_entriesWhereInput | null
 }
 
 export type ledger_entriesCountOrderByAggregateInput = {
@@ -406,6 +418,22 @@ export type Ledger_entriesScalarRelationFilter = {
   isNot?: Prisma.ledger_entriesWhereInput
 }
 
+export type ledger_entriesCreateNestedOneWithoutCash_register_entriesInput = {
+  create?: Prisma.XOR<Prisma.ledger_entriesCreateWithoutCash_register_entriesInput, Prisma.ledger_entriesUncheckedCreateWithoutCash_register_entriesInput>
+  connectOrCreate?: Prisma.ledger_entriesCreateOrConnectWithoutCash_register_entriesInput
+  connect?: Prisma.ledger_entriesWhereUniqueInput
+}
+
+export type ledger_entriesUpdateOneWithoutCash_register_entriesNestedInput = {
+  create?: Prisma.XOR<Prisma.ledger_entriesCreateWithoutCash_register_entriesInput, Prisma.ledger_entriesUncheckedCreateWithoutCash_register_entriesInput>
+  connectOrCreate?: Prisma.ledger_entriesCreateOrConnectWithoutCash_register_entriesInput
+  upsert?: Prisma.ledger_entriesUpsertWithoutCash_register_entriesInput
+  disconnect?: Prisma.ledger_entriesWhereInput | boolean
+  delete?: Prisma.ledger_entriesWhereInput | boolean
+  connect?: Prisma.ledger_entriesWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ledger_entriesUpdateToOneWithWhereWithoutCash_register_entriesInput, Prisma.ledger_entriesUpdateWithoutCash_register_entriesInput>, Prisma.ledger_entriesUncheckedUpdateWithoutCash_register_entriesInput>
+}
+
 export type ledger_entriesCreateNestedOneWithoutLinesInput = {
   create?: Prisma.XOR<Prisma.ledger_entriesCreateWithoutLinesInput, Prisma.ledger_entriesUncheckedCreateWithoutLinesInput>
   connectOrCreate?: Prisma.ledger_entriesCreateOrConnectWithoutLinesInput
@@ -420,6 +448,74 @@ export type ledger_entriesUpdateOneRequiredWithoutLinesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ledger_entriesUpdateToOneWithWhereWithoutLinesInput, Prisma.ledger_entriesUpdateWithoutLinesInput>, Prisma.ledger_entriesUncheckedUpdateWithoutLinesInput>
 }
 
+export type ledger_entriesCreateWithoutCash_register_entriesInput = {
+  id?: string
+  owner_type: string
+  owner_id: string
+  occurred_on: Date | string
+  label: string
+  reference?: string | null
+  currency?: string
+  counterpart_entry_id?: string | null
+  created_at?: Date | string | null
+  lines?: Prisma.ledger_linesCreateNestedManyWithoutEntryInput
+}
+
+export type ledger_entriesUncheckedCreateWithoutCash_register_entriesInput = {
+  id?: string
+  owner_type: string
+  owner_id: string
+  occurred_on: Date | string
+  label: string
+  reference?: string | null
+  currency?: string
+  counterpart_entry_id?: string | null
+  created_at?: Date | string | null
+  lines?: Prisma.ledger_linesUncheckedCreateNestedManyWithoutEntryInput
+}
+
+export type ledger_entriesCreateOrConnectWithoutCash_register_entriesInput = {
+  where: Prisma.ledger_entriesWhereUniqueInput
+  create: Prisma.XOR<Prisma.ledger_entriesCreateWithoutCash_register_entriesInput, Prisma.ledger_entriesUncheckedCreateWithoutCash_register_entriesInput>
+}
+
+export type ledger_entriesUpsertWithoutCash_register_entriesInput = {
+  update: Prisma.XOR<Prisma.ledger_entriesUpdateWithoutCash_register_entriesInput, Prisma.ledger_entriesUncheckedUpdateWithoutCash_register_entriesInput>
+  create: Prisma.XOR<Prisma.ledger_entriesCreateWithoutCash_register_entriesInput, Prisma.ledger_entriesUncheckedCreateWithoutCash_register_entriesInput>
+  where?: Prisma.ledger_entriesWhereInput
+}
+
+export type ledger_entriesUpdateToOneWithWhereWithoutCash_register_entriesInput = {
+  where?: Prisma.ledger_entriesWhereInput
+  data: Prisma.XOR<Prisma.ledger_entriesUpdateWithoutCash_register_entriesInput, Prisma.ledger_entriesUncheckedUpdateWithoutCash_register_entriesInput>
+}
+
+export type ledger_entriesUpdateWithoutCash_register_entriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_type?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_id?: Prisma.StringFieldUpdateOperationsInput | string
+  occurred_on?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  counterpart_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lines?: Prisma.ledger_linesUpdateManyWithoutEntryNestedInput
+}
+
+export type ledger_entriesUncheckedUpdateWithoutCash_register_entriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_type?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_id?: Prisma.StringFieldUpdateOperationsInput | string
+  occurred_on?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  counterpart_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lines?: Prisma.ledger_linesUncheckedUpdateManyWithoutEntryNestedInput
+}
+
 export type ledger_entriesCreateWithoutLinesInput = {
   id?: string
   owner_type: string
@@ -430,6 +526,7 @@ export type ledger_entriesCreateWithoutLinesInput = {
   currency?: string
   counterpart_entry_id?: string | null
   created_at?: Date | string | null
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutLedger_entryInput
 }
 
 export type ledger_entriesUncheckedCreateWithoutLinesInput = {
@@ -442,6 +539,7 @@ export type ledger_entriesUncheckedCreateWithoutLinesInput = {
   currency?: string
   counterpart_entry_id?: string | null
   created_at?: Date | string | null
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutLedger_entryInput
 }
 
 export type ledger_entriesCreateOrConnectWithoutLinesInput = {
@@ -470,6 +568,7 @@ export type ledger_entriesUpdateWithoutLinesInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   counterpart_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutLedger_entryNestedInput
 }
 
 export type ledger_entriesUncheckedUpdateWithoutLinesInput = {
@@ -482,6 +581,7 @@ export type ledger_entriesUncheckedUpdateWithoutLinesInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   counterpart_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutLedger_entryNestedInput
 }
 
 
@@ -491,10 +591,12 @@ export type ledger_entriesUncheckedUpdateWithoutLinesInput = {
 
 export type Ledger_entriesCountOutputType = {
   lines: number
+  cash_register_entries: number
 }
 
 export type Ledger_entriesCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   lines?: boolean | Ledger_entriesCountOutputTypeCountLinesArgs
+  cash_register_entries?: boolean | Ledger_entriesCountOutputTypeCountCash_register_entriesArgs
 }
 
 /**
@@ -514,6 +616,13 @@ export type Ledger_entriesCountOutputTypeCountLinesArgs<ExtArgs extends runtime.
   where?: Prisma.ledger_linesWhereInput
 }
 
+/**
+ * Ledger_entriesCountOutputType without action
+ */
+export type Ledger_entriesCountOutputTypeCountCash_register_entriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.cash_register_entriesWhereInput
+}
+
 
 export type ledger_entriesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -526,6 +635,7 @@ export type ledger_entriesSelect<ExtArgs extends runtime.Types.Extensions.Intern
   counterpart_entry_id?: boolean
   created_at?: boolean
   lines?: boolean | Prisma.ledger_entries$linesArgs<ExtArgs>
+  cash_register_entries?: boolean | Prisma.ledger_entries$cash_register_entriesArgs<ExtArgs>
   _count?: boolean | Prisma.Ledger_entriesCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["ledger_entries"]>
 
@@ -568,6 +678,7 @@ export type ledger_entriesSelectScalar = {
 export type ledger_entriesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_type" | "owner_id" | "occurred_on" | "label" | "reference" | "currency" | "counterpart_entry_id" | "created_at", ExtArgs["result"]["ledger_entries"]>
 export type ledger_entriesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   lines?: boolean | Prisma.ledger_entries$linesArgs<ExtArgs>
+  cash_register_entries?: boolean | Prisma.ledger_entries$cash_register_entriesArgs<ExtArgs>
   _count?: boolean | Prisma.Ledger_entriesCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ledger_entriesIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -577,6 +688,7 @@ export type $ledger_entriesPayload<ExtArgs extends runtime.Types.Extensions.Inte
   name: "ledger_entries"
   objects: {
     lines: Prisma.$ledger_linesPayload<ExtArgs>[]
+    cash_register_entries: Prisma.$cash_register_entriesPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -999,6 +1111,7 @@ readonly fields: ledger_entriesFieldRefs;
 export interface Prisma__ledger_entriesClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   lines<T extends Prisma.ledger_entries$linesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ledger_entries$linesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ledger_linesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  cash_register_entries<T extends Prisma.ledger_entries$cash_register_entriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ledger_entries$cash_register_entriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$cash_register_entriesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1451,6 +1564,30 @@ export type ledger_entries$linesArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.Ledger_linesScalarFieldEnum | Prisma.Ledger_linesScalarFieldEnum[]
+}
+
+/**
+ * ledger_entries.cash_register_entries
+ */
+export type ledger_entries$cash_register_entriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the cash_register_entries
+   */
+  select?: Prisma.cash_register_entriesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the cash_register_entries
+   */
+  omit?: Prisma.cash_register_entriesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.cash_register_entriesInclude<ExtArgs> | null
+  where?: Prisma.cash_register_entriesWhereInput
+  orderBy?: Prisma.cash_register_entriesOrderByWithRelationInput | Prisma.cash_register_entriesOrderByWithRelationInput[]
+  cursor?: Prisma.cash_register_entriesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Cash_register_entriesScalarFieldEnum | Prisma.Cash_register_entriesScalarFieldEnum[]
 }
 
 /**
