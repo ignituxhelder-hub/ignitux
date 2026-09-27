@@ -35,6 +35,7 @@ import { CaisseModule } from './caisse/caisse.module.js';
 import { ImmobilierModule } from './immobilier/immobilier.module.js';
 import { VehiculesModule } from './vehicules/vehicules.module.js';
 import { PubliciteModule } from './publicite/publicite.module.js';
+import { BoutiqueEnLigneModule } from './boutique-en-ligne/boutique-en-ligne.module.js';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { PubliciteModule } from './publicite/publicite.module.js';
     StocksModule,
     AgendaModule,
     CaisseModule,
+    BoutiqueEnLigneModule,
     ImmobilierModule,
     VehiculesModule,
     PubliciteModule,
