@@ -34,23 +34,23 @@ describe('état signé de la connexion', () => {
   const secret = 'secret-de-test-suffisamment-long';
 
   it('se relit tel quel juste après signature', () => {
-    const etat = signerEtat({ userId: 'u1', projectId: 'p1' }, secret);
-    expect(verifierEtat(etat, secret)).toEqual({ userId: 'u1', projectId: 'p1' });
+    const etat = signerEtat({ userId: 'u1', projectId: 'p1', shopDomain: 'ma-boutique.myshopify.com' }, secret);
+    expect(verifierEtat(etat, secret)).toEqual({ userId: 'u1', projectId: 'p1', shopDomain: 'ma-boutique.myshopify.com' });
   });
 
   it('refuse un état signé avec un autre secret', () => {
-    const etat = signerEtat({ userId: 'u1', projectId: 'p1' }, secret);
+    const etat = signerEtat({ userId: 'u1', projectId: 'p1', shopDomain: 'ma-boutique.myshopify.com' }, secret);
     expect(verifierEtat(etat, 'un-autre-secret')).toBeNull();
   });
 
   it('refuse un état altéré', () => {
-    const etat = signerEtat({ userId: 'u1', projectId: 'p1' }, secret);
+    const etat = signerEtat({ userId: 'u1', projectId: 'p1', shopDomain: 'ma-boutique.myshopify.com' }, secret);
     expect(verifierEtat(etat + 'x', secret)).toBeNull();
   });
 
   it('refuse un état expiré', () => {
     vi.useFakeTimers();
-    const etat = signerEtat({ userId: 'u1', projectId: 'p1' }, secret);
+    const etat = signerEtat({ userId: 'u1', projectId: 'p1', shopDomain: 'ma-boutique.myshopify.com' }, secret);
     vi.advanceTimersByTime(11 * 60 * 1000); // 11 minutes, au-delà des 10 autorisées
     expect(verifierEtat(etat, secret)).toBeNull();
     vi.useRealTimers();
@@ -59,6 +59,18 @@ describe('état signé de la connexion', () => {
   it('refuse une chaîne qui ne ressemble pas à un état signé', () => {
     expect(verifierEtat('pas-un-etat', secret)).toBeNull();
     expect(verifierEtat('', secret)).toBeNull();
+  });
+
+  it('refuse un état sans domaine de boutique', () => {
+    // Construit à la main : signerEtat exige toujours un shopDomain, ce
+    // test vérifie que verifierEtat le redemande côté lecture aussi, pour
+    // qu'un ancien state (avant ce champ) ne soit jamais accepté à moitié.
+    const payload = JSON.stringify({ userId: 'u1', projectId: 'p1', expire: Date.now() + 60_000 });
+    const encode = Buffer.from(payload, 'utf8').toString('base64url');
+    const signature = createHmac('sha256', Buffer.from(secret, 'utf8'))
+      .update(encode)
+      .digest('base64url');
+    expect(verifierEtat(`${encode}.${signature}`, secret)).toBeNull();
   });
 });
 

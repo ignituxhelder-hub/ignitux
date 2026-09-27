@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
 import {
   api,
@@ -15,6 +15,7 @@ import { useAuth } from '@/lib/auth';
 export default function BoutiqueEnLignePage() {
   const { token, isReady } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [projets, setProjets] = useState<Project[]>([]);
   const [projectId, setProjectId] = useState<string>('');
@@ -24,10 +25,13 @@ export default function BoutiqueEnLignePage() {
   const [produits, setProduits] = useState<ShopifyProduct[]>([]);
   const [commandes, setCommandes] = useState<ShopifyOrder[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFinalizing, setIsFinalizing] = useState(false);
 
   const [shopDomain, setShopDomain] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
 
   const [forfait, setForfait] = useState('');
   const [prixEuros, setPrixEuros] = useState('');
@@ -43,7 +47,12 @@ export default function BoutiqueEnLignePage() {
       .listProjects(token)
       .then((liste) => {
         setProjets(liste);
-        if (liste.length === 1) setProjectId(liste[0].id);
+        const projetRedirection = searchParams.get('projet');
+        if (projetRedirection) {
+          setProjectId(projetRedirection);
+        } else if (liste.length === 1) {
+          setProjectId(liste[0].id);
+        }
       })
       .catch((err) =>
         setError(err instanceof ApiError ? err.message : 'Impossible de charger tes projets.'),
@@ -60,8 +69,29 @@ export default function BoutiqueEnLignePage() {
       .then((valeur) => {
         setEtat(valeur);
         if (valeur.connectee) {
-          api.listerProduitsBoutique(token, id).then(setProduits).catch(() => undefined);
-          api.listerCommandesBoutique(token, id).then(setCommandes).catch(() => undefined);
+          api
+            .listerProduitsBoutique(token, id)
+            .then(setProduits)
+            .catch((err) =>
+              setError(
+                err instanceof ApiError
+                  ? `Produits indisponibles : ${err.message}`
+                  : 'Impossible de charger les produits.',
+              ),
+            );
+          api
+            .listerCommandesBoutique(token, id)
+            .then(setCommandes)
+            .catch((err) =>
+              setError(
+                err instanceof ApiError
+                  ? `Commandes indisponibles : ${err.message}`
+                  : 'Impossible de charger les commandes.',
+              ),
+            );
+        } else {
+          setProduits([]);
+          setCommandes([]);
         }
       })
       .catch((err) =>
@@ -70,10 +100,49 @@ export default function BoutiqueEnLignePage() {
       .finally(() => setIsLoading(false));
   }
 
+  // La finalisation d'une connexion Shopify démarrée depuis cette page :
+  // le callback backend redirige ici avec le code/shop/state/hmac reçus de
+  // Shopify. On les envoie à l'endpoint authentifié /finaliser, qui vérifie
+  // que c'est bien nous qui avons démarré cette demande.
   useEffect(() => {
-    if (projectId) charger(projectId);
+    if (!token || !projectId) return;
+    const code = searchParams.get('shopify_code');
+    const shop = searchParams.get('shopify_shop');
+    const state = searchParams.get('shopify_state');
+    const hmac = searchParams.get('shopify_hmac');
+    const erreur = searchParams.get('erreur');
+
+    if (erreur) {
+      setError('La connexion à Shopify a échoué. Réessaie depuis « Connecter ma boutique ».');
+      router.replace(`/boutique-en-ligne?projet=${projectId}`);
+      return;
+    }
+
+    if (code && shop && state && hmac) {
+      setIsFinalizing(true);
+      api
+        .finaliserConnexionBoutique(token, projectId, { code, shop, state, hmac })
+        .then(() => {
+          setNotice('Boutique connectée.');
+          charger(projectId);
+        })
+        .catch((err) =>
+          setError(
+            err instanceof ApiError
+              ? `Connexion refusée : ${err.message}`
+              : 'La connexion à Shopify a échoué.',
+          ),
+        )
+        .finally(() => {
+          setIsFinalizing(false);
+          router.replace(`/boutique-en-ligne?projet=${projectId}`);
+        });
+      return;
+    }
+
+    charger(projectId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId]);
+  }, [projectId, token]);
 
   if (!isReady || !token) return null;
 
@@ -88,6 +157,21 @@ export default function BoutiqueEnLignePage() {
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Connexion impossible.');
       setIsConnecting(false);
+    }
+  }
+
+  async function handleDeconnecter() {
+    if (!token || !projectId) return;
+    setError(null);
+    setIsDisconnecting(true);
+    try {
+      await api.deconnecterBoutique(token, projectId);
+      setNotice('Boutique déconnectée.');
+      charger(projectId);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Déconnexion impossible.');
+    } finally {
+      setIsDisconnecting(false);
     }
   }
 
@@ -108,6 +192,8 @@ export default function BoutiqueEnLignePage() {
     <div>
       <h1>Boutique en ligne</h1>
       {error && <p role="alert">{error}</p>}
+      {notice && <p role="status">{notice}</p>}
+      {isFinalizing && <p>Finalisation de la connexion Shopify…</p>}
 
       {isLoadingProjets && <p>Chargement de tes projets…</p>}
 
@@ -155,6 +241,9 @@ export default function BoutiqueEnLignePage() {
       {projectId && !isLoading && etat && etat.connectee && (
         <div>
           <p>{etat.shopDomain}</p>
+          <button type="button" onClick={handleDeconnecter} disabled={isDisconnecting}>
+            Déconnecter cette boutique
+          </button>
 
           {!etat.forfaitDeclare && (
             <form onSubmit={handleDeclarerForfait}>

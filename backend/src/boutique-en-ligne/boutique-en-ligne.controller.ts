@@ -4,7 +4,12 @@ import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { BoutiqueEnLigneService } from './boutique-en-ligne.service.js';
-import { CreerProduitDto, DeclarerForfaitDto, DemarrerConnexionDto } from './dto/boutique-en-ligne.dto.js';
+import {
+  CreerProduitDto,
+  DeclarerForfaitDto,
+  DemarrerConnexionDto,
+  FinaliserConnexionDto,
+} from './dto/boutique-en-ligne.dto.js';
 
 @ApiTags('boutique-en-ligne')
 @ApiBearerAuth()
@@ -25,6 +30,21 @@ export class BoutiqueEnLigneController {
     @Body() dto: DemarrerConnexionDto,
   ) {
     return this.service.demarrerConnexion(user.id, projectId, dto.shopDomain);
+  }
+
+  /**
+   * Authentifié à dessein — voir le commentaire de
+   * BoutiqueEnLigneService.finaliserConnexion : c'est ici, pas dans le
+   * callback public, que se vérifie que la personne qui termine la
+   * connexion est bien celle qui l'a demandée.
+   */
+  @Post('finaliser')
+  finaliser(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Body() dto: FinaliserConnexionDto,
+  ) {
+    return this.service.finaliserConnexion(user.id, projectId, dto);
   }
 
   @Post('deconnexion')

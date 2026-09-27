@@ -2114,6 +2114,17 @@ export const api = {
       body: JSON.stringify({ shopDomain }),
     }),
 
+  finaliserConnexionBoutique: (
+    token: string,
+    projectId: string,
+    donnees: { code: string; shop: string; state: string; hmac: string },
+  ) =>
+    request<void>(`/projects/${projectId}/boutique-en-ligne/finaliser`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(donnees),
+    }),
+
   deconnecterBoutique: (token: string, projectId: string) =>
     request<void>(`/projects/${projectId}/boutique-en-ligne/deconnexion`, {
       method: 'POST',

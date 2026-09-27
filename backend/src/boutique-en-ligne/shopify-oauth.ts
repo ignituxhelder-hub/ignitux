@@ -3,6 +3,12 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 export interface EtatConnexion {
   userId: string;
   projectId: string;
+  /**
+   * Le domaine visé au moment de la demande. Comparé de nouveau à la
+   * finalisation : sans lui, rien n'empêcherait de démarrer une connexion
+   * pour un domaine et de la finaliser silencieusement pour un autre.
+   */
+  shopDomain: string;
 }
 
 /** Le temps d'un aller-retour OAuth, pas plus : au-delà, on préfère
@@ -50,8 +56,14 @@ export function verifierEtat(state: string, secret: string): EtatConnexion | nul
       expire: number;
     };
     if (typeof payload.expire !== 'number' || payload.expire < Date.now()) return null;
-    if (typeof payload.userId !== 'string' || typeof payload.projectId !== 'string') return null;
-    return { userId: payload.userId, projectId: payload.projectId };
+    if (
+      typeof payload.userId !== 'string' ||
+      typeof payload.projectId !== 'string' ||
+      typeof payload.shopDomain !== 'string'
+    ) {
+      return null;
+    }
+    return { userId: payload.userId, projectId: payload.projectId, shopDomain: payload.shopDomain };
   } catch {
     return null;
   }

@@ -12,6 +12,7 @@ describe('BoutiqueEnLigneController', () => {
     service = {
       etat: vi.fn().mockResolvedValue({ connectee: false }),
       demarrerConnexion: vi.fn().mockResolvedValue({ url: 'https://...' }),
+      finaliserConnexion: vi.fn().mockResolvedValue(undefined),
       deconnecter: vi.fn().mockResolvedValue(undefined),
       declarerForfait: vi.fn().mockResolvedValue(undefined),
       listerProduits: vi.fn().mockResolvedValue([]),
@@ -29,6 +30,12 @@ describe('BoutiqueEnLigneController', () => {
   it('relaie demarrerConnexion avec le domaine du DTO', async () => {
     await controller.demarrerConnexion(USER, 'p1', { shopDomain: 'x.myshopify.com' });
     expect(service.demarrerConnexion).toHaveBeenCalledWith('u1', 'p1', 'x.myshopify.com');
+  });
+
+  it('relaie finaliser avec l’utilisateur, le projet et le corps reçu de Shopify', async () => {
+    const dto = { code: 'c', shop: 's.myshopify.com', state: 'etat', hmac: 'h' };
+    await controller.finaliser(USER, 'p1', dto);
+    expect(service.finaliserConnexion).toHaveBeenCalledWith('u1', 'p1', dto);
   });
 
   it('relaie creerProduit avec description null par défaut', async () => {
