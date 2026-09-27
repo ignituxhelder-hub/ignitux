@@ -2,6 +2,7 @@ import { NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { OffresService } from '../offres/offres.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BoutiqueEnLigneService } from './boutique-en-ligne.service.js';
+import { chiffrer } from './chiffrement.js';
 import * as shopifyAdmin from './shopify-admin-client.js';
 import * as shopifyOauth from './shopify-oauth.js';
 
@@ -173,6 +174,56 @@ describe('BoutiqueEnLigneService', () => {
         where: { id: 'c1' },
         data: { disconnected_at: expect.any(Date) },
       });
+    });
+  });
+
+  describe('produits et commandes', () => {
+    beforeEach(() => {
+      prisma.shopify_connections.findFirst.mockResolvedValue({
+        id: 'c1',
+        shop_domain: 'ma-boutique.myshopify.com',
+        access_token_chiffre: chiffrer('shpat_reel'),
+      });
+    });
+
+    it('liste les produits de la boutique connectée', async () => {
+      const spy = vi
+        .spyOn(shopifyAdmin, 'listerProduits')
+        .mockResolvedValue([{ id: 'gid://1', title: 'Bougie', status: 'ACTIVE', totalInventory: 5 }]);
+
+      const produits = await service.listerProduits('u1', 'p1');
+
+      expect(spy).toHaveBeenCalledWith({
+        shopDomain: 'ma-boutique.myshopify.com',
+        accessToken: 'shpat_reel',
+      });
+      expect(produits).toHaveLength(1);
+    });
+
+    it('refuse de lister les produits sans boutique connectée', async () => {
+      prisma.shopify_connections.findFirst.mockResolvedValue(null);
+      await expect(service.listerProduits('u1', 'p1')).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('crée un produit sur la boutique connectée', async () => {
+      const spy = vi
+        .spyOn(shopifyAdmin, 'creerProduit')
+        .mockResolvedValue({ id: 'gid://2', title: 'Savon', status: 'DRAFT', totalInventory: 0 });
+
+      const produit = await service.creerProduit('u1', 'p1', 'Savon', null);
+
+      expect(spy).toHaveBeenCalledWith(
+        { shopDomain: 'ma-boutique.myshopify.com', accessToken: 'shpat_reel' },
+        'Savon',
+        null,
+      );
+      expect(produit.title).toBe('Savon');
+    });
+
+    it('liste les commandes de la boutique connectée', async () => {
+      vi.spyOn(shopifyAdmin, 'listerCommandes').mockResolvedValue([]);
+      const commandes = await service.listerCommandes('u1', 'p1');
+      expect(commandes).toEqual([]);
     });
   });
 });

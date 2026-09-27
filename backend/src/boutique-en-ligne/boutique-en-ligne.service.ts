@@ -3,7 +3,13 @@ import { assertOwnsProject } from '../prisma/assert-owns-project.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { OffresService } from '../offres/offres.service.js';
 import { chiffrer, dechiffrer } from './chiffrement.js';
-import { echangerCodeContreJeton } from './shopify-admin-client.js';
+import {
+  creerProduit as creerProduitShopify,
+  echangerCodeContreJeton,
+  listerCommandes as listerCommandesShopify,
+  listerProduits as listerProduitsShopify,
+  type ShopifyCredentials,
+} from './shopify-admin-client.js';
 import {
   construireUrlAutorisation,
   signerEtat,
@@ -188,5 +194,25 @@ export class BoutiqueEnLigneService {
   /** Partagé avec Task 8. */
   private dechiffrerJeton(connexion: { access_token_chiffre: string }): string {
     return dechiffrer(connexion.access_token_chiffre);
+  }
+
+  private async credentials(userId: string, projectId: string): Promise<ShopifyCredentials> {
+    const connexion = await this.trouverConnexionActive(userId, projectId);
+    return {
+      shopDomain: connexion.shop_domain,
+      accessToken: this.dechiffrerJeton(connexion),
+    };
+  }
+
+  async listerProduits(userId: string, projectId: string) {
+    return listerProduitsShopify(await this.credentials(userId, projectId));
+  }
+
+  async creerProduit(userId: string, projectId: string, titre: string, description: string | null) {
+    return creerProduitShopify(await this.credentials(userId, projectId), titre, description);
+  }
+
+  async listerCommandes(userId: string, projectId: string) {
+    return listerCommandesShopify(await this.credentials(userId, projectId));
   }
 }
