@@ -44,6 +44,7 @@ export const APPS_SYSTEME: readonly AppSysteme[] = [
   { id: 'compte', nom: 'Mon compte', route: '/account', aussi: ['/roles'] },
   { id: 'stocks', nom: 'Stocks', route: '/stocks' },
   { id: 'caisse', nom: 'Caisse', route: '/caisse' },
+  { id: 'boutique-en-ligne', nom: 'Boutique en ligne', route: '/boutique-en-ligne' },
   { id: 'agenda', nom: 'Agenda', route: '/agenda' },
   { id: 'immobilier', nom: 'Immobilier', route: '/immobilier' },
   { id: 'vehicules', nom: 'Véhicules', route: '/vehicules' },
