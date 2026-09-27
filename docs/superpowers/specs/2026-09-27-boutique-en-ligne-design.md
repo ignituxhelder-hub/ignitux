@@ -131,16 +131,28 @@ Point vérifié dans `backend/src/ledger/chart-of-accounts.ts` : Ignitux
 que l'article 9 interdit. Le plan `IGNITUX_CHART` ne sert qu'aux propres
 comptes d'Ignitux.
 
-En conséquence, l'abonnement Shopify déclaré ne s'écrit pas seul :
+En conséquence, l'abonnement Shopify déclaré ne s'écrit pas seul, et
+**aucun nouvel endpoint de comptabilisation n'est nécessaire** : les
+endpoints existants suffisent (`GET/POST /comptabilite/comptes`,
+`POST /comptabilite/ecritures`, déjà exposés côté frontend par
+`api.listLedgerAccounts`/`api.openLedgerAccount`/`api.recordLedgerEntry`).
+Le module Boutique en ligne se contente de **suggérer**, jamais de
+choisir à la place de l'entrepreneur :
 
-- À la validation du forfait (étape 5 ci-dessus), le backend construit un
-  `RecordEntryInput` (`LedgerService`) pré-rempli — montant déclaré, compte
-  de charge suggéré (ex. « Abonnements et services en ligne », ouvert
-  seulement si l'entrepreneur n'a pas déjà un compte équivalent).
-- Il est présenté à l'entrepreneur pour validation explicite, jamais posté
-  en tâche de fond. Techniquement : un endpoint dédié
-  (`POST /projects/:projectId/boutique-en-ligne/comptabiliser-abonnement`)
-  appelé seulement sur son clic « Valider l'écriture ».
+- À la validation du forfait (étape 5 ci-dessus), l'écran affiche le
+  montant déclaré et un libellé suggéré (« Abonnement Shopify — <forfait>
+  »), avec un bouton « Enregistrer dans ma comptabilité ».
+- Ce bouton ouvre un petit formulaire qui laisse l'entrepreneur choisir
+  lui-même le compte à débiter (ses comptes de charge existants, via
+  `listLedgerAccounts` — ou le créer sur place, comme il le ferait déjà
+  depuis `/comptabilite`, sans qu'Ignitux lui impose un numéro de compte)
+  et le compte à créditer (banque ou fournisseurs). Aucun numéro de compte
+  n'est pré-choisi par Ignitux : seule la comptabilité française suit une
+  numérotation PCG, et rien ne dit que celle de l'entrepreneur la suit.
+- Le clic final appelle l'endpoint `POST /comptabilite/ecritures`
+  existant — le module Boutique en ligne ne touche donc jamais
+  `ledger_entries` directement, il ne fait que pré-remplir un formulaire
+  qui utilise le circuit déjà en place.
 - Le renouvellement mensuel automatique de cette écriture est hors
   périmètre v1 (voir plus bas) : on ne construit pas un système de
   dépenses récurrentes pour une seule brique.
@@ -173,7 +185,6 @@ libre, la mention y trouve sa place naturellement.
   - `GET /projects/:projectId/boutique-en-ligne/produits` /
     `POST .../produits` — catalogue, via l'API Admin Shopify (GraphQL)
   - `GET /projects/:projectId/boutique-en-ligne/commandes` — lecture seule
-  - `POST /projects/:projectId/boutique-en-ligne/comptabiliser-abonnement`
 - `boutique-en-ligne.service.ts` — appels à l'API Admin Shopify,
   chiffrement/déchiffrement du jeton
 - Garde d'offre : extension de `Action` dans `backend/src/offres/droits.ts`
@@ -233,6 +244,7 @@ les autres blocages listés dans `verifier-production.mjs`.
 - `droits.spec.ts` — nouveau cas `outil_de_gestion` /
   `boutique_en_ligne`, autorisé/refusé selon l'offre.
 - e2e OAuth avec un Shopify mocké (succès, HMAC invalide, state invalide).
-- Le brouillon d'écriture comptable ne se poste jamais sans l'appel
-  explicite de l'entrepreneur — test qui vérifie qu'aucune tâche de fond
-  n'écrit dans `ledger_entries` pour ce module.
+- Le module Boutique en ligne ne contient aucun appel à
+  `LedgerService`/`ledger_entries` — seule la suggestion d'affichage
+  (montant, libellé) est testée ; l'écriture elle-même passe par le
+  formulaire existant de `/comptabilite`.
