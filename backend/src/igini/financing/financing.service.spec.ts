@@ -50,4 +50,19 @@ describe('FinancingService', () => {
       }),
     );
   });
+
+  it('mentionne un compte Shopify comme poste de dépense pour la vente en ligne', async () => {
+    claude.generateStructuredOutput.mockResolvedValue({
+      summary: 'x',
+      estimated_budget: 'x',
+      funding_sources: ['x'],
+      budget_breakdown: ['x'],
+    });
+
+    await service.createFinancingPlan('Boutique en ligne', 'Vendre des bougies', ATTRIBUTION);
+
+    expect(claude.generateStructuredOutput).toHaveBeenCalledWith(
+      expect.objectContaining({ system: expect.stringContaining('Shopify') }),
+    );
+  });
 });

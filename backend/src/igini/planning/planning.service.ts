@@ -25,7 +25,11 @@ méthode : Construire. On te donne le titre et la description d'une idée de pro
 éventuellement ce que tu sais déjà d'elle (une analyse déjà faite — jamais d'étape ultérieure,
 puisque celles-ci n'existent pas encore à ce stade). Propose un plan de construction concret et
 réaliste, cohérent avec cette analyse si elle existe : des jalons actionnables (pas de généralités
-type "faire une étude de marché" sans préciser comment), adaptés au stade de l'idée décrite.`);
+type "faire une étude de marché" sans préciser comment), adaptés au stade de l'idée décrite. Si le
+projet suppose de vendre en ligne, cite explicitement un compte Shopify (ou une plateforme
+e-commerce équivalente) parmi les ressources nécessaires, avec un ordre de grandeur de coût mensuel
+réaliste (environ 25 à 100 dollars selon le forfait) plutôt qu'une généralité du type "créer un
+site web".`);
 
 @Injectable()
 export class PlanningService {
