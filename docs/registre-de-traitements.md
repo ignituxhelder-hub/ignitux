@@ -105,6 +105,7 @@ Dérivé de `exclusions()` dans `user-data-scope.ts` :
 - **`auth_tokens`** — jetons de sécurité à usage unique (réinitialisation de mot de passe, vérification d'email). Seul leur hash est stocké ; les montrer n'apprendrait rien à la personne et reviendrait à faire circuler du matériel de sécurité.
 - **`compliance_requirements`** — liste des démarches réglementaires proposées par Ignitux, identique pour tout le monde. Ce que la personne a coché, en revanche, fait partie de son export (`project_compliance_checks`, groupe 8).
 - **`constitution_articles`** — texte de la Constitution Ignitux, document public identique pour tout le monde.
+- **`shopify_connections`** — jeton d'accès Shopify, chiffré au repos. Même motif que `auth_tokens` : le remettre chiffré n'apprendrait rien, et une fuite de l'export ne doit pas faire circuler du matériel de sécurité. Le domaine de la boutique et le forfait déclaré restent visibles depuis l'écran Boutique en ligne.
 
 ## Ce que ce registre n'est pas
 

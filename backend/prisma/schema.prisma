@@ -101,6 +101,7 @@ model projects {
   crm_contacts         crm_contacts[]
   billing_documents    billing_documents[]
   stock_items          stock_items[]
+  shopify_connection   shopify_connections?
   agenda_events        agenda_events[]
   real_estate_properties real_estate_properties[]
   fleet_vehicles       fleet_vehicles[]
@@ -723,6 +724,22 @@ model stock_items {
 
   @@index([owner_id])
   @@index([project_id])
+}
+
+model shopify_connections {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id            String    @unique @db.Uuid
+  shop_domain           String
+  access_token_chiffre  String
+  scopes                String
+  forfait_declare       String?
+  prix_declare_centimes Int?
+  connected_at          DateTime  @default(now()) @db.Timestamptz(6)
+  disconnected_at       DateTime? @db.Timestamptz(6)
+  created_at            DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime  @updatedAt @db.Timestamptz(6)
+
+  project projects @relation(fields: [project_id], references: [id], onDelete: Cascade)
 }
 
 /// STOCKS — une entrée ou une sortie sur un article. `quantity` est signée :

@@ -427,6 +427,7 @@ export const ModelName = {
   crm_contacts: 'crm_contacts',
   crm_interactions: 'crm_interactions',
   stock_items: 'stock_items',
+  shopify_connections: 'shopify_connections',
   stock_movements: 'stock_movements',
   agenda_events: 'agenda_events',
   cash_register_entries: 'cash_register_entries',
@@ -473,7 +474,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "shopify_connections" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2694,6 +2695,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.stock_itemsCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.Stock_itemsCountAggregateOutputType> | number
+        }
+      }
+    }
+    shopify_connections: {
+      payload: Prisma.$shopify_connectionsPayload<ExtArgs>
+      fields: Prisma.shopify_connectionsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.shopify_connectionsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shopify_connectionsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.shopify_connectionsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shopify_connectionsPayload>
+        }
+        findFirst: {
+          args: Prisma.shopify_connectionsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shopify_connectionsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.shopify_connectionsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shopify_connectionsPayload>
+        }
+        findMany: {
+          args: Prisma.shopify_connectionsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shopify_connectionsPayload>[]
+        }
+        create: {
+          args: Prisma.shopify_connectionsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shopify_connectionsPayload>
+        }
+        createMany: {
+          args: Prisma.shopify_connectionsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.shopify_connectionsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shopify_connectionsPayload>[]
+        }
+        delete: {
+          args: Prisma.shopify_connectionsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shopify_connectionsPayload>
+        }
+        update: {
+          args: Prisma.shopify_connectionsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shopify_connectionsPayload>
+        }
+        deleteMany: {
+          args: Prisma.shopify_connectionsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.shopify_connectionsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.shopify_connectionsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shopify_connectionsPayload>[]
+        }
+        upsert: {
+          args: Prisma.shopify_connectionsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shopify_connectionsPayload>
+        }
+        aggregate: {
+          args: Prisma.Shopify_connectionsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateShopify_connections>
+        }
+        groupBy: {
+          args: Prisma.shopify_connectionsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Shopify_connectionsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.shopify_connectionsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Shopify_connectionsCountAggregateOutputType> | number
         }
       }
     }
@@ -5447,6 +5522,23 @@ export const Stock_itemsScalarFieldEnum = {
 export type Stock_itemsScalarFieldEnum = (typeof Stock_itemsScalarFieldEnum)[keyof typeof Stock_itemsScalarFieldEnum]
 
 
+export const Shopify_connectionsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  shop_domain: 'shop_domain',
+  access_token_chiffre: 'access_token_chiffre',
+  scopes: 'scopes',
+  forfait_declare: 'forfait_declare',
+  prix_declare_centimes: 'prix_declare_centimes',
+  connected_at: 'connected_at',
+  disconnected_at: 'disconnected_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Shopify_connectionsScalarFieldEnum = (typeof Shopify_connectionsScalarFieldEnum)[keyof typeof Shopify_connectionsScalarFieldEnum]
+
+
 export const Stock_movementsScalarFieldEnum = {
   id: 'id',
   item_id: 'item_id',
@@ -6176,6 +6268,7 @@ export type GlobalOmitConfig = {
   crm_contacts?: Prisma.crm_contactsOmit
   crm_interactions?: Prisma.crm_interactionsOmit
   stock_items?: Prisma.stock_itemsOmit
+  shopify_connections?: Prisma.shopify_connectionsOmit
   stock_movements?: Prisma.stock_movementsOmit
   agenda_events?: Prisma.agenda_eventsOmit
   cash_register_entries?: Prisma.cash_register_entriesOmit

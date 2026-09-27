@@ -171,6 +171,12 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   constitution_articles: excluded(
     'Texte de la Constitution Ignitux. Document public, identique pour tout le monde.',
   ),
+  shopify_connections: excluded(
+    "Jeton d'accès Shopify, chiffré au repos. Même motif que auth_tokens : le remettre " +
+      "chiffré n'apprendrait rien à la personne, et une éventuelle fuite de l'export ne doit " +
+      'pas non plus faire circuler du matériel de sécurité. Le domaine de la boutique et le ' +
+      "forfait déclaré restent visibles depuis l'écran Boutique en ligne lui-même.",
+  ),
 };
 
 /** Les tables réellement écrites dans le fichier d'export. */

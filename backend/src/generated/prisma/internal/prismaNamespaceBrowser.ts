@@ -81,6 +81,7 @@ export const ModelName = {
   crm_contacts: 'crm_contacts',
   crm_interactions: 'crm_interactions',
   stock_items: 'stock_items',
+  shopify_connections: 'shopify_connections',
   stock_movements: 'stock_movements',
   agenda_events: 'agenda_events',
   cash_register_entries: 'cash_register_entries',
@@ -545,6 +546,23 @@ export const Stock_itemsScalarFieldEnum = {
 } as const
 
 export type Stock_itemsScalarFieldEnum = (typeof Stock_itemsScalarFieldEnum)[keyof typeof Stock_itemsScalarFieldEnum]
+
+
+export const Shopify_connectionsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  shop_domain: 'shop_domain',
+  access_token_chiffre: 'access_token_chiffre',
+  scopes: 'scopes',
+  forfait_declare: 'forfait_declare',
+  prix_declare_centimes: 'prix_declare_centimes',
+  connected_at: 'connected_at',
+  disconnected_at: 'disconnected_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Shopify_connectionsScalarFieldEnum = (typeof Shopify_connectionsScalarFieldEnum)[keyof typeof Shopify_connectionsScalarFieldEnum]
 
 
 export const Stock_movementsScalarFieldEnum = {

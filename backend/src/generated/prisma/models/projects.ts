@@ -225,6 +225,7 @@ export type projectsWhereInput = {
   crm_contacts?: Prisma.Crm_contactsListRelationFilter
   billing_documents?: Prisma.Billing_documentsListRelationFilter
   stock_items?: Prisma.Stock_itemsListRelationFilter
+  shopify_connection?: Prisma.XOR<Prisma.Shopify_connectionsNullableScalarRelationFilter, Prisma.shopify_connectionsWhereInput> | null
   agenda_events?: Prisma.Agenda_eventsListRelationFilter
   real_estate_properties?: Prisma.Real_estate_propertiesListRelationFilter
   fleet_vehicles?: Prisma.Fleet_vehiclesListRelationFilter
@@ -265,6 +266,7 @@ export type projectsOrderByWithRelationInput = {
   crm_contacts?: Prisma.crm_contactsOrderByRelationAggregateInput
   billing_documents?: Prisma.billing_documentsOrderByRelationAggregateInput
   stock_items?: Prisma.stock_itemsOrderByRelationAggregateInput
+  shopify_connection?: Prisma.shopify_connectionsOrderByWithRelationInput
   agenda_events?: Prisma.agenda_eventsOrderByRelationAggregateInput
   real_estate_properties?: Prisma.real_estate_propertiesOrderByRelationAggregateInput
   fleet_vehicles?: Prisma.fleet_vehiclesOrderByRelationAggregateInput
@@ -308,6 +310,7 @@ export type projectsWhereUniqueInput = Prisma.AtLeast<{
   crm_contacts?: Prisma.Crm_contactsListRelationFilter
   billing_documents?: Prisma.Billing_documentsListRelationFilter
   stock_items?: Prisma.Stock_itemsListRelationFilter
+  shopify_connection?: Prisma.XOR<Prisma.Shopify_connectionsNullableScalarRelationFilter, Prisma.shopify_connectionsWhereInput> | null
   agenda_events?: Prisma.Agenda_eventsListRelationFilter
   real_estate_properties?: Prisma.Real_estate_propertiesListRelationFilter
   fleet_vehicles?: Prisma.Fleet_vehiclesListRelationFilter
@@ -375,6 +378,7 @@ export type projectsCreateInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -414,6 +418,7 @@ export type projectsUncheckedCreateInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -453,6 +458,7 @@ export type projectsUpdateInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -492,6 +498,7 @@ export type projectsUncheckedUpdateInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -911,6 +918,20 @@ export type projectsUpdateOneWithoutStock_itemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutStock_itemsInput, Prisma.projectsUpdateWithoutStock_itemsInput>, Prisma.projectsUncheckedUpdateWithoutStock_itemsInput>
 }
 
+export type projectsCreateNestedOneWithoutShopify_connectionInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutShopify_connectionInput, Prisma.projectsUncheckedCreateWithoutShopify_connectionInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutShopify_connectionInput
+  connect?: Prisma.projectsWhereUniqueInput
+}
+
+export type projectsUpdateOneRequiredWithoutShopify_connectionNestedInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutShopify_connectionInput, Prisma.projectsUncheckedCreateWithoutShopify_connectionInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutShopify_connectionInput
+  upsert?: Prisma.projectsUpsertWithoutShopify_connectionInput
+  connect?: Prisma.projectsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutShopify_connectionInput, Prisma.projectsUpdateWithoutShopify_connectionInput>, Prisma.projectsUncheckedUpdateWithoutShopify_connectionInput>
+}
+
 export type projectsCreateNestedOneWithoutAgenda_eventsInput = {
   create?: Prisma.XOR<Prisma.projectsCreateWithoutAgenda_eventsInput, Prisma.projectsUncheckedCreateWithoutAgenda_eventsInput>
   connectOrCreate?: Prisma.projectsCreateOrConnectWithoutAgenda_eventsInput
@@ -1073,6 +1094,7 @@ export type projectsCreateWithoutOwnerInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -1111,6 +1133,7 @@ export type projectsUncheckedCreateWithoutOwnerInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -1189,6 +1212,7 @@ export type projectsCreateWithoutAnalysesInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -1227,6 +1251,7 @@ export type projectsUncheckedCreateWithoutAnalysesInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -1281,6 +1306,7 @@ export type projectsUpdateWithoutAnalysesInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -1319,6 +1345,7 @@ export type projectsUncheckedUpdateWithoutAnalysesInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -1357,6 +1384,7 @@ export type projectsCreateWithoutFinancing_plansInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -1395,6 +1423,7 @@ export type projectsUncheckedCreateWithoutFinancing_plansInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -1449,6 +1478,7 @@ export type projectsUpdateWithoutFinancing_plansInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -1487,6 +1517,7 @@ export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -1525,6 +1556,7 @@ export type projectsCreateWithoutDevelopment_plansInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -1563,6 +1595,7 @@ export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -1617,6 +1650,7 @@ export type projectsUpdateWithoutDevelopment_plansInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -1655,6 +1689,7 @@ export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -1693,6 +1728,7 @@ export type projectsCreateWithoutTransmission_plansInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -1731,6 +1767,7 @@ export type projectsUncheckedCreateWithoutTransmission_plansInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -1785,6 +1822,7 @@ export type projectsUpdateWithoutTransmission_plansInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -1823,6 +1861,7 @@ export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -1861,6 +1900,7 @@ export type projectsCreateWithoutMemoriesInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -1899,6 +1939,7 @@ export type projectsUncheckedCreateWithoutMemoriesInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -1953,6 +1994,7 @@ export type projectsUpdateWithoutMemoriesInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -1991,6 +2033,7 @@ export type projectsUncheckedUpdateWithoutMemoriesInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -2029,6 +2072,7 @@ export type projectsCreateWithoutConceptsInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -2067,6 +2111,7 @@ export type projectsUncheckedCreateWithoutConceptsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -2121,6 +2166,7 @@ export type projectsUpdateWithoutConceptsInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -2159,6 +2205,7 @@ export type projectsUncheckedUpdateWithoutConceptsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -2197,6 +2244,7 @@ export type projectsCreateWithoutTasksInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -2235,6 +2283,7 @@ export type projectsUncheckedCreateWithoutTasksInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -2289,6 +2338,7 @@ export type projectsUpdateWithoutTasksInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -2327,6 +2377,7 @@ export type projectsUncheckedUpdateWithoutTasksInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -2365,6 +2416,7 @@ export type projectsCreateWithoutCommunity_commentsInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -2403,6 +2455,7 @@ export type projectsUncheckedCreateWithoutCommunity_commentsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -2457,6 +2510,7 @@ export type projectsUpdateWithoutCommunity_commentsInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -2495,6 +2549,7 @@ export type projectsUncheckedUpdateWithoutCommunity_commentsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -2533,6 +2588,7 @@ export type projectsCreateWithoutCollaboratorsInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -2571,6 +2627,7 @@ export type projectsUncheckedCreateWithoutCollaboratorsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -2625,6 +2682,7 @@ export type projectsUpdateWithoutCollaboratorsInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -2663,6 +2721,7 @@ export type projectsUncheckedUpdateWithoutCollaboratorsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -2701,6 +2760,7 @@ export type projectsCreateWithoutBuild_plansInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -2739,6 +2799,7 @@ export type projectsUncheckedCreateWithoutBuild_plansInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -2793,6 +2854,7 @@ export type projectsUpdateWithoutBuild_plansInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -2831,6 +2893,7 @@ export type projectsUncheckedUpdateWithoutBuild_plansInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -2869,6 +2932,7 @@ export type projectsCreateWithoutCompliance_checksInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -2907,6 +2971,7 @@ export type projectsUncheckedCreateWithoutCompliance_checksInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -2961,6 +3026,7 @@ export type projectsUpdateWithoutCompliance_checksInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -2999,6 +3065,7 @@ export type projectsUncheckedUpdateWithoutCompliance_checksInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -3037,6 +3104,7 @@ export type projectsCreateWithoutAutomation_runsInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -3075,6 +3143,7 @@ export type projectsUncheckedCreateWithoutAutomation_runsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -3129,6 +3198,7 @@ export type projectsUpdateWithoutAutomation_runsInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -3167,6 +3237,7 @@ export type projectsUncheckedUpdateWithoutAutomation_runsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -3206,6 +3277,7 @@ export type projectsCreateWithoutFinancing_roundsInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -3244,6 +3316,7 @@ export type projectsUncheckedCreateWithoutFinancing_roundsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -3298,6 +3371,7 @@ export type projectsUpdateWithoutFinancing_roundsInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -3336,6 +3410,7 @@ export type projectsUncheckedUpdateWithoutFinancing_roundsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -3374,6 +3449,7 @@ export type projectsCreateWithoutEquity_holdersInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -3412,6 +3488,7 @@ export type projectsUncheckedCreateWithoutEquity_holdersInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -3466,6 +3543,7 @@ export type projectsUpdateWithoutEquity_holdersInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -3504,6 +3582,7 @@ export type projectsUncheckedUpdateWithoutEquity_holdersInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -3542,6 +3621,7 @@ export type projectsCreateWithoutEquity_eventsInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -3580,6 +3660,7 @@ export type projectsUncheckedCreateWithoutEquity_eventsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -3634,6 +3715,7 @@ export type projectsUpdateWithoutEquity_eventsInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -3672,6 +3754,7 @@ export type projectsUncheckedUpdateWithoutEquity_eventsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -3710,6 +3793,7 @@ export type projectsCreateWithoutDividendsInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -3748,6 +3832,7 @@ export type projectsUncheckedCreateWithoutDividendsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -3802,6 +3887,7 @@ export type projectsUpdateWithoutDividendsInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -3840,6 +3926,7 @@ export type projectsUncheckedUpdateWithoutDividendsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -3877,6 +3964,7 @@ export type projectsCreateWithoutBilling_documentsInput = {
   workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -3915,6 +4003,7 @@ export type projectsUncheckedCreateWithoutBilling_documentsInput = {
   workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -3969,6 +4058,7 @@ export type projectsUpdateWithoutBilling_documentsInput = {
   workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -4007,6 +4097,7 @@ export type projectsUncheckedUpdateWithoutBilling_documentsInput = {
   workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -4045,6 +4136,7 @@ export type projectsCreateWithoutCrm_contactsInput = {
   workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -4083,6 +4175,7 @@ export type projectsUncheckedCreateWithoutCrm_contactsInput = {
   workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -4137,6 +4230,7 @@ export type projectsUpdateWithoutCrm_contactsInput = {
   workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -4175,6 +4269,7 @@ export type projectsUncheckedUpdateWithoutCrm_contactsInput = {
   workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -4213,6 +4308,7 @@ export type projectsCreateWithoutStock_itemsInput = {
   workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -4251,6 +4347,7 @@ export type projectsUncheckedCreateWithoutStock_itemsInput = {
   workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -4305,6 +4402,7 @@ export type projectsUpdateWithoutStock_itemsInput = {
   workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -4343,6 +4441,179 @@ export type projectsUncheckedUpdateWithoutStock_itemsInput = {
   workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutProjectNestedInput
+  financing_rounds?: Prisma.financing_roundsUncheckedUpdateManyWithoutProjectNestedInput
+  equity_holders?: Prisma.equity_holdersUncheckedUpdateManyWithoutProjectNestedInput
+  equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
+  dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
+  buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+}
+
+export type projectsCreateWithoutShopify_connectionInput = {
+  id?: string
+  title: string
+  description?: string | null
+  sector?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  owner: Prisma.usersCreateNestedOneWithoutProjectsInput
+  analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutProjectInput
+  financing_rounds?: Prisma.financing_roundsCreateNestedManyWithoutProjectInput
+  equity_holders?: Prisma.equity_holdersCreateNestedManyWithoutProjectInput
+  equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
+  dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
+  buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+}
+
+export type projectsUncheckedCreateWithoutShopify_connectionInput = {
+  id?: string
+  owner_id: string
+  title: string
+  description?: string | null
+  sector?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutProjectInput
+  financing_rounds?: Prisma.financing_roundsUncheckedCreateNestedManyWithoutProjectInput
+  equity_holders?: Prisma.equity_holdersUncheckedCreateNestedManyWithoutProjectInput
+  equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
+  dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
+  buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+}
+
+export type projectsCreateOrConnectWithoutShopify_connectionInput = {
+  where: Prisma.projectsWhereUniqueInput
+  create: Prisma.XOR<Prisma.projectsCreateWithoutShopify_connectionInput, Prisma.projectsUncheckedCreateWithoutShopify_connectionInput>
+}
+
+export type projectsUpsertWithoutShopify_connectionInput = {
+  update: Prisma.XOR<Prisma.projectsUpdateWithoutShopify_connectionInput, Prisma.projectsUncheckedUpdateWithoutShopify_connectionInput>
+  create: Prisma.XOR<Prisma.projectsCreateWithoutShopify_connectionInput, Prisma.projectsUncheckedCreateWithoutShopify_connectionInput>
+  where?: Prisma.projectsWhereInput
+}
+
+export type projectsUpdateToOneWithWhereWithoutShopify_connectionInput = {
+  where?: Prisma.projectsWhereInput
+  data: Prisma.XOR<Prisma.projectsUpdateWithoutShopify_connectionInput, Prisma.projectsUncheckedUpdateWithoutShopify_connectionInput>
+}
+
+export type projectsUpdateWithoutShopify_connectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
+  analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutProjectNestedInput
+  financing_rounds?: Prisma.financing_roundsUpdateManyWithoutProjectNestedInput
+  equity_holders?: Prisma.equity_holdersUpdateManyWithoutProjectNestedInput
+  equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
+  dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
+  buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+}
+
+export type projectsUncheckedUpdateWithoutShopify_connectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -4382,6 +4653,7 @@ export type projectsCreateWithoutAgenda_eventsInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
   ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutProjectInput
@@ -4420,6 +4692,7 @@ export type projectsUncheckedCreateWithoutAgenda_eventsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
   ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutProjectInput
@@ -4474,6 +4747,7 @@ export type projectsUpdateWithoutAgenda_eventsInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
   ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutProjectNestedInput
@@ -4512,6 +4786,7 @@ export type projectsUncheckedUpdateWithoutAgenda_eventsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
   ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutProjectNestedInput
@@ -4549,6 +4824,7 @@ export type projectsCreateWithoutWorkflow_definitionsInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -4587,6 +4863,7 @@ export type projectsUncheckedCreateWithoutWorkflow_definitionsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -4641,6 +4918,7 @@ export type projectsUpdateWithoutWorkflow_definitionsInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -4679,6 +4957,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_definitionsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -4717,6 +4996,7 @@ export type projectsCreateWithoutWorkflow_runsInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -4755,6 +5035,7 @@ export type projectsUncheckedCreateWithoutWorkflow_runsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -4809,6 +5090,7 @@ export type projectsUpdateWithoutWorkflow_runsInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -4847,6 +5129,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_runsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -4886,6 +5169,7 @@ export type projectsCreateWithoutBuyback_objectivesInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -4924,6 +5208,7 @@ export type projectsUncheckedCreateWithoutBuyback_objectivesInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -4978,6 +5263,7 @@ export type projectsUpdateWithoutBuyback_objectivesInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -5016,6 +5302,7 @@ export type projectsUncheckedUpdateWithoutBuyback_objectivesInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -5054,6 +5341,7 @@ export type projectsCreateWithoutFinancedProjectsInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -5092,6 +5380,7 @@ export type projectsUncheckedCreateWithoutFinancedProjectsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -5146,6 +5435,7 @@ export type projectsUpdateWithoutFinancedProjectsInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -5184,6 +5474,7 @@ export type projectsUncheckedUpdateWithoutFinancedProjectsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -5221,6 +5512,7 @@ export type projectsCreateWithoutScore_snapshotsInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -5259,6 +5551,7 @@ export type projectsUncheckedCreateWithoutScore_snapshotsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -5313,6 +5606,7 @@ export type projectsUpdateWithoutScore_snapshotsInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -5351,6 +5645,7 @@ export type projectsUncheckedUpdateWithoutScore_snapshotsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -5390,6 +5685,7 @@ export type projectsCreateWithoutReal_estate_propertiesInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
   ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutProjectInput
@@ -5428,6 +5724,7 @@ export type projectsUncheckedCreateWithoutReal_estate_propertiesInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
   ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutProjectInput
@@ -5482,6 +5779,7 @@ export type projectsUpdateWithoutReal_estate_propertiesInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
   ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutProjectNestedInput
@@ -5520,6 +5818,7 @@ export type projectsUncheckedUpdateWithoutReal_estate_propertiesInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
   ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutProjectNestedInput
@@ -5558,6 +5857,7 @@ export type projectsCreateWithoutFleet_vehiclesInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutProjectInput
@@ -5596,6 +5896,7 @@ export type projectsUncheckedCreateWithoutFleet_vehiclesInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutProjectInput
@@ -5650,6 +5951,7 @@ export type projectsUpdateWithoutFleet_vehiclesInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutProjectNestedInput
@@ -5688,6 +5990,7 @@ export type projectsUncheckedUpdateWithoutFleet_vehiclesInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutProjectNestedInput
@@ -5726,6 +6029,7 @@ export type projectsCreateWithoutAd_campaignsInput = {
   crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
@@ -5764,6 +6068,7 @@ export type projectsUncheckedCreateWithoutAd_campaignsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
   billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
   stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
   agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
@@ -5818,6 +6123,7 @@ export type projectsUpdateWithoutAd_campaignsInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -5856,6 +6162,7 @@ export type projectsUncheckedUpdateWithoutAd_campaignsInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -5903,6 +6210,7 @@ export type projectsUpdateWithoutOwnerInput = {
   crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
@@ -5941,6 +6249,7 @@ export type projectsUncheckedUpdateWithoutOwnerInput = {
   crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
   billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
   stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
@@ -6256,6 +6565,7 @@ export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   crm_contacts?: boolean | Prisma.projects$crm_contactsArgs<ExtArgs>
   billing_documents?: boolean | Prisma.projects$billing_documentsArgs<ExtArgs>
   stock_items?: boolean | Prisma.projects$stock_itemsArgs<ExtArgs>
+  shopify_connection?: boolean | Prisma.projects$shopify_connectionArgs<ExtArgs>
   agenda_events?: boolean | Prisma.projects$agenda_eventsArgs<ExtArgs>
   real_estate_properties?: boolean | Prisma.projects$real_estate_propertiesArgs<ExtArgs>
   fleet_vehicles?: boolean | Prisma.projects$fleet_vehiclesArgs<ExtArgs>
@@ -6325,6 +6635,7 @@ export type projectsInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   crm_contacts?: boolean | Prisma.projects$crm_contactsArgs<ExtArgs>
   billing_documents?: boolean | Prisma.projects$billing_documentsArgs<ExtArgs>
   stock_items?: boolean | Prisma.projects$stock_itemsArgs<ExtArgs>
+  shopify_connection?: boolean | Prisma.projects$shopify_connectionArgs<ExtArgs>
   agenda_events?: boolean | Prisma.projects$agenda_eventsArgs<ExtArgs>
   real_estate_properties?: boolean | Prisma.projects$real_estate_propertiesArgs<ExtArgs>
   fleet_vehicles?: boolean | Prisma.projects$fleet_vehiclesArgs<ExtArgs>
@@ -6366,6 +6677,7 @@ export type $projectsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     crm_contacts: Prisma.$crm_contactsPayload<ExtArgs>[]
     billing_documents: Prisma.$billing_documentsPayload<ExtArgs>[]
     stock_items: Prisma.$stock_itemsPayload<ExtArgs>[]
+    shopify_connection: Prisma.$shopify_connectionsPayload<ExtArgs> | null
     agenda_events: Prisma.$agenda_eventsPayload<ExtArgs>[]
     real_estate_properties: Prisma.$real_estate_propertiesPayload<ExtArgs>[]
     fleet_vehicles: Prisma.$fleet_vehiclesPayload<ExtArgs>[]
@@ -6799,6 +7111,7 @@ export interface Prisma__projectsClient<T, Null = never, ExtArgs extends runtime
   crm_contacts<T extends Prisma.projects$crm_contactsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$crm_contactsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$crm_contactsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   billing_documents<T extends Prisma.projects$billing_documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$billing_documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$billing_documentsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   stock_items<T extends Prisma.projects$stock_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$stock_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$stock_itemsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  shopify_connection<T extends Prisma.projects$shopify_connectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$shopify_connectionArgs<ExtArgs>>): Prisma.Prisma__shopify_connectionsClient<runtime.Types.Result.GetResult<Prisma.$shopify_connectionsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   agenda_events<T extends Prisma.projects$agenda_eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$agenda_eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$agenda_eventsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   real_estate_properties<T extends Prisma.projects$real_estate_propertiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$real_estate_propertiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$real_estate_propertiesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   fleet_vehicles<T extends Prisma.projects$fleet_vehiclesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$fleet_vehiclesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$fleet_vehiclesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -7676,6 +7989,25 @@ export type projects$stock_itemsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.Stock_itemsScalarFieldEnum | Prisma.Stock_itemsScalarFieldEnum[]
+}
+
+/**
+ * projects.shopify_connection
+ */
+export type projects$shopify_connectionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the shopify_connections
+   */
+  select?: Prisma.shopify_connectionsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the shopify_connections
+   */
+  omit?: Prisma.shopify_connectionsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.shopify_connectionsInclude<ExtArgs> | null
+  where?: Prisma.shopify_connectionsWhereInput
 }
 
 /**
