@@ -405,6 +405,7 @@ export const ModelName = {
   development_plans: 'development_plans',
   transmission_plans: 'transmission_plans',
   memories: 'memories',
+  chat_messages: 'chat_messages',
   concepts: 'concepts',
   concept_links: 'concept_links',
   tasks: 'tasks',
@@ -473,7 +474,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "chat_messages" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1066,6 +1067,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.memoriesCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.MemoriesCountAggregateOutputType> | number
+        }
+      }
+    }
+    chat_messages: {
+      payload: Prisma.$chat_messagesPayload<ExtArgs>
+      fields: Prisma.chat_messagesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.chat_messagesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$chat_messagesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.chat_messagesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$chat_messagesPayload>
+        }
+        findFirst: {
+          args: Prisma.chat_messagesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$chat_messagesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.chat_messagesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$chat_messagesPayload>
+        }
+        findMany: {
+          args: Prisma.chat_messagesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$chat_messagesPayload>[]
+        }
+        create: {
+          args: Prisma.chat_messagesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$chat_messagesPayload>
+        }
+        createMany: {
+          args: Prisma.chat_messagesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.chat_messagesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$chat_messagesPayload>[]
+        }
+        delete: {
+          args: Prisma.chat_messagesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$chat_messagesPayload>
+        }
+        update: {
+          args: Prisma.chat_messagesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$chat_messagesPayload>
+        }
+        deleteMany: {
+          args: Prisma.chat_messagesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.chat_messagesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.chat_messagesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$chat_messagesPayload>[]
+        }
+        upsert: {
+          args: Prisma.chat_messagesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$chat_messagesPayload>
+        }
+        aggregate: {
+          args: Prisma.Chat_messagesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateChat_messages>
+        }
+        groupBy: {
+          args: Prisma.chat_messagesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Chat_messagesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.chat_messagesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Chat_messagesCountAggregateOutputType> | number
         }
       }
     }
@@ -5144,6 +5219,17 @@ export const MemoriesScalarFieldEnum = {
 export type MemoriesScalarFieldEnum = (typeof MemoriesScalarFieldEnum)[keyof typeof MemoriesScalarFieldEnum]
 
 
+export const Chat_messagesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  role: 'role',
+  content: 'content',
+  created_at: 'created_at'
+} as const
+
+export type Chat_messagesScalarFieldEnum = (typeof Chat_messagesScalarFieldEnum)[keyof typeof Chat_messagesScalarFieldEnum]
+
+
 export const ConceptsScalarFieldEnum = {
   id: 'id',
   user_id: 'user_id',
@@ -6154,6 +6240,7 @@ export type GlobalOmitConfig = {
   development_plans?: Prisma.development_plansOmit
   transmission_plans?: Prisma.transmission_plansOmit
   memories?: Prisma.memoriesOmit
+  chat_messages?: Prisma.chat_messagesOmit
   concepts?: Prisma.conceptsOmit
   concept_links?: Prisma.concept_linksOmit
   tasks?: Prisma.tasksOmit

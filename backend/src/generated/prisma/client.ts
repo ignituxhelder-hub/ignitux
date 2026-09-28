@@ -82,6 +82,17 @@ export type transmission_plans = Prisma.transmission_plansModel
  */
 export type memories = Prisma.memoriesModel
 /**
+ * Model chat_messages
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ * CHAT — un message échangé librement avec Igini, en dehors des 5
+ * générateurs structurés. Un seul fil continu par utilisateur : le rôle
+ * (`role`) porte la distinction entre ce que la personne a écrit et ce
+ * qu'Igini a répondu. Ne stocke jamais le détail des appels d'outils
+ * (analyser/construire/...) qu'un tour de conversation a pu déclencher —
+ * seule la réponse finale en langage naturel est conservée ici.
+ */
+export type chat_messages = Prisma.chat_messagesModel
+/**
  * Model concepts
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */
