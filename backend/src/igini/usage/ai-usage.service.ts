@@ -39,7 +39,14 @@ import { GENERATOR_NAMES, type GeneratorName } from './generator-names.js';
  */
 export interface GenerationAttribution {
   userId: string;
-  projectId: string;
+  /**
+   * `null` pour un appel non rattaché à un projet — un tour de conversation
+   * de l'orchestrateur (voir `ClaudeService.converseWithTools`). Les 5
+   * générateurs, appelés directement ou via un outil du chat, continuent de
+   * passer une chaîne non nulle ; la colonne `ai_usage_events.project_id`
+   * est déjà nullable en base, seul ce type l'était encore.
+   */
+  projectId: string | null;
 }
 
 /**

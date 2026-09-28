@@ -87,6 +87,19 @@ describe('AiUsageService', () => {
       });
     });
 
+    it('accepte et journalise un projectId null (appel non rattaché à un projet, ex. le chat)', async () => {
+      await service.record({
+        context: { userId: 'u1', projectId: null, generator: 'discuter' },
+        model: 'claude-opus-5',
+        usage: UTILISATION,
+        durationMs: 10,
+      });
+
+      expect(table.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ project_id: null }) }),
+      );
+    });
+
     it('extrait la réflexion interne de la décomposition de sortie', async () => {
       // C'est le chiffre que PRICING.md ne pouvait pas connaître : la
       // réflexion est facturée au tarif de sortie et n'apparaît nulle part
@@ -210,7 +223,7 @@ describe('summarise', () => {
   it("garde l'ordre de la méthode IGINI plutôt que celui des données", () => {
     // Un affichage qui change d'ordre d'un mois à l'autre est illisible, et
     // l'ordre des cinq étapes porte un sens : c'est le parcours du porteur.
-    const desordre = ['transmettre', 'analyser', 'developper', 'construire', 'financer'];
+    const desordre = ['transmettre', 'analyser', 'discuter', 'developper', 'construire', 'financer'];
     const resume = summarise(
       desordre.map((generator) => ligne({ generator })),
       depuis,
