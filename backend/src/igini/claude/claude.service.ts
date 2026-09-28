@@ -23,6 +23,33 @@ import {
  */
 export const CLAUDE_MODEL = 'claude-opus-5';
 
+/**
+ * Modèle utilisé par l'orchestrateur du chat (tours de conversation), pas
+ * par les 5 générateurs — délibérément plus rapide/économique, puisqu'un
+ * tour de conversation ordinaire en enchaîne plusieurs par message envoyé,
+ * contrairement à une génération ponctuelle. `CLAUDE_MODEL` reste inchangé
+ * et continue de servir les 5 générateurs, appelés directement ou via un
+ * outil de l'orchestrateur.
+ */
+export const CLAUDE_ORCHESTRATOR_MODEL = 'claude-haiku-4-5';
+
+/** Nombre maximal d'appels Claude pour un seul message envoyé au chat. */
+const MAX_ORCHESTRATION_TURNS = 3;
+
+export interface ToolResult {
+  content: string;
+  isError: boolean;
+}
+
+export interface ConverseWithToolsRequest {
+  systemPrompt: string;
+  messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+  /** Attribution du tour de conversation : `usage.projectId` vaut toujours `null`. */
+  usage: AiUsageContext;
+  tools: Anthropic.Tool[];
+  executeTool: (name: string, input: unknown) => Promise<ToolResult>;
+}
+
 export interface StructuredOutputRequest<T> {
   schema: z.ZodType<T>;
   system: string;
@@ -161,6 +188,108 @@ export class ClaudeService {
       this.logger.error(request.logContext, error as Error);
       throw new InternalServerErrorException(this.toSafeMessage(error, request.userErrorMessage));
     }
+  }
+
+  /**
+   * Chat orchestré : jusqu'à `MAX_ORCHESTRATION_TURNS` allers-retours entre
+   * Claude et les outils NestJS existants. Contrairement à
+   * `generateStructuredOutput`, n'appelle jamais `OffresService.exiger()`
+   * pour le tour lui-même — le chat reste hors du système d'offres ; seuls
+   * les outils générateurs le font, via le code existant qu'ils invoquent.
+   *
+   * Règle de sécurité non négociable : sur le DERNIER tour autorisé, un
+   * outil demandé par Claude n'est jamais exécuté. Sans tour suivant pour
+   * en rendre compte à la personne, un outil à effet de bord — un
+   * générateur payant, qui écrit réellement en base — tournerait sans
+   * qu'elle ne le sache jamais. Le message de repli explicite est renvoyé
+   * à la place.
+   */
+  async converseWithTools(request: ConverseWithToolsRequest): Promise<string> {
+    const availability = this.availability();
+    if (!availability.enabled) {
+      throw new ServiceUnavailableException(availability.reason);
+    }
+
+    await this.aiUsage.assertWithinQuota(request.usage.userId);
+
+    let apiMessages: Anthropic.MessageParam[] = request.messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    for (let turn = 0; turn < MAX_ORCHESTRATION_TURNS; turn++) {
+      const startedAt = Date.now();
+      let response: Anthropic.Message;
+      try {
+        response = await this.getClient().messages.create({
+          model: CLAUDE_ORCHESTRATOR_MODEL,
+          max_tokens: 2048,
+          system: request.systemPrompt,
+          messages: apiMessages,
+          tools: request.tools,
+        });
+      } catch (error) {
+        this.logger.error("Échec d'un tour d'orchestration du chat via Claude", error as Error);
+        throw new InternalServerErrorException(
+          this.toSafeMessage(error, "IGINI n'a pas pu répondre, réessaie dans un instant."),
+        );
+      }
+
+      await this.aiUsage
+        .record({
+          context: request.usage,
+          model: CLAUDE_ORCHESTRATOR_MODEL,
+          usage: response.usage,
+          durationMs: Date.now() - startedAt,
+        })
+        .catch((error: unknown) => {
+          this.logger.error(
+            "Coût IA non journalisé (orchestration du chat) : la dépense a eu lieu mais manquera aux totaux.",
+            error as Error,
+          );
+        });
+
+      const toolUseBlocks = response.content.filter(
+        (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use',
+      );
+
+      if (toolUseBlocks.length === 0) {
+        const text = response.content
+          .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+          .map((block) => block.text)
+          .join('\n')
+          .trim();
+        if (!text) {
+          throw new InternalServerErrorException("IGINI n'a pas pu répondre, réessaie dans un instant.");
+        }
+        return text;
+      }
+
+      if (turn === MAX_ORCHESTRATION_TURNS - 1) {
+        return "Je n'ai pas pu terminer cette demande, peux-tu préciser ?";
+      }
+
+      apiMessages = [...apiMessages, { role: 'assistant', content: response.content }];
+
+      const toolResults: Anthropic.ToolResultBlockParam[] = [];
+      for (const block of toolUseBlocks) {
+        const result = await request.executeTool(block.name, block.input);
+        toolResults.push({
+          type: 'tool_result',
+          tool_use_id: block.id,
+          content: result.content,
+          is_error: result.isError,
+        });
+      }
+
+      apiMessages = [...apiMessages, { role: 'user', content: toolResults }];
+    }
+
+    // Inatteignable : le corps de boucle retourne toujours avant la fin du
+    // dernier tour (soit un texte, soit le message de repli ci-dessus).
+    // Conservé pour que TypeScript voie un retour explicite sur tous les
+    // chemins.
+    return "Je n'ai pas pu terminer cette demande, peux-tu préciser ?";
   }
 
   /**

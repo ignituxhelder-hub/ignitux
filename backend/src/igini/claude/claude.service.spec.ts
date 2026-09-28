@@ -5,13 +5,15 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import type Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
 import { OffresService } from '../../offres/offres.service.js';
 import { AiUsageService } from '../usage/ai-usage.service.js';
-import { ClaudeService } from './claude.service.js';
+import { CLAUDE_MODEL, CLAUDE_ORCHESTRATOR_MODEL, ClaudeService } from './claude.service.js';
 import { GENERATORS_DISABLED_MESSAGE } from './generators-availability.js';
 
 const parseMock = vi.fn();
+const createMock = vi.fn();
 
 // getEnv() valide process.env avec Zod et appelle process.exit(1) si la
 // configuration est incomplète : inutilisable tel quel dans un test.
@@ -34,7 +36,7 @@ const { AnthropicError, APIError, AuthenticationError, RateLimitError, APIConnec
 
 vi.mock('@anthropic-ai/sdk', () => {
   class MockAnthropic {
-    messages = { parse: parseMock };
+    messages = { parse: parseMock, create: createMock };
   }
   Object.assign(MockAnthropic, {
     AnthropicError,
@@ -87,6 +89,7 @@ describe('ClaudeService', () => {
 
   beforeEach(async () => {
     parseMock.mockReset();
+    createMock.mockReset();
     env.current = {};
     aiUsage = {
       record: vi.fn().mockResolvedValue(undefined),
@@ -542,6 +545,120 @@ describe('ClaudeService', () => {
 
       await expect(genererQuelqueChose()).rejects.toThrow();
       expect(aiUsage.assertWithinQuota).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('converseWithTools', () => {
+    const CHAT_ATTRIBUTION = { userId: 'u1', projectId: null, generator: 'discuter' } as const;
+    const UN_OUTIL: Anthropic.Tool = {
+      name: 'lister_projets',
+      description: 'Liste les projets.',
+      input_schema: { type: 'object', properties: {}, required: [] },
+    };
+
+    function reponseTexte(texte: string) {
+      return { content: [{ type: 'text', text: texte }], usage: UTILISATION };
+    }
+
+    function reponseToolUse(id: string, name: string, input: unknown) {
+      return { content: [{ type: 'tool_use', id, name, input }], usage: UTILISATION };
+    }
+
+    const converser = (executeTool = vi.fn()) =>
+      service.converseWithTools({
+        systemPrompt: 'system',
+        messages: [{ role: 'user', content: 'Salut Igini' }],
+        usage: CHAT_ATTRIBUTION,
+        tools: [UN_OUTIL],
+        executeTool,
+      });
+
+    it("n'envoie AUCUNE requête quand les générateurs sont éteints", async () => {
+      env.current = { IGINI_AI_ENABLED: 'false' };
+
+      await expect(converser()).rejects.toBeInstanceOf(ServiceUnavailableException);
+      expect(createMock).not.toHaveBeenCalled();
+    });
+
+    it('refuse avant tout appel réseau quand le plafond de coût global est atteint', async () => {
+      aiUsage.assertWithinQuota.mockRejectedValue(
+        new HttpException('Plafond atteint.', HttpStatus.PAYMENT_REQUIRED),
+      );
+
+      await expect(converser()).rejects.toBeInstanceOf(HttpException);
+      expect(createMock).not.toHaveBeenCalled();
+    });
+
+    it('utilise un modèle distinct de celui des 5 générateurs, et journalise dessous', async () => {
+      createMock.mockResolvedValue(reponseTexte('Salut !'));
+
+      await converser();
+
+      expect(createMock).toHaveBeenCalledWith(expect.objectContaining({ model: CLAUDE_ORCHESTRATOR_MODEL }));
+      expect(CLAUDE_ORCHESTRATOR_MODEL).not.toBe(CLAUDE_MODEL);
+      expect(aiUsage.record).toHaveBeenCalledWith(
+        expect.objectContaining({ context: CHAT_ATTRIBUTION, model: CLAUDE_ORCHESTRATOR_MODEL }),
+      );
+    });
+
+    it("n'appelle jamais offres.exiger — le tour de conversation reste hors du système d'offres", async () => {
+      createMock.mockResolvedValue(reponseTexte('Salut !'));
+
+      await converser();
+
+      expect(offres.exiger).not.toHaveBeenCalled();
+    });
+
+    it('répond directement quand Claude ne demande aucun outil', async () => {
+      createMock.mockResolvedValue(reponseTexte('Bonjour, comment puis-je aider ?'));
+
+      const result = await converser();
+
+      expect(result).toBe('Bonjour, comment puis-je aider ?');
+      expect(createMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('exécute un outil demandé puis renvoie la réponse finale du tour suivant', async () => {
+      createMock
+        .mockResolvedValueOnce(reponseToolUse('t1', 'lister_projets', {}))
+        .mockResolvedValueOnce(reponseTexte('Tu as un projet : Boulangerie.'));
+      const executeTool = vi.fn().mockResolvedValue({ content: '[{"id":"p1"}]', isError: false });
+
+      const result = await converser(executeTool);
+
+      expect(executeTool).toHaveBeenCalledWith('lister_projets', {});
+      expect(result).toBe('Tu as un projet : Boulangerie.');
+      expect(createMock).toHaveBeenCalledTimes(2);
+      // Le deuxième appel doit porter le tool_result rattaché au bon tool_use_id.
+      const secondAppel = createMock.mock.calls[1][0];
+      const dernierMessage = secondAppel.messages[secondAppel.messages.length - 1];
+      expect(dernierMessage).toEqual({
+        role: 'user',
+        content: [{ type: 'tool_result', tool_use_id: 't1', content: '[{"id":"p1"}]', is_error: false }],
+      });
+    });
+
+    it("n'exécute JAMAIS un outil sur le dernier tour autorisé — un générateur payant ne doit jamais tourner sans qu'on puisse en rendre compte", async () => {
+      // Les 3 appels renvoient tous du tool_use : aucun n'est le dernier mot.
+      createMock
+        .mockResolvedValueOnce(reponseToolUse('t1', 'lister_projets', {}))
+        .mockResolvedValueOnce(reponseToolUse('t2', 'lister_projets', {}))
+        .mockResolvedValueOnce(reponseToolUse('t3', 'analyser', { project_id: 'p1' }));
+      const executeTool = vi.fn().mockResolvedValue({ content: '[]', isError: false });
+
+      const result = await converser(executeTool);
+
+      expect(createMock).toHaveBeenCalledTimes(3);
+      // Seuls les 2 premiers tool_use (tours 1 et 2) sont exécutés — jamais le 3e.
+      expect(executeTool).toHaveBeenCalledTimes(2);
+      expect(executeTool).not.toHaveBeenCalledWith('analyser', { project_id: 'p1' });
+      expect(result).toBe("Je n'ai pas pu terminer cette demande, peux-tu préciser ?");
+    });
+
+    it("lève une InternalServerErrorException si l'appel Claude échoue", async () => {
+      createMock.mockRejectedValue(new Error('network error'));
+
+      await expect(converser()).rejects.toBeInstanceOf(InternalServerErrorException);
     });
   });
 });
