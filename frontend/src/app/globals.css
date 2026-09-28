@@ -995,3 +995,20 @@ th {
     display: none;
   }
 }
+
+.panneau-chat-igini__action {
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--accent);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.panneau-chat-igini__confirmation {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}

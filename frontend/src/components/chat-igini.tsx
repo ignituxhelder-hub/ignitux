@@ -1,8 +1,41 @@
 'use client';
 
+import Link from 'next/link';
 import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { api, ApiError, type ChatMessage } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+
+const PROJET_MARKER = /\n?\[\[projet:\s*([^\]]+)\]\]\s*$/;
+const SOUVENIR_MARKER = /\n?\[\[souvenir:\s*([^\]]+)\]\]\s*$/;
+
+export function extraireMarqueurs(contenu: string): {
+  texte: string;
+  projetId: string | null;
+  souvenirSuggere: string | null;
+} {
+  let texte = contenu;
+  let projetId: string | null = null;
+  let souvenirSuggere: string | null = null;
+
+  // Le souvenir, s'il existe, est toujours le marqueur le plus à droite
+  // (voir le prompt système : le projet se conclut d'abord, le souvenir en
+  // dernier). Les deux regex sont ancrées en fin de chaîne (`$`) : extraire
+  // le souvenir en premier est ce qui permet au marqueur projet, qui le
+  // précède, de se retrouver à son tour en fin de chaîne au second passage.
+  const matchSouvenir = texte.match(SOUVENIR_MARKER);
+  if (matchSouvenir) {
+    souvenirSuggere = matchSouvenir[1].trim();
+    texte = texte.slice(0, matchSouvenir.index).trimEnd();
+  }
+
+  const matchProjet = texte.match(PROJET_MARKER);
+  if (matchProjet) {
+    projetId = matchProjet[1].trim();
+    texte = texte.slice(0, matchProjet.index).trimEnd();
+  }
+
+  return { texte, projetId, souvenirSuggere };
+}
 
 export function ChatIgini({ onClose }: { onClose: () => void }) {
   const { token } = useAuth();
@@ -61,12 +94,7 @@ export function ChatIgini({ onClose }: { onClose: () => void }) {
 
       <div className="panneau-chat-igini__messages">
         {messages.map((message) => (
-          <p
-            key={message.id}
-            className={`panneau-chat-igini__message panneau-chat-igini__message--${message.role}`}
-          >
-            {message.content}
-          </p>
+          <MessageIgini key={message.id} message={message} token={token} />
         ))}
         <div ref={finRef} />
       </div>
@@ -86,6 +114,45 @@ export function ChatIgini({ onClose }: { onClose: () => void }) {
           Envoyer
         </button>
       </form>
+    </div>
+  );
+}
+
+function MessageIgini({ message, token }: { message: ChatMessage; token: string | null }) {
+  const { texte, projetId, souvenirSuggere } = extraireMarqueurs(message.content);
+  const [souvenirEnregistre, setSouvenirEnregistre] = useState(false);
+  const [enregistrementEnCours, setEnregistrementEnCours] = useState(false);
+
+  async function enregistrerSouvenir() {
+    if (!token || !souvenirSuggere || enregistrementEnCours) return;
+    setEnregistrementEnCours(true);
+    try {
+      await api.createMemory(token, undefined, 'fact', souvenirSuggere);
+      setSouvenirEnregistre(true);
+    } finally {
+      setEnregistrementEnCours(false);
+    }
+  }
+
+  return (
+    <div className={`panneau-chat-igini__message panneau-chat-igini__message--${message.role}`}>
+      <p style={{ margin: 0 }}>{texte}</p>
+      {projetId && (
+        <Link href={`/projects/${projetId}`} className="panneau-chat-igini__action">
+          Voir le projet →
+        </Link>
+      )}
+      {souvenirSuggere && !souvenirEnregistre && (
+        <button
+          type="button"
+          className="panneau-chat-igini__action"
+          onClick={enregistrerSouvenir}
+          disabled={enregistrementEnCours}
+        >
+          Enregistrer ce souvenir
+        </button>
+      )}
+      {souvenirEnregistre && <p className="panneau-chat-igini__confirmation">Souvenir enregistré.</p>}
     </div>
   );
 }

@@ -1875,7 +1875,7 @@ export const api = {
 
   createMemory: (
     token: string,
-    projectId: string,
+    projectId: string | undefined,
     category: MemoryCategory,
     content: string,
     tags: string[] = [],
