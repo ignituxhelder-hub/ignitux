@@ -55,6 +55,7 @@ export const ModelName = {
   auth_tokens: 'auth_tokens',
   projects: 'projects',
   analyses: 'analyses',
+  analysis_sources: 'analysis_sources',
   financing_plans: 'financing_plans',
   development_plans: 'development_plans',
   transmission_plans: 'transmission_plans',
@@ -184,6 +185,17 @@ export const AnalysesScalarFieldEnum = {
 } as const
 
 export type AnalysesScalarFieldEnum = (typeof AnalysesScalarFieldEnum)[keyof typeof AnalysesScalarFieldEnum]
+
+
+export const Analysis_sourcesScalarFieldEnum = {
+  id: 'id',
+  analysis_id: 'analysis_id',
+  title: 'title',
+  url: 'url',
+  created_at: 'created_at'
+} as const
+
+export type Analysis_sourcesScalarFieldEnum = (typeof Analysis_sourcesScalarFieldEnum)[keyof typeof Analysis_sourcesScalarFieldEnum]
 
 
 export const Financing_plansScalarFieldEnum = {
@@ -699,6 +711,7 @@ export const Ai_usage_eventsScalarFieldEnum = {
   thinking_tokens: 'thinking_tokens',
   cache_creation_input_tokens: 'cache_creation_input_tokens',
   cache_read_input_tokens: 'cache_read_input_tokens',
+  web_search_requests: 'web_search_requests',
   duration_ms: 'duration_ms',
   created_at: 'created_at'
 } as const

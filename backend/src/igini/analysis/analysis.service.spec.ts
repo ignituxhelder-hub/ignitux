@@ -51,4 +51,26 @@ describe('AnalysisService', () => {
       }),
     );
   });
+
+  it('demande une recherche web plafonnée, et laisse passer les sources trouvées', async () => {
+    // Le plafond est vérifié en dur : un changement silencieux du nombre de
+    // recherches autorisées changerait le coût par appel sans que rien ne
+    // le signale ailleurs que dans ai-pricing.ts.
+    const analysis = {
+      summary: 'Idée prometteuse.',
+      feasibility_score: 7,
+      strengths: ['Marché clair'],
+      risks: ['Concurrence forte'],
+      next_steps: ['Valider avec 10 clients'],
+      sources: [{ title: 'Étude de marché', url: 'https://exemple.com/etude' }],
+    };
+    claude.generateStructuredOutput.mockResolvedValue(analysis);
+
+    const result = await service.analyzeProject('Mon idée', 'Une description', ATTRIBUTION);
+
+    expect(result.sources).toEqual(analysis.sources);
+    expect(claude.generateStructuredOutput).toHaveBeenCalledWith(
+      expect.objectContaining({ webSearch: { maxUses: 5 } }),
+    );
+  });
 });

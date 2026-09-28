@@ -54,6 +54,20 @@ export const CACHE_WRITE_MULTIPLIER = 1.25;
 export const CACHE_READ_MULTIPLIER = 0.1;
 
 /**
+ * Prix d'une recherche web, en **micro-dollars** (0,01 $ = 10 000 micro-$).
+ *
+ * Facturée en plus des tokens, pas à leur place — une recherche qui ne
+ * ramène aucun résultat n'est pas facturée non plus (source ci-dessous).
+ * Contrairement à la grille de `ModelRates`, ce tarif ne dépend pas du
+ * modèle : c'est un forfait par recherche, quel que soit qui l'a demandée.
+ *
+ * Source : https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool
+ * (« $10 per 1,000 searches »), vérifié le 28/09/2026 — même exigence de
+ * date que le reste de cette grille.
+ */
+export const WEB_SEARCH_MICRO_USD_PER_SEARCH = 10_000;
+
+/**
  * Taux de conversion, écrit en fraction et non en décimal.
  *
  * `0.92` n'est pas représentable exactement en binaire. Le calcul ci-dessous
@@ -88,6 +102,8 @@ export interface TokenCounts {
   output_tokens: number;
   cache_creation_input_tokens?: number | null;
   cache_read_input_tokens?: number | null;
+  /** Recherches web facturées pour cet appel — voir WEB_SEARCH_MICRO_USD_PER_SEARCH. */
+  web_search_requests?: number | null;
 }
 
 /**
@@ -118,7 +134,10 @@ export function costMicroEur(model: string, tokens: TokenCounts): number | null 
     (tokens.cache_read_input_tokens ?? 0) *
       rates.input *
       CACHE_READ_MULTIPLIER *
-      USD_TO_EUR_NUMERATOR;
+      USD_TO_EUR_NUMERATOR +
+    // Terme à part et pas un taux « par million » : la recherche web se
+    // facture au forfait, indépendamment du modèle qui l'a demandée.
+    (tokens.web_search_requests ?? 0) * WEB_SEARCH_MICRO_USD_PER_SEARCH * USD_TO_EUR_NUMERATOR;
 
   // Arrondi au micro-euro supérieur : sur un coût, arrondir vers le bas
   // flatterait systématiquement le total. Entre deux erreurs d'un millionième

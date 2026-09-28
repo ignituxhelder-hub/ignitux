@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { buildProjectPrompt } from '../claude/build-project-prompt.js';
-import { ClaudeService } from '../claude/claude.service.js';
+import { ClaudeService, type WebSearchSource } from '../claude/claude.service.js';
 import type { GenerationAttribution } from '../usage/ai-usage.service.js';
 import { buildSystemPrompt } from '../claude/igini-identity.js';
 
@@ -25,13 +25,32 @@ const ProjectAnalysisSchema = z.object({
   next_steps: z.array(z.string()).describe('3 à 5 prochaines actions concrètes recommandées'),
 });
 
-export type ProjectAnalysisResult = z.infer<typeof ProjectAnalysisSchema>;
+/**
+ * `sources` n'existe pas dans `ProjectAnalysisSchema` : jamais demandé au
+ * modèle, toujours reconstruit par ClaudeService à partir des résultats de
+ * recherche réellement renvoyés par l'API. Voir WebSearchSource.
+ */
+export type ProjectAnalysisResult = z.infer<typeof ProjectAnalysisSchema> & {
+  sources: WebSearchSource[];
+};
 
 const SYSTEM_PROMPT = buildSystemPrompt(`Ici, tu appliques la première des cinq étapes de ta
 méthode : Découvrir. On te donne le titre et la description d'une idée de projet. Évalue-la avec
 honnêteté et bienveillance : sois concret, évite le remplissage générique, et adapte le niveau
 d'exigence à ce qui est décrit (une idée à un stade précoce n'est pas jugée comme un business plan
-complet).`);
+complet).
+
+Tu as accès à une recherche web : utilise-la quand une vérification externe changerait réellement
+ton jugement — un marché, une réglementation, une concurrence identifiable, un chiffre daté — pas
+par réflexe pour toute idée. Une idée trop tôt pour qu'aucune recherche ne la départage n'en a pas
+besoin.`);
+
+/**
+ * Recherches autorisées par appel. Un plafond dur, pas un réglage anodin :
+ * chaque recherche facture 0,01 $ en plus des tokens (voir
+ * WEB_SEARCH_MICRO_USD_PER_SEARCH dans ai-pricing.ts).
+ */
+const WEB_SEARCH_MAX_USES = 5;
 
 @Injectable()
 export class AnalysisService {
@@ -57,6 +76,7 @@ export class AnalysisService {
       logContext: "Échec de l'analyse du projet via Claude",
       userErrorMessage: "L'analyse a échoué, réessaie dans un instant.",
       usage: { ...attribution, generator: 'analyser' },
+      webSearch: { maxUses: WEB_SEARCH_MAX_USES },
     });
   }
 }

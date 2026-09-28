@@ -401,6 +401,7 @@ export const ModelName = {
   auth_tokens: 'auth_tokens',
   projects: 'projects',
   analyses: 'analyses',
+  analysis_sources: 'analysis_sources',
   financing_plans: 'financing_plans',
   development_plans: 'development_plans',
   transmission_plans: 'transmission_plans',
@@ -473,7 +474,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -770,6 +771,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.analysesCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.AnalysesCountAggregateOutputType> | number
+        }
+      }
+    }
+    analysis_sources: {
+      payload: Prisma.$analysis_sourcesPayload<ExtArgs>
+      fields: Prisma.analysis_sourcesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.analysis_sourcesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysis_sourcesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.analysis_sourcesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysis_sourcesPayload>
+        }
+        findFirst: {
+          args: Prisma.analysis_sourcesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysis_sourcesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.analysis_sourcesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysis_sourcesPayload>
+        }
+        findMany: {
+          args: Prisma.analysis_sourcesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysis_sourcesPayload>[]
+        }
+        create: {
+          args: Prisma.analysis_sourcesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysis_sourcesPayload>
+        }
+        createMany: {
+          args: Prisma.analysis_sourcesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.analysis_sourcesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysis_sourcesPayload>[]
+        }
+        delete: {
+          args: Prisma.analysis_sourcesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysis_sourcesPayload>
+        }
+        update: {
+          args: Prisma.analysis_sourcesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysis_sourcesPayload>
+        }
+        deleteMany: {
+          args: Prisma.analysis_sourcesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.analysis_sourcesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.analysis_sourcesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysis_sourcesPayload>[]
+        }
+        upsert: {
+          args: Prisma.analysis_sourcesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$analysis_sourcesPayload>
+        }
+        aggregate: {
+          args: Prisma.Analysis_sourcesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAnalysis_sources>
+        }
+        groupBy: {
+          args: Prisma.analysis_sourcesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Analysis_sourcesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.analysis_sourcesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Analysis_sourcesCountAggregateOutputType> | number
         }
       }
     }
@@ -5086,6 +5161,17 @@ export const AnalysesScalarFieldEnum = {
 export type AnalysesScalarFieldEnum = (typeof AnalysesScalarFieldEnum)[keyof typeof AnalysesScalarFieldEnum]
 
 
+export const Analysis_sourcesScalarFieldEnum = {
+  id: 'id',
+  analysis_id: 'analysis_id',
+  title: 'title',
+  url: 'url',
+  created_at: 'created_at'
+} as const
+
+export type Analysis_sourcesScalarFieldEnum = (typeof Analysis_sourcesScalarFieldEnum)[keyof typeof Analysis_sourcesScalarFieldEnum]
+
+
 export const Financing_plansScalarFieldEnum = {
   id: 'id',
   project_id: 'project_id',
@@ -5599,6 +5685,7 @@ export const Ai_usage_eventsScalarFieldEnum = {
   thinking_tokens: 'thinking_tokens',
   cache_creation_input_tokens: 'cache_creation_input_tokens',
   cache_read_input_tokens: 'cache_read_input_tokens',
+  web_search_requests: 'web_search_requests',
   duration_ms: 'duration_ms',
   created_at: 'created_at'
 } as const
@@ -6150,6 +6237,7 @@ export type GlobalOmitConfig = {
   auth_tokens?: Prisma.auth_tokensOmit
   projects?: Prisma.projectsOmit
   analyses?: Prisma.analysesOmit
+  analysis_sources?: Prisma.analysis_sourcesOmit
   financing_plans?: Prisma.financing_plansOmit
   development_plans?: Prisma.development_plansOmit
   transmission_plans?: Prisma.transmission_plansOmit

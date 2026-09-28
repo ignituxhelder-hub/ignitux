@@ -123,7 +123,11 @@ export class UserDataService {
       this.prisma.project_collaborators.findMany({ where: { user_id: userId } }),
       this.prisma.project_collaborators.findMany({ where: byProject }),
       this.prisma.workflow_steps.findMany({ where: { workflow_id: { in: workflowIds } } }),
-      this.prisma.analyses.findMany({ where: byProject }),
+      // include: sources — les pages que la recherche web a réellement
+      // consultées font partie de l'analyse exportée, pas une table à part
+      // qu'il faudrait réclamer séparément (même geste que lines/transactions
+      // plus bas pour les écritures comptables et les comptes bancaires).
+      this.prisma.analyses.findMany({ where: byProject, include: { sources: true } }),
       this.prisma.build_plans.findMany({ where: byProject }),
       this.prisma.financing_plans.findMany({ where: byProject }),
       this.prisma.development_plans.findMany({ where: byProject }),

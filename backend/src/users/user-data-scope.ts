@@ -89,6 +89,10 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   fleet_entries: exported('projets_et_contenus'),
 
   analyses: exported('contenus_generes_par_igini'),
+  // Les pages que la recherche web d'IGINI a réellement consultées pour
+  // étayer une analyse (voir ClaudeService.WebSearchSource) — même groupe
+  // que l'analyse elle-même, dont elles ne sont qu'un détail à part.
+  analysis_sources: exported('contenus_generes_par_igini'),
   build_plans: exported('contenus_generes_par_igini'),
   financing_plans: exported('contenus_generes_par_igini'),
   development_plans: exported('contenus_generes_par_igini'),

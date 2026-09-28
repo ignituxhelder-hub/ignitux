@@ -3,6 +3,7 @@ import {
   CACHE_READ_MULTIPLIER,
   CACHE_WRITE_MULTIPLIER,
   GRILLE,
+  WEB_SEARCH_MICRO_USD_PER_SEARCH,
   costMicroEur,
   microEurToEur,
   pricedModels,
@@ -41,6 +42,35 @@ describe('ai-pricing', () => {
       // colonnes étaient un jour inversées au moment de l'enregistrement, le
       // coût serait sous-estimé d'un facteur douze sans que rien ne le dise.
       expect(lecture).toBeLessThan(ecriture as number);
+    });
+
+    it('ajoute le forfait des recherches web, en plus des tokens', () => {
+      // 3 recherches à 0,01 $ chacune = 0,03 $, soit 27 600 micro-euros à
+      // 0,92 — indépendant du modèle, contrairement au reste de la grille.
+      const cout = costMicroEur('claude-opus-5', {
+        input_tokens: 0,
+        output_tokens: 0,
+        web_search_requests: 3,
+      });
+
+      expect(cout).toBe(
+        Math.ceil((3 * WEB_SEARCH_MICRO_USD_PER_SEARCH * USD_TO_EUR_NUMERATOR) / USD_TO_EUR_DENOMINATOR),
+      );
+      expect(cout).toBe(27600);
+    });
+
+    it("n'ajoute rien quand aucune recherche n'a eu lieu", () => {
+      // Absent ou zéro doivent donner exactement le même coût : un appel qui
+      // n'a jamais déclaré cette colonne ne doit pas coûter plus cher qu'un
+      // appel qui l'a explicitement mise à zéro.
+      const sansChamp = costMicroEur('claude-opus-5', { input_tokens: 1200, output_tokens: 900 });
+      const champNul = costMicroEur('claude-opus-5', {
+        input_tokens: 1200,
+        output_tokens: 900,
+        web_search_requests: 0,
+      });
+
+      expect(champNul).toBe(sansChamp);
     });
 
     it("n'arrondit jamais un coût vers le bas", () => {

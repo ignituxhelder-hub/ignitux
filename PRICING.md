@@ -459,3 +459,40 @@ sur `ignitux_prod`** : l'opération a été refusée comme touchant la productio
 comportement. Tant qu'elle n'est pas faite, une bascule du déploiement vers la base de production
 échouerait sur une table manquante. C'est une commande à lancer sciemment, pas un effet de bord à
 subir.
+
+---
+
+## 13. Un quatrième axe de dépense : la recherche web (28/09/2026)
+
+Analyser ne s'appuyait jusqu'ici que sur ce que le modèle savait déjà — jamais rien de vérifié au
+moment de la demande. `AnalysisService` peut désormais déclencher jusqu'à **5 recherches web par
+appel**, et les pages réellement consultées sont rendues à la personne (jamais des URLs que le
+modèle prétendrait avoir vues — voir `ClaudeService.WebSearchSource`).
+
+**Ce que ça change au calcul.** La recherche web se facture **en plus** des tokens, au forfait —
+indépendamment du modèle qui l'a demandée :
+
+| | Valeur |
+|---|---|
+| Prix d'une recherche | **0,01 $** (10 $ / 1 000 recherches) |
+| Source | [Web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool) — « $10 per 1,000 searches », vérifié le 28/09/2026 |
+| Plafond par appel Analyser | 5 recherches |
+| Surcoût maximal par appel | 5 × 0,01 $ = 0,05 $, soit **0,046 €** à 0,92 |
+
+À la profondeur mesurée en section 2 (0,0565 € pour Analyser seul), un appel qui épuiserait son
+plafond de 5 recherches **coûterait jusqu'à 0,1025 €, soit ×1,8** — et c'est un plafond, pas une
+moyenne : une idée trop tôt pour qu'aucune recherche ne la départage ne déclenche aucune recherche
+du tout (le prompt le dit explicitement), et le coût réel se situera la plupart du temps entre les
+deux. Le pipeline complet (5 appels, un par générateur) ne change pas : seul Analyser a accès à cet
+outil aujourd'hui.
+
+**Ce qui est déjà construit, pas seulement décidé.** `ai_usage_events.web_search_requests` compte
+les recherches de chaque appel, `ai-pricing.ts` les valorise, et `coutMicroEur`/`coutEur` les
+comptent automatiquement dans les totaux — même dispositif que la réflexion interne en section 1,
+pour la même raison : un coût qui existe mais que le journal ne voit pas est un coût qui finit par
+fausser un plafond.
+
+**Ce qui reste une hypothèse.** Comme pour le reste de ce document, `IGINI_AI_ENABLED` est encore
+à `false` : le nombre de recherches réellement déclenchées par appel — entre 0 et 5 — n'a jamais
+été mesuré en conditions réelles. Le tableau ci-dessus donne le pire cas, pas une moyenne
+observée.

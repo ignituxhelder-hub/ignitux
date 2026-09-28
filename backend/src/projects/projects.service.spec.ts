@@ -50,6 +50,9 @@ describe('ProjectsService', () => {
       findMany: ReturnType<typeof vi.fn>;
       findFirst: ReturnType<typeof vi.fn>;
     };
+    analysis_sources: {
+      createMany: ReturnType<typeof vi.fn>;
+    };
     build_plans: {
       create: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
@@ -106,6 +109,7 @@ describe('ProjectsService', () => {
         delete: vi.fn(),
       },
       analyses: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
+      analysis_sources: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
       build_plans: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
       financing_plans: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
       development_plans: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
@@ -437,7 +441,59 @@ describe('ProjectsService', () => {
       expect(prisma.analyses.create).toHaveBeenCalledWith({
         data: { project_id: 'p1', ...analysis, ...GENERATED_PROVENANCE },
       });
-      expect(result).toEqual({ id: 'a1', project_id: 'p1', ...analysis });
+      // Aucune source dans ce mock : analyzeProject n'en a pas fourni, et le
+      // résultat le dit honnêtement plutôt que d'omettre le champ.
+      expect(result).toEqual({ id: 'a1', project_id: 'p1', ...analysis, sources: [] });
+    });
+
+    it("persiste les sources réellement consultées par la recherche web", async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      const analysis = {
+        summary: 'Résumé',
+        feasibility_score: 8,
+        strengths: [],
+        risks: [],
+        next_steps: [],
+        sources: [
+          { title: 'Étude de marché', url: 'https://exemple.com/etude' },
+          { title: 'Réglementation locale', url: 'https://exemple.com/reglement' },
+        ],
+      };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      analysisService.analyzeProject.mockResolvedValue(analysis);
+      prisma.analyses.create.mockResolvedValue({ id: 'a1', project_id: 'p1' });
+
+      const result = await service.analyzeForOwner('u1', 'p1');
+
+      expect(prisma.analysis_sources.createMany).toHaveBeenCalledWith({
+        data: [
+          { analysis_id: 'a1', title: 'Étude de marché', url: 'https://exemple.com/etude' },
+          { analysis_id: 'a1', title: 'Réglementation locale', url: 'https://exemple.com/reglement' },
+        ],
+      });
+      // La personne voit les sources dès le retour de l'appel, sans attendre
+      // une relecture ultérieure de l'historique des analyses.
+      expect(result.sources).toEqual(analysis.sources);
+    });
+
+    it("n'écrit rien dans analysis_sources quand la recherche n'a rien trouvé", async () => {
+      // Le cas normal pour une idée trop tôt pour qu'aucune recherche ne la
+      // départage : un createMany([]) serait un appel réseau pour rien.
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      analysisService.analyzeProject.mockResolvedValue({
+        summary: 'Résumé',
+        feasibility_score: 8,
+        strengths: [],
+        risks: [],
+        next_steps: [],
+        sources: [],
+      });
+      prisma.analyses.create.mockResolvedValue({ id: 'a1' });
+
+      await service.analyzeForOwner('u1', 'p1');
+
+      expect(prisma.analysis_sources.createMany).not.toHaveBeenCalled();
     });
 
     describe('ce qu’IGINI sait de la personne', () => {
@@ -624,6 +680,7 @@ describe('ProjectsService', () => {
 
       expect(prisma.analyses.findMany).toHaveBeenCalledWith({
         where: { project_id: 'p1' },
+        include: { sources: true },
         orderBy: { created_at: 'desc' },
       });
       expect(result).toEqual([{ id: 'a1' }]);

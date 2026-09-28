@@ -41,6 +41,7 @@ function ligne(partiel: Partial<UsageEventRow> = {}): UsageEventRow {
     thinking_tokens: 300,
     cache_creation_input_tokens: null,
     cache_read_input_tokens: null,
+    web_search_requests: null,
     ...partiel,
   };
 }
@@ -82,9 +83,34 @@ describe('AiUsageService', () => {
           thinking_tokens: 300,
           cache_creation_input_tokens: null,
           cache_read_input_tokens: null,
+          web_search_requests: null,
           duration_ms: 41000,
         },
       });
+    });
+
+    it('journalise le nombre de recherches web quand l’appel en a fait', async () => {
+      // Le chiffre qui manquait pour que costMicroEur puisse un jour compter
+      // ce que la recherche web a réellement coûté, en plus des tokens.
+      await service.record({
+        context: ATTRIBUTION,
+        model: 'claude-opus-5',
+        usage: { ...UTILISATION, server_tool_use: { web_search_requests: 3 } },
+        durationMs: 1,
+      });
+
+      expect(table.create.mock.calls[0][0].data.web_search_requests).toBe(3);
+    });
+
+    it("inscrit null, et non zéro, quand l'appel n'utilisait pas la recherche web", async () => {
+      await service.record({
+        context: ATTRIBUTION,
+        model: 'claude-opus-5',
+        usage: UTILISATION,
+        durationMs: 1,
+      });
+
+      expect(table.create.mock.calls[0][0].data.web_search_requests).toBeNull();
     });
 
     it('extrait la réflexion interne de la décomposition de sortie', async () => {
@@ -242,6 +268,16 @@ describe('summarise', () => {
 
     expect(resume.parGenerateur[0].coutMicroEur).toBeNull();
     expect(resume.parGenerateur[0].appels).toBe(2);
+  });
+
+  it('compte le forfait des recherches web dans le total, en plus des tokens', () => {
+    // Le seul test qui prouve que le chiffre journalisé par record() finit
+    // réellement par peser dans un total en euros, et pas seulement dans la
+    // colonne qui le stocke.
+    const sansRecherche = summarise([ligne()], depuis, jusqua);
+    const avecRecherche = summarise([ligne({ web_search_requests: 3 })], depuis, jusqua);
+
+    expect(avecRecherche.coutMicroEur).toBe((sansRecherche.coutMicroEur ?? 0) + 27600);
   });
 
   it('rend un résumé honnête sur un mois sans aucun appel', () => {

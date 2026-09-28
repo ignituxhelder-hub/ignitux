@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { Analysis } from '@/lib/api';
+import type { Analysis, AnalysisSource } from '@/lib/api';
 
 /** Le seuil du parcours, répété ici pour que l'écran puisse l'expliquer. */
 const SEUIL = 75;
@@ -106,6 +106,8 @@ export function AnalyseResultat({
       <h3 style={{ marginTop: 0 }}>Ce qu&apos;IGINI a compris</h3>
       <p>{analyse.summary}</p>
 
+      <SourcesConsultees sources={analyse.sources} />
+
       <h3>Les points forts</h3>
       <Liste items={analyse.strengths} vide="Aucun point fort relevé." />
 
@@ -184,6 +186,51 @@ export function AnalyseResultat({
         </>
       )}
     </div>
+  );
+}
+
+/**
+ * CE QU'IGINI A VÉRIFIÉ EN LIGNE, PAS SEULEMENT CE QU'IL SAVAIT DÉJÀ.
+ *
+ * `analyse.sources` n'est jamais rempli par le modèle : Ignitux le
+ * reconstruit après coup à partir des pages que la recherche web a
+ * réellement renvoyées. Ce que cet écran montre est donc vérifiable — on
+ * peut cliquer chaque lien — plutôt qu'une liste d'URLs que le modèle
+ * prétendrait avoir consultées.
+ *
+ * `undefined` (analyses antérieures à cette fonctionnalité) et `[]`
+ * (recherche lancée mais rien trouvé à vérifier) racontent deux histoires
+ * différentes, et l'écran les distingue au lieu de les confondre en un
+ * même silence.
+ */
+function SourcesConsultees({ sources }: { sources: AnalysisSource[] | undefined }) {
+  if (sources === undefined) return null;
+
+  if (sources.length === 0) {
+    return (
+      <p className="muted" style={{ fontSize: '0.8rem' }}>
+        Aucune recherche en ligne n&apos;a été nécessaire pour cette analyse : IGINI a jugé ce
+        qu&apos;il savait déjà suffisant.
+      </p>
+    );
+  }
+
+  return (
+    <>
+      <p className="muted" style={{ fontSize: '0.8rem' }}>
+        IGINI a vérifié ces éléments en ligne avant de conclure — pas seulement dans ce
+        qu&apos;il savait déjà :
+      </p>
+      <ul style={{ margin: '0 0 1rem', paddingLeft: '1.25rem' }}>
+        {sources.map((source) => (
+          <li key={source.url} style={{ marginBottom: '0.35rem', fontSize: '0.9rem' }}>
+            <a href={source.url} target="_blank" rel="noreferrer">
+              {source.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }
 

@@ -253,6 +253,7 @@ export type analysesWhereInput = {
   generated_model?: Prisma.StringNullableFilter<"analyses"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"analyses"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
+  sources?: Prisma.Analysis_sourcesListRelationFilter
 }
 
 export type analysesOrderByWithRelationInput = {
@@ -268,6 +269,7 @@ export type analysesOrderByWithRelationInput = {
   generated_model?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   project?: Prisma.projectsOrderByWithRelationInput
+  sources?: Prisma.analysis_sourcesOrderByRelationAggregateInput
 }
 
 export type analysesWhereUniqueInput = Prisma.AtLeast<{
@@ -286,6 +288,7 @@ export type analysesWhereUniqueInput = Prisma.AtLeast<{
   generated_model?: Prisma.StringNullableFilter<"analyses"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"analyses"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
+  sources?: Prisma.Analysis_sourcesListRelationFilter
 }, "id">
 
 export type analysesOrderByWithAggregationInput = {
@@ -336,6 +339,7 @@ export type analysesCreateInput = {
   generated_model?: string | null
   created_at?: Date | string | null
   project: Prisma.projectsCreateNestedOneWithoutAnalysesInput
+  sources?: Prisma.analysis_sourcesCreateNestedManyWithoutAnalysisInput
 }
 
 export type analysesUncheckedCreateInput = {
@@ -350,6 +354,7 @@ export type analysesUncheckedCreateInput = {
   generated_by?: string
   generated_model?: string | null
   created_at?: Date | string | null
+  sources?: Prisma.analysis_sourcesUncheckedCreateNestedManyWithoutAnalysisInput
 }
 
 export type analysesUpdateInput = {
@@ -364,6 +369,7 @@ export type analysesUpdateInput = {
   generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   project?: Prisma.projectsUpdateOneRequiredWithoutAnalysesNestedInput
+  sources?: Prisma.analysis_sourcesUpdateManyWithoutAnalysisNestedInput
 }
 
 export type analysesUncheckedUpdateInput = {
@@ -378,6 +384,7 @@ export type analysesUncheckedUpdateInput = {
   generated_by?: Prisma.StringFieldUpdateOperationsInput | string
   generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sources?: Prisma.analysis_sourcesUncheckedUpdateManyWithoutAnalysisNestedInput
 }
 
 export type analysesCreateManyInput = {
@@ -483,6 +490,11 @@ export type analysesSumOrderByAggregateInput = {
   feasibility_score?: Prisma.SortOrder
 }
 
+export type AnalysesScalarRelationFilter = {
+  is?: Prisma.analysesWhereInput
+  isNot?: Prisma.analysesWhereInput
+}
+
 export type analysesCreateNestedManyWithoutProjectInput = {
   create?: Prisma.XOR<Prisma.analysesCreateWithoutProjectInput, Prisma.analysesUncheckedCreateWithoutProjectInput> | Prisma.analysesCreateWithoutProjectInput[] | Prisma.analysesUncheckedCreateWithoutProjectInput[]
   connectOrCreate?: Prisma.analysesCreateOrConnectWithoutProjectInput | Prisma.analysesCreateOrConnectWithoutProjectInput[]
@@ -560,6 +572,20 @@ export type analysesUpdatenext_stepsInput = {
   push?: string | string[]
 }
 
+export type analysesCreateNestedOneWithoutSourcesInput = {
+  create?: Prisma.XOR<Prisma.analysesCreateWithoutSourcesInput, Prisma.analysesUncheckedCreateWithoutSourcesInput>
+  connectOrCreate?: Prisma.analysesCreateOrConnectWithoutSourcesInput
+  connect?: Prisma.analysesWhereUniqueInput
+}
+
+export type analysesUpdateOneRequiredWithoutSourcesNestedInput = {
+  create?: Prisma.XOR<Prisma.analysesCreateWithoutSourcesInput, Prisma.analysesUncheckedCreateWithoutSourcesInput>
+  connectOrCreate?: Prisma.analysesCreateOrConnectWithoutSourcesInput
+  upsert?: Prisma.analysesUpsertWithoutSourcesInput
+  connect?: Prisma.analysesWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.analysesUpdateToOneWithWhereWithoutSourcesInput, Prisma.analysesUpdateWithoutSourcesInput>, Prisma.analysesUncheckedUpdateWithoutSourcesInput>
+}
+
 export type analysesCreateWithoutProjectInput = {
   id?: string
   summary: string
@@ -571,6 +597,7 @@ export type analysesCreateWithoutProjectInput = {
   generated_by?: string
   generated_model?: string | null
   created_at?: Date | string | null
+  sources?: Prisma.analysis_sourcesCreateNestedManyWithoutAnalysisInput
 }
 
 export type analysesUncheckedCreateWithoutProjectInput = {
@@ -584,6 +611,7 @@ export type analysesUncheckedCreateWithoutProjectInput = {
   generated_by?: string
   generated_model?: string | null
   created_at?: Date | string | null
+  sources?: Prisma.analysis_sourcesUncheckedCreateNestedManyWithoutAnalysisInput
 }
 
 export type analysesCreateOrConnectWithoutProjectInput = {
@@ -629,6 +657,78 @@ export type analysesScalarWhereInput = {
   created_at?: Prisma.DateTimeNullableFilter<"analyses"> | Date | string | null
 }
 
+export type analysesCreateWithoutSourcesInput = {
+  id?: string
+  summary: string
+  feasibility_score: number
+  score_rationale?: string | null
+  strengths?: Prisma.analysesCreatestrengthsInput | string[]
+  risks?: Prisma.analysesCreaterisksInput | string[]
+  next_steps?: Prisma.analysesCreatenext_stepsInput | string[]
+  generated_by?: string
+  generated_model?: string | null
+  created_at?: Date | string | null
+  project: Prisma.projectsCreateNestedOneWithoutAnalysesInput
+}
+
+export type analysesUncheckedCreateWithoutSourcesInput = {
+  id?: string
+  project_id: string
+  summary: string
+  feasibility_score: number
+  score_rationale?: string | null
+  strengths?: Prisma.analysesCreatestrengthsInput | string[]
+  risks?: Prisma.analysesCreaterisksInput | string[]
+  next_steps?: Prisma.analysesCreatenext_stepsInput | string[]
+  generated_by?: string
+  generated_model?: string | null
+  created_at?: Date | string | null
+}
+
+export type analysesCreateOrConnectWithoutSourcesInput = {
+  where: Prisma.analysesWhereUniqueInput
+  create: Prisma.XOR<Prisma.analysesCreateWithoutSourcesInput, Prisma.analysesUncheckedCreateWithoutSourcesInput>
+}
+
+export type analysesUpsertWithoutSourcesInput = {
+  update: Prisma.XOR<Prisma.analysesUpdateWithoutSourcesInput, Prisma.analysesUncheckedUpdateWithoutSourcesInput>
+  create: Prisma.XOR<Prisma.analysesCreateWithoutSourcesInput, Prisma.analysesUncheckedCreateWithoutSourcesInput>
+  where?: Prisma.analysesWhereInput
+}
+
+export type analysesUpdateToOneWithWhereWithoutSourcesInput = {
+  where?: Prisma.analysesWhereInput
+  data: Prisma.XOR<Prisma.analysesUpdateWithoutSourcesInput, Prisma.analysesUncheckedUpdateWithoutSourcesInput>
+}
+
+export type analysesUpdateWithoutSourcesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  summary?: Prisma.StringFieldUpdateOperationsInput | string
+  feasibility_score?: Prisma.IntFieldUpdateOperationsInput | number
+  score_rationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  strengths?: Prisma.analysesUpdatestrengthsInput | string[]
+  risks?: Prisma.analysesUpdaterisksInput | string[]
+  next_steps?: Prisma.analysesUpdatenext_stepsInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  project?: Prisma.projectsUpdateOneRequiredWithoutAnalysesNestedInput
+}
+
+export type analysesUncheckedUpdateWithoutSourcesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  project_id?: Prisma.StringFieldUpdateOperationsInput | string
+  summary?: Prisma.StringFieldUpdateOperationsInput | string
+  feasibility_score?: Prisma.IntFieldUpdateOperationsInput | number
+  score_rationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  strengths?: Prisma.analysesUpdatestrengthsInput | string[]
+  risks?: Prisma.analysesUpdaterisksInput | string[]
+  next_steps?: Prisma.analysesUpdatenext_stepsInput | string[]
+  generated_by?: Prisma.StringFieldUpdateOperationsInput | string
+  generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
 export type analysesCreateManyProjectInput = {
   id?: string
   summary: string
@@ -653,6 +753,7 @@ export type analysesUpdateWithoutProjectInput = {
   generated_by?: Prisma.StringFieldUpdateOperationsInput | string
   generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sources?: Prisma.analysis_sourcesUpdateManyWithoutAnalysisNestedInput
 }
 
 export type analysesUncheckedUpdateWithoutProjectInput = {
@@ -666,6 +767,7 @@ export type analysesUncheckedUpdateWithoutProjectInput = {
   generated_by?: Prisma.StringFieldUpdateOperationsInput | string
   generated_model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sources?: Prisma.analysis_sourcesUncheckedUpdateManyWithoutAnalysisNestedInput
 }
 
 export type analysesUncheckedUpdateManyWithoutProjectInput = {
@@ -682,6 +784,35 @@ export type analysesUncheckedUpdateManyWithoutProjectInput = {
 }
 
 
+/**
+ * Count Type AnalysesCountOutputType
+ */
+
+export type AnalysesCountOutputType = {
+  sources: number
+}
+
+export type AnalysesCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  sources?: boolean | AnalysesCountOutputTypeCountSourcesArgs
+}
+
+/**
+ * AnalysesCountOutputType without action
+ */
+export type AnalysesCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AnalysesCountOutputType
+   */
+  select?: Prisma.AnalysesCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * AnalysesCountOutputType without action
+ */
+export type AnalysesCountOutputTypeCountSourcesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.analysis_sourcesWhereInput
+}
+
 
 export type analysesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -696,6 +827,8 @@ export type analysesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   generated_model?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
+  sources?: boolean | Prisma.analyses$sourcesArgs<ExtArgs>
+  _count?: boolean | Prisma.AnalysesCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["analyses"]>
 
 export type analysesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -745,6 +878,8 @@ export type analysesSelectScalar = {
 export type analysesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "summary" | "feasibility_score" | "score_rationale" | "strengths" | "risks" | "next_steps" | "generated_by" | "generated_model" | "created_at", ExtArgs["result"]["analyses"]>
 export type analysesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
+  sources?: boolean | Prisma.analyses$sourcesArgs<ExtArgs>
+  _count?: boolean | Prisma.AnalysesCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type analysesIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
@@ -757,6 +892,7 @@ export type $analysesPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   name: "analyses"
   objects: {
     project: Prisma.$projectsPayload<ExtArgs>
+    sources: Prisma.$analysis_sourcesPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1177,6 +1313,7 @@ readonly fields: analysesFieldRefs;
 export interface Prisma__analysesClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   project<T extends Prisma.projectsDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projectsDefaultArgs<ExtArgs>>): Prisma.Prisma__projectsClient<runtime.Types.Result.GetResult<Prisma.$projectsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  sources<T extends Prisma.analyses$sourcesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.analyses$sourcesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$analysis_sourcesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1615,6 +1752,30 @@ export type analysesDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many analyses to delete.
    */
   limit?: number
+}
+
+/**
+ * analyses.sources
+ */
+export type analyses$sourcesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the analysis_sources
+   */
+  select?: Prisma.analysis_sourcesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the analysis_sources
+   */
+  omit?: Prisma.analysis_sourcesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.analysis_sourcesInclude<ExtArgs> | null
+  where?: Prisma.analysis_sourcesWhereInput
+  orderBy?: Prisma.analysis_sourcesOrderByWithRelationInput | Prisma.analysis_sourcesOrderByWithRelationInput[]
+  cursor?: Prisma.analysis_sourcesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Analysis_sourcesScalarFieldEnum | Prisma.Analysis_sourcesScalarFieldEnum[]
 }
 
 /**

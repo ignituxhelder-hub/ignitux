@@ -298,6 +298,25 @@ export class ProjectsService {
       },
     });
 
+    // Les sources réellement consultées par la recherche web (voir
+    // ClaudeService.WebSearchSource) — une table à part, pas un champ sur
+    // `analyses` : chacune est une ligne avec sa propre date, comme un
+    // mouvement de stock est une ligne à part de l'article qu'il concerne.
+    // `result.sources` défend contre un appelant qui, un jour, ne le
+    // fournirait pas : écrire silencieusement rien plutôt que planter sur
+    // `undefined.length` est le bon compromis ici, l'analyse elle-même étant
+    // déjà persistée.
+    const sources = result.sources ?? [];
+    if (sources.length > 0) {
+      await this.prisma.analysis_sources.createMany({
+        data: sources.map((source) => ({
+          analysis_id: analysis.id,
+          title: source.title,
+          url: source.url,
+        })),
+      });
+    }
+
     // Workflow : les prochaines étapes suggérées par l'analyse deviennent des
     // tâches suivables, pas juste du texte affiché puis oublié.
     await this.workflowService.createTasksFromSuggestions(project.id, result.next_steps, 'analysis');
@@ -306,13 +325,17 @@ export class ProjectsService {
     await this.automationService.run(project.id);
     await this.workflowEngineService.advanceActiveRunsForProject(ownerId, project.id);
 
-    return analysis;
+    // Attaché depuis ce qu'on vient d'écrire, pas relu en base : c'est
+    // exactement les mêmes sources, et une requête de plus n'apprendrait
+    // rien que `sources` ne sache déjà.
+    return { ...analysis, sources };
   }
 
   async listAnalysesForOwner(ownerId: string, id: string) {
     await this.findOneForViewer(ownerId, id);
     return this.prisma.analyses.findMany({
       where: { project_id: id },
+      include: { sources: true },
       orderBy: { created_at: 'desc' },
     });
   }

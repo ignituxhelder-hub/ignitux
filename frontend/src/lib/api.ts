@@ -479,11 +479,23 @@ export interface Analysis {
   strengths: string[];
   risks: string[];
   next_steps: string[];
+  /**
+   * Les pages reellement consultees par la recherche web d IGINI — jamais
+   * des URLs recitees de memoire. Absent pour les analyses anterieures a
+   * cette fonctionnalite ; tableau vide quand la recherche a tourne sans
+   * rien trouver d utile a verifier.
+   */
+  sources?: AnalysisSource[];
   /** 'igini' | 'human' — voir Charte IGINI, article 12 de la Constitution. */
   generated_by?: string;
   /** null = modele inconnu (ligne anterieure a la tracabilite), PAS « ecrit par un humain ». */
   generated_model?: string | null;
   created_at: string;
+}
+
+export interface AnalysisSource {
+  title: string;
+  url: string;
 }
 
 export interface BuildPlan {

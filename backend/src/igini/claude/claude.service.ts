@@ -9,7 +9,7 @@ import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import type { z } from 'zod';
 import { getEnv } from '../../config/env.js';
 import { OffresService } from '../../offres/offres.service.js';
-import { AiUsageService, type AiUsageContext } from '../usage/ai-usage.service.js';
+import { AiUsageService, type AiUsageContext, type ClaudeTokenUsage } from '../usage/ai-usage.service.js';
 import {
   readGeneratorsAvailability,
   type GeneratorsAvailability,
@@ -22,6 +22,33 @@ import {
  * sans penser aux colonnes generated_model.
  */
 export const CLAUDE_MODEL = 'claude-opus-5';
+
+/**
+ * Une page réellement visitée par la recherche web — jamais une URL que le
+ * modèle prétendrait avoir vue.
+ *
+ * C'est pour ça qu'aucun générateur ne demande `sources` dans son propre
+ * schéma Zod : un champ que le modèle remplirait lui-même serait exactement
+ * l'information simulée présentée comme réelle que l'article 10 de la
+ * Constitution interdit. Cette liste est reconstruite ici, après coup, à
+ * partir des blocs `web_search_tool_result` que l'API renvoie — jamais du
+ * texte que le modèle a écrit.
+ */
+export interface WebSearchSource {
+  title: string;
+  url: string;
+}
+
+/** Cadrage de la recherche web pour un appel donné. */
+export interface WebSearchOptions {
+  /**
+   * Nombre maximal de recherches pour CET appel. Un plafond dur, et une
+   * décision de coût, pas un détail technique : chaque recherche facture
+   * 0,01 $ en plus des tokens (voir WEB_SEARCH_MICRO_USD_PER_SEARCH dans
+   * ai-pricing.ts).
+   */
+  maxUses: number;
+}
 
 export interface StructuredOutputRequest<T> {
   schema: z.ZodType<T>;
@@ -41,7 +68,22 @@ export interface StructuredOutputRequest<T> {
    * plafond ne pourra jamais décompter.
    */
   usage: AiUsageContext;
+  /**
+   * Absent par défaut : les générateurs qui n'en ont pas besoin ne changent
+   * pas de comportement, tokens et signature de retour compris. Quand il est
+   * fourni, `generateStructuredOutput` renvoie un `sources` en plus — voir
+   * les deux signatures ci-dessous.
+   */
+  webSearch?: WebSearchOptions;
 }
+
+/**
+ * Combien de fois un tour mis en pause (recherche encore en cours côté
+ * serveur) est relancé avant d'abandonner. Anthropic ne documente aucune
+ * borne pour `pause_turn` ; au-delà, mieux vaut échouer proprement que
+ * relancer indéfiniment un appel déjà facturé plusieurs fois.
+ */
+const MAX_PAUSE_RESUMPTIONS = 4;
 
 /**
  * Point d'entrée unique vers l'API Claude pour les fonctionnalités IA
@@ -79,7 +121,15 @@ export class ClaudeService {
     return readGeneratorsAvailability(getEnv().IGINI_AI_ENABLED);
   }
 
-  async generateStructuredOutput<T>(request: StructuredOutputRequest<T>): Promise<T> {
+  async generateStructuredOutput<T>(
+    request: StructuredOutputRequest<T> & { webSearch?: undefined },
+  ): Promise<T>;
+  async generateStructuredOutput<T>(
+    request: StructuredOutputRequest<T> & { webSearch: WebSearchOptions },
+  ): Promise<T & { sources: WebSearchSource[] }>;
+  async generateStructuredOutput<T>(
+    request: StructuredOutputRequest<T>,
+  ): Promise<T | (T & { sources: WebSearchSource[] })> {
     // Le verrou est ici, et pas dans chaque générateur : les cinq passent
     // par ce point unique, donc aucun d'eux ne peut être oublié le jour où
     // un sixième arrive.
@@ -115,13 +165,46 @@ export class ClaudeService {
     const startedAt = Date.now();
 
     try {
-      const response = await this.getClient().messages.parse({
+      const tools: Anthropic.ToolUnion[] | undefined = request.webSearch
+        ? [
+            {
+              type: 'web_search_20260209',
+              name: 'web_search',
+              max_uses: request.webSearch.maxUses,
+            },
+          ]
+        : undefined;
+
+      const baseParams = {
         model: CLAUDE_MODEL,
         max_tokens: 16000,
         system: request.system,
-        messages: [{ role: 'user', content: request.userContent }],
         output_config: { format: zodOutputFormat(request.schema) },
-      });
+        ...(tools ? { tools } : {}),
+      };
+
+      let messages: Anthropic.MessageParam[] = [{ role: 'user', content: request.userContent }];
+      let response = await this.getClient().messages.parse({ ...baseParams, messages });
+      let usage: ClaudeTokenUsage = response.usage;
+
+      // La recherche web peut prendre plusieurs tours côté serveur : un tour
+      // en pause (`pause_turn`) n'a encore produit aucune sortie structurée,
+      // seulement une promesse de reprise — la seule façon documentée de
+      // continuer est de renvoyer ce tour tel quel. On cumule l'usage de
+      // chaque tour : chacun est déjà facturé, et ne retenir que le dernier
+      // sous-évaluerait le coût réel de l'appel. Hors recherche web, aucun
+      // outil serveur n'est déclaré et ce tour ne peut pas se produire — la
+      // boucle ne s'exécute donc jamais pour les quatre autres générateurs,
+      // et `usage` reste `response.usage` sans transformation.
+      if (request.webSearch) {
+        let resumptions = 0;
+        while (response.stop_reason === 'pause_turn' && resumptions < MAX_PAUSE_RESUMPTIONS) {
+          messages = [...messages, { role: 'assistant', content: response.content }];
+          response = await this.getClient().messages.parse({ ...baseParams, messages });
+          usage = addUsage(usage, response.usage);
+          resumptions += 1;
+        }
+      }
 
       // Journalisé AVANT la vérification du contenu, et l'ordre compte : dès
       // qu'une réponse existe, les tokens sont facturés. Enregistrer après le
@@ -142,7 +225,7 @@ export class ClaudeService {
         .record({
           context: request.usage,
           model: CLAUDE_MODEL,
-          usage: response.usage,
+          usage,
           durationMs: Date.now() - startedAt,
         })
         .catch((error: unknown) => {
@@ -156,7 +239,11 @@ export class ClaudeService {
         throw new Error('parsed_output manquant dans la réponse Claude.');
       }
 
-      return response.parsed_output;
+      if (!request.webSearch) {
+        return response.parsed_output;
+      }
+
+      return { ...response.parsed_output, sources: extractWebSearchSources(response.content) };
     } catch (error) {
       this.logger.error(request.logContext, error as Error);
       throw new InternalServerErrorException(this.toSafeMessage(error, request.userErrorMessage));
@@ -189,4 +276,46 @@ export class ClaudeService {
     }
     return fallback;
   }
+}
+
+/** Ajoute l'usage d'un tour supplémentaire (reprise après `pause_turn`). */
+function addUsage(total: ClaudeTokenUsage, next: ClaudeTokenUsage): ClaudeTokenUsage {
+  return {
+    input_tokens: total.input_tokens + next.input_tokens,
+    output_tokens: total.output_tokens + next.output_tokens,
+    output_tokens_details: {
+      thinking_tokens:
+        (total.output_tokens_details?.thinking_tokens ?? 0) +
+        (next.output_tokens_details?.thinking_tokens ?? 0),
+    },
+    cache_creation_input_tokens:
+      (total.cache_creation_input_tokens ?? 0) + (next.cache_creation_input_tokens ?? 0),
+    cache_read_input_tokens:
+      (total.cache_read_input_tokens ?? 0) + (next.cache_read_input_tokens ?? 0),
+    server_tool_use: {
+      web_search_requests:
+        (total.server_tool_use?.web_search_requests ?? 0) +
+        (next.server_tool_use?.web_search_requests ?? 0),
+    },
+  };
+}
+
+/**
+ * Les sources réellement consultées, jamais celles que le modèle
+ * prétendrait avoir vues — voir le commentaire sur `WebSearchSource`.
+ * Dédupliquées par URL : plusieurs recherches d'un même appel renvoient
+ * souvent la même page.
+ */
+function extractWebSearchSources(content: Anthropic.ContentBlock[]): WebSearchSource[] {
+  const seen = new Set<string>();
+  const sources: WebSearchSource[] = [];
+  for (const block of content) {
+    if (block.type !== 'web_search_tool_result' || !Array.isArray(block.content)) continue;
+    for (const result of block.content) {
+      if (seen.has(result.url)) continue;
+      seen.add(result.url);
+      sources.push({ title: result.title, url: result.url });
+    }
+  }
+  return sources;
 }

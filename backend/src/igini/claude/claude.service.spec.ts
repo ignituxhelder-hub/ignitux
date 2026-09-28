@@ -513,6 +513,197 @@ describe('ClaudeService', () => {
     });
   });
 
+  describe('recherche web', () => {
+    /** Un bloc `web_search_tool_result` tel que l'API le renvoie. */
+    const resultatRecherche = (urls: string[]) => ({
+      type: 'web_search_tool_result',
+      tool_use_id: 'srvtoolu_1',
+      content: urls.map((url) => ({
+        type: 'web_search_result',
+        url,
+        title: `Titre de ${url}`,
+        encrypted_content: 'chiffré',
+        page_age: null,
+      })),
+    });
+
+    it("ne déclare aucun outil quand webSearch n'est pas demandé", async () => {
+      parseMock.mockResolvedValue({ parsed_output: { answer: 'ok' }, usage: UTILISATION });
+
+      await genererQuelqueChose();
+
+      expect(parseMock.mock.calls[0][0].tools).toBeUndefined();
+    });
+
+    it('déclare web_search_20260209 plafonné au nombre demandé', async () => {
+      parseMock.mockResolvedValue({
+        parsed_output: { answer: 'ok' },
+        usage: UTILISATION,
+        content: [],
+        stop_reason: 'end_turn',
+      });
+
+      await service.generateStructuredOutput({
+        schema,
+        system: 'system',
+        userContent: 'user',
+        logContext: 'contexte',
+        userErrorMessage: 'échec',
+        usage: ATTRIBUTION,
+        webSearch: { maxUses: 3 },
+      });
+
+      expect(parseMock.mock.calls[0][0].tools).toEqual([
+        { type: 'web_search_20260209', name: 'web_search', max_uses: 3 },
+      ]);
+    });
+
+    it('reconstruit les sources à partir des résultats de recherche renvoyés, jamais du texte du modèle', async () => {
+      parseMock.mockResolvedValue({
+        parsed_output: { answer: 'ok' },
+        usage: UTILISATION,
+        stop_reason: 'end_turn',
+        content: [resultatRecherche(['https://exemple.com/a', 'https://exemple.com/b'])],
+      });
+
+      const result = await service.generateStructuredOutput({
+        schema,
+        system: 'system',
+        userContent: 'user',
+        logContext: 'contexte',
+        userErrorMessage: 'échec',
+        usage: ATTRIBUTION,
+        webSearch: { maxUses: 3 },
+      });
+
+      expect(result.sources).toEqual([
+        { title: 'Titre de https://exemple.com/a', url: 'https://exemple.com/a' },
+        { title: 'Titre de https://exemple.com/b', url: 'https://exemple.com/b' },
+      ]);
+    });
+
+    it('déduplique les sources par URL', async () => {
+      parseMock.mockResolvedValue({
+        parsed_output: { answer: 'ok' },
+        usage: UTILISATION,
+        stop_reason: 'end_turn',
+        content: [
+          resultatRecherche(['https://exemple.com/a']),
+          resultatRecherche(['https://exemple.com/a', 'https://exemple.com/b']),
+        ],
+      });
+
+      const result = await service.generateStructuredOutput({
+        schema,
+        system: 'system',
+        userContent: 'user',
+        logContext: 'contexte',
+        userErrorMessage: 'échec',
+        usage: ATTRIBUTION,
+        webSearch: { maxUses: 5 },
+      });
+
+      expect(result.sources).toHaveLength(2);
+    });
+
+    it("rend un tableau de sources vide quand la recherche n'a rien trouvé — jamais une source inventée", async () => {
+      parseMock.mockResolvedValue({
+        parsed_output: { answer: 'ok' },
+        usage: UTILISATION,
+        stop_reason: 'end_turn',
+        content: [],
+      });
+
+      const result = await service.generateStructuredOutput({
+        schema,
+        system: 'system',
+        userContent: 'user',
+        logContext: 'contexte',
+        userErrorMessage: 'échec',
+        usage: ATTRIBUTION,
+        webSearch: { maxUses: 3 },
+      });
+
+      expect(result.sources).toEqual([]);
+    });
+
+    it("relance un tour en pause_turn en renvoyant l'assistant tel quel, et cumule l'usage des deux tours", async () => {
+      // La seule façon documentée de continuer une recherche mise en pause
+      // côté serveur. Chaque tour est déjà facturé : perdre celui du premier
+      // sous-évaluerait le coût réel de l'appel.
+      const premierTour = {
+        parsed_output: null,
+        usage: { input_tokens: 500, output_tokens: 200, server_tool_use: { web_search_requests: 2 } },
+        stop_reason: 'pause_turn',
+        content: [{ type: 'text', text: 'je continue…', citations: null }],
+      };
+      const secondTour = {
+        parsed_output: { answer: 'ok' },
+        usage: { input_tokens: 300, output_tokens: 150, server_tool_use: { web_search_requests: 1 } },
+        stop_reason: 'end_turn',
+        content: [],
+      };
+      parseMock.mockResolvedValueOnce(premierTour).mockResolvedValueOnce(secondTour);
+
+      await service.generateStructuredOutput({
+        schema,
+        system: 'system',
+        userContent: 'user',
+        logContext: 'contexte',
+        userErrorMessage: 'échec',
+        usage: ATTRIBUTION,
+        webSearch: { maxUses: 5 },
+      });
+
+      expect(parseMock).toHaveBeenCalledTimes(2);
+      // Le second appel renvoie le tour en pause tel quel, en plus du
+      // message d'origine.
+      const deuxiemAppel = parseMock.mock.calls[1][0];
+      expect(deuxiemAppel.messages).toHaveLength(2);
+      expect(deuxiemAppel.messages[1]).toEqual({ role: 'assistant', content: premierTour.content });
+
+      expect(aiUsage.record).toHaveBeenCalledWith({
+        context: ATTRIBUTION,
+        model: 'claude-opus-5',
+        usage: {
+          input_tokens: 800,
+          output_tokens: 350,
+          output_tokens_details: { thinking_tokens: 0 },
+          cache_creation_input_tokens: 0,
+          cache_read_input_tokens: 0,
+          server_tool_use: { web_search_requests: 3 },
+        },
+        durationMs: expect.any(Number),
+      });
+    });
+
+    it('abandonne après un nombre borné de reprises plutôt que de relancer indéfiniment', async () => {
+      const enPause = {
+        parsed_output: null,
+        usage: UTILISATION,
+        stop_reason: 'pause_turn',
+        content: [],
+      };
+      parseMock.mockResolvedValue(enPause);
+
+      await expect(
+        service.generateStructuredOutput({
+          schema,
+          system: 'system',
+          userContent: 'user',
+          logContext: 'contexte',
+          userErrorMessage: 'échec',
+          usage: ATTRIBUTION,
+          webSearch: { maxUses: 5 },
+        }),
+      ).rejects.toBeInstanceOf(InternalServerErrorException);
+
+      // Le tour initial, plus au plus MAX_PAUSE_RESUMPTIONS reprises — pas
+      // une boucle qui continuerait à facturer indéfiniment.
+      expect(parseMock.mock.calls.length).toBeLessThanOrEqual(5);
+    });
+  });
+
   describe('ce que l offre couvre', () => {
     // Les cinq generateurs passent par ce point unique : un controle pose
     // ici ne peut etre oublie par aucun d entre eux.

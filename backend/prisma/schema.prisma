@@ -145,8 +145,26 @@ model analyses {
   generated_by      String    @default("igini")
   generated_model   String?
   created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  sources           analysis_sources[]
 
   @@index([project_id])
+}
+
+/// Les pages réellement consultées par la recherche web pendant une analyse
+/// — jamais des URLs que le modèle prétendrait avoir vues. Une table à part
+/// et non un champ Json : une source est une ligne comme une autre, avec sa
+/// propre date, et Ignitux n'a nulle part ailleurs de colonne Json dans ce
+/// schéma. Même esprit que score_rationale ci-dessus : ce que le produit
+/// affirme doit rester vérifiable, jamais recomposé après coup.
+model analysis_sources {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  analysis_id String    @db.Uuid
+  analysis    analyses  @relation(fields: [analysis_id], references: [id], onDelete: Cascade)
+  title       String
+  url         String
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([analysis_id])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -992,6 +1010,11 @@ model ai_usage_events {
   thinking_tokens             Int?
   cache_creation_input_tokens Int?
   cache_read_input_tokens     Int?
+  /// Nombre de recherches web effectuées par cet appel — facturées 0,01 $
+  /// chacune, en plus des tokens (voir WEB_SEARCH_MICRO_USD_PER_SEARCH dans
+  /// ai-pricing.ts). null pour tout appel qui n'utilisait pas cet outil, y
+  /// compris toutes les lignes antérieures à son introduction.
+  web_search_requests         Int?
   /// Durée de l'appel côté serveur. Permet de croiser coût et latence, les
   /// deux seuls arbitrages réels sur le choix d'un modèle.
   duration_ms                 Int

@@ -66,6 +66,8 @@ export interface ClaudeTokenUsage extends TokenCounts {
    * l'exposent pas.
    */
   output_tokens_details?: { thinking_tokens: number } | null;
+  /** Nombre de recherches web effectuées — absent quand l'appel n'utilisait pas cet outil. */
+  server_tool_use?: { web_search_requests: number } | null;
 }
 
 export interface GeneratorBreakdown {
@@ -152,6 +154,7 @@ export class AiUsageService {
           thinking_tokens: input.usage.output_tokens_details?.thinking_tokens ?? null,
           cache_creation_input_tokens: input.usage.cache_creation_input_tokens ?? null,
           cache_read_input_tokens: input.usage.cache_read_input_tokens ?? null,
+          web_search_requests: input.usage.server_tool_use?.web_search_requests ?? null,
           duration_ms: input.durationMs,
         },
       });
@@ -189,6 +192,7 @@ export class AiUsageService {
           output_tokens: event.output_tokens,
           cache_creation_input_tokens: event.cache_creation_input_tokens ?? 0,
           cache_read_input_tokens: event.cache_read_input_tokens ?? 0,
+          web_search_requests: event.web_search_requests ?? 0,
         });
         return {
           id: event.id,
@@ -199,6 +203,7 @@ export class AiUsageService {
           tokens_entree: event.input_tokens,
           tokens_sortie: event.output_tokens,
           dont_reflexion: event.thinking_tokens,
+          recherches_web: event.web_search_requests,
           duree_ms: event.duration_ms,
           cout_euros: cout === null ? null : microEurToEur(cout),
         };
@@ -302,6 +307,7 @@ export interface UsageEventRow {
   thinking_tokens: number | null;
   cache_creation_input_tokens: number | null;
   cache_read_input_tokens: number | null;
+  web_search_requests: number | null;
 }
 
 /**

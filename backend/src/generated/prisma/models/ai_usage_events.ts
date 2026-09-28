@@ -50,6 +50,7 @@ export type Ai_usage_eventsAvgAggregateOutputType = {
   thinking_tokens: number | null
   cache_creation_input_tokens: number | null
   cache_read_input_tokens: number | null
+  web_search_requests: number | null
   duration_ms: number | null
 }
 
@@ -59,6 +60,7 @@ export type Ai_usage_eventsSumAggregateOutputType = {
   thinking_tokens: number | null
   cache_creation_input_tokens: number | null
   cache_read_input_tokens: number | null
+  web_search_requests: number | null
   duration_ms: number | null
 }
 
@@ -73,6 +75,7 @@ export type Ai_usage_eventsMinAggregateOutputType = {
   thinking_tokens: number | null
   cache_creation_input_tokens: number | null
   cache_read_input_tokens: number | null
+  web_search_requests: number | null
   duration_ms: number | null
   created_at: Date | null
 }
@@ -88,6 +91,7 @@ export type Ai_usage_eventsMaxAggregateOutputType = {
   thinking_tokens: number | null
   cache_creation_input_tokens: number | null
   cache_read_input_tokens: number | null
+  web_search_requests: number | null
   duration_ms: number | null
   created_at: Date | null
 }
@@ -103,6 +107,7 @@ export type Ai_usage_eventsCountAggregateOutputType = {
   thinking_tokens: number
   cache_creation_input_tokens: number
   cache_read_input_tokens: number
+  web_search_requests: number
   duration_ms: number
   created_at: number
   _all: number
@@ -115,6 +120,7 @@ export type Ai_usage_eventsAvgAggregateInputType = {
   thinking_tokens?: true
   cache_creation_input_tokens?: true
   cache_read_input_tokens?: true
+  web_search_requests?: true
   duration_ms?: true
 }
 
@@ -124,6 +130,7 @@ export type Ai_usage_eventsSumAggregateInputType = {
   thinking_tokens?: true
   cache_creation_input_tokens?: true
   cache_read_input_tokens?: true
+  web_search_requests?: true
   duration_ms?: true
 }
 
@@ -138,6 +145,7 @@ export type Ai_usage_eventsMinAggregateInputType = {
   thinking_tokens?: true
   cache_creation_input_tokens?: true
   cache_read_input_tokens?: true
+  web_search_requests?: true
   duration_ms?: true
   created_at?: true
 }
@@ -153,6 +161,7 @@ export type Ai_usage_eventsMaxAggregateInputType = {
   thinking_tokens?: true
   cache_creation_input_tokens?: true
   cache_read_input_tokens?: true
+  web_search_requests?: true
   duration_ms?: true
   created_at?: true
 }
@@ -168,6 +177,7 @@ export type Ai_usage_eventsCountAggregateInputType = {
   thinking_tokens?: true
   cache_creation_input_tokens?: true
   cache_read_input_tokens?: true
+  web_search_requests?: true
   duration_ms?: true
   created_at?: true
   _all?: true
@@ -270,6 +280,7 @@ export type Ai_usage_eventsGroupByOutputType = {
   thinking_tokens: number | null
   cache_creation_input_tokens: number | null
   cache_read_input_tokens: number | null
+  web_search_requests: number | null
   duration_ms: number
   created_at: Date | null
   _count: Ai_usage_eventsCountAggregateOutputType | null
@@ -308,6 +319,7 @@ export type ai_usage_eventsWhereInput = {
   thinking_tokens?: Prisma.IntNullableFilter<"ai_usage_events"> | number | null
   cache_creation_input_tokens?: Prisma.IntNullableFilter<"ai_usage_events"> | number | null
   cache_read_input_tokens?: Prisma.IntNullableFilter<"ai_usage_events"> | number | null
+  web_search_requests?: Prisma.IntNullableFilter<"ai_usage_events"> | number | null
   duration_ms?: Prisma.IntFilter<"ai_usage_events"> | number
   created_at?: Prisma.DateTimeNullableFilter<"ai_usage_events"> | Date | string | null
 }
@@ -323,6 +335,7 @@ export type ai_usage_eventsOrderByWithRelationInput = {
   thinking_tokens?: Prisma.SortOrderInput | Prisma.SortOrder
   cache_creation_input_tokens?: Prisma.SortOrderInput | Prisma.SortOrder
   cache_read_input_tokens?: Prisma.SortOrderInput | Prisma.SortOrder
+  web_search_requests?: Prisma.SortOrderInput | Prisma.SortOrder
   duration_ms?: Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
 }
@@ -341,6 +354,7 @@ export type ai_usage_eventsWhereUniqueInput = Prisma.AtLeast<{
   thinking_tokens?: Prisma.IntNullableFilter<"ai_usage_events"> | number | null
   cache_creation_input_tokens?: Prisma.IntNullableFilter<"ai_usage_events"> | number | null
   cache_read_input_tokens?: Prisma.IntNullableFilter<"ai_usage_events"> | number | null
+  web_search_requests?: Prisma.IntNullableFilter<"ai_usage_events"> | number | null
   duration_ms?: Prisma.IntFilter<"ai_usage_events"> | number
   created_at?: Prisma.DateTimeNullableFilter<"ai_usage_events"> | Date | string | null
 }, "id">
@@ -356,6 +370,7 @@ export type ai_usage_eventsOrderByWithAggregationInput = {
   thinking_tokens?: Prisma.SortOrderInput | Prisma.SortOrder
   cache_creation_input_tokens?: Prisma.SortOrderInput | Prisma.SortOrder
   cache_read_input_tokens?: Prisma.SortOrderInput | Prisma.SortOrder
+  web_search_requests?: Prisma.SortOrderInput | Prisma.SortOrder
   duration_ms?: Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ai_usage_eventsCountOrderByAggregateInput
@@ -379,6 +394,7 @@ export type ai_usage_eventsScalarWhereWithAggregatesInput = {
   thinking_tokens?: Prisma.IntNullableWithAggregatesFilter<"ai_usage_events"> | number | null
   cache_creation_input_tokens?: Prisma.IntNullableWithAggregatesFilter<"ai_usage_events"> | number | null
   cache_read_input_tokens?: Prisma.IntNullableWithAggregatesFilter<"ai_usage_events"> | number | null
+  web_search_requests?: Prisma.IntNullableWithAggregatesFilter<"ai_usage_events"> | number | null
   duration_ms?: Prisma.IntWithAggregatesFilter<"ai_usage_events"> | number
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"ai_usage_events"> | Date | string | null
 }
@@ -394,6 +410,7 @@ export type ai_usage_eventsCreateInput = {
   thinking_tokens?: number | null
   cache_creation_input_tokens?: number | null
   cache_read_input_tokens?: number | null
+  web_search_requests?: number | null
   duration_ms: number
   created_at?: Date | string | null
 }
@@ -409,6 +426,7 @@ export type ai_usage_eventsUncheckedCreateInput = {
   thinking_tokens?: number | null
   cache_creation_input_tokens?: number | null
   cache_read_input_tokens?: number | null
+  web_search_requests?: number | null
   duration_ms: number
   created_at?: Date | string | null
 }
@@ -424,6 +442,7 @@ export type ai_usage_eventsUpdateInput = {
   thinking_tokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   cache_creation_input_tokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   cache_read_input_tokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  web_search_requests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   duration_ms?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -439,6 +458,7 @@ export type ai_usage_eventsUncheckedUpdateInput = {
   thinking_tokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   cache_creation_input_tokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   cache_read_input_tokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  web_search_requests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   duration_ms?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -454,6 +474,7 @@ export type ai_usage_eventsCreateManyInput = {
   thinking_tokens?: number | null
   cache_creation_input_tokens?: number | null
   cache_read_input_tokens?: number | null
+  web_search_requests?: number | null
   duration_ms: number
   created_at?: Date | string | null
 }
@@ -469,6 +490,7 @@ export type ai_usage_eventsUpdateManyMutationInput = {
   thinking_tokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   cache_creation_input_tokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   cache_read_input_tokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  web_search_requests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   duration_ms?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -484,6 +506,7 @@ export type ai_usage_eventsUncheckedUpdateManyInput = {
   thinking_tokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   cache_creation_input_tokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   cache_read_input_tokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  web_search_requests?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   duration_ms?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -499,6 +522,7 @@ export type ai_usage_eventsCountOrderByAggregateInput = {
   thinking_tokens?: Prisma.SortOrder
   cache_creation_input_tokens?: Prisma.SortOrder
   cache_read_input_tokens?: Prisma.SortOrder
+  web_search_requests?: Prisma.SortOrder
   duration_ms?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
@@ -509,6 +533,7 @@ export type ai_usage_eventsAvgOrderByAggregateInput = {
   thinking_tokens?: Prisma.SortOrder
   cache_creation_input_tokens?: Prisma.SortOrder
   cache_read_input_tokens?: Prisma.SortOrder
+  web_search_requests?: Prisma.SortOrder
   duration_ms?: Prisma.SortOrder
 }
 
@@ -523,6 +548,7 @@ export type ai_usage_eventsMaxOrderByAggregateInput = {
   thinking_tokens?: Prisma.SortOrder
   cache_creation_input_tokens?: Prisma.SortOrder
   cache_read_input_tokens?: Prisma.SortOrder
+  web_search_requests?: Prisma.SortOrder
   duration_ms?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
@@ -538,6 +564,7 @@ export type ai_usage_eventsMinOrderByAggregateInput = {
   thinking_tokens?: Prisma.SortOrder
   cache_creation_input_tokens?: Prisma.SortOrder
   cache_read_input_tokens?: Prisma.SortOrder
+  web_search_requests?: Prisma.SortOrder
   duration_ms?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
@@ -548,6 +575,7 @@ export type ai_usage_eventsSumOrderByAggregateInput = {
   thinking_tokens?: Prisma.SortOrder
   cache_creation_input_tokens?: Prisma.SortOrder
   cache_read_input_tokens?: Prisma.SortOrder
+  web_search_requests?: Prisma.SortOrder
   duration_ms?: Prisma.SortOrder
 }
 
@@ -572,6 +600,7 @@ export type ai_usage_eventsSelect<ExtArgs extends runtime.Types.Extensions.Inter
   thinking_tokens?: boolean
   cache_creation_input_tokens?: boolean
   cache_read_input_tokens?: boolean
+  web_search_requests?: boolean
   duration_ms?: boolean
   created_at?: boolean
 }, ExtArgs["result"]["ai_usage_events"]>
@@ -587,6 +616,7 @@ export type ai_usage_eventsSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   thinking_tokens?: boolean
   cache_creation_input_tokens?: boolean
   cache_read_input_tokens?: boolean
+  web_search_requests?: boolean
   duration_ms?: boolean
   created_at?: boolean
 }, ExtArgs["result"]["ai_usage_events"]>
@@ -602,6 +632,7 @@ export type ai_usage_eventsSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   thinking_tokens?: boolean
   cache_creation_input_tokens?: boolean
   cache_read_input_tokens?: boolean
+  web_search_requests?: boolean
   duration_ms?: boolean
   created_at?: boolean
 }, ExtArgs["result"]["ai_usage_events"]>
@@ -617,11 +648,12 @@ export type ai_usage_eventsSelectScalar = {
   thinking_tokens?: boolean
   cache_creation_input_tokens?: boolean
   cache_read_input_tokens?: boolean
+  web_search_requests?: boolean
   duration_ms?: boolean
   created_at?: boolean
 }
 
-export type ai_usage_eventsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "project_id" | "generator" | "model" | "input_tokens" | "output_tokens" | "thinking_tokens" | "cache_creation_input_tokens" | "cache_read_input_tokens" | "duration_ms" | "created_at", ExtArgs["result"]["ai_usage_events"]>
+export type ai_usage_eventsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "project_id" | "generator" | "model" | "input_tokens" | "output_tokens" | "thinking_tokens" | "cache_creation_input_tokens" | "cache_read_input_tokens" | "web_search_requests" | "duration_ms" | "created_at", ExtArgs["result"]["ai_usage_events"]>
 
 export type $ai_usage_eventsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ai_usage_events"
@@ -654,6 +686,13 @@ export type $ai_usage_eventsPayload<ExtArgs extends runtime.Types.Extensions.Int
     thinking_tokens: number | null
     cache_creation_input_tokens: number | null
     cache_read_input_tokens: number | null
+    /**
+     * Nombre de recherches web effectuées par cet appel — facturées 0,01 $
+     * chacune, en plus des tokens (voir WEB_SEARCH_MICRO_USD_PER_SEARCH dans
+     * ai-pricing.ts). null pour tout appel qui n'utilisait pas cet outil, y
+     * compris toutes les lignes antérieures à son introduction.
+     */
+    web_search_requests: number | null
     /**
      * Durée de l'appel côté serveur. Permet de croiser coût et latence, les
      * deux seuls arbitrages réels sur le choix d'un modèle.
@@ -1093,6 +1132,7 @@ export interface ai_usage_eventsFieldRefs {
   readonly thinking_tokens: Prisma.FieldRef<"ai_usage_events", 'Int'>
   readonly cache_creation_input_tokens: Prisma.FieldRef<"ai_usage_events", 'Int'>
   readonly cache_read_input_tokens: Prisma.FieldRef<"ai_usage_events", 'Int'>
+  readonly web_search_requests: Prisma.FieldRef<"ai_usage_events", 'Int'>
   readonly duration_ms: Prisma.FieldRef<"ai_usage_events", 'Int'>
   readonly created_at: Prisma.FieldRef<"ai_usage_events", 'DateTime'>
 }

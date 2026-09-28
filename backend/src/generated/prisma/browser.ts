@@ -38,6 +38,16 @@ export type projects = Prisma.projectsModel
  */
 export type analyses = Prisma.analysesModel
 /**
+ * Model analysis_sources
+ * Les pages réellement consultées par la recherche web pendant une analyse
+ * — jamais des URLs que le modèle prétendrait avoir vues. Une table à part
+ * et non un champ Json : une source est une ligne comme une autre, avec sa
+ * propre date, et Ignitux n'a nulle part ailleurs de colonne Json dans ce
+ * schéma. Même esprit que score_rationale ci-dessus : ce que le produit
+ * affirme doit rester vérifiable, jamais recomposé après coup.
+ */
+export type analysis_sources = Prisma.analysis_sourcesModel
+/**
  * Model financing_plans
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */
