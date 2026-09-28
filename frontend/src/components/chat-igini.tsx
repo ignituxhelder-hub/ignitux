@@ -5,34 +5,33 @@ import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { api, ApiError, type ChatMessage } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
-const PROJET_MARKER = /\n?\[\[projet:\s*([^\]]+)\]\]\s*$/;
-const SOUVENIR_MARKER = /\n?\[\[souvenir:\s*([^\]]+)\]\]\s*$/;
+// Global (pas ancré à `$`) : trouvaille de la revue finale, le prompt
+// système ne garantit aucun ordre entre les deux marqueurs (chacun dit
+// juste « termine ta réponse par… »), et l'ancienne version, ancrée en fin
+// de chaîne, ratait le premier marqueur dès que l'ordre n'était pas
+// exactement projet-puis-souvenir. Un balayage global retire chaque
+// occurrence où qu'elle soit, dans n'importe quel ordre.
+const MARQUEUR_RE = /\n?\[\[(projet|souvenir):\s*([^\]]+)\]\]/g;
 
 export function extraireMarqueurs(contenu: string): {
   texte: string;
   projetId: string | null;
   souvenirSuggere: string | null;
 } {
-  let texte = contenu;
   let projetId: string | null = null;
   let souvenirSuggere: string | null = null;
 
-  // Le souvenir, s'il existe, est toujours le marqueur le plus à droite
-  // (voir le prompt système : le projet se conclut d'abord, le souvenir en
-  // dernier). Les deux regex sont ancrées en fin de chaîne (`$`) : extraire
-  // le souvenir en premier est ce qui permet au marqueur projet, qui le
-  // précède, de se retrouver à son tour en fin de chaîne au second passage.
-  const matchSouvenir = texte.match(SOUVENIR_MARKER);
-  if (matchSouvenir) {
-    souvenirSuggere = matchSouvenir[1].trim();
-    texte = texte.slice(0, matchSouvenir.index).trimEnd();
-  }
-
-  const matchProjet = texte.match(PROJET_MARKER);
-  if (matchProjet) {
-    projetId = matchProjet[1].trim();
-    texte = texte.slice(0, matchProjet.index).trimEnd();
-  }
+  const texte = contenu
+    .replace(MARQUEUR_RE, (_correspondance, type: string, valeur: string) => {
+      // Si le modèle répète un marqueur par erreur, on garde le premier
+      // rencontré — le prompt système dit explicitement « jamais plus
+      // d'une fois par réponse », un second serait une anomalie à ignorer
+      // plutôt qu'à laisser écraser le premier.
+      if (type === 'projet' && projetId === null) projetId = valeur.trim();
+      if (type === 'souvenir' && souvenirSuggere === null) souvenirSuggere = valeur.trim();
+      return '';
+    })
+    .trim();
 
   return { texte, projetId, souvenirSuggere };
 }

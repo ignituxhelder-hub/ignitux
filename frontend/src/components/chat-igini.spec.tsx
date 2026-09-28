@@ -122,6 +122,28 @@ describe('extraireMarqueurs', () => {
       extraireMarqueurs('Fait.\n[[projet: p1]]\n[[souvenir: Contenu]]'),
     ).toEqual({ texte: 'Fait.', projetId: 'p1', souvenirSuggere: 'Contenu' });
   });
+
+  it('extrait les deux marqueurs dans l’ordre inverse (souvenir avant projet)', () => {
+    // Trouvaille de la revue finale : le prompt système ne garantit aucun
+    // ordre entre les deux marqueurs (chacun dit juste « termine ta
+    // réponse par… »). L'ancienne extraction, ancrée en fin de chaîne,
+    // ratait le premier marqueur dès que l'ordre était celui-ci.
+    expect(
+      extraireMarqueurs('Fait.\n[[souvenir: Contenu]]\n[[projet: p1]]'),
+    ).toEqual({ texte: 'Fait.', projetId: 'p1', souvenirSuggere: 'Contenu' });
+  });
+
+  it('ignore un marqueur projet dupliqué et garde le premier', () => {
+    expect(
+      extraireMarqueurs('Fait.\n[[projet: p1]]\n[[projet: p2]]'),
+    ).toEqual({ texte: 'Fait.', projetId: 'p1', souvenirSuggere: null });
+  });
+
+  it('retire un marqueur même au milieu du texte, pas seulement en fin de chaîne', () => {
+    expect(
+      extraireMarqueurs('Avant.\n[[projet: p1]]\nAprès.'),
+    ).toEqual({ texte: 'Avant.\nAprès.', projetId: 'p1', souvenirSuggere: null });
+  });
 });
 
 describe('ChatIgini — marqueurs', () => {

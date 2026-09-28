@@ -19,6 +19,7 @@ type Mock = ReturnType<typeof vi.fn>;
 interface TableMock {
   create: Mock;
   findMany: Mock;
+  count: Mock;
 }
 
 const ATTRIBUTION = { userId: 'u1', projectId: 'p1', generator: 'analyser' } as const;
@@ -53,6 +54,7 @@ describe('AiUsageService', () => {
     table = {
       create: vi.fn().mockResolvedValue({}),
       findMany: vi.fn().mockResolvedValue([]),
+      count: vi.fn().mockResolvedValue(0),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -175,6 +177,28 @@ describe('AiUsageService', () => {
       await service.monthlyTotal(new Date('2026-09-20T14:00:00Z'));
 
       expect(table.findMany.mock.calls[0][0].where.user_id).toBeUndefined();
+    });
+  });
+
+  describe('callsThisMonth', () => {
+    it("ne compte pas les tours de conversation ('discuter') dans le quota des générateurs", async () => {
+      // Trouvaille de la revue finale : sans cette exclusion, un simple
+      // échange de chat consomme le même compteur que les 5 générateurs
+      // réels et déclenche, à tort, le refus « 3 analyses consommées » —
+      // y compris pour le bouton Analyser existant, jamais utilisé.
+      await service.callsThisMonth('u1');
+
+      expect(table.count).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ generator: { not: 'discuter' } }),
+        }),
+      );
+    });
+
+    it('compte bien les appels aux générateurs réels', async () => {
+      table.count.mockResolvedValue(2);
+
+      await expect(service.callsThisMonth('u1')).resolves.toBe(2);
     });
   });
 });

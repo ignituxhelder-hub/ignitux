@@ -218,6 +218,17 @@ export class ClaudeService {
     }));
 
     for (let turn = 0; turn < MAX_ORCHESTRATION_TURNS; turn++) {
+      // Sur le dernier tour autorisé, aucun outil n'est offert — Claude ne
+      // peut alors que répondre en texte. C'est plus strict que « ne pas
+      // exécuter un tool_use sur le dernier tour » : sans cette mesure, un
+      // générateur déclenché sur l'avant-dernier tour pouvait rester
+      // silencieux si le tour suivant tentait un nouvel outil, puisque
+      // celui-ci retombait alors sur le message de repli sans jamais
+      // mentionner ce qui avait réellement tourné (et été payé) avant.
+      // En forçant une réponse texte ici, IGINI doit résumer tout ce qui a
+      // été fait dans les tours précédents plutôt que de tenter un outil de
+      // plus qu'on lui refuserait de toute façon.
+      const dernierTour = turn === MAX_ORCHESTRATION_TURNS - 1;
       const startedAt = Date.now();
       let response: Anthropic.Message;
       try {
@@ -226,7 +237,7 @@ export class ClaudeService {
           max_tokens: 2048,
           system: request.systemPrompt,
           messages: apiMessages,
-          tools: request.tools,
+          ...(dernierTour ? {} : { tools: request.tools }),
         });
       } catch (error) {
         this.logger.error("Échec d'un tour d'orchestration du chat via Claude", error as Error);
@@ -249,9 +260,14 @@ export class ClaudeService {
           );
         });
 
-      const toolUseBlocks = response.content.filter(
-        (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use',
-      );
+      // Sur le dernier tour, `tools` n'a pas été envoyé : Claude ne devrait
+      // matériellement produire aucun bloc `tool_use`. On l'impose quand
+      // même explicitement plutôt que de compter dessus — une réponse qui
+      // en contiendrait un malgré tout ne doit jamais être exécutée ici,
+      // c'est exactement le cas que cette mesure existe pour fermer.
+      const toolUseBlocks = dernierTour
+        ? []
+        : response.content.filter((block): block is Anthropic.ToolUseBlock => block.type === 'tool_use');
 
       if (toolUseBlocks.length === 0) {
         const text = response.content
@@ -259,14 +275,9 @@ export class ClaudeService {
           .map((block) => block.text)
           .join('\n')
           .trim();
-        if (!text) {
-          throw new InternalServerErrorException("IGINI n'a pas pu répondre, réessaie dans un instant.");
-        }
-        return text;
-      }
-
-      if (turn === MAX_ORCHESTRATION_TURNS - 1) {
-        return "Je n'ai pas pu terminer cette demande, peux-tu préciser ?";
+        if (text) return text;
+        if (dernierTour) return "Je n'ai pas pu terminer cette demande, peux-tu préciser ?";
+        throw new InternalServerErrorException("IGINI n'a pas pu répondre, réessaie dans un instant.");
       }
 
       apiMessages = [...apiMessages, { role: 'assistant', content: response.content }];

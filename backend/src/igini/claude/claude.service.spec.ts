@@ -655,6 +655,32 @@ describe('ClaudeService', () => {
       expect(result).toBe("Je n'ai pas pu terminer cette demande, peux-tu préciser ?");
     });
 
+    it("un générateur déclenché sur l'avant-dernier tour n'est jamais perdu en silence — le dernier tour est forcé en texte, pas juste dépourvu d'exécution", async () => {
+      // Trouvaille de la revue finale : la seule garde « jamais exécuter sur
+      // le dernier tour » ne suffit pas. Si le générateur tourne sur
+      // l'AVANT-dernier tour (ici le 2e sur 3) et que le modèle tente un
+      // NOUVEL outil au tour suivant, l'ancienne version retombait sur le
+      // message de repli sans jamais dire que l'analyse avait bien eu lieu
+      // — payée et enregistrée, mais invisible pour la personne.
+      createMock
+        .mockResolvedValueOnce(reponseToolUse('t1', 'lister_projets', {}))
+        .mockResolvedValueOnce(reponseToolUse('t2', 'analyser', { project_id: 'p1' }))
+        .mockResolvedValueOnce(reponseTexte('Analyse terminée : faisabilité 7/10.'));
+      const executeTool = vi
+        .fn()
+        .mockResolvedValueOnce({ content: '[]', isError: false })
+        .mockResolvedValueOnce({ content: '{"feasibility_score":7}', isError: false });
+
+      const result = await converser(executeTool);
+
+      expect(executeTool).toHaveBeenCalledWith('analyser', { project_id: 'p1' });
+      expect(result).toBe('Analyse terminée : faisabilité 7/10.');
+      // Le 3e appel (dernier tour) ne doit proposer aucun outil : c'est ce
+      // qui force la réponse texte plutôt que de compter sur le fait que
+      // le modèle choisisse de ne pas en demander.
+      expect(createMock.mock.calls[2][0]).not.toHaveProperty('tools');
+    });
+
     it("lève une InternalServerErrorException si l'appel Claude échoue", async () => {
       createMock.mockRejectedValue(new Error('network error'));
 

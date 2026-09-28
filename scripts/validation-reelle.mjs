@@ -703,6 +703,15 @@ if (!iaAllumee) {
 
 titre('Chat orchestré');
 
+// Générateurs qui comptent comme « déclenchés » pour ces deux vérifications.
+const NOMS_GENERATEURS = ['analyser', 'construire', 'financer', 'developper', 'transmettre'];
+
+/** Combien d'appels à `generateur` figurent dans l'historique, là, maintenant. */
+async function nombreAppels(generateur) {
+  const { corps } = await appel('/igini/usage/historique');
+  return (corps?.appels ?? []).filter((a) => a.generateur === generateur).length;
+}
+
 if (!iaAllumee) {
   noter('ignore', 'Le chat ne déclenche rien sur une remarque vague', 'générateurs éteints');
   noter('ignore', 'Le chat déclenche bien un générateur sur demande explicite', 'générateurs éteints');
@@ -713,46 +722,53 @@ if (!iaAllumee) {
     'non lancée : ajouter --avec-ia (consomme du budget)',
   );
 } else {
-  let avantAppels = null;
-  await verifier('Le nombre d’appels IA du mois est lisible avant le chat', async () => {
-    const { corps } = await appel('/igini/usage/mois-en-cours');
-    avantAppels = corps?.appels ?? null;
-    return `appels ce mois-ci : ${avantAppels}`;
-  });
-
+  // Trouvaille de la revue finale : la section 8 qui précède a déjà
+  // consommé les 3 analyses incluses en Découverte (une analyse réelle,
+  // puis deux de plus pour prouver le refus de la 4e). Les deux
+  // vérifications ci-dessous comparent donc un AVANT/APRÈS propre à
+  // chaque appel plutôt qu'un compte absolu — et la seconde accepte que le
+  // générateur soit refusé pour cause de quota déjà épuisé, du moment que
+  // le refus est expliqué en conversation plutôt que planté brut.
   await verifier('Une remarque vague ne déclenche aucun générateur', async () => {
+    const avant = await Promise.all(NOMS_GENERATEURS.map(nombreAppels));
     const { statut, corps } = await appel('/chat/messages', {
       method: 'POST',
       body: JSON.stringify({ content: 'Je me demande ce que je devrais faire de mon projet.' }),
     });
     if (statut !== 201) throw new Error(`HTTP ${statut}`);
     if (!corps?.content) throw new Error('réponse sans contenu');
-    const { corps: usage } = await appel('/igini/usage/historique');
-    const generateursDeclenches = (usage?.appels ?? []).filter((a) =>
-      ['analyser', 'construire', 'financer', 'developper', 'transmettre'].includes(a.generateur),
-    );
-    if (generateursDeclenches.length > 0) {
-      throw new Error(`un générateur a tourné sans demande : ${generateursDeclenches[0].generateur}`);
-    }
+    const apres = await Promise.all(NOMS_GENERATEURS.map(nombreAppels));
+    const declenche = NOMS_GENERATEURS.find((_nom, i) => apres[i] > avant[i]);
+    if (declenche) throw new Error(`un générateur a tourné sans demande : ${declenche}`);
     return `réponse reçue, aucun générateur déclenché (${corps.content.length} caractères)`;
   });
 
-  await verifier('Une demande explicite déclenche bien le bon générateur', async () => {
-    if (!projetId) throw new Error('aucun projet');
-    const { statut, corps } = await appel('/chat/messages', {
-      method: 'POST',
-      body: JSON.stringify({
-        content: `Lance une analyse pour le projet dont l'identifiant est ${projetId}.`,
-      }),
-    });
-    if (statut !== 201) throw new Error(`HTTP ${statut}`);
-    const { corps: usage } = await appel('/igini/usage/historique');
-    const dernier = (usage?.appels ?? [])[0];
-    if (dernier?.generateur !== 'analyser') {
-      throw new Error(`attendu un appel 'analyser', dernier appel : ${dernier?.generateur ?? 'aucun'}`);
-    }
-    return `analyse déclenchée, réponse : « ${String(corps?.content ?? '').slice(0, 60)}… »`;
-  });
+  await verifier(
+    'Une demande explicite déclenche le générateur, ou en explique le refus poliment',
+    async () => {
+      if (!projetId) throw new Error('aucun projet');
+      const avant = await nombreAppels('analyser');
+      const { statut, corps } = await appel('/chat/messages', {
+        method: 'POST',
+        body: JSON.stringify({
+          content: `Lance une analyse pour le projet dont l'identifiant est ${projetId}.`,
+        }),
+      });
+      if (statut !== 201) throw new Error(`HTTP ${statut}`);
+      const apres = await nombreAppels('analyser');
+      const declenche = apres > avant;
+      const texte = String(corps?.content ?? '');
+      // Le prompt système demande d'expliquer un refus « dans ses mots » —
+      // pas de mot magique garanti, donc un motif large plutôt qu'exact.
+      const expliqueLeRefus = /quota|analyses incluses|offre|plafond|découverte/i.test(texte);
+      if (!declenche && !expliqueLeRefus) {
+        throw new Error(`ni déclenché, ni refus expliqué : « ${texte.slice(0, 80)} »`);
+      }
+      return declenche
+        ? `analyse déclenchée, réponse : « ${texte.slice(0, 60)}… »`
+        : `quota déjà épuisé par la section précédente, refus expliqué : « ${texte.slice(0, 60)}… »`;
+    },
+  );
 }
 
 // ── 9. Le partage d'un projet ─────────────────────────────────────────────

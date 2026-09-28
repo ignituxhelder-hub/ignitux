@@ -232,11 +232,23 @@ export class AiUsageService {
    * ce compteur-la sert a savoir ou en est la personne dans ce que son
    * offre inclut. Les deux repondent a des questions differentes et n ont
    * pas les memes seuils.
+   *
+   * Exclut `'discuter'` (les tours de l'orchestrateur du chat) : ce
+   * compteur nourrit `appelsCeMois` pour `droits.ts` côté générateurs
+   * (« 3 analyses incluses en Découverte »), une promesse commerciale qui
+   * ne porte que sur les 5 générateurs. Sans cette exclusion, une simple
+   * conversation sans aucun générateur déclenché épuiserait ce quota — et
+   * casserait au passage le bouton Analyser existant, qui lit ce même
+   * compteur.
    */
   async callsThisMonth(userId: string, reference: Date = new Date()): Promise<number> {
     const { depuis, jusqua } = monthRange(reference);
     return this.prisma.ai_usage_events.count({
-      where: { user_id: userId, created_at: { gte: depuis, lt: jusqua } },
+      where: {
+        user_id: userId,
+        created_at: { gte: depuis, lt: jusqua },
+        generator: { not: 'discuter' },
+      },
     });
   }
 
