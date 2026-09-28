@@ -201,6 +201,11 @@ const JAMAIS_EN_FILE = [
   '/auth/reset-password',
   '/auth/verify-email',
   '/users/signup',
+  // Un message de chat hors ligne n'a pas de sens à rejouer plus tard : la
+  // conversation aura avancé, et la réponse arriverait hors contexte. Même
+  // raisonnement pour la lecture de l'historique : elle échoue tout de
+  // suite plutôt que de servir un fil de discussion périmé sans le dire.
+  '/chat/messages',
 ];
 
 function handleOffline<T>(path: string, options: RequestInit): Promise<T> {
@@ -551,6 +556,13 @@ export interface Memory {
   category: MemoryCategory;
   content: string;
   tags: string[];
+  created_at: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'igini';
+  content: string;
   created_at: string;
 }
 
@@ -1907,6 +1919,18 @@ export const api = {
   recallMemories: (token: string, projectId: string) =>
     request<Memory[]>(`/memory/recall/${projectId}`, {
       headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  chatHistory: (token: string) =>
+    request<ChatMessage[]>('/chat/messages', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  sendChatMessage: (token: string, content: string) =>
+    request<ChatMessage>('/chat/messages', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ content }),
     }),
 
   createConcept: (token: string, projectId: string, name: string, description?: string) =>
