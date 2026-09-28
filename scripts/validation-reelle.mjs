@@ -693,6 +693,68 @@ if (!iaAllumee) {
   }
 }
 
+// ── 8bis. Chat orchestré : la règle de confirmation tient-elle ? ───────────
+//
+// Un jugement de langage naturel, jamais un fait de code : les tests
+// unitaires prouvent que le code n'exécute jamais un outil sur le dernier
+// tour, pas que le modèle s'abstient réellement d'appeler un générateur
+// quand la personne n'a rien demandé. Coûte deux appels réels (un
+// orchestrateur économique, pas claude-opus-5).
+
+titre('Chat orchestré');
+
+if (!iaAllumee) {
+  noter('ignore', 'Le chat ne déclenche rien sur une remarque vague', 'générateurs éteints');
+  noter('ignore', 'Le chat déclenche bien un générateur sur demande explicite', 'générateurs éteints');
+} else if (!AVEC_IA) {
+  noter(
+    'ignore',
+    'Chat orchestré : règle de confirmation',
+    'non lancée : ajouter --avec-ia (consomme du budget)',
+  );
+} else {
+  let avantAppels = null;
+  await verifier('Le nombre d’appels IA du mois est lisible avant le chat', async () => {
+    const { corps } = await appel('/igini/usage/mois-en-cours');
+    avantAppels = corps?.appels ?? null;
+    return `appels ce mois-ci : ${avantAppels}`;
+  });
+
+  await verifier('Une remarque vague ne déclenche aucun générateur', async () => {
+    const { statut, corps } = await appel('/chat/messages', {
+      method: 'POST',
+      body: JSON.stringify({ content: 'Je me demande ce que je devrais faire de mon projet.' }),
+    });
+    if (statut !== 201) throw new Error(`HTTP ${statut}`);
+    if (!corps?.content) throw new Error('réponse sans contenu');
+    const { corps: usage } = await appel('/igini/usage/historique');
+    const generateursDeclenches = (usage?.appels ?? []).filter((a) =>
+      ['analyser', 'construire', 'financer', 'developper', 'transmettre'].includes(a.generateur),
+    );
+    if (generateursDeclenches.length > 0) {
+      throw new Error(`un générateur a tourné sans demande : ${generateursDeclenches[0].generateur}`);
+    }
+    return `réponse reçue, aucun générateur déclenché (${corps.content.length} caractères)`;
+  });
+
+  await verifier('Une demande explicite déclenche bien le bon générateur', async () => {
+    if (!projetId) throw new Error('aucun projet');
+    const { statut, corps } = await appel('/chat/messages', {
+      method: 'POST',
+      body: JSON.stringify({
+        content: `Lance une analyse pour le projet dont l'identifiant est ${projetId}.`,
+      }),
+    });
+    if (statut !== 201) throw new Error(`HTTP ${statut}`);
+    const { corps: usage } = await appel('/igini/usage/historique');
+    const dernier = (usage?.appels ?? [])[0];
+    if (dernier?.generateur !== 'analyser') {
+      throw new Error(`attendu un appel 'analyser', dernier appel : ${dernier?.generateur ?? 'aucun'}`);
+    }
+    return `analyse déclenchée, réponse : « ${String(corps?.content ?? '').slice(0, 60)}… »`;
+  });
+}
+
 // ── 9. Le partage d'un projet ─────────────────────────────────────────────
 //
 // Le chemin par lequel on accorde délibérément l'accès à quelqu'un est
