@@ -39,4 +39,8 @@ describe('disponibilité des générateurs IGINI', () => {
     expect(GENERATORS_DISABLED_MESSAGE).toContain('non disponible');
     expect(GENERATORS_DISABLED_MESSAGE).toContain('volontairement');
   });
+
+  it('mentionne aussi le chat avec Igini, devenu la 6e chose protégée par cet interrupteur', () => {
+    expect(GENERATORS_DISABLED_MESSAGE.toLowerCase()).toContain('chat');
+  });
 });

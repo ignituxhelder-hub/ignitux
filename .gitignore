@@ -12,6 +12,9 @@
 backend/.tmp/
 frontend/.tmp/
 
+# Worktrees git isolés pour l'implémentation d'un plan (superpowers).
+.worktrees/
+
 # OS
 .DS_Store
 Thumbs.db

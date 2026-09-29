@@ -39,7 +39,14 @@ import { GENERATOR_NAMES, type GeneratorName } from './generator-names.js';
  */
 export interface GenerationAttribution {
   userId: string;
-  projectId: string;
+  /**
+   * `null` pour un appel non rattaché à un projet — un tour de conversation
+   * de l'orchestrateur (voir `ClaudeService.converseWithTools`). Les 5
+   * générateurs, appelés directement ou via un outil du chat, continuent de
+   * passer une chaîne non nulle ; la colonne `ai_usage_events.project_id`
+   * est déjà nullable en base, seul ce type l'était encore.
+   */
+  projectId: string | null;
 }
 
 /**
@@ -225,11 +232,23 @@ export class AiUsageService {
    * ce compteur-la sert a savoir ou en est la personne dans ce que son
    * offre inclut. Les deux repondent a des questions differentes et n ont
    * pas les memes seuils.
+   *
+   * Exclut `'discuter'` (les tours de l'orchestrateur du chat) : ce
+   * compteur nourrit `appelsCeMois` pour `droits.ts` côté générateurs
+   * (« 3 analyses incluses en Découverte »), une promesse commerciale qui
+   * ne porte que sur les 5 générateurs. Sans cette exclusion, une simple
+   * conversation sans aucun générateur déclenché épuiserait ce quota — et
+   * casserait au passage le bouton Analyser existant, qui lit ce même
+   * compteur.
    */
   async callsThisMonth(userId: string, reference: Date = new Date()): Promise<number> {
     const { depuis, jusqua } = monthRange(reference);
     return this.prisma.ai_usage_events.count({
-      where: { user_id: userId, created_at: { gte: depuis, lt: jusqua } },
+      where: {
+        user_id: userId,
+        created_at: { gte: depuis, lt: jusqua },
+        generator: { not: 'discuter' },
+      },
     });
   }
 

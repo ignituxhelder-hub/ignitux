@@ -59,6 +59,7 @@ export const ModelName = {
   development_plans: 'development_plans',
   transmission_plans: 'transmission_plans',
   memories: 'memories',
+  chat_messages: 'chat_messages',
   concepts: 'concepts',
   concept_links: 'concept_links',
   tasks: 'tasks',
@@ -242,6 +243,17 @@ export const MemoriesScalarFieldEnum = {
 } as const
 
 export type MemoriesScalarFieldEnum = (typeof MemoriesScalarFieldEnum)[keyof typeof MemoriesScalarFieldEnum]
+
+
+export const Chat_messagesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  role: 'role',
+  content: 'content',
+  created_at: 'created_at'
+} as const
+
+export type Chat_messagesScalarFieldEnum = (typeof Chat_messagesScalarFieldEnum)[keyof typeof Chat_messagesScalarFieldEnum]
 
 
 export const ConceptsScalarFieldEnum = {

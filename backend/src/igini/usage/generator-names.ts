@@ -1,5 +1,5 @@
 /**
- * LES CINQ GÉNÉRATEURS, NOMMÉS UNE SEULE FOIS.
+ * LES GÉNÉRATEURS D'IGINI, ET LE CHAT, NOMMÉS UNE SEULE FOIS.
  *
  * Fichier à part, et sans aucune dépendance : le journal de consommation,
  * le catalogue des offres et les contrôles de droits ont tous besoin de ces
@@ -17,6 +17,15 @@
  * Ces chaînes sont écrites en base (`ai_usage_events.generator`). Les
  * renommer demande une migration des lignes existantes, pas seulement un
  * remplacement dans les sources.
+ *
+ * `discuter` (les tours de conversation de l'orchestrateur IGINI) est ici
+ * pour la même raison de traçabilité des coûts que les 5 générateurs, mais
+ * suit une règle différente : aucun appel ne passe par
+ * `OffresService.exiger()` pour lui (voir `ClaudeService.converseWithTools`)
+ * — seul le plafond de coût global le protège. Un tour de conversation qui
+ * déclenche un générateur (ex. `analyser`) journalise CE générateur sous
+ * son propre nom existant, via le code déjà en place ; `discuter` ne
+ * journalise jamais que les tours de l'orchestrateur lui-même.
  */
 export const GENERATOR_NAMES = [
   'analyser',
@@ -24,6 +33,7 @@ export const GENERATOR_NAMES = [
   'financer',
   'developper',
   'transmettre',
+  'discuter',
 ] as const;
 
 export type GeneratorName = (typeof GENERATOR_NAMES)[number];

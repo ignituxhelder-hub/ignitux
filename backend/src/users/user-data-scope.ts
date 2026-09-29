@@ -93,6 +93,10 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   financing_plans: exported('contenus_generes_par_igini'),
   development_plans: exported('contenus_generes_par_igini'),
   transmission_plans: exported('contenus_generes_par_igini'),
+  // Le fil de conversation avec Igini : contrairement aux cinq lignes
+  // ci-dessus, il n'est rattaché à aucun projet (l'orchestrateur est un
+  // assistant général), mais il reste un échange avec Igini au même titre.
+  chat_messages: exported('contenus_generes_par_igini'),
 
   crm_companies: exported('relations_professionnelles'),
   crm_contacts: exported('relations_professionnelles'),

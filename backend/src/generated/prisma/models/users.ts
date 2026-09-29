@@ -192,6 +192,7 @@ export type usersWhereInput = {
   active_role?: Prisma.StringNullableFilter<"users"> | string | null
   projects?: Prisma.ProjectsListRelationFilter
   memories?: Prisma.MemoriesListRelationFilter
+  chat_messages?: Prisma.Chat_messagesListRelationFilter
   concepts?: Prisma.ConceptsListRelationFilter
   community_comments?: Prisma.Community_commentsListRelationFilter
   collaborations?: Prisma.Project_collaboratorsListRelationFilter
@@ -222,6 +223,7 @@ export type usersOrderByWithRelationInput = {
   active_role?: Prisma.SortOrderInput | Prisma.SortOrder
   projects?: Prisma.projectsOrderByRelationAggregateInput
   memories?: Prisma.memoriesOrderByRelationAggregateInput
+  chat_messages?: Prisma.chat_messagesOrderByRelationAggregateInput
   concepts?: Prisma.conceptsOrderByRelationAggregateInput
   community_comments?: Prisma.community_commentsOrderByRelationAggregateInput
   collaborations?: Prisma.project_collaboratorsOrderByRelationAggregateInput
@@ -255,6 +257,7 @@ export type usersWhereUniqueInput = Prisma.AtLeast<{
   active_role?: Prisma.StringNullableFilter<"users"> | string | null
   projects?: Prisma.ProjectsListRelationFilter
   memories?: Prisma.MemoriesListRelationFilter
+  chat_messages?: Prisma.Chat_messagesListRelationFilter
   concepts?: Prisma.ConceptsListRelationFilter
   community_comments?: Prisma.Community_commentsListRelationFilter
   collaborations?: Prisma.Project_collaboratorsListRelationFilter
@@ -309,6 +312,7 @@ export type usersCreateInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -339,6 +343,7 @@ export type usersUncheckedCreateInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -369,6 +374,7 @@ export type usersUpdateInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -399,6 +405,7 @@ export type usersUncheckedUpdateInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -531,6 +538,20 @@ export type usersUpdateOneRequiredWithoutMemoriesNestedInput = {
   upsert?: Prisma.usersUpsertWithoutMemoriesInput
   connect?: Prisma.usersWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutMemoriesInput, Prisma.usersUpdateWithoutMemoriesInput>, Prisma.usersUncheckedUpdateWithoutMemoriesInput>
+}
+
+export type usersCreateNestedOneWithoutChat_messagesInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutChat_messagesInput, Prisma.usersUncheckedCreateWithoutChat_messagesInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutChat_messagesInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutChat_messagesNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutChat_messagesInput, Prisma.usersUncheckedCreateWithoutChat_messagesInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutChat_messagesInput
+  upsert?: Prisma.usersUpsertWithoutChat_messagesInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutChat_messagesInput, Prisma.usersUpdateWithoutChat_messagesInput>, Prisma.usersUncheckedUpdateWithoutChat_messagesInput>
 }
 
 export type usersCreateNestedOneWithoutConceptsInput = {
@@ -794,6 +815,7 @@ export type usersCreateWithoutAuth_tokensInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -823,6 +845,7 @@ export type usersUncheckedCreateWithoutAuth_tokensInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -868,6 +891,7 @@ export type usersUpdateWithoutAuth_tokensInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -897,6 +921,7 @@ export type usersUncheckedUpdateWithoutAuth_tokensInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -925,6 +950,7 @@ export type usersCreateWithoutProjectsInput = {
   created_at?: Date | string | null
   active_role?: string | null
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -954,6 +980,7 @@ export type usersUncheckedCreateWithoutProjectsInput = {
   created_at?: Date | string | null
   active_role?: string | null
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -999,6 +1026,7 @@ export type usersUpdateWithoutProjectsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -1028,6 +1056,7 @@ export type usersUncheckedUpdateWithoutProjectsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -1057,6 +1086,7 @@ export type usersCreateWithoutMemoriesInput = {
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -1086,6 +1116,7 @@ export type usersUncheckedCreateWithoutMemoriesInput = {
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -1131,6 +1162,7 @@ export type usersUpdateWithoutMemoriesInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -1160,6 +1192,143 @@ export type usersUncheckedUpdateWithoutMemoriesInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type usersCreateWithoutChat_messagesInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
+}
+
+export type usersUncheckedCreateWithoutChat_messagesInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type usersCreateOrConnectWithoutChat_messagesInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutChat_messagesInput, Prisma.usersUncheckedCreateWithoutChat_messagesInput>
+}
+
+export type usersUpsertWithoutChat_messagesInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutChat_messagesInput, Prisma.usersUncheckedUpdateWithoutChat_messagesInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutChat_messagesInput, Prisma.usersUncheckedCreateWithoutChat_messagesInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutChat_messagesInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutChat_messagesInput, Prisma.usersUncheckedUpdateWithoutChat_messagesInput>
+}
+
+export type usersUpdateWithoutChat_messagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
+}
+
+export type usersUncheckedUpdateWithoutChat_messagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -1190,6 +1359,7 @@ export type usersCreateWithoutConceptsInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
   auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
@@ -1219,6 +1389,7 @@ export type usersUncheckedCreateWithoutConceptsInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
   auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
@@ -1264,6 +1435,7 @@ export type usersUpdateWithoutConceptsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
   auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
@@ -1293,6 +1465,7 @@ export type usersUncheckedUpdateWithoutConceptsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
   auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
@@ -1322,6 +1495,7 @@ export type usersCreateWithoutCommunity_commentsInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
   auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
@@ -1351,6 +1525,7 @@ export type usersUncheckedCreateWithoutCommunity_commentsInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
   auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
@@ -1396,6 +1571,7 @@ export type usersUpdateWithoutCommunity_commentsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
   auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
@@ -1425,6 +1601,7 @@ export type usersUncheckedUpdateWithoutCommunity_commentsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
   auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
@@ -1454,6 +1631,7 @@ export type usersCreateWithoutCollaborationsInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
@@ -1483,6 +1661,7 @@ export type usersUncheckedCreateWithoutCollaborationsInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
@@ -1528,6 +1707,7 @@ export type usersUpdateWithoutCollaborationsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
@@ -1557,6 +1737,7 @@ export type usersUncheckedUpdateWithoutCollaborationsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
@@ -1586,6 +1767,7 @@ export type usersCreateWithoutMarketplace_profileInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -1615,6 +1797,7 @@ export type usersUncheckedCreateWithoutMarketplace_profileInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -1660,6 +1843,7 @@ export type usersUpdateWithoutMarketplace_profileInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -1689,6 +1873,7 @@ export type usersUncheckedUpdateWithoutMarketplace_profileInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -1718,6 +1903,7 @@ export type usersCreateWithoutMarketplace_contacts_sentInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -1747,6 +1933,7 @@ export type usersUncheckedCreateWithoutMarketplace_contacts_sentInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -1792,6 +1979,7 @@ export type usersUpdateWithoutMarketplace_contacts_sentInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -1821,6 +2009,7 @@ export type usersUncheckedUpdateWithoutMarketplace_contacts_sentInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -1850,6 +2039,7 @@ export type usersCreateWithoutBilling_documentsInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -1879,6 +2069,7 @@ export type usersUncheckedCreateWithoutBilling_documentsInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -1924,6 +2115,7 @@ export type usersUpdateWithoutBilling_documentsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -1953,6 +2145,7 @@ export type usersUncheckedUpdateWithoutBilling_documentsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -1982,6 +2175,7 @@ export type usersCreateWithoutCrm_companiesInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -2011,6 +2205,7 @@ export type usersUncheckedCreateWithoutCrm_companiesInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -2056,6 +2251,7 @@ export type usersUpdateWithoutCrm_companiesInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -2085,6 +2281,7 @@ export type usersUncheckedUpdateWithoutCrm_companiesInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -2114,6 +2311,7 @@ export type usersCreateWithoutCrm_contactsInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -2143,6 +2341,7 @@ export type usersUncheckedCreateWithoutCrm_contactsInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -2188,6 +2387,7 @@ export type usersUpdateWithoutCrm_contactsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -2217,6 +2417,7 @@ export type usersUncheckedUpdateWithoutCrm_contactsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -2246,6 +2447,7 @@ export type usersCreateWithoutStock_itemsInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -2275,6 +2477,7 @@ export type usersUncheckedCreateWithoutStock_itemsInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -2320,6 +2523,7 @@ export type usersUpdateWithoutStock_itemsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -2349,6 +2553,7 @@ export type usersUncheckedUpdateWithoutStock_itemsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -2378,6 +2583,7 @@ export type usersCreateWithoutAgenda_eventsInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -2407,6 +2613,7 @@ export type usersUncheckedCreateWithoutAgenda_eventsInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -2452,6 +2659,7 @@ export type usersUpdateWithoutAgenda_eventsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -2481,6 +2689,7 @@ export type usersUncheckedUpdateWithoutAgenda_eventsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -2510,6 +2719,7 @@ export type usersCreateWithoutCash_register_entriesInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -2539,6 +2749,7 @@ export type usersUncheckedCreateWithoutCash_register_entriesInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -2584,6 +2795,7 @@ export type usersUpdateWithoutCash_register_entriesInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -2613,6 +2825,7 @@ export type usersUncheckedUpdateWithoutCash_register_entriesInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -2642,6 +2855,7 @@ export type usersCreateWithoutRolesInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -2671,6 +2885,7 @@ export type usersUncheckedCreateWithoutRolesInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -2716,6 +2931,7 @@ export type usersUpdateWithoutRolesInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -2745,6 +2961,7 @@ export type usersUncheckedUpdateWithoutRolesInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -2774,6 +2991,7 @@ export type usersCreateWithoutApplicationsInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -2803,6 +3021,7 @@ export type usersUncheckedCreateWithoutApplicationsInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -2848,6 +3067,7 @@ export type usersUpdateWithoutApplicationsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -2877,6 +3097,7 @@ export type usersUncheckedUpdateWithoutApplicationsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -2906,6 +3127,7 @@ export type usersCreateWithoutProfileInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -2935,6 +3157,7 @@ export type usersUncheckedCreateWithoutProfileInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -2980,6 +3203,7 @@ export type usersUpdateWithoutProfileInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -3009,6 +3233,7 @@ export type usersUncheckedUpdateWithoutProfileInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -3038,6 +3263,7 @@ export type usersCreateWithoutSubscriptionInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -3067,6 +3293,7 @@ export type usersUncheckedCreateWithoutSubscriptionInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -3112,6 +3339,7 @@ export type usersUpdateWithoutSubscriptionInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -3141,6 +3369,7 @@ export type usersUncheckedUpdateWithoutSubscriptionInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -3170,6 +3399,7 @@ export type usersCreateWithoutReal_estate_propertiesInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -3199,6 +3429,7 @@ export type usersUncheckedCreateWithoutReal_estate_propertiesInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -3244,6 +3475,7 @@ export type usersUpdateWithoutReal_estate_propertiesInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -3273,6 +3505,7 @@ export type usersUncheckedUpdateWithoutReal_estate_propertiesInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -3302,6 +3535,7 @@ export type usersCreateWithoutFleet_vehiclesInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -3331,6 +3565,7 @@ export type usersUncheckedCreateWithoutFleet_vehiclesInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -3376,6 +3611,7 @@ export type usersUpdateWithoutFleet_vehiclesInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -3405,6 +3641,7 @@ export type usersUncheckedUpdateWithoutFleet_vehiclesInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -3434,6 +3671,7 @@ export type usersCreateWithoutAd_campaignsInput = {
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
@@ -3463,6 +3701,7 @@ export type usersUncheckedCreateWithoutAd_campaignsInput = {
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
   concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
   collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
@@ -3508,6 +3747,7 @@ export type usersUpdateWithoutAd_campaignsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
@@ -3537,6 +3777,7 @@ export type usersUncheckedUpdateWithoutAd_campaignsInput = {
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
   concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
   collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
@@ -3565,6 +3806,7 @@ export type usersUncheckedUpdateWithoutAd_campaignsInput = {
 export type UsersCountOutputType = {
   projects: number
   memories: number
+  chat_messages: number
   concepts: number
   community_comments: number
   collaborations: number
@@ -3586,6 +3828,7 @@ export type UsersCountOutputType = {
 export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   projects?: boolean | UsersCountOutputTypeCountProjectsArgs
   memories?: boolean | UsersCountOutputTypeCountMemoriesArgs
+  chat_messages?: boolean | UsersCountOutputTypeCountChat_messagesArgs
   concepts?: boolean | UsersCountOutputTypeCountConceptsArgs
   community_comments?: boolean | UsersCountOutputTypeCountCommunity_commentsArgs
   collaborations?: boolean | UsersCountOutputTypeCountCollaborationsArgs
@@ -3626,6 +3869,13 @@ export type UsersCountOutputTypeCountProjectsArgs<ExtArgs extends runtime.Types.
  */
 export type UsersCountOutputTypeCountMemoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.memoriesWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountChat_messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.chat_messagesWhereInput
 }
 
 /**
@@ -3750,6 +4000,7 @@ export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   active_role?: boolean
   projects?: boolean | Prisma.users$projectsArgs<ExtArgs>
   memories?: boolean | Prisma.users$memoriesArgs<ExtArgs>
+  chat_messages?: boolean | Prisma.users$chat_messagesArgs<ExtArgs>
   concepts?: boolean | Prisma.users$conceptsArgs<ExtArgs>
   community_comments?: boolean | Prisma.users$community_commentsArgs<ExtArgs>
   collaborations?: boolean | Prisma.users$collaborationsArgs<ExtArgs>
@@ -3803,6 +4054,7 @@ export type usersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
 export type usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   projects?: boolean | Prisma.users$projectsArgs<ExtArgs>
   memories?: boolean | Prisma.users$memoriesArgs<ExtArgs>
+  chat_messages?: boolean | Prisma.users$chat_messagesArgs<ExtArgs>
   concepts?: boolean | Prisma.users$conceptsArgs<ExtArgs>
   community_comments?: boolean | Prisma.users$community_commentsArgs<ExtArgs>
   collaborations?: boolean | Prisma.users$collaborationsArgs<ExtArgs>
@@ -3832,6 +4084,7 @@ export type $usersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   objects: {
     projects: Prisma.$projectsPayload<ExtArgs>[]
     memories: Prisma.$memoriesPayload<ExtArgs>[]
+    chat_messages: Prisma.$chat_messagesPayload<ExtArgs>[]
     concepts: Prisma.$conceptsPayload<ExtArgs>[]
     community_comments: Prisma.$community_commentsPayload<ExtArgs>[]
     collaborations: Prisma.$project_collaboratorsPayload<ExtArgs>[]
@@ -4260,6 +4513,7 @@ export interface Prisma__usersClient<T, Null = never, ExtArgs extends runtime.Ty
   readonly [Symbol.toStringTag]: "PrismaPromise"
   projects<T extends Prisma.users$projectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$projectsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   memories<T extends Prisma.users$memoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$memoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$memoriesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  chat_messages<T extends Prisma.users$chat_messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$chat_messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$chat_messagesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   concepts<T extends Prisma.users$conceptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$conceptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$conceptsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   community_comments<T extends Prisma.users$community_commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$community_commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$community_commentsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   collaborations<T extends Prisma.users$collaborationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$collaborationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$project_collaboratorsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4752,6 +5006,30 @@ export type users$memoriesArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.MemoriesScalarFieldEnum | Prisma.MemoriesScalarFieldEnum[]
+}
+
+/**
+ * users.chat_messages
+ */
+export type users$chat_messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the chat_messages
+   */
+  select?: Prisma.chat_messagesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the chat_messages
+   */
+  omit?: Prisma.chat_messagesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.chat_messagesInclude<ExtArgs> | null
+  where?: Prisma.chat_messagesWhereInput
+  orderBy?: Prisma.chat_messagesOrderByWithRelationInput | Prisma.chat_messagesOrderByWithRelationInput[]
+  cursor?: Prisma.chat_messagesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Chat_messagesScalarFieldEnum | Prisma.Chat_messagesScalarFieldEnum[]
 }
 
 /**
