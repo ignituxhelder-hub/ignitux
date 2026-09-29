@@ -218,8 +218,8 @@ describe('catalogue des offres', () => {
     });
   });
 
-  describe('generateur former', () => {
-    it("inclut 'former' dans les offres payantes, pas dans Decouverte", () => {
+  describe('générateur former', () => {
+    it("inclut 'former' dans les offres payantes, pas dans Découverte", () => {
       const decouverte = CATALOGUE.find((o) => o.id === 'decouverte')!;
       const entrepreneur = CATALOGUE.find((o) => o.id === 'entrepreneur')!;
 
