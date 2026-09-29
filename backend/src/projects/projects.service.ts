@@ -10,6 +10,7 @@ import { PlanningService } from '../igini/planning/planning.service.js';
 import { TransmissionService } from '../igini/transmission/transmission.service.js';
 import { WorkflowEngineService } from '../igini/workflow/workflow-engine.service.js';
 import { WorkflowService } from '../igini/workflow/workflow.service.js';
+import { FormerService, type LegalFormRecommendationResult } from '../igini/former/former.service.js';
 import { OffresService } from '../offres/offres.service.js';
 import { contextePersonne } from '../profile/contexte-personne.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -19,6 +20,7 @@ export class ProjectsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly analysisService: AnalysisService,
+    private readonly formerService: FormerService,
     private readonly planningService: PlanningService,
     private readonly financingService: FinancingService,
     private readonly developmentService: DevelopmentService,
@@ -336,6 +338,71 @@ export class ProjectsService {
     return this.prisma.analyses.findMany({
       where: { project_id: id },
       include: { sources: true },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  /**
+   * Persiste une recommandation et ses tables filles. Privée et réutilisée
+   * par le déclenchement manuel (ci-dessous) et le déclenchement automatique
+   * (ProjectsService.analyzeForOwner) : les deux chemins doivent écrire
+   * exactement la même chose.
+   */
+  private async persistFormerRecommendation(
+    projectId: string,
+    ownerId: string,
+    result: LegalFormRecommendationResult,
+  ) {
+    const recommendation = await this.prisma.legal_form_recommendations.create({
+      data: {
+        project_id: projectId,
+        recommended_form: result.recommended_form,
+        rationale: result.rationale,
+        points_to_check: result.points_to_check,
+        ...(await this.generatedProvenance('legal_form_recommendations', ownerId, projectId)),
+      },
+    });
+
+    if (result.assumptions.length > 0) {
+      await this.prisma.legal_form_assumptions.createMany({
+        data: result.assumptions.map((a) => ({ recommendation_id: recommendation.id, ...a })),
+      });
+    }
+    if (result.alternatives.length > 0) {
+      await this.prisma.legal_form_alternatives.createMany({
+        data: result.alternatives.map((a) => ({ recommendation_id: recommendation.id, ...a })),
+      });
+    }
+    if (result.sources.length > 0) {
+      await this.prisma.legal_form_sources.createMany({
+        data: result.sources.map((s) => ({ recommendation_id: recommendation.id, ...s })),
+      });
+    }
+
+    return {
+      ...recommendation,
+      assumptions: result.assumptions,
+      alternatives: result.alternatives,
+      sources: result.sources,
+    };
+  }
+
+  async recommendLegalFormForOwner(ownerId: string, id: string) {
+    const project = await this.findOneForOwner(ownerId, id);
+    const result = await this.formerService.recommendLegalForm(
+      project.title,
+      project.description,
+      { userId: ownerId, projectId: project.id },
+      this.joinContext(await this.personContext(ownerId), await this.memoryContext(ownerId, id)),
+    );
+    return this.persistFormerRecommendation(project.id, ownerId, result);
+  }
+
+  async listLegalFormRecommendationsForOwner(ownerId: string, id: string) {
+    await this.findOneForViewer(ownerId, id);
+    return this.prisma.legal_form_recommendations.findMany({
+      where: { project_id: id },
+      include: { assumptions: true, alternatives: true, sources: true },
       orderBy: { created_at: 'desc' },
     });
   }

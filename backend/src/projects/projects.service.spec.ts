@@ -15,6 +15,7 @@ import { MemoryService } from '../igini/memory/memory.service.js';
 import { WorkflowEngineService } from '../igini/workflow/workflow-engine.service.js';
 import { WorkflowService } from '../igini/workflow/workflow.service.js';
 import { CLAUDE_MODEL } from '../igini/claude/claude.service.js';
+import { FormerService } from '../igini/former/former.service.js';
 import { OffresService } from '../offres/offres.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ProjectsService } from './projects.service.js';
@@ -53,6 +54,14 @@ describe('ProjectsService', () => {
     analysis_sources: {
       createMany: ReturnType<typeof vi.fn>;
     };
+    legal_form_recommendations: {
+      create: ReturnType<typeof vi.fn>;
+      findMany: ReturnType<typeof vi.fn>;
+      count: ReturnType<typeof vi.fn>;
+    };
+    legal_form_assumptions: { createMany: ReturnType<typeof vi.fn> };
+    legal_form_alternatives: { createMany: ReturnType<typeof vi.fn> };
+    legal_form_sources: { createMany: ReturnType<typeof vi.fn> };
     build_plans: {
       create: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
@@ -84,6 +93,7 @@ describe('ProjectsService', () => {
     user_profiles: { findUnique: ReturnType<typeof vi.fn> };
   };
   let analysisService: { analyzeProject: ReturnType<typeof vi.fn> };
+  let formerService: { recommendLegalForm: ReturnType<typeof vi.fn> };
   let planningService: { createBuildPlan: ReturnType<typeof vi.fn> };
   let financingService: { createFinancingPlan: ReturnType<typeof vi.fn> };
   let developmentService: { createDevelopmentPlan: ReturnType<typeof vi.fn> };
@@ -110,6 +120,14 @@ describe('ProjectsService', () => {
       },
       analyses: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
       analysis_sources: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+      legal_form_recommendations: {
+        create: vi.fn(),
+        findMany: vi.fn(),
+        count: vi.fn().mockResolvedValue(0),
+      },
+      legal_form_assumptions: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+      legal_form_alternatives: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+      legal_form_sources: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
       build_plans: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
       financing_plans: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
       development_plans: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
@@ -133,6 +151,7 @@ describe('ProjectsService', () => {
     prisma.financing_plans.findFirst.mockResolvedValue(null);
     prisma.development_plans.findFirst.mockResolvedValue(null);
     analysisService = { analyzeProject: vi.fn() };
+    formerService = { recommendLegalForm: vi.fn() };
     planningService = { createBuildPlan: vi.fn() };
     financingService = { createFinancingPlan: vi.fn() };
     developmentService = { createDevelopmentPlan: vi.fn() };
@@ -151,6 +170,7 @@ describe('ProjectsService', () => {
         ProjectsService,
         { provide: PrismaService, useValue: prisma },
         { provide: AnalysisService, useValue: analysisService },
+        { provide: FormerService, useValue: formerService },
         { provide: PlanningService, useValue: planningService },
         { provide: FinancingService, useValue: financingService },
         { provide: DevelopmentService, useValue: developmentService },
@@ -698,6 +718,111 @@ describe('ProjectsService', () => {
           id: 'p1',
           OR: [{ owner_id: 'u2-collaborateur' }, { collaborators: { some: { user_id: 'u2-collaborateur' } } }],
         },
+      });
+    });
+  });
+
+  describe('recommendLegalFormForOwner', () => {
+    it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.recommendLegalFormForOwner('u1', 'p1')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(formerService.recommendLegalForm).not.toHaveBeenCalled();
+    });
+
+    it('demande une recommandation puis persiste le résultat, sources comprises', async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      const recommandation = {
+        recommended_form: 'SASU',
+        rationale: 'Raisonnement',
+        assumptions: [{ subject: 'associés', assumption: 'seul', how_to_correct: 'précise si tu es à plusieurs' }],
+        alternatives: [{ form: 'EURL', why_not_chosen: 'moins souple pour lever des fonds' }],
+        points_to_check: ['vérifier le plafond de CA en vigueur'],
+        sources: [{ title: 'Source', url: 'https://exemple.com' }],
+      };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      formerService.recommendLegalForm.mockResolvedValue(recommandation);
+      // Le mock reflète ce qu'un vrai `create()` Prisma renvoie : les champs
+      // passés dans `data`, en écho, plus l'id généré — même convention que
+      // `prisma.analyses.create.mockResolvedValue({ id: 'a1', ...analysis })`
+      // plus haut dans ce fichier. `assumptions`/`alternatives`/`sources` ne
+      // sont volontairement pas dedans : ce sont des tables filles, pas des
+      // colonnes de `legal_form_recommendations`.
+      prisma.legal_form_recommendations.create.mockResolvedValue({
+        id: 'r1',
+        project_id: 'p1',
+        recommended_form: 'SASU',
+        rationale: 'Raisonnement',
+        points_to_check: ['vérifier le plafond de CA en vigueur'],
+      });
+
+      const result = await service.recommendLegalFormForOwner('u1', 'p1');
+
+      expect(formerService.recommendLegalForm).toHaveBeenCalledWith('Idée', 'Desc', ATTRIBUTION, undefined);
+      expect(prisma.legal_form_recommendations.create).toHaveBeenCalledWith({
+        data: {
+          project_id: 'p1',
+          recommended_form: 'SASU',
+          rationale: 'Raisonnement',
+          points_to_check: ['vérifier le plafond de CA en vigueur'],
+          ...GENERATED_PROVENANCE,
+        },
+      });
+      expect(prisma.legal_form_assumptions.createMany).toHaveBeenCalledWith({
+        data: [{ recommendation_id: 'r1', subject: 'associés', assumption: 'seul', how_to_correct: 'précise si tu es à plusieurs' }],
+      });
+      expect(prisma.legal_form_alternatives.createMany).toHaveBeenCalledWith({
+        data: [{ recommendation_id: 'r1', form: 'EURL', why_not_chosen: 'moins souple pour lever des fonds' }],
+      });
+      expect(prisma.legal_form_sources.createMany).toHaveBeenCalledWith({
+        data: [{ recommendation_id: 'r1', title: 'Source', url: 'https://exemple.com' }],
+      });
+      expect(result).toEqual({ id: 'r1', project_id: 'p1', ...recommandation });
+    });
+
+    it("n'appelle aucune table fille quand les listes sont vides", async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      formerService.recommendLegalForm.mockResolvedValue({
+        recommended_form: 'micro-entreprise',
+        rationale: 'r',
+        assumptions: [],
+        alternatives: [],
+        points_to_check: [],
+        sources: [],
+      });
+      prisma.legal_form_recommendations.create.mockResolvedValue({ id: 'r1' });
+
+      await service.recommendLegalFormForOwner('u1', 'p1');
+
+      expect(prisma.legal_form_assumptions.createMany).not.toHaveBeenCalled();
+      expect(prisma.legal_form_alternatives.createMany).not.toHaveBeenCalled();
+      expect(prisma.legal_form_sources.createMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listLegalFormRecommendationsForOwner', () => {
+    it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.listLegalFormRecommendationsForOwner('u1', 'p1')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+    });
+
+    it('un collaborateur peut lister les recommandations, pas seulement le propriétaire', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.legal_form_recommendations.findMany.mockResolvedValue([{ id: 'r1' }]);
+
+      await expect(
+        service.listLegalFormRecommendationsForOwner('u2-collaborateur', 'p1'),
+      ).resolves.toEqual([{ id: 'r1' }]);
+      expect(prisma.legal_form_recommendations.findMany).toHaveBeenCalledWith({
+        where: { project_id: 'p1' },
+        include: { assumptions: true, alternatives: true, sources: true },
+        orderBy: { created_at: 'desc' },
       });
     });
   });
