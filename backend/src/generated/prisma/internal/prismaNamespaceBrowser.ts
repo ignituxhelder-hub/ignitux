@@ -56,6 +56,10 @@ export const ModelName = {
   projects: 'projects',
   analyses: 'analyses',
   analysis_sources: 'analysis_sources',
+  legal_form_recommendations: 'legal_form_recommendations',
+  legal_form_assumptions: 'legal_form_assumptions',
+  legal_form_alternatives: 'legal_form_alternatives',
+  legal_form_sources: 'legal_form_sources',
   financing_plans: 'financing_plans',
   development_plans: 'development_plans',
   transmission_plans: 'transmission_plans',
@@ -196,6 +200,51 @@ export const Analysis_sourcesScalarFieldEnum = {
 } as const
 
 export type Analysis_sourcesScalarFieldEnum = (typeof Analysis_sourcesScalarFieldEnum)[keyof typeof Analysis_sourcesScalarFieldEnum]
+
+
+export const Legal_form_recommendationsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  recommended_form: 'recommended_form',
+  rationale: 'rationale',
+  points_to_check: 'points_to_check',
+  generated_by: 'generated_by',
+  generated_model: 'generated_model',
+  created_at: 'created_at'
+} as const
+
+export type Legal_form_recommendationsScalarFieldEnum = (typeof Legal_form_recommendationsScalarFieldEnum)[keyof typeof Legal_form_recommendationsScalarFieldEnum]
+
+
+export const Legal_form_assumptionsScalarFieldEnum = {
+  id: 'id',
+  recommendation_id: 'recommendation_id',
+  subject: 'subject',
+  assumption: 'assumption',
+  how_to_correct: 'how_to_correct'
+} as const
+
+export type Legal_form_assumptionsScalarFieldEnum = (typeof Legal_form_assumptionsScalarFieldEnum)[keyof typeof Legal_form_assumptionsScalarFieldEnum]
+
+
+export const Legal_form_alternativesScalarFieldEnum = {
+  id: 'id',
+  recommendation_id: 'recommendation_id',
+  form: 'form',
+  why_not_chosen: 'why_not_chosen'
+} as const
+
+export type Legal_form_alternativesScalarFieldEnum = (typeof Legal_form_alternativesScalarFieldEnum)[keyof typeof Legal_form_alternativesScalarFieldEnum]
+
+
+export const Legal_form_sourcesScalarFieldEnum = {
+  id: 'id',
+  recommendation_id: 'recommendation_id',
+  title: 'title',
+  url: 'url'
+} as const
+
+export type Legal_form_sourcesScalarFieldEnum = (typeof Legal_form_sourcesScalarFieldEnum)[keyof typeof Legal_form_sourcesScalarFieldEnum]
 
 
 export const Financing_plansScalarFieldEnum = {
