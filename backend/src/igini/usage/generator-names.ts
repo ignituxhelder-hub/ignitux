@@ -20,6 +20,7 @@
  */
 export const GENERATOR_NAMES = [
   'analyser',
+  'former',
   'construire',
   'financer',
   'developper',

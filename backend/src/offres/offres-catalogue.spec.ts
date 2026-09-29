@@ -217,4 +217,14 @@ describe('catalogue des offres', () => {
       }
     });
   });
+
+  describe('generateur former', () => {
+    it("inclut 'former' dans les offres payantes, pas dans Decouverte", () => {
+      const decouverte = CATALOGUE.find((o) => o.id === 'decouverte')!;
+      const entrepreneur = CATALOGUE.find((o) => o.id === 'entrepreneur')!;
+
+      expect(decouverte.capacites.generateurs).not.toContain('former');
+      expect(entrepreneur.capacites.generateurs).toContain('former');
+    });
+  });
 });

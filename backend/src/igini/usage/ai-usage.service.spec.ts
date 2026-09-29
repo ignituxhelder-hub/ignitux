@@ -236,7 +236,7 @@ describe('summarise', () => {
   it("garde l'ordre de la méthode IGINI plutôt que celui des données", () => {
     // Un affichage qui change d'ordre d'un mois à l'autre est illisible, et
     // l'ordre des cinq étapes porte un sens : c'est le parcours du porteur.
-    const desordre = ['transmettre', 'analyser', 'developper', 'construire', 'financer'];
+    const desordre = ['transmettre', 'analyser', 'former', 'developper', 'construire', 'financer'];
     const resume = summarise(
       desordre.map((generator) => ligne({ generator })),
       depuis,
