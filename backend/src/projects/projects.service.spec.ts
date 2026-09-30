@@ -894,6 +894,26 @@ describe('ProjectsService', () => {
       expect(result).toEqual({ id: 'fp1', project_id: 'p1', ...plan });
     });
 
+    it('crée des tâches suivables à partir des pistes de financement', async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      financingService.createFinancingPlan.mockResolvedValue({
+        summary: 'Résumé',
+        estimated_budget: '5 000 € à 15 000 €',
+        funding_sources: ['Autofinancement', 'Prêt bancaire'],
+        budget_breakdown: ['Développement'],
+      });
+      prisma.financing_plans.create.mockResolvedValue({});
+
+      await service.createFinancingPlanForOwner('u1', 'p1');
+
+      expect(workflowService.createTasksFromSuggestions).toHaveBeenCalledWith(
+        'p1',
+        ['Autofinancement', 'Prêt bancaire'],
+        'financing_plan',
+      );
+    });
+
     it("compose le contexte à partir de l'analyse et de la construction, jamais du développement", async () => {
       const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
       prisma.projects.findFirst.mockResolvedValue(project);
@@ -987,6 +1007,26 @@ describe('ProjectsService', () => {
       expect(result).toEqual({ id: 'dp1', project_id: 'p1', ...plan });
     });
 
+    it('crée des tâches suivables à partir des leviers de croissance', async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      developmentService.createDevelopmentPlan.mockResolvedValue({
+        summary: 'Résumé',
+        growth_levers: ['Bouche-à-oreille', 'Partenariats'],
+        key_metrics: ['Rétention'],
+        scaling_risks: ['Support non préparé'],
+      });
+      prisma.development_plans.create.mockResolvedValue({});
+
+      await service.createDevelopmentPlanForOwner('u1', 'p1');
+
+      expect(workflowService.createTasksFromSuggestions).toHaveBeenCalledWith(
+        'p1',
+        ['Bouche-à-oreille', 'Partenariats'],
+        'development_plan',
+      );
+    });
+
     it("compose le contexte à partir de l'analyse, de la construction et du financement", async () => {
       const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
       prisma.projects.findFirst.mockResolvedValue(project);
@@ -1078,6 +1118,26 @@ describe('ProjectsService', () => {
         data: { project_id: 'p1', ...plan, ...GENERATED_PROVENANCE },
       });
       expect(result).toEqual({ id: 'tp1', project_id: 'p1', ...plan });
+    });
+
+    it('crée des tâches suivables à partir de la check-list de transmissibilité', async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      transmissionService.createTransmissionPlan.mockResolvedValue({
+        summary: 'Résumé',
+        transfer_options: ['Association avec un repreneur'],
+        key_documentation: ['Contrats fournisseurs'],
+        readiness_checklist: ['Formaliser les processus clés', 'Documenter les accès'],
+      });
+      prisma.transmission_plans.create.mockResolvedValue({});
+
+      await service.createTransmissionPlanForOwner('u1', 'p1');
+
+      expect(workflowService.createTasksFromSuggestions).toHaveBeenCalledWith(
+        'p1',
+        ['Formaliser les processus clés', 'Documenter les accès'],
+        'transmission_plan',
+      );
     });
 
     it('compose le contexte à partir des quatre étapes précédentes', async () => {

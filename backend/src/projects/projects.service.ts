@@ -409,6 +409,13 @@ export class ProjectsService {
         ...(await this.generatedProvenance('financing_plans', ownerId, project.id)),
       },
     });
+
+    // Workflow : les pistes de financement deviennent des tâches suivables.
+    await this.workflowService.createTasksFromSuggestions(
+      project.id,
+      result.funding_sources,
+      'financing_plan',
+    );
     await this.automationService.run(project.id);
     await this.workflowEngineService.advanceActiveRunsForProject(ownerId, project.id);
 
@@ -450,6 +457,13 @@ export class ProjectsService {
         ...(await this.generatedProvenance('development_plans', ownerId, project.id)),
       },
     });
+
+    // Workflow : les leviers de croissance deviennent des tâches suivables.
+    await this.workflowService.createTasksFromSuggestions(
+      project.id,
+      result.growth_levers,
+      'development_plan',
+    );
     await this.automationService.run(project.id);
     await this.workflowEngineService.advanceActiveRunsForProject(ownerId, project.id);
 
@@ -500,6 +514,13 @@ export class ProjectsService {
         ...(await this.generatedProvenance('transmission_plans', ownerId, project.id)),
       },
     });
+
+    // Workflow : la check-list de transmissibilité devient des tâches suivables.
+    await this.workflowService.createTasksFromSuggestions(
+      project.id,
+      result.readiness_checklist,
+      'transmission_plan',
+    );
     await this.automationService.run(project.id);
     await this.workflowEngineService.advanceActiveRunsForProject(ownerId, project.id);
 
