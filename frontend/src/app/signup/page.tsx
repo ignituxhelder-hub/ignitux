@@ -12,11 +12,13 @@ export default function SignupPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [acceptedCgu, setAcceptedCgu] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!acceptedCgu) return;
     setError(null);
     setIsSubmitting(true);
     try {
@@ -68,7 +70,21 @@ export default function SignupPage() {
               : ''}
           </p>
         </div>
-        <button className="primary" type="submit" disabled={isSubmitting}>
+        <div className="field" style={{ flexDirection: 'row', alignItems: 'baseline', gap: '0.5rem' }}>
+          <input
+            id="accepte-cgu"
+            type="checkbox"
+            checked={acceptedCgu}
+            onChange={(e) => setAcceptedCgu(e.target.checked)}
+            style={{ width: 'auto' }}
+          />
+          <label htmlFor="accepte-cgu" style={{ margin: 0 }}>
+            J&apos;ai lu et j&apos;accepte les{' '}
+            <Link href="/cgu">conditions d&apos;utilisation</Link> et la{' '}
+            <Link href="/confidentialite">politique de confidentialité</Link>
+          </label>
+        </div>
+        <button className="primary" type="submit" disabled={isSubmitting || !acceptedCgu}>
           {isSubmitting ? 'Création…' : 'Créer mon compte'}
         </button>
       </form>

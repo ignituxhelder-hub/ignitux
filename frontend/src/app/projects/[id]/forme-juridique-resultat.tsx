@@ -78,9 +78,12 @@ export function FormeJuridiqueResultat({ recommandation }: { recommandation: Leg
         </p>
       )}
 
-      <p className="muted" style={{ marginTop: '0.75rem', fontSize: '0.85rem' }}>
-        IGINI recommande, il ne décide pas — dans les cas ambigus, vérifie auprès d&apos;un comptable ou d&apos;un
-        avocat avant de trancher.
+      <p className="notice" style={{ marginTop: '0.75rem' }}>
+        <span>
+          Cette recommandation est indicative, générée par IA, et ne remplace pas l&apos;avis
+          d&apos;un professionnel (comptable, avocat, expert-comptable) — IGINI recommande, il
+          ne décide pas.
+        </span>
       </p>
     </div>
   );

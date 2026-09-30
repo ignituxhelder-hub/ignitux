@@ -33,6 +33,7 @@ describe('SignupPage', () => {
 
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'a@b.com' } });
     fireEvent.change(screen.getByLabelText('Mot de passe'), { target: { value: 'motdepasse' } });
+    fireEvent.click(screen.getByLabelText(/j'ai lu et j'accepte/i));
     fireEvent.click(screen.getByRole('button', { name: /créer mon compte/i }));
 
     // On ne l envoie pas directement dans l espace entrepreneur : rien ne dit
@@ -51,9 +52,50 @@ describe('SignupPage', () => {
 
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'a@b.com' } });
     fireEvent.change(screen.getByLabelText('Mot de passe'), { target: { value: 'motdepasse' } });
+    fireEvent.click(screen.getByLabelText(/j'ai lu et j'accepte/i));
     fireEvent.click(screen.getByRole('button', { name: /créer mon compte/i }));
 
     expect(await screen.findByText('Un compte existe déjà avec cet email.')).toBeInTheDocument();
     expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it("bloque l'inscription tant que les CGU ne sont pas acceptées", async () => {
+    mockFetchSequence(
+      { status: 201, body: { id: 'u1', email: 'a@b.com' } },
+      { status: 200, body: { accessToken: 'tok123', user: { id: 'u1', email: 'a@b.com' } } },
+    );
+
+    render(
+      <AuthProvider>
+        <SignupPage />
+      </AuthProvider>,
+    );
+
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'a@b.com' } });
+    fireEvent.change(screen.getByLabelText('Mot de passe'), { target: { value: 'motdepasse' } });
+
+    expect(screen.getByRole('button', { name: /créer mon compte/i })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: /créer mon compte/i }));
+    expect(router.replace).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByLabelText(/j'ai lu et j'accepte/i));
+    expect(screen.getByRole('button', { name: /créer mon compte/i })).toBeEnabled();
+  });
+
+  it('lie les CGU et la politique de confidentialité', () => {
+    render(
+      <AuthProvider>
+        <SignupPage />
+      </AuthProvider>,
+    );
+
+    expect(screen.getByRole('link', { name: /conditions d'utilisation/i })).toHaveAttribute(
+      'href',
+      '/cgu',
+    );
+    expect(screen.getByRole('link', { name: /politique de confidentialité/i })).toHaveAttribute(
+      'href',
+      '/confidentialite',
+    );
   });
 });

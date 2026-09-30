@@ -139,6 +139,12 @@ export default function AccountPage() {
           router.replace('/');
         }}
       />
+
+      <p className="muted" style={{ marginTop: '1.5rem', fontSize: '0.85rem' }}>
+        <Link href="/confidentialite">Politique de confidentialité</Link> ·{' '}
+        <Link href="/cgu">Conditions d&apos;utilisation</Link> ·{' '}
+        <Link href="/mentions-legales">Mentions légales</Link>
+      </p>
     </main>
   );
 }

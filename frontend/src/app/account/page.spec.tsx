@@ -67,6 +67,27 @@ describe('AccountPage', () => {
     expect(await screen.findByText('Mot de passe actuel incorrect.')).toBeInTheDocument();
   });
 
+  it('lie les 3 pages légales', () => {
+    render(
+      <AuthProvider>
+        <AccountPage />
+      </AuthProvider>,
+    );
+
+    expect(screen.getByRole('link', { name: /politique de confidentialité/i })).toHaveAttribute(
+      'href',
+      '/confidentialite',
+    );
+    expect(screen.getByRole('link', { name: /conditions d'utilisation/i })).toHaveAttribute(
+      'href',
+      '/cgu',
+    );
+    expect(screen.getByRole('link', { name: /mentions légales/i })).toHaveAttribute(
+      'href',
+      '/mentions-legales',
+    );
+  });
+
   describe('mes données', () => {
     it('avertit que le fichier contiendra des coordonnées de tiers', async () => {
       mockApiRoutes({});

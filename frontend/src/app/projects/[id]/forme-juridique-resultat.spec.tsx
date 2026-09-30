@@ -23,6 +23,16 @@ describe('FormeJuridiqueResultat', () => {
     expect(screen.getByText(BASE.rationale)).toBeInTheDocument();
   });
 
+  it("affiche l'avertissement indicatif, mot pour mot comme dans les CGU", () => {
+    render(<FormeJuridiqueResultat recommandation={BASE} />);
+
+    expect(
+      screen.getByText(
+        /indicative, générée par IA, et ne remplace pas l'avis d'un professionnel \(comptable, avocat, expert-comptable\)/,
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("montre chaque hypothèse — sujet, supposition et façon de la corriger — quand IGINI a dû en faire", () => {
     // Coeur du principe de conception du composant : IGINI ne bloque jamais
     // faute d'information, il suppose et le dit. Une hypothèse cachée
