@@ -88,6 +88,12 @@ export interface QuotaVerdict {
  * serrer la vis sans redéployer.
  */
 export const DEFAULT_CALLS_PER_MONTH: number | null = null;
+/**
+ * 2 €/mois/personne — calibré pour la bêta V1 (test privé, petit groupe).
+ * À 10 testeurs actifs : 10 × 2 € = 20 €/mois, largement sous le plafond
+ * d'exploitation de 50 €/mois. Réglable sans redéploiement via
+ * `IGINI_QUOTA_COST_EUR_PER_MONTH` si le groupe grandissait.
+ */
 export const DEFAULT_COST_MICRO_EUR_PER_MONTH = 2 * MICRO_EUR_PER_EUR;
 
 /**

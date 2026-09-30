@@ -1,4 +1,5 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import { betaV1Actif } from '../config/beta-v1.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { peut, type Action, type Verdict } from './droits.js';
 import {
@@ -47,8 +48,8 @@ export class OffresService {
   /**
    * L'offre portée par ce compte.
    *
-   * Sans ligne, sans offre lisible, ou si la lecture échoue : Découverte.
-   * Le repli ne prive de rien, alors qu'une erreur propagée priverait
+   * Sans ligne, sans offre lisible, ou si la lecture échoue : le repli (voir
+   * `repli()`). Il ne prive de rien, alors qu'une erreur propagée priverait
    * quelqu'un de son produit à cause d'un incident de base.
    */
   async offreDe(userId: string): Promise<OffreId> {
@@ -57,18 +58,33 @@ export class OffresService {
         where: { user_id: userId },
         select: { offre: true, ends_on: true },
       });
-      if (!ligne) return OFFRE_PAR_DEFAUT;
-      // Un engagement terminé retombe sur la gratuite plutôt que de laisser
+      if (!ligne) return this.repli();
+      // Un engagement terminé retombe sur le repli plutôt que de laisser
       // ouvert : l'inverse ferait payer une fois pour toujours.
-      if (ligne.ends_on && ligne.ends_on.getTime() < Date.now()) return OFFRE_PAR_DEFAUT;
-      return estOffre(ligne.offre) ? ligne.offre : OFFRE_PAR_DEFAUT;
+      if (ligne.ends_on && ligne.ends_on.getTime() < Date.now()) return this.repli();
+      return estOffre(ligne.offre) ? ligne.offre : this.repli();
     } catch (error) {
       this.logger.error(
-        `Lecture de l'offre impossible pour ${userId} — repli sur ${OFFRE_PAR_DEFAUT}. ` +
+        `Lecture de l'offre impossible pour ${userId} — repli sur ${this.repli()}. ` +
           (error instanceof Error ? error.message : String(error)),
       );
-      return OFFRE_PAR_DEFAUT;
+      return this.repli();
     }
+  }
+
+  /**
+   * Le repli quand aucune offre réelle ne s'applique — Découverte en temps
+   * normal, Entrepreneur pendant la bêta V1.
+   *
+   * Aucun moyen de paiement n'existe pendant la bêta (`PAIEMENT_FOURNISSEUR`
+   * reste "aucun") : rester sur Découverte enfermerait un testeur derrière
+   * seul le générateur Analyser, sans jamais pouvoir essayer les cinq
+   * autres — ce que le test privé demande justement d'éprouver. Le plafond
+   * de coût (2 €/mois/personne, `ai-quota.ts`) continue de protéger la
+   * facture, inchangé par ce choix.
+   */
+  private repli(): OffreId {
+    return betaV1Actif(process.env.IGNITUX_BETA_V1) ? 'entrepreneur' : OFFRE_PAR_DEFAUT;
   }
 
   /** Le verdict pour une action donnée, sans le lever. */

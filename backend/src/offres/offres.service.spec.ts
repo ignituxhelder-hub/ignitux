@@ -12,10 +12,13 @@ describe('OffresService', () => {
     };
   };
   let fournisseurInitial: string | undefined;
+  let betaInitial: string | undefined;
 
   beforeEach(async () => {
     fournisseurInitial = process.env.PAIEMENT_FOURNISSEUR;
     delete process.env.PAIEMENT_FOURNISSEUR;
+    betaInitial = process.env.IGNITUX_BETA_V1;
+    delete process.env.IGNITUX_BETA_V1;
 
     prisma = {
       subscriptions: { findUnique: vi.fn().mockResolvedValue(null), upsert: vi.fn() },
@@ -31,10 +34,15 @@ describe('OffresService', () => {
   afterEach(() => {
     if (fournisseurInitial === undefined) delete process.env.PAIEMENT_FOURNISSEUR;
     else process.env.PAIEMENT_FOURNISSEUR = fournisseurInitial;
+    if (betaInitial === undefined) delete process.env.IGNITUX_BETA_V1;
+    else process.env.IGNITUX_BETA_V1 = betaInitial;
   });
 
   describe('lire l’offre', () => {
+    // Hors bêta V1 (voir describe dédié plus bas) : le repli général reste
+    // Découverte, la gratuite définitive du catalogue.
     it('retombe sur Découverte quand aucune ligne n’existe', async () => {
+      process.env.IGNITUX_BETA_V1 = 'false';
       await expect(service.offreDe('u1')).resolves.toBe('decouverte');
     });
 
@@ -46,6 +54,7 @@ describe('OffresService', () => {
 
     // Laisser ouvert après la fin ferait payer une fois pour toujours.
     it('redescend à Découverte quand l’engagement est terminé', async () => {
+      process.env.IGNITUX_BETA_V1 = 'false';
       prisma.subscriptions.findUnique.mockResolvedValue({
         offre: 'construction',
         ends_on: new Date('2020-01-01'),
@@ -64,6 +73,7 @@ describe('OffresService', () => {
     });
 
     it('ignore une valeur d’offre inconnue plutôt que de l’honorer', async () => {
+      process.env.IGNITUX_BETA_V1 = 'false';
       prisma.subscriptions.findUnique.mockResolvedValue({ offre: 'illimitee', ends_on: null });
 
       await expect(service.offreDe('u1')).resolves.toBe('decouverte');
@@ -72,7 +82,40 @@ describe('OffresService', () => {
     // Un incident de base ne doit pas priver quelqu'un de son produit. Le
     // repli sur la gratuite ne lui retire rien qu'il ait payé.
     it('retombe sur Découverte si la lecture échoue, sans propager', async () => {
+      process.env.IGNITUX_BETA_V1 = 'false';
       prisma.subscriptions.findUnique.mockRejectedValue(new Error('base injoignable'));
+
+      await expect(service.offreDe('u1')).resolves.toBe('decouverte');
+    });
+  });
+
+  describe('lire l’offre pendant la bêta V1', () => {
+    // Aucun moyen de paiement n'existe pendant la bêta : rester sur
+    // Découverte empêcherait un testeur d'essayer 5 des 6 générateurs
+    // (seule 'analyser' y est incluse). Le repli de la bêta est donc
+    // Entrepreneur, pas Découverte — le plafond de coût (2€/mois/personne)
+    // continue de protéger la facture, inchangé.
+    it('remonte à Entrepreneur quand aucune ligne n’existe, par défaut (bêta active)', async () => {
+      await expect(service.offreDe('u1')).resolves.toBe('entrepreneur');
+    });
+
+    it('remonte à Entrepreneur quand l’engagement est terminé', async () => {
+      prisma.subscriptions.findUnique.mockResolvedValue({
+        offre: 'construction',
+        ends_on: new Date('2020-01-01'),
+      });
+
+      await expect(service.offreDe('u1')).resolves.toBe('entrepreneur');
+    });
+
+    it('remonte à Entrepreneur si la lecture échoue, sans propager', async () => {
+      prisma.subscriptions.findUnique.mockRejectedValue(new Error('base injoignable'));
+
+      await expect(service.offreDe('u1')).resolves.toBe('entrepreneur');
+    });
+
+    it('respecte toujours une offre explicitement enregistrée', async () => {
+      prisma.subscriptions.findUnique.mockResolvedValue({ offre: 'decouverte', ends_on: null });
 
       await expect(service.offreDe('u1')).resolves.toBe('decouverte');
     });
@@ -157,7 +200,9 @@ describe('OffresService', () => {
       const vue = await service.catalogue('u1');
 
       expect(vue.souscriptionPossible).toBe(false);
-      expect(vue.actuelle).toBe('decouverte');
+      // Entrepreneur, pas Découverte : repli de la bêta V1 (voir describe
+      // dédié plus haut), actif par défaut dans ce fichier de test.
+      expect(vue.actuelle).toBe('entrepreneur');
     });
 
     it('marque l’offre en cours', async () => {
