@@ -589,7 +589,7 @@ export default function ProjectDetailPage() {
           title="Forme juridique"
           buttonLabel="Proposer une forme juridique"
           buttonBusyLabel="Recommandation en cours…"
-          emptyLabel="Aucune recommandation pour l'instant — elle apparaît automatiquement dès qu'une analyse dépasse 75/100, ou lance-la toi-même."
+          emptyLabel="Aucune recommandation pour l'instant — dès qu'une analyse dépasse 75/100, IGINI en prépare une automatiquement (ça prend une minute ou deux : reviens sur cette page pour la voir), ou lance-la toi-même."
           items={legalForms}
           isBusy={legalForm.isBusy}
           error={legalForm.error}
