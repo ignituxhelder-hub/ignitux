@@ -11,7 +11,6 @@ import {
   type MarketplaceRole,
 } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { BETA_V1_ACTIF } from '@/lib/beta-v1';
 
 const ROLE_LABELS: Record<MarketplaceRole, string> = {
   mentor: 'Mentor',
@@ -67,18 +66,11 @@ export default function MarketplacePage() {
       router.replace('/login');
       return;
     }
-    // Hors périmètre de la bêta V1 (voir lib/beta-v1.ts) : le vrai garde est
-    // côté serveur, ceci ne fait qu'éviter d'atterrir sur une page qui
-    // n'affichera jamais rien.
-    if (isReady && token && BETA_V1_ACTIF) {
-      router.replace('/accueil');
-      return;
-    }
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady, token, router, filterRole]);
 
-  if (!isReady || !token || BETA_V1_ACTIF) {
+  if (!isReady || !token) {
     return null;
   }
 

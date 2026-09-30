@@ -13,7 +13,6 @@ import {
   type ParticipationRow,
 } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { BETA_V1_ACTIF } from '@/lib/beta-v1';
 import { euros, jour, pourcentage } from '@/lib/montants';
 import { useRoles } from '@/lib/roles';
 
@@ -102,17 +101,10 @@ export default function InvestorSpacePage() {
       router.replace('/login');
       return;
     }
-    // Hors périmètre de la bêta V1 (voir lib/beta-v1.ts) : le vrai garde est
-    // côté serveur, ceci ne fait qu'éviter d'atterrir sur une page qui
-    // n'affichera jamais rien.
-    if (BETA_V1_ACTIF) {
-      router.replace('/accueil');
-      return;
-    }
     void charger();
   }, [isReady, token, router, charger]);
 
-  if (!isReady || !token || BETA_V1_ACTIF) return null;
+  if (!isReady || !token) return null;
 
   return (
     <main className="page page--wide">

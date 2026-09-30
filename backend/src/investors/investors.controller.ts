@@ -3,7 +3,6 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
-import { BetaV1Guard } from '../config/beta-v1.guard.js';
 import {
   CorrectMovementDto,
   DistributionDto,
@@ -24,7 +23,7 @@ import { InvestorsService } from './investors.service.js';
  */
 @ApiTags('investisseurs')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, BetaV1Guard)
+@UseGuards(JwtAuthGuard)
 @Controller('investisseurs')
 export class InvestorsController {
   constructor(private readonly investors: InvestorsService) {}
@@ -81,7 +80,7 @@ export class InvestorsController {
  */
 @ApiTags('investisseurs')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, BetaV1Guard)
+@UseGuards(JwtAuthGuard)
 @Controller()
 export class FinancedProjectsController {
   constructor(private readonly investors: InvestorsService) {}

@@ -80,10 +80,11 @@ const envSchema = z.object({
   IGNITUX_BIC: z.string().optional(),
   /** 'aucun' tant qu'aucun encaissement n'est branché. Voir offres.service.ts. */
   PAIEMENT_FOURNISSEUR: z.string().optional(),
-  // Ferme Portefeuille investisseur et Mentors & investisseurs (marketplace),
-  // hors périmètre du test privé et jamais revus par un juriste. Voir
-  // config/beta-v1.ts — même convention que IGINI_AI_ENABLED : seul 'false'
-  // rouvre le produit complet.
+  // Pendant la bêta V1, sans moyen de paiement configuré : un compte sans
+  // abonnement obtient l'offre Entrepreneur plutôt que la gratuite
+  // Découverte, pour que chaque testeur puisse essayer les 6 générateurs.
+  // Voir offres.service.ts et config/beta-v1.ts — même convention que
+  // IGINI_AI_ENABLED : seul 'false' repasse au comportement commercial normal.
   IGNITUX_BETA_V1: z.string().optional(),
 });
 

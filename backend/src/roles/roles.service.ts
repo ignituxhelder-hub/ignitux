@@ -1,14 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { betaV1Actif } from '../config/beta-v1.js';
-import { getEnv } from '../config/env.js';
 import { ConstitutionService } from '../constitution/constitution.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   type DataDomain,
   type RoleDefinition,
-  type RoleId,
   ROLES,
-  ROLES_MASQUES_EN_BETA_V1,
   findRole,
   isRoleId,
   openRoles,
@@ -76,15 +72,7 @@ export class RolesService {
           ? utilisateur.active_role
           : null,
       suggestions,
-      // Pendant la bêta V1, un rôle masqué ne se propose pas à qui ne le
-      // tient pas déjà — celui qui le tient le garde visible, rien ne
-      // disparaît sous ses pieds.
-      catalogue: ROLES.filter(
-        (role) =>
-          !betaV1Actif(getEnv().IGNITUX_BETA_V1) ||
-          !ROLES_MASQUES_EN_BETA_V1.includes(role.id) ||
-          tenus.includes(role.id),
-      ).map((role) => ({
+      catalogue: ROLES.map((role) => ({
         ...role,
         domains: [...role.domains],
         held: tenus.includes(role.id),
@@ -135,18 +123,6 @@ export class RolesService {
     }
 
     const ajoutes = voulus.filter((role) => !actuels.includes(role));
-
-    if (betaV1Actif(getEnv().IGNITUX_BETA_V1)) {
-      const nouveauMasque = ajoutes.find((role) =>
-        ROLES_MASQUES_EN_BETA_V1.includes(role as RoleId),
-      );
-      if (nouveauMasque) {
-        throw new BadRequestException(
-          `Le rôle « ${findRole(nouveauMasque)?.label ?? nouveauMasque} » n'est pas ouvert ` +
-            'pendant cette phase de test privé.',
-        );
-      }
-    }
 
     await this.prisma.$transaction([
       ...(retires.length > 0

@@ -15,7 +15,6 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
-import { BetaV1Guard } from '../config/beta-v1.guard.js';
 import { CreateContactDto } from './dto/create-contact.dto.js';
 import { UpsertProfileDto } from './dto/upsert-profile.dto.js';
 import { MarketplaceService } from './marketplace.service.js';
@@ -23,7 +22,7 @@ import type { MarketplaceRole } from './marketplace-role.js';
 
 @ApiTags('marketplace')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, BetaV1Guard)
+@UseGuards(JwtAuthGuard)
 @Controller('marketplace')
 export class MarketplaceController {
   constructor(private readonly marketplaceService: MarketplaceService) {}

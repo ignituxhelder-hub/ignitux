@@ -36,7 +36,7 @@ nativement, sans conteneur.
 | `ANTHROPIC_API_KEY` | fournie par Helder | non au démarrage, mais requise pour que les générateurs répondent |
 | `IGINI_AI_ENABLED` | `true` — **sans ça, aucun générateur ne fonctionne** | non (défaut déjà `true`) |
 | `IGINI_QUOTA_COST_EUR_PER_MONTH` | `2` (déjà la valeur par défaut — 10 testeurs actifs restent sous 20 €/mois) | non |
-| `IGNITUX_BETA_V1` | `true` (déjà la valeur par défaut — ferme Portefeuille investisseur et Marketplace, ouvre Entrepreneur par défaut aux testeurs) | non |
+| `IGNITUX_BETA_V1` | `true` (déjà la valeur par défaut — sans moyen de paiement, ouvre l'offre Entrepreneur par défaut aux testeurs pour qu'ils puissent essayer les 6 générateurs) | non |
 | `PORT` | injecté automatiquement par l'hébergeur | — |
 
 **Note sur `MAIL_TRANSPORT=log`** : si aucun fournisseur SMTP n'est configuré pour ce premier
@@ -49,7 +49,6 @@ un premier tour — à condition de le savoir. Configurer un vrai SMTP reste rec
 | Variable | Valeur pour la bêta |
 |---|---|
 | `NEXT_PUBLIC_API_URL` | URL du backend Render/Railway, en `https://` — **doit être définie avant `next build`**, pas seulement au démarrage (Next.js l'intègre au code au moment de la compilation) |
-| `NEXT_PUBLIC_BETA_V1` | `true` (déjà la valeur par défaut) — doit rester identique à `IGNITUX_BETA_V1` côté backend |
 
 ## Contrôle au démarrage (déjà en place, vérifié)
 
@@ -65,7 +64,7 @@ qui manque — rien à ajouter ici, juste à lire les journaux du premier démar
 2. Exécuter la migration de production une seule fois : `npx prisma migrate deploy` (avec
    `DATABASE_URL` pointée sur `ignitux_prod`).
 3. Vérifier `GET /ready` sur l'URL backend — doit répondre en bonne santé.
-4. Configurer `NEXT_PUBLIC_API_URL` et `NEXT_PUBLIC_BETA_V1` sur Vercel, déployer le frontend.
+4. Configurer `NEXT_PUBLIC_API_URL` sur Vercel, déployer le frontend.
 5. Revenir sur Render/Railway, mettre à jour `FRONTEND_URL` avec l'URL Vercel finale (sinon
    CORS refuse les requêtes du frontend).
 

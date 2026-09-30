@@ -1,6 +1,4 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { betaV1Actif } from '../config/beta-v1.js';
-import { getEnv } from '../config/env.js';
 import { offre } from '../offres/offres-catalogue.js';
 import { OffresService } from '../offres/offres.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -12,27 +10,7 @@ import {
   type ChoixBureau,
   type Lanceur,
 } from './activation.js';
-import {
-  findApplication,
-  MASQUEES_EN_BETA_V1,
-  type ApplicationId,
-} from './applications-catalogue.js';
-
-/**
- * Retire du bureau ce qui est hors périmètre pendant la bêta V1. Ne
- * supprime aucune donnée : c'est une vue, recalculée à chaque appel.
- */
-function masquerBetaV1(bureau: Lanceur): Lanceur {
-  const garder = (vue: { id: ApplicationId }) => !MASQUEES_EN_BETA_V1.includes(vue.id);
-  return {
-    ...bureau,
-    applications: bureau.applications.filter(garder),
-    suggestions: bureau.suggestions.filter(garder),
-    prevues: bureau.prevues.filter(garder),
-    boutique: bureau.boutique.filter(garder),
-    reglages: bureau.reglages.filter(garder),
-  };
-}
+import { findApplication, type ApplicationId } from './applications-catalogue.js';
 
 /**
  * Lit ce que le moteur d'activation a besoin de savoir, et lui pose la
@@ -93,7 +71,7 @@ export class ApplicationsService {
       }
     }
 
-    const brut = lanceur({
+    return lanceur({
       choix,
       // Un rôle inconnu en base (reste d'une ancienne version) est ignoré
       // plutôt que de faire échouer l'écran d'accueil.
@@ -109,8 +87,6 @@ export class ApplicationsService {
       secteurs,
       outilsDeGestion: offre(offreId).capacites.outilsDeGestion,
     });
-
-    return betaV1Actif(getEnv().IGNITUX_BETA_V1) ? masquerBetaV1(brut) : brut;
   }
 
   /**

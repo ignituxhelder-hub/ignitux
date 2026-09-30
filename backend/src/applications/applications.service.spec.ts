@@ -3,11 +3,6 @@ import { OffresService } from '../offres/offres.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ApplicationsService } from './applications.service.js';
 
-// getEnv() valide process.env avec Zod et appelle process.exit(1) si la
-// configuration est incomplète : inutilisable tel quel dans un test.
-const env = vi.hoisted(() => ({ current: {} as Record<string, string | undefined> }));
-vi.mock('../config/env.js', () => ({ getEnv: () => env.current }));
-
 type Mock = ReturnType<typeof vi.fn>;
 
 describe('ApplicationsService — le bureau', () => {
@@ -25,7 +20,6 @@ describe('ApplicationsService — le bureau', () => {
   };
 
   beforeEach(() => {
-    env.current = {};
     prisma = {
       user_roles: { findMany: vi.fn().mockResolvedValue([{ role: 'entrepreneur' }]) },
       projects: { findMany: vi.fn().mockResolvedValue([]) },
@@ -50,17 +44,14 @@ describe('ApplicationsService — le bureau', () => {
   const ids = (liste: Array<{ id: string }>) => liste.map((app) => app.id);
 
   it('lit les choix enregistrés et les applique au bureau', async () => {
-    // 'stocks', pas 'portefeuille' : ce test porte sur la lecture générique
-    // des choix, pas sur le périmètre de la bêta V1 (voir describe dédié
-    // plus bas) — 'portefeuille' y est masqué par défaut.
     prisma.user_applications.findMany.mockResolvedValue([
-      { app_id: 'stocks', choix: 'ajoutee' },
+      { app_id: 'portefeuille', choix: 'ajoutee' },
       { app_id: 'parcours', choix: 'retiree' },
     ]);
 
     const bureau = await service.lanceurDe('u1');
 
-    expect(ids(bureau.applications)).toContain('stocks');
+    expect(ids(bureau.applications)).toContain('portefeuille');
     expect(ids(bureau.applications)).not.toContain('parcours');
     expect(ids(bureau.boutique)).toContain('parcours');
   });
@@ -102,34 +93,5 @@ describe('ApplicationsService — le bureau', () => {
       BadRequestException,
     );
     expect(prisma.user_applications.upsert).not.toHaveBeenCalled();
-  });
-
-  describe('périmètre de la bêta V1', () => {
-    const toutesLesVues = (bureau: Awaited<ReturnType<ApplicationsService['lanceurDe']>>) => [
-      ...bureau.applications,
-      ...bureau.suggestions,
-      ...bureau.prevues,
-      ...bureau.boutique,
-      ...bureau.reglages,
-    ];
-
-    it('masque Portefeuille investisseur et Mentors & investisseurs par défaut', async () => {
-      prisma.user_roles.findMany.mockResolvedValue([{ role: 'investisseur' }]);
-
-      const bureau = await service.lanceurDe('u1');
-
-      expect(ids(toutesLesVues(bureau))).not.toContain('portefeuille');
-      expect(ids(toutesLesVues(bureau))).not.toContain('reseau');
-    });
-
-    it("les montre à nouveau quand IGNITUX_BETA_V1='false'", async () => {
-      env.current = { IGNITUX_BETA_V1: 'false' };
-      prisma.user_roles.findMany.mockResolvedValue([{ role: 'investisseur' }]);
-
-      const bureau = await service.lanceurDe('u1');
-
-      expect(ids(bureau.applications)).toContain('portefeuille');
-      expect(ids(bureau.applications)).toContain('reseau');
-    });
   });
 });

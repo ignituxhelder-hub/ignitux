@@ -475,15 +475,6 @@ export const APPLICATIONS: readonly Application[] = [
   },
 ];
 
-/**
- * Masquées pendant la bêta V1 (voir config/beta-v1.ts) : Portefeuille
- * investisseur et Mentors & investisseurs, hors périmètre du test privé.
- * Rien n'est supprimé — `applications.service.ts` filtre ces ids du bureau
- * tant que la bêta est active, et les données de qui les aurait déjà
- * utilisées restent intactes derrière.
- */
-export const MASQUEES_EN_BETA_V1: readonly ApplicationId[] = ['portefeuille', 'reseau'];
-
 const PAR_ID = new Map<string, Application>(APPLICATIONS.map((app) => [app.id, app]));
 
 export function findApplication(id: string): Application | undefined {

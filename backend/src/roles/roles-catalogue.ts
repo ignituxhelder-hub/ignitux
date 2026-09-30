@@ -114,13 +114,6 @@ export const ROLES: readonly RoleDefinition[] = [
   },
 ];
 
-/**
- * Masqué pendant la bêta V1 (voir config/beta-v1.ts) : hors périmètre du
- * test privé, jamais revu par un juriste. `roles.service.ts` l'écarte de la
- * sélection tant que la bêta est active, sauf pour qui le tient déjà.
- */
-export const ROLES_MASQUES_EN_BETA_V1: readonly RoleId[] = ['investisseur'];
-
 const PAR_ID = new Map<string, RoleDefinition>(ROLES.map((role) => [role.id, role]));
 
 export function findRole(id: string): RoleDefinition | undefined {

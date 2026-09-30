@@ -1,14 +1,13 @@
 /**
- * LE PÉRIMÈTRE DE LA BÊTA V1 — ce qu'Ignitux montre pendant le test privé.
+ * LA BÊTA V1 — ce qu'Ignitux ajuste pendant le test privé.
  *
- * Portefeuille investisseur et Mentors & investisseurs (marketplace)
- * existent déjà dans le code, mais sont hors du périmètre demandé pour ce
- * test privé et n'ont jamais été revus par un juriste. `IGNITUX_BETA_V1`
- * les tient fermés jusqu'à décision contraire — rien n'est supprimé, tout
- * redevient accessible en changeant une seule variable d'environnement.
+ * Sans moyen de paiement configuré (`PAIEMENT_FOURNISSEUR="aucun"`), un
+ * compte sans abonnement obtient l'offre Entrepreneur plutôt que la
+ * gratuite Découverte (voir `offres.service.ts`), pour que chaque testeur
+ * puisse essayer les 6 générateurs IGINI sans être bloqué dès le premier.
  *
  * Même convention que `readGeneratorsAvailability` : tout ce qui n'est pas
- * exactement `'false'` laisse le produit complet.
+ * exactement `'false'` laisse ce comportement de bêta actif.
  */
 export function betaV1Actif(flag: string | undefined): boolean {
   return flag !== 'false';
