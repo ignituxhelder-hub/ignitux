@@ -28,6 +28,18 @@ import { PrismaService } from '../prisma/prisma.service.js';
 export class ProjectsService {
   private readonly logger = new Logger(ProjectsService.name);
 
+  /**
+   * Projets pour lesquels un déclenchement automatique de Former est en
+   * cours, le temps qu'il se termine. Un appel Former prend 40 à 90
+   * secondes : sans ce verrou, deux analyses rapprochées sur le même
+   * projet verraient toutes les deux `legal_form_recommendations.count()`
+   * à zéro et déclencheraient chacune leur propre recommandation. Un
+   * `Set` en mémoire suffit pour un déploiement mono-instance ; il ne
+   * protégerait pas contre plusieurs instances du serveur en parallèle,
+   * ce qui n'est pas le cas aujourd'hui.
+   */
+  private readonly formerAutoTriggerEnCours = new Set<string>();
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly analysisService: AnalysisService,
@@ -45,9 +57,9 @@ export class ProjectsService {
   ) {}
 
   /**
-   * Provenance commune aux cinq générateurs, soumise au moteur
+   * Provenance commune aux six générateurs, soumise au moteur
    * constitutionnel avant l'écriture. Centralisée ici parce qu'une provenance
-   * recopiée cinq fois finit par diverger, et qu'une divergence silencieuse
+   * recopiée six fois finit par diverger, et qu'une divergence silencieuse
    * sur ce champ précis est exactement ce que l'article 12 interdit.
    */
   private async generatedProvenance(
@@ -421,34 +433,41 @@ export class ProjectsService {
    * à la main (recommendLegalFormForOwner), en connaissance de cause.
    */
   private async triggerFormerAutomatically(ownerId: string, projectId: string): Promise<void> {
-    const dejaRecommande = await this.prisma.legal_form_recommendations.count({
-      where: { project_id: projectId },
-    });
-    if (dejaRecommande > 0) return;
+    if (this.formerAutoTriggerEnCours.has(projectId)) return;
+    this.formerAutoTriggerEnCours.add(projectId);
 
-    const project = await this.prisma.projects.findUniqueOrThrow({ where: { id: projectId } });
-
-    let result: LegalFormRecommendationResult;
     try {
-      result = await this.formerService.recommendLegalForm(
-        project.title,
-        project.description,
-        { userId: ownerId, projectId },
-        this.joinContext(await this.personContext(ownerId), await this.memoryContext(ownerId, projectId)),
-      );
-    } catch (error) {
-      // Refus d'entitlement (offre, plafond, interrupteur) : attendu et
-      // silencieux, ce ne sont pas des pannes — la personne n'a rien
-      // demandé explicitement qui mériterait un message d'erreur.
-      const estUnRefusAttendu =
-        error instanceof ForbiddenException ||
-        error instanceof ServiceUnavailableException ||
-        (error instanceof HttpException && error.getStatus() === HttpStatus.PAYMENT_REQUIRED);
-      if (estUnRefusAttendu) return;
-      throw error;
-    }
+      const dejaRecommande = await this.prisma.legal_form_recommendations.count({
+        where: { project_id: projectId },
+      });
+      if (dejaRecommande > 0) return;
 
-    await this.persistFormerRecommendation(projectId, ownerId, result);
+      const project = await this.prisma.projects.findUniqueOrThrow({ where: { id: projectId } });
+
+      let result: LegalFormRecommendationResult;
+      try {
+        result = await this.formerService.recommendLegalForm(
+          project.title,
+          project.description,
+          { userId: ownerId, projectId },
+          this.joinContext(await this.personContext(ownerId), await this.memoryContext(ownerId, projectId)),
+        );
+      } catch (error) {
+        // Refus d'entitlement (offre, plafond, interrupteur) : attendu et
+        // silencieux, ce ne sont pas des pannes — la personne n'a rien
+        // demandé explicitement qui mériterait un message d'erreur.
+        const estUnRefusAttendu =
+          error instanceof ForbiddenException ||
+          error instanceof ServiceUnavailableException ||
+          (error instanceof HttpException && error.getStatus() === HttpStatus.PAYMENT_REQUIRED);
+        if (estUnRefusAttendu) return;
+        throw error;
+      }
+
+      await this.persistFormerRecommendation(projectId, ownerId, result);
+    } finally {
+      this.formerAutoTriggerEnCours.delete(projectId);
+    }
   }
 
   async recommendLegalFormForOwner(ownerId: string, id: string) {

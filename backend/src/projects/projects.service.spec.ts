@@ -25,8 +25,8 @@ import { ProjectsService } from './projects.service.js';
 /**
  * Provenance attendue sur tout contenu généré (article 12 : un contenu
  * produit par un modèle doit être identifiable comme tel). Constante
- * partagée plutôt que recopiée dans les cinq assertions : si la provenance
- * change, les cinq tests doivent bouger ensemble ou aucun.
+ * partagée plutôt que recopiée dans les six assertions : si la provenance
+ * change, les six tests doivent bouger ensemble ou aucun.
  */
 const GENERATED_PROVENANCE = { generated_by: 'igini', generated_model: CLAUDE_MODEL };
 
@@ -749,6 +749,24 @@ describe('ProjectsService', () => {
         await new Promise((resolve) => setImmediate(resolve));
 
         expect(formerService.recommendLegalForm).not.toHaveBeenCalled();
+      });
+
+      it("ne déclenche qu'une fois quand deux analyses du même projet se chevauchent (course évitée)", async () => {
+        // Un appel Former prend 40 à 90 secondes : si une deuxième analyse
+        // démarre avant que la première n'ait eu le temps d'écrire sa
+        // recommandation, le `count()` vaudrait encore zéro pour les deux.
+        // Sans verrou en mémoire, les deux déclencheraient Former.
+        projetEtAnalyse(8);
+        prisma.legal_form_recommendations.create.mockResolvedValue({ id: 'r1' });
+
+        const p1 = service.analyzeForOwner('u1', 'p1');
+        const p2 = service.analyzeForOwner('u1', 'p1');
+        await Promise.all([p1, p2]);
+        // Non bloquant : on attend le prochain tick pour laisser les
+        // promesses détachées se résoudre avant d'inspecter les mocks.
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(formerService.recommendLegalForm).toHaveBeenCalledTimes(1);
       });
 
       it("n'attend pas Former avant de répondre (non bloquant)", async () => {
