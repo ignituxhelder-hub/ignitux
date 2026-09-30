@@ -8,6 +8,10 @@ const router = createRouterMock();
 vi.mock('next/navigation', () => ({
   useRouter: () => router,
 }));
+// Ce fichier teste le contenu réel de la page, pas le garde de la bêta V1
+// (voir page.beta-v1.spec.tsx, qui teste la redirection avec la vraie
+// valeur par défaut).
+vi.mock('@/lib/beta-v1', () => ({ BETA_V1_ACTIF: false }));
 
 const MENTOR_PROFILE = {
   id: 'm1',

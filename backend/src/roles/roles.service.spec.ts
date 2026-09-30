@@ -4,6 +4,11 @@ import { ConstitutionService } from '../constitution/constitution.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RolesService } from './roles.service.js';
 
+// getEnv() valide process.env avec Zod et appelle process.exit(1) si la
+// configuration est incomplète : inutilisable tel quel dans un test.
+const env = vi.hoisted(() => ({ current: {} as Record<string, string | undefined> }));
+vi.mock('../config/env.js', () => ({ getEnv: () => env.current }));
+
 type Mock = ReturnType<typeof vi.fn>;
 
 describe('RolesService', () => {
@@ -20,6 +25,7 @@ describe('RolesService', () => {
   };
 
   beforeEach(async () => {
+    env.current = {};
     prisma = {
       user_roles: {
         findMany: vi.fn().mockResolvedValue([]),
@@ -55,6 +61,11 @@ describe('RolesService', () => {
 
   describe('prendre des rôles', () => {
     it('accorde les rôles ouverts', async () => {
+      // 'investisseur' est bloqué à la nouvelle prise pendant la bêta V1
+      // (voir describe dédié plus bas) — ce test porte sur la prise
+      // générique d'un rôle ouvert, pas sur le périmètre de la bêta.
+      env.current = { IGNITUX_BETA_V1: 'false' };
+
       await service.setRoles('u1', ['entrepreneur', 'investisseur']);
 
       const crees = prisma.user_roles.create.mock.calls.map((call) => call[0].data.role);
@@ -78,6 +89,7 @@ describe('RolesService', () => {
     });
 
     it('ne recrée pas un rôle déjà tenu', async () => {
+      env.current = { IGNITUX_BETA_V1: 'false' };
       prisma.user_roles.findMany.mockResolvedValue([{ role: 'entrepreneur' }]);
 
       await service.setRoles('u1', ['entrepreneur', 'investisseur']);
@@ -217,6 +229,50 @@ describe('RolesService', () => {
         service.assertViewIsSeparated('u1', 'investisseur', ['portefeuille', 'projets']),
       ).rejects.toThrow(/ne relèvent pas de ce rôle/);
       expect(prisma.constitution_violations.createMany).toHaveBeenCalled();
+    });
+  });
+
+  describe('périmètre de la bêta V1', () => {
+    it('refuse de nouvellement prendre le rôle investisseur pendant la bêta', async () => {
+      await expect(service.setRoles('u1', ['entrepreneur', 'investisseur'])).rejects.toThrow(
+        /pas ouvert pendant cette phase de test/,
+      );
+      expect(prisma.user_roles.create).not.toHaveBeenCalled();
+    });
+
+    it('laisse inchangé un rôle investisseur déjà tenu pendant la bêta', async () => {
+      prisma.user_roles.findMany.mockResolvedValue([
+        { role: 'entrepreneur' },
+        { role: 'investisseur' },
+      ]);
+
+      await expect(
+        service.setRoles('u1', ['entrepreneur', 'investisseur']),
+      ).resolves.toBeDefined();
+      expect(prisma.user_roles.create).not.toHaveBeenCalled();
+    });
+
+    it("autorise à nouveau la prise du rôle investisseur quand IGNITUX_BETA_V1='false'", async () => {
+      env.current = { IGNITUX_BETA_V1: 'false' };
+
+      await service.setRoles('u1', ['entrepreneur', 'investisseur']);
+
+      const crees = prisma.user_roles.create.mock.calls.map((call) => call[0].data.role);
+      expect(crees).toContain('investisseur');
+    });
+
+    it('ne propose pas le rôle investisseur dans le catalogue pendant la bêta', async () => {
+      const mine = await service.myRoles('u1');
+
+      expect(mine.catalogue.map((role) => role.id)).not.toContain('investisseur');
+    });
+
+    it('le propose quand même à qui le tient déjà', async () => {
+      prisma.user_roles.findMany.mockResolvedValue([{ role: 'investisseur' }]);
+
+      const mine = await service.myRoles('u1');
+
+      expect(mine.catalogue.map((role) => role.id)).toContain('investisseur');
     });
   });
 });
