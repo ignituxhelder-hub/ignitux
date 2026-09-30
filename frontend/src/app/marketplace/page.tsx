@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
 import { IginiMention } from '@/components/igini-mention';
@@ -131,9 +130,6 @@ export default function MarketplacePage() {
   return (
     <main className="page page--wide">
       <div className="top-bar">
-        <Link href="/projects" className="muted">
-          ← Retour aux projets
-        </Link>
       </div>
 
       <h1>Mentors et investisseurs</h1>

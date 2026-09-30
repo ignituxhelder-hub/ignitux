@@ -317,6 +317,151 @@ describe('BillingPage', () => {
     });
   });
 
+  // Un brouillon mal saisi ne pouvait être corrigé qu'en le supprimant et en
+  // le recréant : la route de modification existait déjà côté serveur, sans
+  // aucun geste pour l'atteindre.
+  describe('modification d’un brouillon', () => {
+    it("ne propose la modification que sur un brouillon", async () => {
+      mockApiRoutes(
+        routes({
+          'GET /billing/documents': {
+            status: 200,
+            body: { disclaimer: DISCLAIMER, documents: [document({ status: 'emis' })] },
+          },
+        }),
+      );
+
+      render(
+        <AuthProvider>
+          <BillingPage />
+        </AuthProvider>,
+      );
+
+      await screen.findByText(/FAC-2026-0001/);
+      expect(screen.queryByRole('button', { name: 'Modifier' })).not.toBeInTheDocument();
+    });
+
+    it('pré-remplit le formulaire avec les valeurs actuelles du brouillon', async () => {
+      mockApiRoutes(routes());
+
+      render(
+        <AuthProvider>
+          <BillingPage />
+        </AuthProvider>,
+      );
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Modifier' }));
+
+      expect((screen.getByLabelText('Modifier le nom du client') as HTMLInputElement).value).toBe(
+        'Dupont',
+      );
+      expect((screen.getByLabelText('Modifier la désignation') as HTMLInputElement).value).toBe(
+        'Prestation',
+      );
+      expect(
+        (screen.getByLabelText('Modifier le montant hors taxes en euros') as HTMLInputElement)
+          .value,
+      ).toBe('100.00');
+      expect(
+        (screen.getByLabelText('Modifier le taux de TVA en pourcentage') as HTMLInputElement)
+          .value,
+      ).toBe('20');
+    });
+
+    it('envoie le correctif au serveur avec les montants convertis en centimes', async () => {
+      mockApiRoutes(
+        routes({
+          'PATCH /billing/documents/d1': { status: 200, body: document() },
+        }),
+      );
+
+      render(
+        <AuthProvider>
+          <BillingPage />
+        </AuthProvider>,
+      );
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Modifier' }));
+      fireEvent.change(screen.getByLabelText('Modifier le nom du client'), {
+        target: { value: 'Durand' },
+      });
+      fireEvent.change(screen.getByLabelText('Modifier le montant hors taxes en euros'), {
+        target: { value: '150,00' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Enregistrer' }));
+
+      await waitFor(() => {
+        const envoi = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.find(
+          (call) => (call[1]?.method ?? 'GET') === 'PATCH',
+        );
+        expect(envoi).toBeDefined();
+        expect(String(envoi![0])).toContain('/billing/documents/d1');
+        const corps = JSON.parse(String(envoi![1].body));
+        expect(corps.clientName).toBe('Durand');
+        expect(corps.lines[0].unitPriceCents).toBe(15000);
+      });
+    });
+
+    it("ferme le formulaire de modification sans rien envoyer", async () => {
+      mockApiRoutes(routes());
+
+      render(
+        <AuthProvider>
+          <BillingPage />
+        </AuthProvider>,
+      );
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Modifier' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Annuler' }));
+
+      expect(screen.queryByLabelText('Modifier le nom du client')).not.toBeInTheDocument();
+    });
+  });
+
+  it("désactive l'export CSV tant qu'il n'y a aucun document, puis télécharge le fichier", async () => {
+    mockApiRoutes(
+      routes({
+        'GET /billing/documents': { status: 200, body: { disclaimer: DISCLAIMER, documents: [] } },
+      }),
+    );
+
+    render(
+      <AuthProvider>
+        <BillingPage />
+      </AuthProvider>,
+    );
+
+    await screen.findByText("Aucun document pour l'instant.");
+    expect(screen.getByRole('button', { name: 'Exporter en CSV' })).toBeDisabled();
+  });
+
+  it('télécharge un export CSV quand des documents existent', async () => {
+    const csv = 'number,type,status\nFAC-2026-0001,facture,brouillon\n';
+    mockApiRoutes(
+      routes({
+        'GET /billing/documents/export': { status: 200, body: csv },
+      }),
+    );
+    const createObjectURL = vi.fn().mockReturnValue('blob:mock');
+    const revokeObjectURL = vi.fn();
+    URL.createObjectURL = createObjectURL;
+    URL.revokeObjectURL = revokeObjectURL;
+
+    render(
+      <AuthProvider>
+        <BillingPage />
+      </AuthProvider>,
+    );
+
+    const exportButton = await screen.findByRole('button', { name: 'Exporter en CSV' });
+    expect(exportButton).not.toBeDisabled();
+    fireEvent.click(exportButton);
+
+    await waitFor(() => expect(createObjectURL).toHaveBeenCalled());
+    const blob = createObjectURL.mock.calls[0][0] as Blob;
+    expect(blob.type).toBe('text/csv;charset=utf-8');
+  });
+
   it('redirige vers la connexion sans jeton', async () => {
     window.localStorage.clear();
     mockApiRoutes(routes());

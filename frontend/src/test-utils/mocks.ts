@@ -24,6 +24,9 @@ function jsonResponse(status: number, body: unknown) {
     ok: status >= 200 && status < 300,
     status,
     json: () => Promise.resolve(body),
+    // Pour les routes qui renvoient du texte brut (ex. l'export CSV) : la
+    // route se mocke alors avec `body` déjà en chaîne, telle quelle.
+    text: () => Promise.resolve(typeof body === 'string' ? body : JSON.stringify(body)),
   };
 }
 

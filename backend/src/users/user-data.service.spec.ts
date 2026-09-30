@@ -146,8 +146,10 @@ describe('UserDataService', () => {
       // L'egalite est exacte : ajouter une cle connue ne relache rien, mais
       // une colonne inattendue de `users` fait toujours echouer le test.
       // `roles_tenus` ne vient pas de `users` — c'est la table user_roles,
-      // qui ne contient ni secret ni donnee de tiers.
+      // qui ne contient ni secret ni donnee de tiers ; `bureau` non plus,
+      // c'est la table user_applications.
       expect(Object.keys(exported.donnees.compte).sort()).toEqual([
+        'bureau',
         'compte_cree_le',
         'email',
         'email_verifie_le',

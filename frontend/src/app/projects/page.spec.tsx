@@ -79,9 +79,9 @@ describe('ProjectsPage', () => {
       expect(screen.getByText('helder@exemple.fr')).toBeInTheDocument();
     });
 
-    // Sept liens de navigation s'affichaient d'emblée : c'était demander de
-    // comprendre Ignitux avant de s'en servir.
-    it("n'étale pas les outils, mais les garde à un clic", async () => {
+    // « Mes projets » est une application parmi d'autres : on passe aux
+    // voisines par le bureau et la barre des tâches, pas par elle.
+    it('ne mène plus vers les autres applications', async () => {
       mockApiRoutes(routes());
 
       render(
@@ -92,11 +92,8 @@ describe('ProjectsPage', () => {
 
       await screen.findByRole('heading', { name: 'Bienvenue sur Ignitux' });
       expect(screen.queryByRole('link', { name: 'Facturation' })).toBeNull();
-
-      fireEvent.click(screen.getByRole('button', { name: 'Tous mes outils' }));
-
-      expect(await screen.findByRole('link', { name: 'Facturation' })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'Relations' })).toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'Relations' })).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Tous mes outils' })).toBeNull();
     });
 
     // Une seule action principale : proposer de créer pendant qu'on liste,

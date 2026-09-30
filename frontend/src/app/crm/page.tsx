@@ -1,12 +1,12 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
 import {
   api,
   ApiError,
   type CrmChannel,
+  type CrmCompany,
   type CrmContact,
   type CrmKind,
   type CrmPipeline,
@@ -44,6 +44,7 @@ export default function CrmPage() {
   const router = useRouter();
 
   const [contacts, setContacts] = useState<CrmContact[]>([]);
+  const [companies, setCompanies] = useState<CrmCompany[]>([]);
   const [pipeline, setPipeline] = useState<CrmPipeline | null>(null);
   const [selected, setSelected] = useState<CrmContact | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,10 +58,20 @@ export default function CrmPage() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [kind, setKind] = useState<CrmKind>('prospect');
+  const [contactCompanyId, setContactCompanyId] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   const [channel, setChannel] = useState<CrmChannel>('appel');
   const [summary, setSummary] = useState('');
+
+  const [companyName, setCompanyName] = useState('');
+  const [companySector, setCompanySector] = useState('');
+  const [companyWebsite, setCompanyWebsite] = useState('');
+  const [isSavingCompany, setIsSavingCompany] = useState(false);
+  const [editingCompanyId, setEditingCompanyId] = useState<string | null>(null);
+  const [editCompanyName, setEditCompanyName] = useState('');
+  const [editCompanySector, setEditCompanySector] = useState('');
+  const [editCompanyWebsite, setEditCompanyWebsite] = useState('');
 
   function load() {
     if (!token) return;
@@ -71,10 +82,12 @@ export default function CrmPage() {
         stage: stageFilter || undefined,
       }),
       api.getCrmPipeline(token),
+      api.listCrmCompanies(token),
     ])
-      .then(([contactList, pipelineSummary]) => {
+      .then(([contactList, pipelineSummary, companyList]) => {
         setContacts(contactList);
         setPipeline(pipelineSummary);
+        setCompanies(companyList);
       })
       .catch((err) =>
         setError(err instanceof ApiError ? err.message : 'Impossible de charger le CRM.'),
@@ -106,15 +119,74 @@ export default function CrmPage() {
         lastName: lastName.trim(),
         email: email.trim() || undefined,
         kind,
+        companyId: contactCompanyId || undefined,
       });
       setFirstName('');
       setLastName('');
       setEmail('');
+      setContactCompanyId('');
       load();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Impossible d'ajouter ce contact.");
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function handleCreateCompany(e: FormEvent) {
+    e.preventDefault();
+    if (!token || !companyName.trim()) return;
+    setError(null);
+    setIsSavingCompany(true);
+    try {
+      await api.createCrmCompany(token, {
+        name: companyName.trim(),
+        sector: companySector.trim() || undefined,
+        website: companyWebsite.trim() || undefined,
+      });
+      setCompanyName('');
+      setCompanySector('');
+      setCompanyWebsite('');
+      load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Impossible d'ajouter cette entreprise.");
+    } finally {
+      setIsSavingCompany(false);
+    }
+  }
+
+  function startEditCompany(company: CrmCompany) {
+    setEditingCompanyId(company.id);
+    setEditCompanyName(company.name);
+    setEditCompanySector(company.sector ?? '');
+    setEditCompanyWebsite(company.website ?? '');
+  }
+
+  async function handleUpdateCompany(companyId: string, e: FormEvent) {
+    e.preventDefault();
+    if (!token || !editCompanyName.trim()) return;
+    setError(null);
+    try {
+      await api.updateCrmCompany(token, companyId, {
+        name: editCompanyName.trim(),
+        sector: editCompanySector.trim() || undefined,
+        website: editCompanyWebsite.trim() || undefined,
+      });
+      setEditingCompanyId(null);
+      load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Impossible de modifier cette entreprise.");
+    }
+  }
+
+  async function handleDeleteCompany(company: CrmCompany) {
+    if (!token) return;
+    setError(null);
+    try {
+      await api.deleteCrmCompany(token, company.id);
+      load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Impossible de supprimer cette entreprise.');
     }
   }
 
@@ -167,9 +239,6 @@ export default function CrmPage() {
     <main className="page page--wide">
       <div className="top-bar">
         <h1>Relations</h1>
-        <Link href="/projects" className="muted">
-          ← Retour aux projets
-        </Link>
       </div>
 
       <div className="card">
@@ -195,6 +264,110 @@ export default function CrmPage() {
       </div>
 
       {error && <p className="error">{error}</p>}
+
+      <div className="card" style={{ marginTop: '1.5rem' }}>
+        <h2 style={{ marginTop: 0 }}>Entreprises</h2>
+        <form
+          onSubmit={handleCreateCompany}
+          style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}
+        >
+          <input
+            aria-label="Nom de l'entreprise"
+            placeholder="Nom de l'entreprise"
+            value={companyName}
+            onChange={(e) => setCompanyName(e.target.value)}
+          />
+          <input
+            aria-label="Secteur d'activité"
+            placeholder="Secteur (facultatif)"
+            value={companySector}
+            onChange={(e) => setCompanySector(e.target.value)}
+          />
+          <input
+            aria-label="Site web de l'entreprise"
+            placeholder="Site web (facultatif)"
+            value={companyWebsite}
+            onChange={(e) => setCompanyWebsite(e.target.value)}
+          />
+          <button className="secondary" type="submit" disabled={isSavingCompany}>
+            {isSavingCompany ? 'Ajout…' : 'Ajouter une entreprise'}
+          </button>
+        </form>
+
+        {companies.length === 0 ? (
+          <p className="muted" style={{ marginBottom: 0 }}>
+            Aucune entreprise enregistrée pour l&apos;instant.
+          </p>
+        ) : (
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {companies.map((company) => (
+              <li
+                key={company.id}
+                className="project-item"
+                style={{ cursor: 'default', marginBottom: '0.5rem' }}
+              >
+                {editingCompanyId === company.id ? (
+                  <form
+                    onSubmit={(e) => void handleUpdateCompany(company.id, e)}
+                    style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
+                  >
+                    <input
+                      aria-label={`Nom de ${company.name}`}
+                      value={editCompanyName}
+                      onChange={(e) => setEditCompanyName(e.target.value)}
+                    />
+                    <input
+                      aria-label={`Secteur de ${company.name}`}
+                      placeholder="Secteur (facultatif)"
+                      value={editCompanySector}
+                      onChange={(e) => setEditCompanySector(e.target.value)}
+                    />
+                    <input
+                      aria-label={`Site web de ${company.name}`}
+                      placeholder="Site web (facultatif)"
+                      value={editCompanyWebsite}
+                      onChange={(e) => setEditCompanyWebsite(e.target.value)}
+                    />
+                    <button className="secondary" type="submit">
+                      Enregistrer
+                    </button>
+                    <button
+                      className="secondary"
+                      type="button"
+                      onClick={() => setEditingCompanyId(null)}
+                    >
+                      Annuler
+                    </button>
+                  </form>
+                ) : (
+                  <div className="top-bar">
+                    <span>
+                      <strong>{company.name}</strong>
+                      {company.sector && <span className="muted"> — {company.sector}</span>}
+                    </span>
+                    <span style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        className="secondary"
+                        type="button"
+                        onClick={() => startEditCompany(company)}
+                      >
+                        Modifier
+                      </button>
+                      <button
+                        className="secondary"
+                        type="button"
+                        onClick={() => void handleDeleteCompany(company)}
+                      >
+                        Supprimer
+                      </button>
+                    </span>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <div className="card" style={{ marginTop: '1.5rem' }}>
         <h2 style={{ marginTop: 0 }}>Ajouter un contact</h2>
@@ -225,6 +398,18 @@ export default function CrmPage() {
             {(Object.keys(KIND_LABELS) as CrmKind[]).map((value) => (
               <option key={value} value={value}>
                 {KIND_LABELS[value]}
+              </option>
+            ))}
+          </select>
+          <select
+            aria-label="Entreprise du contact"
+            value={contactCompanyId}
+            onChange={(e) => setContactCompanyId(e.target.value)}
+          >
+            <option value="">Aucune entreprise</option>
+            {companies.map((company) => (
+              <option key={company.id} value={company.id}>
+                {company.name}
               </option>
             ))}
           </select>
@@ -287,6 +472,11 @@ export default function CrmPage() {
                 <span className="muted">{KIND_LABELS[contact.kind]}</span>
               </div>
               {contact.email && <p className="muted" style={{ margin: 0 }}>{contact.email}</p>}
+              {contact.company_id && (
+                <p className="muted" style={{ margin: 0 }}>
+                  {companies.find((c) => c.id === contact.company_id)?.name ?? 'Entreprise'}
+                </p>
+              )}
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
                 <select
                   aria-label={`Étape de ${contact.first_name} ${contact.last_name}`}

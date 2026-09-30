@@ -187,7 +187,15 @@ export default function ProjectFinancesPage() {
             />
           </div>
 
-          <Historique registre={registre} />
+          <Historique
+            registre={registre}
+            token={token}
+            onFait={async (m) => {
+              setMessage(m);
+              await charger();
+            }}
+            onErreur={setError}
+          />
 
           <Dividendes dividendes={dividendes} />
 
@@ -384,8 +392,57 @@ function Capital({ capTable }: { capTable: CapTable | null }) {
 
 // ── L'historique des mouvements ─────────────────────────────────────────────
 
-function Historique({ registre }: { registre: ProjectFinancingRegister }) {
+function Historique({
+  registre,
+  token,
+  onFait,
+  onErreur,
+}: {
+  registre: ProjectFinancingRegister;
+  token: string;
+  onFait: (message: string) => Promise<void>;
+  onErreur: (m: string) => void;
+}) {
   const mouvements = [...registre.movements].reverse();
+  const [correctionId, setCorrectionId] = useState<string | null>(null);
+  const [montant, setMontant] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [motif, setMotif] = useState('');
+  const [enCours, setEnCours] = useState(false);
+
+  function ouvrirCorrection() {
+    setMontant('');
+    setDate(new Date().toISOString().slice(0, 10));
+    setMotif('');
+  }
+
+  async function soumettreCorrection(movementId: string, e: FormEvent) {
+    e.preventDefault();
+    if (!motif.trim()) {
+      onErreur('Une correction doit dire pourquoi.');
+      return;
+    }
+    setEnCours(true);
+    try {
+      const cents = centimesDepuisEuros(montant);
+      if (cents === null || cents === 0) {
+        onErreur('Montant de la correction illisible ou nul.');
+        return;
+      }
+      await api.correctInvestorMovement(token, movementId, {
+        amountCents: cents,
+        occurredOn: date,
+        note: motif.trim(),
+      });
+      setCorrectionId(null);
+      await onFait('Correction enregistrée.');
+    } catch (err) {
+      onErreur(err instanceof ApiError ? err.message : "La correction n'a pas pu être enregistrée.");
+    } finally {
+      setEnCours(false);
+    }
+  }
+
   return (
     <div className="card" style={{ marginTop: '1.5rem' }}>
       <h2 style={{ marginTop: 0 }}>Historique</h2>
@@ -396,27 +453,111 @@ function Historique({ registre }: { registre: ProjectFinancingRegister }) {
       ) : (
         <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {mouvements.map((m) => (
-            <li
-              key={m.id}
-              className="top-bar"
-              style={{ marginBottom: '0.4rem', cursor: 'default', alignItems: 'baseline' }}
-            >
-              <span>
-                <span className="muted">{jour(m.occurred_on)}</span>{' '}
-                {MOUVEMENTS[m.kind] ?? m.kind}
-                {m.reference && <span className="muted"> · {m.reference}</span>}
-                {m.corrects_movement_id && (
-                  <span className="muted"> · rectifie une écriture antérieure</span>
-                )}
-              </span>
-              <span style={{ fontVariantNumeric: 'tabular-nums' }}>{euros(m.amount_cents)}</span>
+            <li key={m.id} style={{ marginBottom: '0.4rem' }}>
+              <div
+                className="top-bar"
+                style={{ cursor: 'default', alignItems: 'baseline' }}
+              >
+                <span>
+                  <span className="muted">{jour(m.occurred_on)}</span>{' '}
+                  {MOUVEMENTS[m.kind] ?? m.kind}
+                  {m.reference && <span className="muted"> · {m.reference}</span>}
+                  {m.corrects_movement_id && (
+                    <span className="muted"> · rectifie une écriture antérieure</span>
+                  )}
+                </span>
+                <span style={{ display: 'inline-flex', gap: '0.5rem', alignItems: 'baseline' }}>
+                  <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {euros(m.amount_cents)}
+                  </span>
+                  {m.kind !== 'correction' && (
+                    <button
+                      className="secondary"
+                      type="button"
+                      aria-label={`Corriger le mouvement du ${jour(m.occurred_on)}`}
+                      onClick={() => {
+                        if (correctionId === m.id) {
+                          setCorrectionId(null);
+                        } else {
+                          setCorrectionId(m.id);
+                          ouvrirCorrection();
+                        }
+                      }}
+                    >
+                      Corriger
+                    </button>
+                  )}
+                </span>
+              </div>
+
+              {correctionId === m.id && (
+                <form
+                  onSubmit={(e) => void soumettreCorrection(m.id, e)}
+                  style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}
+                >
+                  <label
+                    className="field"
+                    style={{ marginBottom: 0 }}
+                    htmlFor={`correction-montant-${m.id}`}
+                  >
+                    <span>Correction à ajouter (€, signé)</span>
+                    <input
+                      id={`correction-montant-${m.id}`}
+                      value={montant}
+                      onChange={(e) => setMontant(e.target.value)}
+                      placeholder="ex. -50 ou 50"
+                      required
+                    />
+                  </label>
+                  <label
+                    className="field"
+                    style={{ marginBottom: 0 }}
+                    htmlFor={`correction-date-${m.id}`}
+                  >
+                    <span>Date</span>
+                    <input
+                      id={`correction-date-${m.id}`}
+                      type="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      required
+                    />
+                  </label>
+                  <label
+                    className="field"
+                    style={{ marginBottom: 0, flexBasis: '100%' }}
+                    htmlFor={`correction-motif-${m.id}`}
+                  >
+                    <span>Motif</span>
+                    <input
+                      id={`correction-motif-${m.id}`}
+                      value={motif}
+                      onChange={(e) => setMotif(e.target.value)}
+                      placeholder="pourquoi cette écriture était fausse"
+                      required
+                    />
+                  </label>
+                  <button className="secondary" type="submit" disabled={enCours}>
+                    {enCours ? 'Enregistrement…' : 'Enregistrer la correction'}
+                  </button>
+                  <button
+                    className="secondary"
+                    type="button"
+                    onClick={() => setCorrectionId(null)}
+                  >
+                    Annuler
+                  </button>
+                </form>
+              )}
             </li>
           ))}
         </ul>
       )}
       <p className="muted" style={{ marginBottom: 0, marginTop: '0.75rem' }}>
         Un montant négatif est de l&apos;argent qui entre dans le projet : c&apos;est
-        l&apos;investisseur qui verse. Rien n&apos;est jamais supprimé de cette liste.
+        l&apos;investisseur qui verse. Rien n&apos;est jamais supprimé de cette liste — une
+        erreur se corrige par une écriture de correction, qui référence celle qu&apos;elle
+        rectifie.
       </p>
     </div>
   );

@@ -186,6 +186,223 @@ describe('FinancingSection', () => {
     await screen.findByText('Porteur');
     expect(screen.queryByLabelText('Montant reçu en euros')).not.toBeInTheDocument();
   });
+
+  // Un apport mal saisi ne pouvait être retiré que directement en base :
+  // aucun bouton ne rappelait cette route pourtant déjà exposée.
+  it('supprime un apport erroné directement, sans boîte de confirmation', async () => {
+    mockApiRoutes(
+      routes({
+        'GET /projects/p1/financing/rounds': {
+          status: 200,
+          body: {
+            rounds: [
+              {
+                id: 'r1',
+                project_id: PROJECT_ID,
+                source: 'ignitux',
+                amount_cents: 500000,
+                occurred_at: '2026-03-01T00:00:00.000Z',
+                note: null,
+              },
+            ],
+            totalCents: 500000,
+          },
+        },
+      }),
+    );
+
+    render(<FinancingSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    const bouton = await screen.findByRole('button', {
+      name: /Supprimer l'apport du 01\/03\/2026/,
+    });
+    fireEvent.click(bouton);
+
+    await waitFor(() => {
+      const envoi = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.find(
+        (call) => (call[1]?.method ?? 'GET') === 'DELETE',
+      );
+      expect(envoi).toBeDefined();
+      expect(String(envoi![0])).toContain('/financing/rounds/r1');
+    });
+  });
+
+  it('masque le bouton de suppression des apports en lecture seule', async () => {
+    mockApiRoutes(
+      routes({
+        'GET /projects/p1/financing/rounds': {
+          status: 200,
+          body: {
+            rounds: [
+              {
+                id: 'r1',
+                project_id: PROJECT_ID,
+                source: 'ignitux',
+                amount_cents: 500000,
+                occurred_at: '2026-03-01T00:00:00.000Z',
+                note: null,
+              },
+            ],
+            totalCents: 500000,
+          },
+        },
+      }),
+    );
+
+    render(<FinancingSection token={TOKEN} projectId={PROJECT_ID} readOnly />);
+
+    await screen.findAllByText('5000,00 €');
+    expect(screen.queryByRole('button', { name: /Supprimer l'apport/ })).not.toBeInTheDocument();
+  });
+
+  // La répartition ne pouvait s'afficher que si elle existait déjà : rien
+  // ne permettait de créer un détenteur, de retirer une erreur de saisie,
+  // ni de faire vivre les parts et les dividendes après coup.
+  describe('écriture sur le tableau de répartition', () => {
+    it('ajoute un détenteur avec le nom et le statut de porteur saisis', async () => {
+      mockApiRoutes(
+        routes({
+          'POST /projects/p1/financing/holders': { status: 201, body: { id: 'h3', name: 'Associé' } },
+        }),
+      );
+
+      render(<FinancingSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      await screen.findByText('Porteur');
+      fireEvent.change(screen.getByLabelText('Nom du détenteur'), {
+        target: { value: 'Associé' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Ajouter un détenteur' }));
+
+      await waitFor(() => {
+        const envoi = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.find(
+          (call) => (call[1]?.method ?? 'GET') === 'POST',
+        );
+        expect(envoi).toBeDefined();
+        const corps = JSON.parse(String(envoi![1].body));
+        expect(corps).toEqual({ name: 'Associé', isFounder: false });
+      });
+    });
+
+    it('retire un détenteur directement, sans boîte de confirmation', async () => {
+      mockApiRoutes(routes());
+
+      render(<FinancingSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      await screen.findByText('Ignitux');
+      const retirerButtons = screen.getAllByRole('button', { name: 'Retirer' });
+      fireEvent.click(retirerButtons[1]);
+
+      await waitFor(() => {
+        const envoi = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.find(
+          (call) => (call[1]?.method ?? 'GET') === 'DELETE',
+        );
+        expect(envoi).toBeDefined();
+        expect(String(envoi![0])).toContain('/financing/holders/h2');
+      });
+    });
+
+    it('exige un motif pour enregistrer un changement de part', async () => {
+      mockApiRoutes(
+        routes({
+          'POST /financing/holders/h1/equity-events': { status: 201, body: { id: 'e1' } },
+        }),
+      );
+
+      render(<FinancingSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      await screen.findByText('Porteur');
+      const changerButtons = screen.getAllByRole('button', { name: 'Changer la part' });
+      fireEvent.click(changerButtons[0]);
+
+      fireEvent.change(screen.getByLabelText('Nouvelle part de Porteur en pourcentage'), {
+        target: { value: '75' },
+      });
+      fireEvent.change(screen.getByLabelText('Date du changement de part de Porteur'), {
+        target: { value: '2026-09-01' },
+      });
+      // Le motif est laissé vide : la soumission ne doit rien envoyer.
+      const formulaires = screen.getAllByRole('button', { name: 'Enregistrer' });
+      fireEvent.click(formulaires[0]);
+
+      expect(
+        (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.some(
+          (call) => (call[1]?.method ?? 'GET') === 'POST',
+        ),
+      ).toBe(false);
+
+      fireEvent.change(screen.getByLabelText('Motif du changement de part de Porteur'), {
+        target: { value: 'Nouvel accord entre les parties' },
+      });
+      fireEvent.click(formulaires[0]);
+
+      await waitFor(() => {
+        const envoi = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.find(
+          (call) => (call[1]?.method ?? 'GET') === 'POST',
+        );
+        expect(envoi).toBeDefined();
+        const corps = JSON.parse(String(envoi![1].body));
+        expect(corps.shareBasisPoints).toBe(7500);
+        expect(corps.reason).toBe('Nouvel accord entre les parties');
+      });
+    });
+
+    it('convertit un dividende saisi en euros vers des centimes', async () => {
+      mockApiRoutes(
+        routes({
+          'POST /financing/holders/h1/dividends': { status: 201, body: { id: 'd1' } },
+        }),
+      );
+
+      render(<FinancingSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      await screen.findByText('Porteur');
+      const dividendeButtons = screen.getAllByRole('button', { name: 'Verser un dividende' });
+      fireEvent.click(dividendeButtons[0]);
+
+      fireEvent.change(screen.getByLabelText('Montant du dividende versé à Porteur en euros'), {
+        target: { value: '42,50' },
+      });
+      fireEvent.change(screen.getByLabelText('Date du dividende versé à Porteur'), {
+        target: { value: '2026-09-01' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Enregistrer' }));
+
+      await waitFor(() => {
+        const envoi = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.find(
+          (call) => (call[1]?.method ?? 'GET') === 'POST',
+        );
+        expect(envoi).toBeDefined();
+        const corps = JSON.parse(String(envoi![1].body));
+        expect(corps.amountCents).toBe(4250);
+      });
+    });
+
+    it('affiche l’historique des changements de part', async () => {
+      mockApiRoutes(
+        routes({
+          'GET /projects/p1/financing/equity-events': {
+            status: 200,
+            body: [
+              {
+                id: 'e1',
+                holder_id: 'h1',
+                share_basis_points: 7000,
+                reason: 'Répartition initiale',
+                occurred_at: '2026-01-01T00:00:00.000Z',
+                holder: { id: 'h1', name: 'Porteur' },
+              },
+            ],
+          },
+        }),
+      );
+
+      const { container } = render(<FinancingSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      await waitFor(() => expect(container.textContent).toContain('Répartition initiale'));
+      expect(container.textContent).toContain('70 %');
+    });
+  });
 });
 
 describe('BuybackSection', () => {

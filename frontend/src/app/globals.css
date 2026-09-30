@@ -676,29 +676,720 @@ a.secondary:hover {
   gap: 1.25rem;
 }
 
-/* La barre de navigation applicative. Beaucoup de modules, donc elle doit
-   passer à la ligne proprement plutôt que déborder sur petit écran. */
-.app-nav {
+/* --------------------------------------------------------------------------
+   Le lanceur (/accueil) : titres de section et boutique. Les icônes et
+   les pages sont plus bas, avec « Le bureau comme un écran de téléphone ».
+   -------------------------------------------------------------------------- */
+
+.launcher-section {
+  margin-bottom: 2rem;
+}
+
+.launcher-eyebrow {
+  font-size: var(--texte-etiquette, 0.8rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 0.75rem;
+}
+
+.suggestion__nom {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+}
+
+.app-tile__nom {
+  font-weight: 600;
+}
+
+.app-tile__resume {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.upcoming-list__cadre {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* --------------------------------------------------------------------------
+   Le système (components/systeme.tsx) : une barre en haut qui dit dans
+   quelle application on est, une barre des tâches en bas qui garde celles
+   qu'on a ouvertes. Les deux tiennent compte de l'encoche et de la barre
+   d'accueil du téléphone.
+   -------------------------------------------------------------------------- */
+
+.barre-app {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.4rem 1rem;
+  gap: 0.75rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 0.5rem) 1rem 0.5rem;
+  background: rgb(8 9 13 / 88%);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
 }
 
-.app-nav a {
+.barre-app__bureau {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.25rem;
+  padding: 0 0.6rem;
+  border-radius: var(--radius-sm);
   color: var(--text-muted);
   text-decoration: none;
-  font-size: 0.925rem;
-  padding: 0.2rem 0;
-  border-bottom: 1px solid transparent;
-  transition:
-    color 0.15s ease,
-    border-color 0.15s ease;
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
-.app-nav a:hover {
+.barre-app__bureau:hover {
   color: var(--text);
-  border-bottom-color: var(--flame);
+  background: var(--surface);
+}
+
+.barre-app__titre {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barre-app__glyphe,
+.barre-taches__glyphe {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 7px;
+  background: var(--surface-3);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+/* Le bouton fermer garde la taille d'un doigt, même si le signe est petit. */
+.barre-app__fermer {
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.barre-app__fermer:hover {
+  color: var(--text);
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.barre-taches-espace {
+  height: calc(4rem + env(safe-area-inset-bottom, 0px));
+}
+
+.barre-taches {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem calc(env(safe-area-inset-right, 0px) + 0.75rem)
+    calc(env(safe-area-inset-bottom, 0px) + 0.45rem) calc(env(safe-area-inset-left, 0px) + 0.75rem);
+  background: rgb(5 6 10 / 92%);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+}
+
+/* Les applications ouvertes défilent dans la barre si elles ne tiennent
+   pas : jamais la page entière de côté. */
+.barre-taches__ouvertes {
+  display: flex;
+  gap: 0.35rem;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.barre-taches__item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+  min-height: 2.75rem;
+  padding: 0 0.7rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.barre-taches__item:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.barre-taches__item[aria-current='page'] {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* Le trait sous l'application active, comme sous une fenêtre au premier plan. */
+.barre-taches__item[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  bottom: 3px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--flame);
+}
+
+.barre-taches__item--bureau {
+  padding-right: 0.9rem;
+  margin-right: 0.2rem;
+  border-right: 1px solid var(--border);
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.barre-taches__item--bureau .barre-taches__glyphe {
+  background: transparent;
+  color: var(--text);
+}
+
+/* Sur téléphone, les icônes seules : les noms ne tiendraient pas. Le nom
+   de l'application active reste lisible dans la barre du haut. */
+@media (max-width: 639px) {
+  .barre-taches__item:not(.barre-taches__item--bureau) .barre-taches__nom {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .barre-taches__item {
+    padding: 0 0.6rem;
+  }
+}
+
+.boutique-liste {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 0.75rem;
+}
+
+.boutique-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+}
+
+.boutique-item button {
+  align-self: flex-start;
+  margin-top: 0.35rem;
+  width: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Le bureau comme un écran de téléphone (/accueil) : des icônes rangées en
+   pages qu'on fait glisser, et les points qui disent où on en est.
+
+   La grille a les dimensions de ICONES_PAR_PAGE (lib/systeme.ts) : 4 × 4
+   sur téléphone, 6 × 3 au-delà de 640 px. Chaque page fait exactement la
+   largeur de l'écran et s'aimante en place (scroll-snap) : un geste du
+   doigt tourne une page entière, jamais une demi.
+   -------------------------------------------------------------------------- */
+
+.ecran-accueil {
+  /* Le fond d'écran : deux lueurs, le feu en haut, l'acier en bas. */
+  background:
+    radial-gradient(60rem 28rem at 10% -10%, rgb(255 90 31 / 13%), transparent 60%),
+    radial-gradient(50rem 30rem at 100% 110%, rgb(143 161 189 / 12%), transparent 60%);
+}
+
+.ecran-accueil__titre {
+  margin: 0 0 1rem;
+  font-size: 1.35rem;
+}
+
+.ecran-accueil__rangement {
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.widget-igini {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: rgb(20 22 28 / 72%);
+  backdrop-filter: blur(10px);
+}
+
+.widget-igini .launcher-eyebrow {
+  margin: 0;
+}
+
+.widget-igini__ligne {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.widget-igini__texte {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.widget-igini__ligne .icone__glyphe {
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 0.85rem;
+}
+
+.accueil-pages {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  border-radius: var(--radius-md);
+}
+
+.accueil-pages::-webkit-scrollbar {
+  display: none;
+}
+
+.accueil-pages:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.accueil-page {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: min-content;
+  align-content: start;
+  gap: 1.1rem 0.5rem;
+  margin: 0;
+  padding: 0.5rem 0.25rem 0.75rem;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .accueil-page {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 1.5rem 1rem;
+  }
+}
+
+.accueil-page > li {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+.icone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 6.5rem;
+  padding: 0.25rem 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.icone:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.icone__glyphe {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: clamp(3.4rem, 15vw, 4rem);
+  aspect-ratio: 1;
+  max-width: 100%;
+  border-radius: 24%;
+  background: linear-gradient(145deg, #3a404c, #22262f);
+  box-shadow: 0 8px 18px -10px rgb(0 0 0 / 90%), inset 0 1px 0 rgb(255 255 255 / 12%);
+  color: #fff;
+  font-family: var(--font-display, var(--font-body)), system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: transform 0.15s ease;
+}
+
+/* Une couleur par famille : on retrouve une icône à sa teinte avant de lire
+   son nom. Chaque dégradé porte du blanc au-dessus de 4.5:1. */
+.icone__glyphe[data-categorie='creer'] {
+  background: var(--grad-fire-solid);
+}
+.icone__glyphe[data-categorie='vendre'] {
+  background: linear-gradient(145deg, #b3530d, #7a3208);
+}
+.icone__glyphe[data-categorie='gerer'] {
+  background: linear-gradient(145deg, #2f5f8f, #1c3a5c);
+}
+.icone__glyphe[data-categorie='investir'] {
+  background: linear-gradient(145deg, #1f7a4d, #11492e);
+}
+.icone__glyphe[data-categorie='reseau'] {
+  background: linear-gradient(145deg, #6a47a8, #402a6a);
+}
+.icone__glyphe[data-categorie='reglages'] {
+  background: linear-gradient(145deg, #4d5563, #2c3139);
+}
+
+.icone:hover .icone__glyphe,
+.icone:active .icone__glyphe {
+  transform: scale(0.94);
+}
+
+.icone__nom {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font-size: var(--texte-etiquette);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.icone--prevue .icone__glyphe {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+}
+
+.icone--prevue .icone__nom {
+  color: var(--text-muted);
+}
+
+.icone__badge {
+  position: absolute;
+  top: -0.2rem;
+  right: 50%;
+  transform: translateX(calc(clamp(3.4rem, 15vw, 4rem) / 2 + 0.3rem));
+  padding: 0.05rem 0.4rem;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-size: 0.65rem;
+  white-space: nowrap;
+}
+
+.icone--organiser .icone__glyphe {
+  background: transparent;
+  border: 2px dashed var(--border-strong);
+  box-shadow: none;
+  color: var(--text-muted);
+  font-size: 1.6rem;
+  font-weight: 400;
+}
+
+.icone--organiser .icone__nom {
+  color: var(--text-muted);
+}
+
+/* Le dossier Entreprise : comme sur un téléphone, un fond dépoli plutôt
+   qu'une couleur de famille, avec un aperçu 2×2 de ce qu'il contient. */
+.icone__glyphe--dossier {
+  padding: clamp(0.3rem, 3%, 0.45rem);
+  background: rgb(20 22 28 / 72%);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--border-strong);
+}
+
+.dossier-apercu {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.15rem;
+  width: 100%;
+  height: 100%;
+}
+
+.dossier-apercu__case {
+  display: grid;
+  place-items: center;
+  border-radius: 30%;
+  color: #fff;
+  font-family: var(--font-display, var(--font-body)), system-ui, sans-serif;
+  font-size: 0.5rem;
+  font-weight: 700;
+}
+
+.dossier-apercu__case[data-categorie='creer'] {
+  background: var(--grad-fire-solid);
+}
+.dossier-apercu__case[data-categorie='vendre'] {
+  background: linear-gradient(145deg, #b3530d, #7a3208);
+}
+.dossier-apercu__case[data-categorie='gerer'] {
+  background: linear-gradient(145deg, #2f5f8f, #1c3a5c);
+}
+.dossier-apercu__case[data-categorie='investir'] {
+  background: linear-gradient(145deg, #1f7a4d, #11492e);
+}
+.dossier-apercu__case[data-categorie='reseau'] {
+  background: linear-gradient(145deg, #6a47a8, #402a6a);
+}
+.dossier-apercu__case[data-categorie='reglages'] {
+  background: linear-gradient(145deg, #4d5563, #2c3139);
+}
+
+.ecran-accueil__entete-dossier {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.ecran-accueil__entete-dossier .ecran-accueil__titre {
+  margin: 0;
+}
+
+/* Le mode rangement : les icônes tremblent, comme sur un téléphone, et
+   celles qu'on peut retirer portent un « − ». */
+.accueil-page--rangement .icone__glyphe {
+  animation: icone-tremble 0.28s ease-in-out infinite alternate;
+}
+
+.accueil-page--rangement > li:nth-child(even) .icone__glyphe {
+  animation-delay: -0.14s;
+}
+
+@keyframes icone-tremble {
+  from {
+    transform: rotate(-2deg);
+  }
+  to {
+    transform: rotate(2deg);
+  }
+}
+
+.icone--rangement {
+  cursor: default;
+}
+
+.icone__retirer {
+  position: absolute;
+  top: -0.35rem;
+  left: 50%;
+  transform: translateX(calc(-1 * clamp(3.4rem, 15vw, 4rem) / 2 - 0.35rem));
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  background: #4b515c;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.icone__retirer:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+/* Un doigt mesure plus que le rond : la zone de toucher déborde du dessin. */
+.icone__retirer::before {
+  content: '';
+  position: absolute;
+  inset: -0.6rem;
+}
+
+.accueil-points {
+  display: flex;
+  justify-content: center;
+  gap: 0.15rem;
+  margin: 0.25rem 0 1.5rem;
+}
+
+.accueil-points__point {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.accueil-points__point::after {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--border-strong);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.accueil-points__point[aria-current='true']::after {
+  background: var(--text);
+  transform: scale(1.2);
+}
+
+.accueil-points__point:focus-visible {
+  outline: 2px solid var(--accent);
+  border-radius: 50%;
+}
+
+.detail-prevue {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-prevue .pill {
+  margin-left: 0.5rem;
+}
+
+.boutique-item__entete {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.boutique-item__entete .icone__glyphe {
+  width: 2.5rem;
+  font-size: 0.8rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accueil-pages {
+    scroll-behavior: auto;
+  }
+
+  .accueil-page--rangement .icone__glyphe {
+    animation: none;
+  }
+
+  .icone__glyphe,
+  .accueil-points__point::after {
+    transition: none;
+  }
+}
+
+.install-invite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background: var(--grad-fire-soft), var(--surface);
+}
+
+.install-invite__titre {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.install-invite__etapes {
+  margin: 0.75rem 0 0;
+  padding-left: 1.2rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.install-invite__etapes strong {
+  color: var(--text);
+}
+
+.install-invite__glyphe {
+  display: inline-flex;
+  vertical-align: -0.2em;
+  color: var(--north);
+}
+
+.install-invite__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Ouverte comme application (Windows, Android, iPhone).
+
+   `viewport-fit=cover` (layout.tsx) laisse la page aller sous l'encoche et
+   la barre d'accueil de l'iPhone ; ces marges l'en écartent. Elles valent
+   0 partout ailleurs, donc sans effet dans un navigateur ordinaire.
+   -------------------------------------------------------------------------- */
+
+body {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (display-mode: standalone) {
+  body {
+    /* Sans barre d'adresse, le rebond élastique en haut de page révèle un
+       vide derrière l'application : il fait « site dans un cadre ». */
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 /* --------------------------------------------------------------------------

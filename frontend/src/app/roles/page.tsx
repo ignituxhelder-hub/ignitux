@@ -74,10 +74,11 @@ export default function RolesPage() {
       setMine(misAJour);
       setSelection(misAJour.roles);
       setConfirmation('Tes rôles sont enregistrés.');
-      // Premier passage : on emmène la personne dans son espace. Ensuite,
-      // on la laisse où elle est — elle est venue régler quelque chose.
+      // Premier passage (juste après l'inscription) : on emmène la personne
+      // sur son bureau, là où elle arrivera à chaque ouverture. Ensuite, on
+      // la laisse où elle est — elle est venue régler quelque chose.
       if ((mine?.roles.length ?? 0) === 0 && misAJour.activeRole) {
-        router.push(ROLE_HOME[misAJour.activeRole] ?? '/projects');
+        router.push('/accueil');
       }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "L'enregistrement a échoué.");

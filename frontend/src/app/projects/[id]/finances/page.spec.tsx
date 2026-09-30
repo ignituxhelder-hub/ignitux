@@ -276,6 +276,137 @@ describe('ProjectFinancesPage', () => {
     });
   });
 
+  // Une écriture mal saisie ne pouvait être rectifiée qu'en base : la route
+  // de correction existait déjà côté serveur, sans aucun geste pour
+  // l'atteindre depuis l'interface du porteur.
+  describe('correction d’un mouvement', () => {
+    it('exige un motif avant de rien envoyer', async () => {
+      mockApiRoutes(
+        routes({ 'POST /mouvements-investisseurs/m1/correction': { status: 201, body: {} } }),
+      );
+
+      render(
+        <AuthProvider>
+          <ProjectFinancesPage />
+        </AuthProvider>,
+      );
+
+      fireEvent.click(await screen.findByRole('button', { name: /Corriger le mouvement du/ }));
+      fireEvent.change(screen.getByLabelText('Correction à ajouter (€, signé)'), {
+        target: { value: '-50' },
+      });
+      // Le motif est laissé vide : le champ requis bloque la soumission avant
+      // même que le gestionnaire ne s'exécute.
+      fireEvent.click(screen.getByRole('button', { name: 'Enregistrer la correction' }));
+
+      expect(
+        (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.some(
+          (call) => (call[1]?.method ?? 'GET') === 'POST',
+        ),
+      ).toBe(false);
+    });
+
+    it('envoie le montant signé converti en centimes, avec la date et le motif', async () => {
+      mockApiRoutes(
+        routes({
+          'POST /mouvements-investisseurs/m1/correction': {
+            status: 201,
+            body: {
+              id: 'm2',
+              financed_project_id: 'f1',
+              investor_id: 'i1',
+              participation_id: null,
+              kind: 'correction',
+              amount_cents: -5000,
+              occurred_on: '2026-09-20',
+              reference: null,
+              note: 'Doublon de saisie',
+              corrects_movement_id: 'm1',
+              distribution_id: null,
+            },
+          },
+        }),
+      );
+
+      render(
+        <AuthProvider>
+          <ProjectFinancesPage />
+        </AuthProvider>,
+      );
+
+      fireEvent.click(await screen.findByRole('button', { name: /Corriger le mouvement du/ }));
+      fireEvent.change(screen.getByLabelText('Correction à ajouter (€, signé)'), {
+        target: { value: '-50' },
+      });
+      fireEvent.change(screen.getByLabelText('Motif'), {
+        target: { value: 'Doublon de saisie' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Enregistrer la correction' }));
+
+      await waitFor(() => {
+        const envoi = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.find(
+          (call) => String(call[0]).includes('/mouvements-investisseurs/m1/correction'),
+        );
+        expect(envoi).toBeDefined();
+        const corps = JSON.parse(String(envoi![1].body));
+        expect(corps.amountCents).toBe(-5000);
+        expect(corps.note).toBe('Doublon de saisie');
+      });
+      expect(await screen.findByText('Correction enregistrée.')).toBeInTheDocument();
+    });
+
+    it('ne propose pas de corriger une correction', async () => {
+      mockApiRoutes(
+        routes({
+          'GET /projects/p1/financement': {
+            status: 200,
+            body: registre({
+              movements: [
+                {
+                  id: 'm1',
+                  financed_project_id: 'f1',
+                  investor_id: 'i1',
+                  participation_id: 'part1',
+                  kind: 'investissement',
+                  amount_cents: -500000,
+                  occurred_on: '2026-03-15',
+                  reference: null,
+                  note: null,
+                  corrects_movement_id: null,
+                  distribution_id: null,
+                },
+                {
+                  id: 'm2',
+                  financed_project_id: 'f1',
+                  investor_id: 'i1',
+                  participation_id: null,
+                  kind: 'correction',
+                  amount_cents: -5000,
+                  occurred_on: '2026-09-20',
+                  reference: null,
+                  note: 'Doublon de saisie',
+                  corrects_movement_id: 'm1',
+                  distribution_id: null,
+                },
+              ],
+            }),
+          },
+        }),
+      );
+
+      render(
+        <AuthProvider>
+          <ProjectFinancesPage />
+        </AuthProvider>,
+      );
+
+      await screen.findByText(/rectifie une écriture antérieure/);
+      expect(
+        screen.getAllByRole('button', { name: /Corriger le mouvement du/ }),
+      ).toHaveLength(1);
+    });
+  });
+
   it("n'invente aucun avancement quand aucun objectif n'a été annoncé", async () => {
     mockApiRoutes(
       routes({

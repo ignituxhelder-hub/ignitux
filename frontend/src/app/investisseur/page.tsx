@@ -3,12 +3,12 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { Brand } from '@/components/ignitux-mark';
 import { RoleBar } from '@/components/role-bar';
 import {
   api,
   ApiError,
   type InvestorMovement,
+  type InvestorPortfolio,
   type InvestorSpace,
   type ParticipationRow,
 } from '@/lib/api';
@@ -45,11 +45,12 @@ const MOUVEMENTS: Record<string, string> = {
  * chiffre calculé à part qui finirait par en différer.
  */
 export default function InvestorSpacePage() {
-  const { token, user, isReady, logout } = useAuth();
+  const { token, isReady } = useAuth();
   const router = useRouter();
   const { roles, switchTo } = useRoles(token, 'investisseur');
 
   const [space, setSpace] = useState<InvestorSpace | null>(null);
+  const [portefeuille, setPortefeuille] = useState<InvestorPortfolio | null>(null);
   const [participations, setParticipations] = useState<ParticipationRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,16 +62,34 @@ export default function InvestorSpacePage() {
     try {
       const espace = await api.getInvestorSpace(token);
       setSpace(espace);
+      setPortefeuille(null);
       setRefus(null);
       // Les participations ne se lisent que si un investisseur existe :
       // sinon la route répond 404, ce qui serait un faux problème.
       setParticipations(espace.investorId ? await api.listMyParticipations(token) : []);
       setError(null);
     } catch (err) {
-      // 403 = le rôle n'est pas pris. Ce n'est pas une panne : c'est une
-      // porte, et le message du serveur dit comment l'ouvrir.
-      if (err instanceof ApiError && err.status === 403) setRefus(err.message);
-      else setError(err instanceof ApiError ? err.message : "Impossible de charger l'espace.");
+      // 403 = le rôle n'est pas pris. Ce n'est pas forcément une impasse :
+      // quelqu'un dont l'argent est placé quelque part doit pouvoir le lire
+      // même sans avoir jamais coché la case « investisseur ». On tente
+      // donc le portefeuille sans rôle avant d'afficher un refus.
+      if (err instanceof ApiError && err.status === 403) {
+        try {
+          const vue = await api.getMyPortfolio(token);
+          setSpace(null);
+          setPortefeuille(vue);
+          setParticipations(await api.listMyParticipations(token));
+          setRefus(null);
+          setError(null);
+        } catch {
+          setSpace(null);
+          setPortefeuille(null);
+          setParticipations([]);
+          setRefus(err.message);
+        }
+      } else {
+        setError(err instanceof ApiError ? err.message : "Impossible de charger l'espace.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -89,28 +108,6 @@ export default function InvestorSpacePage() {
 
   return (
     <main className="page page--wide">
-      <div className="top-bar">
-        <div>
-          <Brand />
-          <p className="muted">{user?.email}</p>
-        </div>
-        <div className="app-nav">
-          <Link href="/marketplace">Mentors &amp; investisseurs</Link>
-          <Link href="/constitution">Constitution</Link>
-          <Link href="/account">Mon compte</Link>
-          <button
-            className="secondary"
-            type="button"
-            onClick={() => {
-              logout();
-              router.replace('/login');
-            }}
-          >
-            Se déconnecter
-          </button>
-        </div>
-      </div>
-
       <RoleBar roles={roles} onSwitch={switchTo} />
 
       <h1>Mon portefeuille</h1>
@@ -195,8 +192,87 @@ export default function InvestorSpacePage() {
           <Participations participations={participations} />
         </>
       )}
+
+      {portefeuille && (
+        <>
+          <MonIdentifiant investorId={portefeuille.investorId} nom={portefeuille.displayName} />
+
+          <p className="notice" style={{ marginTop: '1.5rem' }}>
+            <span>
+              Cette vue montre les montants sans la part détenue dans chaque projet, parce que
+              le rôle Investisseur n&apos;est pas pris.{' '}
+              <Link href="/roles">Prendre le rôle Investisseur</Link> pour voir aussi ta part.
+            </span>
+          </p>
+
+          <div className="card" style={{ marginTop: '1.5rem' }}>
+            <h2 style={{ marginTop: 0 }}>Portefeuille global</h2>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                gap: '1rem',
+              }}
+            >
+              <Chiffre libelle="Montant investi" valeur={euros(portefeuille.global.investedCents)} />
+              <Chiffre libelle="Capital récupéré" valeur={euros(portefeuille.global.repaidCents)} />
+              <Chiffre libelle="Dividendes reçus" valeur={euros(portefeuille.global.dividendsCents)} />
+              <Chiffre libelle="Projets" valeur={String(portefeuille.parProjet.length)} />
+            </div>
+            <p className="muted" style={{ marginBottom: 0, marginTop: '1rem' }}>
+              Solde net : <strong>{euros(portefeuille.global.netCents)}</strong> — ce qui est
+              revenu moins ce qui a été mis. Négatif tant que le capital n&apos;est pas rentré,
+              et c&apos;est normal au début.
+            </p>
+          </div>
+
+          <div className="card" style={{ marginTop: '1.5rem' }}>
+            <h2 style={{ marginTop: 0 }}>Mes investissements</h2>
+            {portefeuille.parProjet.length === 0 ? (
+              <p className="muted" style={{ marginBottom: 0 }}>
+                Aucun investissement enregistré pour l&apos;instant.
+              </p>
+            ) : (
+              <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                {portefeuille.parProjet.map((ligne) => (
+                  <LigneProjet
+                    key={ligne.financedProjectId}
+                    ligne={versLigneEspace(ligne)}
+                    token={token}
+                  />
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <Participations participations={participations} />
+        </>
+      )}
     </main>
   );
+}
+
+/**
+ * Adapte une ligne du portefeuille sans rôle à la forme attendue par
+ * `LigneProjet`, sans dupliquer son affichage ni son historique dépliable.
+ * La part détenue n'existe pas hors du rôle Investisseur : ce n'est pas une
+ * omission, c'est ce que dit `shareNotice`.
+ */
+function versLigneEspace(ligne: InvestorPortfolio['parProjet'][number]): InvestorSpace['lines'][number] {
+  return {
+    financedProjectId: ligne.financedProjectId,
+    projectId: ligne.projectId,
+    projectTitle: ligne.projectTitle,
+    status: ligne.status,
+    investedCents: ligne.totals.investedCents,
+    repaidCents: ligne.totals.repaidCents,
+    dividendsCents: ligne.totals.dividendsCents,
+    gainsCents: ligne.totals.gainsCents,
+    netCents: ligne.totals.netCents,
+    shareBasisPoints: null,
+    shareNotice: 'La part détenue ne s’affiche pas ici : elle suppose le rôle Investisseur.',
+    participations: ligne.participations,
+  };
 }
 
 // ── Se déclarer investisseur ────────────────────────────────────────────────

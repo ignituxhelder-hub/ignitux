@@ -60,7 +60,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (isReady && token) {
-      router.replace('/projects');
+      router.replace('/accueil');
     }
   }, [isReady, token, router]);
 

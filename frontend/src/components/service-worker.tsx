@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { demarrerEcouteInstallation } from '@/lib/installation';
 
 /**
  * Enregistre le service worker — et sait s'en défaire.
@@ -26,6 +27,10 @@ import { useEffect } from 'react';
  */
 export function ServiceWorker() {
   useEffect(() => {
+    // Monté à la racine : c'est le seul endroit où l'on est sûr d'écouter
+    // avant que Chrome n'annonce que l'application est installable.
+    demarrerEcouteInstallation();
+
     if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
 
     const enProduction = process.env.NODE_ENV === 'production';

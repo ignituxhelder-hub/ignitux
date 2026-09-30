@@ -43,6 +43,6 @@ describe('HomePage', () => {
       </AuthProvider>,
     );
 
-    await vi.waitFor(() => expect(router.replace).toHaveBeenCalledWith('/projects'));
+    await vi.waitFor(() => expect(router.replace).toHaveBeenCalledWith('/accueil'));
   });
 });

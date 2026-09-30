@@ -21,7 +21,8 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       await login(email, password);
-      router.replace('/projects');
+      // Le lanceur, pas une page : on arrive dans Ignitux, pas dans un outil.
+      router.replace('/accueil');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Connexion impossible.');
     } finally {

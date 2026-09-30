@@ -122,9 +122,6 @@ export default function BanquePage() {
     <main className="page page--wide">
       <div className="top-bar">
         <Brand />
-        <Link href="/projects" className="muted">
-          ← Retour aux projets
-        </Link>
       </div>
 
       <h1>Banque</h1>

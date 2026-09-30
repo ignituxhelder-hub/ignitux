@@ -33,7 +33,7 @@ import { WorkflowSection } from './workflow-section';
 import { BuybackSection, FinancingSection } from './financing-section';
 import { CollaboratorsSection } from './collaborators-section';
 import { ComplianceSection } from './compliance-section';
-import { KnowledgeSection, MemorySection, ScoreSection, TasksSection } from './engine-sections';
+import { KnowledgeSection, MemorySection, ScoreHistorySection, ScoreSection, TasksSection } from './engine-sections';
 
 /**
  * Demande au serveur si les 5 générateurs IGINI sont disponibles.
@@ -640,6 +640,7 @@ export default function ProjectDetailPage() {
           (readOnly). La gestion des collaborateurs et le déclenchement manuel
           de l'automatisation restent réservés au propriétaire. */}
       {montrer('score') && <ScoreSection token={token} projectId={id} refreshSignal={refreshSignal} />}
+      {montrer('score') && <ScoreHistorySection token={token} projectId={id} refreshSignal={refreshSignal} />}
       {/* Nommée pour que le raccourci de la tuile « Tâches » puisse amener
           ici — voir `allerAuxTaches` plus haut. */}
       {montrer('taches') && (

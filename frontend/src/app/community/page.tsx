@@ -48,9 +48,6 @@ export default function CommunityPage() {
   return (
     <main className="page page--wide">
       <div className="top-bar">
-        <Link href="/projects" className="muted">
-          ← Retour aux projets
-        </Link>
       </div>
 
       <h1>Communauté</h1>

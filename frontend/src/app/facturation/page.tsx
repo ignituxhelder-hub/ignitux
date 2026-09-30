@@ -55,6 +55,17 @@ export default function BillingPage() {
   const [correctingId, setCorrectingId] = useState<string | null>(null);
   const [creditLabel, setCreditLabel] = useState('');
   const [creditEuros, setCreditEuros] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
+
+  // Modification d'un brouillon en place : tant qu'un document n'est pas
+  // émis, il n'a pas encore de numéro engagé — le corriger n'est pas le
+  // réécrire.
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editClientName, setEditClientName] = useState('');
+  const [editLabel, setEditLabel] = useState('');
+  const [editAmountEuros, setEditAmountEuros] = useState('');
+  const [editVatPercent, setEditVatPercent] = useState('');
+  const [isEditSaving, setIsEditSaving] = useState(false);
 
   function load() {
     if (!token) return;
@@ -143,6 +154,7 @@ export default function BillingPage() {
    * possible en changeant le montant.
    */
   function startCorrection(document: BillingDocument) {
+    setEditingId(null);
     setCorrectingId(document.id);
     setCreditLabel(`Avoir sur ${document.number}`);
     setCreditEuros(
@@ -150,6 +162,54 @@ export default function BillingPage() {
         document.totals.subtotalCents % 100,
       ).padStart(2, '0')}`,
     );
+  }
+
+  /**
+   * Ouvre la modification d'un brouillon : seule la première ligne est
+   * éditable ici, comme à la création — un brouillon à plusieurs lignes se
+   * modifie encore par suppression et recréation.
+   */
+  function startEdit(document: BillingDocument) {
+    setCorrectingId(null);
+    setEditingId(document.id);
+    setEditClientName(document.client_name);
+    const firstLine = document.lines[0];
+    setEditLabel(firstLine?.label ?? '');
+    setEditAmountEuros(
+      firstLine
+        ? `${Math.floor(firstLine.unit_price_cents / 100)}.${String(
+            Math.abs(firstLine.unit_price_cents) % 100,
+          ).padStart(2, '0')}`
+        : '',
+    );
+    setEditVatPercent(
+      firstLine ? `${Math.floor(firstLine.vat_rate_basis_points / 100)}` : '20',
+    );
+  }
+
+  async function handleEdit(document: BillingDocument, e: FormEvent) {
+    e.preventDefault();
+    if (!token || !editClientName.trim() || !editLabel.trim()) return;
+    setError(null);
+    setIsEditSaving(true);
+    try {
+      const unitPriceCents = Math.round(Number(editAmountEuros.replace(',', '.')) * 100);
+      const vatRateBasisPoints = Math.round(Number(editVatPercent.replace(',', '.')) * 100);
+      if (!Number.isFinite(unitPriceCents) || !Number.isFinite(vatRateBasisPoints)) {
+        setError('Montant ou taux de TVA illisible.');
+        return;
+      }
+      await api.updateBillingDraft(token, document.id, {
+        clientName: editClientName.trim(),
+        lines: [{ label: editLabel.trim(), quantityMilli: 1000, unitPriceCents, vatRateBasisPoints }],
+      });
+      setEditingId(null);
+      load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Impossible de modifier ce document.');
+    } finally {
+      setIsEditSaving(false);
+    }
   }
 
   /**
@@ -189,6 +249,28 @@ export default function BillingPage() {
     }
   }
 
+  async function handleExportCsv() {
+    if (!token) return;
+    setError(null);
+    setIsExporting(true);
+    try {
+      const csv = await api.exportBillingCsv(token);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ignitux-facturation-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Impossible d'exporter la facturation.");
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
   async function handlePay(document: BillingDocument) {
     if (!token) return;
     setError(null);
@@ -204,9 +286,6 @@ export default function BillingPage() {
     <main className="page page--wide">
       <div className="top-bar">
         <h1>Facturation</h1>
-        <Link href="/projects" className="muted">
-          ← Retour aux projets
-        </Link>
       </div>
 
       <div className="card">
@@ -275,7 +354,17 @@ export default function BillingPage() {
       </div>
 
       <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Documents</h2>
+        <div className="top-bar">
+          <h2 style={{ marginTop: 0 }}>Documents</h2>
+          <button
+            className="secondary"
+            type="button"
+            onClick={() => void handleExportCsv()}
+            disabled={isExporting || documents.length === 0}
+          >
+            {isExporting ? 'Export…' : 'Exporter en CSV'}
+          </button>
+        </div>
         <p className="muted" style={{ marginTop: 0 }}>
           Ouvre un document pour le voir tel que ton client le recevra, et l&apos;imprimer ou
           l&apos;enregistrer en PDF.
@@ -329,6 +418,15 @@ export default function BillingPage() {
                     <button
                       className="secondary"
                       type="button"
+                      onClick={() =>
+                        editingId === document.id ? setEditingId(null) : startEdit(document)
+                      }
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      className="secondary"
+                      type="button"
                       onClick={() => void handleDelete(document)}
                     >
                       Supprimer
@@ -364,6 +462,49 @@ export default function BillingPage() {
                   </span>
                 )}
               </div>
+
+              {editingId === document.id && (
+                <form
+                  onSubmit={(e) => void handleEdit(document, e)}
+                  style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    flexWrap: 'wrap',
+                    marginTop: '0.75rem',
+                  }}
+                >
+                  <input
+                    aria-label="Modifier le nom du client"
+                    placeholder="Client"
+                    value={editClientName}
+                    onChange={(e) => setEditClientName(e.target.value)}
+                  />
+                  <input
+                    aria-label="Modifier la désignation"
+                    placeholder="Désignation de la prestation"
+                    value={editLabel}
+                    onChange={(e) => setEditLabel(e.target.value)}
+                  />
+                  <input
+                    aria-label="Modifier le montant hors taxes en euros"
+                    placeholder="Montant HT (€)"
+                    value={editAmountEuros}
+                    onChange={(e) => setEditAmountEuros(e.target.value)}
+                  />
+                  <input
+                    aria-label="Modifier le taux de TVA en pourcentage"
+                    placeholder="TVA (%)"
+                    value={editVatPercent}
+                    onChange={(e) => setEditVatPercent(e.target.value)}
+                  />
+                  <button className="secondary" type="submit" disabled={isEditSaving}>
+                    {isEditSaving ? 'Enregistrement…' : 'Enregistrer'}
+                  </button>
+                  <button className="secondary" type="button" onClick={() => setEditingId(null)}>
+                    Annuler
+                  </button>
+                </form>
+              )}
 
               {correctingId === document.id && (
                 <form

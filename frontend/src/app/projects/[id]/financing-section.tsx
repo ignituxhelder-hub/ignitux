@@ -7,6 +7,8 @@ import {
   type BuybackProgress,
   type CapTable,
   type DividendDistribution,
+  type EquityEvent,
+  type EquityHolderShare,
   type FinancingRound,
   type FinancingSource,
 } from '@/lib/api';
@@ -62,6 +64,21 @@ export function FinancingSection({ token, projectId, readOnly = false }: Financi
   const [occurredAt, setOccurredAt] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
+  const [equityEvents, setEquityEvents] = useState<EquityEvent[]>([]);
+  const [holderName, setHolderName] = useState('');
+  const [holderIsFounder, setHolderIsFounder] = useState(false);
+  const [isAddingHolder, setIsAddingHolder] = useState(false);
+
+  const [equityFormHolderId, setEquityFormHolderId] = useState<string | null>(null);
+  const [equityPercent, setEquityPercent] = useState('');
+  const [equityReason, setEquityReason] = useState('');
+  const [equityDate, setEquityDate] = useState('');
+
+  const [dividendFormHolderId, setDividendFormHolderId] = useState<string | null>(null);
+  const [dividendEuros, setDividendEuros] = useState('');
+  const [dividendDate, setDividendDate] = useState('');
+  const [dividendNote, setDividendNote] = useState('');
+
   function load() {
     if (!token) return;
     setIsLoading(true);
@@ -69,8 +86,9 @@ export function FinancingSection({ token, projectId, readOnly = false }: Financi
       api.listFinancingRounds(token, projectId),
       api.getCapTable(token, projectId),
       api.listDividends(token, projectId),
+      api.listEquityEvents(token, projectId),
     ])
-      .then(([roundList, table, dividendList]) => {
+      .then(([roundList, table, dividendList, eventList]) => {
         // Gardes défensives : une réponse tronquée (proxy, cache d'un
         // client plus ancien) ne doit pas faire disparaître la section
         // entière. Le piège s'est déjà produit une fois sur Compliance.
@@ -79,6 +97,7 @@ export function FinancingSection({ token, projectId, readOnly = false }: Financi
         setCapTable(Array.isArray(table?.holders) ? table : null);
         setDividends(Array.isArray(dividendList?.dividends) ? dividendList.dividends : []);
         setDividendTotalCents(dividendList?.totalCents ?? 0);
+        setEquityEvents(Array.isArray(eventList) ? eventList : []);
       })
       .catch(() => {})
       .finally(() => setIsLoading(false));
@@ -88,6 +107,17 @@ export function FinancingSection({ token, projectId, readOnly = false }: Financi
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, projectId]);
+
+  async function handleDeleteRound(roundId: string) {
+    if (!token) return;
+    setError(null);
+    try {
+      await api.deleteFinancingRound(token, roundId);
+      load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Impossible de supprimer cet apport.');
+    }
+  }
 
   async function handleRecordRound(e: FormEvent) {
     e.preventDefault();
@@ -115,6 +145,106 @@ export function FinancingSection({ token, projectId, readOnly = false }: Financi
     }
   }
 
+  async function handleAddHolder(e: FormEvent) {
+    e.preventDefault();
+    if (!token || !holderName.trim()) return;
+    setError(null);
+    setIsAddingHolder(true);
+    try {
+      await api.addEquityHolder(token, projectId, holderName.trim(), holderIsFounder);
+      setHolderName('');
+      setHolderIsFounder(false);
+      load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Impossible d'ajouter ce détenteur.");
+    } finally {
+      setIsAddingHolder(false);
+    }
+  }
+
+  async function handleRemoveHolder(holderId: string) {
+    if (!token) return;
+    setError(null);
+    try {
+      await api.removeHolder(token, holderId);
+      load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Impossible de retirer ce détenteur.');
+    }
+  }
+
+  function startEquityChange(holder: EquityHolderShare) {
+    setEquityFormHolderId(holder.holderId);
+    setEquityPercent('');
+    setEquityReason('');
+    setEquityDate('');
+    setDividendFormHolderId(null);
+  }
+
+  async function handleRecordEquityChange(holderId: string, e: FormEvent) {
+    e.preventDefault();
+    if (!token || !equityReason.trim() || !equityDate) return;
+    setError(null);
+    setIsSaving(true);
+    try {
+      const shareBasisPoints = Math.round(Number(equityPercent.replace(',', '.')) * 100);
+      if (!Number.isFinite(shareBasisPoints) || shareBasisPoints < 0 || shareBasisPoints > 10000) {
+        setError('Part illisible : elle doit être comprise entre 0 et 100 %.');
+        return;
+      }
+      await api.recordEquityChange(token, holderId, {
+        shareBasisPoints,
+        reason: equityReason.trim(),
+        occurredAt: new Date(equityDate).toISOString(),
+      });
+      setEquityFormHolderId(null);
+      setEquityPercent('');
+      setEquityReason('');
+      setEquityDate('');
+      load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Impossible d'enregistrer ce changement de part.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  function startDividend(holder: EquityHolderShare) {
+    setDividendFormHolderId(holder.holderId);
+    setDividendEuros('');
+    setDividendDate('');
+    setDividendNote('');
+    setEquityFormHolderId(null);
+  }
+
+  async function handleRecordDividend(holderId: string, e: FormEvent) {
+    e.preventDefault();
+    if (!token || !dividendDate) return;
+    setError(null);
+    setIsSaving(true);
+    try {
+      const amountCents = Math.round(Number(dividendEuros.replace(',', '.')) * 100);
+      if (!Number.isFinite(amountCents) || amountCents <= 0) {
+        setError('Montant illisible ou nul.');
+        return;
+      }
+      await api.recordDividend(token, holderId, {
+        amountCents,
+        occurredAt: new Date(dividendDate).toISOString(),
+        note: dividendNote.trim() || undefined,
+      });
+      setDividendFormHolderId(null);
+      setDividendEuros('');
+      setDividendDate('');
+      setDividendNote('');
+      load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Impossible d'enregistrer ce dividende.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
     <div className="card" style={{ marginTop: '1.5rem' }}>
       <h2 style={{ marginTop: 0 }}>Financement</h2>
@@ -136,12 +266,28 @@ export function FinancingSection({ token, projectId, readOnly = false }: Financi
           </p>
           <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {rounds.map((round) => (
-              <li key={round.id} style={{ marginBottom: '0.25rem' }}>
-                <span className="muted">
-                  {new Date(round.occurred_at).toLocaleDateString('fr-FR')} —{' '}
-                  {SOURCE_LABELS[round.source]}
-                </span>{' '}
-                {formatCents(round.amount_cents)}
+              <li
+                key={round.id}
+                className="top-bar"
+                style={{ marginBottom: '0.25rem', cursor: 'default' }}
+              >
+                <span>
+                  <span className="muted">
+                    {new Date(round.occurred_at).toLocaleDateString('fr-FR')} —{' '}
+                    {SOURCE_LABELS[round.source]}
+                  </span>{' '}
+                  {formatCents(round.amount_cents)}
+                </span>
+                {!readOnly && (
+                  <button
+                    className="secondary"
+                    type="button"
+                    aria-label={`Supprimer l'apport du ${new Date(round.occurred_at).toLocaleDateString('fr-FR')}`}
+                    onClick={() => void handleDeleteRound(round.id)}
+                  >
+                    Supprimer
+                  </button>
+                )}
               </li>
             ))}
           </ul>
@@ -189,13 +335,106 @@ export function FinancingSection({ token, projectId, readOnly = false }: Financi
         <>
           <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {capTable.holders.map((holder) => (
-              <li key={holder.holderId} style={{ marginBottom: '0.25rem' }}>
+              <li key={holder.holderId} style={{ marginBottom: '0.5rem' }}>
                 <strong>{holder.name}</strong>
                 {holder.isFounder && <span className="muted"> (porteur)</span>} —{' '}
                 {holder.shareBasisPoints === null ? (
                   <span className="muted">part non renseignée</span>
                 ) : (
                   formatBasisPoints(holder.shareBasisPoints)
+                )}
+                {!readOnly && (
+                  <span style={{ marginLeft: '0.5rem', display: 'inline-flex', gap: '0.4rem' }}>
+                    <button
+                      className="secondary"
+                      type="button"
+                      onClick={() => startEquityChange(holder)}
+                    >
+                      Changer la part
+                    </button>
+                    <button className="secondary" type="button" onClick={() => startDividend(holder)}>
+                      Verser un dividende
+                    </button>
+                    <button
+                      className="secondary"
+                      type="button"
+                      onClick={() => void handleRemoveHolder(holder.holderId)}
+                    >
+                      Retirer
+                    </button>
+                  </span>
+                )}
+
+                {!readOnly && equityFormHolderId === holder.holderId && (
+                  <form
+                    onSubmit={(e) => void handleRecordEquityChange(holder.holderId, e)}
+                    style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}
+                  >
+                    <input
+                      aria-label={`Nouvelle part de ${holder.name} en pourcentage`}
+                      placeholder="Part (%)"
+                      value={equityPercent}
+                      onChange={(e) => setEquityPercent(e.target.value)}
+                    />
+                    <input
+                      aria-label={`Motif du changement de part de ${holder.name}`}
+                      placeholder="Motif"
+                      value={equityReason}
+                      onChange={(e) => setEquityReason(e.target.value)}
+                    />
+                    <input
+                      aria-label={`Date du changement de part de ${holder.name}`}
+                      type="date"
+                      value={equityDate}
+                      onChange={(e) => setEquityDate(e.target.value)}
+                    />
+                    <button className="secondary" type="submit" disabled={isSaving}>
+                      {isSaving ? 'Enregistrement…' : 'Enregistrer'}
+                    </button>
+                    <button
+                      className="secondary"
+                      type="button"
+                      onClick={() => setEquityFormHolderId(null)}
+                    >
+                      Annuler
+                    </button>
+                  </form>
+                )}
+
+                {!readOnly && dividendFormHolderId === holder.holderId && (
+                  <form
+                    onSubmit={(e) => void handleRecordDividend(holder.holderId, e)}
+                    style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}
+                  >
+                    <input
+                      aria-label={`Montant du dividende versé à ${holder.name} en euros`}
+                      placeholder="Montant (€)"
+                      value={dividendEuros}
+                      onChange={(e) => setDividendEuros(e.target.value)}
+                    />
+                    <input
+                      aria-label={`Date du dividende versé à ${holder.name}`}
+                      type="date"
+                      value={dividendDate}
+                      onChange={(e) => setDividendDate(e.target.value)}
+                    />
+                    <input
+                      aria-label={`Note sur le dividende versé à ${holder.name}`}
+                      placeholder="Note (optionnel)"
+                      value={dividendNote}
+                      onChange={(e) => setDividendNote(e.target.value)}
+                    />
+                    <button className="secondary" type="submit" disabled={isSaving}>
+                      {isSaving ? 'Enregistrement…' : 'Enregistrer'}
+                    </button>
+                    <button
+                      className="secondary"
+                      type="button"
+                      onClick={() => setDividendFormHolderId(null)}
+                    >
+                      Annuler
+                    </button>
+                  </form>
                 )}
               </li>
             ))}
@@ -228,6 +467,57 @@ export function FinancingSection({ token, projectId, readOnly = false }: Financi
                 .join(' → ')}
             </p>
           )}
+        </>
+      )}
+
+      {!readOnly && (
+        <form
+          onSubmit={handleAddHolder}
+          style={{
+            display: 'flex',
+            gap: '0.5rem',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            marginTop: '0.75rem',
+          }}
+        >
+          <input
+            aria-label="Nom du détenteur"
+            placeholder="Nom du détenteur"
+            value={holderName}
+            onChange={(e) => setHolderName(e.target.value)}
+          />
+          <label style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
+            <input
+              type="checkbox"
+              checked={holderIsFounder}
+              onChange={(e) => setHolderIsFounder(e.target.checked)}
+              aria-label="Ce détenteur est porteur du projet"
+            />
+            Porteur
+          </label>
+          <button className="secondary" type="submit" disabled={isAddingHolder}>
+            {isAddingHolder ? 'Ajout…' : 'Ajouter un détenteur'}
+          </button>
+        </form>
+      )}
+
+      {equityEvents.length > 0 && (
+        <>
+          <h3 style={{ marginBottom: '0.5rem', marginTop: '1.25rem' }}>
+            Historique des changements de part
+          </h3>
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {equityEvents.map((event) => (
+              <li key={event.id} style={{ marginBottom: '0.25rem' }}>
+                <span className="muted">
+                  {new Date(event.occurred_at).toLocaleDateString('fr-FR')} —{' '}
+                  {event.holder?.name ?? 'Détenteur'}
+                </span>{' '}
+                {formatBasisPoints(event.share_basis_points)} — {event.reason}
+              </li>
+            ))}
+          </ul>
         </>
       )}
 

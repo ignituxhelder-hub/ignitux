@@ -79,9 +79,12 @@ export default function ConstitutionPage() {
     <main className="page page--wide">
       <div className="top-bar">
         <h1>Constitution IGNITUX</h1>
-        <Link href={token ? '/projects' : '/'} className="muted">
-          {token ? '← Retour aux projets' : "← Retour à l'accueil"}
-        </Link>
+        {/* Connectée, la barre de l'application ramène au bureau. */}
+        {!token && (
+          <Link href="/" className="muted">
+            ← Retour à l&apos;accueil
+          </Link>
+        )}
       </div>
 
       <div className="card">

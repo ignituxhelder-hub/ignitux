@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Brand } from '@/components/ignitux-mark';
@@ -90,9 +89,6 @@ export default function ComptabilitePage() {
     <main className="page page--wide">
       <div className="top-bar">
         <Brand />
-        <Link href="/projects" className="muted">
-          ← Retour aux projets
-        </Link>
       </div>
 
       <h1>Comptabilité</h1>

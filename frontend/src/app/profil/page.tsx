@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Brand } from '@/components/ignitux-mark';
@@ -81,9 +80,6 @@ export default function ProfilePage() {
     <main className="page">
       <div className="top-bar">
         <Brand />
-        <Link href="/projects" className="muted">
-          ← Retour à mes projets
-        </Link>
       </div>
 
       <h1>Ce qu&apos;Ignitux sait de toi</h1>

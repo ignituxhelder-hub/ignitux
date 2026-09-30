@@ -48,9 +48,6 @@ export default function AccountPage() {
   return (
     <main className="page">
       <div className="top-bar">
-        <Link href="/projects" className="muted">
-          ← Retour aux projets
-        </Link>
       </div>
       <Brand />
       <h1>Mon compte</h1>
@@ -124,6 +121,17 @@ export default function AccountPage() {
       </div>
 
       <ExportSection token={token} />
+
+      <div className="card">
+        <h2 style={{ marginTop: 0 }}>Cookies et stockage local</h2>
+        <p className="muted" style={{ marginTop: 0, marginBottom: 0 }}>
+          Ignitux ne pose aucun cookie et ne fait tourner aucun script de suivi. La connexion
+          (ton jeton de session) est mémorisée uniquement dans le stockage local de ton
+          navigateur, sur cet appareil : elle disparaît si tu l&apos;effaces et n&apos;est jamais
+          partagée avec un tiers.
+        </p>
+      </div>
+
       <DeleteAccountSection
         token={token}
         onDeleted={() => {

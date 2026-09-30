@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 /**
  * LE SERVICE WORKER — pour que l'application DÉMARRE sans connexion.
  *

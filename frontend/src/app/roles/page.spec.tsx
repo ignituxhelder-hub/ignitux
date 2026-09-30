@@ -70,7 +70,7 @@ describe('RolesPage', () => {
     expect(screen.getByText(/pas encore ouvert/)).toBeInTheDocument();
   });
 
-  it('enregistre les rôles cochés puis emmène dans le premier espace', async () => {
+  it('enregistre les rôles cochés puis emmène sur le bureau', async () => {
     mockApiRoutes(
       routes({
         'PUT /roles/moi': {
@@ -104,7 +104,8 @@ describe('RolesPage', () => {
       expect(envoi).toBeDefined();
       expect(JSON.parse(String(envoi![1].body))).toEqual({ roles: ['entrepreneur'] });
     });
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith('/projects'));
+    // Juste après l'inscription, on entre sur le bureau, comme à chaque ouverture.
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith('/accueil'));
   });
 
   it("n'enregistre rien sans rôle coché, et le dit", async () => {

@@ -56,8 +56,8 @@ export default function Error({
         <button className="primary" type="button" onClick={reset} style={{ width: 'auto' }}>
           Réessayer
         </button>
-        <Link href="/projects" className="muted" style={{ alignSelf: 'center' }}>
-          Retour à mes projets
+        <Link href="/accueil" className="muted" style={{ alignSelf: 'center' }}>
+          Retour au bureau
         </Link>
       </div>
 

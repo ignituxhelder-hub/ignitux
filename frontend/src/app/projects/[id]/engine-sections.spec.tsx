@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mockApiRoutes } from '@/test-utils/mocks';
-import { KnowledgeSection, MemorySection, ScoreSection, TasksSection } from './engine-sections';
+import { KnowledgeSection, MemorySection, ScoreHistorySection, ScoreSection, TasksSection } from './engine-sections';
 
 const TOKEN = 'tok123';
 const PROJECT_ID = 'p1';
@@ -29,6 +29,48 @@ describe('ScoreSection', () => {
     mockApiRoutes({ 'GET /projects/p1/scores': { status: 500, body: { message: 'Oups.' } } });
 
     render(<ScoreSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    expect(await screen.findByText('Oups.')).toBeInTheDocument();
+  });
+});
+
+describe('ScoreHistorySection', () => {
+  it("affiche un message quand il n'y a pas encore d'historique", async () => {
+    mockApiRoutes({ 'GET /projects/p1/scores/historique': { status: 200, body: [] } });
+
+    render(<ScoreHistorySection token={TOKEN} projectId={PROJECT_ID} />);
+
+    expect(await screen.findByText(/Pas encore d.historique/)).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'Évolution des scores dans le temps' })).not.toBeInTheDocument();
+  });
+
+  it('dessine une courbe par score, en sautant les relevés manquants', async () => {
+    mockApiRoutes({
+      'GET /projects/p1/scores/historique': {
+        status: 200,
+        body: [
+          { jour: '2026-09-01', etincelle: 5, construction: null, evolution: 2, transmission: null, confiance: 4 },
+          { jour: '2026-09-02', etincelle: 6, construction: 3, evolution: null, transmission: null, confiance: 4 },
+          { jour: '2026-09-03', etincelle: 7, construction: 4, evolution: 3, transmission: 1, confiance: 6 },
+        ],
+      },
+    });
+
+    const { container } = render(<ScoreHistorySection token={TOKEN} projectId={PROJECT_ID} />);
+
+    expect(await screen.findByRole('img', { name: 'Évolution des scores dans le temps' })).toBeInTheDocument();
+    // Un tracé par score qui a au moins deux points consécutifs connus
+    // (étincelle et confiance) ; construction n'en a qu'un seul relevé
+    // consécutif possible (jours 2 et 3), les autres sont trop troués.
+    expect(container.querySelectorAll('svg path').length).toBeGreaterThan(0);
+    expect(screen.getByText('2026-09-01')).toBeInTheDocument();
+    expect(screen.getByText('2026-09-03')).toBeInTheDocument();
+  });
+
+  it('affiche une erreur si le chargement échoue', async () => {
+    mockApiRoutes({ 'GET /projects/p1/scores/historique': { status: 500, body: { message: 'Oups.' } } });
+
+    render(<ScoreHistorySection token={TOKEN} projectId={PROJECT_ID} />);
 
     expect(await screen.findByText('Oups.')).toBeInTheDocument();
   });
@@ -283,6 +325,32 @@ describe('MemorySection', () => {
       expect(searched.length).toBeGreaterThan(0);
       expect(searched[searched.length - 1]).toContain('category=decision');
     });
+  });
+
+  it('affiche le rappel prioritaire à côté de la liste des souvenirs', async () => {
+    mockApiRoutes({
+      'GET /memory': { status: 200, body: [] },
+      'GET /memory/summary': { status: 200, body: { summary: '' } },
+      'GET /memory/recall/p1': {
+        status: 200,
+        body: [
+          {
+            id: 'm1',
+            user_id: 'u1',
+            project_id: 'p1',
+            category: 'decision',
+            content: 'Rester sur un MVP simple.',
+            tags: [],
+            created_at: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+    });
+
+    render(<MemorySection token={TOKEN} projectId={PROJECT_ID} />);
+
+    expect(await screen.findByText('Ce dont IGINI se souvient en priorité')).toBeInTheDocument();
+    expect(screen.getByText('Rester sur un MVP simple.')).toBeInTheDocument();
   });
 
   it('distingue « aucun résultat » de « aucun souvenir »', async () => {
@@ -557,6 +625,69 @@ describe('KnowledgeSection', () => {
 
     await screen.findByText("Aucun concept pour l'instant.");
     expect(screen.queryByRole('img', { name: 'Graphe des concepts et de leurs relations' })).not.toBeInTheDocument();
+  });
+
+  it('centre le graphe sur le voisinage d\'un concept puis revient à la vue complète', async () => {
+    const c1 = {
+      id: 'c1',
+      user_id: 'u1',
+      project_id: 'p1',
+      name: 'Client cible',
+      description: null,
+      category: null,
+      created_at: '2026-01-01T00:00:00.000Z',
+    };
+    const c2 = {
+      id: 'c2',
+      user_id: 'u1',
+      project_id: 'p1',
+      name: 'Offre SaaS',
+      description: null,
+      category: null,
+      created_at: '2026-01-01T00:00:00.000Z',
+    };
+    const c3 = {
+      id: 'c3',
+      user_id: 'u1',
+      project_id: 'p1',
+      name: 'Concurrent X',
+      description: null,
+      category: null,
+      created_at: '2026-01-01T00:00:00.000Z',
+    };
+    const edgeC1C2 = {
+      id: 'l1',
+      from_concept_id: 'c1',
+      to_concept_id: 'c2',
+      relation_type: 'a_besoin_de',
+      created_at: '2026-01-01T00:00:00.000Z',
+    };
+
+    mockApiRoutes({
+      'GET /knowledge/graph': {
+        status: 200,
+        body: { nodes: [c1, c2, c3], edges: [edgeC1C2] },
+      },
+      'GET /knowledge/concepts/c1/neighbourhood': {
+        status: 200,
+        body: { center: c1, depth: 1, nodes: [c1, c2], edges: [edgeC1C2] },
+      },
+    });
+
+    render(<KnowledgeSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    const svg = await screen.findByRole('img', { name: 'Graphe des concepts et de leurs relations' });
+    expect(svg.querySelectorAll('circle')).toHaveLength(3);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Centrer sur Client cible' }));
+
+    expect(await screen.findByText(/Voisinage de Client cible\./)).toBeInTheDocument();
+    expect(svg.querySelectorAll('circle')).toHaveLength(2);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Centrer sur tout le graphe' }));
+
+    await waitFor(() => expect(svg.querySelectorAll('circle')).toHaveLength(3));
+    expect(screen.queryByText(/Voisinage de Client cible\./)).not.toBeInTheDocument();
   });
 
   it('masque les formulaires de création et de liaison en lecture seule', async () => {

@@ -22,7 +22,7 @@ describe('écrans de secours', () => {
     it('donne une sortie', () => {
       render(<NotFound />);
 
-      expect(screen.getByRole('button', { name: /retour à mes projets/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /retour au bureau/i })).toBeInTheDocument();
     });
   });
 

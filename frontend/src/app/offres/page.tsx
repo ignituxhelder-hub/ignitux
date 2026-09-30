@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { Brand } from '@/components/ignitux-mark';
@@ -70,9 +69,6 @@ export default function OffresPage() {
     <main className="page page--wide">
       <div className="top-bar">
         <Brand />
-        <Link href="/projects" className="muted">
-          ← Retour aux projets
-        </Link>
       </div>
 
       <h1>Offres</h1>

@@ -3,7 +3,9 @@ import { IBM_Plex_Mono, IBM_Plex_Sans, Sora } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { OfflineBanner } from '@/components/offline-banner';
 import { ServiceWorker } from '@/components/service-worker';
+import { Systeme } from '@/components/systeme';
 import { AuthProvider } from '@/lib/auth';
+import { imagesDemarrage } from '@/lib/ecrans-demarrage';
 import './globals.css';
 
 // Sora porte la personnalité de la marque (titres, chiffres des scores) ;
@@ -22,12 +24,28 @@ export const metadata: Metadata = {
   title: 'Ignitux',
   description:
     "Igini, l'intelligence d'Ignitux, t'accompagne pour transformer une idée en réalité — analyser, construire, financer, développer, transmettre.",
+  // Installée sur iPhone, l'application ignore le manifeste : Safari lit
+  // ces balises-ci pour le titre, `apple-icon.png` pour l'icône, et les
+  // écrans de démarrage pour ne pas s'ouvrir sur du blanc.
+  appleWebApp: {
+    capable: true,
+    title: 'Ignitux',
+    statusBarStyle: 'black',
+    startupImage: imagesDemarrage(),
+  },
+  // `appleWebApp.capable` n'écrit que la balise propre à Apple ; Chrome sur
+  // Android lit celle-ci quand on ajoute la page à l'écran d'accueil sans
+  // passer par l'installation.
+  other: { 'mobile-web-app-capable': 'yes' },
 };
 
 export const viewport: Viewport = {
   // Doit suivre --bg : c'est la couleur que le navigateur mobile peint
   // autour de la page, et un écart se voit immédiatement.
   themeColor: '#08090d',
+  // Installée sur iPhone, la page occupe tout l'écran, encoche comprise ;
+  // `globals.css` rend la place avec les marges `safe-area-inset-*`.
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -46,7 +64,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <div className="offline-slot">
             <OfflineBanner />
           </div>
-          {children}
+          {/* Le bureau, la barre de l'application et la barre des tâches :
+              ce qui fait d'Ignitux un système plutôt qu'une suite de pages. */}
+          <Systeme>{children}</Systeme>
         </AuthProvider>
       </body>
     </html>

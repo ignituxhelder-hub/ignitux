@@ -32,7 +32,7 @@ describe('LoginPage', () => {
     fireEvent.change(screen.getByLabelText('Mot de passe'), { target: { value: 'motdepasse' } });
     fireEvent.click(screen.getByRole('button', { name: /se connecter/i }));
 
-    await waitFor(() => expect(router.replace).toHaveBeenCalledWith('/projects'));
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith('/accueil'));
   });
 
   it("affiche le message d'erreur du backend en cas d'échec", async () => {

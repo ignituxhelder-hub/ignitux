@@ -26,9 +26,9 @@ export default function NotFound() {
         le lien est probablement incomplet, ou la page a changé de nom.
       </p>
       <div className="hero-actions">
-        <Link href="/projects">
+        <Link href="/accueil">
           <button className="primary" type="button" style={{ width: 'auto' }}>
-            Retour à mes projets
+            Retour au bureau
           </button>
         </Link>
         <Link href="/" className="muted" style={{ alignSelf: 'center' }}>

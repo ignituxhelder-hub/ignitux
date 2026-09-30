@@ -60,7 +60,7 @@ export class UserDataService {
     const projectIds = await this.ownedProjectIds(userId);
     const byProject = { project_id: { in: projectIds } };
 
-    const [projects, concepts, contacts, documents, workflows, profile, roles, monProfil] =
+    const [projects, concepts, contacts, documents, workflows, profile, roles, monProfil, bureau] =
       await Promise.all([
       this.prisma.projects.findMany({ where: { owner_id: userId } }),
       this.prisma.concepts.findMany({ where: { user_id: userId } }),
@@ -70,6 +70,11 @@ export class UserDataService {
       this.prisma.marketplace_profiles.findUnique({ where: { user_id: userId } }),
       this.prisma.user_roles.findMany({ where: { user_id: userId }, orderBy: { role: 'asc' } }),
       this.prisma.user_profiles.findUnique({ where: { user_id: userId } }),
+      this.prisma.user_applications.findMany({
+        where: { user_id: userId },
+        select: { app_id: true, choix: true, updated_at: true },
+        orderBy: { app_id: 'asc' },
+      }),
     ]);
 
     const conceptIds = concepts.map((concept) => concept.id);
@@ -190,7 +195,8 @@ export class UserDataService {
         // Les roles tenus : sous quelles casquettes la personne a travaille.
         // Ils ne detiennent aucune donnee, mais dire lesquels etaient pris
         // explique la forme du reste du fichier.
-        compte: { ...compte, roles_tenus: roles, profil: monProfil },
+        // Le bureau : ce qu'elle y a ajouté ou retiré elle-même.
+        compte: { ...compte, roles_tenus: roles, profil: monProfil, bureau },
         projets_et_contenus: {
           projets: projects,
           taches: tasks,

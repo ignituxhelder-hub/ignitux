@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { Brand } from '@/components/ignitux-mark';
 import { RoleBar } from '@/components/role-bar';
 import { api, ApiError, type Project, type ProjectJourneySummary } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -32,11 +31,17 @@ import { useRoles } from '@/lib/roles';
  *
  * Rien. Les outils de travail — CRM, facturation, espace investisseur —
  * gardent toutes leurs actions : ce sont des outils, pas de
- * l'accompagnement, et les appauvrir n'aiderait personne. Ils se rejoignent
- * depuis « Tous mes outils », d'un clic.
+ * l'accompagnement, et les appauvrir n'aiderait personne.
+ *
+ * ## Une application parmi d'autres
+ *
+ * Cette page a longtemps été le carrefour d'Ignitux : un bouton « Tous mes
+ * outils » y menait partout. Ce rôle est passé au bureau (/accueil) et à la
+ * barre des tâches (`systeme.tsx`). Ici ne reste que « Mes projets » : on
+ * passe d'une application à l'autre par le système, pas par ses voisines.
  */
 export default function ProjectsPage() {
-  const { token, user, isReady, logout } = useAuth();
+  const { token, user, isReady } = useAuth();
   const router = useRouter();
   const { roles, switchTo } = useRoles(token, 'entrepreneur');
 
@@ -50,7 +55,6 @@ export default function ProjectsPage() {
   const [description, setDescription] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [outils, setOutils] = useState(false);
 
   const charger = useCallback(async (jeton: string) => {
     setIsLoading(true);
@@ -107,47 +111,6 @@ export default function ProjectsPage() {
 
   return (
     <main className="page page--wide">
-      <div className="top-bar">
-        <Brand />
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <button
-            className="secondary"
-            type="button"
-            aria-expanded={outils}
-            onClick={() => setOutils((o) => !o)}
-          >
-            Tous mes outils
-          </button>
-          <button
-            className="secondary"
-            type="button"
-            onClick={() => {
-              logout();
-              router.replace('/login');
-            }}
-          >
-            Se déconnecter
-          </button>
-        </div>
-      </div>
-
-      {/* Les outils restent à un clic, jamais étalés d'emblée. */}
-      {outils && (
-        <nav className="card app-nav" aria-label="Tous mes outils" style={{ marginBottom: '1.5rem' }}>
-          <Link href="/crm">Relations</Link>
-          <Link href="/facturation">Facturation</Link>
-          <Link href="/banque">Banque</Link>
-          <Link href="/comptabilite">Comptabilité</Link>
-          <Link href="/community">Communauté</Link>
-          <Link href="/marketplace">Mentors &amp; investisseurs</Link>
-          <Link href="/profil">Mon profil</Link>
-          <Link href="/consommation-ia">Consommation IA</Link>
-          <Link href="/offres">Offres</Link>
-          <Link href="/constitution">Constitution</Link>
-          <Link href="/account">Mon compte</Link>
-        </nav>
-      )}
-
       <RoleBar roles={roles} onSwitch={switchTo} />
 
       {/* Pas de prenom devine depuis l adresse : « heldersimoes.ge » n est

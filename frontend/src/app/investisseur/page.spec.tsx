@@ -173,14 +173,19 @@ describe('InvestorSpacePage', () => {
     expect(screen.queryByText('0 %')).toBeNull();
   });
 
-  // 403 = le rôle n'est pas pris. Ce n'est pas une panne : c'est une porte,
-  // et l'écran doit montrer où est la poignée.
-  it("propose de prendre le rôle quand l'espace est refusé", async () => {
+  // 403 = le rôle n'est pas pris. Si aucun investissement n'existe non plus
+  // (le portefeuille de secours répond 404), ce n'est pas une panne : c'est
+  // une porte, et l'écran doit montrer où est la poignée.
+  it("propose de prendre le rôle quand l'espace est refusé et qu'aucun investissement n'existe", async () => {
     mockApiRoutes(
       routes({
         'GET /espaces/investisseur': {
           status: 403,
           body: { message: 'Cet espace est réservé au rôle « Investisseur ».' },
+        },
+        'GET /investisseurs/moi/portefeuille': {
+          status: 404,
+          body: { message: "Aucun investisseur n'est enregistré à ton nom." },
         },
       }),
     );
@@ -198,6 +203,60 @@ describe('InvestorSpacePage', () => {
     );
     // Un refus de rôle ne doit pas déconnecter.
     expect(router.replace).not.toHaveBeenCalledWith('/login');
+  });
+
+  // Quelqu'un dont l'argent est placé quelque part doit pouvoir le lire même
+  // s'il n'a jamais coché la case « investisseur » : le refus de rôle ne
+  // doit pas cacher un portefeuille qui existe réellement.
+  it("montre le portefeuille malgré le refus de rôle, quand un investissement existe", async () => {
+    mockApiRoutes(
+      routes({
+        'GET /espaces/investisseur': {
+          status: 403,
+          body: { message: 'Cet espace est réservé au rôle « Investisseur ».' },
+        },
+        'GET /investisseurs/moi/portefeuille': {
+          status: 200,
+          body: {
+            investorId: 'i1',
+            displayName: 'Helder Simões',
+            global: {
+              investedCents: 500000,
+              repaidCents: 120000,
+              dividendsCents: 35000,
+              gainsCents: 0,
+              netCents: -345000,
+            },
+            parProjet: [
+              {
+                financedProjectId: 'f1',
+                projectId: 'p1',
+                projectTitle: 'Atelier Perrin',
+                status: 'en_remboursement',
+                participations: 1,
+                totals: {
+                  investedCents: 500000,
+                  repaidCents: 120000,
+                  dividendsCents: 35000,
+                  gainsCents: 0,
+                  netCents: -345000,
+                },
+              },
+            ],
+          },
+        },
+      }),
+    );
+
+    render(
+      <AuthProvider>
+        <InvestorSpacePage />
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByText('Atelier Perrin')).toBeInTheDocument();
+    expect(screen.getByText(/rôle Investisseur n'est pas pris/)).toBeInTheDocument();
+    expect(screen.queryByText(/réservé au rôle/)).toBeNull();
   });
 
   it("propose de se déclarer investisseur quand personne ne l'est encore", async () => {

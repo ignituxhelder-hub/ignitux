@@ -6,9 +6,11 @@ import {
   ApiError,
   type Concept,
   type ConceptLink,
+  type ConceptNeighbourhood,
   type Memory,
   type MemoryCategory,
   type ScoreCard,
+  type ScoreSnapshot,
   type Task,
   type TaskStatus,
 } from '@/lib/api';
@@ -123,6 +125,185 @@ export function ScoreSection({ token, projectId, refreshSignal }: SectionProps) 
         Ces scores sont calculés à partir de ce qu&apos;IGINI sait déjà du projet — « — » veut dire
         qu&apos;aucune donnée n&apos;existe encore pour le calculer, pas un score fabriqué.
       </p>
+    </div>
+  );
+}
+
+// L'acier, pas le feu : ces courbes rapportent une mesure, elles ne
+// déclenchent rien — la même règle que `scoreColor` ci-dessus.
+const HISTORY_COLORS: Record<keyof ScoreCard, string> = {
+  etincelle: 'var(--north)',
+  construction: 'var(--ok)',
+  evolution: 'var(--warn)',
+  transmission: 'var(--danger)',
+  confiance: 'var(--steel)',
+};
+
+function ScoreHistoryChart({ history }: { history: ScoreSnapshot[] }) {
+  const width = 560;
+  const height = 220;
+  const marginLeft = 26;
+  const marginRight = 10;
+  const marginTop = 10;
+  const marginBottom = 20;
+  const plotWidth = width - marginLeft - marginRight;
+  const plotHeight = height - marginTop - marginBottom;
+
+  const keys = Object.keys(SCORE_LABELS) as Array<keyof ScoreCard>;
+
+  function x(index: number) {
+    return history.length === 1
+      ? marginLeft + plotWidth / 2
+      : marginLeft + (index / (history.length - 1)) * plotWidth;
+  }
+
+  function y(value: number) {
+    return marginTop + plotHeight - (value / 10) * plotHeight;
+  }
+
+  // Un relevé manquant coupe le tracé plutôt que de le combler : voir le
+  // commentaire de `historique()` côté backend, aucune interpolation.
+  function pathFor(key: keyof ScoreCard) {
+    let d = '';
+    let drawing = false;
+    history.forEach((snapshot, index) => {
+      const value = snapshot[key];
+      if (value === null) {
+        drawing = false;
+        return;
+      }
+      d += `${drawing ? 'L' : 'M'}${x(index)},${y(value)} `;
+      drawing = true;
+    });
+    return d.trim();
+  }
+
+  return (
+    <>
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        aria-label="Évolution des scores dans le temps"
+        style={{ width: '100%', height: 'auto', display: 'block' }}
+      >
+        {[0, 5, 10].map((tick) => (
+          <g key={tick}>
+            <line
+              x1={marginLeft}
+              y1={y(tick)}
+              x2={width - marginRight}
+              y2={y(tick)}
+              style={{ stroke: 'var(--border)', strokeWidth: 1 }}
+            />
+            <text
+              x={marginLeft - 6}
+              y={y(tick) + 3}
+              textAnchor="end"
+              style={{ fill: 'var(--text-muted)', fontSize: 9 }}
+            >
+              {tick}
+            </text>
+          </g>
+        ))}
+        {keys.map((key) => {
+          const d = pathFor(key);
+          return (
+            <g key={key}>
+              {d && <path d={d} style={{ fill: 'none', stroke: HISTORY_COLORS[key], strokeWidth: 2 }} />}
+              {history.map((snapshot, index) => {
+                const value = snapshot[key];
+                if (value === null) return null;
+                return (
+                  <circle
+                    key={`${key}-${snapshot.jour}`}
+                    cx={x(index)}
+                    cy={y(value)}
+                    r={2.5}
+                    style={{ fill: HISTORY_COLORS[key] }}
+                  />
+                );
+              })}
+            </g>
+          );
+        })}
+        <text x={marginLeft} y={height - 4} textAnchor="start" style={{ fill: 'var(--text-muted)', fontSize: 9 }}>
+          {history[0].jour}
+        </text>
+        <text
+          x={width - marginRight}
+          y={height - 4}
+          textAnchor="end"
+          style={{ fill: 'var(--text-muted)', fontSize: 9 }}
+        >
+          {history[history.length - 1].jour}
+        </text>
+      </svg>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '0.5rem' }}>
+        {keys.map((key) => (
+          <span key={key} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem' }}>
+            <span
+              style={{
+                display: 'inline-block',
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: HISTORY_COLORS[key],
+              }}
+            />
+            {SCORE_LABELS[key]}
+          </span>
+        ))}
+      </div>
+    </>
+  );
+}
+
+export function ScoreHistorySection({ token, projectId, refreshSignal }: SectionProps) {
+  const [history, setHistory] = useState<ScoreSnapshot[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  function load() {
+    if (!token) return;
+    setIsLoading(true);
+    setError(null);
+    api
+      .getScoreHistory(token, projectId)
+      .then(setHistory)
+      .catch((err) =>
+        setError(err instanceof ApiError ? err.message : "Impossible de charger l'historique des scores."),
+      )
+      .finally(() => setIsLoading(false));
+  }
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, projectId, refreshSignal]);
+
+  return (
+    <div className="card" style={{ marginTop: '1.5rem' }}>
+      <div className="top-bar" style={{ marginBottom: '1rem' }}>
+        <h2 style={{ margin: 0 }}>Historique des scores</h2>
+        <button className="secondary" type="button" onClick={load} disabled={isLoading}>
+          {isLoading ? 'Actualisation…' : 'Actualiser'}
+        </button>
+      </div>
+      {error && <p className="error">{error}</p>}
+      {isLoading && history.length === 0 && !error && <p className="loading">Chargement…</p>}
+      {!isLoading && !error && history.length === 0 && (
+        <p className="muted">
+          Pas encore d&apos;historique : reviens après quelques jours d&apos;activité sur ce projet.
+        </p>
+      )}
+      {history.length > 0 && <ScoreHistoryChart history={history} />}
+      {history.length > 0 && (
+        <p className="muted" style={{ marginTop: '1rem', marginBottom: 0 }}>
+          Un point par jour où au moins un score a changé — sans interpolation entre deux relevés, un
+          projet qu&apos;on n&apos;a pas ouvert pendant plusieurs semaines n&apos;a pas « progressé
+          régulièrement », il n&apos;a simplement pas été mesuré.
+        </p>
+      )}
     </div>
   );
 }
@@ -251,16 +432,18 @@ export function TasksSection({
   );
 }
 
-const MEMORY_CATEGORIES: MemoryCategory[] = ['decision', 'preference', 'learning', 'fact'];
+const MEMORY_CATEGORIES: MemoryCategory[] = ['decision', 'preference', 'learning', 'fact', 'error'];
 const CATEGORY_LABELS: Record<MemoryCategory, string> = {
   decision: 'Décision',
   preference: 'Préférence',
   learning: 'Apprentissage',
   fact: 'Fait',
+  error: 'Erreur à ne pas refaire',
 };
 
 export function MemorySection({ token, projectId, readOnly = false }: ReadOnlySectionProps) {
   const [memories, setMemories] = useState<Memory[]>([]);
+  const [recalled, setRecalled] = useState<Memory[]>([]);
   const [summary, setSummary] = useState<string | null>(null);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [category, setCategory] = useState<MemoryCategory>('decision');
@@ -297,6 +480,9 @@ export function MemorySection({ token, projectId, readOnly = false }: ReadOnlySe
       }),
       api.listMemoryTags(token, projectId).then((tags) => {
         if (!cancelled) setAvailableTags(tags);
+      }),
+      api.recallMemories(token, projectId).then((data) => {
+        if (!cancelled) setRecalled(data);
       }),
     ])
       .catch(() => {})
@@ -367,6 +553,27 @@ export function MemorySection({ token, projectId, readOnly = false }: ReadOnlySe
         </p>
       )}
       {error && <p className="error">{error}</p>}
+
+      {recalled.length > 0 && (
+        <div style={{ marginBottom: '1rem' }}>
+          <strong>Ce dont IGINI se souvient en priorité</strong>
+          <p className="muted" style={{ margin: '0.25rem 0 0.5rem' }}>
+            Ce qu&apos;IGINI relit avant de générer quoi que ce soit sur ce projet — les décisions
+            d&apos;abord, le reste ensuite.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {recalled.map((m) => (
+              <div className="project-item" style={{ cursor: 'default' }} key={`recall-${m.id}`}>
+                <div className="top-bar" style={{ marginBottom: '0.25rem' }}>
+                  <strong>{CATEGORY_LABELS[m.category]}</strong>
+                  <span className="muted">{new Date(m.created_at).toLocaleString('fr-FR')}</span>
+                </div>
+                <p style={{ margin: 0 }}>{m.content}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <form
         onSubmit={(e) => {
@@ -488,7 +695,15 @@ export function MemorySection({ token, projectId, readOnly = false }: ReadOnlySe
   );
 }
 
-function ConceptGraphView({ concepts, edges }: { concepts: Concept[]; edges: ConceptLink[] }) {
+function ConceptGraphView({
+  concepts,
+  edges,
+  onSelectConcept,
+}: {
+  concepts: Concept[];
+  edges: ConceptLink[];
+  onSelectConcept?: (id: string) => void;
+}) {
   if (concepts.length === 0) return null;
 
   const size = 280;
@@ -535,7 +750,16 @@ function ConceptGraphView({ concepts, edges }: { concepts: Concept[]; edges: Con
         if (!pos) return null;
         return (
           <g key={concept.id}>
-            <circle cx={pos.x} cy={pos.y} r={7} style={{ fill: 'var(--accent)' }} />
+            <circle
+              cx={pos.x}
+              cy={pos.y}
+              r={7}
+              role={onSelectConcept ? 'button' : undefined}
+              aria-label={onSelectConcept ? `Centrer sur ${concept.name}` : undefined}
+              tabIndex={onSelectConcept ? 0 : undefined}
+              onClick={onSelectConcept ? () => onSelectConcept(concept.id) : undefined}
+              style={{ fill: 'var(--accent)', cursor: onSelectConcept ? 'pointer' : 'default' }}
+            />
             <text
               x={pos.x}
               y={pos.y + 18}
@@ -578,9 +802,17 @@ export function KnowledgeSection({
   const [matchedIds, setMatchedIds] = useState<string[] | null>(null);
   const [pathMessage, setPathMessage] = useState<string | null>(null);
 
+  // Voisinage : centrer le graphe sur un concept et ses voisins directs
+  // plutôt que de forcer à lire un graphe entier trop dense pour qu'on y
+  // distingue quoi que ce soit.
+  const [focusId, setFocusId] = useState<string | null>(null);
+  const [neighbourhood, setNeighbourhood] = useState<ConceptNeighbourhood | null>(null);
+
   function loadGraph() {
     if (!token) return;
     setIsLoading(true);
+    setFocusId(null);
+    setNeighbourhood(null);
     api
       .getConceptGraph(token, projectId)
       .then((graph) => {
@@ -590,6 +822,23 @@ export function KnowledgeSection({
       })
       .catch(() => {})
       .finally(() => setIsLoading(false));
+  }
+
+  async function handleFocusConcept(conceptId: string) {
+    if (!token) return;
+    setError(null);
+    try {
+      const result = await api.getConceptNeighbourhood(token, conceptId);
+      setFocusId(conceptId);
+      setNeighbourhood(result);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Impossible de charger le voisinage de ce concept.');
+    }
+  }
+
+  function clearFocus() {
+    setFocusId(null);
+    setNeighbourhood(null);
   }
 
   useEffect(() => {
@@ -757,7 +1006,19 @@ export function KnowledgeSection({
       {!isLoading && concepts.length > 0 && visibleConcepts.length === 0 && (
         <p className="muted">Aucun concept ne correspond à cette recherche.</p>
       )}
-      <ConceptGraphView concepts={concepts} edges={edges} />
+      <ConceptGraphView
+        concepts={focusId && neighbourhood ? neighbourhood.nodes : concepts}
+        edges={focusId && neighbourhood ? neighbourhood.edges : edges}
+        onSelectConcept={(id) => void handleFocusConcept(id)}
+      />
+      {focusId && (
+        <p className="muted">
+          Voisinage de {conceptName(focusId)}.{' '}
+          <button className="secondary" type="button" onClick={clearFocus}>
+            Centrer sur tout le graphe
+          </button>
+        </p>
+      )}
       {isolated.length > 0 && (
         <p className="muted">
           {isolated.length} concept(s) ne sont reliés à rien pour l&apos;instant. Ce n&apos;est pas

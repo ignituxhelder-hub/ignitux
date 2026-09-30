@@ -34,10 +34,22 @@ const PIPELINE = {
   ],
 };
 
+const COMPANY = {
+  id: 'co1',
+  owner_id: 'u1',
+  name: 'Acme SARL',
+  sector: 'Bâtiment',
+  website: null,
+  notes: null,
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_at: '2026-01-01T00:00:00.000Z',
+};
+
 function routes(overrides: Record<string, { status: number; body: unknown }> = {}) {
   return {
     'GET /crm/contacts': { status: 200, body: [CONTACT] },
     'GET /crm/pipeline': { status: 200, body: PIPELINE },
+    'GET /crm/companies': { status: 200, body: [] as unknown[] },
     ...overrides,
   };
 }
@@ -225,5 +237,173 @@ describe('CrmPage', () => {
     );
 
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith('/login'));
+  });
+
+  // Les routes d'entreprises existaient côté API sans aucun appelant côté
+  // client : ni liste, ni création, ni lien contact → entreprise.
+  describe('entreprises', () => {
+    it('liste les entreprises existantes', async () => {
+      mockApiRoutes(routes({ 'GET /crm/companies': { status: 200, body: [COMPANY] } }));
+
+      render(
+        <AuthProvider>
+          <CrmPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByText('Acme SARL', { selector: 'strong' })).toBeInTheDocument();
+      expect(screen.getByText(/Bâtiment/)).toBeInTheDocument();
+    });
+
+    it('crée une entreprise avec son nom, secteur et site web', async () => {
+      const bodies: string[] = [];
+      global.fetch = vi.fn().mockImplementation((url: string, options?: RequestInit) => {
+        const path = new URL(url).pathname;
+        if (options?.method === 'POST' && path === '/crm/companies') {
+          bodies.push(String(options.body));
+        }
+        const body =
+          path === '/crm/pipeline'
+            ? PIPELINE
+            : path === '/crm/companies'
+              ? []
+              : path === '/crm/contacts'
+                ? [CONTACT]
+                : {};
+        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(body) });
+      }) as unknown as typeof fetch;
+
+      render(
+        <AuthProvider>
+          <CrmPage />
+        </AuthProvider>,
+      );
+
+      await screen.findByText('Ada Lovelace');
+      fireEvent.change(screen.getByLabelText("Nom de l'entreprise"), {
+        target: { value: 'Acme SARL' },
+      });
+      fireEvent.change(screen.getByLabelText("Secteur d'activité"), {
+        target: { value: 'Bâtiment' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Ajouter une entreprise' }));
+
+      await waitFor(() => expect(bodies.length).toBeGreaterThan(0));
+      const payload = JSON.parse(bodies[0]) as { name: string; sector?: string };
+      expect(payload).toEqual({ name: 'Acme SARL', sector: 'Bâtiment' });
+    });
+
+    it('modifie une entreprise via le formulaire en ligne', async () => {
+      const routeMap = routes({
+        'GET /crm/companies': { status: 200, body: [COMPANY] },
+        'PATCH /crm/companies/co1': {
+          status: 200,
+          body: { ...COMPANY, name: 'Acme SAS' },
+        },
+      });
+      mockApiRoutes(routeMap);
+
+      render(
+        <AuthProvider>
+          <CrmPage />
+        </AuthProvider>,
+      );
+
+      await screen.findByText('Acme SARL', { selector: 'strong' });
+      fireEvent.click(screen.getByRole('button', { name: 'Modifier' }));
+      fireEvent.change(screen.getByLabelText('Nom de Acme SARL'), {
+        target: { value: 'Acme SAS' },
+      });
+      routeMap['GET /crm/companies'] = {
+        status: 200,
+        body: [{ ...COMPANY, name: 'Acme SAS' }],
+      };
+      fireEvent.click(screen.getByRole('button', { name: 'Enregistrer' }));
+
+      expect(await screen.findByText('Acme SAS', { selector: 'strong' })).toBeInTheDocument();
+    });
+
+    it('supprime une entreprise directement, sans boîte de confirmation', async () => {
+      const routeMap = routes({
+        'GET /crm/companies': { status: 200, body: [COMPANY] },
+        'DELETE /crm/companies/co1': { status: 204, body: null },
+      });
+      mockApiRoutes(routeMap);
+
+      render(
+        <AuthProvider>
+          <CrmPage />
+        </AuthProvider>,
+      );
+
+      const companyName = await screen.findByText('Acme SARL', { selector: 'strong' });
+      const companyItem = companyName.closest('li') as HTMLElement;
+      routeMap['GET /crm/companies'] = { status: 200, body: [] };
+      fireEvent.click(within(companyItem).getByRole('button', { name: 'Supprimer' }));
+
+      await waitFor(() => expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/crm/companies/co1'),
+        expect.objectContaining({ method: 'DELETE' }),
+      ));
+    });
+
+    it('associe un contact à une entreprise existante dès sa création', async () => {
+      const bodies: string[] = [];
+      global.fetch = vi.fn().mockImplementation((url: string, options?: RequestInit) => {
+        const path = new URL(url).pathname;
+        if (options?.method === 'POST' && path === '/crm/contacts') {
+          bodies.push(String(options.body));
+        }
+        const body =
+          path === '/crm/pipeline'
+            ? PIPELINE
+            : path === '/crm/companies'
+              ? [COMPANY]
+              : path === '/crm/contacts'
+                ? [CONTACT]
+                : {};
+        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(body) });
+      }) as unknown as typeof fetch;
+
+      render(
+        <AuthProvider>
+          <CrmPage />
+        </AuthProvider>,
+      );
+
+      await screen.findByText('Ada Lovelace');
+      fireEvent.change(screen.getByLabelText('Prénom'), { target: { value: 'Bob' } });
+      fireEvent.change(screen.getByLabelText('Nom'), { target: { value: 'Martin' } });
+      fireEvent.change(screen.getByLabelText('Entreprise du contact'), {
+        target: { value: 'co1' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Ajouter' }));
+
+      await waitFor(() => expect(bodies.length).toBeGreaterThan(0));
+      const payload = JSON.parse(bodies[0]) as { companyId?: string };
+      expect(payload.companyId).toBe('co1');
+    });
+
+    it("affiche le nom de l'entreprise sous chaque contact rattaché", async () => {
+      mockApiRoutes(
+        routes({
+          'GET /crm/companies': { status: 200, body: [COMPANY] },
+          'GET /crm/contacts': {
+            status: 200,
+            body: [{ ...CONTACT, company_id: 'co1' }],
+          },
+        }),
+      );
+
+      render(
+        <AuthProvider>
+          <CrmPage />
+        </AuthProvider>,
+      );
+
+      await screen.findByText('Ada Lovelace');
+      const list = await screen.findByRole('list', { name: 'Liste des contacts' });
+      expect(within(list).getByText('Acme SARL')).toBeInTheDocument();
+    });
   });
 });
