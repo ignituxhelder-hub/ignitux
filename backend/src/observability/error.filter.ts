@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
+import { signalerErreur } from './rapporteur-erreurs.js';
 
 /** Ce que le client reçoit quand rien de prévu ne s'est produit. */
 export interface UnexpectedErrorBody {
@@ -63,6 +64,15 @@ export class UnexpectedErrorFilter implements ExceptionFilter {
         this.logger.error(
           `${request.method ?? '?'} ${request.url ?? '?'} → ${statut} : ${exception.message}`,
         );
+        signalerErreur({
+          reference: randomUUID().slice(0, 8),
+          methode: request.method ?? '?',
+          chemin: request.url ?? '?',
+          message: `${statut} : ${exception.message}`,
+          pile: exception.stack ?? null,
+          utilisateurId: request.user?.id ?? null,
+          moment: new Date().toISOString(),
+        });
       }
       return;
     }
@@ -98,6 +108,19 @@ export class UnexpectedErrorFilter implements ExceptionFilter {
         ` — ${exception instanceof Error ? exception.message : String(exception)}`,
       exception instanceof Error ? exception.stack : undefined,
     );
+
+    // Le journal local reste la source de vérité ; le rapporteur prévient
+    // quelqu'un. Il n'attend pas et ne lève jamais : la réponse part quoi
+    // qu'il arrive au collecteur.
+    signalerErreur({
+      reference,
+      methode: request.method ?? '?',
+      chemin: request.url ?? '?',
+      message: exception instanceof Error ? exception.message : String(exception),
+      pile: exception instanceof Error ? (exception.stack ?? null) : null,
+      utilisateurId: request.user?.id ?? null,
+      moment: new Date().toISOString(),
+    });
 
     const corps: UnexpectedErrorBody = {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,

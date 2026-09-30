@@ -114,4 +114,52 @@ describe('le dernier filet', () => {
       expect(reponse.code).toBe(500);
     });
   });
+
+  // Une panne que personne ne lit se découvre par le message de quelqu'un,
+  // des jours après. Le filet prévient donc le collecteur — et seulement
+  // pour les pannes : un refus voulu n'est pas un incident.
+  describe('le signalement au collecteur', () => {
+    const original = process.env.ERREURS_WEBHOOK_URL;
+    let fetchMock: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      process.env.ERREURS_WEBHOOK_URL = 'https://collecteur.exemple.test/hook';
+      fetchMock = vi.fn().mockResolvedValue({ ok: true });
+      vi.stubGlobal('fetch', fetchMock);
+    });
+    afterEach(() => {
+      process.env.ERREURS_WEBHOOK_URL = original;
+      vi.unstubAllGlobals();
+    });
+
+    it('signale une panne imprévue, avec la même référence que la réponse', () => {
+      const { reponse } = attraper(new Error('connexion perdue'));
+      const envoye = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(envoye.reference).toBe((reponse.corps as { reference: string }).reference);
+      expect(envoye.utilisateurId).toBe('u1');
+    });
+
+    it('signale une 5xx délibérée', () => {
+      attraper(new HttpException('Service indisponible.', HttpStatus.SERVICE_UNAVAILABLE));
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('ne signale ni un refus, ni un corps trop gros', () => {
+      attraper(new ForbiddenException('Non.'));
+      attraper({ type: 'entity.too.large' });
+
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('rend sa réponse même quand le collecteur est injoignable', () => {
+      fetchMock.mockRejectedValue(new Error('réseau coupé'));
+
+      const { reponse } = attraper(new Error('panne'));
+
+      expect(reponse.code).toBe(500);
+    });
+  });
 });

@@ -106,6 +106,7 @@ describe('ReadinessService', () => {
     process.env.JWT_SECRET = 'secret-de-test-assez-long-pour-passer-32';
     process.env.IGINI_AI_ENABLED = 'true';
     process.env.ANTHROPIC_API_KEY = 'sk-ant-test';
+    process.env.ERREURS_WEBHOOK_URL = 'https://collecteur.exemple/hook';
     // Le cache de getEnv() survit d'un test à l'autre : sans cet oubli, les
     // cas qui changent l'état de l'IA mesureraient la configuration du
     // premier test exécuté.
@@ -253,6 +254,26 @@ describe('ReadinessService', () => {
       const s = await service(prismaAvec(TOUTES), mailAvec(SMTP_OK));
 
       expect((await s.check()).verifications.ia.detail).toMatch(/aucune clé/);
+    });
+  });
+
+  describe('monitoring', () => {
+    it('est ok quand un collecteur est configuré', async () => {
+      const s = await service(prismaAvec(TOUTES), mailAvec(SMTP_OK));
+
+      const resultat = await s.check();
+      expect(resultat.verifications.monitoring.etat).toBe('ok');
+    });
+
+    // Sans collecteur, le produit fonctionne à l'identique — seulement
+    // personne n'est prévenu avant qu'une personne écrive.
+    it('classe l’absence de collecteur en dégradé, pas en panne', async () => {
+      delete process.env.ERREURS_WEBHOOK_URL;
+      const s = await service(prismaAvec(TOUTES), mailAvec(SMTP_OK));
+
+      const resultat = await s.check();
+      expect(resultat.verifications.monitoring.etat).toBe('degrade');
+      expect(resultat.verifications.monitoring.detail).toMatch(/ERREURS_WEBHOOK_URL/);
     });
   });
 

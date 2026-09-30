@@ -4,6 +4,7 @@ import { COMPLIANCE_REQUIREMENTS_FR } from '../compliance/compliance-requirement
 import { Prisma } from '../generated/prisma/client.js';
 import { MailService } from '../mail/mail.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { rapporteurActif } from './rapporteur-erreurs.js';
 
 export interface CheckResult {
   /** 'ok' | 'degrade' | 'panne' — trois états, pas deux. */
@@ -106,6 +107,7 @@ export class ReadinessService {
       referentiel: await this.verifierReferentiel(),
       email: await this.verifierEmail(),
       ia: this.verifierIa(),
+      monitoring: this.verifierMonitoring(),
     };
 
     const etats = Object.values(verifications).map((v) => v.etat);
@@ -146,7 +148,7 @@ export class ReadinessService {
       const detail =
         `${manquantes.length} table(s) manquent en base : ${manquantes.join(', ')}. ` +
         "L'application démarre quand même et échouera à la première écriture dans ces " +
-        'modules. Lancer `prisma db push` sur cette base.';
+        'modules. Lancer `prisma migrate deploy` sur cette base.';
       this.logger.error(detail);
       return { etat: 'panne', detail };
     } catch (error) {
@@ -202,7 +204,7 @@ export class ReadinessService {
       const detail =
         `${manquantes.length} colonne(s) manquent en base : ${manquantes.join(', ')}. ` +
         "Les tables existent, donc l'application démarre et les lectures passent — seules " +
-        'les écritures touchant ces colonnes échoueront. Lancer `prisma db push` sur cette base.';
+        'les écritures touchant ces colonnes échoueront. Lancer `prisma migrate deploy` sur cette base.';
       this.logger.error(detail);
       return { etat: 'panne', detail };
     } catch (error) {
@@ -275,6 +277,25 @@ export class ReadinessService {
     return {
       etat: 'panne',
       detail: `SMTP configuré mais injoignable — ${resultat.detail ?? 'raison inconnue'}`,
+    };
+  }
+
+  /**
+   * Le rapporteur d'erreurs a-t-il un collecteur configuré ?
+   *
+   * « Dégradé », pas « panne » : sans lui, le produit fonctionne exactement
+   * comme avant — les erreurs restent dans les journaux locaux, seulement
+   * personne n'est prévenu avant qu'une personne écrive.
+   */
+  private verifierMonitoring(): CheckResult {
+    if (rapporteurActif()) {
+      return { etat: 'ok', detail: "Le rapporteur d'erreurs a un collecteur configuré." };
+    }
+    return {
+      etat: 'degrade',
+      detail:
+        "Aucun collecteur configuré (ERREURS_WEBHOOK_URL absent) : les erreurs restent dans " +
+        "les journaux locaux, personne n'est prévenu avant qu'une personne écrive.",
     };
   }
 

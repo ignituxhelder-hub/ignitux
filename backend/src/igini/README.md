@@ -36,12 +36,16 @@ de signal réel, le moteur renvoie `null` ou une valeur neutre plutôt qu'un chi
   encore d'extraction automatique de concepts depuis les plans générés.
 - **Workflow** (`workflow/`) — `POST /projects/:projectId/tasks`, `GET /projects/:projectId/tasks`,
   `PATCH /tasks/:taskId/status`. Des tâches suivables (`pending`/`done`/…, assignées à `human` ou
-  `igini`) créées manuellement ou automatiquement : `ProjectsService.analyzeForOwner` et
-  `createBuildPlanForOwner` appellent `WorkflowService.createTasksFromSuggestions` pour transformer
-  les prochaines étapes/jalons suggérés par l'IA en tâches réelles. **Il n'y a pas de moteur
+  `igini`) créées manuellement ou automatiquement : les cinq générateurs (`analyzeForOwner`,
+  `createBuildPlanForOwner`, `createFinancingPlanForOwner`, `createDevelopmentPlanForOwner`,
+  `createTransmissionPlanForOwner`) appellent tous `WorkflowService.createTasksFromSuggestions`
+  pour transformer ce que l'IA suggère (prochaines étapes, jalons, pistes de financement, leviers
+  de croissance, check-list de transmissibilité) en tâches réelles. **Il n'y a pas de moteur
   d'automatisation qui exécute ces tâches tout seul** — IGINI n'a aucune action concrète à
   déclencher pour l'instant, ce serait mentir que de le prétendre.
-- **Score** (`scoring/`) — `GET /projects/:projectId/scores`. Un tableau de bord dérivé des
+- **Score** (`scoring/`) — `GET /projects/:projectId/scores` et
+  `GET /projects/:projectId/scores/historique` (jusqu'à 90 jours, un point par relevé quotidien,
+  sans interpolation). Un tableau de bord dérivé des
   données déjà en base : `etincelle` = score de faisabilité de la dernière analyse (ou `null` si
   aucune analyse), `construction` = proportion de tâches terminées, `evolution`/`transmission` =
   heuristiques bornées à 10 basées sur la richesse du plan de développement/transmission, et
