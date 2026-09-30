@@ -13,6 +13,7 @@ import {
 import { IginiMention } from '@/components/igini-mention';
 import { ProchaineEtape, Progression, SectionsFermees, TableauDeBord } from '@/components/parcours';
 import { AnalyseEnCours, AnalyseResultat } from './analyse-resultat';
+import { FormeJuridiqueResultat } from './forme-juridique-resultat';
 import { ChampsADemander } from '@/components/champs-profil';
 import {
   api,
@@ -23,6 +24,7 @@ import {
   type FinancingPlan,
   type IginiStatus,
   type JourneyView,
+  type LegalFormRecommendation,
   type ProfileField,
   type Project,
   type TransmissionPlan,
@@ -197,6 +199,20 @@ export default function ProjectDetailPage() {
     api.analyzeProject,
     setAnalyses,
     "Impossible d'analyser le projet.",
+    onGenerated,
+  );
+
+  const [legalForms, setLegalForms] = usePlanList<LegalFormRecommendation>(
+    token,
+    id,
+    api.listLegalFormRecommendations,
+  );
+  const legalForm = useGeneration(
+    token,
+    id,
+    api.recommendLegalForm,
+    setLegalForms,
+    'Impossible de recommander une forme juridique.',
     onGenerated,
   );
 
@@ -563,6 +579,22 @@ export default function ProjectDetailPage() {
              quelque chose a cassé. On dit ce qui est en cours, sans feindre
              une progression que le modèle ne fournit pas. */
           busyContent={<AnalyseEnCours />}
+          readOnly={!isOwner}
+          iginiStatus={iginiStatus}
+        />
+      )}
+
+      {montrer('analyse') && (
+        <GenerationSection
+          title="Forme juridique"
+          buttonLabel="Proposer une forme juridique"
+          buttonBusyLabel="Recommandation en cours…"
+          emptyLabel="Aucune recommandation pour l'instant — elle apparaît automatiquement dès qu'une analyse dépasse 75/100, ou lance-la toi-même."
+          items={legalForms}
+          isBusy={legalForm.isBusy}
+          error={legalForm.error}
+          onGenerate={legalForm.generate}
+          renderItem={(item) => <FormeJuridiqueResultat recommandation={item} key={item.id} />}
           readOnly={!isOwner}
           iginiStatus={iginiStatus}
         />
