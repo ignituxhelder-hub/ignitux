@@ -69,7 +69,7 @@ async function bootstrap() {
 function servirLaDocumentation(app: NestExpressApplication) {
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Ignitux API')
-    .setDescription("API d'Ignitux : comptes, projets, et les 5 générateurs IA d'IGINI.")
+    .setDescription("API d'Ignitux : comptes, projets, et les 6 générateurs IA d'IGINI.")
     .setVersion('1.0')
     .addBearerAuth()
     .build();

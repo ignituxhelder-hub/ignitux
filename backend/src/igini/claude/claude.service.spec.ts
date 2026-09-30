@@ -705,7 +705,7 @@ describe('ClaudeService', () => {
   });
 
   describe('ce que l offre couvre', () => {
-    // Les cinq generateurs passent par ce point unique : un controle pose
+    // Les six generateurs passent par ce point unique : un controle pose
     // ici ne peut etre oublie par aucun d entre eux.
     it('verifie les droits avant tout appel reseau', async () => {
       offres.exiger.mockRejectedValue(new Error('offre insuffisante'));

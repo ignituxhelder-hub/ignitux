@@ -10,9 +10,9 @@ import {
 import { checkQuota, readQuotaLimits, type QuotaLimits, type QuotaVerdict } from './ai-quota.js';
 
 /**
- * Les cinq générateurs, nommés comme la méthode IGINI les nomme.
+ * Les six générateurs, nommés comme la méthode IGINI les nomme.
  *
- * C'est un type union et pas un `string` : le jour où un sixième générateur
+ * C'est un type union et pas un `string` : le jour où un septième générateur
  * arrive, il ne compilera pas tant qu'il n'aura pas été ajouté ici. Une
  * chaîne libre aurait laissé passer un `'analyse'` au singulier ou un
  * `'Analyser'` majuscule, et le journal se serait mis à compter deux

@@ -1,5 +1,5 @@
 /**
- * LES CINQ GÉNÉRATEURS, NOMMÉS UNE SEULE FOIS.
+ * LES SIX GÉNÉRATEURS, NOMMÉS UNE SEULE FOIS.
  *
  * Fichier à part, et sans aucune dépendance : le journal de consommation,
  * le catalogue des offres et les contrôles de droits ont tous besoin de ces

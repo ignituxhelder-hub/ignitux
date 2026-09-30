@@ -130,15 +130,15 @@ export class ClaudeService {
   async generateStructuredOutput<T>(
     request: StructuredOutputRequest<T>,
   ): Promise<T | (T & { sources: WebSearchSource[] })> {
-    // Le verrou est ici, et pas dans chaque générateur : les cinq passent
+    // Le verrou est ici, et pas dans chaque générateur : les six passent
     // par ce point unique, donc aucun d'eux ne peut être oublié le jour où
-    // un sixième arrive.
+    // un septième arrive.
     const availability = this.availability();
     if (!availability.enabled) {
       throw new ServiceUnavailableException(availability.reason);
     }
 
-    // Le plafond mensuel, au même endroit et pour la même raison : les cinq
+    // Le plafond mensuel, au même endroit et pour la même raison : les six
     // générateurs passent ici, donc aucun ne peut être oublié.
     //
     // **Avant** l'appel réseau, et **hors** du try. Avant, parce qu'un
@@ -147,7 +147,7 @@ export class ClaudeService {
     // ressortirait en « erreur interne », et la personne ne saurait pas que
     // son forfait est consommé.
     // Ce que l'offre couvre, au même endroit et pour la même raison que le
-    // plafond : les cinq générateurs passent ici.
+    // plafond : les six générateurs passent ici.
     //
     // **Avant** le plafond global, et l'ordre a un sens. Le plafond
     // technique protège le budget d'Ignitux ; l'offre décrit ce que la
