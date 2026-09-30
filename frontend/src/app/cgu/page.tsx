@@ -8,8 +8,8 @@ export const metadata = {
 /**
  * LES CONDITIONS D'UTILISATION — VERSION TEST.
  *
- * Premier jet, à valider par Helder avant que de vrais testeurs y accèdent :
- * voir docs/superpowers/plans/2026-09-30-v1-test-prive.md, Tâche 4.
+ * Validé par Helder le 2026-09-30 — voir
+ * docs/superpowers/plans/2026-09-30-v1-test-prive.md, Tâche 4.
  */
 export default function CguPage() {
   return (

@@ -10,9 +10,9 @@ export const metadata = {
  *
  * Helder édite Ignitux à titre personnel, salarié par ailleurs, sans
  * structure commerciale à ce jour — d'où « personne physique » plutôt
- * qu'une raison sociale inventée. Hébergeur à compléter une fois choisi
- * (Tâche 7). Premier jet à valider avant que de vrais testeurs y accèdent —
- * voir docs/superpowers/plans/2026-09-30-v1-test-prive.md, Tâche 4.
+ * qu'une raison sociale inventée. Validé par Helder le 2026-09-30 ; reste
+ * l'hébergeur à compléter une fois choisi (Tâche 7) — voir
+ * docs/superpowers/plans/2026-09-30-v1-test-prive.md, Tâche 4.
  */
 export default function MentionsLegalesPage() {
   return (

@@ -8,12 +8,10 @@ export const metadata = {
 /**
  * LA POLITIQUE DE CONFIDENTIALITÉ PUBLIQUE.
  *
- * Premier jet écrit à partir de ce que le code fait réellement
+ * Écrite à partir de ce que le code fait réellement
  * (docs/registre-de-traitements.md, dérivé table par table du schéma) — pas
- * un modèle générique. Identité (nom, adresse, email) confirmée par Helder
- * le 2026-09-30 ; le reste du texte reste à valider avant que de vrais
- * testeurs y accèdent : voir docs/superpowers/plans/2026-09-30-v1-test-prive.md,
- * Tâche 4.
+ * un modèle générique. Validée par Helder le 2026-09-30 (identité et texte) —
+ * voir docs/superpowers/plans/2026-09-30-v1-test-prive.md, Tâche 4.
  */
 export default function ConfidentialitePage() {
   return (
