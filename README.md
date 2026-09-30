@@ -14,6 +14,7 @@ IGNITUX est l'écosystème, IGINI est l'intelligence qui l'anime — voir [`back
   - [`backend/src/community/`](backend/src/community) — IGNITUX (pas IGINI) : projets publics et
     encouragements entre porteurs de projet.
 - [`frontend/`](frontend) — App Next.js consommant l'API : inscription, connexion, gestion des projets.
+- [`pc-usage-tracker/`](pc-usage-tracker/README.md) — outil indépendant qui comptabilise le temps d'utilisation du PC servant de serveur, et le montant dû à son propriétaire.
 
 ## Lancer le projet avec Docker — le plus simple
 

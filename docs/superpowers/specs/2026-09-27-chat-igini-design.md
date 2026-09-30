@@ -1,7 +1,13 @@
 # Chat avec Igini — icône persistante + panneau de discussion libre
 
 27 septembre 2026. Design validé avec Helder en session de brainstorming.
-Prochaine étape : plan d'implémentation (writing-plans).
+
+> **Remplacé le 27 septembre 2026 par
+> [`2026-09-27-igini-conversationnel-design.md`](2026-09-27-igini-conversationnel-design.md).**
+> La table `chat_messages`, les endpoints et l'emplacement frontend décrits
+> ici sont repris tels quels par le nouveau document ; ce qui change (le
+> chat devient un orchestrateur à outils dès la v1, pas un texte-seul) y
+> est décrit. Ne pas implémenter ce document seul.
 
 ## Pourquoi
 

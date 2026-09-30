@@ -1,0 +1,82 @@
+﻿# Modèle économique — état réel
+
+Sources : `backend/src/offres/offres-catalogue.ts` (code, vérifié le 30/09/2026), `PRICING.md`,
+`docs/modele-economique.md`, Bible chapitre 7.
+
+## La ligne de partage
+
+Le principe, vérifié dans le code et cohérent partout où il est documenté : ce qui ne coûte rien à
+faire tourner reste gratuit ; ce qui coûte de l'argent réel à chaque clic (un appel à un générateur
+IGINI) est payant **[Code, Bible]**. Ce n'est pas « basique contre avancé ».
+
+## Les trois offres — chiffres vérifiés dans le code
+
+| | Découverte | Entrepreneur | Construction |
+|---|---|---|---|
+| Prix | Gratuit | 9,90 €/mois | 59,00 €/mois |
+| Projets | 1 | Sans limite | Sans limite |
+| Générateurs IGINI | Analyser seul | Les 5 | Les 5 |
+| Générations IA/mois | 3 | 30 | 35 |
+| Comptabilité, facturation, banque | — | — | Oui |
+| Financement, investisseurs | — | — | Oui |
+| Collaborateurs | — | — | Sans limite |
+
+Une **évaluation de financement** existe à part, 99,00 €, explicitement non vendue comme un
+abonnement (un avertissement obligatoire, testé dans le code, l'accompagne partout où le prix
+s'affiche) **[Code]**.
+
+Les prix sont réglables par variable d'environnement sans redéploiement (`OFFRE_<ID>_PRIX_CENTIMES`)
+**[Code]** — utile pour une bêta à prix réduit, mais cela signifie aussi que **le prix affiché en
+production à un instant T doit être vérifié dans la configuration réelle**, pas supposé égal au
+catalogue par défaut.
+
+## Coût de l'intelligence artificielle — mesuré, pas estimé
+
+Sur 55 appels réels au modèle `claude-opus-5` (mesure du 19-20/09/2026) : **0,0511 € par génération
+en moyenne** **[Bible, Pricing]**. Un pipeline complet (les 5 générateurs, une fois chacun) mesuré à
+**0,3530 €** **[Pricing]**.
+
+## ⚠️ Incohérence identifiée par cet audit — à trancher par le fondateur
+
+`PRICING.md` construit tout son raisonnement de plafond de coût IA (« 10 % du prix de vente ») sur
+un **prix de vente de référence de 20,00 €/mois** — cité explicitement dans ses tableaux. **Aucune
+des trois offres réellement en vigueur ne vaut 20,00 €/mois** : Entrepreneur est à 9,90 € et
+Construction à 59,00 €.
+
+Conséquence chiffrée :
+
+| Offre | Prix réel | Plafond IA actuel (2,00 €) | % réel du prix |
+|---|---|---|---|
+| Entrepreneur | 9,90 € | 2,00 € | **20,2 %** — le double du taux annoncé |
+| Construction | 59,00 € | 2,00 € | **3,4 %** — très en dessous du taux annoncé |
+
+**[À DÉFINIR — décision fondateur]** : soit le plafond de 2,00 €/mois s'applique tel quel et le
+« taux de 10 % » n'a jamais correspondu aux offres réellement lancées (il faut le dire autrement),
+soit le plafond doit être recalculé par offre (par exemple 0,99 € pour Entrepreneur, 5,90 € pour
+Construction, pour respecter réellement 10 % sur chacune). Ce point doit être tranché **avant** de
+présenter « le coût IA est maîtrisé à 10 % du prix de vente » à un investisseur, sous peine de
+présenter un chiffre qui ne résiste pas à une question de suivi.
+
+Ce que le calcul montre malgré tout, et qui reste solide : le coût réel mesuré (0,3530 € pour un
+pipeline complet) est **très inférieur** à n'importe laquelle des deux offres payantes, avec une
+marge confortable même dans le scénario le plus défavorable (Entrepreneur à 9,90 €, coût réel à
+3,6 % du prix). Le sujet n'est pas la viabilité du coût IA — elle est acquise — mais la formulation
+du « plafond de 10 % » telle qu'écrite aujourd'hui.
+
+## Ce que ce dossier ne peut pas fournir
+
+- **Aucune donnée d'utilisateurs payants réels** — 0 utilisateur confirmé par le dépôt.
+- **Aucun coût d'acquisition, aucun taux de conversion, aucune rétention** — non mesurables sans
+  utilisateurs réels.
+- **Aucune projection de revenu** au-delà de ce que l'arithmétique des offres permet de calculer
+  mécaniquement (voir `12-besoin-financement.md` pour un usage prudent de ce calcul).
+
+## Ce qui reste hors modèle économique actuel
+
+- Aucun encaissement réel (pas de Stripe/Mollie/autre branché) **[Doc: en-attente-paiement.md]**.
+- Le modèle 51/49 de participation au capital des projets financés par IGNITUX est **suivi** dans le
+  code (registre, répartition, rachat) mais **le barème lui-même** (taux d'entrée, règle de
+  dilution) n'est pas un calcul du produit — c'est une donnée que le porteur de projet définit
+  lui-même pour son propre projet **[Bible, RAPPORT-SESSION]**. Le montage juridique du modèle
+  51/49 au niveau d'IGNITUX (la part perpétuelle de 5 %) n'a lui-même aucun contrat généré à ce
+  jour **[Status]**.

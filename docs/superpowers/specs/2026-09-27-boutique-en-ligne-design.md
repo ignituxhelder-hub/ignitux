@@ -217,9 +217,11 @@ libre, la mention y trouve sa place naturellement.
 S'ajoute à la liste déjà connue (hébergement, domaine, SMTP, moyen de
 paiement, dans `docs/reste-a-faire.md`) : **un compte Shopify Partner**,
 avec `SHOPIFY_API_KEY`, `SHOPIFY_API_SECRET`, `SHOPIFY_SCOPES`,
-`SHOPIFY_APP_URL`. Sans ces variables, le module refuse de démarrer plutôt
-que d'exposer une intégration à moitié configurée — même discipline que
-les autres blocages listés dans `verifier-production.mjs`.
+`SHOPIFY_APP_URL`. Même discipline que `PAIEMENT_FOURNISSEUR="aucun"` :
+leur absence ne bloque pas le démarrage du serveur (une brique optionnelle
+ne doit pas empêcher tout Ignitux de tourner) — elle rend seulement la
+route de connexion Shopify indisponible, avec un message clair plutôt
+qu'un plantage, jusqu'à ce que Helder les pose.
 
 ## Hors périmètre (explicitement exclu de cette v1)
 

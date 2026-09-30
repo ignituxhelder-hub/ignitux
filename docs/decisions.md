@@ -922,3 +922,36 @@ une bêta de trente personnes ; à revoir avec le domaine.
 
 **Où** — `backend/src/config/production-preflight.ts`
 (`DOMAINES_IMPOSSIBLES`), et les fichiers d'environnement, non versionnés.
+
+## Adopter les migrations Prisma versionnées, en commençant par la base de développement
+
+**Quoi** — `backend/prisma/migrations/` existe désormais, avec une migration unique
+(`20260929144415_baseline`) qui recrée tout le schéma actuel depuis zéro. Elle a été générée hors
+ligne (`prisma migrate diff --from-empty --to-schema`, aucune connexion à la base) puis marquée
+« déjà appliquée » sur `postgres` (dev) via `prisma migrate resolve --applied`, sans exécuter une
+seule ligne de SQL contre cette base — seule la table de suivi `_prisma_migrations` a été écrite.
+`prisma migrate status` y répond maintenant « à jour ». La CI (`.github/workflows/ci.yml`, jobs
+« Bout en bout » et « L'image démarre-t-elle ? ») pose désormais le schéma via
+`prisma migrate deploy` plutôt que `prisma db push`, ce qui valide au passage que la migration
+suffit à reconstruire le schéma sur une base jetable.
+
+**Pourquoi** — jusqu'ici le schéma n'existait qu'en un seul endroit vivant, `schema.prisma`, pose
+à chaque fois par `db push` : aucun historique, aucun diff relisible entre deux états, et la
+seule preuve qu'une base est à jour était de la comparer table par table (ce que fait
+`ReadinessService`). Une migration versionnée donne un historique relisible et rejouable, et
+CI en vérifie désormais la validité à chaque exécution plutôt que de la supposer.
+
+**Ce que ça ne change pas** — la règle « lire le SQL avant de pousser sur la production » (entrée
+ci-dessus) reste entière : `migrer-prod.mjs` appelle encore `prisma db push`, volontairement laissé
+tel quel. `ignitux_prod` et `ignitux_test` n'ont **pas** été baselinées : elles n'ont pas le même
+schéma que `postgres` en ce moment (`user_applications` leur manque encore, voir
+`reste-a-faire.md` point « À faire par toi »), donc rejouer la migration de baseline telle quelle
+contre l'une d'elles échouerait sur les tables déjà présentes. Les faire basculer sur
+`migrate deploy` demande d'abord un diff dédié à chacune (`prisma migrate diff --from-url <base>
+--to-schema schema.prisma`) pour construire leur propre point de départ — pas de s'appuyer sur
+celui de `postgres`. Volontairement laissé de côté : ça touche la production, et ce n'est pas une
+décision technique à prendre seul.
+
+**Où** — `backend/prisma/migrations/`, `backend/prisma/migrations/migration_lock.toml`,
+`.github/workflows/ci.yml`, `backend/src/observability/readiness.service.ts` (le message
+`schema`/`colonnes` recommande maintenant `migrate deploy`, plus `db push`).
