@@ -8,11 +8,11 @@ export const metadata = {
 /**
  * LES MENTIONS LÉGALES.
  *
- * L'éditeur, l'hébergeur et le contact, à compléter avec les informations
- * réelles de Helder (les mêmes que IGNITUX_RAISON_SOCIALE / IGNITUX_ADRESSE /
- * IGNITUX_EMAIL côté serveur, et l'hébergeur choisi en Tâche 7). Premier
- * jet à valider avant que de vrais testeurs y accèdent — voir
- * docs/superpowers/plans/2026-09-30-v1-test-prive.md, Tâche 4.
+ * Helder édite Ignitux à titre personnel, salarié par ailleurs, sans
+ * structure commerciale à ce jour — d'où « personne physique » plutôt
+ * qu'une raison sociale inventée. Hébergeur à compléter une fois choisi
+ * (Tâche 7). Premier jet à valider avant que de vrais testeurs y accèdent —
+ * voir docs/superpowers/plans/2026-09-30-v1-test-prive.md, Tâche 4.
  */
 export default function MentionsLegalesPage() {
   return (
@@ -28,11 +28,11 @@ export default function MentionsLegalesPage() {
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Éditeur</h2>
         <p style={{ marginBottom: 0 }}>
-          Ignitux — [raison sociale à compléter]
+          Ignitux est édité par Helder Simões, personne physique.
           <br />
-          [adresse à compléter]
+          28 avenue de la Route Blanche, 74950 Scionzier, France
           <br />
-          Contact : [email à compléter]
+          Contact : ignitux@outlook.com
         </p>
       </div>
 

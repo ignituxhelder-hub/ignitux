@@ -10,7 +10,8 @@ export const metadata = {
  *
  * Premier jet écrit à partir de ce que le code fait réellement
  * (docs/registre-de-traitements.md, dérivé table par table du schéma) — pas
- * un modèle générique. Reste à valider par Helder avant que de vrais
+ * un modèle générique. Identité (nom, adresse, email) confirmée par Helder
+ * le 2026-09-30 ; le reste du texte reste à valider avant que de vrais
  * testeurs y accèdent : voir docs/superpowers/plans/2026-09-30-v1-test-prive.md,
  * Tâche 4.
  */
@@ -36,9 +37,10 @@ export default function ConfidentialitePage() {
       <div className="card" style={{ marginTop: '1.5rem' }}>
         <h2 style={{ marginTop: 0 }}>Qui traite tes données</h2>
         <p>
-          Ignitux — [raison sociale à compléter], [adresse à compléter]. Contact :{' '}
-          [email à compléter]. Ignitux est responsable du traitement de tes données de
-          compte et du fonctionnement du service.
+          Ignitux est édité par Helder Simões, personne physique, 28 avenue de la Route
+          Blanche, 74950 Scionzier, France. Contact : ignitux@outlook.com. Helder est
+          responsable du traitement de tes données de compte et du fonctionnement du
+          service.
         </p>
         <p style={{ marginBottom: 0 }}>
           Pour les coordonnées de tiers que tu saisis toi-même dans Ignitux (contacts CRM,
