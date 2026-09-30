@@ -28,9 +28,16 @@ describe('disponibilité des générateurs IGINI', () => {
     }
   });
 
-  it('nomme les cinq générateurs dans le message affiché', () => {
+  it('nomme les six générateurs dans le message affiché', () => {
     // Le testeur doit comprendre ce qui est éteint sans avoir à deviner.
-    for (const generator of ['Analyser', 'Construire', 'Financer', 'Développer', 'Transmettre']) {
+    for (const generator of [
+      'Analyser',
+      'Former',
+      'Construire',
+      'Financer',
+      'Développer',
+      'Transmettre',
+    ]) {
       expect(GENERATORS_DISABLED_MESSAGE).toContain(generator);
     }
   });

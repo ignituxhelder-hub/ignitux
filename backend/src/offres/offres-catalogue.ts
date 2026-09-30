@@ -51,7 +51,7 @@ export function estOffre(valeur: string): valeur is OffreId {
 export interface Capacites {
   /** Nombre de projets simultanés. `null` = sans limite. */
   projets: number | null;
-  /** Les cinq générateurs IGINI, nommément. Vide = aucun. */
+  /** Les six générateurs IGINI, nommément. Vide = aucun. */
   generateurs: readonly GeneratorName[];
   /** Appels aux générateurs par mois civil. `null` = sans limite. */
   appelsIaParMois: number | null;
@@ -64,7 +64,7 @@ export interface Capacites {
 }
 
 /**
- * Les cinq générateurs, repris du journal de consommation plutôt que
+ * Les six générateurs, repris du journal de consommation plutôt que
  * redéclarés ici.
  *
  * Il y a eu deux listes pendant un moment — `analyse` ici, `analyser`
@@ -129,12 +129,12 @@ export const CATALOGUE: readonly Offre[] = [
     label: 'Entrepreneur',
     prixCentimes: 990,
     resume:
-      'Autant de projets que nécessaire, et les cinq générateurs pour passer de ' +
+      'Autant de projets que nécessaire, et les six générateurs pour passer de ' +
       "l'idée au plan.",
     argument:
-      "Tu as vu ce que l'analyse donne. Construire, financer, développer et transmettre " +
-      'sont les quatre étapes suivantes, et elles produisent des documents que tu ' +
-      "n'aurais pas écrits seul.",
+      "Tu as vu ce que l'analyse donne. Former, construire, financer, développer et " +
+      'transmettre sont les cinq étapes suivantes, et elles produisent des documents ' +
+      "que tu n'aurais pas écrits seul.",
     capacites: {
       projets: null,
       generateurs: [...GENERATOR_NAMES],
