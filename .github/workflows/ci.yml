@@ -110,7 +110,10 @@ jobs:
       - name: Installer Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: L'application s'ouvre-t-elle sans réseau ?
+      # Même instance pour les deux questions : sans réseau, puis installable
+      # sur Windows, Android et iPhone (manifeste, icônes à la bonne taille,
+      # verdict de Chromium, écrans de démarrage iOS).
+      - name: L'application s'ouvre-t-elle sans réseau, et s'installe-t-elle ?
         run: |
           npx next start -H 127.0.0.1 -p 3001 &
           for i in $(seq 1 30); do
@@ -118,6 +121,7 @@ jobs:
             sleep 2
           done
           node ../scripts/hors-ligne.mjs --web http://127.0.0.1:3001 --navigateur chromium
+          node ../scripts/installable.mjs --web http://127.0.0.1:3001 --navigateur chromium
 
   # LES TESTS DE BOUT EN BOUT, SUR UNE BASE JETABLE
   #
@@ -183,10 +187,11 @@ jobs:
 
       - run: npm ci
 
-      # Sur une base vide : c'est aussi la seule vérification automatique
-      # que le schéma se pose de zéro, ce qu'aucun autre job ne fait.
+      # Sur une base vide, via les migrations versionnées (prisma/migrations) :
+      # c'est aussi la seule vérification automatique que le schéma se pose
+      # de zéro à partir d'elles, ce qu'aucun autre job ne fait.
       - name: Poser le schéma
-        run: npx prisma db push
+        run: npx prisma migrate deploy
 
       - name: Tests de bout en bout
         run: npm run test:e2e
@@ -262,7 +267,7 @@ jobs:
 
       - name: Poser le schéma
         run: |
-          docker run --rm --network host             -e DATABASE_URL=postgresql://ignitux:ignitux@localhost:5432/ignitux             -v "$PWD/backend:/w" -w /w node:24-slim             sh -c "npm ci --silent && npx prisma db push --skip-generate"
+          docker run --rm --network host             -e DATABASE_URL=postgresql://ignitux:ignitux@localhost:5432/ignitux             -v "$PWD/backend:/w" -w /w node:24-slim             sh -c "npm ci --silent && npx prisma migrate deploy"
 
       - name: L'image du serveur répond-elle ?
         run: |
