@@ -402,6 +402,10 @@ export const ModelName = {
   projects: 'projects',
   analyses: 'analyses',
   analysis_sources: 'analysis_sources',
+  legal_form_recommendations: 'legal_form_recommendations',
+  legal_form_assumptions: 'legal_form_assumptions',
+  legal_form_alternatives: 'legal_form_alternatives',
+  legal_form_sources: 'legal_form_sources',
   financing_plans: 'financing_plans',
   development_plans: 'development_plans',
   transmission_plans: 'transmission_plans',
@@ -474,7 +478,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -845,6 +849,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.analysis_sourcesCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.Analysis_sourcesCountAggregateOutputType> | number
+        }
+      }
+    }
+    legal_form_recommendations: {
+      payload: Prisma.$legal_form_recommendationsPayload<ExtArgs>
+      fields: Prisma.legal_form_recommendationsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.legal_form_recommendationsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_recommendationsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.legal_form_recommendationsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_recommendationsPayload>
+        }
+        findFirst: {
+          args: Prisma.legal_form_recommendationsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_recommendationsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.legal_form_recommendationsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_recommendationsPayload>
+        }
+        findMany: {
+          args: Prisma.legal_form_recommendationsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_recommendationsPayload>[]
+        }
+        create: {
+          args: Prisma.legal_form_recommendationsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_recommendationsPayload>
+        }
+        createMany: {
+          args: Prisma.legal_form_recommendationsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.legal_form_recommendationsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_recommendationsPayload>[]
+        }
+        delete: {
+          args: Prisma.legal_form_recommendationsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_recommendationsPayload>
+        }
+        update: {
+          args: Prisma.legal_form_recommendationsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_recommendationsPayload>
+        }
+        deleteMany: {
+          args: Prisma.legal_form_recommendationsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.legal_form_recommendationsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.legal_form_recommendationsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_recommendationsPayload>[]
+        }
+        upsert: {
+          args: Prisma.legal_form_recommendationsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_recommendationsPayload>
+        }
+        aggregate: {
+          args: Prisma.Legal_form_recommendationsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLegal_form_recommendations>
+        }
+        groupBy: {
+          args: Prisma.legal_form_recommendationsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Legal_form_recommendationsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.legal_form_recommendationsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Legal_form_recommendationsCountAggregateOutputType> | number
+        }
+      }
+    }
+    legal_form_assumptions: {
+      payload: Prisma.$legal_form_assumptionsPayload<ExtArgs>
+      fields: Prisma.legal_form_assumptionsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.legal_form_assumptionsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_assumptionsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.legal_form_assumptionsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_assumptionsPayload>
+        }
+        findFirst: {
+          args: Prisma.legal_form_assumptionsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_assumptionsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.legal_form_assumptionsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_assumptionsPayload>
+        }
+        findMany: {
+          args: Prisma.legal_form_assumptionsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_assumptionsPayload>[]
+        }
+        create: {
+          args: Prisma.legal_form_assumptionsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_assumptionsPayload>
+        }
+        createMany: {
+          args: Prisma.legal_form_assumptionsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.legal_form_assumptionsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_assumptionsPayload>[]
+        }
+        delete: {
+          args: Prisma.legal_form_assumptionsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_assumptionsPayload>
+        }
+        update: {
+          args: Prisma.legal_form_assumptionsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_assumptionsPayload>
+        }
+        deleteMany: {
+          args: Prisma.legal_form_assumptionsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.legal_form_assumptionsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.legal_form_assumptionsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_assumptionsPayload>[]
+        }
+        upsert: {
+          args: Prisma.legal_form_assumptionsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_assumptionsPayload>
+        }
+        aggregate: {
+          args: Prisma.Legal_form_assumptionsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLegal_form_assumptions>
+        }
+        groupBy: {
+          args: Prisma.legal_form_assumptionsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Legal_form_assumptionsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.legal_form_assumptionsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Legal_form_assumptionsCountAggregateOutputType> | number
+        }
+      }
+    }
+    legal_form_alternatives: {
+      payload: Prisma.$legal_form_alternativesPayload<ExtArgs>
+      fields: Prisma.legal_form_alternativesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.legal_form_alternativesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_alternativesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.legal_form_alternativesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_alternativesPayload>
+        }
+        findFirst: {
+          args: Prisma.legal_form_alternativesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_alternativesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.legal_form_alternativesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_alternativesPayload>
+        }
+        findMany: {
+          args: Prisma.legal_form_alternativesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_alternativesPayload>[]
+        }
+        create: {
+          args: Prisma.legal_form_alternativesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_alternativesPayload>
+        }
+        createMany: {
+          args: Prisma.legal_form_alternativesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.legal_form_alternativesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_alternativesPayload>[]
+        }
+        delete: {
+          args: Prisma.legal_form_alternativesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_alternativesPayload>
+        }
+        update: {
+          args: Prisma.legal_form_alternativesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_alternativesPayload>
+        }
+        deleteMany: {
+          args: Prisma.legal_form_alternativesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.legal_form_alternativesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.legal_form_alternativesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_alternativesPayload>[]
+        }
+        upsert: {
+          args: Prisma.legal_form_alternativesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_alternativesPayload>
+        }
+        aggregate: {
+          args: Prisma.Legal_form_alternativesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLegal_form_alternatives>
+        }
+        groupBy: {
+          args: Prisma.legal_form_alternativesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Legal_form_alternativesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.legal_form_alternativesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Legal_form_alternativesCountAggregateOutputType> | number
+        }
+      }
+    }
+    legal_form_sources: {
+      payload: Prisma.$legal_form_sourcesPayload<ExtArgs>
+      fields: Prisma.legal_form_sourcesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.legal_form_sourcesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_sourcesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.legal_form_sourcesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_sourcesPayload>
+        }
+        findFirst: {
+          args: Prisma.legal_form_sourcesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_sourcesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.legal_form_sourcesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_sourcesPayload>
+        }
+        findMany: {
+          args: Prisma.legal_form_sourcesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_sourcesPayload>[]
+        }
+        create: {
+          args: Prisma.legal_form_sourcesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_sourcesPayload>
+        }
+        createMany: {
+          args: Prisma.legal_form_sourcesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.legal_form_sourcesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_sourcesPayload>[]
+        }
+        delete: {
+          args: Prisma.legal_form_sourcesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_sourcesPayload>
+        }
+        update: {
+          args: Prisma.legal_form_sourcesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_sourcesPayload>
+        }
+        deleteMany: {
+          args: Prisma.legal_form_sourcesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.legal_form_sourcesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.legal_form_sourcesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_sourcesPayload>[]
+        }
+        upsert: {
+          args: Prisma.legal_form_sourcesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$legal_form_sourcesPayload>
+        }
+        aggregate: {
+          args: Prisma.Legal_form_sourcesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLegal_form_sources>
+        }
+        groupBy: {
+          args: Prisma.legal_form_sourcesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Legal_form_sourcesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.legal_form_sourcesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Legal_form_sourcesCountAggregateOutputType> | number
         }
       }
     }
@@ -5172,6 +5472,51 @@ export const Analysis_sourcesScalarFieldEnum = {
 export type Analysis_sourcesScalarFieldEnum = (typeof Analysis_sourcesScalarFieldEnum)[keyof typeof Analysis_sourcesScalarFieldEnum]
 
 
+export const Legal_form_recommendationsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  recommended_form: 'recommended_form',
+  rationale: 'rationale',
+  points_to_check: 'points_to_check',
+  generated_by: 'generated_by',
+  generated_model: 'generated_model',
+  created_at: 'created_at'
+} as const
+
+export type Legal_form_recommendationsScalarFieldEnum = (typeof Legal_form_recommendationsScalarFieldEnum)[keyof typeof Legal_form_recommendationsScalarFieldEnum]
+
+
+export const Legal_form_assumptionsScalarFieldEnum = {
+  id: 'id',
+  recommendation_id: 'recommendation_id',
+  subject: 'subject',
+  assumption: 'assumption',
+  how_to_correct: 'how_to_correct'
+} as const
+
+export type Legal_form_assumptionsScalarFieldEnum = (typeof Legal_form_assumptionsScalarFieldEnum)[keyof typeof Legal_form_assumptionsScalarFieldEnum]
+
+
+export const Legal_form_alternativesScalarFieldEnum = {
+  id: 'id',
+  recommendation_id: 'recommendation_id',
+  form: 'form',
+  why_not_chosen: 'why_not_chosen'
+} as const
+
+export type Legal_form_alternativesScalarFieldEnum = (typeof Legal_form_alternativesScalarFieldEnum)[keyof typeof Legal_form_alternativesScalarFieldEnum]
+
+
+export const Legal_form_sourcesScalarFieldEnum = {
+  id: 'id',
+  recommendation_id: 'recommendation_id',
+  title: 'title',
+  url: 'url'
+} as const
+
+export type Legal_form_sourcesScalarFieldEnum = (typeof Legal_form_sourcesScalarFieldEnum)[keyof typeof Legal_form_sourcesScalarFieldEnum]
+
+
 export const Financing_plansScalarFieldEnum = {
   id: 'id',
   project_id: 'project_id',
@@ -6238,6 +6583,10 @@ export type GlobalOmitConfig = {
   projects?: Prisma.projectsOmit
   analyses?: Prisma.analysesOmit
   analysis_sources?: Prisma.analysis_sourcesOmit
+  legal_form_recommendations?: Prisma.legal_form_recommendationsOmit
+  legal_form_assumptions?: Prisma.legal_form_assumptionsOmit
+  legal_form_alternatives?: Prisma.legal_form_alternativesOmit
+  legal_form_sources?: Prisma.legal_form_sourcesOmit
   financing_plans?: Prisma.financing_plansOmit
   development_plans?: Prisma.development_plansOmit
   transmission_plans?: Prisma.transmission_plansOmit

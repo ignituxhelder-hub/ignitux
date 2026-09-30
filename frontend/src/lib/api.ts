@@ -498,6 +498,33 @@ export interface AnalysisSource {
   url: string;
 }
 
+export interface LegalFormAssumption {
+  subject: string;
+  assumption: string;
+  how_to_correct: string;
+}
+
+export interface LegalFormAlternative {
+  form: string;
+  why_not_chosen: string;
+}
+
+export interface LegalFormRecommendation {
+  id: string;
+  project_id: string;
+  /** 'micro-entreprise' | 'EI' | 'EURL' | 'SASU' | 'SARL' | 'SAS' */
+  recommended_form: string;
+  rationale: string;
+  points_to_check: string[];
+  assumptions: LegalFormAssumption[];
+  alternatives: LegalFormAlternative[];
+  sources: AnalysisSource[];
+  /** 'igini' | 'human' — voir Charte IGINI, article 12 de la Constitution. */
+  generated_by?: string;
+  generated_model?: string | null;
+  created_at: string;
+}
+
 export interface BuildPlan {
   id: string;
   project_id: string;
@@ -1848,6 +1875,17 @@ export const api = {
 
   listFinancingPlans: (token: string, id: string) =>
     request<FinancingPlan[]>(`/projects/${id}/financing-plans`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  recommendLegalForm: (token: string, id: string) =>
+    request<LegalFormRecommendation>(`/projects/${id}/legal-form`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listLegalFormRecommendations: (token: string, id: string) =>
+    request<LegalFormRecommendation[]>(`/projects/${id}/legal-forms`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
 

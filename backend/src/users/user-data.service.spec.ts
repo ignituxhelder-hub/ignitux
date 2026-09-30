@@ -206,6 +206,18 @@ describe('UserDataService', () => {
       expect(exported.donnees.relations_professionnelles.echanges).toHaveLength(1);
     });
 
+    it('inclut les recommandations de forme juridique dans les contenus générés par IGINI', async () => {
+      prisma.legal_form_recommendations.findMany.mockResolvedValue([
+        { id: 'r1', recommended_form: 'SASU' },
+      ]);
+
+      const exported = await service.exportUserData('u1');
+
+      expect(exported.donnees.contenus_generes_par_igini.formes_juridiques_recommandees).toEqual([
+        { id: 'r1', recommended_form: 'SASU' },
+      ]);
+    });
+
     it('inclut le journal des violations qui concernent la personne', async () => {
       prisma.constitution_violations.findMany.mockResolvedValue([{ id: 'v1', user_id: 'u1' }]);
 

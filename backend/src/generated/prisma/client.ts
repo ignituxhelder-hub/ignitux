@@ -72,6 +72,33 @@ export type analyses = Prisma.analysesModel
  */
 export type analysis_sources = Prisma.analysis_sourcesModel
 /**
+ * Model legal_form_recommendations
+ * La forme juridique qu'IGINI recommande pour un projet, jamais une
+ * décision prise à la place de la personne — voir le cadrage du prompt
+ * dans former.service.ts. Une table à part par entreprise, pas une
+ * colonne sur `analyses` : le générateur Former est indépendant
+ * d'Analyser, même s'il se déclenche souvent juste après.
+ */
+export type legal_form_recommendations = Prisma.legal_form_recommendationsModel
+/**
+ * Model legal_form_assumptions
+ * Une hypothèse qu'IGINI a prise faute d'information dans le projet —
+ * jamais tue : le sujet, l'hypothèse retenue, et comment la corriger si
+ * elle est fausse.
+ */
+export type legal_form_assumptions = Prisma.legal_form_assumptionsModel
+/**
+ * Model legal_form_alternatives
+ * Une forme sérieusement envisagée mais pas retenue, et pourquoi.
+ */
+export type legal_form_alternatives = Prisma.legal_form_alternativesModel
+/**
+ * Model legal_form_sources
+ * Même rôle que analysis_sources : les pages réellement consultées par
+ * la recherche web, jamais des URLs récitées de mémoire.
+ */
+export type legal_form_sources = Prisma.legal_form_sourcesModel
+/**
  * Model financing_plans
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */

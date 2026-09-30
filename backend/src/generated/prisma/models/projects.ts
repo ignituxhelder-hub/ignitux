@@ -208,6 +208,7 @@ export type projectsWhereInput = {
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   owner?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
   analyses?: Prisma.AnalysesListRelationFilter
+  legal_form_recommendations?: Prisma.Legal_form_recommendationsListRelationFilter
   build_plans?: Prisma.Build_plansListRelationFilter
   financing_plans?: Prisma.Financing_plansListRelationFilter
   development_plans?: Prisma.Development_plansListRelationFilter
@@ -248,6 +249,7 @@ export type projectsOrderByWithRelationInput = {
   updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
   owner?: Prisma.usersOrderByWithRelationInput
   analyses?: Prisma.analysesOrderByRelationAggregateInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsOrderByRelationAggregateInput
   build_plans?: Prisma.build_plansOrderByRelationAggregateInput
   financing_plans?: Prisma.financing_plansOrderByRelationAggregateInput
   development_plans?: Prisma.development_plansOrderByRelationAggregateInput
@@ -291,6 +293,7 @@ export type projectsWhereUniqueInput = Prisma.AtLeast<{
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   owner?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
   analyses?: Prisma.AnalysesListRelationFilter
+  legal_form_recommendations?: Prisma.Legal_form_recommendationsListRelationFilter
   build_plans?: Prisma.Build_plansListRelationFilter
   financing_plans?: Prisma.Financing_plansListRelationFilter
   development_plans?: Prisma.Development_plansListRelationFilter
@@ -358,6 +361,7 @@ export type projectsCreateInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -397,6 +401,7 @@ export type projectsUncheckedCreateInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -436,6 +441,7 @@ export type projectsUpdateInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -475,6 +481,7 @@ export type projectsUncheckedUpdateInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -647,6 +654,20 @@ export type projectsUpdateOneRequiredWithoutAnalysesNestedInput = {
   upsert?: Prisma.projectsUpsertWithoutAnalysesInput
   connect?: Prisma.projectsWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutAnalysesInput, Prisma.projectsUpdateWithoutAnalysesInput>, Prisma.projectsUncheckedUpdateWithoutAnalysesInput>
+}
+
+export type projectsCreateNestedOneWithoutLegal_form_recommendationsInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutLegal_form_recommendationsInput, Prisma.projectsUncheckedCreateWithoutLegal_form_recommendationsInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutLegal_form_recommendationsInput
+  connect?: Prisma.projectsWhereUniqueInput
+}
+
+export type projectsUpdateOneRequiredWithoutLegal_form_recommendationsNestedInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutLegal_form_recommendationsInput, Prisma.projectsUncheckedCreateWithoutLegal_form_recommendationsInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutLegal_form_recommendationsInput
+  upsert?: Prisma.projectsUpsertWithoutLegal_form_recommendationsInput
+  connect?: Prisma.projectsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutLegal_form_recommendationsInput, Prisma.projectsUpdateWithoutLegal_form_recommendationsInput>, Prisma.projectsUncheckedUpdateWithoutLegal_form_recommendationsInput>
 }
 
 export type projectsCreateNestedOneWithoutFinancing_plansInput = {
@@ -1056,6 +1077,7 @@ export type projectsCreateWithoutOwnerInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -1094,6 +1116,7 @@ export type projectsUncheckedCreateWithoutOwnerInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -1172,6 +1195,7 @@ export type projectsCreateWithoutAnalysesInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -1210,6 +1234,7 @@ export type projectsUncheckedCreateWithoutAnalysesInput = {
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -1264,6 +1289,7 @@ export type projectsUpdateWithoutAnalysesInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -1302,6 +1328,179 @@ export type projectsUncheckedUpdateWithoutAnalysesInput = {
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutProjectNestedInput
+  financing_rounds?: Prisma.financing_roundsUncheckedUpdateManyWithoutProjectNestedInput
+  equity_holders?: Prisma.equity_holdersUncheckedUpdateManyWithoutProjectNestedInput
+  equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
+  dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
+  buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+}
+
+export type projectsCreateWithoutLegal_form_recommendationsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  sector?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  owner: Prisma.usersCreateNestedOneWithoutProjectsInput
+  analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutProjectInput
+  financing_rounds?: Prisma.financing_roundsCreateNestedManyWithoutProjectInput
+  equity_holders?: Prisma.equity_holdersCreateNestedManyWithoutProjectInput
+  equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
+  dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
+  buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+}
+
+export type projectsUncheckedCreateWithoutLegal_form_recommendationsInput = {
+  id?: string
+  owner_id: string
+  title: string
+  description?: string | null
+  sector?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutProjectInput
+  financing_rounds?: Prisma.financing_roundsUncheckedCreateNestedManyWithoutProjectInput
+  equity_holders?: Prisma.equity_holdersUncheckedCreateNestedManyWithoutProjectInput
+  equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
+  dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
+  buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+}
+
+export type projectsCreateOrConnectWithoutLegal_form_recommendationsInput = {
+  where: Prisma.projectsWhereUniqueInput
+  create: Prisma.XOR<Prisma.projectsCreateWithoutLegal_form_recommendationsInput, Prisma.projectsUncheckedCreateWithoutLegal_form_recommendationsInput>
+}
+
+export type projectsUpsertWithoutLegal_form_recommendationsInput = {
+  update: Prisma.XOR<Prisma.projectsUpdateWithoutLegal_form_recommendationsInput, Prisma.projectsUncheckedUpdateWithoutLegal_form_recommendationsInput>
+  create: Prisma.XOR<Prisma.projectsCreateWithoutLegal_form_recommendationsInput, Prisma.projectsUncheckedCreateWithoutLegal_form_recommendationsInput>
+  where?: Prisma.projectsWhereInput
+}
+
+export type projectsUpdateToOneWithWhereWithoutLegal_form_recommendationsInput = {
+  where?: Prisma.projectsWhereInput
+  data: Prisma.XOR<Prisma.projectsUpdateWithoutLegal_form_recommendationsInput, Prisma.projectsUncheckedUpdateWithoutLegal_form_recommendationsInput>
+}
+
+export type projectsUpdateWithoutLegal_form_recommendationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
+  analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutProjectNestedInput
+  financing_rounds?: Prisma.financing_roundsUpdateManyWithoutProjectNestedInput
+  equity_holders?: Prisma.equity_holdersUpdateManyWithoutProjectNestedInput
+  equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
+  dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
+  buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+}
+
+export type projectsUncheckedUpdateWithoutLegal_form_recommendationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -1341,6 +1540,7 @@ export type projectsCreateWithoutFinancing_plansInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
   transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
@@ -1379,6 +1579,7 @@ export type projectsUncheckedCreateWithoutFinancing_plansInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
   transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -1433,6 +1634,7 @@ export type projectsUpdateWithoutFinancing_plansInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
   transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
@@ -1471,6 +1673,7 @@ export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
   transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -1509,6 +1712,7 @@ export type projectsCreateWithoutDevelopment_plansInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
@@ -1547,6 +1751,7 @@ export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -1601,6 +1806,7 @@ export type projectsUpdateWithoutDevelopment_plansInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
@@ -1639,6 +1845,7 @@ export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -1677,6 +1884,7 @@ export type projectsCreateWithoutTransmission_plansInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -1715,6 +1923,7 @@ export type projectsUncheckedCreateWithoutTransmission_plansInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -1769,6 +1978,7 @@ export type projectsUpdateWithoutTransmission_plansInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -1807,6 +2017,7 @@ export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -1845,6 +2056,7 @@ export type projectsCreateWithoutMemoriesInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -1883,6 +2095,7 @@ export type projectsUncheckedCreateWithoutMemoriesInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -1937,6 +2150,7 @@ export type projectsUpdateWithoutMemoriesInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -1975,6 +2189,7 @@ export type projectsUncheckedUpdateWithoutMemoriesInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -2013,6 +2228,7 @@ export type projectsCreateWithoutConceptsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -2051,6 +2267,7 @@ export type projectsUncheckedCreateWithoutConceptsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -2105,6 +2322,7 @@ export type projectsUpdateWithoutConceptsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -2143,6 +2361,7 @@ export type projectsUncheckedUpdateWithoutConceptsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -2181,6 +2400,7 @@ export type projectsCreateWithoutTasksInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -2219,6 +2439,7 @@ export type projectsUncheckedCreateWithoutTasksInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -2273,6 +2494,7 @@ export type projectsUpdateWithoutTasksInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -2311,6 +2533,7 @@ export type projectsUncheckedUpdateWithoutTasksInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -2349,6 +2572,7 @@ export type projectsCreateWithoutCommunity_commentsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -2387,6 +2611,7 @@ export type projectsUncheckedCreateWithoutCommunity_commentsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -2441,6 +2666,7 @@ export type projectsUpdateWithoutCommunity_commentsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -2479,6 +2705,7 @@ export type projectsUncheckedUpdateWithoutCommunity_commentsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -2517,6 +2744,7 @@ export type projectsCreateWithoutCollaboratorsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -2555,6 +2783,7 @@ export type projectsUncheckedCreateWithoutCollaboratorsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -2609,6 +2838,7 @@ export type projectsUpdateWithoutCollaboratorsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -2647,6 +2877,7 @@ export type projectsUncheckedUpdateWithoutCollaboratorsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -2685,6 +2916,7 @@ export type projectsCreateWithoutBuild_plansInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
   transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
@@ -2723,6 +2955,7 @@ export type projectsUncheckedCreateWithoutBuild_plansInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
   transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -2777,6 +3010,7 @@ export type projectsUpdateWithoutBuild_plansInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
   transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
@@ -2815,6 +3049,7 @@ export type projectsUncheckedUpdateWithoutBuild_plansInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
   transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -2853,6 +3088,7 @@ export type projectsCreateWithoutCompliance_checksInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -2891,6 +3127,7 @@ export type projectsUncheckedCreateWithoutCompliance_checksInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -2945,6 +3182,7 @@ export type projectsUpdateWithoutCompliance_checksInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -2983,6 +3221,7 @@ export type projectsUncheckedUpdateWithoutCompliance_checksInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -3021,6 +3260,7 @@ export type projectsCreateWithoutAutomation_runsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -3059,6 +3299,7 @@ export type projectsUncheckedCreateWithoutAutomation_runsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -3113,6 +3354,7 @@ export type projectsUpdateWithoutAutomation_runsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -3151,6 +3393,7 @@ export type projectsUncheckedUpdateWithoutAutomation_runsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -3189,6 +3432,7 @@ export type projectsCreateWithoutFinancing_roundsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -3227,6 +3471,7 @@ export type projectsUncheckedCreateWithoutFinancing_roundsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -3281,6 +3526,7 @@ export type projectsUpdateWithoutFinancing_roundsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -3319,6 +3565,7 @@ export type projectsUncheckedUpdateWithoutFinancing_roundsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -3357,6 +3604,7 @@ export type projectsCreateWithoutEquity_holdersInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -3395,6 +3643,7 @@ export type projectsUncheckedCreateWithoutEquity_holdersInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -3449,6 +3698,7 @@ export type projectsUpdateWithoutEquity_holdersInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -3487,6 +3737,7 @@ export type projectsUncheckedUpdateWithoutEquity_holdersInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -3525,6 +3776,7 @@ export type projectsCreateWithoutEquity_eventsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -3563,6 +3815,7 @@ export type projectsUncheckedCreateWithoutEquity_eventsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -3617,6 +3870,7 @@ export type projectsUpdateWithoutEquity_eventsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -3655,6 +3909,7 @@ export type projectsUncheckedUpdateWithoutEquity_eventsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -3693,6 +3948,7 @@ export type projectsCreateWithoutDividendsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -3731,6 +3987,7 @@ export type projectsUncheckedCreateWithoutDividendsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -3785,6 +4042,7 @@ export type projectsUpdateWithoutDividendsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -3823,6 +4081,7 @@ export type projectsUncheckedUpdateWithoutDividendsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -3861,6 +4120,7 @@ export type projectsCreateWithoutBilling_documentsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -3899,6 +4159,7 @@ export type projectsUncheckedCreateWithoutBilling_documentsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -3953,6 +4214,7 @@ export type projectsUpdateWithoutBilling_documentsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -3991,6 +4253,7 @@ export type projectsUncheckedUpdateWithoutBilling_documentsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -4029,6 +4292,7 @@ export type projectsCreateWithoutCrm_contactsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -4067,6 +4331,7 @@ export type projectsUncheckedCreateWithoutCrm_contactsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -4121,6 +4386,7 @@ export type projectsUpdateWithoutCrm_contactsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -4159,6 +4425,7 @@ export type projectsUncheckedUpdateWithoutCrm_contactsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -4197,6 +4464,7 @@ export type projectsCreateWithoutStock_itemsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -4235,6 +4503,7 @@ export type projectsUncheckedCreateWithoutStock_itemsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -4289,6 +4558,7 @@ export type projectsUpdateWithoutStock_itemsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -4327,6 +4597,7 @@ export type projectsUncheckedUpdateWithoutStock_itemsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -4365,6 +4636,7 @@ export type projectsCreateWithoutAgenda_eventsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -4403,6 +4675,7 @@ export type projectsUncheckedCreateWithoutAgenda_eventsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -4457,6 +4730,7 @@ export type projectsUpdateWithoutAgenda_eventsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -4495,6 +4769,7 @@ export type projectsUncheckedUpdateWithoutAgenda_eventsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -4533,6 +4808,7 @@ export type projectsCreateWithoutWorkflow_definitionsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -4571,6 +4847,7 @@ export type projectsUncheckedCreateWithoutWorkflow_definitionsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -4625,6 +4902,7 @@ export type projectsUpdateWithoutWorkflow_definitionsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -4663,6 +4941,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_definitionsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -4701,6 +4980,7 @@ export type projectsCreateWithoutWorkflow_runsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -4739,6 +5019,7 @@ export type projectsUncheckedCreateWithoutWorkflow_runsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -4793,6 +5074,7 @@ export type projectsUpdateWithoutWorkflow_runsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -4831,6 +5113,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_runsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -4869,6 +5152,7 @@ export type projectsCreateWithoutBuyback_objectivesInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -4907,6 +5191,7 @@ export type projectsUncheckedCreateWithoutBuyback_objectivesInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -4961,6 +5246,7 @@ export type projectsUpdateWithoutBuyback_objectivesInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -4999,6 +5285,7 @@ export type projectsUncheckedUpdateWithoutBuyback_objectivesInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -5037,6 +5324,7 @@ export type projectsCreateWithoutFinancedProjectsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -5075,6 +5363,7 @@ export type projectsUncheckedCreateWithoutFinancedProjectsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -5129,6 +5418,7 @@ export type projectsUpdateWithoutFinancedProjectsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -5167,6 +5457,7 @@ export type projectsUncheckedUpdateWithoutFinancedProjectsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -5205,6 +5496,7 @@ export type projectsCreateWithoutScore_snapshotsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -5243,6 +5535,7 @@ export type projectsUncheckedCreateWithoutScore_snapshotsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -5297,6 +5590,7 @@ export type projectsUpdateWithoutScore_snapshotsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -5335,6 +5629,7 @@ export type projectsUncheckedUpdateWithoutScore_snapshotsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -5373,6 +5668,7 @@ export type projectsCreateWithoutReal_estate_propertiesInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -5411,6 +5707,7 @@ export type projectsUncheckedCreateWithoutReal_estate_propertiesInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -5465,6 +5762,7 @@ export type projectsUpdateWithoutReal_estate_propertiesInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -5503,6 +5801,7 @@ export type projectsUncheckedUpdateWithoutReal_estate_propertiesInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -5541,6 +5840,7 @@ export type projectsCreateWithoutFleet_vehiclesInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -5579,6 +5879,7 @@ export type projectsUncheckedCreateWithoutFleet_vehiclesInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -5633,6 +5934,7 @@ export type projectsUpdateWithoutFleet_vehiclesInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -5671,6 +5973,7 @@ export type projectsUncheckedUpdateWithoutFleet_vehiclesInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -5709,6 +6012,7 @@ export type projectsCreateWithoutAd_campaignsInput = {
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
@@ -5747,6 +6051,7 @@ export type projectsUncheckedCreateWithoutAd_campaignsInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
   build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
   financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
   development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
@@ -5801,6 +6106,7 @@ export type projectsUpdateWithoutAd_campaignsInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -5839,6 +6145,7 @@ export type projectsUncheckedUpdateWithoutAd_campaignsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -5886,6 +6193,7 @@ export type projectsUpdateWithoutOwnerInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
@@ -5924,6 +6232,7 @@ export type projectsUncheckedUpdateWithoutOwnerInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -5970,6 +6279,7 @@ export type projectsUncheckedUpdateManyWithoutOwnerInput = {
 
 export type ProjectsCountOutputType = {
   analyses: number
+  legal_form_recommendations: number
   build_plans: number
   financing_plans: number
   development_plans: number
@@ -6000,6 +6310,7 @@ export type ProjectsCountOutputType = {
 
 export type ProjectsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   analyses?: boolean | ProjectsCountOutputTypeCountAnalysesArgs
+  legal_form_recommendations?: boolean | ProjectsCountOutputTypeCountLegal_form_recommendationsArgs
   build_plans?: boolean | ProjectsCountOutputTypeCountBuild_plansArgs
   financing_plans?: boolean | ProjectsCountOutputTypeCountFinancing_plansArgs
   development_plans?: boolean | ProjectsCountOutputTypeCountDevelopment_plansArgs
@@ -6043,6 +6354,13 @@ export type ProjectsCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Ext
  */
 export type ProjectsCountOutputTypeCountAnalysesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.analysesWhereInput
+}
+
+/**
+ * ProjectsCountOutputType without action
+ */
+export type ProjectsCountOutputTypeCountLegal_form_recommendationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.legal_form_recommendationsWhereInput
 }
 
 /**
@@ -6239,6 +6557,7 @@ export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   updated_at?: boolean
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   analyses?: boolean | Prisma.projects$analysesArgs<ExtArgs>
+  legal_form_recommendations?: boolean | Prisma.projects$legal_form_recommendationsArgs<ExtArgs>
   build_plans?: boolean | Prisma.projects$build_plansArgs<ExtArgs>
   financing_plans?: boolean | Prisma.projects$financing_plansArgs<ExtArgs>
   development_plans?: boolean | Prisma.projects$development_plansArgs<ExtArgs>
@@ -6308,6 +6627,7 @@ export type projectsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type projectsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   analyses?: boolean | Prisma.projects$analysesArgs<ExtArgs>
+  legal_form_recommendations?: boolean | Prisma.projects$legal_form_recommendationsArgs<ExtArgs>
   build_plans?: boolean | Prisma.projects$build_plansArgs<ExtArgs>
   financing_plans?: boolean | Prisma.projects$financing_plansArgs<ExtArgs>
   development_plans?: boolean | Prisma.projects$development_plansArgs<ExtArgs>
@@ -6349,6 +6669,7 @@ export type $projectsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   objects: {
     owner: Prisma.$usersPayload<ExtArgs>
     analyses: Prisma.$analysesPayload<ExtArgs>[]
+    legal_form_recommendations: Prisma.$legal_form_recommendationsPayload<ExtArgs>[]
     build_plans: Prisma.$build_plansPayload<ExtArgs>[]
     financing_plans: Prisma.$financing_plansPayload<ExtArgs>[]
     development_plans: Prisma.$development_plansPayload<ExtArgs>[]
@@ -6782,6 +7103,7 @@ export interface Prisma__projectsClient<T, Null = never, ExtArgs extends runtime
   readonly [Symbol.toStringTag]: "PrismaPromise"
   owner<T extends Prisma.usersDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.usersDefaultArgs<ExtArgs>>): Prisma.Prisma__usersClient<runtime.Types.Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   analyses<T extends Prisma.projects$analysesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$analysesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$analysesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  legal_form_recommendations<T extends Prisma.projects$legal_form_recommendationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$legal_form_recommendationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$legal_form_recommendationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   build_plans<T extends Prisma.projects$build_plansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$build_plansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$build_plansPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   financing_plans<T extends Prisma.projects$financing_plansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$financing_plansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$financing_plansPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   development_plans<T extends Prisma.projects$development_plansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$development_plansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$development_plansPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -7268,6 +7590,30 @@ export type projects$analysesArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.AnalysesScalarFieldEnum | Prisma.AnalysesScalarFieldEnum[]
+}
+
+/**
+ * projects.legal_form_recommendations
+ */
+export type projects$legal_form_recommendationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the legal_form_recommendations
+   */
+  select?: Prisma.legal_form_recommendationsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the legal_form_recommendations
+   */
+  omit?: Prisma.legal_form_recommendationsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.legal_form_recommendationsInclude<ExtArgs> | null
+  where?: Prisma.legal_form_recommendationsWhereInput
+  orderBy?: Prisma.legal_form_recommendationsOrderByWithRelationInput | Prisma.legal_form_recommendationsOrderByWithRelationInput[]
+  cursor?: Prisma.legal_form_recommendationsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Legal_form_recommendationsScalarFieldEnum | Prisma.Legal_form_recommendationsScalarFieldEnum[]
 }
 
 /**

@@ -1,9 +1,9 @@
 /**
- * DISPONIBILITÉ DES 5 GÉNÉRATEURS IGINI.
+ * DISPONIBILITÉ DES 6 GÉNÉRATEURS IGINI.
  *
- * Les générateurs (Analyser, Construire, Financer, Développer, Transmettre)
- * sont les seules fonctionnalités d'Ignitux qui consomment du budget IA.
- * Ce module porte l'interrupteur qui les coupe, et rien d'autre.
+ * Les générateurs (Analyser, Former, Construire, Financer, Développer,
+ * Transmettre) sont les seules fonctionnalités d'Ignitux qui consomment du
+ * budget IA. Ce module porte l'interrupteur qui les coupe, et rien d'autre.
  *
  * Pourquoi un interrupteur explicite plutôt que « on retire la clé API » :
  * sans clé, l'appel part quand même, échoue côté SDK, et la personne voit
@@ -17,8 +17,8 @@
  */
 
 export const GENERATORS_DISABLED_MESSAGE =
-  "Fonctionnalité IA non disponible pour ce test. Les 5 générateurs d'IGINI (Analyser, " +
-  'Construire, Financer, Développer, Transmettre) sont volontairement éteints sur cet ' +
+  "Fonctionnalité IA non disponible pour ce test. Les 6 générateurs d'IGINI (Analyser, " +
+  'Former, Construire, Financer, Développer, Transmettre) sont volontairement éteints sur cet ' +
   "environnement : aucune demande n'est envoyée à l'IA. Tout le reste d'Ignitux fonctionne " +
   'normalement.';
 

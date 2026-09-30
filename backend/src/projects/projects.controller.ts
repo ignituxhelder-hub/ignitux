@@ -123,6 +123,19 @@ export class ProjectsController {
     return this.projectsService.listAnalysesForOwner(user.id, id);
   }
 
+  @Post(':id/legal-form')
+  @HttpCode(HttpStatus.CREATED)
+  // Chaque appel coûte un appel API Claude — limite dédiée contre les abus.
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  recommendLegalForm(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
+    return this.projectsService.recommendLegalFormForOwner(user.id, id);
+  }
+
+  @Get(':id/legal-forms')
+  listLegalForms(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
+    return this.projectsService.listLegalFormRecommendationsForOwner(user.id, id);
+  }
+
   @Post(':id/plan')
   @HttpCode(HttpStatus.CREATED)
   // Chaque appel coûte un appel API Claude — limite dédiée contre les abus.

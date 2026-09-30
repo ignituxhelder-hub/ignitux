@@ -84,6 +84,7 @@ model projects {
   created_at           DateTime?                   @default(now()) @db.Timestamptz(6)
   updated_at           DateTime?                   @updatedAt @db.Timestamptz(6)
   analyses             analyses[]
+  legal_form_recommendations legal_form_recommendations[]
   build_plans          build_plans[]
   financing_plans      financing_plans[]
   development_plans    development_plans[]
@@ -165,6 +166,69 @@ model analysis_sources {
   created_at  DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([analysis_id])
+}
+
+/// La forme juridique qu'IGINI recommande pour un projet, jamais une
+/// décision prise à la place de la personne — voir le cadrage du prompt
+/// dans former.service.ts. Une table à part par entreprise, pas une
+/// colonne sur `analyses` : le générateur Former est indépendant
+/// d'Analyser, même s'il se déclenche souvent juste après.
+model legal_form_recommendations {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id        String    @db.Uuid
+  project           projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  /// 'micro-entreprise' | 'EI' | 'EURL' | 'SASU' | 'SARL' | 'SAS'
+  recommended_form  String
+  rationale         String
+  points_to_check   String[]
+  // Provenance — même convention que analyses.generated_by.
+  generated_by      String    @default("igini")
+  generated_model   String?
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+
+  assumptions       legal_form_assumptions[]
+  alternatives      legal_form_alternatives[]
+  sources           legal_form_sources[]
+
+  @@index([project_id])
+}
+
+/// Une hypothèse qu'IGINI a prise faute d'information dans le projet —
+/// jamais tue : le sujet, l'hypothèse retenue, et comment la corriger si
+/// elle est fausse.
+model legal_form_assumptions {
+  id                 String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recommendation_id  String                     @db.Uuid
+  recommendation     legal_form_recommendations @relation(fields: [recommendation_id], references: [id], onDelete: Cascade)
+  subject            String
+  assumption         String
+  how_to_correct     String
+
+  @@index([recommendation_id])
+}
+
+/// Une forme sérieusement envisagée mais pas retenue, et pourquoi.
+model legal_form_alternatives {
+  id                 String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recommendation_id  String                     @db.Uuid
+  recommendation     legal_form_recommendations @relation(fields: [recommendation_id], references: [id], onDelete: Cascade)
+  /// 'micro-entreprise' | 'EI' | 'EURL' | 'SASU' | 'SARL' | 'SAS'
+  form               String
+  why_not_chosen     String
+
+  @@index([recommendation_id])
+}
+
+/// Même rôle que analysis_sources : les pages réellement consultées par
+/// la recherche web, jamais des URLs récitées de mémoire.
+model legal_form_sources {
+  id                 String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recommendation_id  String                     @db.Uuid
+  recommendation     legal_form_recommendations @relation(fields: [recommendation_id], references: [id], onDelete: Cascade)
+  title              String
+  url                String
+
+  @@index([recommendation_id])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.

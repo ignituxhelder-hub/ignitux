@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  ForbiddenException,
+  Logger,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -15,6 +17,7 @@ import { MemoryService } from '../igini/memory/memory.service.js';
 import { WorkflowEngineService } from '../igini/workflow/workflow-engine.service.js';
 import { WorkflowService } from '../igini/workflow/workflow.service.js';
 import { CLAUDE_MODEL } from '../igini/claude/claude.service.js';
+import { FormerService } from '../igini/former/former.service.js';
 import { OffresService } from '../offres/offres.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ProjectsService } from './projects.service.js';
@@ -22,8 +25,8 @@ import { ProjectsService } from './projects.service.js';
 /**
  * Provenance attendue sur tout contenu généré (article 12 : un contenu
  * produit par un modèle doit être identifiable comme tel). Constante
- * partagée plutôt que recopiée dans les cinq assertions : si la provenance
- * change, les cinq tests doivent bouger ensemble ou aucun.
+ * partagée plutôt que recopiée dans les six assertions : si la provenance
+ * change, les six tests doivent bouger ensemble ou aucun.
  */
 const GENERATED_PROVENANCE = { generated_by: 'igini', generated_model: CLAUDE_MODEL };
 
@@ -42,6 +45,7 @@ describe('ProjectsService', () => {
       count: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
       findFirst: ReturnType<typeof vi.fn>;
+      findUniqueOrThrow: ReturnType<typeof vi.fn>;
       update: ReturnType<typeof vi.fn>;
       delete: ReturnType<typeof vi.fn>;
     };
@@ -53,6 +57,14 @@ describe('ProjectsService', () => {
     analysis_sources: {
       createMany: ReturnType<typeof vi.fn>;
     };
+    legal_form_recommendations: {
+      create: ReturnType<typeof vi.fn>;
+      findMany: ReturnType<typeof vi.fn>;
+      count: ReturnType<typeof vi.fn>;
+    };
+    legal_form_assumptions: { createMany: ReturnType<typeof vi.fn> };
+    legal_form_alternatives: { createMany: ReturnType<typeof vi.fn> };
+    legal_form_sources: { createMany: ReturnType<typeof vi.fn> };
     build_plans: {
       create: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
@@ -84,6 +96,7 @@ describe('ProjectsService', () => {
     user_profiles: { findUnique: ReturnType<typeof vi.fn> };
   };
   let analysisService: { analyzeProject: ReturnType<typeof vi.fn> };
+  let formerService: { recommendLegalForm: ReturnType<typeof vi.fn> };
   let planningService: { createBuildPlan: ReturnType<typeof vi.fn> };
   let financingService: { createFinancingPlan: ReturnType<typeof vi.fn> };
   let developmentService: { createDevelopmentPlan: ReturnType<typeof vi.fn> };
@@ -105,11 +118,22 @@ describe('ProjectsService', () => {
         count: vi.fn().mockResolvedValue(0),
         findMany: vi.fn(),
         findFirst: vi.fn(),
+        // Relu par le déclenchement automatique de Former (titre/description
+        // du projet), séparément du findFirst qui sert à analyzeForOwner lui-même.
+        findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'p1', title: 'Idée', description: 'Desc' }),
         update: vi.fn(),
         delete: vi.fn(),
       },
       analyses: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
       analysis_sources: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+      legal_form_recommendations: {
+        create: vi.fn(),
+        findMany: vi.fn(),
+        count: vi.fn().mockResolvedValue(0),
+      },
+      legal_form_assumptions: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+      legal_form_alternatives: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
+      legal_form_sources: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
       build_plans: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
       financing_plans: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
       development_plans: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
@@ -133,6 +157,14 @@ describe('ProjectsService', () => {
     prisma.financing_plans.findFirst.mockResolvedValue(null);
     prisma.development_plans.findFirst.mockResolvedValue(null);
     analysisService = { analyzeProject: vi.fn() };
+    formerService = { recommendLegalForm: vi.fn().mockResolvedValue({
+      recommended_form: 'micro-entreprise',
+      rationale: 'r',
+      assumptions: [],
+      alternatives: [],
+      points_to_check: [],
+      sources: [],
+    }) };
     planningService = { createBuildPlan: vi.fn() };
     financingService = { createFinancingPlan: vi.fn() };
     developmentService = { createDevelopmentPlan: vi.fn() };
@@ -151,6 +183,7 @@ describe('ProjectsService', () => {
         ProjectsService,
         { provide: PrismaService, useValue: prisma },
         { provide: AnalysisService, useValue: analysisService },
+        { provide: FormerService, useValue: formerService },
         { provide: PlanningService, useValue: planningService },
         { provide: FinancingService, useValue: financingService },
         { provide: DevelopmentService, useValue: developmentService },
@@ -661,6 +694,132 @@ describe('ProjectsService', () => {
 
       expect(automationService.run).toHaveBeenCalledWith('p1');
     });
+
+    describe('déclenchement automatique de Former', () => {
+      const projetEtAnalyse = (score: number) => {
+        const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+        prisma.projects.findFirst.mockResolvedValue(project);
+        // Relu séparément par triggerFormerAutomatically (titre/description),
+        // sans passer par le findFirst déjà utilisé par analyzeForOwner.
+        prisma.projects.findUniqueOrThrow.mockResolvedValue(project);
+        analysisService.analyzeProject.mockResolvedValue({
+          summary: 'r',
+          feasibility_score: score,
+          strengths: [],
+          risks: [],
+          next_steps: [],
+        });
+        prisma.analyses.create.mockResolvedValue({ id: 'a1', project_id: 'p1', feasibility_score: score });
+      };
+
+      it('déclenche Former quand le score atteint 8', async () => {
+        projetEtAnalyse(8);
+        formerService.recommendLegalForm.mockResolvedValue({
+          recommended_form: 'SASU',
+          rationale: 'r',
+          assumptions: [],
+          alternatives: [],
+          points_to_check: [],
+          sources: [],
+        });
+        prisma.legal_form_recommendations.create.mockResolvedValue({ id: 'r1' });
+
+        await service.analyzeForOwner('u1', 'p1');
+        // Non bloquant : on attend le prochain tick pour laisser la promesse
+        // détachée se résoudre avant d'inspecter les mocks.
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(formerService.recommendLegalForm).toHaveBeenCalledTimes(1);
+      });
+
+      it('ne déclenche pas Former en dessous de 8', async () => {
+        projetEtAnalyse(7);
+
+        await service.analyzeForOwner('u1', 'p1');
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(formerService.recommendLegalForm).not.toHaveBeenCalled();
+      });
+
+      it("ne déclenche qu'une fois : pas de nouvelle recommandation si le projet en a déjà une", async () => {
+        projetEtAnalyse(9);
+        prisma.legal_form_recommendations.count.mockResolvedValue(1);
+
+        await service.analyzeForOwner('u1', 'p1');
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(formerService.recommendLegalForm).not.toHaveBeenCalled();
+      });
+
+      it("ne déclenche qu'une fois quand deux analyses du même projet se chevauchent (course évitée)", async () => {
+        // Un appel Former prend 40 à 90 secondes : si une deuxième analyse
+        // démarre avant que la première n'ait eu le temps d'écrire sa
+        // recommandation, le `count()` vaudrait encore zéro pour les deux.
+        // Sans verrou en mémoire, les deux déclencheraient Former.
+        projetEtAnalyse(8);
+        prisma.legal_form_recommendations.create.mockResolvedValue({ id: 'r1' });
+
+        const p1 = service.analyzeForOwner('u1', 'p1');
+        const p2 = service.analyzeForOwner('u1', 'p1');
+        await Promise.all([p1, p2]);
+        // Non bloquant : on attend le prochain tick pour laisser les
+        // promesses détachées se résoudre avant d'inspecter les mocks.
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(formerService.recommendLegalForm).toHaveBeenCalledTimes(1);
+      });
+
+      it("n'attend pas Former avant de répondre (non bloquant)", async () => {
+        projetEtAnalyse(8);
+        let resolveFormer: (value: unknown) => void = () => {};
+        formerService.recommendLegalForm.mockReturnValue(
+          new Promise((resolve) => {
+            resolveFormer = resolve;
+          }),
+        );
+
+        const resultat = await service.analyzeForOwner('u1', 'p1');
+
+        // La réponse de l'analyse part sans attendre Former.
+        expect(resultat).toBeTruthy();
+        resolveFormer({
+          recommended_form: 'SASU',
+          rationale: 'r',
+          assumptions: [],
+          alternatives: [],
+          points_to_check: [],
+          sources: [],
+        });
+      });
+
+      it("journalise une vraie panne pendant le déclenchement automatique, sans faire échouer l'analyse", async () => {
+        projetEtAnalyse(8);
+        formerService.recommendLegalForm.mockRejectedValue(new Error('réseau'));
+        // Nest écrit sur le prototype partagé de Logger : l'espionner est le
+        // moyen standard de vérifier qu'une erreur a été journalisée, sans
+        // exposer le champ privé `logger` de ProjectsService.
+        const loggerSpy = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+
+        const resultat = await service.analyzeForOwner('u1', 'p1');
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(resultat).toBeTruthy();
+        expect(loggerSpy).toHaveBeenCalled();
+        loggerSpy.mockRestore();
+      });
+
+      it("reste silencieux quand Former échoue pour un refus d'entitlement (offre insuffisante)", async () => {
+        projetEtAnalyse(8);
+        formerService.recommendLegalForm.mockRejectedValue(new ForbiddenException('offre insuffisante'));
+        const loggerSpy = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+
+        await service.analyzeForOwner('u1', 'p1');
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(loggerSpy).not.toHaveBeenCalled();
+        loggerSpy.mockRestore();
+      });
+    });
   });
 
   describe('listAnalysesForOwner', () => {
@@ -698,6 +857,111 @@ describe('ProjectsService', () => {
           id: 'p1',
           OR: [{ owner_id: 'u2-collaborateur' }, { collaborators: { some: { user_id: 'u2-collaborateur' } } }],
         },
+      });
+    });
+  });
+
+  describe('recommendLegalFormForOwner', () => {
+    it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.recommendLegalFormForOwner('u1', 'p1')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(formerService.recommendLegalForm).not.toHaveBeenCalled();
+    });
+
+    it('demande une recommandation puis persiste le résultat, sources comprises', async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      const recommandation = {
+        recommended_form: 'SASU',
+        rationale: 'Raisonnement',
+        assumptions: [{ subject: 'associés', assumption: 'seul', how_to_correct: 'précise si tu es à plusieurs' }],
+        alternatives: [{ form: 'EURL', why_not_chosen: 'moins souple pour lever des fonds' }],
+        points_to_check: ['vérifier le plafond de CA en vigueur'],
+        sources: [{ title: 'Source', url: 'https://exemple.com' }],
+      };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      formerService.recommendLegalForm.mockResolvedValue(recommandation);
+      // Le mock reflète ce qu'un vrai `create()` Prisma renvoie : les champs
+      // passés dans `data`, en écho, plus l'id généré — même convention que
+      // `prisma.analyses.create.mockResolvedValue({ id: 'a1', ...analysis })`
+      // plus haut dans ce fichier. `assumptions`/`alternatives`/`sources` ne
+      // sont volontairement pas dedans : ce sont des tables filles, pas des
+      // colonnes de `legal_form_recommendations`.
+      prisma.legal_form_recommendations.create.mockResolvedValue({
+        id: 'r1',
+        project_id: 'p1',
+        recommended_form: 'SASU',
+        rationale: 'Raisonnement',
+        points_to_check: ['vérifier le plafond de CA en vigueur'],
+      });
+
+      const result = await service.recommendLegalFormForOwner('u1', 'p1');
+
+      expect(formerService.recommendLegalForm).toHaveBeenCalledWith('Idée', 'Desc', ATTRIBUTION, undefined);
+      expect(prisma.legal_form_recommendations.create).toHaveBeenCalledWith({
+        data: {
+          project_id: 'p1',
+          recommended_form: 'SASU',
+          rationale: 'Raisonnement',
+          points_to_check: ['vérifier le plafond de CA en vigueur'],
+          ...GENERATED_PROVENANCE,
+        },
+      });
+      expect(prisma.legal_form_assumptions.createMany).toHaveBeenCalledWith({
+        data: [{ recommendation_id: 'r1', subject: 'associés', assumption: 'seul', how_to_correct: 'précise si tu es à plusieurs' }],
+      });
+      expect(prisma.legal_form_alternatives.createMany).toHaveBeenCalledWith({
+        data: [{ recommendation_id: 'r1', form: 'EURL', why_not_chosen: 'moins souple pour lever des fonds' }],
+      });
+      expect(prisma.legal_form_sources.createMany).toHaveBeenCalledWith({
+        data: [{ recommendation_id: 'r1', title: 'Source', url: 'https://exemple.com' }],
+      });
+      expect(result).toEqual({ id: 'r1', project_id: 'p1', ...recommandation });
+    });
+
+    it("n'appelle aucune table fille quand les listes sont vides", async () => {
+      const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+      prisma.projects.findFirst.mockResolvedValue(project);
+      formerService.recommendLegalForm.mockResolvedValue({
+        recommended_form: 'micro-entreprise',
+        rationale: 'r',
+        assumptions: [],
+        alternatives: [],
+        points_to_check: [],
+        sources: [],
+      });
+      prisma.legal_form_recommendations.create.mockResolvedValue({ id: 'r1' });
+
+      await service.recommendLegalFormForOwner('u1', 'p1');
+
+      expect(prisma.legal_form_assumptions.createMany).not.toHaveBeenCalled();
+      expect(prisma.legal_form_alternatives.createMany).not.toHaveBeenCalled();
+      expect(prisma.legal_form_sources.createMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listLegalFormRecommendationsForOwner', () => {
+    it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.listLegalFormRecommendationsForOwner('u1', 'p1')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+    });
+
+    it('un collaborateur peut lister les recommandations, pas seulement le propriétaire', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.legal_form_recommendations.findMany.mockResolvedValue([{ id: 'r1' }]);
+
+      await expect(
+        service.listLegalFormRecommendationsForOwner('u2-collaborateur', 'p1'),
+      ).resolves.toEqual([{ id: 'r1' }]);
+      expect(prisma.legal_form_recommendations.findMany).toHaveBeenCalledWith({
+        where: { project_id: 'p1' },
+        include: { assumptions: true, alternatives: true, sources: true },
+        orderBy: { created_at: 'desc' },
       });
     });
   });

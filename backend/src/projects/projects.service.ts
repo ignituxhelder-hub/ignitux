@@ -1,4 +1,13 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConstitutionService } from '../constitution/constitution.service.js';
 import { AnalysisService } from '../igini/analysis/analysis.service.js';
 import { CLAUDE_MODEL } from '../igini/claude/claude.service.js';
@@ -10,15 +19,31 @@ import { PlanningService } from '../igini/planning/planning.service.js';
 import { TransmissionService } from '../igini/transmission/transmission.service.js';
 import { WorkflowEngineService } from '../igini/workflow/workflow-engine.service.js';
 import { WorkflowService } from '../igini/workflow/workflow.service.js';
+import { FormerService, type LegalFormRecommendationResult } from '../igini/former/former.service.js';
 import { OffresService } from '../offres/offres.service.js';
 import { contextePersonne } from '../profile/contexte-personne.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
 export class ProjectsService {
+  private readonly logger = new Logger(ProjectsService.name);
+
+  /**
+   * Projets pour lesquels un déclenchement automatique de Former est en
+   * cours, le temps qu'il se termine. Un appel Former prend 40 à 90
+   * secondes : sans ce verrou, deux analyses rapprochées sur le même
+   * projet verraient toutes les deux `legal_form_recommendations.count()`
+   * à zéro et déclencheraient chacune leur propre recommandation. Un
+   * `Set` en mémoire suffit pour un déploiement mono-instance ; il ne
+   * protégerait pas contre plusieurs instances du serveur en parallèle,
+   * ce qui n'est pas le cas aujourd'hui.
+   */
+  private readonly formerAutoTriggerEnCours = new Set<string>();
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly analysisService: AnalysisService,
+    private readonly formerService: FormerService,
     private readonly planningService: PlanningService,
     private readonly financingService: FinancingService,
     private readonly developmentService: DevelopmentService,
@@ -32,9 +57,9 @@ export class ProjectsService {
   ) {}
 
   /**
-   * Provenance commune aux cinq générateurs, soumise au moteur
+   * Provenance commune aux six générateurs, soumise au moteur
    * constitutionnel avant l'écriture. Centralisée ici parce qu'une provenance
-   * recopiée cinq fois finit par diverger, et qu'une divergence silencieuse
+   * recopiée six fois finit par diverger, et qu'une divergence silencieuse
    * sur ce champ précis est exactement ce que l'article 12 interdit.
    */
   private async generatedProvenance(
@@ -325,6 +350,19 @@ export class ProjectsService {
     await this.automationService.run(project.id);
     await this.workflowEngineService.advanceActiveRunsForProject(ownerId, project.id);
 
+    // Non attendu par cette réponse : un appel Former prend 40 à 90
+    // secondes mesurées (PRICING.md §2), doubler l'attente de l'analyse
+    // pour une recommandation que personne n'a explicitement demandée
+    // serait pire que la retarder de quelques secondes.
+    if (analysis.feasibility_score >= 8) {
+      void this.triggerFormerAutomatically(ownerId, project.id).catch((error: unknown) => {
+        this.logger.error(
+          `Déclenchement automatique de Former en échec pour le projet ${project.id}.`,
+          error as Error,
+        );
+      });
+    }
+
     // Attaché depuis ce qu'on vient d'écrire, pas relu en base : c'est
     // exactement les mêmes sources, et une requête de plus n'apprendrait
     // rien que `sources` ne sache déjà.
@@ -336,6 +374,118 @@ export class ProjectsService {
     return this.prisma.analyses.findMany({
       where: { project_id: id },
       include: { sources: true },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  /**
+   * Persiste une recommandation et ses tables filles. Privée et réutilisée
+   * par le déclenchement manuel (ci-dessous) et le déclenchement automatique
+   * (ProjectsService.analyzeForOwner) : les deux chemins doivent écrire
+   * exactement la même chose.
+   */
+  private async persistFormerRecommendation(
+    projectId: string,
+    ownerId: string,
+    result: LegalFormRecommendationResult,
+  ) {
+    const recommendation = await this.prisma.legal_form_recommendations.create({
+      data: {
+        project_id: projectId,
+        recommended_form: result.recommended_form,
+        rationale: result.rationale,
+        points_to_check: result.points_to_check,
+        ...(await this.generatedProvenance('legal_form_recommendations', ownerId, projectId)),
+      },
+    });
+
+    if (result.assumptions.length > 0) {
+      await this.prisma.legal_form_assumptions.createMany({
+        data: result.assumptions.map((a) => ({ recommendation_id: recommendation.id, ...a })),
+      });
+    }
+    if (result.alternatives.length > 0) {
+      await this.prisma.legal_form_alternatives.createMany({
+        data: result.alternatives.map((a) => ({ recommendation_id: recommendation.id, ...a })),
+      });
+    }
+    if (result.sources.length > 0) {
+      await this.prisma.legal_form_sources.createMany({
+        data: result.sources.map((s) => ({ recommendation_id: recommendation.id, ...s })),
+      });
+    }
+
+    return {
+      ...recommendation,
+      assumptions: result.assumptions,
+      alternatives: result.alternatives,
+      sources: result.sources,
+    };
+  }
+
+  /**
+   * Déclenchement automatique de Former — voir
+   * docs/superpowers/specs/2026-09-28-generateur-former-design.md.
+   *
+   * Une seule recommandation automatique par projet : relancer Analyser
+   * plusieurs fois sur une idée déjà au-dessus du seuil ne doit pas
+   * déclencher une nouvelle dépense à chaque fois. Relancer reste possible
+   * à la main (recommendLegalFormForOwner), en connaissance de cause.
+   */
+  private async triggerFormerAutomatically(ownerId: string, projectId: string): Promise<void> {
+    if (this.formerAutoTriggerEnCours.has(projectId)) return;
+    this.formerAutoTriggerEnCours.add(projectId);
+
+    try {
+      const dejaRecommande = await this.prisma.legal_form_recommendations.count({
+        where: { project_id: projectId },
+      });
+      if (dejaRecommande > 0) return;
+
+      const project = await this.prisma.projects.findUniqueOrThrow({ where: { id: projectId } });
+
+      let result: LegalFormRecommendationResult;
+      try {
+        result = await this.formerService.recommendLegalForm(
+          project.title,
+          project.description,
+          { userId: ownerId, projectId },
+          this.joinContext(await this.personContext(ownerId), await this.memoryContext(ownerId, projectId)),
+        );
+      } catch (error) {
+        // Refus d'entitlement (offre, plafond, interrupteur) : attendu et
+        // silencieux, ce ne sont pas des pannes — la personne n'a rien
+        // demandé explicitement qui mériterait un message d'erreur.
+        const estUnRefusAttendu =
+          error instanceof ForbiddenException ||
+          error instanceof ServiceUnavailableException ||
+          (error instanceof HttpException && error.getStatus() === HttpStatus.PAYMENT_REQUIRED);
+        if (estUnRefusAttendu) return;
+        throw error;
+      }
+
+      await this.persistFormerRecommendation(projectId, ownerId, result);
+    } finally {
+      this.formerAutoTriggerEnCours.delete(projectId);
+    }
+  }
+
+  async recommendLegalFormForOwner(ownerId: string, id: string) {
+    const project = await this.findOneForOwner(ownerId, id);
+    const result = await this.formerService.recommendLegalForm(
+      project.title,
+      project.description,
+      { userId: ownerId, projectId: project.id },
+      this.joinContext(await this.personContext(ownerId), await this.memoryContext(ownerId, id)),
+    );
+    return this.persistFormerRecommendation(project.id, ownerId, result);
+  }
+
+  async listLegalFormRecommendationsForOwner(ownerId: string, id: string) {
+    await this.findOneForViewer(ownerId, id);
+    return this.prisma.legal_form_recommendations.findMany({
+      where: { project_id: id },
+      include: { assumptions: true, alternatives: true, sources: true },
       orderBy: { created_at: 'desc' },
     });
   }

@@ -19,6 +19,8 @@ describe('ProjectsController', () => {
     removeCollaborator: ReturnType<typeof vi.fn>;
     analyzeForOwner: ReturnType<typeof vi.fn>;
     listAnalysesForOwner: ReturnType<typeof vi.fn>;
+    recommendLegalFormForOwner: ReturnType<typeof vi.fn>;
+    listLegalFormRecommendationsForOwner: ReturnType<typeof vi.fn>;
     createBuildPlanForOwner: ReturnType<typeof vi.fn>;
     listBuildPlansForOwner: ReturnType<typeof vi.fn>;
     createFinancingPlanForOwner: ReturnType<typeof vi.fn>;
@@ -46,6 +48,8 @@ describe('ProjectsController', () => {
       removeCollaborator: vi.fn(),
       analyzeForOwner: vi.fn(),
       listAnalysesForOwner: vi.fn(),
+      recommendLegalFormForOwner: vi.fn(),
+      listLegalFormRecommendationsForOwner: vi.fn(),
       createBuildPlanForOwner: vi.fn(),
       listBuildPlansForOwner: vi.fn(),
       createFinancingPlanForOwner: vi.fn(),
@@ -170,6 +174,24 @@ describe('ProjectsController', () => {
 
     expect(projectsService.listAnalysesForOwner).toHaveBeenCalledWith('u1', 'p1');
     expect(result).toEqual([{ id: 'a1' }]);
+  });
+
+  it('recommendLegalForm délègue au service avec le propriétaire courant', async () => {
+    projectsService.recommendLegalFormForOwner.mockResolvedValue({ id: 'r1' });
+
+    const result = await controller.recommendLegalForm(currentUser, 'p1');
+
+    expect(projectsService.recommendLegalFormForOwner).toHaveBeenCalledWith('u1', 'p1');
+    expect(result).toEqual({ id: 'r1' });
+  });
+
+  it('listLegalForms délègue au service avec le propriétaire courant', async () => {
+    projectsService.listLegalFormRecommendationsForOwner.mockResolvedValue([{ id: 'r1' }]);
+
+    const result = await controller.listLegalForms(currentUser, 'p1');
+
+    expect(projectsService.listLegalFormRecommendationsForOwner).toHaveBeenCalledWith('u1', 'p1');
+    expect(result).toEqual([{ id: 'r1' }]);
   });
 
   it('createBuildPlan délègue au service avec le propriétaire courant', async () => {

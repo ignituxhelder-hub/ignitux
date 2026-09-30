@@ -9,6 +9,7 @@ import { euros } from '@/lib/montants';
 
 const GENERATEURS: Record<string, string> = {
   analyser: 'Analyser',
+  former: 'Former',
   construire: 'Construire',
   financer: 'Financer',
   developper: 'Développer',

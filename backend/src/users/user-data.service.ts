@@ -93,6 +93,7 @@ export class UserDataService {
       collaboratorsInvited,
       workflowSteps,
       analyses,
+      legalFormRecommendations,
       buildPlans,
       financingPlans,
       developmentPlans,
@@ -133,6 +134,10 @@ export class UserDataService {
       // qu'il faudrait réclamer séparément (même geste que lines/transactions
       // plus bas pour les écritures comptables et les comptes bancaires).
       this.prisma.analyses.findMany({ where: byProject, include: { sources: true } }),
+      this.prisma.legal_form_recommendations.findMany({
+        where: byProject,
+        include: { assumptions: true, alternatives: true, sources: true },
+      }),
       this.prisma.build_plans.findMany({ where: byProject }),
       this.prisma.financing_plans.findMany({ where: byProject }),
       this.prisma.development_plans.findMany({ where: byProject }),
@@ -210,6 +215,7 @@ export class UserDataService {
         },
         contenus_generes_par_igini: {
           analyses,
+          formes_juridiques_recommandees: legalFormRecommendations,
           plans_de_construction: buildPlans,
           plans_de_financement: financingPlans,
           plans_de_developpement: developmentPlans,
