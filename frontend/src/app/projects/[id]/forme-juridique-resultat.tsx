@@ -22,7 +22,7 @@ export function FormeJuridiqueResultat({ recommandation }: { recommandation: Leg
 
       {recommandation.assumptions.length > 0 && (
         <div style={{ marginTop: '0.75rem' }}>
-          <strong>Ce qu'IGINI a supposé, faute d'information</strong>
+          <strong>Ce qu&apos;IGINI a supposé, faute d&apos;information</strong>
           <ul style={{ margin: '0.25rem 0 0', paddingLeft: '1.25rem' }}>
             {recommandation.assumptions.map((a, index) => (
               <li key={index} style={{ marginBottom: '0.35rem' }}>
@@ -74,12 +74,12 @@ export function FormeJuridiqueResultat({ recommandation }: { recommandation: Leg
         </div>
       ) : (
         <p className="muted" style={{ marginTop: '0.75rem', fontSize: '0.85rem' }}>
-          Aucune recherche en ligne n'a été nécessaire pour cette recommandation.
+          Aucune recherche en ligne n&apos;a été nécessaire pour cette recommandation.
         </p>
       )}
 
       <p className="muted" style={{ marginTop: '0.75rem', fontSize: '0.85rem' }}>
-        IGINI recommande, il ne décide pas — dans les cas ambigus, vérifie auprès d'un comptable ou d'un
+        IGINI recommande, il ne décide pas — dans les cas ambigus, vérifie auprès d&apos;un comptable ou d&apos;un
         avocat avant de trancher.
       </p>
     </div>
