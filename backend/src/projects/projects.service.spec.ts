@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  ForbiddenException,
+  Logger,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -43,6 +45,7 @@ describe('ProjectsService', () => {
       count: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
       findFirst: ReturnType<typeof vi.fn>;
+      findUniqueOrThrow: ReturnType<typeof vi.fn>;
       update: ReturnType<typeof vi.fn>;
       delete: ReturnType<typeof vi.fn>;
     };
@@ -115,6 +118,9 @@ describe('ProjectsService', () => {
         count: vi.fn().mockResolvedValue(0),
         findMany: vi.fn(),
         findFirst: vi.fn(),
+        // Relu par le déclenchement automatique de Former (titre/description
+        // du projet), séparément du findFirst qui sert à analyzeForOwner lui-même.
+        findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'p1', title: 'Idée', description: 'Desc' }),
         update: vi.fn(),
         delete: vi.fn(),
       },
@@ -151,7 +157,14 @@ describe('ProjectsService', () => {
     prisma.financing_plans.findFirst.mockResolvedValue(null);
     prisma.development_plans.findFirst.mockResolvedValue(null);
     analysisService = { analyzeProject: vi.fn() };
-    formerService = { recommendLegalForm: vi.fn() };
+    formerService = { recommendLegalForm: vi.fn().mockResolvedValue({
+      recommended_form: 'micro-entreprise',
+      rationale: 'r',
+      assumptions: [],
+      alternatives: [],
+      points_to_check: [],
+      sources: [],
+    }) };
     planningService = { createBuildPlan: vi.fn() };
     financingService = { createFinancingPlan: vi.fn() };
     developmentService = { createDevelopmentPlan: vi.fn() };
@@ -680,6 +693,114 @@ describe('ProjectsService', () => {
       await service.analyzeForOwner('u1', 'p1');
 
       expect(automationService.run).toHaveBeenCalledWith('p1');
+    });
+
+    describe('déclenchement automatique de Former', () => {
+      const projetEtAnalyse = (score: number) => {
+        const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+        prisma.projects.findFirst.mockResolvedValue(project);
+        // Relu séparément par triggerFormerAutomatically (titre/description),
+        // sans passer par le findFirst déjà utilisé par analyzeForOwner.
+        prisma.projects.findUniqueOrThrow.mockResolvedValue(project);
+        analysisService.analyzeProject.mockResolvedValue({
+          summary: 'r',
+          feasibility_score: score,
+          strengths: [],
+          risks: [],
+          next_steps: [],
+        });
+        prisma.analyses.create.mockResolvedValue({ id: 'a1', project_id: 'p1', feasibility_score: score });
+      };
+
+      it('déclenche Former quand le score atteint 8', async () => {
+        projetEtAnalyse(8);
+        formerService.recommendLegalForm.mockResolvedValue({
+          recommended_form: 'SASU',
+          rationale: 'r',
+          assumptions: [],
+          alternatives: [],
+          points_to_check: [],
+          sources: [],
+        });
+        prisma.legal_form_recommendations.create.mockResolvedValue({ id: 'r1' });
+
+        await service.analyzeForOwner('u1', 'p1');
+        // Non bloquant : on attend le prochain tick pour laisser la promesse
+        // détachée se résoudre avant d'inspecter les mocks.
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(formerService.recommendLegalForm).toHaveBeenCalledTimes(1);
+      });
+
+      it('ne déclenche pas Former en dessous de 8', async () => {
+        projetEtAnalyse(7);
+
+        await service.analyzeForOwner('u1', 'p1');
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(formerService.recommendLegalForm).not.toHaveBeenCalled();
+      });
+
+      it("ne déclenche qu'une fois : pas de nouvelle recommandation si le projet en a déjà une", async () => {
+        projetEtAnalyse(9);
+        prisma.legal_form_recommendations.count.mockResolvedValue(1);
+
+        await service.analyzeForOwner('u1', 'p1');
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(formerService.recommendLegalForm).not.toHaveBeenCalled();
+      });
+
+      it("n'attend pas Former avant de répondre (non bloquant)", async () => {
+        projetEtAnalyse(8);
+        let resolveFormer: (value: unknown) => void = () => {};
+        formerService.recommendLegalForm.mockReturnValue(
+          new Promise((resolve) => {
+            resolveFormer = resolve;
+          }),
+        );
+
+        const resultat = await service.analyzeForOwner('u1', 'p1');
+
+        // La réponse de l'analyse part sans attendre Former.
+        expect(resultat).toBeTruthy();
+        resolveFormer({
+          recommended_form: 'SASU',
+          rationale: 'r',
+          assumptions: [],
+          alternatives: [],
+          points_to_check: [],
+          sources: [],
+        });
+      });
+
+      it("journalise une vraie panne pendant le déclenchement automatique, sans faire échouer l'analyse", async () => {
+        projetEtAnalyse(8);
+        formerService.recommendLegalForm.mockRejectedValue(new Error('réseau'));
+        // Nest écrit sur le prototype partagé de Logger : l'espionner est le
+        // moyen standard de vérifier qu'une erreur a été journalisée, sans
+        // exposer le champ privé `logger` de ProjectsService.
+        const loggerSpy = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+
+        const resultat = await service.analyzeForOwner('u1', 'p1');
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(resultat).toBeTruthy();
+        expect(loggerSpy).toHaveBeenCalled();
+        loggerSpy.mockRestore();
+      });
+
+      it("reste silencieux quand Former échoue pour un refus d'entitlement (offre insuffisante)", async () => {
+        projetEtAnalyse(8);
+        formerService.recommendLegalForm.mockRejectedValue(new ForbiddenException('offre insuffisante'));
+        const loggerSpy = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+
+        await service.analyzeForOwner('u1', 'p1');
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(loggerSpy).not.toHaveBeenCalled();
+        loggerSpy.mockRestore();
+      });
     });
   });
 
