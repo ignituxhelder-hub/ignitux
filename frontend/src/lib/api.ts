@@ -156,6 +156,16 @@ export interface IdentityVerification {
   createdAt: string;
 }
 
+export interface Mandate {
+  id: string;
+  projectId: string;
+  purpose: string;
+  mandateText: string;
+  signedFullName: string;
+  signedAt: string;
+  status: 'active' | 'revoquee';
+}
+
 /**
  * L'upload de pièce d'identité envoie du `multipart/form-data` : contrairement
  * à `request`, on ne fixe jamais `Content-Type` ici — le navigateur doit
@@ -3094,6 +3104,35 @@ export const api = {
 
   getMesVerifications(token: string) {
     return request<IdentityVerification[]>('/identite/verifications', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+
+  getMesMandats(token: string) {
+    return request<Mandate[]>('/identite/mandats', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+
+  creerMandat(token: string, projectId: string, purpose: string) {
+    return request<Mandate>('/identite/mandats', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ projectId, purpose }),
+    });
+  },
+
+  signerMandat(token: string, mandateId: string, nomComplet: string) {
+    return request<Mandate>(`/identite/mandats/${mandateId}/signer`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ nomComplet }),
+    });
+  },
+
+  revoquerMandat(token: string, mandateId: string) {
+    return request<Mandate>(`/identite/mandats/${mandateId}/revoquer`, {
+      method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
     });
   },

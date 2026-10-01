@@ -36,6 +36,7 @@ import { BuybackSection, FinancingSection } from './financing-section';
 import { CollaboratorsSection } from './collaborators-section';
 import { ComplianceSection } from './compliance-section';
 import { KnowledgeSection, MemorySection, ScoreSection, TasksSection } from './engine-sections';
+import { MandatSection } from './mandat-section';
 
 /**
  * Demande au serveur si les 5 générateurs IGINI sont disponibles.
@@ -699,6 +700,13 @@ export default function ProjectDetailPage() {
           onChanged={onGenerated}
         />
       )}
+
+      {/* MANDAT — pas un résultat de générateur IGINI, donc pas mêlé aux
+          sections ci-dessus : c'est une autorisation que le porteur donne,
+          pas une recommandation qu'IGINI produit. Réservé au propriétaire,
+          comme la création d'un mandat côté serveur (assertOwnsProject). */}
+      {isOwner && <MandatSection token={token} projectId={id} />}
+
       {montrer('conformite') && <ComplianceSection token={token} projectId={id} readOnly={!isOwner} />}
       {montrer('automatisation') && (
         <AutomationSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
