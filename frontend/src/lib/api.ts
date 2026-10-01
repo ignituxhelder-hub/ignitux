@@ -146,6 +146,37 @@ async function requestCsv(path: string, token: string): Promise<string> {
   return res.text();
 }
 
+export type IdentityVerificationStatus = 'en_attente' | 'validee' | 'rejetee';
+
+export interface IdentityVerification {
+  id: string;
+  documentType: string;
+  status: IdentityVerificationStatus;
+  rejectionReason: string | null;
+  createdAt: string;
+}
+
+/**
+ * L'upload de pièce d'identité envoie du `multipart/form-data` : contrairement
+ * à `request`, on ne fixe jamais `Content-Type` ici — le navigateur doit
+ * poser lui-même la frontière multipart, que `fetch` calcule à partir du
+ * `FormData` fourni.
+ */
+async function requestMultipart<T>(path: string, token: string, form: FormData): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  const body = await res.json().catch(() => null);
+  if (!res.ok) {
+    const message =
+      body && typeof body.message === 'string' ? body.message : 'Une erreur est survenue.';
+    throw new ApiError(message, res.status);
+  }
+  return body as T;
+}
+
 /**
  * Le stockage utilisé pour le cache et la file d'attente. Injecté par
  * AuthProvider au montage plutôt que lu depuis `window` : ce module est
@@ -3046,4 +3077,24 @@ export const api = {
     request<ProfileField[]>(`/profil/a-demander/${moment}`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
+
+  // ── IDENTITÉ ──────────────────────────────────────────────────────────────
+  soumettreDocumentIdentite(
+    token: string,
+    documentType: 'carte_identite' | 'passeport' | 'titre_sejour',
+    front: File,
+    back: File | null,
+  ) {
+    const form = new FormData();
+    form.append('documentType', documentType);
+    form.append('front', front);
+    if (back) form.append('back', back);
+    return requestMultipart<IdentityVerification>('/identite/verifications', token, form);
+  },
+
+  getMesVerifications(token: string) {
+    return request<IdentityVerification[]>('/identite/verifications', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
 };
