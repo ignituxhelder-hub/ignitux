@@ -14,7 +14,7 @@ describe('IdentiteController', () => {
   let service: Record<string, ReturnType<typeof vi.fn>>;
 
   beforeEach(async () => {
-    service = { soumettreDocument: vi.fn(), listerMesVerifications: vi.fn() };
+    service = { soumettreDocumentPourUtilisateur: vi.fn(), listerMesVerifications: vi.fn() };
     const moduleRef = await Test.createTestingModule({
       controllers: [IdentiteController],
       providers: [{ provide: IdentiteService, useValue: service }],
@@ -32,7 +32,7 @@ describe('IdentiteController', () => {
   const user = { id: 'user-1', email: 'a@b.c' };
 
   it('transmet recto/verso au service', async () => {
-    service.soumettreDocument.mockResolvedValue({ id: 'v1' });
+    service.soumettreDocumentPourUtilisateur.mockResolvedValue({ id: 'v1' });
     const front = { buffer: Buffer.from('r'), mimetype: 'image/jpeg' } as Express.Multer.File;
     const back = { buffer: Buffer.from('v'), mimetype: 'image/jpeg' } as Express.Multer.File;
 
@@ -41,7 +41,7 @@ describe('IdentiteController', () => {
       back: [back],
     });
 
-    expect(service.soumettreDocument).toHaveBeenCalledWith(
+    expect(service.soumettreDocumentPourUtilisateur).toHaveBeenCalledWith(
       'user-1',
       'carte_identite',
       front.buffer,

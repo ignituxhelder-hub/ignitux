@@ -9,12 +9,22 @@ describe('IdentiteService — soumission de document', () => {
   let service: IdentiteService;
   let prisma: {
     identity_verifications: { create: ReturnType<typeof vi.fn>; findMany: ReturnType<typeof vi.fn> };
+    user_profiles: { findUnique: ReturnType<typeof vi.fn> };
   };
 
   beforeEach(async () => {
     prisma = {
       identity_verifications: { create: vi.fn(), findMany: vi.fn() },
+      user_profiles: { findUnique: vi.fn() },
     };
+    // Valeur par défaut réaliste (une vraie extraction OCR ne rend jamais
+    // `undefined`) : sans ceci, les tests qui ne configurent pas
+    // explicitement `extraireTexte` planteraient sur
+    // `extraireChampsStructures(undefined)` depuis que soumettreDocument en
+    // dépend (Task 4) — `mockReset()` d'abord pour qu'aucun test n'hérite
+    // d'une configuration laissée par le précédent.
+    const { extraireTexte } = await import('./ocr-extraction.js');
+    vi.mocked(extraireTexte).mockReset().mockResolvedValue('');
     const moduleRef = await Test.createTestingModule({
       providers: [IdentiteService, { provide: PrismaService, useValue: prisma }],
     }).compile();
@@ -26,7 +36,7 @@ describe('IdentiteService — soumission de document', () => {
     const back = Buffer.from('verso');
     prisma.identity_verifications.create.mockResolvedValue({ id: 'v1', status: 'en_attente' });
 
-    await service.soumettreDocument('user-1', 'carte_identite', front, back);
+    await service.soumettreDocument('user-1', 'carte_identite', front, back, null);
 
     expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
@@ -41,14 +51,14 @@ describe('IdentiteService — soumission de document', () => {
 
   it('refuse une carte d’identité sans verso', async () => {
     await expect(
-      service.soumettreDocument('user-1', 'carte_identite', Buffer.from('recto'), null),
+      service.soumettreDocument('user-1', 'carte_identite', Buffer.from('recto'), null, null),
     ).rejects.toThrow(BadRequestException);
   });
 
   it('accepte un passeport sans verso', async () => {
     prisma.identity_verifications.create.mockResolvedValue({ id: 'v1' });
     await expect(
-      service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null),
+      service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null, null),
     ).resolves.toBeDefined();
   });
 
@@ -66,8 +76,91 @@ describe('IdentiteService — soumission de document', () => {
     vi.mocked(extraireTexte).mockResolvedValue('texte simulé');
     prisma.identity_verifications.create.mockResolvedValue({ id: 'v1' });
 
-    await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null);
+    await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null, null);
 
     expect(extraireTexte).toHaveBeenCalledWith(Buffer.from('page'));
+  });
+
+  it('marque name_matches_account à null quand le compte n’a pas de nom affiché', async () => {
+    const { extraireTexte } = await import('./ocr-extraction.js');
+    vi.mocked(extraireTexte).mockResolvedValue('texte sans nom exploitable');
+    prisma.identity_verifications.create.mockResolvedValue({ id: 'v1' });
+
+    await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null, null);
+
+    expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ name_matches_account: null }),
+    });
+  });
+
+  it('stocke le résultat de la validation MRZ', async () => {
+    const { extraireTexte } = await import('./ocr-extraction.js');
+    vi.mocked(extraireTexte).mockResolvedValue('AUCUNE MRZ ICI');
+    prisma.identity_verifications.create.mockResolvedValue({ id: 'v1' });
+
+    await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null, null);
+
+    expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ mrz_checksum_valid: null }),
+    });
+  });
+
+  it('rejette automatiquement un document dont la date d’expiration MRZ est passée', async () => {
+    const { extraireTexte } = await import('./ocr-extraction.js');
+    // Même ligne MRZ officielle ICAO utilisée dans champs-extraits.spec.ts :
+    // expiration 12/04/2012, largement passée à la date où ce test tourne.
+    vi.mocked(extraireTexte).mockResolvedValue('L898902C36UTO7408122F1204159ZE184226B<<<<<10');
+    prisma.identity_verifications.create.mockResolvedValue({ id: 'v1' });
+
+    await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null, null);
+
+    expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        status: 'rejetee',
+        rejection_reason: 'Document expiré.',
+      }),
+    });
+  });
+
+  it('laisse un document non expiré en_attente', async () => {
+    const { extraireTexte } = await import('./ocr-extraction.js');
+    vi.mocked(extraireTexte).mockResolvedValue('AUCUNE MRZ ICI');
+    prisma.identity_verifications.create.mockResolvedValue({ id: 'v1' });
+
+    await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null, null);
+
+    expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ status: 'en_attente', rejection_reason: null }),
+    });
+  });
+
+  describe('soumettreDocumentPourUtilisateur', () => {
+    it('résout le display_name du profil et le transmet à soumettreDocument', async () => {
+      prisma.user_profiles.findUnique.mockResolvedValue({ display_name: 'Jean Dupont' });
+      prisma.identity_verifications.create.mockResolvedValue({ id: 'v1' });
+      const { extraireTexte } = await import('./ocr-extraction.js');
+      vi.mocked(extraireTexte).mockResolvedValue('IDENTITE JEAN DUPONT FRANCE');
+
+      await service.soumettreDocumentPourUtilisateur('user-1', 'passeport', Buffer.from('page'), null);
+
+      expect(prisma.user_profiles.findUnique).toHaveBeenCalledWith({
+        where: { user_id: 'user-1' },
+        select: { display_name: true },
+      });
+      expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ name_matches_account: true }),
+      });
+    });
+
+    it('transmet null quand le profil n’a pas de display_name (ou n’existe pas)', async () => {
+      prisma.user_profiles.findUnique.mockResolvedValue(null);
+      prisma.identity_verifications.create.mockResolvedValue({ id: 'v1' });
+
+      await service.soumettreDocumentPourUtilisateur('user-1', 'passeport', Buffer.from('page'), null);
+
+      expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ name_matches_account: null }),
+      });
+    });
   });
 });

@@ -67,7 +67,7 @@ export class IdentiteController {
     }
     const back = files.back?.[0] ?? null;
 
-    return this.identiteService.soumettreDocument(
+    return this.identiteService.soumettreDocumentPourUtilisateur(
       user.id,
       dto.documentType,
       front.buffer,
