@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -16,6 +17,7 @@ import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { DeleteAccountDto } from './dto/delete-account.dto.js';
 import { SignupDto } from './dto/signup.dto.js';
+import { TurnstileVerificationService } from './turnstile-verification.service.js';
 import { UserDataService } from './user-data.service.js';
 import { UsersService } from './users.service.js';
 
@@ -25,6 +27,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly emailVerificationService: EmailVerificationService,
+    private readonly turnstileVerificationService: TurnstileVerificationService,
     private readonly userDataService: UserDataService,
   ) {}
 
@@ -33,6 +36,13 @@ export class UsersController {
   // Limite contre les inscriptions automatisées : 5 tentatives / minute / IP.
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
   async signup(@Body() dto: SignupDto) {
+    // Avant toute écriture en base : un jeton invalide ne doit jamais créer
+    // de compte, même partiellement.
+    const captchaValide = await this.turnstileVerificationService.verify(dto.captchaToken);
+    if (!captchaValide) {
+      throw new BadRequestException('Vérification anti-robot invalide. Réessaie.');
+    }
+
     const user = await this.usersService.signup(dto.email, dto.password);
     // Ne bloque jamais l'inscription si l'envoi echoue (aucun vrai
     // fournisseur d'email n'est configure pour l'instant, voir MailService) —

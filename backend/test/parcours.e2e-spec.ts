@@ -29,16 +29,22 @@ describe('parcours complet (e2e)', () => {
     it('refuse une inscription en double', async () => {
       await api(app)
         .post('/users/signup')
-        .send({ email: account.email, password: account.password })
+        .send({ email: account.email, password: account.password, captchaToken: 'jeton-e2e' })
         .expect(409);
     });
 
     it('refuse un mot de passe trop court', async () => {
       // Vérifie aussi, en creux, que le ValidationPipe est bien branché
-      // dans ces tests : sans lui, le DTO ne serait jamais validé.
+      // dans ces tests : sans lui, le DTO ne serait jamais validé. Un
+      // captchaToken valide isole ce test du contrôle anti-robot : seule la
+      // longueur du mot de passe est en cause ici.
       await api(app)
         .post('/users/signup')
-        .send({ email: `court.${Date.now()}@e2e.test`, password: 'court' })
+        .send({
+          email: `court.${Date.now()}@e2e.test`,
+          password: 'court',
+          captchaToken: 'jeton-e2e',
+        })
         .expect(400);
     });
 

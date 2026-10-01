@@ -52,7 +52,12 @@ export async function createAccount(app: INestApplication<Server>): Promise<Test
   // il serait le bon, et le test passerait sans rien vérifier.
   const password = `MotDePasse-E2E-${sequence}-${Date.now()}`;
 
-  const signup = await api(app).post('/users/signup').send({ email, password }).expect(201);
+  // .env.test porte la clé de test Cloudflare : « jeton-e2e » n'a besoin
+  // d'être qu'une chaîne non vide, siteverify l'accepte sans la vérifier.
+  const signup = await api(app)
+    .post('/users/signup')
+    .send({ email, password, captchaToken: 'jeton-e2e' })
+    .expect(201);
   const login = await api(app).post('/auth/login').send({ email, password }).expect(200);
 
   return {

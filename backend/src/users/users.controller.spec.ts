@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmailVerificationService } from '../auth-tokens/email-verification.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { TurnstileVerificationService } from './turnstile-verification.service.js';
 import { UserDataService } from './user-data.service.js';
 import { UsersController } from './users.controller.js';
 import { UsersService } from './users.service.js';
@@ -11,6 +12,7 @@ describe('UsersController', () => {
   let controller: UsersController;
   let usersService: { signup: ReturnType<typeof vi.fn> };
   let emailVerificationService: { sendVerification: ReturnType<typeof vi.fn> };
+  let turnstileVerificationService: { verify: ReturnType<typeof vi.fn> };
   let userDataService: {
     exportUserData: ReturnType<typeof vi.fn>;
     previewDeletion: ReturnType<typeof vi.fn>;
@@ -20,6 +22,9 @@ describe('UsersController', () => {
   beforeEach(async () => {
     usersService = { signup: vi.fn() };
     emailVerificationService = { sendVerification: vi.fn() };
+    // Vraie par défaut : la plupart des tests portent sur autre chose que le
+    // CAPTCHA lui-même, voir le describe dédié plus bas.
+    turnstileVerificationService = { verify: vi.fn().mockResolvedValue(true) };
     userDataService = {
       exportUserData: vi.fn(),
       previewDeletion: vi.fn(),
@@ -31,6 +36,7 @@ describe('UsersController', () => {
       providers: [
         { provide: UsersService, useValue: usersService },
         { provide: EmailVerificationService, useValue: emailVerificationService },
+        { provide: TurnstileVerificationService, useValue: turnstileVerificationService },
         { provide: UserDataService, useValue: userDataService },
       ],
     })
@@ -51,7 +57,11 @@ describe('UsersController', () => {
   it('délègue au service et renvoie son résultat', async () => {
     usersService.signup.mockResolvedValue({ id: 'uuid-1', email: 'a@b.com' });
 
-    const result = await controller.signup({ email: 'a@b.com', password: 'motdepasse' });
+    const result = await controller.signup({
+      email: 'a@b.com',
+      password: 'motdepasse',
+      captchaToken: 'jeton-valide',
+    });
 
     expect(usersService.signup).toHaveBeenCalledWith('a@b.com', 'motdepasse');
     expect(result).toEqual({ id: 'uuid-1', email: 'a@b.com' });
@@ -60,9 +70,40 @@ describe('UsersController', () => {
   it("envoie un email de verification apres l'inscription", async () => {
     usersService.signup.mockResolvedValue({ id: 'uuid-1', email: 'a@b.com' });
 
-    await controller.signup({ email: 'a@b.com', password: 'motdepasse' });
+    await controller.signup({
+      email: 'a@b.com',
+      password: 'motdepasse',
+      captchaToken: 'jeton-valide',
+    });
 
     expect(emailVerificationService.sendVerification).toHaveBeenCalledWith('uuid-1', 'a@b.com');
+  });
+
+  describe('vérification anti-robot', () => {
+    it('vérifie le jeton Turnstile avant de créer le compte', async () => {
+      usersService.signup.mockResolvedValue({ id: 'uuid-1', email: 'a@b.com' });
+
+      await controller.signup({
+        email: 'a@b.com',
+        password: 'motdepasse',
+        captchaToken: 'jeton-du-widget',
+      });
+
+      expect(turnstileVerificationService.verify).toHaveBeenCalledWith('jeton-du-widget');
+    });
+
+    it('refuse la création du compte si le jeton est invalide', async () => {
+      turnstileVerificationService.verify.mockResolvedValue(false);
+
+      await expect(
+        controller.signup({
+          email: 'a@b.com',
+          password: 'motdepasse',
+          captchaToken: 'jeton-invalide',
+        }),
+      ).rejects.toThrow('Vérification anti-robot invalide');
+      expect(usersService.signup).not.toHaveBeenCalled();
+    });
   });
 
   describe('données personnelles', () => {
