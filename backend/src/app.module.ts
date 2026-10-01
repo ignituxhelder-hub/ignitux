@@ -30,6 +30,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { ProjectsModule } from './projects/projects.module.js';
 import { UsersModule } from './users/users.module.js';
 import { StocksModule } from './stocks/stocks.module.js';
+import { IdentiteModule } from './identite/identite.module.js';
 import { AgendaModule } from './agenda/agenda.module.js';
 import { CaisseModule } from './caisse/caisse.module.js';
 import { ImmobilierModule } from './immobilier/immobilier.module.js';
@@ -68,6 +69,7 @@ import { PubliciteModule } from './publicite/publicite.module.js';
     FinanceAuditModule,
     MarketplaceModule,
     StocksModule,
+    IdentiteModule,
     AgendaModule,
     CaisseModule,
     ImmobilierModule,
