@@ -1,6 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { RoleGuard } from '../roles/role.guard.js';
 import { fileFilter, IdentiteController } from './identite.controller.js';
 import { IdentiteService } from './identite.service.js';
 
@@ -24,6 +25,11 @@ describe('IdentiteController', () => {
       // fourni par PassportModule — absent de ce module de test isolé. Ces
       // tests portent sur la délégation au service, pas sur la garde elle-même.
       .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      // RoleGuard dépend de RolesService (via RolesModule), absent de ce
+      // module isolé. Même raisonnement que pour JwtAuthGuard ci-dessus :
+      // que la garde soit bien montée est vérifié à la couche e2e, pas ici.
+      .overrideGuard(RoleGuard)
       .useValue({ canActivate: () => true })
       .compile();
     controller = moduleRef.get(IdentiteController);
@@ -59,6 +65,18 @@ describe('IdentiteController', () => {
     service.listerMesVerifications.mockResolvedValue([]);
     await controller.mesVerifications(user);
     expect(service.listerMesVerifications).toHaveBeenCalledWith('user-1');
+  });
+
+  it('expose la file en attente', async () => {
+    service.listerEnAttente = vi.fn().mockResolvedValue([]);
+    await controller.enAttente();
+    expect(service.listerEnAttente).toHaveBeenCalled();
+  });
+
+  it('transmet la décision de revue', async () => {
+    service.revoirVerification = vi.fn().mockResolvedValue({ id: 'v1' });
+    await controller.revoir('v1', { decision: 'rejetee', motif: 'photo illisible' });
+    expect(service.revoirVerification).toHaveBeenCalledWith('v1', 'rejetee', 'photo illisible');
   });
 });
 

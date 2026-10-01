@@ -208,3 +208,46 @@ describe('IdentiteService — soumission de document', () => {
     });
   });
 });
+
+describe('IdentiteService — revue', () => {
+  let service: IdentiteService;
+  let prisma: {
+    identity_verifications: { findFirst: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> };
+  };
+
+  beforeEach(async () => {
+    prisma = {
+      identity_verifications: { findFirst: vi.fn(), update: vi.fn() },
+    };
+    const moduleRef = await Test.createTestingModule({
+      providers: [IdentiteService, { provide: PrismaService, useValue: prisma }],
+    }).compile();
+    service = moduleRef.get(IdentiteService);
+  });
+
+  it('valide une vérification en_attente', async () => {
+    prisma.identity_verifications.findFirst = vi.fn().mockResolvedValue({ id: 'v1', status: 'en_attente' });
+    prisma.identity_verifications.update = vi.fn().mockResolvedValue({ id: 'v1', status: 'validee' });
+
+    await service.revoirVerification('v1', 'validee');
+
+    expect(prisma.identity_verifications.update).toHaveBeenCalledWith({
+      where: { id: 'v1' },
+      data: expect.objectContaining({ status: 'validee' }),
+    });
+  });
+
+  it('refuse de revoir une vérification déjà tranchée', async () => {
+    prisma.identity_verifications.findFirst = vi.fn().mockResolvedValue({ id: 'v1', status: 'validee' });
+
+    await expect(service.revoirVerification('v1', 'rejetee', 'doublon')).rejects.toThrow(
+      /déjà/i,
+    );
+  });
+
+  it('exige un motif pour un rejet', async () => {
+    prisma.identity_verifications.findFirst = vi.fn().mockResolvedValue({ id: 'v1', status: 'en_attente' });
+
+    await expect(service.revoirVerification('v1', 'rejetee')).rejects.toThrow(/motif/i);
+  });
+});

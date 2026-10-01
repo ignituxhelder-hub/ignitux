@@ -5,6 +5,8 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
   Post,
   UploadedFiles,
   UseGuards,
@@ -15,7 +17,9 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
-import { SubmitDocumentDto } from './dto/identite.dto.js';
+import { RequireRole } from '../roles/require-role.decorator.js';
+import { RoleGuard } from '../roles/role.guard.js';
+import { ReviewVerificationDto, SubmitDocumentDto } from './dto/identite.dto.js';
 import { IdentiteService } from './identite.service.js';
 
 const TAILLE_MAX_OCTETS = 8 * 1024 * 1024;
@@ -78,5 +82,20 @@ export class IdentiteController {
   @Get('verifications')
   mesVerifications(@CurrentUser() user: AuthenticatedUser) {
     return this.identiteService.listerMesVerifications(user.id);
+  }
+
+  @Get('verifications/en-attente')
+  @UseGuards(RoleGuard)
+  @RequireRole('administrateur')
+  enAttente() {
+    return this.identiteService.listerEnAttente();
+  }
+
+  @Post('verifications/:id/revue')
+  @UseGuards(RoleGuard)
+  @RequireRole('administrateur')
+  @HttpCode(HttpStatus.OK)
+  revoir(@Param('id', ParseUUIDPipe) id: string, @Body() dto: ReviewVerificationDto) {
+    return this.identiteService.revoirVerification(id, dto.decision, dto.motif);
   }
 }

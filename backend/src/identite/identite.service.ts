@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { type DocumentType } from './dto/identite.dto.js';
 import { extraireChampsStructures } from './champs-extraits.js';
@@ -118,5 +118,45 @@ export class IdentiteService {
       throw new NotFoundException('Vérification introuvable.');
     }
     return verification;
+  }
+
+  /**
+   * La revue humaine : la spec la traite comme obligatoire avant qu'une
+   * vérification ne compte comme validée, quel que soit ce que l'OCR/MRZ
+   * (Tasks 3-4) a déjà établi. `en_attente` seulement — une fois tranchée,
+   * la décision ne se reprend pas (ConflictException plutôt que d'écraser
+   * silencieusement un rejet par une validation ou inversement).
+   */
+  listerEnAttente() {
+    return this.prisma.identity_verifications.findMany({
+      where: { status: 'en_attente' },
+      orderBy: { created_at: 'asc' },
+    });
+  }
+
+  async revoirVerification(verificationId: string, decision: 'validee' | 'rejetee', motif?: string) {
+    const verification = await this.prisma.identity_verifications.findFirst({
+      where: { id: verificationId },
+    });
+    if (!verification) {
+      throw new NotFoundException('Vérification introuvable.');
+    }
+    if (verification.status !== 'en_attente') {
+      throw new ConflictException(
+        `Cette vérification est déjà ${verification.status} : une décision ne se reprend pas.`,
+      );
+    }
+    if (decision === 'rejetee' && !motif) {
+      throw new BadRequestException('Un motif est requis pour rejeter une vérification.');
+    }
+
+    return this.prisma.identity_verifications.update({
+      where: { id: verificationId },
+      data: {
+        status: decision,
+        rejection_reason: decision === 'rejetee' ? motif : null,
+        reviewed_at: new Date(),
+      },
+    });
   }
 }
