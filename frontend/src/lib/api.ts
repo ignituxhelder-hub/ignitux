@@ -1725,8 +1725,11 @@ export const api = {
   /** Sans jeton : l'état d'une fonctionnalité n'est pas une donnée personnelle. */
   getIginiStatus: () => request<IginiStatus>('/igini/status'),
 
-  signup: (email: string, password: string) =>
-    request<User>('/users/signup', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  signup: (email: string, password: string, captchaToken: string) =>
+    request<User>('/users/signup', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, captchaToken }),
+    }),
 
   login: (email: string, password: string) =>
     request<{ accessToken: string; refreshToken: string; user: User }>('/auth/login', {

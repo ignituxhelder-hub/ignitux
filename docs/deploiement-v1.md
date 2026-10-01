@@ -1,9 +1,15 @@
-# Déploiement V1 — test privé
+# Déploiement V1 — ouverture publique
 
-Ce document liste tout ce qu'il faut configurer pour mettre IGNITUX en ligne pour la bêta
-privée : backend sur Render ou Railway, frontend sur Vercel. Il ne déclenche aucun
-déploiement — c'est la préparation (Tâche 6 du plan). Les comptes à créer et les secrets à
-fournir sont demandés séparément (Tâche 7) ; ce document leur sert de référence.
+Ce document liste tout ce qu'il faut configurer pour mettre IGNITUX en ligne : backend sur
+Render ou Railway, frontend sur Vercel. Il ne déclenche aucun déploiement — c'est la
+préparation (Tâche 6 du plan). Les comptes à créer et les secrets à fournir sont demandés
+séparément (Tâche 7) ; ce document leur sert de référence.
+
+Révisé pour l'ouverture publique (au lieu de la bêta privée sur invitation d'origine) :
+chaque inscription passe maintenant par une vérification anti-robot (Cloudflare Turnstile,
+voir plus bas), et `IGNITUX_BETA_V1` passe à `false` pour que les nouveaux comptes tombent
+sur l'offre Découverte gratuite plutôt que sur l'offre payante Entrepreneur offerte
+automatiquement.
 
 ## Pourquoi Render/Railway + Vercel plutôt que tout-Docker
 
@@ -16,7 +22,7 @@ nativement, sans conteneur.
 
 ## Variables d'environnement — backend (Render ou Railway)
 
-| Variable | Valeur pour la bêta | Obligatoire au démarrage ? |
+| Variable | Valeur | Obligatoire au démarrage ? |
 |---|---|---|
 | `NODE_ENV` | `production` | oui — déclenche tous les contrôles ci-dessous |
 | `DATABASE_URL` | fournie par Helder (Supabase, base `ignitux_prod`, **pas** `postgres`) | oui |
@@ -35,28 +41,38 @@ nativement, sans conteneur.
 | `PAIEMENT_FOURNISSEUR` | `aucun` | non (défaut) |
 | `ANTHROPIC_API_KEY` | fournie par Helder | non au démarrage, mais requise pour que les générateurs répondent |
 | `IGINI_AI_ENABLED` | `true` — **sans ça, aucun générateur ne fonctionne** | non (défaut déjà `true`) |
-| `IGINI_QUOTA_COST_EUR_PER_MONTH` | `2` (déjà la valeur par défaut — 10 testeurs actifs restent sous 20 €/mois) | non |
-| `IGNITUX_BETA_V1` | `true` (déjà la valeur par défaut — sans moyen de paiement, ouvre l'offre Entrepreneur par défaut aux testeurs pour qu'ils puissent essayer les 6 générateurs) | non |
+| `IGINI_QUOTA_COST_EUR_PER_MONTH` | `2` par défaut — plafond par personne. Pas de plafond global : Helder gère le risque de coût agrégé lui-même, probablement via le plafond de dépense de la console Anthropic | non |
+| `IGNITUX_BETA_V1` | `false` — **changé pour l'ouverture publique** (l'ancienne valeur `true` ouvrait l'offre payante Entrepreneur gratuitement à tout inscrit ; en public, les nouveaux comptes tombent sur l'offre Découverte gratuite) | oui, à poser explicitement |
+| `TURNSTILE_SECRET_KEY` | clé secrète du tableau de bord Cloudflare Turnstile — **nouvelle, obligatoire au démarrage** | oui |
 | `PORT` | injecté automatiquement par l'hébergeur | — |
 
-**Note sur `MAIL_TRANSPORT=log`** : si aucun fournisseur SMTP n'est configuré pour ce premier
-test, "mot de passe oublié" ne fonctionnera pas (l'email part seulement dans les journaux du
-serveur). Pour un tout petit groupe de testeurs de confiance, c'est un risque acceptable pour
-un premier tour — à condition de le savoir. Configurer un vrai SMTP reste recommandé (Tâche 7).
+**Note sur `MAIL_TRANSPORT=log`** : si aucun fournisseur SMTP n'est configuré, l'email part
+seulement dans les journaux du serveur — voir la limite connue ci-dessous, qui détaille
+pourquoi c'est un choix assumé pour ce premier tour plutôt qu'un oubli.
 
-## Variable d'environnement — frontend (Vercel)
+## Variables d'environnement — frontend (Vercel)
 
-| Variable | Valeur pour la bêta |
+| Variable | Valeur |
 |---|---|
 | `NEXT_PUBLIC_API_URL` | URL du backend Render/Railway, en `https://` — **doit être définie avant `next build`**, pas seulement au démarrage (Next.js l'intègre au code au moment de la compilation) |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | clé SITE (publique) du même site Cloudflare Turnstile que `TURNSTILE_SECRET_KEY` côté backend — doit elle aussi être définie avant `next build` |
+
+## Limite connue : « mot de passe oublié »
+
+Tant qu'aucun nom de domaine n'est acheté et vérifié chez un fournisseur d'email (Resend)
+ou que l'envoi SMTP (Outlook) n'est pas finalisé, `MAIL_TRANSPORT` reste `log` :
+« mot de passe oublié » ne fonctionne pour personne, silencieusement. Décision assumée
+pour ce premier tour d'ouverture publique (Helder achètera le domaine plus tard) — à
+corriger rapidement une fois le domaine en place.
 
 ## Contrôle au démarrage (déjà en place, vérifié)
 
 `backend/src/config/production-preflight.ts` refuse de démarrer en production si l'une des
 variables obligatoires ci-dessus manque ou garde une valeur d'exemple du dépôt (`JWT_SECRET`
 laissé à `change-me`, `FRONTEND_URL` qui pointe sur `localhost`, `DATABASE_URL` qui pointe sur
-la base `postgres` au lieu de `ignitux_prod`, etc.). Le message d'erreur nomme précisément ce
-qui manque — rien à ajouter ici, juste à lire les journaux du premier démarrage s'il refuse.
+la base `postgres` au lieu de `ignitux_prod`, `TURNSTILE_SECRET_KEY` laissée à la clé de test
+Cloudflare, etc.). Le message d'erreur nomme précisément ce qui manque — rien à ajouter ici,
+juste à lire les journaux du premier démarrage s'il refuse.
 
 ## Procédure (Tâche 8, une fois les comptes et secrets de la Tâche 7 réunis)
 
@@ -73,4 +89,4 @@ qui manque — rien à ajouter ici, juste à lire les journaux du premier démar
 *(à compléter une fois le déploiement réel fait — Tâche 8)*
 
 - Backend : —
-- Frontend (lien à envoyer aux testeurs) : —
+- Frontend (lien public) : —

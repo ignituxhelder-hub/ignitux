@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import Script from 'next/script';
 import { useRouter } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Brand } from '@/components/ignitux-mark';
 import { ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -13,16 +14,29 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [acceptedCgu, setAcceptedCgu] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Le widget Cloudflare Turnstile appelle cette fonction par son nom (voir
+  // data-callback ci-dessous) une fois le défi résolu — il ne connaît rien
+  // de React, donc le pont passe par `window`.
+  useEffect(() => {
+    (window as unknown as { handleTurnstileToken?: (token: string) => void }).handleTurnstileToken =
+      setCaptchaToken;
+    return () => {
+      delete (window as unknown as { handleTurnstileToken?: (token: string) => void })
+        .handleTurnstileToken;
+    };
+  }, []);
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!acceptedCgu) return;
+    if (!acceptedCgu || !captchaToken) return;
     setError(null);
     setIsSubmitting(true);
     try {
-      await signup(email, password);
+      await signup(email, password, captchaToken);
       router.replace('/roles');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de créer le compte.');
@@ -84,7 +98,17 @@ export default function SignupPage() {
             <Link href="/confidentialite">politique de confidentialité</Link>
           </label>
         </div>
-        <button className="primary" type="submit" disabled={isSubmitting || !acceptedCgu}>
+        <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="afterInteractive" async defer />
+        <div
+          className="cf-turnstile"
+          data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+          data-callback="handleTurnstileToken"
+        />
+        <button
+          className="primary"
+          type="submit"
+          disabled={isSubmitting || !acceptedCgu || !captchaToken}
+        >
           {isSubmitting ? 'Création…' : 'Créer mon compte'}
         </button>
       </form>
