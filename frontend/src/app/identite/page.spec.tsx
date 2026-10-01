@@ -3,10 +3,17 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import IdentitePage from './page.js';
 import { api } from '@/lib/api.js';
 import { useAuth } from '@/lib/auth.js';
+import { createRouterMock } from '@/test-utils/mocks';
 
 vi.mock('@/lib/api.js');
 vi.mock('@/lib/auth.js');
-vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: vi.fn() }) }));
+
+// Référence stable entre les rendus, comme le vrai useRouter() de Next.js :
+// un objet recréé à chaque appel casserait l'effet de chargement, qui a
+// `router` en dépendance (re-render → nouvelle référence → effet relancé en
+// boucle). Voir frontend/src/test-utils/mocks.ts.
+const router = createRouterMock();
+vi.mock('next/navigation', () => ({ useRouter: () => router }));
 
 describe('IdentitePage', () => {
   beforeEach(() => {

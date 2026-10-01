@@ -60,12 +60,7 @@ export default function IdentitePage() {
       return;
     }
     void charger();
-    // router est volontairement absent des dépendances : Next.js le garantit
-    // stable, et le suivre forcerait cet effet à se redéclencher à chaque
-    // rendu dans un test qui mocke useRouter() avec un objet recréé à chaque
-    // appel, provoquant une boucle de rechargement sans fin.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReady, token, charger]);
+  }, [isReady, token, router, charger]);
 
   const soumettre = async (evenement: React.FormEvent) => {
     evenement.preventDefault();
