@@ -53,16 +53,15 @@ const SECRETS_D_EXEMPLE = [
 ];
 
 /**
- * Les clés de test publiées par Cloudflare pour Turnstile : toujours
- * « réussit », toujours « échoue », toujours « bloqué ». Documentées, donc
- * publiques — les laisser en production équivaut à n'avoir aucune
- * protection anti-robot, puisqu'elles ne vérifient jamais le jeton reçu.
+ * Le gabarit des clés de test publiées par Cloudflare pour Turnstile :
+ * toujours « réussit », toujours « échoue », toujours « bloqué ». Un
+ * gabarit plutôt qu'une liste figée des trois clés documentées aujourd'hui —
+ * si Cloudflare en publie une 4e sur la même forme, elle est refusée sans
+ * modifier ce fichier. Laisser une clé de test en production équivaut à
+ * n'avoir aucune protection anti-robot, puisqu'elle ne vérifie jamais le
+ * jeton reçu.
  */
-const CLES_TURNSTILE_DE_TEST = [
-  '1x0000000000000000000000000000000AA',
-  '2x0000000000000000000000000000000AA',
-  '3x0000000000000000000000000000000AA',
-];
+const CLE_TURNSTILE_DE_TEST = /^[1-9]x0{10,}AA$/i;
 
 /**
  * Les domaines qui ne peuvent pas recevoir de courrier, jamais.
@@ -284,7 +283,7 @@ export function productionProblems(env: PreflightInput): PreflightProblem[] {
         "n'importe quel script peut créer des comptes en masse. Récupère la clé secrète " +
         'depuis le tableau de bord Cloudflare Turnstile.',
     );
-  } else if (CLES_TURNSTILE_DE_TEST.includes(turnstile.trim())) {
+  } else if (CLE_TURNSTILE_DE_TEST.test(turnstile.trim())) {
     probleme(
       'TURNSTILE_SECRET_KEY',
       'porte une clé de test publiée par Cloudflare — elle ne vérifie jamais réellement ' +

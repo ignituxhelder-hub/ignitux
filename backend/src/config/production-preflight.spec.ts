@@ -338,6 +338,21 @@ describe('documentation d’API', () => {
       },
     );
 
+    // La forme (un chiffre, « x », des zéros, « AA ») plutôt qu'une liste
+    // figée : si Cloudflare documente un jour une 4e clé de test sur le même
+    // gabarit, elle est refusée sans qu'il faille éditer ce fichier.
+    it("refuse une clé de test au même gabarit, même non publiée aujourd'hui", () => {
+      expect(
+        problemesSur({ TURNSTILE_SECRET_KEY: '4x0000000000000000000000000000000AA' }),
+      ).toContain('TURNSTILE_SECRET_KEY');
+    });
+
+    it('refuse une clé de test entourée d’espaces (copier-coller depuis un fichier .env)', () => {
+      expect(
+        problemesSur({ TURNSTILE_SECRET_KEY: '  1x0000000000000000000000000000000AA  ' }),
+      ).toContain('TURNSTILE_SECRET_KEY');
+    });
+
     it('accepte une vraie clé', () => {
       expect(problemesSur({})).not.toContain('TURNSTILE_SECRET_KEY');
     });

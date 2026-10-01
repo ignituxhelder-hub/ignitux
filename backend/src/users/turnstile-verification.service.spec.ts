@@ -83,6 +83,16 @@ describe('TurnstileVerificationService', () => {
     await expect(service.verify('jeton')).resolves.toBe(false);
   });
 
+  // Une panne Cloudflare peut aussi répondre 200 avec une page d'erreur HTML
+  // (pas du JSON) plutôt que de faire échouer la requête elle-même — même
+  // garde-fou fail-closed que pour une panne réseau.
+  it('renvoie false si la réponse de Cloudflare n’est pas du JSON exploitable', async () => {
+    fetchMock.mockResolvedValue({ json: () => Promise.reject(new Error('corps non-JSON')) });
+    const service = await serviceAvec({ ...BASE, TURNSTILE_SECRET_KEY: 'ma-cle-secrete' });
+
+    await expect(service.verify('jeton')).resolves.toBe(false);
+  });
+
   it("renvoie false si la clé secrète n'est pas configurée, sans appeler Cloudflare", async () => {
     const service = await serviceAvec({ ...BASE, TURNSTILE_SECRET_KEY: undefined });
 

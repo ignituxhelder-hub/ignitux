@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
 import { createRouterMock, mockFetchSequence } from '@/test-utils/mocks';
-import SignupPage from './page';
+import SignupPage, { TURNSTILE_CALLBACK_NAME } from './page';
 
 const router = createRouterMock();
 vi.mock('next/navigation', () => ({
@@ -16,9 +16,7 @@ vi.mock('next/navigation', () => ({
  */
 function completeCaptcha(token = 'faux-jeton-captcha') {
   act(() => {
-    (window as unknown as { handleTurnstileToken: (t: string) => void }).handleTurnstileToken(
-      token,
-    );
+    (window as unknown as Record<string, (t: string) => void>)[TURNSTILE_CALLBACK_NAME](token);
   });
 }
 
@@ -104,6 +102,34 @@ describe('SignupPage', () => {
 
     expect(await screen.findByText('Un compte existe déjà avec cet email.')).toBeInTheDocument();
     expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  // Un jeton Turnstile est à usage unique : après un échec (email déjà pris,
+  // panne réseau, etc.), renvoyer le même jeton échouerait de nouveau côté
+  // Cloudflare. Le bouton doit redemander une vérification fraîche.
+  it("redemande une vérification anti-robot après un échec d'inscription", async () => {
+    mockFetchSequence({ status: 409, body: { message: 'Un compte existe déjà avec cet email.' } });
+
+    render(
+      <AuthProvider>
+        <SignupPage />
+      </AuthProvider>,
+    );
+
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'a@b.com' } });
+    fireEvent.change(screen.getByLabelText('Mot de passe'), { target: { value: 'motdepasse' } });
+    fireEvent.click(screen.getByLabelText(/j'ai lu et j'accepte/i));
+    completeCaptcha();
+    fireEvent.click(screen.getByRole('button', { name: /créer mon compte/i }));
+
+    await screen.findByText('Un compte existe déjà avec cet email.');
+
+    // Le jeton qui vient d'échouer est consommé côté Cloudflare : le bouton
+    // doit rester désactivé tant qu'un nouveau jeton n'a pas été reçu.
+    expect(screen.getByRole('button', { name: /créer mon compte/i })).toBeDisabled();
+
+    completeCaptcha('nouveau-jeton');
+    expect(screen.getByRole('button', { name: /créer mon compte/i })).toBeEnabled();
   });
 
   it("bloque l'inscription tant que les CGU ne sont pas acceptées", async () => {

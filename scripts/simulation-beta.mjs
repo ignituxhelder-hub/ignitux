@@ -70,7 +70,7 @@ async function creerCompte(slug) {
     inscription = await fetch(`${API}/users/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: motDePasse }),
+      body: JSON.stringify({ email, password: motDePasse, captchaToken: 'jeton-script' }),
     });
     if (inscription.status !== 429) break;
     // La fenêtre du limiteur fait une minute : on la laisse s'écouler

@@ -284,7 +284,7 @@ try {
   // ── L'inscription et sa confirmation d'adresse ────────────────────────
   const inscription = await appel('/users/signup', {
     method: 'POST',
-    body: JSON.stringify({ email: ADRESSE, password: ANCIEN }),
+    body: JSON.stringify({ email: ADRESSE, password: ANCIEN, captchaToken: 'jeton-script' }),
   });
   if (inscription.statut !== 201) throw new Error(`inscription HTTP ${inscription.statut}`);
 

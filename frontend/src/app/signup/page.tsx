@@ -8,6 +8,14 @@ import { Brand } from '@/components/ignitux-mark';
 import { ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
+/**
+ * Nom du pont entre le widget Cloudflare Turnstile et React — partagé entre
+ * l'attribut `data-callback` et l'assignation sur `window` pour qu'un
+ * renommage reste une opération vérifiée par le compilateur plutôt qu'un
+ * grep-et-prie entre une chaîne JSX et une clé d'objet.
+ */
+export const TURNSTILE_CALLBACK_NAME = 'handleTurnstileToken';
+
 export default function SignupPage() {
   const { signup } = useAuth();
   const router = useRouter();
@@ -22,11 +30,10 @@ export default function SignupPage() {
   // data-callback ci-dessous) une fois le défi résolu — il ne connaît rien
   // de React, donc le pont passe par `window`.
   useEffect(() => {
-    (window as unknown as { handleTurnstileToken?: (token: string) => void }).handleTurnstileToken =
-      setCaptchaToken;
+    const bridge = window as unknown as Record<string, ((token: string) => void) | undefined>;
+    bridge[TURNSTILE_CALLBACK_NAME] = setCaptchaToken;
     return () => {
-      delete (window as unknown as { handleTurnstileToken?: (token: string) => void })
-        .handleTurnstileToken;
+      delete bridge[TURNSTILE_CALLBACK_NAME];
     };
   }, []);
 
@@ -40,6 +47,14 @@ export default function SignupPage() {
       router.replace('/roles');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de créer le compte.');
+      // Un jeton Turnstile est à usage unique : qu'il ait échoué chez
+      // Cloudflare ou que l'inscription ait échoué ensuite (email déjà pris,
+      // etc.), le renvoyer ferait échouer la prochaine tentative pour une
+      // raison invisible à la personne. On redemande une vérification fraîche.
+      setCaptchaToken(null);
+      (
+        window as unknown as { turnstile?: { reset?: () => void } }
+      ).turnstile?.reset?.();
     } finally {
       setIsSubmitting(false);
     }
@@ -98,11 +113,11 @@ export default function SignupPage() {
             <Link href="/confidentialite">politique de confidentialité</Link>
           </label>
         </div>
-        <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="afterInteractive" async defer />
+        <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="afterInteractive" />
         <div
           className="cf-turnstile"
           data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-          data-callback="handleTurnstileToken"
+          data-callback={TURNSTILE_CALLBACK_NAME}
         />
         <button
           className="primary"

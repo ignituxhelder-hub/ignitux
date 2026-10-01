@@ -235,7 +235,7 @@ try {
   const inscription = await fetch(`${API}/users/signup`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: EMAIL, password: MDP }),
+    body: JSON.stringify({ email: EMAIL, password: MDP, captchaToken: 'jeton-script' }),
   });
 
   // L'inscription ne rend pas de jeton — elle rend le compte. Le jeton
