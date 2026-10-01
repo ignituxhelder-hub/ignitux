@@ -145,6 +145,27 @@ describe('IdentiteService — soumission de document', () => {
     });
   });
 
+  it('ne rejette pas un document dont la MRZ indique une expiration future (régression siècle)', async () => {
+    const { extraireTexte } = await import('./ocr-extraction.js');
+    // Même ligne officielle ICAO, expiration modifiée en '360101'
+    // (1er janvier 2036). Couvre la régression où l'heuristique de siècle
+    // sans buffer de pivot lisait yy=36 comme 1936 et rejetait à tort ce
+    // document pourtant valide bien au-delà d'aujourd'hui — le seul
+    // contrôle de cette méthode qui court-circuite la revue humaine.
+    vi.mocked(extraireTexte).mockResolvedValue('L898902C36UTO7408122F3601017ZE184226B<<<<<10');
+    prisma.identity_verifications.create.mockResolvedValue({ id: 'v1' });
+
+    await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null, null);
+
+    expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        status: 'en_attente',
+        rejection_reason: null,
+        extracted_expiry_date: new Date(Date.UTC(2036, 0, 1)),
+      }),
+    });
+  });
+
   it('laisse un document non expiré en_attente', async () => {
     const { extraireTexte } = await import('./ocr-extraction.js');
     vi.mocked(extraireTexte).mockResolvedValue('AUCUNE MRZ ICI');

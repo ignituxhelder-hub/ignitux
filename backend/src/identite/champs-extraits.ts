@@ -9,16 +9,26 @@ export interface ChampsExtraits {
 
 /**
  * Complète une année à deux chiffres MRZ en année complète : si les deux
- * chiffres dépassent l'année courante à deux chiffres, on suppose le
- * siècle précédent (une naissance ne peut pas être dans le futur), sinon
- * le siècle courant. Même heuristique pour la date d'expiration — une
- * pièce réelle n'expire jamais assez loin dans le passé pour que ça pose
- * problème avant longtemps.
+ * chiffres dépassent un pivot fixé 20 ans après l'année courante à deux
+ * chiffres, on suppose le siècle précédent, sinon le siècle courant.
+ *
+ * Même fonction pour date de naissance (toujours dans le passé) et date
+ * d'expiration (généralement dans le futur proche) : un simple seuil sur
+ * l'année courante suffirait pour une naissance, mais lirait à tort une
+ * expiration future (ex. yy=36 en 2026) comme un siècle en arrière
+ * (1936 au lieu de 2036) — bug réel détecté en revue, qui aurait fait
+ * rejeter automatiquement un document pourtant valide, le seul contrôle
+ * de ce module qui court-circuite la revue humaine. Le buffer de 20 ans
+ * couvre large les durées de validité réelles des pièces (5 à 15 ans en
+ * France) sans risquer de mal lire une naissance plausible : décaler le
+ * pivot ne fait que repousser de 20 ans l'année la plus ancienne
+ * interprétée comme « siècle courant », jamais la plus récente.
  */
 function anneeComplete(yy: number, anneeReference: number): number {
   const siecleCourant = Math.floor(anneeReference / 100) * 100;
   const anneeCourante2Chiffres = anneeReference % 100;
-  return yy > anneeCourante2Chiffres ? siecleCourant - 100 + yy : siecleCourant + yy;
+  const pivot = anneeCourante2Chiffres + 20;
+  return yy > pivot ? siecleCourant - 100 + yy : siecleCourant + yy;
 }
 
 function dateDepuisMrz(yymmdd: string, anneeReference: number): Date | undefined {
