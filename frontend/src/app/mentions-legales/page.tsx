@@ -10,9 +10,11 @@ export const metadata = {
  *
  * Helder édite Ignitux à titre personnel, salarié par ailleurs, sans
  * structure commerciale à ce jour — d'où « personne physique » plutôt
- * qu'une raison sociale inventée. Validé par Helder le 2026-09-30 ; reste
- * l'hébergeur à compléter une fois choisi (Tâche 7) — voir
- * docs/superpowers/plans/2026-09-30-v1-test-prive.md, Tâche 4.
+ * qu'une raison sociale inventée. Validé par Helder le 2026-09-30 ; section
+ * hébergement complétée le 2026-10-01 une fois Render choisi comme hébergeur
+ * backend (Vercel pour le frontend était déjà la décision de Helder, voir
+ * docs/deploiement-v1.md) — voir docs/superpowers/plans/2026-09-30-v1-test-prive.md,
+ * Tâche 4.
  */
 export default function MentionsLegalesPage() {
   return (
@@ -38,7 +40,14 @@ export default function MentionsLegalesPage() {
 
       <div className="card" style={{ marginTop: '1.5rem' }}>
         <h2 style={{ marginTop: 0 }}>Hébergement</h2>
-        <p style={{ marginBottom: 0 }}>[hébergeur à compléter une fois choisi]</p>
+        <p>
+          Backend : Render Services, Inc., 525 Brannan Street Ste 300, San Francisco, CA
+          94107, États-Unis — render.com
+        </p>
+        <p style={{ marginBottom: 0 }}>
+          Frontend : Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis —
+          vercel.com
+        </p>
       </div>
 
       <div className="card" style={{ marginTop: '1.5rem' }}>

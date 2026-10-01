@@ -1,9 +1,15 @@
 # Déploiement V1 — ouverture publique
 
 Ce document liste tout ce qu'il faut configurer pour mettre IGNITUX en ligne : backend sur
-Render ou Railway, frontend sur Vercel. Il ne déclenche aucun déploiement — c'est la
-préparation (Tâche 6 du plan). Les comptes à créer et les secrets à fournir sont demandés
-séparément (Tâche 7) ; ce document leur sert de référence.
+Render, frontend sur Vercel. Il ne déclenche aucun déploiement — c'est la préparation
+(Tâche 6 du plan). Les comptes à créer et les secrets à fournir sont demandés séparément
+(Tâche 7) ; ce document leur sert de référence.
+
+**Render plutôt que Railway (2026-10-01)** : les deux étaient envisagés, Render a été choisi
+parce qu'il a un vrai plan gratuit sans carte bancaire (limite : le service s'endort après
+15 min d'inactivité et se réveille en ~1 minute), alors que Railway n'offre plus qu'un
+crédit d'essai limité et peut demander une carte. Cohérent avec la décision de ne pas
+engager de dépense récurrente avant que le produit ait des utilisateurs réels.
 
 Révisé pour l'ouverture publique (au lieu de la bêta privée sur invitation d'origine) :
 chaque inscription passe maintenant par une vérification anti-robot (Cloudflare Turnstile,
@@ -11,16 +17,16 @@ voir plus bas), et `IGNITUX_BETA_V1` passe à `false` pour que les nouveaux comp
 sur l'offre Découverte gratuite plutôt que sur l'offre payante Entrepreneur offerte
 automatiquement.
 
-## Pourquoi Render/Railway + Vercel plutôt que tout-Docker
+## Pourquoi Render + Vercel plutôt que tout-Docker
 
 Un document antérieur (`docs/hebergement.md`, 26/09/2026) recommandait de déployer les deux
 services comme conteneurs Docker sur Scalingo ou Railway, sans Vercel. Cette V1 suit à la
-place la consigne explicite de Helder : backend sur Render ou Railway, frontend sur Vercel.
-`backend/Dockerfile` reste utilisable tel quel (Render/Railway démarrent nativement depuis un
+place la consigne explicite de Helder : backend sur Render, frontend sur Vercel.
+`backend/Dockerfile` reste utilisable tel quel (Render démarre nativement depuis un
 Dockerfile). `frontend/Dockerfile` n'est **pas** utilisé pour Vercel — Vercel build Next.js
 nativement, sans conteneur.
 
-## Variables d'environnement — backend (Render ou Railway)
+## Variables d'environnement — backend (Render)
 
 | Variable | Valeur | Obligatoire au démarrage ? |
 |---|---|---|
@@ -29,7 +35,7 @@ nativement, sans conteneur.
 | `JWT_SECRET` | généré (`openssl rand -base64 48`), différent de dev, ≥ 32 caractères | oui |
 | `JWT_EXPIRES_IN` | `1d` (déjà la valeur par défaut) | non |
 | `FRONTEND_URL` | URL Vercel finale, en `https://` | oui |
-| `TRUST_PROXY` | `1` (Render/Railway sont derrière un proxy) | oui |
+| `TRUST_PROXY` | `1` (Render est derrière un proxy) | oui |
 | `MAIL_TRANSPORT` | `smtp` si un fournisseur est configuré (Tâche 7), sinon `log` — voir note ci-dessous | oui |
 | `MAIL_FROM`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` | fournies par Helder si `MAIL_TRANSPORT=smtp` | si smtp |
 | `ENABLE_API_DOCS` | `false` | non (défaut déjà `false`) |
@@ -54,7 +60,7 @@ pourquoi c'est un choix assumé pour ce premier tour plutôt qu'un oubli.
 
 | Variable | Valeur |
 |---|---|
-| `NEXT_PUBLIC_API_URL` | URL du backend Render/Railway, en `https://` — **doit être définie avant `next build`**, pas seulement au démarrage (Next.js l'intègre au code au moment de la compilation) |
+| `NEXT_PUBLIC_API_URL` | URL du backend Render, en `https://` — **doit être définie avant `next build`**, pas seulement au démarrage (Next.js l'intègre au code au moment de la compilation) |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | clé SITE (publique) du même site Cloudflare Turnstile que `TURNSTILE_SECRET_KEY` côté backend — doit elle aussi être définie avant `next build` |
 
 ## Limite connue : « mot de passe oublié »
@@ -76,13 +82,13 @@ juste à lire les journaux du premier démarrage s'il refuse.
 
 ## Procédure (Tâche 8, une fois les comptes et secrets de la Tâche 7 réunis)
 
-1. Configurer les variables ci-dessus sur Render/Railway, déployer le backend.
+1. Configurer les variables ci-dessus sur Render, déployer le backend.
 2. Exécuter la migration de production une seule fois : `npx prisma migrate deploy` (avec
    `DATABASE_URL` pointée sur `ignitux_prod`).
 3. Vérifier `GET /ready` sur l'URL backend — doit répondre en bonne santé.
 4. Configurer `NEXT_PUBLIC_API_URL` sur Vercel, déployer le frontend.
-5. Revenir sur Render/Railway, mettre à jour `FRONTEND_URL` avec l'URL Vercel finale (sinon
-   CORS refuse les requêtes du frontend).
+5. Revenir sur Render, mettre à jour `FRONTEND_URL` avec l'URL Vercel finale (sinon CORS
+   refuse les requêtes du frontend).
 
 ## URLs de production
 
