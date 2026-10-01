@@ -8,9 +8,8 @@ export const metadata = {
 /**
  * LES CONDITIONS D'UTILISATION — OUVERTURE PUBLIQUE.
  *
- * BROUILLON pour l'ouverture publique, pas encore validé par Helder — à
- * relire avant publication. Remplace la version « test privé » validée le
- * 2026-09-30 (voir docs/superpowers/plans/2026-09-30-v1-test-prive.md,
+ * Validé par Helder le 2026-10-01. Remplace la version « test privé »
+ * validée le 2026-09-30 (voir docs/superpowers/plans/2026-09-30-v1-test-prive.md,
  * Tâche 4), devenue inexacte : l'accès n'est plus sur invitation.
  */
 export default function CguPage() {

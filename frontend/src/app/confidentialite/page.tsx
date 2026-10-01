@@ -12,11 +12,10 @@ export const metadata = {
  * (docs/registre-de-traitements.md, dérivé table par table du schéma) — pas
  * un modèle générique.
  *
- * BROUILLON pour l'ouverture publique, pas encore validé par Helder — à
- * relire avant publication. L'identité et la structure du texte avaient été
- * validées le 2026-09-30 pour la version « test privé » (voir
- * docs/superpowers/plans/2026-09-30-v1-test-prive.md, Tâche 4) ; seul le
- * passage sur le statut du produit change ici.
+ * Validé par Helder le 2026-10-01 pour l'ouverture publique. L'identité et
+ * la structure du texte avaient déjà été validées le 2026-09-30 pour la
+ * version « test privé » (voir docs/superpowers/plans/2026-09-30-v1-test-prive.md,
+ * Tâche 4) ; seul le passage sur le statut du produit a changé.
  */
 export default function ConfidentialitePage() {
   return (
