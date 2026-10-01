@@ -61,7 +61,7 @@ describe('IdentiteService — soumission de document', () => {
     });
   });
 
-  it('lance l’extraction OCR sur le recto après la création', async () => {
+  it('lance l’extraction OCR sur le recto avant la création', async () => {
     const { extraireTexte } = await import('./ocr-extraction.js');
     vi.mocked(extraireTexte).mockResolvedValue('texte simulé');
     prisma.identity_verifications.create.mockResolvedValue({ id: 'v1' });
