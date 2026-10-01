@@ -101,7 +101,30 @@ describe('IdentiteService — soumission de document', () => {
     await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null, null);
 
     expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({ mrz_checksum_valid: null }),
+      data: expect.objectContaining({
+        mrz_checksum_valid: null,
+        extracted_document_number: null,
+        extracted_birth_date: null,
+        extracted_expiry_date: null,
+      }),
+    });
+  });
+
+  it('stocke le numéro de document et les dates extraits de la MRZ', async () => {
+    const { extraireTexte } = await import('./ocr-extraction.js');
+    // Même ligne officielle ICAO utilisée dans champs-extraits.spec.ts :
+    // numéro 'L898902C3', naissance 12/08/1974, expiration 15/04/2012.
+    vi.mocked(extraireTexte).mockResolvedValue('L898902C36UTO7408122F1204159ZE184226B<<<<<10');
+    prisma.identity_verifications.create.mockResolvedValue({ id: 'v1' });
+
+    await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null, null);
+
+    expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        extracted_document_number: 'L898902C3',
+        extracted_birth_date: new Date(Date.UTC(1974, 7, 12)),
+        extracted_expiry_date: new Date(Date.UTC(2012, 3, 15)),
+      }),
     });
   });
 

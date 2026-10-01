@@ -52,6 +52,14 @@ export class IdentiteService {
         rejection_reason: expire ? 'Document expiré.' : null,
         mrz_checksum_valid: champs.mrzValide,
         name_matches_account: nomCoherent,
+        // Champs bruts tirés de la MRZ, en plus du booléen mrz_checksum_valid
+        // dérivé : la revue humaine (Task 5/9) doit pouvoir voir ce que la
+        // MRZ dit réellement, pas seulement si son chiffre de contrôle est
+        // valide. `undefined` (aucune MRZ TD3 détectée) devient `null` ici —
+        // Prisma n'accepte pas `undefined` comme valeur de colonne nullable.
+        extracted_document_number: champs.numeroDocument ?? null,
+        extracted_birth_date: champs.dateNaissance ?? null,
+        extracted_expiry_date: champs.dateExpiration ?? null,
       },
     });
   }
