@@ -6,10 +6,12 @@ export const metadata = {
 };
 
 /**
- * LES CONDITIONS D'UTILISATION — VERSION TEST.
+ * LES CONDITIONS D'UTILISATION — OUVERTURE PUBLIQUE.
  *
- * Validé par Helder le 2026-09-30 — voir
- * docs/superpowers/plans/2026-09-30-v1-test-prive.md, Tâche 4.
+ * BROUILLON pour l'ouverture publique, pas encore validé par Helder — à
+ * relire avant publication. Remplace la version « test privé » validée le
+ * 2026-09-30 (voir docs/superpowers/plans/2026-09-30-v1-test-prive.md,
+ * Tâche 4), devenue inexacte : l'accès n'est plus sur invitation.
  */
 export default function CguPage() {
   return (
@@ -20,25 +22,27 @@ export default function CguPage() {
         </Link>
       </div>
       <Brand />
-      <h1>Conditions d&apos;utilisation — version test</h1>
+      <h1>Conditions d&apos;utilisation</h1>
 
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Objet</h2>
         <p style={{ marginBottom: 0 }}>
-          Ces conditions régissent l&apos;accès à Ignitux et à IGINI pendant une{' '}
-          <strong>phase de test privé</strong> : gratuite, sur invitation, à un petit groupe de
-          testeurs. Elles ne concernent pas un produit commercial ouvert au public — cette
-          version-là aura ses propres conditions, revues avant son lancement.
+          Ces conditions régissent l&apos;accès à Ignitux et à IGINI, ouverts à toute
+          personne qui crée un compte. L&apos;offre Découverte, gratuite, est accordée par
+          défaut ; les offres payantes (Entrepreneur, Construction) seront proposées dès
+          qu&apos;un moyen de paiement sera activé. Le produit reste en développement actif —
+          voir « Ce que tu peux attendre du service » ci-dessous.
         </p>
       </div>
 
       <div className="card" style={{ marginTop: '1.5rem' }}>
         <h2 style={{ marginTop: 0 }}>Ce que tu peux attendre du service</h2>
         <p style={{ marginBottom: 0 }}>
-          C&apos;est un test. Le service peut être interrompu, modifié ou redémarré sans
-          préavis, et Ignitux ne garantit ni sa disponibilité ni sa continuité pendant cette
-          phase. Un bug ou une perte de données restent possibles : garde une copie de ce qui
-          t&apos;importe (export disponible depuis <Link href="/account">Mon compte</Link>).
+          Ignitux est un produit jeune, en développement actif. Le service peut être
+          interrompu, modifié ou redémarré sans préavis, et Ignitux ne garantit ni sa
+          disponibilité ni sa continuité. Un bug ou une perte de données restent possibles :
+          garde une copie de ce qui t&apos;importe (export disponible depuis{' '}
+          <Link href="/account">Mon compte</Link>).
         </p>
       </div>
 
@@ -65,18 +69,19 @@ export default function CguPage() {
             traiter (celles de tiers exigent leur accord, quand la loi le demande).
           </li>
           <li>
-            Signale les bugs et les comportements inattendus — c&apos;est le but de ce test.
+            Signale les bugs et les comportements inattendus — ça aide à améliorer le
+            produit.
           </li>
         </ul>
       </div>
 
       <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Fin du test</h2>
+        <h2 style={{ marginTop: 0 }}>Fin d&apos;accès</h2>
         <p style={{ marginBottom: 0 }}>
           Tu peux supprimer ton compte à tout moment, sans justification, depuis{' '}
-          <Link href="/account">Mon compte</Link>. Ignitux peut aussi mettre fin à la phase
-          de test ou à ton accès ; dans ce cas, tu seras prévenu et pourras récupérer tes
-          données avant leur suppression.
+          <Link href="/account">Mon compte</Link>. Ignitux peut aussi mettre fin à ton accès ;
+          dans ce cas, tu seras prévenu et pourras récupérer tes données avant leur
+          suppression.
         </p>
       </div>
 

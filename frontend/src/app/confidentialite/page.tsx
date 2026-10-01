@@ -10,8 +10,13 @@ export const metadata = {
  *
  * Écrite à partir de ce que le code fait réellement
  * (docs/registre-de-traitements.md, dérivé table par table du schéma) — pas
- * un modèle générique. Validée par Helder le 2026-09-30 (identité et texte) —
- * voir docs/superpowers/plans/2026-09-30-v1-test-prive.md, Tâche 4.
+ * un modèle générique.
+ *
+ * BROUILLON pour l'ouverture publique, pas encore validé par Helder — à
+ * relire avant publication. L'identité et la structure du texte avaient été
+ * validées le 2026-09-30 pour la version « test privé » (voir
+ * docs/superpowers/plans/2026-09-30-v1-test-prive.md, Tâche 4) ; seul le
+ * passage sur le statut du produit change ici.
  */
 export default function ConfidentialitePage() {
   return (
@@ -26,9 +31,9 @@ export default function ConfidentialitePage() {
 
       <div className="card">
         <p style={{ marginTop: 0 }}>
-          <strong>Version test.</strong> Ignitux est en phase de test privé, sur invitation,
-          pas encore un produit commercial public. Ce texte sera revu avant toute ouverture
-          plus large.
+          <strong>Produit en développement actif.</strong> Ignitux est un produit jeune,
+          ouvert au public. Ce texte reflète ce que le service fait réellement aujourd&apos;hui
+          et sera mis à jour si cela change.
         </p>
       </div>
 
@@ -70,7 +75,7 @@ export default function ConfidentialitePage() {
           </li>
           <li>
             <strong>La consommation de l&apos;IA</strong> — quel générateur, quand, et son
-            coût, pour t&apos;en montrer le détail et respecter les limites de la bêta.
+            coût, pour t&apos;en montrer le détail et respecter les limites de ton offre.
           </li>
         </ul>
         <p style={{ marginBottom: 0 }}>
