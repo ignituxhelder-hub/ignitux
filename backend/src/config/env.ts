@@ -86,6 +86,10 @@ const envSchema = z.object({
   // Voir offres.service.ts et config/beta-v1.ts — même convention que
   // IGINI_AI_ENABLED : seul 'false' repasse au comportement commercial normal.
   IGNITUX_BETA_V1: z.string().optional(),
+  // Clé secrète Cloudflare Turnstile, utilisée pour vérifier le jeton reçu à
+  // l'inscription. Optionnelle ici (le développement s'en passe) ; c'est le
+  // contrôle de production qui l'exige — voir production-preflight.ts.
+  TURNSTILE_SECRET_KEY: z.string().optional(),
 });
 
 /**

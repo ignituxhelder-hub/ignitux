@@ -34,6 +34,7 @@ export interface PreflightInput {
   IGNITUX_RAISON_SOCIALE?: string;
   IGNITUX_ADRESSE?: string;
   IGNITUX_EMAIL?: string;
+  TURNSTILE_SECRET_KEY?: string;
 }
 
 export interface PreflightProblem {
@@ -49,6 +50,18 @@ const SECRETS_D_EXEMPLE = [
   'change-me',
   'secret',
   'development-secret-at-least-32-characters',
+];
+
+/**
+ * Les clés de test publiées par Cloudflare pour Turnstile : toujours
+ * « réussit », toujours « échoue », toujours « bloqué ». Documentées, donc
+ * publiques — les laisser en production équivaut à n'avoir aucune
+ * protection anti-robot, puisqu'elles ne vérifient jamais le jeton reçu.
+ */
+const CLES_TURNSTILE_DE_TEST = [
+  '1x0000000000000000000000000000000AA',
+  '2x0000000000000000000000000000000AA',
+  '3x0000000000000000000000000000000AA',
 ];
 
 /**
@@ -256,6 +269,27 @@ export function productionProblems(env: PreflightInput): PreflightProblem[] {
           "toute facture émise est sans valeur. Ignitux ne l'invente pas — renseigne-la.",
       );
     }
+  }
+
+  // ── La vérification anti-robot ──────────────────────────────────────────
+  //
+  // Sans elle, le formulaire d'inscription n'a plus aucune protection que la
+  // limite de débit par IP : n'importe quel script peut créer des comptes en
+  // masse, chacun avec son offre gratuite et son budget IA.
+  const turnstile = env.TURNSTILE_SECRET_KEY ?? '';
+  if (turnstile.trim() === '') {
+    probleme(
+      'TURNSTILE_SECRET_KEY',
+      "est vide. Sans elle, l'inscription ne peut vérifier aucun jeton Turnstile : " +
+        "n'importe quel script peut créer des comptes en masse. Récupère la clé secrète " +
+        'depuis le tableau de bord Cloudflare Turnstile.',
+    );
+  } else if (CLES_TURNSTILE_DE_TEST.includes(turnstile.trim())) {
+    probleme(
+      'TURNSTILE_SECRET_KEY',
+      'porte une clé de test publiée par Cloudflare — elle ne vérifie jamais réellement ' +
+        'le jeton reçu. Remplace-la par la clé secrète du vrai site Turnstile.',
+    );
   }
 
   return problemes;

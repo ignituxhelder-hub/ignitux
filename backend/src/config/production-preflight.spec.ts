@@ -24,6 +24,7 @@ function saine(overrides: PreflightInput = {}): PreflightInput {
     IGNITUX_RAISON_SOCIALE: 'Ignitux',
     IGNITUX_ADRESSE: '1 rue Exemple, 00000 Ville, France',
     IGNITUX_EMAIL: 'contact@exemple.fr',
+    TURNSTILE_SECRET_KEY: '0xK7f2mQ9wR4tY8uI1oP6aS3dF5gH0jK2l',
     ...overrides,
   };
 }
@@ -313,6 +314,32 @@ describe('documentation d’API', () => {
       );
 
       expect(probleme?.detail).toMatch(/renseigne/i);
+    });
+  });
+
+  describe('la vérification anti-robot (Turnstile)', () => {
+    // Sans elle, l'inscription s'ouvre à n'importe quel script : le serveur
+    // ne pourrait jamais vérifier un jeton Turnstile côté Cloudflare.
+    it('refuse de démarrer sans la clé secrète', () => {
+      expect(problemesSur({ TURNSTILE_SECRET_KEY: undefined })).toContain('TURNSTILE_SECRET_KEY');
+    });
+
+    it('refuse une clé vide', () => {
+      expect(problemesSur({ TURNSTILE_SECRET_KEY: '  ' })).toContain('TURNSTILE_SECRET_KEY');
+    });
+
+    // Les clés de test publiées par Cloudflare (toujours « réussit » ou
+    // toujours « échoue ») ne vérifient jamais rien : les laisser en
+    // production équivaut à n'avoir aucune protection.
+    it.each(['1x0000000000000000000000000000000AA', '2x0000000000000000000000000000000AA'])(
+      'refuse une clé de test Cloudflare : %s',
+      (cle) => {
+        expect(problemesSur({ TURNSTILE_SECRET_KEY: cle })).toContain('TURNSTILE_SECRET_KEY');
+      },
+    );
+
+    it('accepte une vraie clé', () => {
+      expect(problemesSur({})).not.toContain('TURNSTILE_SECRET_KEY');
     });
   });
 });
