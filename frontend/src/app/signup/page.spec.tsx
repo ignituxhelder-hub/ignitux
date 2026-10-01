@@ -2,7 +2,8 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
 import { createRouterMock, mockFetchSequence } from '@/test-utils/mocks';
-import SignupPage, { TURNSTILE_CALLBACK_NAME } from './page';
+import { TURNSTILE_CALLBACK_NAME } from '@/lib/turnstile';
+import SignupPage from './page';
 
 const router = createRouterMock();
 vi.mock('next/navigation', () => ({

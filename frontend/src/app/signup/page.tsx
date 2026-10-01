@@ -7,14 +7,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Brand } from '@/components/ignitux-mark';
 import { ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-
-/**
- * Nom du pont entre le widget Cloudflare Turnstile et React — partagé entre
- * l'attribut `data-callback` et l'assignation sur `window` pour qu'un
- * renommage reste une opération vérifiée par le compilateur plutôt qu'un
- * grep-et-prie entre une chaîne JSX et une clé d'objet.
- */
-export const TURNSTILE_CALLBACK_NAME = 'handleTurnstileToken';
+import { TURNSTILE_CALLBACK_NAME } from '@/lib/turnstile';
 
 export default function SignupPage() {
   const { signup } = useAuth();
