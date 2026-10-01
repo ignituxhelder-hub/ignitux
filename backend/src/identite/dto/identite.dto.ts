@@ -1,4 +1,4 @@
-import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsIn, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 export const DOCUMENT_TYPES = ['carte_identite', 'passeport', 'titre_sejour'] as const;
 export type DocumentType = (typeof DOCUMENT_TYPES)[number];
@@ -18,4 +18,20 @@ export class ReviewVerificationDto {
   @IsString()
   @MaxLength(500)
   motif?: string;
+}
+
+export class CreateMandateDto {
+  @IsUUID()
+  projectId: string;
+
+  @IsString()
+  @MaxLength(100)
+  purpose: string;
+}
+
+export class SignMandateDto {
+  @IsString()
+  @MinLength(1, { message: 'nomComplet ne peut pas être vide.' })
+  @MaxLength(200)
+  nomComplet: string;
 }

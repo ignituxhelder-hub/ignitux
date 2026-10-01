@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RoleGuard } from '../roles/role.guard.js';
 import { fileFilter, IdentiteController } from './identite.controller.js';
 import { IdentiteService } from './identite.service.js';
+import { MandatsService } from './mandats.service.js';
 
 describe('IdentiteController', () => {
   let controller: IdentiteController;
@@ -13,12 +14,17 @@ describe('IdentiteController', () => {
   // type figé sur les seules méthodes de cette task casserait la
   // compilation dès la prochaine.
   let service: Record<string, ReturnType<typeof vi.fn>>;
+  let mandats: Record<string, ReturnType<typeof vi.fn>>;
 
   beforeEach(async () => {
     service = { soumettreDocumentPourUtilisateur: vi.fn(), listerMesVerifications: vi.fn() };
+    mandats = { creerMandat: vi.fn(), signerMandat: vi.fn(), revoquerMandat: vi.fn(), listerMesMandats: vi.fn() };
     const moduleRef = await Test.createTestingModule({
       controllers: [IdentiteController],
-      providers: [{ provide: IdentiteService, useValue: service }],
+      providers: [
+        { provide: IdentiteService, useValue: service },
+        { provide: MandatsService, useValue: mandats },
+      ],
     })
       // Même convention que crm/caisse/stocks : JwtAuthGuard étend
       // AuthGuard('jwt') de @nestjs/passport, qui dépend d'AuthModuleOptions
@@ -77,6 +83,25 @@ describe('IdentiteController', () => {
     service.revoirVerification = vi.fn().mockResolvedValue({ id: 'v1' });
     await controller.revoir('v1', { decision: 'rejetee', motif: 'photo illisible' });
     expect(service.revoirVerification).toHaveBeenCalledWith('v1', 'rejetee', 'photo illisible');
+  });
+
+  it('crée un mandat pour le projet donné', async () => {
+    mandats.creerMandat = vi.fn().mockResolvedValue({ id: 'm1' });
+    await controller.creerMandat(user, { projectId: 'p1', purpose: 'depot_creation_entreprise' });
+    expect(mandats.creerMandat).toHaveBeenCalledWith('user-1', 'p1', 'depot_creation_entreprise');
+  });
+
+  it('signe un mandat avec l’IP de la requête', async () => {
+    mandats.signerMandat = vi.fn().mockResolvedValue({ id: 'm1' });
+    const req = { ip: '203.0.113.4' } as any;
+    await controller.signerMandat(user, 'm1', { nomComplet: 'Jean Dupont' }, req);
+    expect(mandats.signerMandat).toHaveBeenCalledWith('user-1', 'm1', 'Jean Dupont', '203.0.113.4');
+  });
+
+  it('révoque un mandat', async () => {
+    mandats.revoquerMandat = vi.fn().mockResolvedValue({ id: 'm1' });
+    await controller.revoquerMandat(user, 'm1');
+    expect(mandats.revoquerMandat).toHaveBeenCalledWith('user-1', 'm1');
   });
 });
 

@@ -8,6 +8,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Req,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -19,8 +20,9 @@ import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RequireRole } from '../roles/require-role.decorator.js';
 import { RoleGuard } from '../roles/role.guard.js';
-import { ReviewVerificationDto, SubmitDocumentDto } from './dto/identite.dto.js';
+import { CreateMandateDto, ReviewVerificationDto, SignMandateDto, SubmitDocumentDto } from './dto/identite.dto.js';
 import { IdentiteService } from './identite.service.js';
+import { MandatsService } from './mandats.service.js';
 
 const TAILLE_MAX_OCTETS = 8 * 1024 * 1024;
 const TYPES_MIME_ACCEPTES = new Set(['image/jpeg', 'image/png']);
@@ -42,7 +44,10 @@ export function fileFilter(
 @UseGuards(JwtAuthGuard)
 @Controller('identite')
 export class IdentiteController {
-  constructor(private readonly identiteService: IdentiteService) {}
+  constructor(
+    private readonly identiteService: IdentiteService,
+    private readonly mandatsService: MandatsService,
+  ) {}
 
   @Post('verifications')
   @HttpCode(HttpStatus.CREATED)
@@ -97,5 +102,31 @@ export class IdentiteController {
   @HttpCode(HttpStatus.OK)
   revoir(@Param('id', ParseUUIDPipe) id: string, @Body() dto: ReviewVerificationDto) {
     return this.identiteService.revoirVerification(id, dto.decision, dto.motif);
+  }
+
+  @Post('mandats')
+  @HttpCode(HttpStatus.CREATED)
+  creerMandat(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateMandateDto) {
+    return this.mandatsService.creerMandat(user.id, dto.projectId, dto.purpose);
+  }
+
+  @Get('mandats')
+  mesMandats(@CurrentUser() user: AuthenticatedUser) {
+    return this.mandatsService.listerMesMandats(user.id);
+  }
+
+  @Post('mandats/:id/signer')
+  signerMandat(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: SignMandateDto,
+    @Req() req: { ip: string },
+  ) {
+    return this.mandatsService.signerMandat(user.id, id, dto.nomComplet, req.ip);
+  }
+
+  @Post('mandats/:id/revoquer')
+  revoquerMandat(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
+    return this.mandatsService.revoquerMandat(user.id, id);
   }
 }
