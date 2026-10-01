@@ -462,7 +462,9 @@ export const ModelName = {
   fleet_vehicles: 'fleet_vehicles',
   fleet_entries: 'fleet_entries',
   ad_campaigns: 'ad_campaigns',
-  ad_campaign_entries: 'ad_campaign_entries'
+  ad_campaign_entries: 'ad_campaign_entries',
+  identity_verifications: 'identity_verifications',
+  mandates: 'mandates'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -478,7 +480,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries" | "identity_verifications" | "mandates"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -5366,6 +5368,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    identity_verifications: {
+      payload: Prisma.$identity_verificationsPayload<ExtArgs>
+      fields: Prisma.identity_verificationsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.identity_verificationsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$identity_verificationsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.identity_verificationsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$identity_verificationsPayload>
+        }
+        findFirst: {
+          args: Prisma.identity_verificationsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$identity_verificationsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.identity_verificationsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$identity_verificationsPayload>
+        }
+        findMany: {
+          args: Prisma.identity_verificationsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$identity_verificationsPayload>[]
+        }
+        create: {
+          args: Prisma.identity_verificationsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$identity_verificationsPayload>
+        }
+        createMany: {
+          args: Prisma.identity_verificationsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.identity_verificationsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$identity_verificationsPayload>[]
+        }
+        delete: {
+          args: Prisma.identity_verificationsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$identity_verificationsPayload>
+        }
+        update: {
+          args: Prisma.identity_verificationsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$identity_verificationsPayload>
+        }
+        deleteMany: {
+          args: Prisma.identity_verificationsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.identity_verificationsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.identity_verificationsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$identity_verificationsPayload>[]
+        }
+        upsert: {
+          args: Prisma.identity_verificationsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$identity_verificationsPayload>
+        }
+        aggregate: {
+          args: Prisma.Identity_verificationsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateIdentity_verifications>
+        }
+        groupBy: {
+          args: Prisma.identity_verificationsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Identity_verificationsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.identity_verificationsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Identity_verificationsCountAggregateOutputType> | number
+        }
+      }
+    }
+    mandates: {
+      payload: Prisma.$mandatesPayload<ExtArgs>
+      fields: Prisma.mandatesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.mandatesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mandatesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.mandatesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mandatesPayload>
+        }
+        findFirst: {
+          args: Prisma.mandatesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mandatesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.mandatesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mandatesPayload>
+        }
+        findMany: {
+          args: Prisma.mandatesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mandatesPayload>[]
+        }
+        create: {
+          args: Prisma.mandatesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mandatesPayload>
+        }
+        createMany: {
+          args: Prisma.mandatesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.mandatesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mandatesPayload>[]
+        }
+        delete: {
+          args: Prisma.mandatesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mandatesPayload>
+        }
+        update: {
+          args: Prisma.mandatesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mandatesPayload>
+        }
+        deleteMany: {
+          args: Prisma.mandatesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.mandatesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.mandatesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mandatesPayload>[]
+        }
+        upsert: {
+          args: Prisma.mandatesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mandatesPayload>
+        }
+        aggregate: {
+          args: Prisma.MandatesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMandates>
+        }
+        groupBy: {
+          args: Prisma.mandatesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MandatesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.mandatesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MandatesCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -6321,6 +6471,47 @@ export const Ad_campaign_entriesScalarFieldEnum = {
 export type Ad_campaign_entriesScalarFieldEnum = (typeof Ad_campaign_entriesScalarFieldEnum)[keyof typeof Ad_campaign_entriesScalarFieldEnum]
 
 
+export const Identity_verificationsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  document_type: 'document_type',
+  document_front: 'document_front',
+  document_back: 'document_back',
+  extracted_first_name: 'extracted_first_name',
+  extracted_last_name: 'extracted_last_name',
+  extracted_birth_date: 'extracted_birth_date',
+  extracted_document_number: 'extracted_document_number',
+  extracted_expiry_date: 'extracted_expiry_date',
+  mrz_checksum_valid: 'mrz_checksum_valid',
+  name_matches_account: 'name_matches_account',
+  status: 'status',
+  rejection_reason: 'rejection_reason',
+  reviewed_by: 'reviewed_by',
+  reviewed_at: 'reviewed_at',
+  created_at: 'created_at'
+} as const
+
+export type Identity_verificationsScalarFieldEnum = (typeof Identity_verificationsScalarFieldEnum)[keyof typeof Identity_verificationsScalarFieldEnum]
+
+
+export const MandatesScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  project_id: 'project_id',
+  identity_verification_id: 'identity_verification_id',
+  purpose: 'purpose',
+  mandate_text: 'mandate_text',
+  signed_full_name: 'signed_full_name',
+  signed_at: 'signed_at',
+  signer_ip: 'signer_ip',
+  status: 'status',
+  revoked_at: 'revoked_at',
+  created_at: 'created_at'
+} as const
+
+export type MandatesScalarFieldEnum = (typeof MandatesScalarFieldEnum)[keyof typeof MandatesScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -6411,6 +6602,20 @@ export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
  * Reference to a field of type 'Decimal[]'
  */
 export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Bytes'
+ */
+export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
+    
+
+
+/**
+ * Reference to a field of type 'Bytes[]'
+ */
+export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
     
 
 
@@ -6644,6 +6849,8 @@ export type GlobalOmitConfig = {
   fleet_entries?: Prisma.fleet_entriesOmit
   ad_campaigns?: Prisma.ad_campaignsOmit
   ad_campaign_entries?: Prisma.ad_campaign_entriesOmit
+  identity_verifications?: Prisma.identity_verificationsOmit
+  mandates?: Prisma.mandatesOmit
 }
 
 /* Types for Logging */

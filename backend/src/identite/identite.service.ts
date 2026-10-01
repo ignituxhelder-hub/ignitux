@@ -34,8 +34,8 @@ export class IdentiteService {
       data: {
         owner_id: ownerId,
         document_type: documentType,
-        document_front: front,
-        document_back: back,
+        document_front: new Uint8Array(front),
+        document_back: back ? new Uint8Array(back) : null,
         status: 'en_attente',
         // Task 4 remplira les champs extraits structurés à partir de
         // `texteOcr` ; pour l'instant rien n'est encore dérivé.

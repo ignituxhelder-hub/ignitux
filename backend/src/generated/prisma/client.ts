@@ -600,3 +600,13 @@ export type ad_campaigns = Prisma.ad_campaignsModel
  * 
  */
 export type ad_campaign_entries = Prisma.ad_campaign_entriesModel
+/**
+ * Model identity_verifications
+ * 
+ */
+export type identity_verifications = Prisma.identity_verificationsModel
+/**
+ * Model mandates
+ * 
+ */
+export type mandates = Prisma.mandatesModel

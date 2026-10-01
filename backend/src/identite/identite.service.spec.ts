@@ -32,8 +32,8 @@ describe('IdentiteService — soumission de document', () => {
       data: expect.objectContaining({
         owner_id: 'user-1',
         document_type: 'carte_identite',
-        document_front: front,
-        document_back: back,
+        document_front: expect.any(Uint8Array),
+        document_back: expect.any(Uint8Array),
         status: 'en_attente',
       }),
     });
