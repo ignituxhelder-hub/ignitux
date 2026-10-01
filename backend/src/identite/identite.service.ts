@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { type DocumentType } from './dto/identite.dto.js';
+import { extraireTexte } from './ocr-extraction.js';
 
 /**
  * IDENTITÉ ET MANDATS — la brique de confiance sur laquelle s'appuiera un
@@ -27,6 +28,8 @@ export class IdentiteService {
       );
     }
 
+    const texteOcr = await extraireTexte(front);
+
     return this.prisma.identity_verifications.create({
       data: {
         owner_id: ownerId,
@@ -34,6 +37,8 @@ export class IdentiteService {
         document_front: front,
         document_back: back,
         status: 'en_attente',
+        // Task 4 remplira les champs extraits structurés à partir de
+        // `texteOcr` ; pour l'instant rien n'est encore dérivé.
       },
     });
   }

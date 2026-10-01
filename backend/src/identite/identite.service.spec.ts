@@ -3,6 +3,8 @@ import { BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { IdentiteService } from './identite.service.js';
 
+vi.mock('./ocr-extraction.js', () => ({ extraireTexte: vi.fn() }));
+
 describe('IdentiteService — soumission de document', () => {
   let service: IdentiteService;
   let prisma: {
@@ -57,5 +59,15 @@ describe('IdentiteService — soumission de document', () => {
       where: { owner_id: 'user-1' },
       orderBy: { created_at: 'desc' },
     });
+  });
+
+  it('lance l’extraction OCR sur le recto après la création', async () => {
+    const { extraireTexte } = await import('./ocr-extraction.js');
+    vi.mocked(extraireTexte).mockResolvedValue('texte simulé');
+    prisma.identity_verifications.create.mockResolvedValue({ id: 'v1' });
+
+    await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null);
+
+    expect(extraireTexte).toHaveBeenCalledWith(Buffer.from('page'));
   });
 });
