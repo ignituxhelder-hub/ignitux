@@ -36,6 +36,8 @@ model users {
   applications              user_applications[]
   profile                   user_profiles?
   subscription              subscriptions?
+  identity_verifications    identity_verifications[]
+  mandates                  mandates[]
   /// Le rôle sous lequel la personne travaille en ce moment. Rangé ici et
   /// non dans le navigateur pour que le mode suive la personne d une
   /// machine à l autre. null tant qu elle n a pas choisi.
@@ -112,6 +114,7 @@ model projects {
   dividends            dividend_distributions[]
   buyback_objectives   buyback_objectives[]
   financedProjects     financed_projects?
+  mandates             mandates[]
 
   @@index([owner_id])
   @@index([is_public])
@@ -1674,4 +1677,53 @@ model ad_campaign_entries {
   created_at  DateTime?    @default(now()) @db.Timestamptz(6)
 
   @@index([campaign_id])
+}
+
+model identity_verifications {
+  id                          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_id                    String    @db.Uuid
+  owner                       users     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  document_type               String    // 'carte_identite' | 'passeport' | 'titre_sejour'
+  document_front              Bytes
+  document_back               Bytes?
+  extracted_first_name        String?
+  extracted_last_name         String?
+  extracted_birth_date        DateTime? @db.Date
+  extracted_document_number   String?
+  extracted_expiry_date       DateTime? @db.Date
+  mrz_checksum_valid          Boolean?
+  name_matches_account        Boolean?
+  status                      String    @default("en_attente") // 'en_attente' | 'validee' | 'rejetee'
+  rejection_reason            String?
+  reviewed_by                 String?   @db.Uuid
+  reviewed_at                 DateTime? @db.Timestamptz(6)
+  created_at                  DateTime? @default(now()) @db.Timestamptz(6)
+
+  mandates                    mandates[]
+  @@index([owner_id])
+}
+
+model mandates {
+  id                       String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_id                 String                  @db.Uuid
+  owner                    users                   @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  project_id               String                  @db.Uuid
+  project                  projects                @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  identity_verification_id String                  @db.Uuid
+  identity_verification    identity_verifications  @relation(fields: [identity_verification_id], references: [id], onDelete: Restrict)
+  purpose                  String
+  // Nullable : un mandat existe d'abord en attente de signature (créé par
+  // creerMandat), puis ces quatre champs se remplissent ensemble au moment
+  // de la signature (signerMandat) — jamais partiellement. `signed_at`
+  // non-null est la façon de savoir qu'un mandat est signé, sans sentinel.
+  mandate_text             String?
+  signed_full_name         String?
+  signed_at                DateTime?               @db.Timestamptz(6)
+  signer_ip                String?
+  status                   String                  @default("active") // 'active' | 'revoquee'
+  revoked_at               DateTime?               @db.Timestamptz(6)
+  created_at               DateTime?               @default(now()) @db.Timestamptz(6)
+
+  @@index([owner_id])
+  @@index([project_id])
 }
