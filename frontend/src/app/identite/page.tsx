@@ -146,10 +146,10 @@ export default function IdentitePage() {
       )}
       {verifications.map((v) => (
         <div key={v.id} className="card">
-          <strong>{LIBELLES_DOCUMENT[v.documentType] ?? v.documentType}</strong>
+          <strong>{LIBELLES_DOCUMENT[v.document_type] ?? v.document_type}</strong>
           <p>{LIBELLES_STATUT[v.status] ?? v.status}</p>
-          {v.status === 'rejetee' && v.rejectionReason && (
-            <p className="error">{v.rejectionReason}</p>
+          {v.status === 'rejetee' && v.rejection_reason && (
+            <p className="error">{v.rejection_reason}</p>
           )}
         </div>
       ))}

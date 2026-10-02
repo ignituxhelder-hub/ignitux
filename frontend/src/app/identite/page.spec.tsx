@@ -28,7 +28,7 @@ describe('IdentitePage', () => {
 
   it('affiche le statut d’une vérification existante', async () => {
     vi.mocked(api.getMesVerifications).mockResolvedValue([
-      { id: 'v1', documentType: 'passeport', status: 'en_attente', rejectionReason: null, createdAt: '2026-09-30T00:00:00.000Z' },
+      { id: 'v1', document_type: 'passeport', status: 'en_attente', rejection_reason: null, created_at: '2026-09-30T00:00:00.000Z' },
     ]);
     render(<IdentitePage />);
     expect(await screen.findByText(/en attente/i)).toBeInTheDocument();
@@ -36,7 +36,7 @@ describe('IdentitePage', () => {
 
   it('affiche le motif de rejet quand une vérification est rejetée', async () => {
     vi.mocked(api.getMesVerifications).mockResolvedValue([
-      { id: 'v1', documentType: 'passeport', status: 'rejetee', rejectionReason: 'photo illisible', createdAt: '2026-09-30T00:00:00.000Z' },
+      { id: 'v1', document_type: 'passeport', status: 'rejetee', rejection_reason: 'photo illisible', created_at: '2026-09-30T00:00:00.000Z' },
     ]);
     render(<IdentitePage />);
     expect(await screen.findByText(/photo illisible/i)).toBeInTheDocument();

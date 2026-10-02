@@ -150,19 +150,21 @@ export type IdentityVerificationStatus = 'en_attente' | 'validee' | 'rejetee';
 
 export interface IdentityVerification {
   id: string;
-  documentType: string;
+  document_type: string;
   status: IdentityVerificationStatus;
-  rejectionReason: string | null;
-  createdAt: string;
+  rejection_reason: string | null;
+  created_at: string;
 }
 
 export interface Mandate {
   id: string;
-  projectId: string;
+  project_id: string;
   purpose: string;
-  mandateText: string;
-  signedFullName: string;
-  signedAt: string;
+  mandate_text: string;
+  /** null tant que signerMandat n'a pas encore été appelé. */
+  signed_full_name: string | null;
+  /** null tant que signerMandat n'a pas encore été appelé. */
+  signed_at: string | null;
   status: 'active' | 'revoquee';
 }
 

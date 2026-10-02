@@ -17,7 +17,7 @@ describe('MandatSection', () => {
 
   it('propose de signer un mandat quand une vérification est validée', async () => {
     vi.mocked(api.getMesVerifications).mockResolvedValue([
-      { id: 'v1', documentType: 'passeport', status: 'validee', rejectionReason: null, createdAt: '2026-09-30T00:00:00.000Z' },
+      { id: 'v1', document_type: 'passeport', status: 'validee', rejection_reason: null, created_at: '2026-09-30T00:00:00.000Z' },
     ]);
     vi.mocked(api.getMesMandats).mockResolvedValue([]);
     render(<MandatSection token="tok" projectId="p1" />);
@@ -26,20 +26,42 @@ describe('MandatSection', () => {
 
   it('affiche un mandat déjà signé avec un bouton de révocation', async () => {
     vi.mocked(api.getMesVerifications).mockResolvedValue([
-      { id: 'v1', documentType: 'passeport', status: 'validee', rejectionReason: null, createdAt: '2026-09-30T00:00:00.000Z' },
+      { id: 'v1', document_type: 'passeport', status: 'validee', rejection_reason: null, created_at: '2026-09-30T00:00:00.000Z' },
     ]);
     vi.mocked(api.getMesMandats).mockResolvedValue([
       {
         id: 'm1',
-        projectId: 'p1',
+        project_id: 'p1',
         purpose: 'depot_creation_entreprise',
-        mandateText: 'texte',
-        signedFullName: 'Jean Dupont',
-        signedAt: '2026-09-30T00:00:00.000Z',
+        mandate_text: 'texte',
+        signed_full_name: 'Jean Dupont',
+        signed_at: '2026-09-30T00:00:00.000Z',
         status: 'active',
       },
     ]);
     render(<MandatSection token="tok" projectId="p1" />);
     expect(await screen.findByRole('button', { name: /révoquer/i })).toBeInTheDocument();
+  });
+
+  it("propose de signer (pas de révoquer) un mandat existant mais pas encore signé", async () => {
+    vi.mocked(api.getMesVerifications).mockResolvedValue([
+      { id: 'v1', document_type: 'passeport', status: 'validee', rejection_reason: null, created_at: '2026-09-30T00:00:00.000Z' },
+    ]);
+    vi.mocked(api.getMesMandats).mockResolvedValue([
+      {
+        id: 'm1',
+        project_id: 'p1',
+        purpose: 'depot_creation_entreprise',
+        mandate_text: 'texte',
+        // Un mandat créé mais pas encore signé : `status` vaut déjà 'active'
+        // (voir Task 6), seul `signed_at` distingue les deux états.
+        signed_full_name: null,
+        signed_at: null,
+        status: 'active',
+      },
+    ]);
+    render(<MandatSection token="tok" projectId="p1" />);
+    expect(await screen.findByRole('button', { name: /signer/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /révoquer/i })).not.toBeInTheDocument();
   });
 });
