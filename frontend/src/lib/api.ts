@@ -3110,6 +3110,20 @@ export const api = {
     });
   },
 
+  getVerificationsEnAttente(token: string) {
+    return request<IdentityVerification[]>('/identite/verifications/en-attente', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+
+  revoirVerification(token: string, id: string, decision: 'validee' | 'rejetee', motif?: string) {
+    return request<IdentityVerification>(`/identite/verifications/${id}/revue`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ decision, motif }),
+    });
+  },
+
   getMesMandats(token: string) {
     return request<Mandate[]>('/identite/mandats', {
       headers: { Authorization: `Bearer ${token}` },
