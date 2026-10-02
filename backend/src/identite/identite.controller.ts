@@ -3,12 +3,15 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
+  ParseEnumPipe,
   ParseUUIDPipe,
   Post,
   Req,
+  StreamableFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -20,9 +23,17 @@ import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RequireRole } from '../roles/require-role.decorator.js';
 import { RoleGuard } from '../roles/role.guard.js';
-import { CreateMandateDto, ReviewVerificationDto, SignMandateDto, SubmitDocumentDto } from './dto/identite.dto.js';
+import {
+  CreateMandateDto,
+  FACES_DOCUMENT,
+  type FaceDocument,
+  ReviewVerificationDto,
+  SignMandateDto,
+  SubmitDocumentDto,
+} from './dto/identite.dto.js';
 import { IdentiteService } from './identite.service.js';
 import { MandatsService } from './mandats.service.js';
+import { TEXTE_MANDAT } from './mandate-text.js';
 
 const TAILLE_MAX_OCTETS = 8 * 1024 * 1024;
 const TYPES_MIME_ACCEPTES = new Set(['image/jpeg', 'image/png']);
@@ -96,12 +107,40 @@ export class IdentiteController {
     return this.identiteService.listerEnAttente();
   }
 
+  /**
+   * Une face de la pièce, en binaire (image/png ou image/jpeg), pour
+   * l'aperçu — jamais dans les réponses JSON de liste. Propriétaire ou
+   * administrateur seulement : le contrôle vit dans le service, parce qu'il
+   * n'est pas binaire comme RoleGuard (« propriétaire OU rôle »).
+   * `no-store` : une pièce d'identité ne doit rester dans aucun cache.
+   */
+  @Get('verifications/:id/document/:face')
+  @Header('Cache-Control', 'no-store')
+  async document(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('face', new ParseEnumPipe(FACES_DOCUMENT)) face: FaceDocument,
+  ) {
+    const { contenu, type } = await this.identiteService.lireDocument(user.id, id, face);
+    return new StreamableFile(contenu, { type });
+  }
+
   @Post('verifications/:id/revue')
   @UseGuards(RoleGuard)
   @RequireRole('administrateur')
   @HttpCode(HttpStatus.OK)
-  revoir(@Param('id', ParseUUIDPipe) id: string, @Body() dto: ReviewVerificationDto) {
-    return this.identiteService.revoirVerification(id, dto.decision, dto.motif);
+  revoir(
+    @CurrentUser() admin: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ReviewVerificationDto,
+  ) {
+    return this.identiteService.revoirVerification(admin.id, id, dto.decision, dto.motif);
+  }
+
+  /** Le texte que la personne lit avant de signer — celui que signerMandat figera. */
+  @Get('mandats/texte')
+  texteMandat() {
+    return { texte: TEXTE_MANDAT };
   }
 
   @Post('mandats')

@@ -1,10 +1,20 @@
 import { Test } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  type ExecutionContext,
+  type INestApplication,
+  NotFoundException,
+  StreamableFile,
+  ValidationPipe,
+} from '@nestjs/common';
+import { HEADERS_METADATA } from '@nestjs/common/constants.js';
+import request from 'supertest';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RoleGuard } from '../roles/role.guard.js';
 import { fileFilter, IdentiteController } from './identite.controller.js';
 import { IdentiteService } from './identite.service.js';
 import { MandatsService } from './mandats.service.js';
+import { TEXTE_MANDAT } from './mandate-text.js';
 
 describe('IdentiteController', () => {
   let controller: IdentiteController;
@@ -79,10 +89,33 @@ describe('IdentiteController', () => {
     expect(service.listerEnAttente).toHaveBeenCalled();
   });
 
-  it('transmet la décision de revue', async () => {
+  it('transmet la décision de revue avec l’administrateur qui tranche', async () => {
     service.revoirVerification = vi.fn().mockResolvedValue({ id: 'v1' });
-    await controller.revoir('v1', { decision: 'rejetee', motif: 'photo illisible' });
-    expect(service.revoirVerification).toHaveBeenCalledWith('v1', 'rejetee', 'photo illisible');
+    const admin = { id: 'admin-1', email: 'admin@ignitux.test' };
+    await controller.revoir(admin, 'v1', { decision: 'rejetee', motif: 'photo illisible' });
+    expect(service.revoirVerification).toHaveBeenCalledWith('admin-1', 'v1', 'rejetee', 'photo illisible');
+  });
+
+  it('sert une face de document en binaire, avec son type détecté', async () => {
+    const octets = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+    service.lireDocument = vi.fn().mockResolvedValue({ contenu: octets, type: 'image/png' });
+
+    const fichier = await controller.document(user, 'v1', 'back');
+
+    expect(service.lireDocument).toHaveBeenCalledWith('user-1', 'v1', 'back');
+    expect(fichier).toBeInstanceOf(StreamableFile);
+    expect(fichier.getHeaders().type).toBe('image/png');
+  });
+
+  it('interdit toute mise en cache de la réponse document', () => {
+    // @Header pose ses métadonnées sur la méthode : on vérifie directement
+    // ce que Nest lira, plutôt que de monter un serveur HTTP complet.
+    const entetes = Reflect.getMetadata(HEADERS_METADATA, IdentiteController.prototype.document);
+    expect(entetes).toEqual(expect.arrayContaining([{ name: 'Cache-Control', value: 'no-store' }]));
+  });
+
+  it('expose le texte du mandat en vigueur', () => {
+    expect(controller.texteMandat()).toEqual({ texte: TEXTE_MANDAT });
   });
 
   it('crée un mandat pour le projet donné', async () => {
@@ -94,7 +127,7 @@ describe('IdentiteController', () => {
   it('signe un mandat avec l’IP de la requête', async () => {
     mandats.signerMandat = vi.fn().mockResolvedValue({ id: 'm1' });
     const req = { ip: '203.0.113.4' } as any;
-    await controller.signerMandat(user, 'm1', { nomComplet: 'Jean Dupont' }, req);
+    await controller.signerMandat(user, 'm1', { nomComplet: 'Jean Dupont', accepte: true }, req);
     expect(mandats.signerMandat).toHaveBeenCalledWith('user-1', 'm1', 'Jean Dupont', '203.0.113.4');
   });
 
@@ -102,6 +135,102 @@ describe('IdentiteController', () => {
     mandats.revoquerMandat = vi.fn().mockResolvedValue({ id: 'm1' });
     await controller.revoquerMandat(user, 'm1');
     expect(mandats.revoquerMandat).toHaveBeenCalledWith('user-1', 'm1');
+  });
+});
+
+/**
+ * Au niveau HTTP, avec la même ValidationPipe que main.ts : vérifie ce que
+ * les tests d'appel direct ci-dessus ne peuvent pas voir — les en-têtes et
+ * le corps binaire réellement envoyés, la validation de `:face`, et le
+ * refus d'une signature sans `accepte: true`.
+ */
+describe('IdentiteController (HTTP)', () => {
+  let app: INestApplication;
+  let service: Record<string, ReturnType<typeof vi.fn>>;
+  let mandats: Record<string, ReturnType<typeof vi.fn>>;
+  const UUID = '11111111-1111-4111-8111-111111111111';
+  const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x01, 0x02]);
+
+  beforeEach(async () => {
+    service = { lireDocument: vi.fn() };
+    mandats = { signerMandat: vi.fn().mockResolvedValue({ id: 'm1' }) };
+    const moduleRef = await Test.createTestingModule({
+      controllers: [IdentiteController],
+      providers: [
+        { provide: IdentiteService, useValue: service },
+        { provide: MandatsService, useValue: mandats },
+      ],
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({
+        canActivate: (ctx: ExecutionContext) => {
+          ctx.switchToHttp().getRequest().user = { id: 'user-1', email: 'a@b.c' };
+          return true;
+        },
+      })
+      .overrideGuard(RoleGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
+    app = moduleRef.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    await app.init();
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('sert les octets bruts avec Content-Type détecté et Cache-Control: no-store', async () => {
+    service.lireDocument.mockResolvedValue({ contenu: PNG, type: 'image/png' });
+
+    const res = await request(app.getHttpServer())
+      .get(`/identite/verifications/${UUID}/document/front`)
+      .buffer(true)
+      .parse((r, cb) => {
+        const morceaux: Buffer[] = [];
+        r.on('data', (m: Buffer) => morceaux.push(m));
+        r.on('end', () => cb(null, Buffer.concat(morceaux)));
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toBe('image/png');
+    expect(res.headers['cache-control']).toBe('no-store');
+    expect(Buffer.compare(res.body as Buffer, PNG)).toBe(0);
+    expect(service.lireDocument).toHaveBeenCalledWith('user-1', UUID, 'front');
+  });
+
+  it('refuse une face inconnue (400) sans interroger le service', async () => {
+    const res = await request(app.getHttpServer()).get(`/identite/verifications/${UUID}/document/selfie`);
+    expect(res.status).toBe(400);
+    expect(service.lireDocument).not.toHaveBeenCalled();
+  });
+
+  it('propage le 404 du service (verso absent, ou tiers non autorisé)', async () => {
+    service.lireDocument.mockRejectedValue(new NotFoundException("Cette vérification n'a pas de verso."));
+    const res = await request(app.getHttpServer()).get(`/identite/verifications/${UUID}/document/back`);
+    expect(res.status).toBe(404);
+  });
+
+  it('sert le texte du mandat', async () => {
+    const res = await request(app.getHttpServer()).get('/identite/mandats/texte');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ texte: TEXTE_MANDAT });
+  });
+
+  it('refuse une signature sans accepte: true', async () => {
+    const res = await request(app.getHttpServer())
+      .post(`/identite/mandats/${UUID}/signer`)
+      .send({ nomComplet: 'Jean Dupont' });
+    expect(res.status).toBe(400);
+    expect(mandats.signerMandat).not.toHaveBeenCalled();
+  });
+
+  it('accepte une signature avec accepte: true', async () => {
+    const res = await request(app.getHttpServer())
+      .post(`/identite/mandats/${UUID}/signer`)
+      .send({ nomComplet: 'Jean Dupont', accepte: true });
+    expect(res.status).toBe(201);
+    expect(mandats.signerMandat).toHaveBeenCalledWith('user-1', UUID, 'Jean Dupont', expect.any(String));
   });
 });
 

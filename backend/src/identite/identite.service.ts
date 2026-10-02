@@ -1,8 +1,52 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { type DocumentType } from './dto/identite.dto.js';
+import { RolesService } from '../roles/roles.service.js';
+import { type DocumentType, type FaceDocument } from './dto/identite.dto.js';
 import { extraireChampsStructures } from './champs-extraits.js';
 import { extraireTexte } from './ocr-extraction.js';
+
+/**
+ * Les octets bruts des pièces ne sortent jamais dans une réponse JSON de
+ * liste, de création ou de revue : Prisma 7 sérialise `Bytes` en
+ * `Uint8Array`, que `JSON.stringify` transforme en objet `{"0":…}` environ
+ * 13 fois plus lourd que le fichier — et que le cache hors ligne du
+ * frontend recopierait ensuite dans le navigateur. Seul `lireDocument` y
+ * donne accès, une face à la fois, au propriétaire ou à un administrateur.
+ */
+const SANS_OCTETS = { document_front: true, document_back: true } as const;
+
+export type TypeImage = 'image/png' | 'image/jpeg' | 'application/octet-stream';
+
+/**
+ * Type MIME déduit des premiers octets. Suffisant ici : l'upload n'accepte
+ * que JPEG et PNG (`fileFilter` du contrôleur), inutile de stocker le type
+ * d'origine dans une colonne de plus. Tout autre contenu retombe sur un
+ * type binaire neutre plutôt que d'être présenté comme une image.
+ */
+export function typeImage(octets: Uint8Array): TypeImage {
+  if (
+    octets.length >= 4 &&
+    octets[0] === 0x89 &&
+    octets[1] === 0x50 &&
+    octets[2] === 0x4e &&
+    octets[3] === 0x47
+  ) {
+    return 'image/png';
+  }
+  if (octets.length >= 2 && octets[0] === 0xff && octets[1] === 0xd8) {
+    return 'image/jpeg';
+  }
+  return 'application/octet-stream';
+}
+
+/**
+ * Un dossier signalé (MRZ invalide ou nom incohérent) passe en tête de la
+ * file de revue. `null` n'est pas un signal — seulement une absence de MRZ
+ * détectée ou de nom de compte — et ne fait donc pas remonter le dossier.
+ */
+function estSignale(v: { mrz_checksum_valid: boolean | null; name_matches_account: boolean | null }) {
+  return v.mrz_checksum_valid === false || v.name_matches_account === false;
+}
 
 /**
  * IDENTITÉ ET MANDATS — la brique de confiance sur laquelle s'appuiera un
@@ -12,7 +56,10 @@ import { extraireTexte } from './ocr-extraction.js';
  */
 @Injectable()
 export class IdentiteService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly roles: RolesService,
+  ) {}
 
   async soumettreDocument(
     ownerId: string,
@@ -61,6 +108,7 @@ export class IdentiteService {
         extracted_birth_date: champs.dateNaissance ?? null,
         extracted_expiry_date: champs.dateExpiration ?? null,
       },
+      omit: SANS_OCTETS,
     });
   }
 
@@ -107,7 +155,56 @@ export class IdentiteService {
     return this.prisma.identity_verifications.findMany({
       where: { owner_id: ownerId },
       orderBy: { created_at: 'desc' },
+      omit: SANS_OCTETS,
     });
+  }
+
+  /**
+   * Une face de pièce d'identité, en binaire, pour l'aperçu. Réservé au
+   * propriétaire de la vérification ou à un `administrateur` (la revue
+   * humaine doit voir la pièce pour trancher). Un tiers reçoit le même 404
+   * qu'une vérification inexistante : lui répondre 403 confirmerait que
+   * l'identifiant existe.
+   *
+   * Une seule colonne d'octets est lue (`select`), jamais les deux : un
+   * aperçu du recto n'a aucune raison de charger aussi le verso en mémoire.
+   */
+  async lireDocument(
+    demandeurId: string,
+    verificationId: string,
+    face: FaceDocument,
+  ): Promise<{ contenu: Buffer; type: TypeImage }> {
+    const verification =
+      face === 'front'
+        ? await this.prisma.identity_verifications
+            .findFirst({
+              where: { id: verificationId },
+              select: { owner_id: true, document_front: true },
+            })
+            .then((v) => v && { owner_id: v.owner_id, octets: v.document_front })
+        : await this.prisma.identity_verifications
+            .findFirst({
+              where: { id: verificationId },
+              select: { owner_id: true, document_back: true },
+            })
+            .then((v) => v && { owner_id: v.owner_id, octets: v.document_back });
+    if (!verification) {
+      throw new NotFoundException('Vérification introuvable.');
+    }
+    if (
+      verification.owner_id !== demandeurId &&
+      !(await this.roles.holdsRole(demandeurId, 'administrateur'))
+    ) {
+      throw new NotFoundException('Vérification introuvable.');
+    }
+
+    const { octets } = verification;
+    if (!octets) {
+      throw new NotFoundException(
+        face === 'back' ? "Cette vérification n'a pas de verso." : 'Recto introuvable.',
+      );
+    }
+    return { contenu: Buffer.from(octets), type: typeImage(octets) };
   }
 
   async findVerificationForOwner(ownerId: string, verificationId: string) {
@@ -121,22 +218,70 @@ export class IdentiteService {
   }
 
   /**
+   * La file de revue : tout ce dont l'administrateur a besoin pour trancher
+   * (champs extraits, signaux de fraude, qui a déposé), sauf les octets des
+   * pièces, servis à part par `lireDocument`.
+   *
+   * Forme de chaque élément : les colonnes sélectionnées ci-dessous, plus
+   * `a_un_verso` (booléen) et `owner: { email, display_name }` (aplati
+   * depuis `owner.profile.display_name`, `null` sans profil).
+   *
+   * Ordre : dossiers signalés d'abord, puis les autres ; le plus ancien
+   * d'abord à l'intérieur de chaque groupe (tri stable sur la liste déjà
+   * ordonnée par `created_at`).
+   */
+  async listerEnAttente() {
+    const [lignes, avecVerso] = await Promise.all([
+      this.prisma.identity_verifications.findMany({
+        where: { status: 'en_attente' },
+        orderBy: { created_at: 'asc' },
+        select: {
+          id: true,
+          document_type: true,
+          status: true,
+          created_at: true,
+          extracted_document_number: true,
+          extracted_birth_date: true,
+          extracted_expiry_date: true,
+          mrz_checksum_valid: true,
+          name_matches_account: true,
+          owner: { select: { email: true, profile: { select: { display_name: true } } } },
+        },
+      }),
+      // Savoir s'il existe un verso sans lire ses octets : un simple test
+      // IS NOT NULL côté Postgres, qui ne renvoie que des identifiants.
+      this.prisma.identity_verifications.findMany({
+        where: { status: 'en_attente', document_back: { not: null } },
+        select: { id: true },
+      }),
+    ]);
+    const idsAvecVerso = new Set(avecVerso.map((v) => v.id));
+
+    const file = lignes.map(({ owner, ...v }) => ({
+      ...v,
+      a_un_verso: idsAvecVerso.has(v.id),
+      owner: { email: owner.email, display_name: owner.profile?.display_name ?? null },
+    }));
+    return [...file.filter(estSignale), ...file.filter((v) => !estSignale(v))];
+  }
+
+  /**
    * La revue humaine : la spec la traite comme obligatoire avant qu'une
    * vérification ne compte comme validée, quel que soit ce que l'OCR/MRZ
    * (Tasks 3-4) a déjà établi. `en_attente` seulement — une fois tranchée,
    * la décision ne se reprend pas (ConflictException plutôt que d'écraser
    * silencieusement un rejet par une validation ou inversement).
+   * `adminId` est consigné dans `reviewed_by` : la trace de qui a tranché.
    */
-  listerEnAttente() {
-    return this.prisma.identity_verifications.findMany({
-      where: { status: 'en_attente' },
-      orderBy: { created_at: 'asc' },
-    });
-  }
-
-  async revoirVerification(verificationId: string, decision: 'validee' | 'rejetee', motif?: string) {
+  async revoirVerification(
+    adminId: string,
+    verificationId: string,
+    decision: 'validee' | 'rejetee',
+    motif?: string,
+  ) {
     const verification = await this.prisma.identity_verifications.findFirst({
       where: { id: verificationId },
+      select: { id: true, status: true },
     });
     if (!verification) {
       throw new NotFoundException('Vérification introuvable.');
@@ -155,8 +300,11 @@ export class IdentiteService {
       data: {
         status: decision,
         rejection_reason: decision === 'rejetee' ? motif : null,
+        // Trace d'audit : qui a tranché, pas seulement quand.
+        reviewed_by: adminId,
         reviewed_at: new Date(),
       },
+      omit: SANS_OCTETS,
     });
   }
 }

@@ -1,9 +1,14 @@
 import { Test } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { IdentiteService } from './identite.service.js';
+import { RolesService } from '../roles/roles.service.js';
+import { IdentiteService, typeImage } from './identite.service.js';
 
 vi.mock('./ocr-extraction.js', () => ({ extraireTexte: vi.fn() }));
+
+// Les octets bruts des pièces ne doivent jamais sortir dans une réponse JSON
+// de liste/création : seul lireDocument y donne accès, une face à la fois.
+const SANS_OCTETS = { document_front: true, document_back: true };
 
 describe('IdentiteService — soumission de document', () => {
   let service: IdentiteService;
@@ -26,7 +31,11 @@ describe('IdentiteService — soumission de document', () => {
     const { extraireTexte } = await import('./ocr-extraction.js');
     vi.mocked(extraireTexte).mockReset().mockResolvedValue('');
     const moduleRef = await Test.createTestingModule({
-      providers: [IdentiteService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        IdentiteService,
+        { provide: PrismaService, useValue: prisma },
+        { provide: RolesService, useValue: { holdsRole: vi.fn() } },
+      ],
     }).compile();
     service = moduleRef.get(IdentiteService);
   });
@@ -39,6 +48,7 @@ describe('IdentiteService — soumission de document', () => {
     await service.soumettreDocument('user-1', 'carte_identite', front, back, null);
 
     expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+      omit: SANS_OCTETS,
       data: expect.objectContaining({
         owner_id: 'user-1',
         document_type: 'carte_identite',
@@ -68,6 +78,7 @@ describe('IdentiteService — soumission de document', () => {
     expect(prisma.identity_verifications.findMany).toHaveBeenCalledWith({
       where: { owner_id: 'user-1' },
       orderBy: { created_at: 'desc' },
+      omit: SANS_OCTETS,
     });
   });
 
@@ -89,6 +100,7 @@ describe('IdentiteService — soumission de document', () => {
     await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null, null);
 
     expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+      omit: SANS_OCTETS,
       data: expect.objectContaining({ name_matches_account: null }),
     });
   });
@@ -101,6 +113,7 @@ describe('IdentiteService — soumission de document', () => {
     await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null, null);
 
     expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+      omit: SANS_OCTETS,
       data: expect.objectContaining({
         mrz_checksum_valid: null,
         extracted_document_number: null,
@@ -120,6 +133,7 @@ describe('IdentiteService — soumission de document', () => {
     await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null, null);
 
     expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+      omit: SANS_OCTETS,
       data: expect.objectContaining({
         extracted_document_number: 'L898902C3',
         extracted_birth_date: new Date(Date.UTC(1974, 7, 12)),
@@ -138,6 +152,7 @@ describe('IdentiteService — soumission de document', () => {
     await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null, null);
 
     expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+      omit: SANS_OCTETS,
       data: expect.objectContaining({
         status: 'rejetee',
         rejection_reason: 'Document expiré.',
@@ -158,6 +173,7 @@ describe('IdentiteService — soumission de document', () => {
     await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null, null);
 
     expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+      omit: SANS_OCTETS,
       data: expect.objectContaining({
         status: 'en_attente',
         rejection_reason: null,
@@ -174,6 +190,7 @@ describe('IdentiteService — soumission de document', () => {
     await service.soumettreDocument('user-1', 'passeport', Buffer.from('page'), null, null);
 
     expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+      omit: SANS_OCTETS,
       data: expect.objectContaining({ status: 'en_attente', rejection_reason: null }),
     });
   });
@@ -192,6 +209,7 @@ describe('IdentiteService — soumission de document', () => {
         select: { display_name: true },
       });
       expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+        omit: SANS_OCTETS,
         data: expect.objectContaining({ name_matches_account: true }),
       });
     });
@@ -203,6 +221,7 @@ describe('IdentiteService — soumission de document', () => {
       await service.soumettreDocumentPourUtilisateur('user-1', 'passeport', Buffer.from('page'), null);
 
       expect(prisma.identity_verifications.create).toHaveBeenCalledWith({
+        omit: SANS_OCTETS,
         data: expect.objectContaining({ name_matches_account: null }),
       });
     });
@@ -212,42 +231,261 @@ describe('IdentiteService — soumission de document', () => {
 describe('IdentiteService — revue', () => {
   let service: IdentiteService;
   let prisma: {
-    identity_verifications: { findFirst: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> };
+    identity_verifications: {
+      findFirst: ReturnType<typeof vi.fn>;
+      findMany: ReturnType<typeof vi.fn>;
+      update: ReturnType<typeof vi.fn>;
+    };
   };
+  let roles: { holdsRole: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     prisma = {
-      identity_verifications: { findFirst: vi.fn(), update: vi.fn() },
+      identity_verifications: { findFirst: vi.fn(), findMany: vi.fn(), update: vi.fn() },
     };
+    roles = { holdsRole: vi.fn().mockResolvedValue(false) };
     const moduleRef = await Test.createTestingModule({
-      providers: [IdentiteService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        IdentiteService,
+        { provide: PrismaService, useValue: prisma },
+        { provide: RolesService, useValue: roles },
+      ],
     }).compile();
     service = moduleRef.get(IdentiteService);
   });
 
-  it('valide une vérification en_attente', async () => {
-    prisma.identity_verifications.findFirst = vi.fn().mockResolvedValue({ id: 'v1', status: 'en_attente' });
-    prisma.identity_verifications.update = vi.fn().mockResolvedValue({ id: 'v1', status: 'validee' });
+  it('valide une vérification en_attente et trace l’administrateur qui a tranché', async () => {
+    prisma.identity_verifications.findFirst.mockResolvedValue({ id: 'v1', status: 'en_attente' });
+    prisma.identity_verifications.update.mockResolvedValue({ id: 'v1', status: 'validee' });
 
-    await service.revoirVerification('v1', 'validee');
+    await service.revoirVerification('admin-1', 'v1', 'validee');
 
     expect(prisma.identity_verifications.update).toHaveBeenCalledWith({
       where: { id: 'v1' },
-      data: expect.objectContaining({ status: 'validee' }),
+      data: expect.objectContaining({
+        status: 'validee',
+        reviewed_by: 'admin-1',
+        reviewed_at: expect.any(Date),
+      }),
+      omit: SANS_OCTETS,
+    });
+  });
+
+  it('trace aussi l’administrateur sur un rejet', async () => {
+    prisma.identity_verifications.findFirst.mockResolvedValue({ id: 'v1', status: 'en_attente' });
+    prisma.identity_verifications.update.mockResolvedValue({ id: 'v1', status: 'rejetee' });
+
+    await service.revoirVerification('admin-1', 'v1', 'rejetee', 'photo illisible');
+
+    expect(prisma.identity_verifications.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: 'rejetee',
+          rejection_reason: 'photo illisible',
+          reviewed_by: 'admin-1',
+        }),
+      }),
+    );
+  });
+
+  it('ne relit pas les octets des pièces pour trancher', async () => {
+    prisma.identity_verifications.findFirst.mockResolvedValue({ id: 'v1', status: 'en_attente' });
+    prisma.identity_verifications.update.mockResolvedValue({ id: 'v1', status: 'validee' });
+
+    await service.revoirVerification('admin-1', 'v1', 'validee');
+
+    expect(prisma.identity_verifications.findFirst).toHaveBeenCalledWith({
+      where: { id: 'v1' },
+      select: { id: true, status: true },
     });
   });
 
   it('refuse de revoir une vérification déjà tranchée', async () => {
-    prisma.identity_verifications.findFirst = vi.fn().mockResolvedValue({ id: 'v1', status: 'validee' });
+    prisma.identity_verifications.findFirst.mockResolvedValue({ id: 'v1', status: 'validee' });
 
-    await expect(service.revoirVerification('v1', 'rejetee', 'doublon')).rejects.toThrow(
+    await expect(service.revoirVerification('admin-1', 'v1', 'rejetee', 'doublon')).rejects.toThrow(
       /déjà/i,
     );
   });
 
   it('exige un motif pour un rejet', async () => {
-    prisma.identity_verifications.findFirst = vi.fn().mockResolvedValue({ id: 'v1', status: 'en_attente' });
+    prisma.identity_verifications.findFirst.mockResolvedValue({ id: 'v1', status: 'en_attente' });
 
-    await expect(service.revoirVerification('v1', 'rejetee')).rejects.toThrow(/motif/i);
+    await expect(service.revoirVerification('admin-1', 'v1', 'rejetee')).rejects.toThrow(/motif/i);
+  });
+
+  describe('listerEnAttente', () => {
+    function ligne(id: string, extra: Record<string, unknown> = {}) {
+      return {
+        id,
+        document_type: 'passeport',
+        status: 'en_attente',
+        created_at: new Date('2026-09-30T00:00:00.000Z'),
+        extracted_document_number: null,
+        extracted_birth_date: null,
+        extracted_expiry_date: null,
+        mrz_checksum_valid: null,
+        name_matches_account: null,
+        owner: { email: `${id}@exemple.fr`, profile: { display_name: `Nom ${id}` } },
+        ...extra,
+      };
+    }
+
+    it('ne sélectionne jamais les octets des pièces et joint l’identité du déposant', async () => {
+      prisma.identity_verifications.findMany.mockResolvedValue([]);
+
+      await service.listerEnAttente();
+
+      const appelListe = prisma.identity_verifications.findMany.mock.calls[0][0];
+      expect(appelListe.where).toEqual({ status: 'en_attente' });
+      expect(appelListe.orderBy).toEqual({ created_at: 'asc' });
+      expect(appelListe.select).toEqual(
+        expect.objectContaining({
+          extracted_document_number: true,
+          extracted_birth_date: true,
+          extracted_expiry_date: true,
+          mrz_checksum_valid: true,
+          name_matches_account: true,
+          owner: { select: { email: true, profile: { select: { display_name: true } } } },
+        }),
+      );
+      expect(appelListe.select.document_front).toBeUndefined();
+      expect(appelListe.select.document_back).toBeUndefined();
+    });
+
+    it('aplatit le déposant et indique la présence d’un verso', async () => {
+      prisma.identity_verifications.findMany
+        .mockResolvedValueOnce([
+          ligne('v1'),
+          ligne('v2', { owner: { email: 'v2@exemple.fr', profile: null } }),
+        ])
+        .mockResolvedValueOnce([{ id: 'v1' }]);
+
+      const resultat = await service.listerEnAttente();
+
+      // Deuxième requête : seulement les identifiants qui ont un verso,
+      // sans jamais lire les octets eux-mêmes.
+      expect(prisma.identity_verifications.findMany).toHaveBeenCalledWith({
+        where: { status: 'en_attente', document_back: { not: null } },
+        select: { id: true },
+      });
+      expect(resultat[0]).toEqual(
+        expect.objectContaining({
+          id: 'v1',
+          a_un_verso: true,
+          owner: { email: 'v1@exemple.fr', display_name: 'Nom v1' },
+        }),
+      );
+      expect(resultat[1]).toEqual(
+        expect.objectContaining({
+          id: 'v2',
+          a_un_verso: false,
+          owner: { email: 'v2@exemple.fr', display_name: null },
+        }),
+      );
+    });
+
+    it('place les dossiers signalés en tête, en gardant l’ordre chronologique dans chaque groupe', async () => {
+      prisma.identity_verifications.findMany
+        .mockResolvedValueOnce([
+          ligne('ancien-ok'),
+          ligne('ancien-mrz-ko', { mrz_checksum_valid: false }),
+          ligne('recent-ok', { mrz_checksum_valid: true, name_matches_account: true }),
+          ligne('recent-nom-ko', { name_matches_account: false }),
+        ])
+        .mockResolvedValueOnce([]);
+
+      const resultat = await service.listerEnAttente();
+
+      expect(resultat.map((v) => v.id)).toEqual([
+        'ancien-mrz-ko',
+        'recent-nom-ko',
+        'ancien-ok',
+        'recent-ok',
+      ]);
+    });
+  });
+
+  describe('lireDocument', () => {
+    const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]);
+    const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00]);
+
+    it('rend le recto au propriétaire avec le type PNG détecté', async () => {
+      prisma.identity_verifications.findFirst.mockResolvedValue({
+        owner_id: 'user-1',
+        document_front: new Uint8Array(PNG),
+      });
+
+      const doc = await service.lireDocument('user-1', 'v1', 'front');
+
+      expect(prisma.identity_verifications.findFirst).toHaveBeenCalledWith({
+        where: { id: 'v1' },
+        select: { owner_id: true, document_front: true },
+      });
+      expect(doc.type).toBe('image/png');
+      expect(Buffer.from(doc.contenu).equals(PNG)).toBe(true);
+      // Le propriétaire n'a pas besoin d'être administrateur.
+      expect(roles.holdsRole).not.toHaveBeenCalled();
+    });
+
+    it('ne lit que la colonne du verso quand on demande le verso, et détecte le JPEG', async () => {
+      prisma.identity_verifications.findFirst.mockResolvedValue({
+        owner_id: 'user-1',
+        document_back: new Uint8Array(JPEG),
+      });
+
+      const doc = await service.lireDocument('user-1', 'v1', 'back');
+
+      expect(prisma.identity_verifications.findFirst).toHaveBeenCalledWith({
+        where: { id: 'v1' },
+        select: { owner_id: true, document_back: true },
+      });
+      expect(doc.type).toBe('image/jpeg');
+    });
+
+    it('rend le document à un administrateur qui n’en est pas propriétaire', async () => {
+      prisma.identity_verifications.findFirst.mockResolvedValue({
+        owner_id: 'user-1',
+        document_front: new Uint8Array(JPEG),
+      });
+      roles.holdsRole.mockResolvedValue(true);
+
+      const doc = await service.lireDocument('admin-1', 'v1', 'front');
+
+      expect(roles.holdsRole).toHaveBeenCalledWith('admin-1', 'administrateur');
+      expect(doc.type).toBe('image/jpeg');
+    });
+
+    it('refuse (404) un tiers ni propriétaire ni administrateur', async () => {
+      prisma.identity_verifications.findFirst.mockResolvedValue({
+        owner_id: 'user-1',
+        document_front: new Uint8Array(JPEG),
+      });
+      roles.holdsRole.mockResolvedValue(false);
+
+      await expect(service.lireDocument('intrus', 'v1', 'front')).rejects.toThrow(NotFoundException);
+      expect(roles.holdsRole).toHaveBeenCalledWith('intrus', 'administrateur');
+    });
+
+    it('404 quand la vérification n’existe pas', async () => {
+      prisma.identity_verifications.findFirst.mockResolvedValue(null);
+
+      await expect(service.lireDocument('user-1', 'v1', 'front')).rejects.toThrow(NotFoundException);
+    });
+
+    it('404 quand la face demandée est absente (passeport sans verso)', async () => {
+      prisma.identity_verifications.findFirst.mockResolvedValue({ owner_id: 'user-1', document_back: null });
+
+      await expect(service.lireDocument('user-1', 'v1', 'back')).rejects.toThrow(NotFoundException);
+    });
+  });
+});
+
+describe('typeImage', () => {
+  it('reconnaît PNG et JPEG, et retombe sur un type binaire neutre sinon', () => {
+    expect(typeImage(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d]))).toBe('image/png');
+    expect(typeImage(new Uint8Array([0xff, 0xd8, 0xff, 0xdb]))).toBe('image/jpeg');
+    expect(typeImage(new Uint8Array([0x25, 0x50, 0x44, 0x46]))).toBe('application/octet-stream');
+    expect(typeImage(new Uint8Array([]))).toBe('application/octet-stream');
   });
 });

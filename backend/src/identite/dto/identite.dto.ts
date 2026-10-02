@@ -1,4 +1,4 @@
-import { IsIn, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import { Equals, IsIn, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 export const DOCUMENT_TYPES = ['carte_identite', 'passeport', 'titre_sejour'] as const;
 export type DocumentType = (typeof DOCUMENT_TYPES)[number];
@@ -34,4 +34,15 @@ export class SignMandateDto {
   @MinLength(1, { message: 'nomComplet ne peut pas être vide.' })
   @MaxLength(200)
   nomComplet: string;
+
+  /**
+   * La case de consentement cochée : sans elle, la signature électronique
+   * simple ne prouve pas que la personne a lu le texte. Exactement `true`
+   * (comparaison stricte) — ni absent, ni `false`, ni la chaîne "true".
+   */
+  @Equals(true, { message: 'Il faut cocher la case de consentement pour signer le mandat.' })
+  accepte: boolean;
 }
+
+export const FACES_DOCUMENT = { front: 'front', back: 'back' } as const;
+export type FaceDocument = (typeof FACES_DOCUMENT)[keyof typeof FACES_DOCUMENT];
