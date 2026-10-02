@@ -8,11 +8,21 @@ import { api, ApiError, type Mandate } from '@/lib/api';
  * MANDAT — n'est pas un résultat de générateur IGINI, et vit donc à part
  * de `engine-sections.tsx` : c'est une autorisation que la personne donne,
  * pas une recommandation qu'IGINI produit.
+ *
+ * Signature électronique simple (spec) : la personne relit le texte figé
+ * du mandat — celui-là même que le serveur enregistrera —, coche une case
+ * de consentement, puis retape son nom complet. Le bouton « Signer » reste
+ * désactivé tant que les deux ne sont pas faits.
  */
 export function MandatSection({ token, projectId }: { token: string; projectId: string }) {
   const [identiteValidee, setIdentiteValidee] = useState(false);
+  /** Le mandat en cours pour ce projet (actif, signé ou non) — jamais un mandat révoqué. */
   const [mandat, setMandat] = useState<Mandate | null>(null);
+  /** Un mandat antérieur a été révoqué : on le dit en une ligne, sans bloquer une nouvelle signature. */
+  const [revocationAnterieure, setRevocationAnterieure] = useState(false);
+  const [texteMandat, setTexteMandat] = useState<string | null>(null);
   const [nomComplet, setNomComplet] = useState('');
+  const [accepte, setAccepte] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,12 +30,20 @@ export function MandatSection({ token, projectId }: { token: string; projectId: 
   const charger = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [verifications, mandats] = await Promise.all([
+      const [verifications, mandats, { texte }] = await Promise.all([
         api.getMesVerifications(token),
         api.getMesMandats(token),
+        api.getTexteMandat(token),
       ]);
       setIdentiteValidee(verifications.some((v) => v.status === 'validee'));
-      setMandat(mandats.find((m) => m.project_id === projectId) ?? null);
+      // Un mandat révoqué ne bloque pas une nouvelle signature (le serveur
+      // n'impose aucune unicité par projet) : le mandat « en cours » est le
+      // plus récent qui n'est pas révoqué. La liste arrive déjà du plus
+      // récent au plus ancien (listerMesMandats).
+      const duProjet = mandats.filter((m) => m.project_id === projectId);
+      setMandat(duProjet.find((m) => m.status !== 'revoquee') ?? null);
+      setRevocationAnterieure(duProjet.some((m) => m.status === 'revoquee'));
+      setTexteMandat(texte);
       setError(null);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de charger le mandat.');
@@ -41,9 +59,8 @@ export function MandatSection({ token, projectId }: { token: string; projectId: 
   // Un mandat existe en base dès sa création, avant toute signature : le
   // champ qui distingue « signé » de « pas encore signé » est `signed_at`,
   // pas `status` (qui ne distingue qu'actif de révoqué — voir Task 6).
-  const mandatSigne = mandat !== null && mandat.status === 'active' && mandat.signed_at !== null;
-  const mandatRevoque = mandat !== null && mandat.status === 'revoquee';
-  const peutSigner = identiteValidee && !mandatSigne && !mandatRevoque;
+  const mandatSigne = mandat !== null && mandat.signed_at !== null;
+  const peutSigner = identiteValidee && !mandatSigne && texteMandat !== null;
 
   /**
    * Crée le mandat si besoin, puis le signe.
@@ -59,7 +76,7 @@ export function MandatSection({ token, projectId }: { token: string; projectId: 
    * perdre cette information et de tout retenter depuis zéro au prochain clic.
    */
   const signer = async () => {
-    if (!nomComplet.trim()) return;
+    if (!nomComplet.trim() || !accepte) return;
     setIsSubmitting(true);
     setError(null);
     try {
@@ -68,7 +85,7 @@ export function MandatSection({ token, projectId }: { token: string; projectId: 
         cible = await api.creerMandat(token, projectId, 'depot_creation_entreprise');
         setMandat(cible);
       }
-      const signe = await api.signerMandat(token, cible.id, nomComplet);
+      const signe = await api.signerMandat(token, cible.id, nomComplet, true);
       setMandat(signe);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de signer le mandat.');
@@ -80,8 +97,13 @@ export function MandatSection({ token, projectId }: { token: string; projectId: 
   const revoquer = async () => {
     if (!mandat) return;
     try {
-      const revoque = await api.revoquerMandat(token, mandat.id);
-      setMandat(revoque);
+      await api.revoquerMandat(token, mandat.id);
+      // Le mandat révoqué cesse d'être « en cours » : le formulaire de
+      // signature réapparaît, vierge, pour qui voudrait en donner un nouveau.
+      setMandat(null);
+      setRevocationAnterieure(true);
+      setNomComplet('');
+      setAccepte(false);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de révoquer le mandat.');
     }
@@ -102,12 +124,29 @@ export function MandatSection({ token, projectId }: { token: string; projectId: 
         </p>
       )}
 
+      {revocationAnterieure && !mandatSigne && (
+        <p className="muted">Un mandat précédent pour ce projet a été révoqué.</p>
+      )}
+
       {peutSigner && (
         <>
           <p>
-            Ce mandat autorise Ignitux à préparer et déposer les démarches de création de cette
-            entreprise en ton nom.
+            Lis le texte ci-dessous : c&apos;est exactement celui qui sera conservé avec ta
+            signature.
           </p>
+          <div className="texte-mandat">{texteMandat}</div>
+          <div>
+            <input
+              id="mandat-consentement"
+              type="checkbox"
+              checked={accepte}
+              onChange={(e) => setAccepte(e.target.checked)}
+            />{' '}
+            <label htmlFor="mandat-consentement">
+              J’ai lu ce mandat et j’autorise Ignitux à agir en mon nom pour ce projet, dans ces
+              termes.
+            </label>
+          </div>
           <label>
             Nom complet
             <input
@@ -120,14 +159,14 @@ export function MandatSection({ token, projectId }: { token: string; projectId: 
             className="primary"
             type="button"
             onClick={signer}
-            disabled={!nomComplet.trim() || isSubmitting}
+            disabled={!nomComplet.trim() || !accepte || isSubmitting}
           >
             {isSubmitting ? 'Signature…' : 'Signer'}
           </button>
         </>
       )}
 
-      {mandat && mandat.status === 'active' && mandat.signed_at && (
+      {mandat && mandatSigne && mandat.signed_at && (
         <>
           <p className="muted">
             Signé par {mandat.signed_full_name} le{' '}
@@ -138,8 +177,6 @@ export function MandatSection({ token, projectId }: { token: string; projectId: 
           </button>
         </>
       )}
-
-      {mandatRevoque && <p className="muted">Ce mandat a été révoqué.</p>}
     </div>
   );
 }

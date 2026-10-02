@@ -156,6 +156,31 @@ export interface IdentityVerification {
   created_at: string;
 }
 
+/**
+ * Un élément de la file de revue administrateur (GET
+ * /identite/verifications/en-attente) — distinct d'`IdentityVerification`
+ * parce que l'administrateur voit ce que le propriétaire n'a pas besoin de
+ * revoir : champs extraits, signaux de fraude, identité du déposant. Les
+ * octets des pièces n'y sont jamais : voir `getDocumentVerification`.
+ */
+export interface VerificationEnAttente {
+  id: string;
+  document_type: string;
+  status: IdentityVerificationStatus;
+  created_at: string;
+  extracted_document_number: string | null;
+  extracted_birth_date: string | null;
+  extracted_expiry_date: string | null;
+  /** false = chiffre de contrôle MRZ faux (signal) ; null = pas de MRZ lue. */
+  mrz_checksum_valid: boolean | null;
+  /** false = nom du compte absent de la pièce (signal) ; null = pas de nom de compte. */
+  name_matches_account: boolean | null;
+  a_un_verso: boolean;
+  owner: { email: string; display_name: string | null };
+}
+
+export type FaceDocument = 'front' | 'back';
+
 export interface Mandate {
   id: string;
   project_id: string;
@@ -3104,16 +3129,53 @@ export const api = {
     return requestMultipart<IdentityVerification>('/identite/verifications', token, form);
   },
 
+  // Ni la liste de ses vérifications ni la file de revue ne vont dans le
+  // cache hors ligne : ce sont des données d'identité (et, pour la file, celles
+  // de tiers), qui n'ont rien à faire en clair dans le stockage du navigateur.
   getMesVerifications(token: string) {
-    return request<IdentityVerification[]>('/identite/verifications', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    return request<IdentityVerification[]>(
+      '/identite/verifications',
+      { headers: { Authorization: `Bearer ${token}` } },
+      { skipOfflineCache: true },
+    );
   },
 
   getVerificationsEnAttente(token: string) {
-    return request<IdentityVerification[]>('/identite/verifications/en-attente', {
+    return request<VerificationEnAttente[]>(
+      '/identite/verifications/en-attente',
+      { headers: { Authorization: `Bearer ${token}` } },
+      { skipOfflineCache: true },
+    );
+  },
+
+  /**
+   * Une face de pièce d'identité, en binaire. Une balise `<img src>` ne peut
+   * pas porter l'en-tête `Authorization` : on récupère donc les octets ici,
+   * et l'appelant en fait une URL `blob:` (voir `identite/revue/document-apercu.tsx`).
+   * Jamais mis en cache (le serveur répond `Cache-Control: no-store`).
+   */
+  async getDocumentVerification(token: string, id: string, face: FaceDocument): Promise<Blob> {
+    const res = await fetch(`${API_URL}/identite/verifications/${id}/document/${face}`, {
       headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
     });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      const message =
+        body && typeof body.message === 'string' ? body.message : 'Document indisponible.';
+      throw new ApiError(message, res.status);
+    }
+    return res.blob();
+  },
+
+  getTexteMandat(token: string) {
+    return request<{ texte: string }>(
+      '/identite/mandats/texte',
+      { headers: { Authorization: `Bearer ${token}` } },
+      // Un texte engageant ne doit jamais être relu depuis une copie locale
+      // périmée : sans réseau, on ne signe pas de toute façon.
+      { skipOfflineCache: true },
+    );
   },
 
   revoirVerification(token: string, id: string, decision: 'validee' | 'rejetee', motif?: string) {
@@ -3138,11 +3200,16 @@ export const api = {
     });
   },
 
-  signerMandat(token: string, mandateId: string, nomComplet: string) {
+  /**
+   * `accepte` est typé `true` : l'appelant doit avoir réellement recueilli
+   * la case de consentement — le wrapper ne l'invente pas à sa place. Le
+   * serveur refuse toute autre valeur.
+   */
+  signerMandat(token: string, mandateId: string, nomComplet: string, accepte: true) {
     return request<Mandate>(`/identite/mandats/${mandateId}/signer`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ nomComplet }),
+      body: JSON.stringify({ nomComplet, accepte }),
     });
   },
 

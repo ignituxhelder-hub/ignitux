@@ -104,7 +104,13 @@ export default function IdentitePage() {
           <select
             aria-label="Type de document"
             value={documentType}
-            onChange={(e) => setDocumentType(e.target.value as typeof documentType)}
+            onChange={(e) => {
+              const type = e.target.value as typeof documentType;
+              setDocumentType(type);
+              // Le champ verso disparaît pour un passeport : un verso choisi
+              // auparavant ne doit pas partir en douce avec la soumission.
+              if (type === 'passeport') setBack(null);
+            }}
           >
             <option value="carte_identite">Carte d&apos;identité</option>
             <option value="passeport">Passeport</option>
