@@ -404,6 +404,16 @@ function iconeParts({ className }: IconeSvgProps) {
   );
 }
 
+function iconeCrayon({ className }: IconeSvgProps) {
+  return (
+    <svg className={className} width="70%" height="70%" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <rect x="1" y="12.5" width="14" height="1.6" rx="0.6" opacity="0.4" />
+      <path d="M10.6 1.4a1.4 1.4 0 0 1 2 0l1 1a1.4 1.4 0 0 1 0 2L6 12H3v-3Z" />
+      <path d="m9.6 2.4 3 3" opacity="0.3" />
+    </svg>
+  );
+}
+
 function iconeGenerique({ className }: IconeSvgProps) {
   return (
     <svg className={className} width="70%" height="70%" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -443,6 +453,7 @@ const ICONES: Record<string, (props: IconeSvgProps) => ReturnType<typeof iconeGe
   developpement: iconeCroissance,
   transmission: iconeTransmission,
   // Outils transverses du projet (lib/etapes-projet.ts, OUTILS_PROJET).
+  infos: iconeCrayon,
   score: iconeCible,
   taches: iconeListeControle,
   memoire: iconeMemoire,

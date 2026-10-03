@@ -148,7 +148,9 @@ describe('ProjectDetailPage', () => {
       </AuthProvider>,
     );
 
-    expect(await screen.findByDisplayValue('École motocross')).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'École motocross' }),
+    ).toBeInTheDocument();
 
     expect(screen.getByRole('button', { name: 'Analyser' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Forme juridique' })).toBeInTheDocument();
@@ -164,6 +166,24 @@ describe('ProjectDetailPage', () => {
   });
 
   describe('grille d’icônes des étapes', () => {
+    it('range le titre et la description derrière leur propre icône', async () => {
+      mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+      // Le formulaire n'est plus déplié d'office en haut de la fiche.
+      expect(screen.queryByDisplayValue('École motocross')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Titre et description' }));
+      expect(screen.getByDisplayValue('École motocross')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^sauvegarder$/i })).toBeInTheDocument();
+    });
+
     it('ouvre le contenu d’une seule étape à la fois, au clic sur son icône', async () => {
       mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
 
@@ -173,7 +193,7 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      await screen.findByDisplayValue('École motocross');
+      await screen.findByRole('heading', { level: 1, name: 'École motocross' });
 
       fireEvent.click(screen.getByRole('button', { name: 'Construction' }));
       expect(await screen.findByText("Aucun plan pour l'instant.")).toBeInTheDocument();
@@ -194,7 +214,7 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      await screen.findByDisplayValue('École motocross');
+      await screen.findByRole('heading', { level: 1, name: 'École motocross' });
 
       const bouton = screen.getByRole('button', { name: 'Analyser' });
       fireEvent.click(bouton);
@@ -222,7 +242,7 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      await screen.findByDisplayValue('École motocross');
+      await screen.findByRole('heading', { level: 1, name: 'École motocross' });
 
       expect(screen.getByRole('button', { name: 'Analyser' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Forme juridique' })).toBeInTheDocument();
@@ -255,7 +275,7 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      await screen.findByDisplayValue('École motocross');
+      await screen.findByRole('heading', { level: 1, name: 'École motocross' });
 
       for (const label of [
         'Analyser',
@@ -288,7 +308,7 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      await screen.findByDisplayValue('École motocross');
+      await screen.findByRole('heading', { level: 1, name: 'École motocross' });
 
       await waitFor(() => expect(container.textContent).toContain('Mémoire'));
       expect(container.textContent).toContain('Connaissance');
@@ -310,7 +330,7 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      await screen.findByDisplayValue('École motocross');
+      await screen.findByRole('heading', { level: 1, name: 'École motocross' });
       fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
 
       expect(await screen.findByText('Analyser ce projet')).toBeInTheDocument();
@@ -343,7 +363,7 @@ describe('ProjectDetailPage', () => {
       </AuthProvider>,
     );
 
-    await screen.findByDisplayValue('École motocross');
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
     fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
     fireEvent.click(screen.getByRole('button', { name: /analyser ce projet/i }));
 
@@ -387,7 +407,7 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      await screen.findByDisplayValue('École motocross');
+      await screen.findByRole('heading', { level: 1, name: 'École motocross' });
       fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
 
       expect(await screen.findByRole('heading', { name: 'Pourquoi ce score ?' })).toBeInTheDocument();
@@ -405,7 +425,7 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      await screen.findByDisplayValue('École motocross');
+      await screen.findByRole('heading', { level: 1, name: 'École motocross' });
       fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
 
       expect(await screen.findByText(/serait inventer son raisonnement/)).toBeInTheDocument();
@@ -421,7 +441,7 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      await screen.findByDisplayValue('École motocross');
+      await screen.findByRole('heading', { level: 1, name: 'École motocross' });
       fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
 
       expect(await screen.findByText('60 / 100')).toBeInTheDocument();
@@ -439,7 +459,7 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      await screen.findByDisplayValue('École motocross');
+      await screen.findByRole('heading', { level: 1, name: 'École motocross' });
       fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
 
       expect(await screen.findByText('80 / 100')).toBeInTheDocument();
@@ -461,7 +481,7 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      await screen.findByDisplayValue('École motocross');
+      await screen.findByRole('heading', { level: 1, name: 'École motocross' });
       fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
 
       expect(await screen.findByText(/jamais un chiffre intermédiaire/)).toBeInTheDocument();
@@ -500,7 +520,7 @@ describe('ProjectDetailPage', () => {
       </AuthProvider>,
     );
 
-    await screen.findByDisplayValue('École motocross');
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
     fireEvent.click(screen.getByRole('button', { name: 'Tâches' }));
     expect(await screen.findByText("Aucune tâche pour l'instant.")).toBeInTheDocument();
 
@@ -567,7 +587,9 @@ describe('ProjectDetailPage', () => {
       </AuthProvider>,
     );
 
-    const titleInput = await screen.findByDisplayValue('École motocross');
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    fireEvent.click(screen.getByRole('button', { name: 'Titre et description' }));
+    const titleInput = screen.getByDisplayValue('École motocross');
     fireEvent.change(titleInput, { target: { value: 'École motocross avancée' } });
     fireEvent.click(screen.getByRole('button', { name: /^sauvegarder$/i }));
 
@@ -587,7 +609,8 @@ describe('ProjectDetailPage', () => {
       </AuthProvider>,
     );
 
-    await screen.findByDisplayValue('École motocross');
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    fireEvent.click(screen.getByRole('button', { name: 'Titre et description' }));
     fireEvent.click(screen.getByRole('button', { name: /supprimer le projet/i }));
 
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith('/projects'));
@@ -606,7 +629,8 @@ describe('ProjectDetailPage', () => {
       </AuthProvider>,
     );
 
-    await screen.findByDisplayValue('École motocross');
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    fireEvent.click(screen.getByRole('button', { name: 'Titre et description' }));
     expect(screen.getByText("Ce projet n'est visible que par toi.")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /rendre public/i }));

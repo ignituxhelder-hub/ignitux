@@ -392,6 +392,15 @@ export default function ProjectDetailPage() {
     return parcours.visible.some((s) => s.section === section);
   };
 
+  /** Quelles icônes « Les outils » proposer — voir OUTILS_PROJET. */
+  const outilVisible = (outil: { id: string; section: string }): boolean => {
+    // Le formulaire d'édition n'est pas une section du parcours : il est
+    // toujours là pour le propriétaire, jamais pour un collaborateur.
+    if (outil.id === 'infos') return !!project && isOwner;
+    if (outil.id === 'collaborateurs') return isOwner && montrer(outil.section);
+    return montrer(outil.section);
+  };
+
   return (
     <main className="page page--wide">
       <div className="top-bar">
@@ -492,59 +501,11 @@ export default function ProjectDetailPage() {
             </IginiMention>
           )}
 
-          {isOwner ? (
-            <form className="card" onSubmit={handleSave}>
-              {formError && <p className="error">{formError}</p>}
-              <div className="field">
-                <label htmlFor="title">Titre</label>
-                <input
-                  id="title"
-                  required
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
-              <div className="field">
-                <label htmlFor="description">Description</label>
-                <textarea
-                  id="description"
-                  rows={5}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <button className="primary" type="submit" disabled={isSaving}>
-                  {isSaving ? 'Sauvegarde…' : 'Sauvegarder'}
-                </button>
-                <button
-                  className="secondary"
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? 'Suppression…' : 'Supprimer le projet'}
-                </button>
-                <button
-                  className="secondary"
-                  type="button"
-                  onClick={handleToggleVisibility}
-                  disabled={isTogglingVisibility}
-                >
-                  {isTogglingVisibility
-                    ? 'Mise à jour…'
-                    : project.is_public
-                      ? 'Rendre privé'
-                      : 'Rendre public'}
-                </button>
-              </div>
-              <p className="muted" style={{ marginTop: '0.75rem', marginBottom: 0 }}>
-                {project.is_public
-                  ? 'Ce projet est visible dans la communauté.'
-                  : "Ce projet n'est visible que par toi."}
-              </p>
-            </form>
-          ) : (
+          {/* Le formulaire du propriétaire vit maintenant derrière l'icône
+              « Titre et description » (plus bas, avec les outils). Un
+              collaborateur garde cette carte courte : elle lui dit pourquoi
+              il ne peut rien modifier. */}
+          {!isOwner && (
             <div className="card">
               {project.description && (
                 <p style={{ marginTop: 0, marginBottom: 0 }}>{project.description}</p>
@@ -609,9 +570,15 @@ export default function ProjectDetailPage() {
                 analyse={item}
                 key={item.id}
                 onCorriger={() => {
-                  const champ = window.document.getElementById('description');
-                  champ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  (champ as HTMLTextAreaElement | null)?.focus();
+                  // Le champ description n'existe que lorsque l'icône
+                  // « Titre et description » est ouverte : on l'ouvre d'abord
+                  // (ce qui ferme l'analyse), puis on y mène.
+                  setEtapeOuverte('infos');
+                  window.requestAnimationFrame(() => {
+                    const champ = window.document.getElementById('description');
+                    champ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    (champ as HTMLTextAreaElement | null)?.focus();
+                  });
                 }}
                 onContinuer={() => {
                   // La section de construction n'existe dans le DOM que
@@ -727,18 +694,14 @@ export default function ProjectDetailPage() {
           un collaborateur (readOnly) ; la gestion des collaborateurs et le
           déclenchement manuel de l'automatisation restent réservés au
           propriétaire, y compris pour l'icône elle-même. */}
-      {OUTILS_PROJET.some(
-        (outil) => montrer(outil.section) && (outil.id !== 'collaborateurs' || isOwner),
-      ) && (
+      {OUTILS_PROJET.some(outilVisible) && (
         <div className="card" style={{ marginTop: '1.5rem' }}>
           <h2 style={{ marginTop: 0 }}>Les outils</h2>
           <ul
             className="etapes-grille"
             style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', listStyle: 'none', margin: 0, padding: 0 }}
           >
-            {OUTILS_PROJET.filter(
-              (outil) => montrer(outil.section) && (outil.id !== 'collaborateurs' || isOwner),
-            ).map((outil) => {
+            {OUTILS_PROJET.filter(outilVisible).map((outil) => {
               const active = etapeOuverte === outil.id;
               return (
                 <li key={outil.id}>
@@ -758,6 +721,50 @@ export default function ProjectDetailPage() {
             })}
           </ul>
         </div>
+      )}
+
+      {project && isOwner && etapeOuverte === 'infos' && (
+        <form className="card" onSubmit={handleSave} style={{ marginTop: '1.5rem' }}>
+          {formError && <p className="error">{formError}</p>}
+          <div className="field">
+            <label htmlFor="title">Titre</label>
+            <input id="title" required value={title} onChange={(e) => setTitle(e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="description">Description</label>
+            <textarea
+              id="description"
+              rows={5}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button className="primary" type="submit" disabled={isSaving}>
+              {isSaving ? 'Sauvegarde…' : 'Sauvegarder'}
+            </button>
+            <button className="secondary" type="button" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? 'Suppression…' : 'Supprimer le projet'}
+            </button>
+            <button
+              className="secondary"
+              type="button"
+              onClick={handleToggleVisibility}
+              disabled={isTogglingVisibility}
+            >
+              {isTogglingVisibility
+                ? 'Mise à jour…'
+                : project.is_public
+                  ? 'Rendre privé'
+                  : 'Rendre public'}
+            </button>
+          </div>
+          <p className="muted" style={{ marginTop: '0.75rem', marginBottom: 0 }}>
+            {project.is_public
+              ? 'Ce projet est visible dans la communauté.'
+              : "Ce projet n'est visible que par toi."}
+          </p>
+        </form>
       )}
 
       {montrer('score') && etapeOuverte === 'score' && (
