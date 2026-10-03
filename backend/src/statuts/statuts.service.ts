@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConstitutionService } from '../constitution/constitution.service.js';
 import { CLAUDE_MODEL, ClaudeService } from '../igini/claude/claude.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -109,5 +109,33 @@ export class StatutsService {
         },
       },
     });
+  }
+
+  async modifierTexte(ownerId: string, projectId: string, content: string) {
+    const bylaws = await this.findForOwner(ownerId, projectId);
+    if (bylaws.status === 'retenue') {
+      throw new ConflictException('Cette version est retenue : elle ne peut plus être modifiée.');
+    }
+    return this.prisma.company_bylaws.update({ where: { id: bylaws.id }, data: { content } });
+  }
+
+  async regenererPourProjet(ownerId: string, projectId: string, dto: GenerateBylawsDto) {
+    const bylaws = await this.findForOwner(ownerId, projectId);
+    if (bylaws.status === 'retenue') {
+      throw new ConflictException('Cette version est retenue : elle ne peut plus être régénérée.');
+    }
+    // genererPourProjet fait déjà un upsert sur project_id : la ligne existante
+    // est remplacée (contenu + associés), pas dupliquée.
+    return this.genererPourProjet(ownerId, projectId, dto);
+  }
+
+  private async findForOwner(ownerId: string, projectId: string) {
+    const bylaws = await this.prisma.company_bylaws.findFirst({
+      where: { project_id: projectId, owner_id: ownerId },
+    });
+    if (!bylaws) {
+      throw new NotFoundException('Statuts introuvables pour ce projet.');
+    }
+    return bylaws;
   }
 }

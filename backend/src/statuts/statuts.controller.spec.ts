@@ -29,4 +29,17 @@ describe('StatutsController', () => {
 
     expect(service.genererPourProjet).toHaveBeenCalledWith('user-1', 'p1', dto);
   });
+
+  it('transmet l’édition du texte', async () => {
+    service.modifierTexte = vi.fn().mockResolvedValue({ id: 'b1' });
+    await controller.modifier(user, 'p1', { content: 'nouveau texte' });
+    expect(service.modifierTexte).toHaveBeenCalledWith('user-1', 'p1', 'nouveau texte');
+  });
+
+  it('transmet la régénération', async () => {
+    const dto = { capitalCents: 100000, headOffice: 'Paris', durationYears: 99, associates: [{ fullName: 'A', shareBasisPoints: 10000 }] };
+    service.regenererPourProjet = vi.fn().mockResolvedValue({ id: 'b1' });
+    await controller.regenerer(user, 'p1', dto);
+    expect(service.regenererPourProjet).toHaveBeenCalledWith('user-1', 'p1', dto);
+  });
 });

@@ -45,3 +45,9 @@ export class GenerateBylawsDto {
   @Type(() => AssociateInputDto)
   associates: AssociateInputDto[];
 }
+
+export class UpdateBylawsContentDto {
+  @IsString()
+  @MinLength(1, { message: 'content ne peut pas être vide.' })
+  content: string;
+}
