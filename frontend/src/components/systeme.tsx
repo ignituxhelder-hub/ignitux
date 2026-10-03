@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
+import { Icone } from '@/components/icones';
 import { useAuth } from '@/lib/auth';
 import {
   applicationDe,
@@ -13,7 +14,6 @@ import {
   EVENEMENT_TACHES,
   fermer,
   lireTaches,
-  monogramme,
   ouvrir,
   stockageNavigateur,
   type Tache,
@@ -96,7 +96,7 @@ export function Systeme({ children }: { children: ReactNode }) {
           </Link>
           <span className="barre-app__titre">
             <span className="barre-app__glyphe" aria-hidden="true">
-              {monogramme(app.nom)}
+              <Icone id={app.id} />
             </span>
             {app.nom}
           </span>
@@ -148,7 +148,7 @@ export function Systeme({ children }: { children: ReactNode }) {
                 title={ouverte.nom}
               >
                 <span className="barre-taches__glyphe" aria-hidden="true">
-                  {monogramme(ouverte.nom)}
+                  <Icone id={ouverte.id} />
                 </span>
                 <span className="barre-taches__nom">{ouverte.nom}</span>
               </Link>

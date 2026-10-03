@@ -139,7 +139,7 @@ describe('ProjectDetailPage', () => {
     vi.restoreAllMocks();
   });
 
-  it('charge le projet et affiche les 5 sections vides', async () => {
+  it('charge le projet et affiche une icône par étape, sans contenu empilé', async () => {
     mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
 
     render(
@@ -149,11 +149,86 @@ describe('ProjectDetailPage', () => {
     );
 
     expect(await screen.findByDisplayValue('École motocross')).toBeInTheDocument();
-    expect(screen.getByText("Aucune analyse pour l'instant.")).toBeInTheDocument();
-    expect(screen.getByText("Aucun plan pour l'instant.")).toBeInTheDocument();
-    expect(screen.getByText("Aucun plan de financement pour l'instant.")).toBeInTheDocument();
-    expect(screen.getByText("Aucun plan de développement pour l'instant.")).toBeInTheDocument();
-    expect(screen.getByText("Aucun plan de transmission pour l'instant.")).toBeInTheDocument();
+
+    expect(screen.getByRole('button', { name: 'Analyser' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Forme juridique' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Construction' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Financement' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Développement' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Transmission' })).toBeInTheDocument();
+
+    // Rien ne s'affiche tant qu'aucune icône n'a été choisie : c'est tout le
+    // sens du changement — ne plus tout montrer d'un coup.
+    expect(screen.queryByText("Aucune analyse pour l'instant.")).not.toBeInTheDocument();
+    expect(screen.queryByText("Aucun plan pour l'instant.")).not.toBeInTheDocument();
+  });
+
+  describe('grille d’icônes des étapes', () => {
+    it('ouvre le contenu d’une seule étape à la fois, au clic sur son icône', async () => {
+      mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      await screen.findByDisplayValue('École motocross');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Construction' }));
+      expect(await screen.findByText("Aucun plan pour l'instant.")).toBeInTheDocument();
+      expect(screen.queryByText("Aucune analyse pour l'instant.")).not.toBeInTheDocument();
+
+      // Choisir une autre étape ferme la précédente : une seule à la fois.
+      fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
+      expect(await screen.findByText("Aucune analyse pour l'instant.")).toBeInTheDocument();
+      expect(screen.queryByText("Aucun plan pour l'instant.")).not.toBeInTheDocument();
+    });
+
+    it('referme l’étape ouverte si on clique de nouveau sur son icône', async () => {
+      mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      await screen.findByDisplayValue('École motocross');
+
+      const bouton = screen.getByRole('button', { name: 'Analyser' });
+      fireEvent.click(bouton);
+      expect(await screen.findByText("Aucune analyse pour l'instant.")).toBeInTheDocument();
+
+      fireEvent.click(bouton);
+      expect(screen.queryByText("Aucune analyse pour l'instant.")).not.toBeInTheDocument();
+    });
+
+    it('ne propose que les icônes des étapes que le parcours a ouvertes', async () => {
+      mockApiRoutes({
+        'GET /projects/p1': { status: 200, body: PROJECT },
+        ...ENGINE_ROUTES,
+        'GET /projects/p1/parcours': {
+          status: 200,
+          body: parcours({
+            visible: [{ section: 'analyse', label: 'Analyse', phase: 'decouvrir' }],
+          }),
+        },
+      });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      await screen.findByDisplayValue('École motocross');
+
+      expect(screen.getByRole('button', { name: 'Analyser' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Forme juridique' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Construction' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Financement' })).not.toBeInTheDocument();
+    });
   });
 
   describe('générateurs IA éteints', () => {
@@ -169,7 +244,8 @@ describe('ProjectDetailPage', () => {
 
     it('remplace les 6 boutons par un message, sans erreur rouge', async () => {
       // Un bouton qui échoue fait croire que le produit est cassé. Ici la
-      // personne lit « indisponible » avant même de cliquer.
+      // personne lit « indisponible » avant même de cliquer — sur chacune des
+      // six étapes, ouverte une à la fois via son icône.
       mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES, ...OFF });
 
       render(
@@ -180,12 +256,24 @@ describe('ProjectDetailPage', () => {
 
       await screen.findByDisplayValue('École motocross');
 
-      await waitFor(() =>
-        expect(screen.getAllByText('Fonctionnalité IA non disponible pour ce test.')).toHaveLength(6),
-      );
-      expect(screen.queryByText('Analyser ce projet')).not.toBeInTheDocument();
-      expect(screen.queryByText('Générer un plan de financement')).not.toBeInTheDocument();
-      expect(screen.getAllByText('IA indisponible')).toHaveLength(6);
+      for (const label of [
+        'Analyser',
+        'Forme juridique',
+        'Construction',
+        'Financement',
+        'Développement',
+        'Transmission',
+      ]) {
+        const icone = screen.getByRole('button', { name: label });
+        fireEvent.click(icone);
+        expect(
+          await screen.findByText('Fonctionnalité IA non disponible pour ce test.'),
+        ).toBeInTheDocument();
+        expect(screen.getByText('IA indisponible')).toBeInTheDocument();
+        expect(screen.queryByText('Analyser ce projet')).not.toBeInTheDocument();
+        expect(screen.queryByText('Générer un plan de financement')).not.toBeInTheDocument();
+        fireEvent.click(icone); // referme avant de passer à la suivante
+      }
     });
 
     it('laisse les 4 moteurs transverses utilisables', async () => {
@@ -221,6 +309,9 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
+      await screen.findByDisplayValue('École motocross');
+      fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
+
       expect(await screen.findByText('Analyser ce projet')).toBeInTheDocument();
       expect(screen.queryByText('IA indisponible')).not.toBeInTheDocument();
     });
@@ -252,6 +343,7 @@ describe('ProjectDetailPage', () => {
     );
 
     await screen.findByDisplayValue('École motocross');
+    fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
     fireEvent.click(screen.getByRole('button', { name: /analyser ce projet/i }));
 
     expect(await screen.findByText('Idée solide pour un premier lancement local.')).toBeInTheDocument();
@@ -294,6 +386,9 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
+      await screen.findByDisplayValue('École motocross');
+      fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
+
       expect(await screen.findByRole('heading', { name: 'Pourquoi ce score ?' })).toBeInTheDocument();
       expect(screen.getByText(/cycle de vente est long/)).toBeInTheDocument();
     });
@@ -309,6 +404,9 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
+      await screen.findByDisplayValue('École motocross');
+      fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
+
       expect(await screen.findByText(/serait inventer son raisonnement/)).toBeInTheDocument();
     });
 
@@ -321,6 +419,9 @@ describe('ProjectDetailPage', () => {
           <ProjectDetailPage />
         </AuthProvider>,
       );
+
+      await screen.findByDisplayValue('École motocross');
+      fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
 
       expect(await screen.findByText('60 / 100')).toBeInTheDocument();
       expect(screen.getByText(/en dessous du seuil de 75/)).toBeInTheDocument();
@@ -336,6 +437,9 @@ describe('ProjectDetailPage', () => {
           <ProjectDetailPage />
         </AuthProvider>,
       );
+
+      await screen.findByDisplayValue('École motocross');
+      fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
 
       expect(await screen.findByText('80 / 100')).toBeInTheDocument();
       expect(
@@ -355,6 +459,9 @@ describe('ProjectDetailPage', () => {
           <ProjectDetailPage />
         </AuthProvider>,
       );
+
+      await screen.findByDisplayValue('École motocross');
+      fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
 
       expect(await screen.findByText(/jamais un chiffre intermédiaire/)).toBeInTheDocument();
     });
@@ -427,6 +534,7 @@ describe('ProjectDetailPage', () => {
       ],
     };
 
+    fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
     fireEvent.click(screen.getByRole('button', { name: /analyser ce projet/i }));
 
     // Sans le signal de rafraîchissement, ces deux assertions échouent : la
@@ -530,6 +638,8 @@ describe('ProjectDetailPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'École motocross' })).toBeInTheDocument();
     expect(screen.getByText(/Projet partagé avec toi/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
     expect(screen.getByText('Résumé existant.')).toBeInTheDocument();
 
     // Pas de bouton de génération, pas de formulaire d'édition.
@@ -691,7 +801,8 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      expect(await screen.findByRole('heading', { name: 'Analyse' })).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: 'Analyser' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Construction' })).not.toBeInTheDocument();
       expect(screen.queryByRole('heading', { name: /Conformité/ })).toBeNull();
       expect(screen.queryByRole('heading', { name: /Souvenirs|Mémoire/ })).toBeNull();
     });
@@ -781,7 +892,7 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      expect(await screen.findByRole('heading', { name: 'Analyse' })).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: 'Analyser' })).toBeInTheDocument();
     });
   });
 });

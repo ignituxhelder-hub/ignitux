@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Brand } from '@/components/ignitux-mark';
+import { Icone } from '@/components/icones';
 import { InvitationInstallation } from '@/components/invitation-installation';
 import {
   api,
@@ -15,7 +16,7 @@ import {
 } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useRoles } from '@/lib/roles';
-import { enPages, fermerTache, ICONES_PAR_PAGE, monogramme } from '@/lib/systeme';
+import { enPages, fermerTache, ICONES_PAR_PAGE } from '@/lib/systeme';
 
 /**
  * LE BUREAU — ce qu'on voit en ouvrant Ignitux.
@@ -65,7 +66,7 @@ function useIconesParPage(): number {
 function Glyphe({ app }: { app: ApplicationVue }) {
   return (
     <span className="icone__glyphe" data-categorie={app.categorie} aria-hidden="true">
-      {monogramme(app.nom)}
+      <Icone id={app.id} />
     </span>
   );
 }
@@ -76,7 +77,7 @@ function ApercuDossier({ apercu }: { apercu: readonly ApplicationVue[] }) {
     <span className="dossier-apercu">
       {apercu.slice(0, 4).map((app) => (
         <span key={app.id} className="dossier-apercu__case" data-categorie={app.categorie}>
-          {monogramme(app.nom)}
+          <Icone id={app.id} />
         </span>
       ))}
     </span>

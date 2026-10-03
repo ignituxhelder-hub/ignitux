@@ -68,12 +68,6 @@ export function applicationParId(id: string): AppSysteme | null {
   return APPS_SYSTEME.find((app) => app.id === id) ?? null;
 }
 
-/** Deux lettres, pour que chaque application se reconnaisse d'un coup d'œil. */
-export function monogramme(nom: string): string {
-  const mots = nom.split(/[\s&]+/).filter(Boolean);
-  return (mots.length > 1 ? mots[0][0] + mots[1][0] : nom.slice(0, 2)).toUpperCase();
-}
-
 // ── Les pages du bureau ─────────────────────────────────────────────────────
 
 /**

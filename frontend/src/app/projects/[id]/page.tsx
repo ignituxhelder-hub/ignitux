@@ -10,8 +10,10 @@ import {
   type ReactNode,
   type SetStateAction,
 } from 'react';
+import { Icone } from '@/components/icones';
 import { IginiMention } from '@/components/igini-mention';
 import { ProchaineEtape, Progression, SectionsFermees, TableauDeBord } from '@/components/parcours';
+import { ETAPES_PROJET } from '@/lib/etapes-projet';
 import { AnalyseEnCours, AnalyseResultat } from './analyse-resultat';
 import { FormeJuridiqueResultat } from './forme-juridique-resultat';
 import { ChampsADemander } from '@/components/champs-profil';
@@ -164,6 +166,10 @@ export default function ProjectDetailPage() {
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [parcours, setParcours] = useState<JourneyView | null>(null);
   const [vueAvancee, setVueAvancee] = useState(false);
+  // Laquelle des six étapes (voir lib/etapes-projet.ts) affiche son contenu en
+  // ce moment — jamais plus d'une, c'est tout le principe de la grille
+  // d'icônes qui remplace l'empilement de texte.
+  const [etapeOuverte, setEtapeOuverte] = useState<string | null>(null);
   const [aDemander, setADemander] = useState<ProfileField[]>([]);
   const onGenerated = () => setRefreshSignal((n) => n + 1);
 
@@ -542,7 +548,39 @@ export default function ProjectDetailPage() {
         </>
       )}
 
-      {montrer('analyse') && (
+      {/* Une icône par étape, plutôt que les six empilées avec leur texte
+          complet visible en même temps. On choisit laquelle ouvrir ; les
+          autres restent fermées jusqu'au prochain clic. */}
+      {ETAPES_PROJET.some((etape) => montrer(etape.section)) && (
+        <div className="card" style={{ marginTop: '1.5rem' }}>
+          <h2 style={{ marginTop: 0 }}>Les étapes</h2>
+          <ul
+            className="etapes-grille"
+            style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', listStyle: 'none', margin: 0, padding: 0 }}
+          >
+            {ETAPES_PROJET.filter((etape) => montrer(etape.section)).map((etape) => {
+              const active = etapeOuverte === etape.id;
+              return (
+                <li key={etape.id}>
+                  <button
+                    type="button"
+                    className="icone"
+                    aria-pressed={active}
+                    onClick={() => setEtapeOuverte((courante) => (courante === etape.id ? null : etape.id))}
+                  >
+                    <span className="icone__glyphe" data-categorie="creer" aria-hidden="true">
+                      <Icone id={etape.id} />
+                    </span>
+                    <span className="icone__nom">{etape.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {montrer('analyse') && etapeOuverte === 'analyse' && (
         <GenerationSection
           title="Analyse"
           buttonLabel="Analyser ce projet"
@@ -566,9 +604,15 @@ export default function ProjectDetailPage() {
                   (champ as HTMLTextAreaElement | null)?.focus();
                 }}
                 onContinuer={() => {
-                  window.document
-                    .getElementById('section-construction')
-                    ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  // La section de construction n'existe dans le DOM que
+                  // lorsque son icône est ouverte : on l'ouvre d'abord, et on
+                  // ne défile qu'une fois qu'elle est montée.
+                  setEtapeOuverte('construction');
+                  window.requestAnimationFrame(() => {
+                    window.document
+                      .getElementById('section-construction')
+                      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  });
                 }}
               />
             ) : (
@@ -584,7 +628,7 @@ export default function ProjectDetailPage() {
         />
       )}
 
-      {montrer('analyse') && (
+      {montrer('analyse') && etapeOuverte === 'forme-juridique' && (
         <GenerationSection
           title="Forme juridique"
           buttonLabel="Proposer une forme juridique"
@@ -600,7 +644,7 @@ export default function ProjectDetailPage() {
         />
       )}
 
-      {montrer('construction') && (
+      {montrer('construction') && etapeOuverte === 'construction' && (
         <GenerationSection
           anchorId="section-construction"
           title="Plan de construction"
@@ -620,7 +664,7 @@ export default function ProjectDetailPage() {
       {/* Deux sections portaient le même nom : celle-ci, où IGINI rédige un plan,
           et celle du bas, où figure l'argent réellement reçu. En faisant défiler,
           on ne pouvait pas les distinguer. */}
-      {montrer('financement') && (
+      {montrer('financement') && etapeOuverte === 'financement' && (
         <GenerationSection
           title="Plan de financement"
           buttonLabel="Générer un plan de financement"
@@ -636,7 +680,7 @@ export default function ProjectDetailPage() {
         />
       )}
 
-      {montrer('developpement') && (
+      {montrer('developpement') && etapeOuverte === 'developpement' && (
         <GenerationSection
           title="Développement"
           buttonLabel="Générer un plan de développement"
@@ -652,7 +696,7 @@ export default function ProjectDetailPage() {
         />
       )}
 
-      {montrer('transmission') && (
+      {montrer('transmission') && etapeOuverte === 'transmission' && (
         <GenerationSection
           title="Transmission"
           buttonLabel="Générer un plan de transmission"
