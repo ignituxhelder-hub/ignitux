@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useEffect, useState, type FormEvent } from 'react';
 import { RoleBar } from '@/components/role-bar';
 import { api, ApiError, type Project, type ProjectJourneySummary } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -41,8 +41,20 @@ import { useRoles } from '@/lib/roles';
  * passe d'une application à l'autre par le système, pas par ses voisines.
  */
 export default function ProjectsPage() {
+  // useSearchParams() oblige Next.js à sortir cette partie du rendu statique
+  // au build ("missing-suspense-with-csr-bailout") sans cette limite : elle
+  // isole la lecture de ?creer=1 du reste de la page.
+  return (
+    <Suspense fallback={<p className="loading">Chargement…</p>}>
+      <ProjectsPageInterieur />
+    </Suspense>
+  );
+}
+
+function ProjectsPageInterieur() {
   const { token, user, isReady } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { roles, switchTo } = useRoles(token, 'entrepreneur');
 
   const [projects, setProjects] = useState<Project[]>([]);
@@ -50,7 +62,11 @@ export default function ProjectsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
 
-  const [creation, setCreation] = useState(false);
+  // Vient de /projects/[id] par « + Nouveau projet » : sans ce drapeau, la
+  // redirection automatique vers l'unique projet (plus bas) empêcherait
+  // jamais d'en créer un second.
+  const veutCreer = searchParams.get('creer') === '1';
+  const [creation, setCreation] = useState(veutCreer);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
@@ -83,6 +99,17 @@ export default function ProjectsPage() {
     }
     void charger(token);
   }, [isReady, token, router, charger]);
+
+  /**
+   * Un seul projet : passer par une liste qui ne contient qu'une ligne
+   * n'aide personne, on entre directement dedans. `veutCreer` est
+   * l'échappatoire — sans elle, cette redirection empêcherait pour toujours
+   * de créer un second projet depuis cette page.
+   */
+  useEffect(() => {
+    if (veutCreer || isLoading || projects.length !== 1) return;
+    router.replace(`/projects/${projects[0].id}`);
+  }, [veutCreer, isLoading, projects, router]);
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();

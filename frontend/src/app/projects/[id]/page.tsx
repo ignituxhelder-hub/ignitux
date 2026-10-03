@@ -395,9 +395,18 @@ export default function ProjectDetailPage() {
   return (
     <main className="page page--wide">
       <div className="top-bar">
-        <Link href="/projects" className="muted">
-          ← Retour aux projets
-        </Link>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <Link href="/projects" className="muted">
+            ← Retour aux projets
+          </Link>
+          {/* Avec un seul projet, « Retour aux projets » ramène directement
+              ici (voir projects/page.tsx) — ce lien-ci reste donc le seul
+              moyen d'en commencer un second. `?creer=1` évite d'y être
+              aussitôt renvoyé par cette même redirection. */}
+          <Link href="/projects?creer=1" className="muted">
+            + Nouveau projet
+          </Link>
+        </div>
         {/* L'argent a son propre écran : la fiche projet faisait déjà sept
             mille pixels, et le financement s'y perdait tout en bas. */}
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
