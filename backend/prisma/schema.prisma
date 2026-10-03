@@ -40,6 +40,7 @@ model users {
   /// non dans le navigateur pour que le mode suive la personne d une
   /// machine à l autre. null tant qu elle n a pas choisi.
   active_role               String?
+  company_bylaws   company_bylaws[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -77,6 +78,10 @@ model projects {
   // Nullable, et il le restera : la conformité s'affiche entière sans lui,
   // simplement pas triée.
   sector               String?
+  /// 'micro-entreprise' | 'EI' | 'EURL' | 'SASU' | 'SARL' | 'SAS' — ce que la
+  /// personne a retenu, pas seulement ce que Former a recommandé. Nullable
+  /// tant qu'elle n'a rien confirmé.
+  confirmed_legal_form String?
   // Un projet public est visible dans la communauté (lecture seule pour les
   // autres utilisateurs, qui peuvent y laisser des encouragements) — false
   // par défaut, l'utilisateur décide explicitement de le rendre public.
@@ -112,6 +117,7 @@ model projects {
   dividends            dividend_distributions[]
   buyback_objectives   buyback_objectives[]
   financedProjects     financed_projects?
+  bylaws           company_bylaws?
 
   @@index([owner_id])
   @@index([is_public])
@@ -229,6 +235,45 @@ model legal_form_sources {
   url                String
 
   @@index([recommendation_id])
+}
+
+model company_bylaws {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_id         String    @db.Uuid
+  owner            users     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  project_id       String    @unique @db.Uuid
+  project          projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  // Copie de la forme confirmée au moment de la génération : le document
+  // garde une trace de ce pour quoi il a été écrit, même si la
+  // confirmation change ensuite sur le projet.
+  legal_form       String
+  capital_cents    Int
+  head_office      String
+  duration_years   Int
+  content          String
+  status           String    @default("brouillon") // 'brouillon' | 'retenue'
+  finalized_at     DateTime? @db.Timestamptz(6)
+  // Même convention que legal_form_recommendations.generated_by/generated_model.
+  generated_by     String    @default("igini")
+  generated_model  String?
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @updatedAt @db.Timestamptz(6)
+
+  associates       bylaw_associates[]
+  @@index([owner_id])
+}
+
+model bylaw_associates {
+  id                 String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bylaws_id          String          @db.Uuid
+  bylaws             company_bylaws  @relation(fields: [bylaws_id], references: [id], onDelete: Cascade)
+  full_name          String
+  // Points de base : 10000 = 100 %. Convention déjà établie par
+  // equity_events.share_basis_points — voir Global Constraints.
+  share_basis_points Int
+  created_at         DateTime?       @default(now()) @db.Timestamptz(6)
+
+  @@index([bylaws_id])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
