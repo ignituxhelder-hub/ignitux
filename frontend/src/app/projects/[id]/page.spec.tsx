@@ -153,7 +153,7 @@ describe('ProjectDetailPage', () => {
     expect(screen.getByRole('button', { name: 'Analyser' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Forme juridique' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Construction' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Financement' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Plan de financement' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Développement' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Transmission' })).toBeInTheDocument();
 
@@ -227,7 +227,7 @@ describe('ProjectDetailPage', () => {
       expect(screen.getByRole('button', { name: 'Analyser' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Forme juridique' })).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Construction' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Financement' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Plan de financement' })).not.toBeInTheDocument();
     });
   });
 
@@ -245,7 +245,8 @@ describe('ProjectDetailPage', () => {
     it('remplace les 6 boutons par un message, sans erreur rouge', async () => {
       // Un bouton qui échoue fait croire que le produit est cassé. Ici la
       // personne lit « indisponible » avant même de cliquer — sur chacune des
-      // six étapes, ouverte une à la fois via son icône.
+      // six étapes, ouverte une à la fois via son icône. Six allers-retours
+      // réels dépassent le délai par défaut du test.
       mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES, ...OFF });
 
       render(
@@ -260,7 +261,7 @@ describe('ProjectDetailPage', () => {
         'Analyser',
         'Forme juridique',
         'Construction',
-        'Financement',
+        'Plan de financement',
         'Développement',
         'Transmission',
       ]) {
@@ -274,7 +275,7 @@ describe('ProjectDetailPage', () => {
         expect(screen.queryByText('Générer un plan de financement')).not.toBeInTheDocument();
         fireEvent.click(icone); // referme avant de passer à la suivante
       }
-    });
+    }, 15000);
 
     it('laisse les 4 moteurs transverses utilisables', async () => {
       // Le sens du dispositif : seuls les générateurs sont coupés. Si les
@@ -500,6 +501,7 @@ describe('ProjectDetailPage', () => {
     );
 
     await screen.findByDisplayValue('École motocross');
+    fireEvent.click(screen.getByRole('button', { name: 'Tâches' }));
     expect(await screen.findByText("Aucune tâche pour l'instant.")).toBeInTheDocument();
 
     // Ce que le backend aura fait pendant la génération : l'automatisation a
@@ -537,13 +539,17 @@ describe('ProjectDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
     fireEvent.click(screen.getByRole('button', { name: /analyser ce projet/i }));
 
-    // Sans le signal de rafraîchissement, ces deux assertions échouent : la
-    // liste resterait vide et l'historique d'automatisation aussi.
+    // Sans le signal de rafraîchissement, ces deux assertions échoueraient : la
+    // liste resterait vide et l'historique d'automatisation aussi — chacune
+    // dans son propre outil, ouvert via son icône.
+    fireEvent.click(screen.getByRole('button', { name: 'Tâches' }));
     expect(await screen.findByText('Créer le plan de construction (Construction)')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Automatisation' }));
     await waitFor(() =>
       expect(document.body.textContent).toContain('4 tâche(s) créée(s), 0 fermée(s)'),
     );
-  });
+  }, 15000);
 
   it('sauvegarde les modifications du projet', async () => {
     mockApiRoutes({
@@ -648,20 +654,29 @@ describe('ProjectDetailPage', () => {
     // La gestion des collaborateurs reste réservée au propriétaire.
     expect(screen.queryByText('Collaborateurs')).not.toBeInTheDocument();
 
-    // Les 4 moteurs transverses sont visibles en lecture seule pour un collaborateur.
-    // Par leur titre : « Tâches » est aussi le libellé d'un repère du
-    // tableau de bord, et getByText en trouverait deux.
+    // Les outils transverses sont accessibles en lecture seule pour un
+    // collaborateur — chacun derrière sa propre icône, ouverte à son tour.
+    fireEvent.click(screen.getByRole('button', { name: 'Score' }));
     expect(screen.getByRole('heading', { name: 'Score IGNITUX' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Tâches' }));
     expect(screen.getByRole('heading', { name: 'Tâches' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Mémoire' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Connaissance' })).toBeInTheDocument();
     expect(screen.queryByLabelText('Nouvelle tâche')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Mémoire' }));
+    expect(screen.getByRole('heading', { name: 'Mémoire' })).toBeInTheDocument();
     expect(screen.queryByLabelText('Contenu du souvenir')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Connaissances' }));
+    expect(screen.getByRole('heading', { name: 'Connaissance' })).toBeInTheDocument();
     expect(screen.queryByLabelText('Nom du concept')).not.toBeInTheDocument();
 
     // Conformité et automatisation sont aussi visibles en lecture seule.
+    fireEvent.click(screen.getByRole('button', { name: 'Conformité' }));
     expect(screen.getByRole('heading', { name: 'Conformité' })).toBeInTheDocument();
-    expect(screen.getByText('Automatisation')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Automatisation' }));
+    expect(screen.getByRole('heading', { name: 'Automatisation' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /lancer l'automatisation/i })).not.toBeInTheDocument();
   });
 

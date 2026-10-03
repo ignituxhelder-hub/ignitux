@@ -302,6 +302,108 @@ function iconeTransmission({ className }: IconeSvgProps) {
   );
 }
 
+function iconeCible({ className }: IconeSvgProps) {
+  return (
+    <svg className={className} width="70%" height="70%" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <circle cx="8" cy="8" r="7.2" opacity="0.2" />
+      <path d="M8 1.6a6.4 6.4 0 1 0 0 12.8A6.4 6.4 0 0 0 8 1.6Zm0 1.8a4.6 4.6 0 1 1 0 9.2 4.6 4.6 0 0 1 0-9.2Z" />
+      <circle cx="8" cy="8" r="2.1" />
+    </svg>
+  );
+}
+
+function iconeListeControle({ className }: IconeSvgProps) {
+  return (
+    <svg className={className} width="70%" height="70%" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <rect x="1" y="1" width="14" height="14" rx="2" opacity="0.2" />
+      <path d="M3.2 4.8 4.4 6l2-2.2-1-1L4.4 4 3.8 3.4Z" />
+      <rect x="7.2" y="3.4" width="6.5" height="1.3" rx="0.6" />
+      <path d="M3.2 9.8 4.4 11l2-2.2-1-1-1 1-0.6-0.6Z" />
+      <rect x="7.2" y="8.4" width="6.5" height="1.3" rx="0.6" />
+      <rect x="2.5" y="13" width="4.2" height="1.3" rx="0.6" opacity="0.6" />
+      <rect x="7.2" y="13" width="6.5" height="1.3" rx="0.6" opacity="0.6" />
+    </svg>
+  );
+}
+
+function iconeMemoire({ className }: IconeSvgProps) {
+  return (
+    <svg className={className} width="70%" height="70%" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M8 1C4.7 1 2.5 3.4 2.5 6.3c0 2 1 3.1 1 4.4 0 .9-.3 1.3-.3 2 0 1 .8 1.6 1.8 1.6.6 0 1-.3 1.3-.7.3.4.8.7 1.4.7s1.1-.3 1.4-.7c.3.4.7.7 1.3.7 1 0 1.8-.6 1.8-1.6 0-.7-.3-1.1-.3-2 0-1.3 1-2.4 1-4.4C13.5 3.4 11.3 1 8 1Z" opacity="0.25" />
+      <path d="M8 2.4c-2.6 0-4.3 1.8-4.3 3.9 0 1.5.7 2.4.9 3.5.1.6-.1 1-.1 1.5 0 .5.4.8.8.8.5 0 .8-.3.9-.8.1-.6.1-1.2.1-1.9M8 2.4c2.6 0 4.3 1.8 4.3 3.9 0 1.5-.7 2.4-.9 3.5-.1.6.1 1 .1 1.5 0 .5-.4.8-.8.8-.5 0-.8-.3-.9-.8-.1-.6-.1-1.2-.1-1.9M8 2.4v9.3" />
+    </svg>
+  );
+}
+
+function iconeConnaissances({ className }: IconeSvgProps) {
+  return (
+    <svg className={className} width="70%" height="70%" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M8 1.5 2 6l6 4.5 6-4.5Z" opacity="0.2" />
+      <circle cx="8" cy="3" r="1.8" />
+      <circle cx="3" cy="10" r="1.8" opacity="0.6" />
+      <circle cx="13" cy="10" r="1.8" opacity="0.6" />
+      <circle cx="8" cy="14.5" r="1.4" opacity="0.4" />
+      <path d="M6.7 4.3 4.2 8.7M9.3 4.3l2.5 4.4M4.5 11.2l2.8 1.8M11.5 11.2l-2.8 1.8" />
+    </svg>
+  );
+}
+
+function iconeBouclier({ className }: IconeSvgProps) {
+  return (
+    <svg className={className} width="70%" height="70%" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M8 0.8 14.5 3v4.3c0 4.4-2.8 7-6.5 7.9-3.7-.9-6.5-3.5-6.5-7.9V3Z" opacity="0.25" />
+      <path d="M8 0.8 14.5 3v4.3c0 4.4-2.8 7-6.5 7.9-3.7-.9-6.5-3.5-6.5-7.9V3Zm0 1.9L3.5 4.3v3c0 3.2 1.9 5.2 4.5 6 2.6-.8 4.5-2.8 4.5-6v-3Z" />
+      <path d="M5.4 8.1 7.2 10l3.4-3.8" />
+    </svg>
+  );
+}
+
+function iconeAutomatisation({ className }: IconeSvgProps) {
+  return (
+    <svg className={className} width="70%" height="70%" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <circle cx="6" cy="6" r="4" opacity="0.2" />
+      <path d="M6.6 1.2h-1.2l-.3 1.3c-.4.1-.8.3-1.1.5L2.8 2.4l-.9.9L2.6 4.5c-.2.3-.4.7-.5 1.1l-1.3.3v1.2l1.3.3c.1.4.3.8.5 1.1l-.7 1.2.9.9 1.2-.7c.3.2.7.4 1.1.5l.3 1.3h1.2l.3-1.3c.4-.1.8-.3 1.1-.5l1.2.7.9-.9-.7-1.2c.2-.3.4-.7.5-1.1l1.3-.3V5.9l-1.3-.3a3.9 3.9 0 0 0-.5-1.1l.7-1.2-.9-.9-1.2.7a3.9 3.9 0 0 0-1.1-.5Z" />
+      <circle cx="6" cy="6" r="1.7" opacity="0.5" />
+      <path d="M11.5 8.5 14 11l-3 3-1-1 1.6-1.6H9v-1.4h2.6L10 8.5Z" />
+    </svg>
+  );
+}
+
+function iconeProcessus({ className }: IconeSvgProps) {
+  return (
+    <svg className={className} width="70%" height="70%" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <rect x="0.5" y="1" width="4.5" height="4" rx="1" />
+      <rect x="11" y="1" width="4.5" height="4" rx="1" opacity="0.5" />
+      <rect x="5.8" y="11" width="4.5" height="4" rx="1" opacity="0.75" />
+      <path d="M5 3h3.5v6H5" opacity="0.6" />
+      <path d="M8.5 9H13V3" opacity="0.4" />
+      <path d="M8 9v3" />
+    </svg>
+  );
+}
+
+function iconeCoffre({ className }: IconeSvgProps) {
+  return (
+    <svg className={className} width="70%" height="70%" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <rect x="1" y="2.5" width="14" height="11.5" rx="1.5" opacity="0.2" />
+      <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h11A1.5 1.5 0 0 1 15 2.5v11A1.5 1.5 0 0 1 13.5 15h-11A1.5 1.5 0 0 1 1 13.5Zm1.8 1.8v9h10.4v-9Z" />
+      <circle cx="8" cy="8.2" r="2.3" />
+      <rect x="7.3" y="8.2" width="1.4" height="2.6" />
+    </svg>
+  );
+}
+
+function iconeParts({ className }: IconeSvgProps) {
+  return (
+    <svg className={className} width="70%" height="70%" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <circle cx="8" cy="8" r="7" opacity="0.2" />
+      <path d="M8 8V1a7 7 0 0 1 7 7Z" />
+      <path d="M8 8 2.6 11.5A7 7 0 0 1 8 1Z" opacity="0.6" />
+      <path d="M8 8 13.4 11.5A7 7 0 0 1 2.6 11.5Z" opacity="0.35" />
+    </svg>
+  );
+}
+
 function iconeGenerique({ className }: IconeSvgProps) {
   return (
     <svg className={className} width="70%" height="70%" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -340,6 +442,17 @@ const ICONES: Record<string, (props: IconeSvgProps) => ReturnType<typeof iconeGe
   financement: iconePiece,
   developpement: iconeCroissance,
   transmission: iconeTransmission,
+  // Outils transverses du projet (lib/etapes-projet.ts, OUTILS_PROJET).
+  score: iconeCible,
+  taches: iconeListeControle,
+  memoire: iconeMemoire,
+  connaissances: iconeConnaissances,
+  conformite: iconeBouclier,
+  automatisation: iconeAutomatisation,
+  processus: iconeProcessus,
+  'financement-recu': iconeCoffre,
+  capital: iconeParts,
+  collaborateurs: iconePersonnes,
 };
 
 export function Icone({ id, className }: { id: string; className?: string }) {

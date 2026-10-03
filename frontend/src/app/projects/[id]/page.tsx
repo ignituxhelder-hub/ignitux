@@ -13,7 +13,7 @@ import {
 import { Icone } from '@/components/icones';
 import { IginiMention } from '@/components/igini-mention';
 import { ProchaineEtape, Progression, SectionsFermees, TableauDeBord } from '@/components/parcours';
-import { ETAPES_PROJET } from '@/lib/etapes-projet';
+import { ETAPES_PROJET, OUTILS_PROJET } from '@/lib/etapes-projet';
 import { AnalyseEnCours, AnalyseResultat } from './analyse-resultat';
 import { FormeJuridiqueResultat } from './forme-juridique-resultat';
 import { ChampsADemander } from '@/components/champs-profil';
@@ -457,6 +457,7 @@ export default function ProjectDetailPage() {
                 isOwner && !montrer('taches')
                   ? () => {
                       setVueAvancee(true);
+                      setEtapeOuverte('taches');
                       setAllerAuxTaches(true);
                     }
                   : undefined
@@ -721,14 +722,53 @@ export default function ProjectDetailPage() {
         />
       )}
 
-      {/* Les 4 moteurs transverses sont en lecture seule pour un collaborateur
-          (readOnly). La gestion des collaborateurs et le déclenchement manuel
-          de l'automatisation restent réservés au propriétaire. */}
-      {montrer('score') && <ScoreSection token={token} projectId={id} refreshSignal={refreshSignal} />}
-      {montrer('score') && <ScoreHistorySection token={token} projectId={id} refreshSignal={refreshSignal} />}
+      {/* Mêmes icônes, pour les outils transverses — score, tâches,
+          conformité… Les 4 moteurs d'origine restent en lecture seule pour
+          un collaborateur (readOnly) ; la gestion des collaborateurs et le
+          déclenchement manuel de l'automatisation restent réservés au
+          propriétaire, y compris pour l'icône elle-même. */}
+      {OUTILS_PROJET.some(
+        (outil) => montrer(outil.section) && (outil.id !== 'collaborateurs' || isOwner),
+      ) && (
+        <div className="card" style={{ marginTop: '1.5rem' }}>
+          <h2 style={{ marginTop: 0 }}>Les outils</h2>
+          <ul
+            className="etapes-grille"
+            style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', listStyle: 'none', margin: 0, padding: 0 }}
+          >
+            {OUTILS_PROJET.filter(
+              (outil) => montrer(outil.section) && (outil.id !== 'collaborateurs' || isOwner),
+            ).map((outil) => {
+              const active = etapeOuverte === outil.id;
+              return (
+                <li key={outil.id}>
+                  <button
+                    type="button"
+                    className="icone"
+                    aria-pressed={active}
+                    onClick={() => setEtapeOuverte((courante) => (courante === outil.id ? null : outil.id))}
+                  >
+                    <span className="icone__glyphe" data-categorie="gerer" aria-hidden="true">
+                      <Icone id={outil.id} />
+                    </span>
+                    <span className="icone__nom">{outil.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {montrer('score') && etapeOuverte === 'score' && (
+        <>
+          <ScoreSection token={token} projectId={id} refreshSignal={refreshSignal} />
+          <ScoreHistorySection token={token} projectId={id} refreshSignal={refreshSignal} />
+        </>
+      )}
       {/* Nommée pour que le raccourci de la tuile « Tâches » puisse amener
           ici — voir `allerAuxTaches` plus haut. */}
-      {montrer('taches') && (
+      {montrer('taches') && etapeOuverte === 'taches' && (
         <div id="taches">
           <TasksSection
             token={token}
@@ -743,8 +783,10 @@ export default function ProjectDetailPage() {
           />
         </div>
       )}
-      {montrer('memoire') && <MemorySection token={token} projectId={id} readOnly={!isOwner} />}
-      {montrer('connaissances') && (
+      {montrer('memoire') && etapeOuverte === 'memoire' && (
+        <MemorySection token={token} projectId={id} readOnly={!isOwner} />
+      )}
+      {montrer('connaissances') && etapeOuverte === 'connaissances' && (
         <KnowledgeSection
           token={token}
           projectId={id}
@@ -753,16 +795,24 @@ export default function ProjectDetailPage() {
           onChanged={onGenerated}
         />
       )}
-      {montrer('conformite') && <ComplianceSection token={token} projectId={id} readOnly={!isOwner} />}
-      {montrer('automatisation') && (
+      {montrer('conformite') && etapeOuverte === 'conformite' && (
+        <ComplianceSection token={token} projectId={id} readOnly={!isOwner} />
+      )}
+      {montrer('automatisation') && etapeOuverte === 'automatisation' && (
         <AutomationSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
       )}
-      {montrer('processus') && (
+      {montrer('processus') && etapeOuverte === 'processus' && (
         <WorkflowSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
       )}
-      {montrer('financement') && <FinancingSection token={token} projectId={id} readOnly={!isOwner} />}
-      {montrer('capital') && <BuybackSection token={token} projectId={id} readOnly={!isOwner} />}
-      {montrer('collaborateurs') && isOwner && <CollaboratorsSection token={token} projectId={id} />}
+      {montrer('financement') && etapeOuverte === 'financement-recu' && (
+        <FinancingSection token={token} projectId={id} readOnly={!isOwner} />
+      )}
+      {montrer('capital') && etapeOuverte === 'capital' && (
+        <BuybackSection token={token} projectId={id} readOnly={!isOwner} />
+      )}
+      {montrer('collaborateurs') && isOwner && etapeOuverte === 'collaborateurs' && (
+        <CollaboratorsSection token={token} projectId={id} />
+      )}
 
       {vueAvancee && parcours && <SectionsFermees parcours={parcours} />}
     </main>
