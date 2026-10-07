@@ -267,10 +267,15 @@ export const CONSTITUTION_ARTICLES: readonly ConstitutionArticleSeed[] = [
     title: 'Financement Éthique',
     text: 'Le financement doit servir la création de valeur réelle.',
     principle: 'financement_ethique',
-    // Vérifié par trois règles :
+    // Vérifié par plusieurs règles :
     // - `majorite-du-porteur` — une répartition qui ferait passer le porteur
     //   sous la majorité est refusée (modèle économique IGNITUX :
-    //   l'entrepreneur reste propriétaire principal) ;
+    //   l'entrepreneur reste propriétaire principal), y compris à
+    //   l'exécution d'un palier de participation ;
+    // - `ignitux-ne-remonte-pas` — un palier de participation ne peut que
+    //   faire baisser la part d'IGNITUX, jusqu'à 0 % ;
+    // - `droit-dividendes-apres-transmission` — le droit économique sur les
+    //   dividendes n'est constaté qu'une fois IGNITUX à 0 % du capital ;
     // - `caisses-separees` — une écriture comptable touchant le compte d'un
     //   autre propriétaire est refusée. L'argent d'une personne n'entre
     //   jamais dans les livres d'IGNITUX, ni l'inverse ;

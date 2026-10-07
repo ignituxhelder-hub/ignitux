@@ -1,49 +1,72 @@
+import { DEFAULT_ENTRY_SPLIT } from '../participation/participation-model.js';
+
 /**
  * FINANCEMENT IGNITUX — le modèle économique, tel qu'il a été défini.
  *
- * Le modèle a été transmis par le porteur du projet le 19 septembre 2026 et
- * remplace l'avertissement de périmètre qui disait, honnêtement à l'époque,
- * qu'aucun barème n'existait. Il tient en quatre règles :
+ * Le modèle sépare trois choses, qui ne se mélangent jamais :
  *
- *   1. À l'entrée, l'entrepreneur garde 51 % et IGNITUX reçoit 49 %.
- *   2. IGNITUX apporte analyse, accompagnement, IA, outils, financement et
- *      réseau.
- *   3. En atteignant ses objectifs (rentabilité, autonomie, stabilité),
- *      l'entrepreneur rachète progressivement les parts d'IGNITUX jusqu'à
- *      100 %.
- *   4. Même à 100 %, il reverse 5 % des dividendes RÉELLEMENT VERSÉS —
- *      pas du chiffre d'affaires, pas du bénéfice brut.
+ *   1. LE CAPITAL — l'entrepreneur et IGNITUX se partagent le capital au
+ *      départ ; la part d'IGNITUX ne fait que baisser, par paliers validés
+ *      par IGNITUX, jusqu'à 0 %. La structure de départ actuelle est
+ *      51 % / 49 %, mais c'est la valeur de départ de chaque accord, pas une
+ *      règle : chaque accord porte sa répartition et ses paliers.
+ *   2. LE DROIT SUR LES DIVIDENDES — une fois le capital entièrement
+ *      transmis, IGNITUX conserve 5 % des dividendes RÉELLEMENT VERSÉS (taux
+ *      par défaut, porté par l'accord). Ce n'est pas une part de capital, ni
+ *      du chiffre d'affaires, ni du bénéfice.
+ *   3. L'ACCÈS À L'ÉCOSYSTÈME — défini par l'accord, indépendant des deux
+ *      autres.
+ *
+ * Aucun palier ne dépend du temps : il est validé quand les conditions
+ * définies pour le projet sont remplies. Voir `participation/`.
  *
  * Ce que ce module calcule et ce qu'il ne calcule toujours pas :
  *
- * — il calcule la part perpétuelle de 5 %, parce que la règle est exacte
- *   et s'applique à un montant déjà versé ;
- * — il n'invente pas les seuils de « rentabilité », « autonomie » et
- *   « stabilité » qui déclenchent le rachat : le modèle nomme ces objectifs
- *   sans les chiffrer, et fabriquer des seuils reviendrait à décider à la
- *   place du porteur à quel moment il peut racheter ses parts ;
+ * — il calcule le droit de 5 %, parce que la règle est exacte et s'applique
+ *   à un montant déjà versé ;
+ * — il n'invente pas les seuils qui déclenchent un palier : fabriquer des
+ *   seuils reviendrait à décider à la place des personnes à quel moment le
+ *   capital se transmet ;
  * — il ne valorise pas le projet : aucune méthode de valorisation n'a été
  *   choisie, donc aucun prix de rachat ne peut être déduit ;
  * — il n'annonce aucun dividende prévisionnel : un dividende se constate.
  */
 export const FINANCING_SCOPE_NOTICE =
-  "Le modèle IGNITUX est appliqué ici : 51 % pour l'entrepreneur et 49 % pour Ignitux à " +
-  "l'entrée, rachat progressif jusqu'à 100 % lorsque les objectifs sont atteints, puis 5 % " +
-  'des dividendes réellement versés reversés à Ignitux à vie. Ignitux calcule cette part de ' +
-  "5 % sur les dividendes que tu enregistres, et rien d'autre : ni valorisation du projet, ni " +
-  'prix de rachat, ni dividende prévisionnel. Les seuils qui déclenchent le rachat ' +
-  '(rentabilité, autonomie, stabilité) ne sont pas chiffrés dans le modèle — ils restent ta ' +
-  'décision.';
-
-/** Répartition à l'entrée, en points de base (10000 = 100 %). */
-export const FOUNDER_ENTRY_BASIS_POINTS = 5100;
-export const IGNITUX_ENTRY_BASIS_POINTS = 4900;
+  "Le modèle IGNITUX distingue trois choses. Le capital : la structure de départ actuelle est " +
+  "51 % pour l'entrepreneur et 49 % pour Ignitux, valeur de départ propre à chaque accord et " +
+  "jamais une règle ; la part d'Ignitux ne fait que baisser, par paliers validés par Ignitux, " +
+  "jusqu'à 0 %, et aucun palier ne dépend du temps. Le droit sur les dividendes : uniquement " +
+  'une fois le capital entièrement transmis, 5 % des dividendes réellement versés (taux par ' +
+  "défaut de l'accord), distinct du capital — ce n'est pas une part de capital. L'accès à " +
+  "l'écosystème Ignitux : défini par l'accord, indépendant des deux autres. Ignitux calcule ce " +
+  "droit sur les dividendes que tu enregistres, et rien d'autre : ni valorisation du projet, ni " +
+  "prix de rachat, ni dividende prévisionnel. Les conditions qui déclenchent un palier ne sont " +
+  "pas chiffrées par Ignitux : elles sont définies projet par projet.";
 
 /**
- * Part des dividendes reversée à Ignitux à perpétuité : 5 %, soit 500
- * points de base. Elle porte sur les dividendes RÉELLEMENT VERSÉS, jamais
- * sur le chiffre d'affaires ni sur le bénéfice brut — la distinction est
- * dans le modèle et elle change tout.
+ * Répartition d'entrée actuelle, en points de base (10000 = 100 %).
+ *
+ * Valeurs PAR DÉFAUT d'un nouvel accord, pas une règle : un accord recopie
+ * ces valeurs à sa création puis porte les siennes. La source unique est
+ * `participation/participation-model.ts`.
+ */
+export const FOUNDER_ENTRY_BASIS_POINTS = DEFAULT_ENTRY_SPLIT.founderBasisPoints;
+export const IGNITUX_ENTRY_BASIS_POINTS = DEFAULT_ENTRY_SPLIT.ignituxBasisPoints;
+
+/**
+ * ANCIEN MÉCANISME du moteur investisseurs — à ne pas confondre avec le droit
+ * économique du nouveau modèle de participation.
+ *
+ * Le moteur investisseurs (`investors/`) peut prélever 5 % d'un versement
+ * quand on le lui demande explicitement, à n'importe quel moment. Ce n'est PAS
+ * le droit économique d'IGNITUX : celui-là n'existe qu'une fois le capital
+ * entièrement transmis, est porté par l'accord et enregistré à part
+ * (`participation/`, `dividend_right_entries`). Cette constante reste pour ne
+ * rien casser sur les projets existants ; elle sera nettoyée dans une étape
+ * ultérieure, une fois le nouveau mécanisme adopté partout.
+ *
+ * 5 % = 500 points de base, sur les dividendes RÉELLEMENT VERSÉS, jamais sur
+ * le chiffre d'affaires ni sur le bénéfice brut.
  */
 export const PERPETUAL_DIVIDEND_BASIS_POINTS = 500;
 

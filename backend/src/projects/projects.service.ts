@@ -22,6 +22,7 @@ import { WorkflowService } from '../igini/workflow/workflow.service.js';
 import { FormerService, type LegalFormRecommendationResult } from '../igini/former/former.service.js';
 import { OffresService } from '../offres/offres.service.js';
 import { contextePersonne } from '../profile/contexte-personne.js';
+import { chargerContexteParticipation } from '../participation/participation-context.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
@@ -296,6 +297,17 @@ export class ProjectsService {
     }
   }
 
+  /**
+   * Où en est la participation d'IGNITUX dans ce projet, pour IGINI.
+   *
+   * Seulement pour les étapes où elle compte (construire, financer,
+   * développer, transmettre) : l'analyse et la forme juridique précèdent
+   * tout accord. L'échec est avalé dans le chargeur.
+   */
+  private participationContext(projectId: string): Promise<string | undefined> {
+    return chargerContexteParticipation(this.prisma, projectId);
+  }
+
   private joinContext(...parts: Array<string | undefined>): string | undefined {
     const present = parts.filter((part): part is string => Boolean(part));
     return present.length > 0 ? present.join('\n') : undefined;
@@ -492,12 +504,13 @@ export class ProjectsService {
 
   async createBuildPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
-    const [personne, memory, analysis] = await Promise.all([
+    const [personne, memory, analysis, participation] = await Promise.all([
       this.personContext(ownerId),
       this.memoryContext(ownerId, id),
       this.latestAnalysisContext(id),
+      this.participationContext(id),
     ]);
-    const context = this.joinContext(personne, memory, analysis);
+    const context = this.joinContext(personne, memory, analysis, participation);
     const result = await this.planningService.createBuildPlan(
       project.title,
       project.description,
@@ -535,13 +548,14 @@ export class ProjectsService {
 
   async createFinancingPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
-    const [personne, memory, analysis, buildPlan] = await Promise.all([
+    const [personne, memory, analysis, buildPlan, participation] = await Promise.all([
       this.personContext(ownerId),
       this.memoryContext(ownerId, id),
       this.latestAnalysisContext(id),
       this.latestBuildPlanContext(id),
+      this.participationContext(id),
     ]);
-    const context = this.joinContext(personne, memory, analysis, buildPlan);
+    const context = this.joinContext(personne, memory, analysis, buildPlan, participation);
     const result = await this.financingService.createFinancingPlan(
       project.title,
       project.description,
@@ -582,14 +596,15 @@ export class ProjectsService {
 
   async createDevelopmentPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
-    const [personne, memory, analysis, buildPlan, financingPlan] = await Promise.all([
+    const [personne, memory, analysis, buildPlan, financingPlan, participation] = await Promise.all([
       this.personContext(ownerId),
       this.memoryContext(ownerId, id),
       this.latestAnalysisContext(id),
       this.latestBuildPlanContext(id),
       this.latestFinancingPlanContext(id),
+      this.participationContext(id),
     ]);
-    const context = this.joinContext(personne, memory, analysis, buildPlan, financingPlan);
+    const context = this.joinContext(personne, memory, analysis, buildPlan, financingPlan, participation);
     const result = await this.developmentService.createDevelopmentPlan(
       project.title,
       project.description,
@@ -630,7 +645,7 @@ export class ProjectsService {
 
   async createTransmissionPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
-    const [personne, memory, analysis, buildPlan, financingPlan, developmentPlan] =
+    const [personne, memory, analysis, buildPlan, financingPlan, developmentPlan, participation] =
       await Promise.all([
       this.personContext(ownerId),
       this.memoryContext(ownerId, id),
@@ -638,6 +653,7 @@ export class ProjectsService {
       this.latestBuildPlanContext(id),
       this.latestFinancingPlanContext(id),
       this.latestDevelopmentPlanContext(id),
+      this.participationContext(id),
     ]);
     const context = this.joinContext(
       personne,
@@ -646,6 +662,7 @@ export class ProjectsService {
       buildPlan,
       financingPlan,
       developmentPlan,
+      participation,
     );
     const result = await this.transmissionService.createTransmissionPlan(
       project.title,

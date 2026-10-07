@@ -12,6 +12,11 @@ import {
   type OffreId,
 } from './offres-catalogue.js';
 
+/** La place d'une offre dans la progression du catalogue : plus haut = plus complète. */
+function rang(id: OffreId): number {
+  return CATALOGUE.findIndex((o) => o.id === id);
+}
+
 /**
  * L'OFFRE D'UNE PERSONNE — la lire, la changer, et refuser ce qu'elle ne
  * couvre pas.
@@ -53,6 +58,39 @@ export class OffresService {
    * quelqu'un de son produit à cause d'un incident de base.
    */
   async offreDe(userId: string): Promise<OffreId> {
+    const abonnement = await this.offreDeAbonnement(userId);
+    const accord = await this.offreDesAccords(userId);
+    return accord !== null && rang(accord) > rang(abonnement) ? accord : abonnement;
+  }
+
+  /**
+   * L'offre garantie par un accord de participation IGNITUX, ou null.
+   *
+   * L'accès à l'écosystème tient à l'accord, jamais au capital : on ne lit
+   * donc que le statut de l'accord (actif ou transmis), pas la part
+   * d'IGNITUX. Un entrepreneur arrivé à 100 % garde ce que son accord prévoit.
+   *
+   * Une lecture qui échoue ne retire rien : on retombe sur l'abonnement,
+   * comme `offreDeAbonnement` retombe sur le repli.
+   */
+  private async offreDesAccords(userId: string): Promise<OffreId | null> {
+    try {
+      const accords = await this.prisma.participation_agreements.findMany({
+        where: { project: { owner_id: userId }, status: { in: ['actif', 'transmis'] } },
+        select: { ecosystem_offre: true },
+      });
+      const offres = accords.map((a) => a.ecosystem_offre).filter(estOffre);
+      return offres.length === 0 ? null : offres.reduce((meilleure, o) => (rang(o) > rang(meilleure) ? o : meilleure));
+    } catch (error) {
+      this.logger.error(
+        `Lecture des accords de participation impossible pour ${userId} — l'abonnement seul s'applique. ` +
+          (error instanceof Error ? error.message : String(error)),
+      );
+      return null;
+    }
+  }
+
+  private async offreDeAbonnement(userId: string): Promise<OffreId> {
     try {
       const ligne = await this.prisma.subscriptions.findUnique({
         where: { user_id: userId },
