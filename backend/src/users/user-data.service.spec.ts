@@ -218,6 +218,23 @@ describe('UserDataService', () => {
       ]);
     });
 
+    it('inclut les statuts générés, avec leurs associés, pour les projets de la personne', async () => {
+      prisma.projects.findMany.mockResolvedValue([{ id: 'p1' }]);
+      prisma.company_bylaws.findMany.mockResolvedValue([
+        { id: 'b1', project_id: 'p1', associates: [{ full_name: 'Alice', share_basis_points: 10000 }] },
+      ]);
+
+      const exported = await service.exportUserData('u1');
+
+      expect(prisma.company_bylaws.findMany).toHaveBeenCalledWith({
+        where: { project_id: { in: ['p1'] } },
+        include: { associates: true },
+      });
+      expect(exported.donnees.contenus_generes_par_igini.statuts).toEqual([
+        { id: 'b1', project_id: 'p1', associates: [{ full_name: 'Alice', share_basis_points: 10000 }] },
+      ]);
+    });
+
     it('inclut le journal des violations qui concernent la personne', async () => {
       prisma.constitution_violations.findMany.mockResolvedValue([{ id: 'v1', user_id: 'u1' }]);
 
