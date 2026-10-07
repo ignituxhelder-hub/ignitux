@@ -1,9 +1,23 @@
-import type { INestApplication } from '@nestjs/common';
+import { NotFoundException, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { inflateSync } from 'node:zlib';
 import request from 'supertest';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { StatutsController } from './statuts.controller.js';
 import { StatutsService } from './statuts.service.js';
+
+/** Texte (hex WinAnsi) des flux décompressés du PDF. */
+function flux(b: Buffer): string {
+  let out = '';
+  for (const m of b.toString('latin1').matchAll(/stream\r?\n([\s\S]*?)endstream/g)) {
+    try {
+      out += [...inflateSync(Buffer.from(m[1], 'latin1')).toString('latin1').matchAll(/<([0-9a-f]+)>/g)].map((x) => x[1]).join('');
+    } catch {
+      // flux non Flate : ignoré
+    }
+  }
+  return out;
+}
 
 describe('StatutsController', () => {
   let controller: StatutsController;
@@ -71,7 +85,9 @@ describe('StatutsController', () => {
     service.obtenirPourProjet = vi.fn().mockResolvedValue(null);
     const res = { set: vi.fn(), send: vi.fn() } as any;
 
-    await expect(controller.telechargerPdf(user, 'p1', res)).rejects.toThrow();
+    await expect(controller.telechargerPdf(user, 'p1', res)).rejects.toBeInstanceOf(NotFoundException);
+    expect(res.set).not.toHaveBeenCalled();
+    expect(res.send).not.toHaveBeenCalled();
   });
 });
 
@@ -122,8 +138,40 @@ describe('StatutsController GET pdf (HTTP)', () => {
     expect(service.obtenirPourProjet).toHaveBeenCalledWith('user-1', projectId);
   });
 
+  describe('marqueur de brouillon', () => {
+    const telecharger = async (status: string) => {
+      service.obtenirPourProjet.mockResolvedValue({ id: 'b1', status, content: 'Corps' });
+      const res = await request(app.getHttpServer())
+        .get(`/projects/${projectId}/statuts/pdf`)
+        .buffer(true)
+        .parse((r, cb) => {
+          const chunks: Buffer[] = [];
+          r.on('data', (c: Buffer) => chunks.push(c));
+          r.on('end', () => cb(null, Buffer.concat(chunks)));
+        });
+      return flux(res.body as Buffer);
+    };
+    const MARQUEUR_HEX = '42726f75696c6c6f6e20' + '9720e0';
+
+    it('un brouillon porte le marqueur', async () => {
+      expect(await telecharger('brouillon')).toContain(MARQUEUR_HEX);
+    });
+
+    it('un statut inconnu compte comme brouillon', async () => {
+      expect(await telecharger('autre')).toContain(MARQUEUR_HEX);
+    });
+
+    it('une version retenue ne porte pas le marqueur', async () => {
+      expect(await telecharger('retenue')).not.toContain('42726f75696c6c6f6e');
+    });
+  });
+
   it('404 quand le service renvoie null', async () => {
     service.obtenirPourProjet.mockResolvedValue(null);
-    await request(app.getHttpServer()).get(`/projects/${projectId}/statuts/pdf`).expect(404);
+    const res = await request(app.getHttpServer()).get(`/projects/${projectId}/statuts/pdf`);
+
+    expect(res.status).toBe(404);
+    expect(service.obtenirPourProjet).toHaveBeenCalledWith('user-1', projectId);
+    expect(res.body.message).toBe('Statuts introuvables pour ce projet.');
   });
 });

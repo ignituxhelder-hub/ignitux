@@ -63,7 +63,7 @@ export class StatutsController {
     if (!bylaws) {
       throw new NotFoundException('Statuts introuvables pour ce projet.');
     }
-    const pdf = await genererPdfStatuts(bylaws.content);
+    const pdf = await genererPdfStatuts(bylaws.content, { brouillon: bylaws.status !== 'retenue' });
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'attachment; filename="statuts.pdf"',
