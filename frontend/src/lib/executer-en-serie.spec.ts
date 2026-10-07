@@ -2,7 +2,42 @@ import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from './api';
 import { executerEnSerie } from './executer-en-serie';
 
+/** Laisse passer les micro-tâches en attente. */
+const souffler = () => new Promise<void>((r) => setTimeout(r, 0));
+
 describe('executerEnSerie', () => {
+  it("ne lance le suivant qu'une fois le précédent résolu (promesses contrôlées)", async () => {
+    const resolveurs: Array<(v: string) => void> = [];
+    const lancer = vi.fn(
+      (id: string) => new Promise<string>((resolve) => resolveurs.push((v) => resolve(`${id}:${v}`))),
+    );
+
+    const fini = executerEnSerie(['a', 'b'], lancer, vi.fn());
+
+    await souffler();
+    expect(lancer).toHaveBeenCalledTimes(1);
+    expect(lancer).toHaveBeenLastCalledWith('a');
+
+    resolveurs[0]('ok');
+    await souffler();
+    expect(lancer).toHaveBeenCalledTimes(2);
+    expect(lancer).toHaveBeenLastCalledWith('b');
+
+    resolveurs[1]('ok');
+    expect(await fini).toEqual({ traites: 2, arretePourLimite: false, restants: [] });
+  });
+
+  it('ne fait rien avec une liste vide', async () => {
+    const lancer = vi.fn();
+    const onProgres = vi.fn();
+
+    const bilan = await executerEnSerie([], lancer, onProgres);
+
+    expect(bilan).toEqual({ traites: 0, arretePourLimite: false, restants: [] });
+    expect(lancer).not.toHaveBeenCalled();
+    expect(onProgres).not.toHaveBeenCalled();
+  });
+
   it('traite tous les ids, strictement l\'un après l\'autre', async () => {
     const journal: string[] = [];
     const lancer = vi.fn(async (id: string) => {
@@ -41,10 +76,13 @@ describe('executerEnSerie', () => {
       throw new ApiError('Générateurs indisponibles.', 503);
     });
 
-    const bilan = await executerEnSerie(['a', 'b'], lancer, vi.fn());
+    const onProgres = vi.fn();
+    const bilan = await executerEnSerie(['a', 'b'], lancer, onProgres);
 
     expect(bilan).toEqual({ traites: 0, arretePourLimite: true, restants: ['a', 'b'] });
     expect(lancer).toHaveBeenCalledTimes(1);
+    const arrets = onProgres.mock.calls.filter(([info]) => info.etat === 'arret');
+    expect(arrets).toEqual([[{ id: 'a', etat: 'arret', message: 'Générateurs indisponibles.' }]]);
   });
 
   it('marque un id en échec sur toute autre erreur et continue', async () => {

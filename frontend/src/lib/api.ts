@@ -203,10 +203,23 @@ const JAMAIS_EN_FILE = [
   '/users/signup',
 ];
 
+// Les routes d'exécution IA portent des ids au milieu du chemin : on les
+// reconnaît par motif. Lancer une exécution coûte de l'argent (quota, coût
+// IA) et ne doit pas être rejoué plus tard à l'insu de la personne ; valider
+// ou refuser un résultat doit être un geste explicite et confirmé, pas une
+// promesse « en attente » qui ressemble à une action faite.
+const JAMAIS_EN_FILE_MOTIFS = [
+  /^\/projects\/[^/]+\/tasks\/[^/]+\/(run|validate|refuse)$/,
+  /^\/projects\/[^/]+\/compliance\/[^/]+\/(run|validate|refuse)$/,
+];
+
 function handleOffline<T>(path: string, options: RequestInit): Promise<T> {
   const method = (options.method ?? 'GET').toUpperCase();
 
-  if (JAMAIS_EN_FILE.some((route) => path === route || path.startsWith(`${route}/`))) {
+  if (
+    JAMAIS_EN_FILE.some((route) => path === route || path.startsWith(`${route}/`)) ||
+    JAMAIS_EN_FILE_MOTIFS.some((motif) => motif.test(path))
+  ) {
     throw new ApiError(
       'Pas de réseau. Ce type de demande ne peut pas être mis de côté pour plus ' +
         'tard — réessaie une fois la connexion revenue. Rien n’a été enregistré ' +

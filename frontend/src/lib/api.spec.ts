@@ -369,4 +369,33 @@ describe('api — exécution IA des tâches et de la conformité', () => {
     expect(url).toMatch(/\/projects\/p\/compliance\/r1\/refuse$/);
     expect(JSON.parse(init.body as string)).toEqual({ reason: 'Non' });
   });
+  describe('hors ligne : jamais mises en file', () => {
+    afterEach(() => setOfflineStorage(null));
+
+    const appels: Array<[string, () => Promise<unknown>]> = [
+      ['runTask', () => api.runTask('t', 'p', 'x')],
+      ['validateTask', () => api.validateTask('t', 'p', 'x')],
+      ['refuseTask', () => api.refuseTask('t', 'p', 'x', 'non')],
+      ['runCompliance', () => api.runCompliance('t', 'p', 'r1')],
+      ['validateCompliance', () => api.validateCompliance('t', 'p', 'r1')],
+      ['refuseCompliance', () => api.refuseCompliance('t', 'p', 'r1', 'non')],
+    ];
+
+    it.each(appels)('%s échoue au lieu d’entrer en file', async (_nom, appel) => {
+      const entries = new Map<string, string>();
+      setOfflineStorage({
+        get length() {
+          return entries.size;
+        },
+        key: (i: number) => [...entries.keys()][i] ?? null,
+        getItem: (k: string) => entries.get(k) ?? null,
+        setItem: (k: string, v: string) => void entries.set(k, v),
+        removeItem: (k: string) => void entries.delete(k),
+      });
+      global.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+
+      await expect(appel()).rejects.toMatchObject({ name: 'ApiError', message: expect.stringContaining('mis de côté') });
+      expect(entries.size).toBe(0);
+    });
+  });
 });
