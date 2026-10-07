@@ -9,6 +9,7 @@ const FORMES_AVEC_PERSONNE_MORALE = new Set(['EURL', 'SASU', 'SARL', 'SAS']);
 const TOTAL_BASIS_POINTS = 10000;
 
 interface AssocieSaisie {
+  id: number;
   fullName: string;
   sharePercent: string;
 }
@@ -61,6 +62,13 @@ function saisieDepuisCentiemes(valeur: number): string {
   return Number.isInteger(unites) ? String(unites) : unites.toFixed(2).replace('.', ',');
 }
 
+let prochainIdAssocie = 0;
+/** Un identifiant stable par ligne : l'index ne l'est pas quand on en retire une. */
+function nouvelAssocie(fullName = '', sharePercent = ''): AssocieSaisie {
+  prochainIdAssocie += 1;
+  return { id: prochainIdAssocie, fullName, sharePercent };
+}
+
 /**
  * STATUTS — brouillon à relire, jamais un document prêt à déposer sans
  * contrôle. Même principe que Former et que le mandat : une aide, pas une
@@ -77,20 +85,27 @@ export function StatutsSection({
   confirmedLegalForm: string | null;
   onFormConfirmed: (form: string) => void;
 }) {
-  const [formeChoisie, setFormeChoisie] = useState(confirmedLegalForm ?? 'micro-entreprise');
+  // Vide tant que rien n'est choisi : jamais une forme présélectionnée « au
+  // hasard » — la personne confirme une décision, on ne la prend pas pour elle.
+  const [formeChoisie, setFormeChoisie] = useState(confirmedLegalForm ?? '');
+  const [changerForme, setChangerForme] = useState(false);
+  // `bylaws` = la dernière version connue du serveur ; `texte` = ce qui est
+  // dans la zone de saisie. Leur écart, c'est « modifications non enregistrées ».
   const [bylaws, setBylaws] = useState<CompanyBylaws | null>(null);
+  const [texte, setTexte] = useState('');
   // Le projet pour lequel le chargement a abouti. Dérivé plutôt qu'un
   // booléen posé dans l'effet : quand la forme confirmée passe de « aucune »
   // à une société, le tout premier rendu doit déjà être « Chargement… », sinon
   // le formulaire de génération vide clignote avant que le chargement ne
   // démarre — et quelqu'un qui a déjà des statuts ne doit jamais le voir.
   const [projetCharge, setProjetCharge] = useState<string | null>(null);
+  const [chargementEchoue, setChargementEchoue] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [capital, setCapital] = useState('');
   const [headOffice, setHeadOffice] = useState('');
   const [durationYears, setDurationYears] = useState('99');
-  const [associes, setAssocies] = useState<AssocieSaisie[]>([{ fullName: '', sharePercent: '100' }]);
+  const [associes, setAssocies] = useState<AssocieSaisie[]>(() => [nouvelAssocie('', '100')]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -100,13 +115,24 @@ export function StatutsSection({
   const aPersonneMorale = confirmedLegalForm ? FORMES_AVEC_PERSONNE_MORALE.has(confirmedLegalForm) : false;
   const isLoading = aPersonneMorale && projetCharge !== projectId;
   const isBusy = isGenerating || isSaving || isRetaining || isDownloading;
+  const modifie = bylaws !== null && texte !== bylaws.content;
+
+  /** Toute réponse du serveur remplace l'état local ; `associates` n'est jamais supposé présent. */
+  const recevoir = (recu: CompanyBylaws | null) => {
+    setBylaws(recu ? { ...recu, associates: recu.associates ?? [] } : null);
+    setTexte(recu?.content ?? '');
+  };
 
   const charger = useCallback(async () => {
     if (!aPersonneMorale) return;
+    setChargementEchoue(false);
     try {
-      setBylaws(await api.getStatuts(token, projectId));
+      const recu = await api.getStatuts(token, projectId);
+      setBylaws(recu ? { ...recu, associates: recu.associates ?? [] } : null);
+      setTexte(recu?.content ?? '');
       setError(null);
     } catch (err) {
+      setChargementEchoue(true);
       setError(err instanceof ApiError ? err.message : 'Impossible de charger les statuts.');
     } finally {
       setProjetCharge(projectId);
@@ -117,14 +143,46 @@ export function StatutsSection({
     void charger();
   }, [charger]);
 
+  const reessayer = () => {
+    setProjetCharge(null);
+    void charger();
+  };
+
+  // Sans forme confirmée : on propose la dernière recommandation de Former
+  // (la plus récente d'abord), que la personne reste libre de changer.
+  useEffect(() => {
+    if (confirmedLegalForm) return;
+    let annule = false;
+    api
+      .listLegalFormRecommendations(token, projectId)
+      .then((recommandations) => {
+        const forme = Array.isArray(recommandations) ? recommandations[0]?.recommended_form : undefined;
+        if (!annule && forme && (FORMES as readonly string[]).includes(forme)) {
+          setFormeChoisie((courante) => courante || forme);
+        }
+      })
+      .catch(() => undefined); // un confort : sans lui, la personne choisit elle-même
+    return () => {
+      annule = true;
+    };
+  }, [token, projectId, confirmedLegalForm]);
+
   const confirmerForme = async () => {
+    if (!formeChoisie) return;
     setError(null);
     try {
       await api.confirmerFormeJuridique(token, projectId, formeChoisie);
+      setChangerForme(false);
       onFormConfirmed(formeChoisie);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de confirmer la forme juridique.');
     }
+  };
+
+  const ouvrirChangementForme = () => {
+    setError(null);
+    setFormeChoisie(confirmedLegalForm ?? '');
+    setChangerForme(true);
   };
 
   const genererStatuts = async () => {
@@ -137,10 +195,10 @@ export function StatutsSection({
     setIsGenerating(true);
     try {
       if (isRegenerating) {
-        setBylaws(await api.regenererStatuts(token, projectId, demande.dto));
+        recevoir(await api.regenererStatuts(token, projectId, demande.dto));
         setIsRegenerating(false);
       } else {
-        setBylaws(await api.genererStatuts(token, projectId, demande.dto));
+        recevoir(await api.genererStatuts(token, projectId, demande.dto));
       }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'La génération a échoué.');
@@ -156,23 +214,20 @@ export function StatutsSection({
     setCapital(saisieDepuisCentiemes(bylaws.capital_cents));
     setHeadOffice(bylaws.head_office);
     setDurationYears(String(bylaws.duration_years));
+    const existants = bylaws.associates ?? [];
     setAssocies(
-      bylaws.associates.length > 0
-        ? bylaws.associates.map((a) => ({
-            fullName: a.full_name,
-            sharePercent: saisieDepuisCentiemes(a.share_basis_points),
-          }))
-        : [{ fullName: '', sharePercent: '100' }],
+      existants.length > 0
+        ? existants.map((a) => nouvelAssocie(a.full_name, saisieDepuisCentiemes(a.share_basis_points)))
+        : [nouvelAssocie('', '100')],
     );
     setIsRegenerating(true);
   };
 
   const enregistrer = async () => {
-    if (!bylaws) return;
     setError(null);
     setIsSaving(true);
     try {
-      setBylaws(await api.modifierStatuts(token, projectId, bylaws.content));
+      recevoir(await api.modifierStatuts(token, projectId, texte));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Impossible d'enregistrer les modifications.");
     } finally {
@@ -181,10 +236,15 @@ export function StatutsSection({
   };
 
   const retenir = async () => {
+    // Irréversible : on le dit, et on attend un accord explicite.
+    const accord = window.confirm(
+      'Retenir cette version la verrouille définitivement : tu ne pourras plus ni la modifier ni la régénérer. Continuer ?',
+    );
+    if (!accord) return;
     setError(null);
     setIsRetaining(true);
     try {
-      setBylaws(await api.retenirStatuts(token, projectId));
+      recevoir(await api.retenirStatuts(token, projectId));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de retenir cette version.');
     } finally {
@@ -212,8 +272,8 @@ export function StatutsSection({
     }
   };
 
-  const modifierAssocie = (index: number, changement: Partial<AssocieSaisie>) => {
-    setAssocies((courants) => courants.map((a, i) => (i === index ? { ...a, ...changement } : a)));
+  const modifierAssocie = (id: number, changement: Partial<AssocieSaisie>) => {
+    setAssocies((courants) => courants.map((a) => (a.id === id ? { ...a, ...changement } : a)));
   };
 
   if (isLoading) {
@@ -225,14 +285,20 @@ export function StatutsSection({
     );
   }
 
+  const montrerChoixForme = !confirmedLegalForm || changerForme;
+
   return (
     <div className="card">
       <h2>Statuts</h2>
       {error && <p className="error">{error}</p>}
 
-      {!confirmedLegalForm && (
+      {montrerChoixForme && (
         <>
-          <p className="muted">Confirme d&apos;abord la forme juridique retenue pour ce projet.</p>
+          <p className="muted">
+            {confirmedLegalForm
+              ? 'Choisis la forme juridique à confirmer à la place de la forme actuelle.'
+              : "Confirme d'abord la forme juridique retenue pour ce projet."}
+          </p>
           <label htmlFor="statuts-forme">Forme juridique</label>
           <select
             id="statuts-forme"
@@ -240,16 +306,33 @@ export function StatutsSection({
             value={formeChoisie}
             onChange={(e) => setFormeChoisie(e.target.value)}
           >
+            <option value="" disabled>
+              Choisir une forme…
+            </option>
             {FORMES.map((f) => (
               <option key={f} value={f}>
                 {f}
               </option>
             ))}
           </select>
-          <button className="primary" type="button" onClick={confirmerForme}>
+          <button className="primary" type="button" onClick={confirmerForme} disabled={!formeChoisie}>
             Confirmer cette forme
           </button>
+          {changerForme && (
+            <button className="secondary" type="button" onClick={() => setChangerForme(false)}>
+              Annuler
+            </button>
+          )}
         </>
+      )}
+
+      {confirmedLegalForm && !changerForme && (
+        <p className="muted">
+          Forme juridique confirmée : {confirmedLegalForm}.{' '}
+          <button className="secondary" type="button" onClick={ouvrirChangementForme}>
+            Modifier la forme
+          </button>
+        </p>
       )}
 
       {confirmedLegalForm && !aPersonneMorale && (
@@ -259,7 +342,15 @@ export function StatutsSection({
         </p>
       )}
 
-      {confirmedLegalForm && aPersonneMorale && (!bylaws || isRegenerating) && (
+      {confirmedLegalForm && aPersonneMorale && chargementEchoue && (
+        // Jamais le formulaire de génération ici : la génération écrase les
+        // statuts existants, et on ne sait pas s'il y en a.
+        <button className="secondary" type="button" onClick={reessayer}>
+          Réessayer
+        </button>
+      )}
+
+      {confirmedLegalForm && aPersonneMorale && !chargementEchoue && (!bylaws || isRegenerating) && (
         <>
           <p className="notice">
             Ce qui suit est un brouillon à relire — jamais un document prêt à déposer sans contrôle.
@@ -292,28 +383,34 @@ export function StatutsSection({
             onChange={(e) => setDurationYears(e.target.value)}
           />
           {associes.map((associe, index) => (
-            <div key={index}>
-              <label htmlFor={`statuts-associe-nom-${index}`}>Nom de l&apos;associé {index + 1}</label>
+            <div key={associe.id}>
+              <label htmlFor={`statuts-associe-nom-${associe.id}`}>Nom de l&apos;associé {index + 1}</label>
               <input
-                id={`statuts-associe-nom-${index}`}
+                id={`statuts-associe-nom-${associe.id}`}
                 aria-label={`Nom de l'associé ${index + 1}`}
                 value={associe.fullName}
-                onChange={(e) => modifierAssocie(index, { fullName: e.target.value })}
+                onChange={(e) => modifierAssocie(associe.id, { fullName: e.target.value })}
               />
-              <label htmlFor={`statuts-associe-part-${index}`}>Part de l&apos;associé {index + 1} (%)</label>
+              <label htmlFor={`statuts-associe-part-${associe.id}`}>Part de l&apos;associé {index + 1} (%)</label>
               <input
-                id={`statuts-associe-part-${index}`}
+                id={`statuts-associe-part-${associe.id}`}
                 aria-label={`Part de l'associé ${index + 1} (%)`}
                 value={associe.sharePercent}
-                onChange={(e) => modifierAssocie(index, { sharePercent: e.target.value })}
+                onChange={(e) => modifierAssocie(associe.id, { sharePercent: e.target.value })}
               />
+              {associes.length > 1 && (
+                <button
+                  className="secondary"
+                  type="button"
+                  aria-label={`Retirer l'associé ${index + 1}`}
+                  onClick={() => setAssocies((courants) => courants.filter((a) => a.id !== associe.id))}
+                >
+                  Retirer
+                </button>
+              )}
             </div>
           ))}
-          <button
-            className="secondary"
-            type="button"
-            onClick={() => setAssocies([...associes, { fullName: '', sharePercent: '' }])}
-          >
+          <button className="secondary" type="button" onClick={() => setAssocies([...associes, nouvelAssocie()])}>
             Ajouter un associé
           </button>
           <button className="primary" type="button" onClick={genererStatuts} disabled={isGenerating}>
@@ -327,7 +424,7 @@ export function StatutsSection({
         </>
       )}
 
-      {confirmedLegalForm && aPersonneMorale && bylaws && !isRegenerating && (
+      {confirmedLegalForm && aPersonneMorale && !chargementEchoue && bylaws && !isRegenerating && (
         <>
           {bylaws.status === 'brouillon' && (
             <p className="notice">
@@ -337,21 +434,23 @@ export function StatutsSection({
           {bylaws.legal_form !== confirmedLegalForm && (
             <p className="error">
               Ce texte a été généré pour « {bylaws.legal_form} », mais la forme confirmée sur ce
-              projet est maintenant « {confirmedLegalForm} ». Le contenu n&apos;a pas suivi ce
-              changement automatiquement — régénère si tu veux qu&apos;il corresponde à la forme
-              actuelle.
+              projet est maintenant « {confirmedLegalForm} ».{' '}
+              {bylaws.status === 'retenue'
+                ? 'Cette version est retenue : elle est verrouillée et ne peut plus être régénérée.'
+                : "Le contenu n'a pas suivi ce changement automatiquement — régénère si tu veux qu'il corresponde à la forme actuelle."}
             </p>
           )}
           <label htmlFor="statuts-texte">Texte des statuts</label>
           <textarea
             id="statuts-texte"
             aria-label="Texte des statuts"
-            value={bylaws.content}
+            value={texte}
             readOnly={bylaws.status === 'retenue'}
-            onChange={(e) => setBylaws({ ...bylaws, content: e.target.value })}
+            onChange={(e) => setTexte(e.target.value)}
             rows={20}
             style={{ width: '100%' }}
           />
+          {modifie && <p className="notice">Modifications non enregistrées</p>}
           {bylaws.status === 'brouillon' && (
             <>
               <button className="secondary" type="button" onClick={enregistrer} disabled={isBusy}>
@@ -360,13 +459,13 @@ export function StatutsSection({
               <button className="secondary" type="button" onClick={ouvrirRegeneration} disabled={isBusy}>
                 Régénérer
               </button>
-              <button className="primary" type="button" onClick={retenir} disabled={isBusy}>
+              <button className="primary" type="button" onClick={retenir} disabled={isBusy || modifie}>
                 {isRetaining ? 'Enregistrement…' : 'Retenir cette version'}
               </button>
             </>
           )}
           {bylaws.status === 'retenue' && <p className="muted">Version retenue le {jour(bylaws.finalized_at)}</p>}
-          <button className="secondary" type="button" onClick={telecharger} disabled={isBusy}>
+          <button className="secondary" type="button" onClick={telecharger} disabled={isBusy || modifie}>
             {isDownloading ? 'Téléchargement…' : 'Télécharger en PDF'}
           </button>
         </>

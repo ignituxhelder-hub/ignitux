@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockApiRoutes } from '@/test-utils/mocks';
 import { StatutsSection } from './statuts-section';
 
@@ -181,6 +181,11 @@ describe('StatutsSection', () => {
     ];
     const brouillon = () => bylaws({ content: 'Article 1 — Forme', associates: associes });
 
+    beforeEach(() => {
+      // Retenir demande confirmation (irréversible) : accordée par défaut ici.
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+    });
+
     function rendre(forme = 'SASU') {
       return render(
         <StatutsSection token={TOKEN} projectId={PROJECT_ID} confirmedLegalForm={forme} onFormConfirmed={vi.fn()} />,
@@ -317,7 +322,7 @@ describe('StatutsSection', () => {
       expect(await screen.findByDisplayValue('Texte tout juste généré')).toBeInTheDocument();
     });
 
-    it('télécharge le PDF avec l’en-tête Authorization, via un lien blob temporaire', async () => {
+    it('télécharge le PDF avec l’en-tête Authorization, et ne révoque l’URL blob qu’après un délai', async () => {
       const fetchMock = vi.fn().mockImplementation((url: string) => {
         const pdf = String(url).endsWith('/statuts/pdf');
         return Promise.resolve({
@@ -328,20 +333,40 @@ describe('StatutsSection', () => {
         });
       });
       global.fetch = fetchMock as unknown as typeof fetch;
-      const createObjectURL = vi.fn().mockReturnValue('blob:statuts');
-      const revokeObjectURL = vi.fn();
-      Object.assign(URL, { createObjectURL, revokeObjectURL });
+      // jsdom n'a pas ces fonctions : on les définit, puis on les espionne
+      // (vi.restoreAllMocks les remet à l'état de départ après chaque test).
+      Object.defineProperty(URL, 'createObjectURL', { configurable: true, writable: true, value: () => '' });
+      Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, writable: true, value: () => undefined });
+      const createObjectURL = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:statuts');
+      const revokeObjectURL = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
       const clic = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
 
       rendre();
-      fireEvent.click(await screen.findByRole('button', { name: /télécharger en pdf/i }));
+      const bouton = await screen.findByRole('button', { name: /télécharger en pdf/i });
+      // Seul setTimeout est simulé : les promesses (fetch simulé) restent réelles.
+      vi.useFakeTimers({ toFake: ['setTimeout'] });
+      try {
+        fireEvent.click(bouton);
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(0);
+        });
 
-      await waitFor(() => expect(clic).toHaveBeenCalledTimes(1));
-      const appelPdf = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/projects/p1/statuts/pdf'));
-      expect(appelPdf?.[1].headers.Authorization).toBe(`Bearer ${TOKEN}`);
-      expect(createObjectURL).toHaveBeenCalledTimes(1);
-      // Jamais révoquée de façon synchrone : le téléchargement n'a pas encore démarré.
-      expect(revokeObjectURL).not.toHaveBeenCalled();
+        expect(clic).toHaveBeenCalledTimes(1);
+        const appelPdf = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/projects/p1/statuts/pdf'));
+        expect(appelPdf?.[1].headers.Authorization).toBe(`Bearer ${TOKEN}`);
+        expect(createObjectURL).toHaveBeenCalledTimes(1);
+        // Pas de révocation synchrone : le téléchargement n'a pas encore démarré.
+        expect(revokeObjectURL).not.toHaveBeenCalled();
+
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(4000);
+        });
+        expect(revokeObjectURL).toHaveBeenCalledWith('blob:statuts');
+      } finally {
+        vi.useRealTimers();
+        delete (URL as unknown as Record<string, unknown>).createObjectURL;
+        delete (URL as unknown as Record<string, unknown>).revokeObjectURL;
+      }
     });
 
     it("montre l'erreur de l'API quand l'enregistrement échoue", async () => {
@@ -407,21 +432,257 @@ describe('StatutsSection', () => {
       await waitFor(() => expect(screen.getByRole('button', { name: /retenir cette version/i })).toBeEnabled());
     });
 
+    it('forme exacte des réponses du serveur : Régénérer préremplit après génération, enregistrement et rétention', async () => {
+      // Les routes de mutation rendent la même forme que le GET (associés
+      // compris) ; ces corps reprennent les colonnes réelles de la ligne.
+      const reponse = (overrides: Record<string, unknown> = {}) => ({
+        id: 'b1',
+        owner_id: 'u1',
+        project_id: 'p1',
+        legal_form: 'SASU',
+        capital_cents: 250000,
+        head_office: '5 avenue Foch',
+        duration_years: 50,
+        content: 'Texte serveur',
+        status: 'brouillon',
+        finalized_at: null,
+        generated_by: 'igini',
+        generated_model: 'claude-x',
+        created_at: '2026-10-03T10:00:00.000Z',
+        updated_at: '2026-10-03T10:00:00.000Z',
+        associates: [{ id: 'a1', bylaws_id: 'b1', full_name: 'Carole', share_basis_points: 10000 }],
+        ...overrides,
+      });
+      mockApiRoutes({
+        'GET /projects/p1/statuts': { status: 200, body: null },
+        'POST /projects/p1/statuts': { status: 201, body: reponse() },
+        'PATCH /projects/p1/statuts': { status: 200, body: reponse({ content: 'Texte serveur revu' }) },
+      });
+      rendre();
+      await screen.findByLabelText('Capital social (€)');
+      remplirFormulaire();
+      fireEvent.click(screen.getByRole('button', { name: /générer les statuts/i }));
+      await screen.findByDisplayValue('Texte serveur');
+
+      fireEvent.change(screen.getByLabelText('Texte des statuts'), { target: { value: 'Texte serveur revu' } });
+      fireEvent.click(screen.getByRole('button', { name: /enregistrer les modifications/i }));
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Régénérer' })).toBeEnabled());
+      await waitFor(() => expect(screen.queryByText('Modifications non enregistrées')).not.toBeInTheDocument());
+
+      fireEvent.click(screen.getByRole('button', { name: 'Régénérer' }));
+      expect(screen.getByLabelText('Capital social (€)')).toHaveValue('2500');
+      expect(screen.getByLabelText('Siège social')).toHaveValue('5 avenue Foch');
+      expect(screen.getByLabelText('Durée de la société (années)')).toHaveValue('50');
+      expect(screen.getByLabelText("Nom de l'associé 1")).toHaveValue('Carole');
+    });
+
+    it('ne plante pas si une réponse arrive sans associés : Régénérer ouvre un formulaire avec un associé vide', async () => {
+      mockApiRoutes({
+        'GET /projects/p1/statuts': { status: 200, body: null },
+        'POST /projects/p1/statuts': {
+          status: 201,
+          body: { ...bylaws({ content: 'Texte sans associés' }), associates: undefined },
+        },
+      });
+      rendre();
+      await screen.findByLabelText('Capital social (€)');
+      remplirFormulaire();
+      fireEvent.click(screen.getByRole('button', { name: /générer les statuts/i }));
+      await screen.findByDisplayValue('Texte sans associés');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Régénérer' }));
+      expect(screen.getByLabelText('Capital social (€)')).toHaveValue('1000');
+      expect(screen.getByLabelText("Nom de l'associé 1")).toHaveValue('');
+    });
+
+    it('bloque Retenir et le PDF tant que le texte modifié n’est pas enregistré', async () => {
+      mockApiRoutes({
+        'GET /projects/p1/statuts': { status: 200, body: brouillon() },
+        'PATCH /projects/p1/statuts': { status: 200, body: { ...brouillon(), content: 'Texte revu' } },
+      });
+      rendre();
+      expect(await screen.findByRole('button', { name: /retenir cette version/i })).toBeEnabled();
+      expect(screen.queryByText('Modifications non enregistrées')).not.toBeInTheDocument();
+
+      fireEvent.change(screen.getByLabelText('Texte des statuts'), { target: { value: 'Texte revu' } });
+      expect(screen.getByText('Modifications non enregistrées')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /retenir cette version/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /télécharger en pdf/i })).toBeDisabled();
+
+      fireEvent.click(screen.getByRole('button', { name: /enregistrer les modifications/i }));
+      await waitFor(() => expect(screen.queryByText('Modifications non enregistrées')).not.toBeInTheDocument());
+      expect(screen.getByRole('button', { name: /retenir cette version/i })).toBeEnabled();
+      expect(screen.getByRole('button', { name: /télécharger en pdf/i })).toBeEnabled();
+    });
+
+    it('ne retient rien si la confirmation est refusée', async () => {
+      mockApiRoutes({ 'GET /projects/p1/statuts': { status: 200, body: brouillon() } });
+      const confirmer = vi.spyOn(window, 'confirm').mockReturnValue(false);
+      rendre();
+      fireEvent.click(await screen.findByRole('button', { name: /retenir cette version/i }));
+
+      expect(confirmer).toHaveBeenCalledWith(expect.stringMatching(/définitivement/));
+      expect(appelsAvecMethode('POST')).toHaveLength(0);
+      expect(screen.getByRole('button', { name: /retenir cette version/i })).toBeEnabled();
+    });
+
+    it('retient après confirmation, en appelant POST /statuts/retenir', async () => {
+      mockApiRoutes({
+        'GET /projects/p1/statuts': { status: 200, body: brouillon() },
+        'POST /projects/p1/statuts/retenir': {
+          status: 201,
+          body: { ...brouillon(), status: 'retenue', finalized_at: '2026-10-03T10:00:00.000Z' },
+        },
+      });
+      rendre();
+      fireEvent.click(await screen.findByRole('button', { name: /retenir cette version/i }));
+
+      await screen.findByText(/Version retenue le/);
+      const [url] = appelsAvecMethode('POST')[0];
+      expect(String(url)).toMatch(/\/projects\/p1\/statuts\/retenir$/);
+    });
+
+    it('retire un associé à la régénération, et garde au moins une ligne', async () => {
+      mockApiRoutes({
+        'GET /projects/p1/statuts': { status: 200, body: brouillon() },
+        'POST /projects/p1/statuts/regenerer': { status: 201, body: brouillon() },
+      });
+      rendre();
+      fireEvent.click(await screen.findByRole('button', { name: 'Régénérer' }));
+
+      fireEvent.click(screen.getByRole('button', { name: "Retirer l'associé 1" }));
+      expect(screen.queryByLabelText("Nom de l'associé 2")).not.toBeInTheDocument();
+      // Il reste Bob, devenu le premier : ses valeurs ont suivi la ligne.
+      expect(screen.getByLabelText("Nom de l'associé 1")).toHaveValue('Bob');
+      expect(screen.queryByRole('button', { name: /retirer l'associé/i })).not.toBeInTheDocument();
+
+      fireEvent.change(screen.getByLabelText("Part de l'associé 1 (%)"), { target: { value: '100' } });
+      fireEvent.click(screen.getByRole('button', { name: /régénérer les statuts/i }));
+      await waitFor(() => expect(appelsAvecMethode('POST')).toHaveLength(1));
+      const [, options] = appelsAvecMethode('POST')[0];
+      expect(JSON.parse(options.body).associates).toEqual([{ fullName: 'Bob', shareBasisPoints: 10000 }]);
+    });
+
+    it('sur une version retenue, l’avertissement de forme ne propose pas de régénérer', async () => {
+      mockApiRoutes({
+        'GET /projects/p1/statuts': {
+          status: 200,
+          body: { ...brouillon(), status: 'retenue', finalized_at: '2026-10-03T10:00:00.000Z' },
+        },
+      });
+      rendre('SARL');
+      expect(await screen.findByText(/verrouillée et ne peut plus être régénérée/i)).toBeInTheDocument();
+      expect(screen.queryByText(/régénère si tu veux/i)).not.toBeInTheDocument();
+    });
+
+    it('n’affiche jamais le formulaire de génération quand le chargement échoue, et permet de réessayer', async () => {
+      let appels = 0;
+      global.fetch = vi.fn().mockImplementation(() => {
+        appels += 1;
+        return Promise.resolve(
+          appels === 1
+            ? { ok: false, status: 500, json: () => Promise.resolve({ message: 'Serveur indisponible.' }) }
+            : { ok: true, status: 200, json: () => Promise.resolve(brouillon()) },
+        );
+      }) as unknown as typeof fetch;
+      rendre();
+
+      expect(await screen.findByText('Serveur indisponible.')).toBeInTheDocument();
+      expect(screen.queryByLabelText('Capital social (€)')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /générer les statuts/i })).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Réessayer' }));
+      expect(await screen.findByDisplayValue('Article 1 — Forme')).toBeInTheDocument();
+      expect(screen.queryByText('Serveur indisponible.')).not.toBeInTheDocument();
+    });
+
+    it('permet de changer la forme confirmée, prérempli avec la forme actuelle', async () => {
+      mockApiRoutes({
+        'GET /projects/p1/statuts': { status: 200, body: brouillon() },
+        'PATCH /projects/p1/forme-juridique': { status: 200, body: { id: 'p1', confirmed_legal_form: 'SARL' } },
+      });
+      const onFormConfirmed = vi.fn();
+      render(<StatutsSection token={TOKEN} projectId={PROJECT_ID} confirmedLegalForm="SASU" onFormConfirmed={onFormConfirmed} />);
+      await screen.findByDisplayValue('Article 1 — Forme');
+      expect(screen.queryByLabelText('Forme juridique')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: /modifier la forme/i }));
+      const select = screen.getByLabelText('Forme juridique');
+      expect(select).toHaveValue('SASU');
+      fireEvent.change(select, { target: { value: 'SARL' } });
+      fireEvent.click(screen.getByRole('button', { name: /confirmer cette forme/i }));
+
+      await waitFor(() => expect(onFormConfirmed).toHaveBeenCalledWith('SARL'));
+      const [, options] = appelsAvecMethode('PATCH')[0];
+      expect(JSON.parse(options.body)).toEqual({ legalForm: 'SARL' });
+    });
+
+    it('ne change pas la forme si on annule', async () => {
+      mockApiRoutes({ 'GET /projects/p1/statuts': { status: 200, body: brouillon() } });
+      rendre();
+      await screen.findByDisplayValue('Article 1 — Forme');
+      fireEvent.click(screen.getByRole('button', { name: /modifier la forme/i }));
+      fireEvent.click(screen.getByRole('button', { name: 'Annuler' }));
+      expect(screen.queryByLabelText('Forme juridique')).not.toBeInTheDocument();
+      expect(appelsAvecMethode('PATCH')).toHaveLength(0);
+    });
+
     it('ne montre jamais le formulaire vide quand la forme est confirmée et que des statuts existent', async () => {
       mockApiRoutes({ 'GET /projects/p1/statuts': { status: 200, body: brouillon() } });
-      const { rerender } = render(
+      const { rerender, container } = render(
         <StatutsSection token={TOKEN} projectId={PROJECT_ID} confirmedLegalForm={null} onFormConfirmed={vi.fn()} />,
       );
       await screen.findByLabelText('Forme juridique');
 
+      // On enregistre tout nœud ajouté au DOM à partir de maintenant, même
+      // s'il est retiré juste après : un clignotement d'un seul rendu serait
+      // invisible à une vérification faite après coup, pas à un observateur.
+      const champsAjoutes: string[] = [];
+      const observateur = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          m.addedNodes.forEach((n) => {
+            if (n instanceof Element && (n.id === 'statuts-capital' || n.querySelector('#statuts-capital'))) {
+              champsAjoutes.push('statuts-capital');
+            }
+          });
+        }
+      });
+      observateur.observe(container, { childList: true, subtree: true });
+
       rerender(
         <StatutsSection token={TOKEN} projectId={PROJECT_ID} confirmedLegalForm="SASU" onFormConfirmed={vi.fn()} />,
       );
-      // Dès le rendu qui suit la confirmation : chargement, pas de formulaire.
-      expect(screen.queryByLabelText('Capital social (€)')).not.toBeInTheDocument();
       expect(screen.getByText('Chargement…')).toBeInTheDocument();
       expect(await screen.findByDisplayValue('Article 1 — Forme')).toBeInTheDocument();
-      expect(screen.queryByLabelText('Capital social (€)')).not.toBeInTheDocument();
+      observateur.disconnect();
+      expect(champsAjoutes).toEqual([]);
+    });
+  });
+
+  describe('forme juridique à confirmer', () => {
+    it('présélectionne la dernière recommandation de Former', async () => {
+      mockApiRoutes({
+        'GET /projects/p1/legal-forms': {
+          status: 200,
+          body: [{ id: 'r2', recommended_form: 'SARL' }, { id: 'r1', recommended_form: 'SAS' }],
+        },
+      });
+      render(<StatutsSection token={TOKEN} projectId={PROJECT_ID} confirmedLegalForm={null} onFormConfirmed={vi.fn()} />);
+
+      await waitFor(() => expect(screen.getByLabelText('Forme juridique')).toHaveValue('SARL'));
+      expect(screen.getByRole('button', { name: /confirmer cette forme/i })).toBeEnabled();
+    });
+
+    it('sans recommandation : aucune présélection, et Confirmer reste désactivé tant qu’aucune forme n’est choisie', async () => {
+      mockApiRoutes({ 'GET /projects/p1/legal-forms': { status: 200, body: [] } });
+      render(<StatutsSection token={TOKEN} projectId={PROJECT_ID} confirmedLegalForm={null} onFormConfirmed={vi.fn()} />);
+
+      const select = await screen.findByLabelText('Forme juridique');
+      expect(select).toHaveValue('');
+      expect(screen.getByRole('button', { name: /confirmer cette forme/i })).toBeDisabled();
+
+      fireEvent.change(select, { target: { value: 'EURL' } });
+      expect(screen.getByRole('button', { name: /confirmer cette forme/i })).toBeEnabled();
     });
   });
 });
