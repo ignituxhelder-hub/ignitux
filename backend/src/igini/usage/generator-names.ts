@@ -25,6 +25,11 @@ export const GENERATOR_NAMES = [
   'financer',
   'developper',
   'transmettre',
+  // Septième nom, hors des six générateurs de méthode : il sert à compter
+  // l'exécution d'une tâche par IGINI dans le journal. Pour les droits, il
+  // ne figure pas dans la liste d'une offre (voir `droits.ts`), mais il
+  // consomme les générations du mois comme les autres.
+  'executer',
 ] as const;
 
 export type GeneratorName = (typeof GENERATOR_NAMES)[number];

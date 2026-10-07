@@ -107,7 +107,10 @@ export function peut(offreId: OffreId, action: Action): Verdict {
     }
 
     case 'generer': {
-      if (!capacites.generateurs.includes(action.generateur)) {
+      // « executer » n'est pas un des six générateurs de méthode : toute
+      // offre le permet, et seul le quota mensuel de générations le borne.
+      const horsListe = action.generateur === 'executer';
+      if (!horsListe && !capacites.generateurs.includes(action.generateur)) {
         const quiOuvre = premiereOffreQui(offreId, (c) =>
           c.generateurs.includes(action.generateur),
         );
@@ -121,7 +124,7 @@ export function peut(offreId: OffreId, action: Action): Verdict {
       const quiOuvre = premiereOffreQui(
         offreId,
         (c) =>
-          c.generateurs.includes(action.generateur) &&
+          (horsListe || c.generateurs.includes(action.generateur)) &&
           (c.appelsIaParMois === null ||
             c.appelsIaParMois > (capacites.appelsIaParMois as number)),
       );

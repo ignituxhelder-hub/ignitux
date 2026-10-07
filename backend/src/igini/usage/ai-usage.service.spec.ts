@@ -243,7 +243,7 @@ describe('summarise', () => {
       jusqua,
     );
 
-    expect(resume.parGenerateur.map((l) => l.generateur)).toEqual([...GENERATOR_NAMES]);
+    expect(resume.parGenerateur.map((l) => l.generateur)).toEqual(GENERATOR_NAMES.filter((g) => g !== 'executer'));
   });
 
   it('refuse de donner un total quand un modèle échappe à la grille', () => {

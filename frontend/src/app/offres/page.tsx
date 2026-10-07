@@ -183,7 +183,11 @@ function CarteOffre({
           texte={
             capacites.generateurs.length === 0
               ? 'Aucun générateur'
-              : capacites.generateurs.map((g) => GENERATEURS[g] ?? g).join(', ')
+              : capacites.generateurs
+                  // « executer » n'est pas un des six générateurs de méthode annoncés.
+                  .filter((g) => g !== 'executer')
+                  .map((g) => GENERATEURS[g] ?? g)
+                  .join(', ')
           }
         />
         {capacites.outilsDeGestion && <Ligne texte="Comptabilité, facturation, banque" />}

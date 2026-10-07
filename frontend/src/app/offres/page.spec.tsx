@@ -79,6 +79,26 @@ describe('OffresPage', () => {
     expect(screen.getByText('1 projet')).toBeInTheDocument();
   });
 
+  it('n’annonce que les six générateurs de méthode, pas « executer »', async () => {
+    mockApiRoutes({
+      'GET /offres': {
+        status: 200,
+        body: CATALOGUE({
+          offres: [
+            OFFRE('entrepreneur', 'Entrepreneur', 990, {
+              capacites: { generateurs: ['analyser', 'construire', 'executer'] },
+            }),
+          ],
+        }),
+      },
+    });
+
+    afficher();
+
+    expect(await screen.findByText('Analyser, Construire')).toBeInTheDocument();
+    expect(screen.queryByText(/executer/i)).not.toBeInTheDocument();
+  });
+
   it('marque l’offre en cours', async () => {
     mockApiRoutes({ 'GET /offres': { status: 200, body: CATALOGUE() } });
 
