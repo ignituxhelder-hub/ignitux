@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { assertOwnsProject } from '../../prisma/assert-owns-project.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { AutomationService } from '../automation/automation.service.js';
@@ -37,14 +37,15 @@ export class ExecutionService {
       return task;
     }
 
-    // Après un refus motivé, le motif guide la nouvelle tentative.
-    const contexte =
-      task.ai_status === 'refuse' && task.ai_refusal_reason
-        ? `Une première version a été refusée par la personne. Motif : ${task.ai_refusal_reason}`
-        : undefined;
+    // Un motif de refus guide la nouvelle tentative, même si un échec est
+    // intervenu entre-temps (refus -> échec -> relance garde le motif).
+    const contexte = task.ai_refusal_reason
+      ? `Une première version a été refusée par la personne. Motif : ${task.ai_refusal_reason}`
+      : undefined;
 
+    let resultat;
     try {
-      const resultat = await this.claude.generateStructuredOutput({
+      resultat = await this.claude.generateStructuredOutput({
         schema: ExecutionResultSchema,
         system: SYSTEM_PROMPT,
         userContent: buildProjectPrompt(task.title, task.description, contexte),
@@ -52,30 +53,34 @@ export class ExecutionService {
         userErrorMessage: "L'exécution de la tâche a échoué, réessaie dans un instant.",
         usage: { userId, projectId, generator: 'executer' },
       });
-
-      const etapes = resultat.etapes?.length
-        ? `\n\n${resultat.etapes.map((etape, i) => `${i + 1}. ${etape}`).join('\n')}`
-        : '';
-
-      return await this.prisma.tasks.update({
-        where: { id: taskId },
-        data: {
-          ai_status: 'a_valider',
-          ai_result_kind: resultat.kind,
-          ai_result: `${resultat.contenu}${etapes}`,
-          ai_refusal_reason: null,
-          ai_run_at: new Date(),
-        },
-      });
     } catch (erreur) {
-      // On garde la trace de l'échec (y compris quota/plafond), puis on
-      // relance telle quelle pour que l'appelant voie l'erreur d'origine.
-      await this.prisma.tasks.update({
-        where: { id: taskId },
-        data: { ai_status: 'echec', ai_run_at: new Date() },
-      });
+      // Offre, quota, plafond de coût, générateurs coupés (403/503) : rien
+      // n'a été tenté, la tâche reste « non traitée » et on ne l'écrit pas.
+      const status = erreur instanceof HttpException ? erreur.getStatus() : undefined;
+      if (status !== 403 && status !== 503) {
+        await this.prisma.tasks.update({
+          where: { id: taskId },
+          data: { ai_status: 'echec', ai_run_at: new Date() },
+        });
+      }
       throw erreur;
     }
+
+    const etapes = resultat.etapes?.length
+      ? '\n\n' + resultat.etapes.map((etape, i) => `${i + 1}. ${etape}`).join('\n')
+      : '';
+
+    // Hors du try : un échec d'enregistrement ne doit pas écrire « echec ».
+    return this.prisma.tasks.update({
+      where: { id: taskId },
+      data: {
+        ai_status: 'a_valider',
+        ai_result_kind: resultat.kind,
+        ai_result: `${resultat.contenu}${etapes}`,
+        ai_refusal_reason: null,
+        ai_run_at: new Date(),
+      },
+    });
   }
 
   async validateTask(userId: string, projectId: string, taskId: string) {
@@ -94,7 +99,10 @@ export class ExecutionService {
   }
 
   async refuseTask(userId: string, projectId: string, taskId: string, reason?: string) {
-    await this.getTask(userId, projectId, taskId);
+    const task = await this.getTask(userId, projectId, taskId);
+    if (task.ai_status !== 'a_valider') {
+      throw new BadRequestException("Aucun résultat d'IGINI à refuser pour cette tâche.");
+    }
     // `status` n'est volontairement pas touché : refuser le résultat de l'IA
     // ne dit rien de l'avancement réel de la tâche.
     return this.prisma.tasks.update({

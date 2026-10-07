@@ -1,4 +1,10 @@
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  InternalServerErrorException,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { AutomationService } from '../automation/automation.service.js';
@@ -117,8 +123,8 @@ describe('ExecutionService', () => {
     expect(claude.generateStructuredOutput).not.toHaveBeenCalled();
   });
 
-  it("5. si Claude échoue, enregistre ai_status 'echec' puis relance l'exception", async () => {
-    const erreur = new ForbiddenException('Quota atteint');
+  it("5. si Claude échoue (erreur non limite), enregistre 'echec' puis relance", async () => {
+    const erreur = new InternalServerErrorException('boom');
     claude.generateStructuredOutput.mockRejectedValue(erreur);
 
     await expect(service.runTask('u1', 'p1', 't1')).rejects.toBe(erreur);
@@ -126,6 +132,41 @@ describe('ExecutionService', () => {
     expect(prisma.tasks.update).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ ai_status: 'echec' }) }),
     );
+  });
+
+  it.each([new ForbiddenException('Quota'), new ServiceUnavailableException('Coupé')])(
+    '5b. erreur 403/503 : relancée telle quelle, tâche non modifiée',
+    async (erreur) => {
+      claude.generateStructuredOutput.mockRejectedValue(erreur);
+
+      await expect(service.runTask('u1', 'p1', 't1')).rejects.toBe(erreur);
+
+      expect(prisma.tasks.update).not.toHaveBeenCalled();
+    },
+  );
+
+  it("5c. si l'enregistrement du résultat échoue, l'erreur remonte sans écriture 'echec'", async () => {
+    claude.generateStructuredOutput.mockResolvedValue({ kind: 'livrable', titre: 'x', contenu: 'y' });
+    const erreur = new Error('db down');
+    prisma.tasks.update.mockRejectedValue(erreur);
+
+    await expect(service.runTask('u1', 'p1', 't1')).rejects.toBe(erreur);
+
+    expect(prisma.tasks.update).toHaveBeenCalledTimes(1);
+    expect(prisma.tasks.update.mock.calls[0][0].data.ai_status).toBe('a_valider');
+  });
+
+  it('6b. refus puis échec puis relance : le motif reste dans le prompt', async () => {
+    prisma.tasks.findFirst.mockResolvedValue({
+      ...TACHE,
+      ai_status: 'echec',
+      ai_refusal_reason: 'Trop vague',
+    });
+    claude.generateStructuredOutput.mockResolvedValue({ kind: 'livrable', titre: 'x', contenu: 'y' });
+
+    await service.runTask('u1', 'p1', 't1');
+
+    expect(claude.generateStructuredOutput.mock.calls[0][0].userContent).toContain('Trop vague');
   });
 
   it('6. une tâche refusée avec motif transmet le motif à Claude', async () => {
@@ -170,5 +211,12 @@ describe('ExecutionService', () => {
     const data = prisma.tasks.update.mock.calls[0][0].data;
     expect(data).toEqual({ ai_status: 'refuse', ai_refusal_reason: 'Pas adapté' });
     expect(data).not.toHaveProperty('status');
+  });
+
+  it.each([null, 'valide', 'echec'])('8b. refuseTask rejette si ai_status vaut %s', async (aiStatus) => {
+    prisma.tasks.findFirst.mockResolvedValue({ ...TACHE, ai_status: aiStatus });
+
+    await expect(service.refuseTask('u1', 'p1', 't1')).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.tasks.update).not.toHaveBeenCalled();
   });
 });
