@@ -249,6 +249,9 @@ describe('Constitution et données personnelles (e2e)', () => {
       // et le droit d'accès porte sur elles aussi. Les omettre rendrait
       // l'export incomplet sans que personne ne puisse s'en apercevoir.
       expect(Object.keys(response.body.donnees.compte).sort()).toEqual([
+        // Le bureau (applications ajoutées ou retirées) est une préférence que la
+        // personne a choisie : il part avec l'export, comme ses rôles.
+        'bureau',
         'compte_cree_le',
         'email',
         'email_verifie_le',
