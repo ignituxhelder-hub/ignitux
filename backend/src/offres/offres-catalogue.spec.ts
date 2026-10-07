@@ -44,6 +44,21 @@ describe('catalogue des offres', () => {
 
       for (const id of ['entrepreneur', 'construction'] as const) {
         expect(offre(id).capacites.generateurs).toEqual([...GENERATEURS]);
+        expect(offre(id).capacites.generateurs).toHaveLength(6);
+      }
+    });
+
+    it('n’annonce jamais « executer » parmi les générateurs d’une offre', () => {
+      expect(GENERATEURS).toEqual([
+        'analyser',
+        'former',
+        'construire',
+        'financer',
+        'developper',
+        'transmettre',
+      ]);
+      for (const o of CATALOGUE) {
+        expect(o.capacites.generateurs, o.id).not.toContain('executer');
       }
     });
 

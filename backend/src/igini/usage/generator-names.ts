@@ -18,19 +18,23 @@
  * renommer demande une migration des lignes existantes, pas seulement un
  * remplacement dans les sources.
  */
-export const GENERATOR_NAMES = [
+/** Les six générateurs de méthode : ceux que les offres annoncent. */
+export const GENERATEURS_METHODE = [
   'analyser',
   'former',
   'construire',
   'financer',
   'developper',
   'transmettre',
-  // Septième nom, hors des six générateurs de méthode : il sert à compter
-  // l'exécution d'une tâche par IGINI dans le journal. Pour les droits, il
-  // ne figure pas dans la liste d'une offre (voir `droits.ts`), mais il
-  // consomme les générations du mois comme les autres.
-  'executer',
 ] as const;
+
+/**
+ * Tous les noms que le journal accepte : les six de méthode, plus
+ * « executer » — l'exécution d'une tâche par IGINI. Ce septième nom n'est
+ * dans la liste d'aucune offre (voir `droits.ts`), mais il consomme les
+ * générations du mois comme les autres.
+ */
+export const GENERATOR_NAMES = [...GENERATEURS_METHODE, 'executer'] as const;
 
 export type GeneratorName = (typeof GENERATOR_NAMES)[number];
 

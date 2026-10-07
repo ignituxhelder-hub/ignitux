@@ -25,12 +25,20 @@ describe('droits ouverts par une offre', () => {
 
   describe('générer', () => {
     it('laisse IGINI exécuter une tâche en Découverte, hors de la liste des générateurs', () => {
-      const verdict = peut('decouverte', { kind: 'generer', generateur: 'executer', appelsCeMois: 0 });
+      const verdict = peut('decouverte', {
+        kind: 'generer',
+        generateur: 'executer',
+        appelsCeMois: 0,
+      });
       expect(verdict.autorise).toBe(true);
     });
 
     it('compte pourtant l’exécution dans les générations du mois', () => {
-      const verdict = peut('decouverte', { kind: 'generer', generateur: 'executer', appelsCeMois: 3 });
+      const verdict = peut('decouverte', {
+        kind: 'generer',
+        generateur: 'executer',
+        appelsCeMois: 3,
+      });
       expect(verdict.autorise).toBe(false);
       expect(verdict.seRenouvelleLeMoisProchain).toBe(true);
     });
@@ -42,7 +50,7 @@ describe('droits ouverts par une offre', () => {
     });
 
     it('refuse les quatre autres générateurs en Découverte', () => {
-      for (const g of GENERATEURS.filter((x) => x !== 'analyser' && x !== 'executer')) {
+      for (const g of GENERATEURS.filter((x) => x !== 'analyser')) {
         const verdict = peut('decouverte', { kind: 'generer', generateur: g, appelsCeMois: 0 });
         expect(verdict.autorise, g).toBe(false);
         expect(verdict.offreQuiOuvre, g).toBe('entrepreneur');

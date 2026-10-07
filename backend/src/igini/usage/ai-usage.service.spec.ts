@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import {
   AiUsageService,
-  GENERATOR_NAMES,
   monthRange,
   summarise,
   type UsageEventRow,
@@ -243,7 +242,14 @@ describe('summarise', () => {
       jusqua,
     );
 
-    expect(resume.parGenerateur.map((l) => l.generateur)).toEqual(GENERATOR_NAMES.filter((g) => g !== 'executer'));
+    expect(resume.parGenerateur.map((l) => l.generateur)).toEqual([
+      'analyser',
+      'former',
+      'construire',
+      'financer',
+      'developper',
+      'transmettre',
+    ]);
   });
 
   it('refuse de donner un total quand un modèle échappe à la grille', () => {

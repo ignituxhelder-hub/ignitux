@@ -71,8 +71,8 @@ export interface Capacites {
  * là-bas. Rien n'échouait : un droit se serait appliqué à un nom que
  * personne n'émettait, et le refus ne serait jamais venu.
  */
-import { GENERATOR_NAMES, type GeneratorName } from '../igini/usage/generator-names.js';
-export { GENERATOR_NAMES as GENERATEURS };
+import { GENERATEURS_METHODE, type GeneratorName } from '../igini/usage/generator-names.js';
+export { GENERATEURS_METHODE as GENERATEURS };
 export type { GeneratorName as GenerateurId };
 
 export interface Offre {
@@ -137,7 +137,7 @@ export const CATALOGUE: readonly Offre[] = [
       "que tu n'aurais pas écrits seul.",
     capacites: {
       projets: null,
-      generateurs: [...GENERATOR_NAMES],
+      generateurs: [...GENERATEURS_METHODE],
       appelsIaParMois: 30,
       outilsDeGestion: false,
       investisseurs: false,
@@ -156,7 +156,7 @@ export const CATALOGUE: readonly Offre[] = [
       'tient ses comptes, elle rend des comptes à ceux qui l’ont financée.',
     capacites: {
       projets: null,
-      generateurs: [...GENERATOR_NAMES],
+      generateurs: [...GENERATEURS_METHODE],
       /*
        * 35 et non 150, depuis le 26 septembre 2026.
        *
