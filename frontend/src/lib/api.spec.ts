@@ -308,3 +308,65 @@ describe('api', () => {
     });
   });
 });
+
+describe('api — exécution IA des tâches et de la conformité', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function appelEnvoye() {
+    const [url, init] = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
+    return { url: String(url), init: init as RequestInit };
+  }
+
+  it('runTask envoie POST /projects/p/tasks/x/run avec le jeton', async () => {
+    mockFetchOnce(201, { id: 'x', ai_status: 'a_valider' });
+
+    const tache = await api.runTask('t', 'p', 'x');
+
+    const { url, init } = appelEnvoye();
+    expect(url).toMatch(/\/projects\/p\/tasks\/x\/run$/);
+    expect(init.method).toBe('POST');
+    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer t');
+    expect(tache.ai_status).toBe('a_valider');
+  });
+
+  it('validateTask envoie POST .../validate', async () => {
+    mockFetchOnce(201, { id: 'x', ai_status: 'valide' });
+    await api.validateTask('t', 'p', 'x');
+    const { url, init } = appelEnvoye();
+    expect(url).toMatch(/\/projects\/p\/tasks\/x\/validate$/);
+    expect(init.method).toBe('POST');
+  });
+
+  it('refuseTask envoie le motif dans le corps', async () => {
+    mockFetchOnce(201, { id: 'x', ai_status: 'refuse' });
+    await api.refuseTask('t', 'p', 'x', 'Trop vague');
+    const { url, init } = appelEnvoye();
+    expect(url).toMatch(/\/projects\/p\/tasks\/x\/refuse$/);
+    expect(init.method).toBe('POST');
+    expect(JSON.parse(init.body as string)).toEqual({ reason: 'Trop vague' });
+  });
+
+  it('refuseTask sans motif envoie un corps JSON vide de motif', async () => {
+    mockFetchOnce(201, { id: 'x' });
+    await api.refuseTask('t', 'p', 'x');
+    expect(JSON.parse(appelEnvoye().init.body as string)).toEqual({});
+  });
+
+  it('runCompliance, validateCompliance et refuseCompliance visent /compliance/:id', async () => {
+    mockFetchOnce(201, { requirement_id: 'r1', status: 'a_valider' });
+    await api.runCompliance('t', 'p', 'r1');
+    expect(appelEnvoye().url).toMatch(/\/projects\/p\/compliance\/r1\/run$/);
+
+    mockFetchOnce(201, { requirement_id: 'r1', status: 'valide' });
+    await api.validateCompliance('t', 'p', 'r1');
+    expect(appelEnvoye().url).toMatch(/\/projects\/p\/compliance\/r1\/validate$/);
+
+    mockFetchOnce(201, { requirement_id: 'r1', status: 'refuse' });
+    await api.refuseCompliance('t', 'p', 'r1', 'Non');
+    const { url, init } = appelEnvoye();
+    expect(url).toMatch(/\/projects\/p\/compliance\/r1\/refuse$/);
+    expect(JSON.parse(init.body as string)).toEqual({ reason: 'Non' });
+  });
+});

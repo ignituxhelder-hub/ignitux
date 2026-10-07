@@ -635,6 +635,11 @@ export interface ConceptPath {
 export type TaskStatus = 'pending' | 'in_progress' | 'done' | 'blocked';
 export type TaskAssignee = 'human' | 'igini';
 
+/** État d'une exécution IA : en attente de validation humaine, validée, refusée ou échouée. */
+export type AiStatus = 'a_valider' | 'valide' | 'refuse' | 'echec';
+/** Livrable rédigé par l'IA, ou simples instructions à suivre par la personne. */
+export type AiResultKind = 'livrable' | 'instructions';
+
 export interface Task {
   id: string;
   project_id: string;
@@ -643,6 +648,12 @@ export interface Task {
   status: TaskStatus;
   assignee: TaskAssignee;
   source: string;
+  // Exécution par IGINI : null tant que rien n'a été lancé sur cette tâche.
+  ai_status: AiStatus | null;
+  ai_result_kind: AiResultKind | null;
+  ai_result: string | null;
+  ai_refusal_reason: string | null;
+  ai_run_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -867,6 +878,28 @@ export interface ComplianceRequirement {
   source_name: string;
   source_url: string;
   completed: boolean;
+  // Dernier travail d'IGINI sur cette démarche, ou null s'il n'y en a pas.
+  ai: ComplianceAiState | null;
+}
+
+/** L'état IA tel que la liste de conformité le renvoie (sans les ids). */
+export interface ComplianceAiState {
+  status: AiStatus;
+  result_kind: AiResultKind | null;
+  result: string | null;
+  refusal_reason: string | null;
+}
+
+/** Une ligne d'exécution IA, telle que les routes run/validate/refuse la renvoient. */
+export interface ComplianceAiRun {
+  project_id: string;
+  requirement_id: string;
+  status: AiStatus;
+  result_kind: AiResultKind | null;
+  result: string | null;
+  refusal_reason: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 /**
@@ -2008,6 +2041,44 @@ export const api = {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify({ status }),
+    }),
+
+  runTask: (token: string, projectId: string, taskId: string) =>
+    request<Task>(`/projects/${projectId}/tasks/${taskId}/run`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  validateTask: (token: string, projectId: string, taskId: string) =>
+    request<Task>(`/projects/${projectId}/tasks/${taskId}/validate`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  refuseTask: (token: string, projectId: string, taskId: string, reason?: string) =>
+    request<Task>(`/projects/${projectId}/tasks/${taskId}/refuse`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ reason }),
+    }),
+
+  runCompliance: (token: string, projectId: string, requirementId: string) =>
+    request<ComplianceAiRun>(`/projects/${projectId}/compliance/${requirementId}/run`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  validateCompliance: (token: string, projectId: string, requirementId: string) =>
+    request<ComplianceAiRun>(`/projects/${projectId}/compliance/${requirementId}/validate`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  refuseCompliance: (token: string, projectId: string, requirementId: string, reason?: string) =>
+    request<ComplianceAiRun>(`/projects/${projectId}/compliance/${requirementId}/refuse`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ reason }),
     }),
 
   getScoreCard: (token: string, projectId: string) =>
