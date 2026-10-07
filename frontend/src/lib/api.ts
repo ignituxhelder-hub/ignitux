@@ -203,10 +203,26 @@ const JAMAIS_EN_FILE = [
   '/users/signup',
 ];
 
+/**
+ * Écritures jamais mises en file, reconnues par motif (l'identifiant de projet
+ * varie). Les statuts sont un document juridique : rejouer plus tard une
+ * génération (appel Claude payant), une régénération, une retenue ou un
+ * changement de forme juridique, à un moment où la personne ne regarde plus
+ * l'écran, ferait plus de mal qu'un échec immédiat. Les lectures (GET)
+ * restent servies par le cache comme les autres.
+ */
+const ECRITURES_JAMAIS_EN_FILE = [
+  /^\/projects\/[^/?#]+\/statuts(?:\/[^?#]*)?(?:[?#].*)?$/,
+  /^\/projects\/[^/?#]+\/forme-juridique(?:[?#].*)?$/,
+];
+
 function handleOffline<T>(path: string, options: RequestInit): Promise<T> {
   const method = (options.method ?? 'GET').toUpperCase();
 
-  if (JAMAIS_EN_FILE.some((route) => path === route || path.startsWith(`${route}/`))) {
+  if (
+    JAMAIS_EN_FILE.some((route) => path === route || path.startsWith(`${route}/`)) ||
+    (method !== 'GET' && ECRITURES_JAMAIS_EN_FILE.some((motif) => motif.test(path)))
+  ) {
     throw new ApiError(
       'Pas de réseau. Ce type de demande ne peut pas être mis de côté pour plus ' +
         'tard — réessaie une fois la connexion revenue. Rien n’a été enregistré ' +
@@ -376,9 +392,36 @@ export interface Project {
   description: string | null;
   /** Le secteur du projet. null tant qu il n a pas ete demande. */
   sector: string | null;
+  /** La forme juridique confirmee par la personne. null tant qu elle n a pas tranche. */
+  confirmed_legal_form: string | null;
   is_public: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface BylawAssociate {
+  id: string;
+  full_name: string;
+  share_basis_points: number;
+}
+
+export interface CompanyBylaws {
+  id: string;
+  legal_form: string;
+  capital_cents: number;
+  head_office: string;
+  duration_years: number;
+  content: string;
+  status: 'brouillon' | 'retenue';
+  finalized_at: string | null;
+  associates: BylawAssociate[];
+}
+
+export interface GenerateBylawsInput {
+  capitalCents: number;
+  headOffice: string;
+  durationYears: number;
+  associates: { fullName: string; shareBasisPoints: number }[];
 }
 
 export interface Collaborator {
@@ -1826,6 +1869,60 @@ export const api = {
     request<Project>(`/projects/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
+
+  confirmerFormeJuridique: (token: string, projectId: string, legalForm: string | null) =>
+    request<Project>(`/projects/${projectId}/forme-juridique`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ legalForm }),
+    }),
+
+  getStatuts: (token: string, projectId: string) =>
+    request<CompanyBylaws | null>(`/projects/${projectId}/statuts`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  genererStatuts: (token: string, projectId: string, dto: GenerateBylawsInput) =>
+    request<CompanyBylaws>(`/projects/${projectId}/statuts`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(dto),
+    }),
+
+  modifierStatuts: (token: string, projectId: string, content: string) =>
+    request<CompanyBylaws>(`/projects/${projectId}/statuts`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ content }),
+    }),
+
+  regenererStatuts: (token: string, projectId: string, dto: GenerateBylawsInput) =>
+    request<CompanyBylaws>(`/projects/${projectId}/statuts/regenerer`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(dto),
+    }),
+
+  retenirStatuts: (token: string, projectId: string) =>
+    request<CompanyBylaws>(`/projects/${projectId}/statuts/retenir`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  /**
+   * Le PDF est protégé par le jeton : pas de lien `<a href>` direct. On
+   * récupère les octets avec l'en-tête Authorization, puis l'appelant
+   * déclenche le téléchargement via un lien temporaire vers un blob.
+   */
+  telechargerStatutsPdf: async (token: string, projectId: string): Promise<Blob> => {
+    const res = await fetch(`${API_URL}/projects/${projectId}/statuts/pdf`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      throw new ApiError('Impossible de télécharger le PDF.', res.status);
+    }
+    return res.blob();
+  },
 
   createProject: (token: string, title: string, description: string) =>
     request<Project>('/projects', {

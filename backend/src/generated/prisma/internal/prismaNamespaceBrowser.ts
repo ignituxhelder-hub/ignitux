@@ -60,6 +60,8 @@ export const ModelName = {
   legal_form_assumptions: 'legal_form_assumptions',
   legal_form_alternatives: 'legal_form_alternatives',
   legal_form_sources: 'legal_form_sources',
+  company_bylaws: 'company_bylaws',
+  bylaw_associates: 'bylaw_associates',
   financing_plans: 'financing_plans',
   development_plans: 'development_plans',
   transmission_plans: 'transmission_plans',
@@ -166,6 +168,7 @@ export const ProjectsScalarFieldEnum = {
   title: 'title',
   description: 'description',
   sector: 'sector',
+  confirmed_legal_form: 'confirmed_legal_form',
   is_public: 'is_public',
   created_at: 'created_at',
   updated_at: 'updated_at'
@@ -245,6 +248,37 @@ export const Legal_form_sourcesScalarFieldEnum = {
 } as const
 
 export type Legal_form_sourcesScalarFieldEnum = (typeof Legal_form_sourcesScalarFieldEnum)[keyof typeof Legal_form_sourcesScalarFieldEnum]
+
+
+export const Company_bylawsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  project_id: 'project_id',
+  legal_form: 'legal_form',
+  capital_cents: 'capital_cents',
+  head_office: 'head_office',
+  duration_years: 'duration_years',
+  content: 'content',
+  status: 'status',
+  finalized_at: 'finalized_at',
+  generated_by: 'generated_by',
+  generated_model: 'generated_model',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Company_bylawsScalarFieldEnum = (typeof Company_bylawsScalarFieldEnum)[keyof typeof Company_bylawsScalarFieldEnum]
+
+
+export const Bylaw_associatesScalarFieldEnum = {
+  id: 'id',
+  bylaws_id: 'bylaws_id',
+  full_name: 'full_name',
+  share_basis_points: 'share_basis_points',
+  created_at: 'created_at'
+} as const
+
+export type Bylaw_associatesScalarFieldEnum = (typeof Bylaw_associatesScalarFieldEnum)[keyof typeof Bylaw_associatesScalarFieldEnum]
 
 
 export const Financing_plansScalarFieldEnum = {

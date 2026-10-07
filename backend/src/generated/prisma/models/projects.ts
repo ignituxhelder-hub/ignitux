@@ -30,6 +30,7 @@ export type ProjectsMinAggregateOutputType = {
   title: string | null
   description: string | null
   sector: string | null
+  confirmed_legal_form: string | null
   is_public: boolean | null
   created_at: Date | null
   updated_at: Date | null
@@ -41,6 +42,7 @@ export type ProjectsMaxAggregateOutputType = {
   title: string | null
   description: string | null
   sector: string | null
+  confirmed_legal_form: string | null
   is_public: boolean | null
   created_at: Date | null
   updated_at: Date | null
@@ -52,6 +54,7 @@ export type ProjectsCountAggregateOutputType = {
   title: number
   description: number
   sector: number
+  confirmed_legal_form: number
   is_public: number
   created_at: number
   updated_at: number
@@ -65,6 +68,7 @@ export type ProjectsMinAggregateInputType = {
   title?: true
   description?: true
   sector?: true
+  confirmed_legal_form?: true
   is_public?: true
   created_at?: true
   updated_at?: true
@@ -76,6 +80,7 @@ export type ProjectsMaxAggregateInputType = {
   title?: true
   description?: true
   sector?: true
+  confirmed_legal_form?: true
   is_public?: true
   created_at?: true
   updated_at?: true
@@ -87,6 +92,7 @@ export type ProjectsCountAggregateInputType = {
   title?: true
   description?: true
   sector?: true
+  confirmed_legal_form?: true
   is_public?: true
   created_at?: true
   updated_at?: true
@@ -171,6 +177,7 @@ export type ProjectsGroupByOutputType = {
   title: string
   description: string | null
   sector: string | null
+  confirmed_legal_form: string | null
   is_public: boolean
   created_at: Date | null
   updated_at: Date | null
@@ -203,6 +210,7 @@ export type projectsWhereInput = {
   title?: Prisma.StringFilter<"projects"> | string
   description?: Prisma.StringNullableFilter<"projects"> | string | null
   sector?: Prisma.StringNullableFilter<"projects"> | string | null
+  confirmed_legal_form?: Prisma.StringNullableFilter<"projects"> | string | null
   is_public?: Prisma.BoolFilter<"projects"> | boolean
   created_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
@@ -236,6 +244,7 @@ export type projectsWhereInput = {
   dividends?: Prisma.Dividend_distributionsListRelationFilter
   buyback_objectives?: Prisma.Buyback_objectivesListRelationFilter
   financedProjects?: Prisma.XOR<Prisma.Financed_projectsNullableScalarRelationFilter, Prisma.financed_projectsWhereInput> | null
+  bylaws?: Prisma.XOR<Prisma.Company_bylawsNullableScalarRelationFilter, Prisma.company_bylawsWhereInput> | null
 }
 
 export type projectsOrderByWithRelationInput = {
@@ -244,6 +253,7 @@ export type projectsOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   sector?: Prisma.SortOrderInput | Prisma.SortOrder
+  confirmed_legal_form?: Prisma.SortOrderInput | Prisma.SortOrder
   is_public?: Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -277,6 +287,7 @@ export type projectsOrderByWithRelationInput = {
   dividends?: Prisma.dividend_distributionsOrderByRelationAggregateInput
   buyback_objectives?: Prisma.buyback_objectivesOrderByRelationAggregateInput
   financedProjects?: Prisma.financed_projectsOrderByWithRelationInput
+  bylaws?: Prisma.company_bylawsOrderByWithRelationInput
 }
 
 export type projectsWhereUniqueInput = Prisma.AtLeast<{
@@ -288,6 +299,7 @@ export type projectsWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"projects"> | string
   description?: Prisma.StringNullableFilter<"projects"> | string | null
   sector?: Prisma.StringNullableFilter<"projects"> | string | null
+  confirmed_legal_form?: Prisma.StringNullableFilter<"projects"> | string | null
   is_public?: Prisma.BoolFilter<"projects"> | boolean
   created_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
@@ -321,6 +333,7 @@ export type projectsWhereUniqueInput = Prisma.AtLeast<{
   dividends?: Prisma.Dividend_distributionsListRelationFilter
   buyback_objectives?: Prisma.Buyback_objectivesListRelationFilter
   financedProjects?: Prisma.XOR<Prisma.Financed_projectsNullableScalarRelationFilter, Prisma.financed_projectsWhereInput> | null
+  bylaws?: Prisma.XOR<Prisma.Company_bylawsNullableScalarRelationFilter, Prisma.company_bylawsWhereInput> | null
 }, "id">
 
 export type projectsOrderByWithAggregationInput = {
@@ -329,6 +342,7 @@ export type projectsOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   sector?: Prisma.SortOrderInput | Prisma.SortOrder
+  confirmed_legal_form?: Prisma.SortOrderInput | Prisma.SortOrder
   is_public?: Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -346,6 +360,7 @@ export type projectsScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"projects"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"projects"> | string | null
   sector?: Prisma.StringNullableWithAggregatesFilter<"projects"> | string | null
+  confirmed_legal_form?: Prisma.StringNullableWithAggregatesFilter<"projects"> | string | null
   is_public?: Prisma.BoolWithAggregatesFilter<"projects"> | boolean
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"projects"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableWithAggregatesFilter<"projects"> | Date | string | null
@@ -356,6 +371,7 @@ export type projectsCreateInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -389,6 +405,7 @@ export type projectsCreateInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateInput = {
@@ -397,6 +414,7 @@ export type projectsUncheckedCreateInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -429,6 +447,7 @@ export type projectsUncheckedCreateInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUpdateInput = {
@@ -436,6 +455,7 @@ export type projectsUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -469,6 +489,7 @@ export type projectsUpdateInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateInput = {
@@ -477,6 +498,7 @@ export type projectsUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -509,6 +531,7 @@ export type projectsUncheckedUpdateInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateManyInput = {
@@ -517,6 +540,7 @@ export type projectsCreateManyInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -527,6 +551,7 @@ export type projectsUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -538,6 +563,7 @@ export type projectsUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -559,6 +585,7 @@ export type projectsCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   sector?: Prisma.SortOrder
+  confirmed_legal_form?: Prisma.SortOrder
   is_public?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -570,6 +597,7 @@ export type projectsMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   sector?: Prisma.SortOrder
+  confirmed_legal_form?: Prisma.SortOrder
   is_public?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -581,6 +609,7 @@ export type projectsMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   sector?: Prisma.SortOrder
+  confirmed_legal_form?: Prisma.SortOrder
   is_public?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -668,6 +697,20 @@ export type projectsUpdateOneRequiredWithoutLegal_form_recommendationsNestedInpu
   upsert?: Prisma.projectsUpsertWithoutLegal_form_recommendationsInput
   connect?: Prisma.projectsWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutLegal_form_recommendationsInput, Prisma.projectsUpdateWithoutLegal_form_recommendationsInput>, Prisma.projectsUncheckedUpdateWithoutLegal_form_recommendationsInput>
+}
+
+export type projectsCreateNestedOneWithoutBylawsInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutBylawsInput, Prisma.projectsUncheckedCreateWithoutBylawsInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutBylawsInput
+  connect?: Prisma.projectsWhereUniqueInput
+}
+
+export type projectsUpdateOneRequiredWithoutBylawsNestedInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutBylawsInput, Prisma.projectsUncheckedCreateWithoutBylawsInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutBylawsInput
+  upsert?: Prisma.projectsUpsertWithoutBylawsInput
+  connect?: Prisma.projectsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutBylawsInput, Prisma.projectsUpdateWithoutBylawsInput>, Prisma.projectsUncheckedUpdateWithoutBylawsInput>
 }
 
 export type projectsCreateNestedOneWithoutFinancing_plansInput = {
@@ -1073,6 +1116,7 @@ export type projectsCreateWithoutOwnerInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -1105,6 +1149,7 @@ export type projectsCreateWithoutOwnerInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutOwnerInput = {
@@ -1112,6 +1157,7 @@ export type projectsUncheckedCreateWithoutOwnerInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -1144,6 +1190,7 @@ export type projectsUncheckedCreateWithoutOwnerInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutOwnerInput = {
@@ -1181,6 +1228,7 @@ export type projectsScalarWhereInput = {
   title?: Prisma.StringFilter<"projects"> | string
   description?: Prisma.StringNullableFilter<"projects"> | string | null
   sector?: Prisma.StringNullableFilter<"projects"> | string | null
+  confirmed_legal_form?: Prisma.StringNullableFilter<"projects"> | string | null
   is_public?: Prisma.BoolFilter<"projects"> | boolean
   created_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
@@ -1191,6 +1239,7 @@ export type projectsCreateWithoutAnalysesInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -1223,6 +1272,7 @@ export type projectsCreateWithoutAnalysesInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutAnalysesInput = {
@@ -1231,6 +1281,7 @@ export type projectsUncheckedCreateWithoutAnalysesInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -1262,6 +1313,7 @@ export type projectsUncheckedCreateWithoutAnalysesInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutAnalysesInput = {
@@ -1285,6 +1337,7 @@ export type projectsUpdateWithoutAnalysesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1317,6 +1370,7 @@ export type projectsUpdateWithoutAnalysesInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutAnalysesInput = {
@@ -1325,6 +1379,7 @@ export type projectsUncheckedUpdateWithoutAnalysesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1356,6 +1411,7 @@ export type projectsUncheckedUpdateWithoutAnalysesInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutLegal_form_recommendationsInput = {
@@ -1363,6 +1419,7 @@ export type projectsCreateWithoutLegal_form_recommendationsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -1395,6 +1452,7 @@ export type projectsCreateWithoutLegal_form_recommendationsInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutLegal_form_recommendationsInput = {
@@ -1403,6 +1461,7 @@ export type projectsUncheckedCreateWithoutLegal_form_recommendationsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -1434,6 +1493,7 @@ export type projectsUncheckedCreateWithoutLegal_form_recommendationsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutLegal_form_recommendationsInput = {
@@ -1457,6 +1517,7 @@ export type projectsUpdateWithoutLegal_form_recommendationsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1489,6 +1550,7 @@ export type projectsUpdateWithoutLegal_form_recommendationsInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutLegal_form_recommendationsInput = {
@@ -1497,10 +1559,192 @@ export type projectsUncheckedUpdateWithoutLegal_form_recommendationsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutProjectNestedInput
+  financing_rounds?: Prisma.financing_roundsUncheckedUpdateManyWithoutProjectNestedInput
+  equity_holders?: Prisma.equity_holdersUncheckedUpdateManyWithoutProjectNestedInput
+  equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
+  dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
+  buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+}
+
+export type projectsCreateWithoutBylawsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  sector?: string | null
+  confirmed_legal_form?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  owner: Prisma.usersCreateNestedOneWithoutProjectsInput
+  analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutProjectInput
+  financing_rounds?: Prisma.financing_roundsCreateNestedManyWithoutProjectInput
+  equity_holders?: Prisma.equity_holdersCreateNestedManyWithoutProjectInput
+  equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
+  dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
+  buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+}
+
+export type projectsUncheckedCreateWithoutBylawsInput = {
+  id?: string
+  owner_id: string
+  title: string
+  description?: string | null
+  sector?: string | null
+  confirmed_legal_form?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutProjectInput
+  financing_rounds?: Prisma.financing_roundsUncheckedCreateNestedManyWithoutProjectInput
+  equity_holders?: Prisma.equity_holdersUncheckedCreateNestedManyWithoutProjectInput
+  equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
+  dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
+  buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+}
+
+export type projectsCreateOrConnectWithoutBylawsInput = {
+  where: Prisma.projectsWhereUniqueInput
+  create: Prisma.XOR<Prisma.projectsCreateWithoutBylawsInput, Prisma.projectsUncheckedCreateWithoutBylawsInput>
+}
+
+export type projectsUpsertWithoutBylawsInput = {
+  update: Prisma.XOR<Prisma.projectsUpdateWithoutBylawsInput, Prisma.projectsUncheckedUpdateWithoutBylawsInput>
+  create: Prisma.XOR<Prisma.projectsCreateWithoutBylawsInput, Prisma.projectsUncheckedCreateWithoutBylawsInput>
+  where?: Prisma.projectsWhereInput
+}
+
+export type projectsUpdateToOneWithWhereWithoutBylawsInput = {
+  where?: Prisma.projectsWhereInput
+  data: Prisma.XOR<Prisma.projectsUpdateWithoutBylawsInput, Prisma.projectsUncheckedUpdateWithoutBylawsInput>
+}
+
+export type projectsUpdateWithoutBylawsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
+  analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutProjectNestedInput
+  financing_rounds?: Prisma.financing_roundsUpdateManyWithoutProjectNestedInput
+  equity_holders?: Prisma.equity_holdersUpdateManyWithoutProjectNestedInput
+  equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
+  dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
+  buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+}
+
+export type projectsUncheckedUpdateWithoutBylawsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
   build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
   financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
   development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
@@ -1535,6 +1779,7 @@ export type projectsCreateWithoutFinancing_plansInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -1567,6 +1812,7 @@ export type projectsCreateWithoutFinancing_plansInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutFinancing_plansInput = {
@@ -1575,6 +1821,7 @@ export type projectsUncheckedCreateWithoutFinancing_plansInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -1606,6 +1853,7 @@ export type projectsUncheckedCreateWithoutFinancing_plansInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutFinancing_plansInput = {
@@ -1629,6 +1877,7 @@ export type projectsUpdateWithoutFinancing_plansInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1661,6 +1910,7 @@ export type projectsUpdateWithoutFinancing_plansInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
@@ -1669,6 +1919,7 @@ export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1700,6 +1951,7 @@ export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutDevelopment_plansInput = {
@@ -1707,6 +1959,7 @@ export type projectsCreateWithoutDevelopment_plansInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -1739,6 +1992,7 @@ export type projectsCreateWithoutDevelopment_plansInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
@@ -1747,6 +2001,7 @@ export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -1778,6 +2033,7 @@ export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutDevelopment_plansInput = {
@@ -1801,6 +2057,7 @@ export type projectsUpdateWithoutDevelopment_plansInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1833,6 +2090,7 @@ export type projectsUpdateWithoutDevelopment_plansInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
@@ -1841,6 +2099,7 @@ export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1872,6 +2131,7 @@ export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutTransmission_plansInput = {
@@ -1879,6 +2139,7 @@ export type projectsCreateWithoutTransmission_plansInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -1911,6 +2172,7 @@ export type projectsCreateWithoutTransmission_plansInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutTransmission_plansInput = {
@@ -1919,6 +2181,7 @@ export type projectsUncheckedCreateWithoutTransmission_plansInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -1950,6 +2213,7 @@ export type projectsUncheckedCreateWithoutTransmission_plansInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutTransmission_plansInput = {
@@ -1973,6 +2237,7 @@ export type projectsUpdateWithoutTransmission_plansInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2005,6 +2270,7 @@ export type projectsUpdateWithoutTransmission_plansInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
@@ -2013,6 +2279,7 @@ export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2044,6 +2311,7 @@ export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutMemoriesInput = {
@@ -2051,6 +2319,7 @@ export type projectsCreateWithoutMemoriesInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -2083,6 +2352,7 @@ export type projectsCreateWithoutMemoriesInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutMemoriesInput = {
@@ -2091,6 +2361,7 @@ export type projectsUncheckedCreateWithoutMemoriesInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -2122,6 +2393,7 @@ export type projectsUncheckedCreateWithoutMemoriesInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutMemoriesInput = {
@@ -2145,6 +2417,7 @@ export type projectsUpdateWithoutMemoriesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2177,6 +2450,7 @@ export type projectsUpdateWithoutMemoriesInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutMemoriesInput = {
@@ -2185,6 +2459,7 @@ export type projectsUncheckedUpdateWithoutMemoriesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2216,6 +2491,7 @@ export type projectsUncheckedUpdateWithoutMemoriesInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutConceptsInput = {
@@ -2223,6 +2499,7 @@ export type projectsCreateWithoutConceptsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -2255,6 +2532,7 @@ export type projectsCreateWithoutConceptsInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutConceptsInput = {
@@ -2263,6 +2541,7 @@ export type projectsUncheckedCreateWithoutConceptsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -2294,6 +2573,7 @@ export type projectsUncheckedCreateWithoutConceptsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutConceptsInput = {
@@ -2317,6 +2597,7 @@ export type projectsUpdateWithoutConceptsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2349,6 +2630,7 @@ export type projectsUpdateWithoutConceptsInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutConceptsInput = {
@@ -2357,6 +2639,7 @@ export type projectsUncheckedUpdateWithoutConceptsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2388,6 +2671,7 @@ export type projectsUncheckedUpdateWithoutConceptsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutTasksInput = {
@@ -2395,6 +2679,7 @@ export type projectsCreateWithoutTasksInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -2427,6 +2712,7 @@ export type projectsCreateWithoutTasksInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutTasksInput = {
@@ -2435,6 +2721,7 @@ export type projectsUncheckedCreateWithoutTasksInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -2466,6 +2753,7 @@ export type projectsUncheckedCreateWithoutTasksInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutTasksInput = {
@@ -2489,6 +2777,7 @@ export type projectsUpdateWithoutTasksInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2521,6 +2810,7 @@ export type projectsUpdateWithoutTasksInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutTasksInput = {
@@ -2529,6 +2819,7 @@ export type projectsUncheckedUpdateWithoutTasksInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2560,6 +2851,7 @@ export type projectsUncheckedUpdateWithoutTasksInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutCommunity_commentsInput = {
@@ -2567,6 +2859,7 @@ export type projectsCreateWithoutCommunity_commentsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -2599,6 +2892,7 @@ export type projectsCreateWithoutCommunity_commentsInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutCommunity_commentsInput = {
@@ -2607,6 +2901,7 @@ export type projectsUncheckedCreateWithoutCommunity_commentsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -2638,6 +2933,7 @@ export type projectsUncheckedCreateWithoutCommunity_commentsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutCommunity_commentsInput = {
@@ -2661,6 +2957,7 @@ export type projectsUpdateWithoutCommunity_commentsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2693,6 +2990,7 @@ export type projectsUpdateWithoutCommunity_commentsInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutCommunity_commentsInput = {
@@ -2701,6 +2999,7 @@ export type projectsUncheckedUpdateWithoutCommunity_commentsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2732,6 +3031,7 @@ export type projectsUncheckedUpdateWithoutCommunity_commentsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutCollaboratorsInput = {
@@ -2739,6 +3039,7 @@ export type projectsCreateWithoutCollaboratorsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -2771,6 +3072,7 @@ export type projectsCreateWithoutCollaboratorsInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutCollaboratorsInput = {
@@ -2779,6 +3081,7 @@ export type projectsUncheckedCreateWithoutCollaboratorsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -2810,6 +3113,7 @@ export type projectsUncheckedCreateWithoutCollaboratorsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutCollaboratorsInput = {
@@ -2833,6 +3137,7 @@ export type projectsUpdateWithoutCollaboratorsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2865,6 +3170,7 @@ export type projectsUpdateWithoutCollaboratorsInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutCollaboratorsInput = {
@@ -2873,6 +3179,7 @@ export type projectsUncheckedUpdateWithoutCollaboratorsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2904,6 +3211,7 @@ export type projectsUncheckedUpdateWithoutCollaboratorsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutBuild_plansInput = {
@@ -2911,6 +3219,7 @@ export type projectsCreateWithoutBuild_plansInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -2943,6 +3252,7 @@ export type projectsCreateWithoutBuild_plansInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutBuild_plansInput = {
@@ -2951,6 +3261,7 @@ export type projectsUncheckedCreateWithoutBuild_plansInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -2982,6 +3293,7 @@ export type projectsUncheckedCreateWithoutBuild_plansInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutBuild_plansInput = {
@@ -3005,6 +3317,7 @@ export type projectsUpdateWithoutBuild_plansInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3037,6 +3350,7 @@ export type projectsUpdateWithoutBuild_plansInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutBuild_plansInput = {
@@ -3045,6 +3359,7 @@ export type projectsUncheckedUpdateWithoutBuild_plansInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3076,6 +3391,7 @@ export type projectsUncheckedUpdateWithoutBuild_plansInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutCompliance_checksInput = {
@@ -3083,6 +3399,7 @@ export type projectsCreateWithoutCompliance_checksInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -3115,6 +3432,7 @@ export type projectsCreateWithoutCompliance_checksInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutCompliance_checksInput = {
@@ -3123,6 +3441,7 @@ export type projectsUncheckedCreateWithoutCompliance_checksInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -3154,6 +3473,7 @@ export type projectsUncheckedCreateWithoutCompliance_checksInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutCompliance_checksInput = {
@@ -3177,6 +3497,7 @@ export type projectsUpdateWithoutCompliance_checksInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3209,6 +3530,7 @@ export type projectsUpdateWithoutCompliance_checksInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutCompliance_checksInput = {
@@ -3217,6 +3539,7 @@ export type projectsUncheckedUpdateWithoutCompliance_checksInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3248,6 +3571,7 @@ export type projectsUncheckedUpdateWithoutCompliance_checksInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutAutomation_runsInput = {
@@ -3255,6 +3579,7 @@ export type projectsCreateWithoutAutomation_runsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -3287,6 +3612,7 @@ export type projectsCreateWithoutAutomation_runsInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutAutomation_runsInput = {
@@ -3295,6 +3621,7 @@ export type projectsUncheckedCreateWithoutAutomation_runsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -3326,6 +3653,7 @@ export type projectsUncheckedCreateWithoutAutomation_runsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutAutomation_runsInput = {
@@ -3349,6 +3677,7 @@ export type projectsUpdateWithoutAutomation_runsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3381,6 +3710,7 @@ export type projectsUpdateWithoutAutomation_runsInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutAutomation_runsInput = {
@@ -3389,6 +3719,7 @@ export type projectsUncheckedUpdateWithoutAutomation_runsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3420,6 +3751,7 @@ export type projectsUncheckedUpdateWithoutAutomation_runsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutFinancing_roundsInput = {
@@ -3427,6 +3759,7 @@ export type projectsCreateWithoutFinancing_roundsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -3459,6 +3792,7 @@ export type projectsCreateWithoutFinancing_roundsInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutFinancing_roundsInput = {
@@ -3467,6 +3801,7 @@ export type projectsUncheckedCreateWithoutFinancing_roundsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -3498,6 +3833,7 @@ export type projectsUncheckedCreateWithoutFinancing_roundsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutFinancing_roundsInput = {
@@ -3521,6 +3857,7 @@ export type projectsUpdateWithoutFinancing_roundsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3553,6 +3890,7 @@ export type projectsUpdateWithoutFinancing_roundsInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutFinancing_roundsInput = {
@@ -3561,6 +3899,7 @@ export type projectsUncheckedUpdateWithoutFinancing_roundsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3592,6 +3931,7 @@ export type projectsUncheckedUpdateWithoutFinancing_roundsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutEquity_holdersInput = {
@@ -3599,6 +3939,7 @@ export type projectsCreateWithoutEquity_holdersInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -3631,6 +3972,7 @@ export type projectsCreateWithoutEquity_holdersInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutEquity_holdersInput = {
@@ -3639,6 +3981,7 @@ export type projectsUncheckedCreateWithoutEquity_holdersInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -3670,6 +4013,7 @@ export type projectsUncheckedCreateWithoutEquity_holdersInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutEquity_holdersInput = {
@@ -3693,6 +4037,7 @@ export type projectsUpdateWithoutEquity_holdersInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3725,6 +4070,7 @@ export type projectsUpdateWithoutEquity_holdersInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutEquity_holdersInput = {
@@ -3733,6 +4079,7 @@ export type projectsUncheckedUpdateWithoutEquity_holdersInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3764,6 +4111,7 @@ export type projectsUncheckedUpdateWithoutEquity_holdersInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutEquity_eventsInput = {
@@ -3771,6 +4119,7 @@ export type projectsCreateWithoutEquity_eventsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -3803,6 +4152,7 @@ export type projectsCreateWithoutEquity_eventsInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutEquity_eventsInput = {
@@ -3811,6 +4161,7 @@ export type projectsUncheckedCreateWithoutEquity_eventsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -3842,6 +4193,7 @@ export type projectsUncheckedCreateWithoutEquity_eventsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutEquity_eventsInput = {
@@ -3865,6 +4217,7 @@ export type projectsUpdateWithoutEquity_eventsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3897,6 +4250,7 @@ export type projectsUpdateWithoutEquity_eventsInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutEquity_eventsInput = {
@@ -3905,6 +4259,7 @@ export type projectsUncheckedUpdateWithoutEquity_eventsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3936,6 +4291,7 @@ export type projectsUncheckedUpdateWithoutEquity_eventsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutDividendsInput = {
@@ -3943,6 +4299,7 @@ export type projectsCreateWithoutDividendsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -3975,6 +4332,7 @@ export type projectsCreateWithoutDividendsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutDividendsInput = {
@@ -3983,6 +4341,7 @@ export type projectsUncheckedCreateWithoutDividendsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -4014,6 +4373,7 @@ export type projectsUncheckedCreateWithoutDividendsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutDividendsInput = {
@@ -4037,6 +4397,7 @@ export type projectsUpdateWithoutDividendsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4069,6 +4430,7 @@ export type projectsUpdateWithoutDividendsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutDividendsInput = {
@@ -4077,6 +4439,7 @@ export type projectsUncheckedUpdateWithoutDividendsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4108,6 +4471,7 @@ export type projectsUncheckedUpdateWithoutDividendsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutBilling_documentsInput = {
@@ -4115,6 +4479,7 @@ export type projectsCreateWithoutBilling_documentsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -4147,6 +4512,7 @@ export type projectsCreateWithoutBilling_documentsInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutBilling_documentsInput = {
@@ -4155,6 +4521,7 @@ export type projectsUncheckedCreateWithoutBilling_documentsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -4186,6 +4553,7 @@ export type projectsUncheckedCreateWithoutBilling_documentsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutBilling_documentsInput = {
@@ -4209,6 +4577,7 @@ export type projectsUpdateWithoutBilling_documentsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4241,6 +4610,7 @@ export type projectsUpdateWithoutBilling_documentsInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutBilling_documentsInput = {
@@ -4249,6 +4619,7 @@ export type projectsUncheckedUpdateWithoutBilling_documentsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4280,6 +4651,7 @@ export type projectsUncheckedUpdateWithoutBilling_documentsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutCrm_contactsInput = {
@@ -4287,6 +4659,7 @@ export type projectsCreateWithoutCrm_contactsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -4319,6 +4692,7 @@ export type projectsCreateWithoutCrm_contactsInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutCrm_contactsInput = {
@@ -4327,6 +4701,7 @@ export type projectsUncheckedCreateWithoutCrm_contactsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -4358,6 +4733,7 @@ export type projectsUncheckedCreateWithoutCrm_contactsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutCrm_contactsInput = {
@@ -4381,6 +4757,7 @@ export type projectsUpdateWithoutCrm_contactsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4413,6 +4790,7 @@ export type projectsUpdateWithoutCrm_contactsInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutCrm_contactsInput = {
@@ -4421,6 +4799,7 @@ export type projectsUncheckedUpdateWithoutCrm_contactsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4452,6 +4831,7 @@ export type projectsUncheckedUpdateWithoutCrm_contactsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutStock_itemsInput = {
@@ -4459,6 +4839,7 @@ export type projectsCreateWithoutStock_itemsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -4491,6 +4872,7 @@ export type projectsCreateWithoutStock_itemsInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutStock_itemsInput = {
@@ -4499,6 +4881,7 @@ export type projectsUncheckedCreateWithoutStock_itemsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -4530,6 +4913,7 @@ export type projectsUncheckedCreateWithoutStock_itemsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutStock_itemsInput = {
@@ -4553,6 +4937,7 @@ export type projectsUpdateWithoutStock_itemsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4585,6 +4970,7 @@ export type projectsUpdateWithoutStock_itemsInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutStock_itemsInput = {
@@ -4593,6 +4979,7 @@ export type projectsUncheckedUpdateWithoutStock_itemsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4624,6 +5011,7 @@ export type projectsUncheckedUpdateWithoutStock_itemsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutAgenda_eventsInput = {
@@ -4631,6 +5019,7 @@ export type projectsCreateWithoutAgenda_eventsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -4663,6 +5052,7 @@ export type projectsCreateWithoutAgenda_eventsInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutAgenda_eventsInput = {
@@ -4671,6 +5061,7 @@ export type projectsUncheckedCreateWithoutAgenda_eventsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -4702,6 +5093,7 @@ export type projectsUncheckedCreateWithoutAgenda_eventsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutAgenda_eventsInput = {
@@ -4725,6 +5117,7 @@ export type projectsUpdateWithoutAgenda_eventsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4757,6 +5150,7 @@ export type projectsUpdateWithoutAgenda_eventsInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutAgenda_eventsInput = {
@@ -4765,6 +5159,7 @@ export type projectsUncheckedUpdateWithoutAgenda_eventsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4796,6 +5191,7 @@ export type projectsUncheckedUpdateWithoutAgenda_eventsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutWorkflow_definitionsInput = {
@@ -4803,6 +5199,7 @@ export type projectsCreateWithoutWorkflow_definitionsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -4835,6 +5232,7 @@ export type projectsCreateWithoutWorkflow_definitionsInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutWorkflow_definitionsInput = {
@@ -4843,6 +5241,7 @@ export type projectsUncheckedCreateWithoutWorkflow_definitionsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -4874,6 +5273,7 @@ export type projectsUncheckedCreateWithoutWorkflow_definitionsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutWorkflow_definitionsInput = {
@@ -4897,6 +5297,7 @@ export type projectsUpdateWithoutWorkflow_definitionsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4929,6 +5330,7 @@ export type projectsUpdateWithoutWorkflow_definitionsInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutWorkflow_definitionsInput = {
@@ -4937,6 +5339,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_definitionsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4968,6 +5371,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_definitionsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutWorkflow_runsInput = {
@@ -4975,6 +5379,7 @@ export type projectsCreateWithoutWorkflow_runsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -5007,6 +5412,7 @@ export type projectsCreateWithoutWorkflow_runsInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutWorkflow_runsInput = {
@@ -5015,6 +5421,7 @@ export type projectsUncheckedCreateWithoutWorkflow_runsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -5046,6 +5453,7 @@ export type projectsUncheckedCreateWithoutWorkflow_runsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutWorkflow_runsInput = {
@@ -5069,6 +5477,7 @@ export type projectsUpdateWithoutWorkflow_runsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5101,6 +5510,7 @@ export type projectsUpdateWithoutWorkflow_runsInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutWorkflow_runsInput = {
@@ -5109,6 +5519,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_runsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5140,6 +5551,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_runsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutBuyback_objectivesInput = {
@@ -5147,6 +5559,7 @@ export type projectsCreateWithoutBuyback_objectivesInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -5179,6 +5592,7 @@ export type projectsCreateWithoutBuyback_objectivesInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutBuyback_objectivesInput = {
@@ -5187,6 +5601,7 @@ export type projectsUncheckedCreateWithoutBuyback_objectivesInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -5218,6 +5633,7 @@ export type projectsUncheckedCreateWithoutBuyback_objectivesInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutBuyback_objectivesInput = {
@@ -5241,6 +5657,7 @@ export type projectsUpdateWithoutBuyback_objectivesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5273,6 +5690,7 @@ export type projectsUpdateWithoutBuyback_objectivesInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutBuyback_objectivesInput = {
@@ -5281,6 +5699,7 @@ export type projectsUncheckedUpdateWithoutBuyback_objectivesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5312,6 +5731,7 @@ export type projectsUncheckedUpdateWithoutBuyback_objectivesInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutFinancedProjectsInput = {
@@ -5319,6 +5739,7 @@ export type projectsCreateWithoutFinancedProjectsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -5351,6 +5772,7 @@ export type projectsCreateWithoutFinancedProjectsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutFinancedProjectsInput = {
@@ -5359,6 +5781,7 @@ export type projectsUncheckedCreateWithoutFinancedProjectsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -5390,6 +5813,7 @@ export type projectsUncheckedCreateWithoutFinancedProjectsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutFinancedProjectsInput = {
@@ -5413,6 +5837,7 @@ export type projectsUpdateWithoutFinancedProjectsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5445,6 +5870,7 @@ export type projectsUpdateWithoutFinancedProjectsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutFinancedProjectsInput = {
@@ -5453,6 +5879,7 @@ export type projectsUncheckedUpdateWithoutFinancedProjectsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5484,6 +5911,7 @@ export type projectsUncheckedUpdateWithoutFinancedProjectsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutScore_snapshotsInput = {
@@ -5491,6 +5919,7 @@ export type projectsCreateWithoutScore_snapshotsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -5523,6 +5952,7 @@ export type projectsCreateWithoutScore_snapshotsInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutScore_snapshotsInput = {
@@ -5531,6 +5961,7 @@ export type projectsUncheckedCreateWithoutScore_snapshotsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -5562,6 +5993,7 @@ export type projectsUncheckedCreateWithoutScore_snapshotsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutScore_snapshotsInput = {
@@ -5585,6 +6017,7 @@ export type projectsUpdateWithoutScore_snapshotsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5617,6 +6050,7 @@ export type projectsUpdateWithoutScore_snapshotsInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutScore_snapshotsInput = {
@@ -5625,6 +6059,7 @@ export type projectsUncheckedUpdateWithoutScore_snapshotsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5656,6 +6091,7 @@ export type projectsUncheckedUpdateWithoutScore_snapshotsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutReal_estate_propertiesInput = {
@@ -5663,6 +6099,7 @@ export type projectsCreateWithoutReal_estate_propertiesInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -5695,6 +6132,7 @@ export type projectsCreateWithoutReal_estate_propertiesInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutReal_estate_propertiesInput = {
@@ -5703,6 +6141,7 @@ export type projectsUncheckedCreateWithoutReal_estate_propertiesInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -5734,6 +6173,7 @@ export type projectsUncheckedCreateWithoutReal_estate_propertiesInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutReal_estate_propertiesInput = {
@@ -5757,6 +6197,7 @@ export type projectsUpdateWithoutReal_estate_propertiesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5789,6 +6230,7 @@ export type projectsUpdateWithoutReal_estate_propertiesInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutReal_estate_propertiesInput = {
@@ -5797,6 +6239,7 @@ export type projectsUncheckedUpdateWithoutReal_estate_propertiesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5828,6 +6271,7 @@ export type projectsUncheckedUpdateWithoutReal_estate_propertiesInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutFleet_vehiclesInput = {
@@ -5835,6 +6279,7 @@ export type projectsCreateWithoutFleet_vehiclesInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -5867,6 +6312,7 @@ export type projectsCreateWithoutFleet_vehiclesInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutFleet_vehiclesInput = {
@@ -5875,6 +6321,7 @@ export type projectsUncheckedCreateWithoutFleet_vehiclesInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -5906,6 +6353,7 @@ export type projectsUncheckedCreateWithoutFleet_vehiclesInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutFleet_vehiclesInput = {
@@ -5929,6 +6377,7 @@ export type projectsUpdateWithoutFleet_vehiclesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -5961,6 +6410,7 @@ export type projectsUpdateWithoutFleet_vehiclesInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutFleet_vehiclesInput = {
@@ -5969,6 +6419,7 @@ export type projectsUncheckedUpdateWithoutFleet_vehiclesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6000,6 +6451,7 @@ export type projectsUncheckedUpdateWithoutFleet_vehiclesInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutAd_campaignsInput = {
@@ -6007,6 +6459,7 @@ export type projectsCreateWithoutAd_campaignsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -6039,6 +6492,7 @@ export type projectsCreateWithoutAd_campaignsInput = {
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutAd_campaignsInput = {
@@ -6047,6 +6501,7 @@ export type projectsUncheckedCreateWithoutAd_campaignsInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -6078,6 +6533,7 @@ export type projectsUncheckedCreateWithoutAd_campaignsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutAd_campaignsInput = {
@@ -6101,6 +6557,7 @@ export type projectsUpdateWithoutAd_campaignsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6133,6 +6590,7 @@ export type projectsUpdateWithoutAd_campaignsInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutAd_campaignsInput = {
@@ -6141,6 +6599,7 @@ export type projectsUncheckedUpdateWithoutAd_campaignsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6172,6 +6631,7 @@ export type projectsUncheckedUpdateWithoutAd_campaignsInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateManyOwnerInput = {
@@ -6179,6 +6639,7 @@ export type projectsCreateManyOwnerInput = {
   title: string
   description?: string | null
   sector?: string | null
+  confirmed_legal_form?: string | null
   is_public?: boolean
   created_at?: Date | string | null
   updated_at?: Date | string | null
@@ -6189,6 +6650,7 @@ export type projectsUpdateWithoutOwnerInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6221,6 +6683,7 @@ export type projectsUpdateWithoutOwnerInput = {
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutOwnerInput = {
@@ -6228,6 +6691,7 @@ export type projectsUncheckedUpdateWithoutOwnerInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6260,6 +6724,7 @@ export type projectsUncheckedUpdateWithoutOwnerInput = {
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateManyWithoutOwnerInput = {
@@ -6267,6 +6732,7 @@ export type projectsUncheckedUpdateManyWithoutOwnerInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6552,6 +7018,7 @@ export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   title?: boolean
   description?: boolean
   sector?: boolean
+  confirmed_legal_form?: boolean
   is_public?: boolean
   created_at?: boolean
   updated_at?: boolean
@@ -6585,6 +7052,7 @@ export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   dividends?: boolean | Prisma.projects$dividendsArgs<ExtArgs>
   buyback_objectives?: boolean | Prisma.projects$buyback_objectivesArgs<ExtArgs>
   financedProjects?: boolean | Prisma.projects$financedProjectsArgs<ExtArgs>
+  bylaws?: boolean | Prisma.projects$bylawsArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["projects"]>
 
@@ -6594,6 +7062,7 @@ export type projectsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   title?: boolean
   description?: boolean
   sector?: boolean
+  confirmed_legal_form?: boolean
   is_public?: boolean
   created_at?: boolean
   updated_at?: boolean
@@ -6606,6 +7075,7 @@ export type projectsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   title?: boolean
   description?: boolean
   sector?: boolean
+  confirmed_legal_form?: boolean
   is_public?: boolean
   created_at?: boolean
   updated_at?: boolean
@@ -6618,12 +7088,13 @@ export type projectsSelectScalar = {
   title?: boolean
   description?: boolean
   sector?: boolean
+  confirmed_legal_form?: boolean
   is_public?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type projectsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_id" | "title" | "description" | "sector" | "is_public" | "created_at" | "updated_at", ExtArgs["result"]["projects"]>
+export type projectsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_id" | "title" | "description" | "sector" | "confirmed_legal_form" | "is_public" | "created_at" | "updated_at", ExtArgs["result"]["projects"]>
 export type projectsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   analyses?: boolean | Prisma.projects$analysesArgs<ExtArgs>
@@ -6655,6 +7126,7 @@ export type projectsInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   dividends?: boolean | Prisma.projects$dividendsArgs<ExtArgs>
   buyback_objectives?: boolean | Prisma.projects$buyback_objectivesArgs<ExtArgs>
   financedProjects?: boolean | Prisma.projects$financedProjectsArgs<ExtArgs>
+  bylaws?: boolean | Prisma.projects$bylawsArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type projectsIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -6697,6 +7169,7 @@ export type $projectsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     dividends: Prisma.$dividend_distributionsPayload<ExtArgs>[]
     buyback_objectives: Prisma.$buyback_objectivesPayload<ExtArgs>[]
     financedProjects: Prisma.$financed_projectsPayload<ExtArgs> | null
+    bylaws: Prisma.$company_bylawsPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -6704,6 +7177,12 @@ export type $projectsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     title: string
     description: string | null
     sector: string | null
+    /**
+     * 'micro-entreprise' | 'EI' | 'EURL' | 'SASU' | 'SARL' | 'SAS' — ce que la
+     * personne a retenu, pas seulement ce que Former a recommandé. Nullable
+     * tant qu'elle n'a rien confirmé.
+     */
+    confirmed_legal_form: string | null
     is_public: boolean
     created_at: Date | null
     updated_at: Date | null
@@ -7131,6 +7610,7 @@ export interface Prisma__projectsClient<T, Null = never, ExtArgs extends runtime
   dividends<T extends Prisma.projects$dividendsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$dividendsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$dividend_distributionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   buyback_objectives<T extends Prisma.projects$buyback_objectivesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$buyback_objectivesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$buyback_objectivesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   financedProjects<T extends Prisma.projects$financedProjectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$financedProjectsArgs<ExtArgs>>): Prisma.Prisma__financed_projectsClient<runtime.Types.Result.GetResult<Prisma.$financed_projectsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  bylaws<T extends Prisma.projects$bylawsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$bylawsArgs<ExtArgs>>): Prisma.Prisma__company_bylawsClient<runtime.Types.Result.GetResult<Prisma.$company_bylawsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7165,6 +7645,7 @@ export interface projectsFieldRefs {
   readonly title: Prisma.FieldRef<"projects", 'String'>
   readonly description: Prisma.FieldRef<"projects", 'String'>
   readonly sector: Prisma.FieldRef<"projects", 'String'>
+  readonly confirmed_legal_form: Prisma.FieldRef<"projects", 'String'>
   readonly is_public: Prisma.FieldRef<"projects", 'Boolean'>
   readonly created_at: Prisma.FieldRef<"projects", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"projects", 'DateTime'>
@@ -8257,6 +8738,25 @@ export type projects$financedProjectsArgs<ExtArgs extends runtime.Types.Extensio
    */
   include?: Prisma.financed_projectsInclude<ExtArgs> | null
   where?: Prisma.financed_projectsWhereInput
+}
+
+/**
+ * projects.bylaws
+ */
+export type projects$bylawsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the company_bylaws
+   */
+  select?: Prisma.company_bylawsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the company_bylaws
+   */
+  omit?: Prisma.company_bylawsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.company_bylawsInclude<ExtArgs> | null
+  where?: Prisma.company_bylawsWhereInput
 }
 
 /**

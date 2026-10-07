@@ -406,6 +406,8 @@ export const ModelName = {
   legal_form_assumptions: 'legal_form_assumptions',
   legal_form_alternatives: 'legal_form_alternatives',
   legal_form_sources: 'legal_form_sources',
+  company_bylaws: 'company_bylaws',
+  bylaw_associates: 'bylaw_associates',
   financing_plans: 'financing_plans',
   development_plans: 'development_plans',
   transmission_plans: 'transmission_plans',
@@ -478,7 +480,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "company_bylaws" | "bylaw_associates" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1145,6 +1147,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.legal_form_sourcesCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.Legal_form_sourcesCountAggregateOutputType> | number
+        }
+      }
+    }
+    company_bylaws: {
+      payload: Prisma.$company_bylawsPayload<ExtArgs>
+      fields: Prisma.company_bylawsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.company_bylawsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_bylawsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.company_bylawsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_bylawsPayload>
+        }
+        findFirst: {
+          args: Prisma.company_bylawsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_bylawsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.company_bylawsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_bylawsPayload>
+        }
+        findMany: {
+          args: Prisma.company_bylawsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_bylawsPayload>[]
+        }
+        create: {
+          args: Prisma.company_bylawsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_bylawsPayload>
+        }
+        createMany: {
+          args: Prisma.company_bylawsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.company_bylawsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_bylawsPayload>[]
+        }
+        delete: {
+          args: Prisma.company_bylawsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_bylawsPayload>
+        }
+        update: {
+          args: Prisma.company_bylawsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_bylawsPayload>
+        }
+        deleteMany: {
+          args: Prisma.company_bylawsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.company_bylawsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.company_bylawsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_bylawsPayload>[]
+        }
+        upsert: {
+          args: Prisma.company_bylawsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_bylawsPayload>
+        }
+        aggregate: {
+          args: Prisma.Company_bylawsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCompany_bylaws>
+        }
+        groupBy: {
+          args: Prisma.company_bylawsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Company_bylawsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.company_bylawsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Company_bylawsCountAggregateOutputType> | number
+        }
+      }
+    }
+    bylaw_associates: {
+      payload: Prisma.$bylaw_associatesPayload<ExtArgs>
+      fields: Prisma.bylaw_associatesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.bylaw_associatesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bylaw_associatesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.bylaw_associatesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bylaw_associatesPayload>
+        }
+        findFirst: {
+          args: Prisma.bylaw_associatesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bylaw_associatesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.bylaw_associatesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bylaw_associatesPayload>
+        }
+        findMany: {
+          args: Prisma.bylaw_associatesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bylaw_associatesPayload>[]
+        }
+        create: {
+          args: Prisma.bylaw_associatesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bylaw_associatesPayload>
+        }
+        createMany: {
+          args: Prisma.bylaw_associatesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.bylaw_associatesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bylaw_associatesPayload>[]
+        }
+        delete: {
+          args: Prisma.bylaw_associatesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bylaw_associatesPayload>
+        }
+        update: {
+          args: Prisma.bylaw_associatesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bylaw_associatesPayload>
+        }
+        deleteMany: {
+          args: Prisma.bylaw_associatesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.bylaw_associatesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.bylaw_associatesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bylaw_associatesPayload>[]
+        }
+        upsert: {
+          args: Prisma.bylaw_associatesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bylaw_associatesPayload>
+        }
+        aggregate: {
+          args: Prisma.Bylaw_associatesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBylaw_associates>
+        }
+        groupBy: {
+          args: Prisma.bylaw_associatesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Bylaw_associatesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.bylaw_associatesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Bylaw_associatesCountAggregateOutputType> | number
         }
       }
     }
@@ -5436,6 +5586,7 @@ export const ProjectsScalarFieldEnum = {
   title: 'title',
   description: 'description',
   sector: 'sector',
+  confirmed_legal_form: 'confirmed_legal_form',
   is_public: 'is_public',
   created_at: 'created_at',
   updated_at: 'updated_at'
@@ -5515,6 +5666,37 @@ export const Legal_form_sourcesScalarFieldEnum = {
 } as const
 
 export type Legal_form_sourcesScalarFieldEnum = (typeof Legal_form_sourcesScalarFieldEnum)[keyof typeof Legal_form_sourcesScalarFieldEnum]
+
+
+export const Company_bylawsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  project_id: 'project_id',
+  legal_form: 'legal_form',
+  capital_cents: 'capital_cents',
+  head_office: 'head_office',
+  duration_years: 'duration_years',
+  content: 'content',
+  status: 'status',
+  finalized_at: 'finalized_at',
+  generated_by: 'generated_by',
+  generated_model: 'generated_model',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Company_bylawsScalarFieldEnum = (typeof Company_bylawsScalarFieldEnum)[keyof typeof Company_bylawsScalarFieldEnum]
+
+
+export const Bylaw_associatesScalarFieldEnum = {
+  id: 'id',
+  bylaws_id: 'bylaws_id',
+  full_name: 'full_name',
+  share_basis_points: 'share_basis_points',
+  created_at: 'created_at'
+} as const
+
+export type Bylaw_associatesScalarFieldEnum = (typeof Bylaw_associatesScalarFieldEnum)[keyof typeof Bylaw_associatesScalarFieldEnum]
 
 
 export const Financing_plansScalarFieldEnum = {
@@ -6587,6 +6769,8 @@ export type GlobalOmitConfig = {
   legal_form_assumptions?: Prisma.legal_form_assumptionsOmit
   legal_form_alternatives?: Prisma.legal_form_alternativesOmit
   legal_form_sources?: Prisma.legal_form_sourcesOmit
+  company_bylaws?: Prisma.company_bylawsOmit
+  bylaw_associates?: Prisma.bylaw_associatesOmit
   financing_plans?: Prisma.financing_plansOmit
   development_plans?: Prisma.development_plansOmit
   transmission_plans?: Prisma.transmission_plansOmit

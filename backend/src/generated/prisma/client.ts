@@ -99,6 +99,16 @@ export type legal_form_alternatives = Prisma.legal_form_alternativesModel
  */
 export type legal_form_sources = Prisma.legal_form_sourcesModel
 /**
+ * Model company_bylaws
+ * 
+ */
+export type company_bylaws = Prisma.company_bylawsModel
+/**
+ * Model bylaw_associates
+ * 
+ */
+export type bylaw_associates = Prisma.bylaw_associatesModel
+/**
  * Model financing_plans
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */

@@ -172,6 +172,19 @@ export class ProjectsService {
     return this.prisma.projects.update({ where: { id }, data: { sector } });
   }
 
+  /**
+   * La forme juridique RETENUE par la personne, distincte de la simple
+   * recommandation de Former. Un document aussi engageant que des statuts
+   * ne doit jamais se construire sur une suggestion non confirmée.
+   */
+  async setConfirmedLegalFormForOwner(ownerId: string, id: string, legalForm: string | null) {
+    await this.findOneForOwner(ownerId, id);
+    return this.prisma.projects.update({
+      where: { id },
+      data: { confirmed_legal_form: legalForm },
+    });
+  }
+
   async setVisibilityForOwner(ownerId: string, id: string, isPublic: boolean) {
     await this.findOneForOwner(ownerId, id);
     return this.prisma.projects.update({ where: { id }, data: { is_public: isPublic } });
