@@ -108,6 +108,7 @@ export class UserDataService {
       equityEvents,
       dividends,
       buybackObjectives,
+      accordsDeParticipation,
       comments,
       contactsSent,
       contactsReceived,
@@ -155,6 +156,12 @@ export class UserDataService {
       this.prisma.equity_events.findMany({ where: byProject }),
       this.prisma.dividend_distributions.findMany({ where: byProject }),
       this.prisma.buyback_objectives.findMany({ where: byProject }),
+      // Avec ses paliers et ses lignes de droit sur les dividendes : une seule
+      // lecture, comme les sources d'une analyse.
+      this.prisma.participation_agreements.findMany({
+        where: byProject,
+        include: { milestones: true, dividend_rights: true },
+      }),
       this.prisma.community_comments.findMany({ where: { author_id: userId } }),
       this.prisma.marketplace_contacts.findMany({ where: { from_user_id: userId } }),
       profile
@@ -247,6 +254,7 @@ export class UserDataService {
           evenements_de_repartition: equityEvents,
           dividendes_verses: dividends,
           objectifs_de_rachat: buybackObjectives,
+          accords_de_participation: accordsDeParticipation,
           // Ton profil d'investisseur, ce que tu as placé, et l'historique
           // de ce qui t'est revenu — projet par projet, jamais mélangés.
           profil_investisseur: investisseur,

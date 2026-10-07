@@ -94,6 +94,9 @@ describe('ProjectsService', () => {
       findUnique: ReturnType<typeof vi.fn>;
     };
     user_profiles: { findUnique: ReturnType<typeof vi.fn> };
+    participation_agreements: { findFirst: ReturnType<typeof vi.fn> };
+    participation_milestones: { findMany: ReturnType<typeof vi.fn> };
+    equity_events: { findMany: ReturnType<typeof vi.fn> };
   };
   let analysisService: { analyzeProject: ReturnType<typeof vi.fn> };
   let formerService: { recommendLegalForm: ReturnType<typeof vi.fn> };
@@ -148,6 +151,10 @@ describe('ProjectsService', () => {
       // Le profil alimente le contexte de chaque generation. Vide par
       // defaut : ces tests eprouvent le fil des etapes, pas la personne.
       user_profiles: { findUnique: vi.fn().mockResolvedValue(null) },
+      // Aucun accord de participation par défaut : le contexte reste ce qu'il était.
+      participation_agreements: { findFirst: vi.fn().mockResolvedValue(null) },
+      participation_milestones: { findMany: vi.fn().mockResolvedValue([]) },
+      equity_events: { findMany: vi.fn().mockResolvedValue([]) },
     };
     // Par défaut, aucune étape précédente n'existe encore (buildProjectContext
     // doit alors renvoyer undefined) ; les tests qui veulent simuler un
@@ -1374,6 +1381,102 @@ describe('ProjectsService', () => {
         orderBy: { created_at: 'desc' },
       });
       expect(result).toEqual([{ id: 'dp1' }]);
+    });
+  });
+
+  describe('contexte de participation IGNITUX', () => {
+    const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
+
+    beforeEach(() => {
+      prisma.projects.findFirst.mockResolvedValue(project);
+      prisma.participation_agreements.findFirst.mockResolvedValue({
+        id: 'a1',
+        project_id: 'p1',
+        founder_holder_id: 'hf',
+        ignitux_holder_id: 'hi',
+        status: 'actif',
+        dividend_right_bps: 500,
+      });
+      prisma.equity_events.findMany.mockResolvedValue([
+        { holder_id: 'hf', share_basis_points: 6400, occurred_at: new Date('2026-10-01') },
+        { holder_id: 'hi', share_basis_points: 3600, occurred_at: new Date('2026-10-01') },
+      ]);
+      prisma.participation_milestones.findMany.mockResolvedValue([
+        { position: 1, label: null, target_ignitux_bps: 1200, status: 'prevu', conditions: ['Condition du projet'] },
+      ]);
+    });
+
+    it('éclaire le plan de financement : où en est le capital et quel est le prochain palier', async () => {
+      financingService.createFinancingPlan.mockResolvedValue({
+        summary: 'R',
+        estimated_budget: 'x',
+        funding_sources: [],
+        budget_breakdown: [],
+      });
+      prisma.financing_plans.create.mockResolvedValue({});
+
+      await service.createFinancingPlanForOwner('u1', 'p1');
+
+      const context = financingService.createFinancingPlan.mock.calls[0][3] as string;
+      expect(context).toContain('64 % porteur / 36 % IGNITUX');
+      expect(context).toContain('Condition du projet');
+    });
+
+    it('éclaire le plan de développement', async () => {
+      developmentService.createDevelopmentPlan.mockResolvedValue({
+        summary: 'R',
+        growth_levers: [],
+        key_metrics: [],
+        scaling_risks: [],
+      });
+      prisma.development_plans.create.mockResolvedValue({});
+
+      await service.createDevelopmentPlanForOwner('u1', 'p1');
+
+      expect(developmentService.createDevelopmentPlan.mock.calls[0][3]).toContain('64 % porteur / 36 % IGNITUX');
+    });
+
+    it('éclaire le plan de transmission', async () => {
+      transmissionService.createTransmissionPlan.mockResolvedValue({
+        summary: 'R',
+        transfer_options: [],
+        key_documentation: [],
+        readiness_checklist: [],
+      });
+      prisma.transmission_plans.create.mockResolvedValue({});
+
+      await service.createTransmissionPlanForOwner('u1', 'p1');
+
+      expect(transmissionService.createTransmissionPlan.mock.calls[0][3]).toContain('64 % porteur / 36 % IGNITUX');
+    });
+
+    it('éclaire le plan de construction', async () => {
+      planningService.createBuildPlan.mockResolvedValue({
+        summary: 'R',
+        estimated_timeline: 'x',
+        milestones: [],
+        key_resources: [],
+      });
+      prisma.build_plans.create.mockResolvedValue({});
+
+      await service.createBuildPlanForOwner('u1', 'p1');
+
+      expect(planningService.createBuildPlan.mock.calls[0][3]).toContain('64 % porteur / 36 % IGNITUX');
+    });
+
+    it('n’ajoute rien quand le projet n’a pas d’accord', async () => {
+      prisma.participation_agreements.findFirst.mockResolvedValue(null);
+      financingService.createFinancingPlan.mockResolvedValue({
+        summary: 'R',
+        estimated_budget: 'x',
+        funding_sources: [],
+        budget_breakdown: [],
+      });
+      prisma.financing_plans.create.mockResolvedValue({});
+
+      await service.createFinancingPlanForOwner('u1', 'p1');
+
+      expect(financingService.createFinancingPlan.mock.calls[0][3]).toBeUndefined();
     });
   });
 

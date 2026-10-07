@@ -276,6 +276,27 @@ describe('ProjectFinancesPage', () => {
     });
   });
 
+  // L'ancien prélèvement de 5 % n'est pas le droit économique d'IGNITUX : celui-là
+  // vit dans l'accord de participation, et ne commence qu'après la transmission
+  // complète du capital. Le libellé ne doit pas laisser croire le contraire.
+  it('présente le prélèvement de 5 % comme l’ancien mécanisme, pas comme le droit IGNITUX', async () => {
+    mockApiRoutes(routes());
+
+    render(
+      <AuthProvider>
+        <ProjectFinancesPage />
+      </AuthProvider>,
+    );
+
+    fireEvent.change(await screen.findByLabelText('Nature'), { target: { value: 'dividende' } });
+
+    const libelle = await screen.findByLabelText(/part perpétuelle de 5 %/);
+    const texte = libelle.closest('label')!.textContent ?? '';
+    expect(texte).toMatch(/ancien mécanisme/i);
+    expect(texte).toMatch(/distinct du droit économique/i);
+    expect(texte).not.toMatch(/51\/49/);
+  });
+
   // Une écriture mal saisie ne pouvait être rectifiée qu'en base : la route
   // de correction existait déjà côté serveur, sans aucun geste pour
   // l'atteindre depuis l'interface du porteur.

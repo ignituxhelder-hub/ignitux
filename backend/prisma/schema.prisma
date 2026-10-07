@@ -116,6 +116,7 @@ model projects {
   equity_events        equity_events[]
   dividends            dividend_distributions[]
   buyback_objectives   buyback_objectives[]
+  participation_agreement participation_agreements?
   financedProjects     financed_projects?
   bylaws           company_bylaws?
 
@@ -588,6 +589,8 @@ model equity_holders {
   equity_events  equity_events[]
   dividends      dividend_distributions[]
   participations participations[]
+  founder_agreement participation_agreements? @relation("agreement_founder")
+  ignitux_agreement participation_agreements? @relation("agreement_ignitux")
 
   @@index([project_id])
 }
@@ -652,6 +655,117 @@ model dividend_distributions {
 
   @@index([project_id])
   @@index([holder_id])
+}
+
+/// PARTICIPATION IGNITUX — l'accord qui lie un projet à IGNITUX.
+///
+/// Un accord = trois choses distinctes, jamais mélangées :
+///   1. le CAPITAL, qui reste dans `equity_events` (seule autorité) ;
+///   2. le DROIT ÉCONOMIQUE, un pourcentage des dividendes distribués, dû
+///      uniquement quand IGNITUX est à 0 % du capital (`dividend_right_entries`) ;
+///   3. l'ACCÈS À L'ÉCOSYSTÈME, porté par `ecosystem_offre`, indépendant du
+///      capital : il ne disparaît pas quand IGNITUX passe à 0 %.
+///
+/// Les parts de départ et le taux du droit sont ceux DE CET ACCORD, copiés à
+/// sa création depuis des valeurs par défaut. Aucun délai, aucune échéance :
+/// la progression passe par `participation_milestones`, validés à la main.
+model participation_agreements {
+  id                  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id          String         @unique @db.Uuid
+  project             projects       @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  /// Les deux détenteurs du capital. NoAction : supprimer un détenteur
+  /// effacerait en cascade l'historique de la transmission.
+  founder_holder_id   String         @unique @db.Uuid
+  founder_holder      equity_holders @relation("agreement_founder", fields: [founder_holder_id], references: [id], onDelete: NoAction)
+  ignitux_holder_id   String         @unique @db.Uuid
+  ignitux_holder      equity_holders @relation("agreement_ignitux", fields: [ignitux_holder_id], references: [id], onDelete: NoAction)
+  /// La répartition de départ, en points de base. Fait historique : la part
+  /// d'aujourd'hui se lit dans `equity_events`.
+  initial_founder_bps Int
+  initial_ignitux_bps Int
+  /// Le droit sur les dividendes DISTRIBUÉS, en points de base. Propre à
+  /// l'accord ; jamais une part de capital.
+  dividend_right_bps  Int
+  /// 'actif' | 'transmis' | 'clos'. 'transmis' = IGNITUX est à 0 % du capital.
+  status              String         @default("actif")
+  effective_on        DateTime       @db.Date
+  /// Référence du contrat signé, quand il existe (validation juridique).
+  contract_reference  String?
+  /// L'offre que le contrat garantit à l'entrepreneur. Chaîne libre comme
+  /// `subscriptions.offre` : le catalogue reste l'autorité.
+  ecosystem_offre     String         @default("construction")
+  /// Le jour où IGNITUX est passé à 0 % du capital. C'est ce qui ouvre le
+  /// droit sur les dividendes.
+  transmitted_on      DateTime?      @db.Date
+  created_at          DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?      @updatedAt @db.Timestamptz(6)
+
+  milestones      participation_milestones[]
+  dividend_rights dividend_right_entries[]
+
+  @@index([status])
+}
+
+/// PARTICIPATION IGNITUX — un palier de la transmission du capital.
+///
+/// Un palier n'est JAMAIS déclenché par le temps : aucune colonne ici ne
+/// porte une durée ni une échéance automatique. Il passe de 'prevu' à
+/// 'valide' quand IGNITUX constate que les conditions définies pour ce projet
+/// sont remplies, puis à 'execute' quand le capital est réellement modifié.
+/// L'entrepreneur peut en prendre connaissance (`founder_acknowledged_at`),
+/// ce qui ne remplace jamais la validation d'IGNITUX.
+model participation_milestones {
+  id                      String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  agreement_id            String                   @db.Uuid
+  agreement               participation_agreements @relation(fields: [agreement_id], references: [id], onDelete: Cascade)
+  /// L'ordre des paliers. La part visée décroît strictement avec la position.
+  position                Int
+  label                   String?
+  /// La part d'IGNITUX visée APRÈS ce palier, en points de base.
+  target_ignitux_bps      Int
+  /// Les conditions de ce palier, propres au projet, écrites par une personne.
+  /// Vide = « conditions à définir » : le produit n'en invente aucune.
+  conditions              String[]
+  /// 'prevu' | 'valide' | 'execute' | 'abandonne'
+  status                  String                   @default("prevu")
+  validated_at            DateTime?                @db.Timestamptz(6)
+  /// Qui, côté IGNITUX, a validé. Jamais l'entrepreneur seul.
+  validated_by            String?                  @db.Uuid
+  validation_note         String?
+  founder_acknowledged_at DateTime?                @db.Timestamptz(6)
+  effective_on            DateTime?                @db.Date
+  executed_at             DateTime?                @db.Timestamptz(6)
+  /// Les événements de capital écrits à l'exécution (porteur + IGNITUX).
+  equity_event_ids        String[]
+  created_at              DateTime?                @default(now()) @db.Timestamptz(6)
+
+  @@unique([agreement_id, position])
+  @@index([agreement_id])
+}
+
+/// PARTICIPATION IGNITUX — le droit économique sur un dividende distribué.
+///
+/// Registre SÉPARÉ du capital : ces lignes ne sont jamais des parts. Une ligne
+/// naît d'un dividende réellement distribué, et seulement après transmission
+/// complète du capital. Sans dividende, aucune ligne, aucun paiement.
+model dividend_right_entries {
+  id                String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  agreement_id      String                   @db.Uuid
+  agreement         participation_agreements @relation(fields: [agreement_id], references: [id], onDelete: Cascade)
+  /// Le dividende total effectivement distribué.
+  distributed_cents Int
+  /// Le taux de l'accord AU MOMENT du constat, recopié : changer l'accord
+  /// plus tard ne réécrit pas ce qui était dû.
+  right_bps         Int
+  due_cents         Int
+  occurred_on       DateTime                 @db.Date
+  /// 'du' | 'regle'
+  status            String                   @default("du")
+  settled_on        DateTime?                @db.Date
+  note              String?
+  created_at        DateTime?                @default(now()) @db.Timestamptz(6)
+
+  @@index([agreement_id])
 }
 
 /// FACTURATION — un document commercial : devis, facture ou avoir.

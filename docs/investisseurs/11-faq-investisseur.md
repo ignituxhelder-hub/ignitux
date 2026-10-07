@@ -122,14 +122,19 @@ certaines écritures en base.
 **Manque** : les articles 16 (Offline First — en réalité fonctionnel, voir §1.7 du dossier
 principal) et 17 (Les Gardiens — réellement absent) restent `declared`.
 
-## 17. Comment fonctionne le modèle 51/49 ?
+## 17. Comment fonctionne le modèle de participation ?
 
-**Courte** : le porteur de projet reste majoritaire (règle `majorite-du-porteur`, bloquante), avec
-une part perpétuelle de 5 % suivie dans le registre d'investissement.
-**Preuve** : `backend/src/constitution/constitution-rules.ts`, `docs/decisions.md`
-(« La part perpétuelle de 5 % se dit, elle ne se devine pas ») **[Code, Doc]**.
-**Manque** : **aucun contrat juridique généré** pour ce modèle à ce jour — c'est un suivi, pas un
-montage juridique **[Status]**. Voir aussi le point réglementaire de `10-risques-et-reponses.md`.
+**Courte** : le porteur de projet reste majoritaire (règle `majorite-du-porteur`, bloquante). La
+structure de départ actuelle est 51 % porteur / 49 % IGNITUX, mais c'est une valeur de départ propre
+à chaque accord, pas une règle fixe. La part d'IGNITUX ne peut que baisser, par paliers validés par
+IGNITUX, sans aucune règle de temps, jusqu'à 0 %. À ce moment seulement, IGNITUX conserve 5 % des
+dividendes effectivement distribués (ce n'est pas une part de capital), et le porteur garde l'accès à
+l'écosystème IGNITUX selon son accord.
+**Preuve** : `backend/src/participation/`, `backend/src/constitution/constitution-rules.ts`,
+`docs/decisions.md` (« La participation d'IGNITUX ») **[Code, Doc]**.
+**Manque** : **aucun contrat juridique généré** pour ce modèle à ce jour, et le droit sur les
+dividendes n'a pas été relu par un juriste — c'est un suivi, pas un montage juridique **[Status]**.
+Voir aussi le point réglementaire de `10-risques-et-reponses.md`.
 
 ## 18. Quels sont les risques juridiques ?
 

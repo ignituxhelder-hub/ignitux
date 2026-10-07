@@ -43,6 +43,9 @@ export interface OutilProjet {
 }
 
 export const OUTILS_PROJET: readonly OutilProjet[] = [
+  // Pas une section du parcours : le formulaire d'édition du projet, réservé
+  // au propriétaire et toujours disponible (voir `outilVisible` côté page).
+  { id: 'infos', label: 'Titre et description', section: 'infos' },
   { id: 'score', label: 'Score', section: 'score' },
   { id: 'taches', label: 'Tâches', section: 'taches' },
   { id: 'memoire', label: 'Mémoire', section: 'memoire' },

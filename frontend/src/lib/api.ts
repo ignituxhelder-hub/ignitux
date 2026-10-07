@@ -1034,6 +1034,77 @@ export interface CapTable {
   founderTrajectory: Array<{ occurredAt: string; shareBasisPoints: number }>;
 }
 
+export type ParticipationAgreementStatus = 'actif' | 'transmis' | 'clos';
+export type ParticipationMilestoneStatus = 'prevu' | 'valide' | 'execute' | 'abandonne';
+export type ParticipationPhase = 'partagee' | 'transmise' | 'inconnue';
+
+export interface ParticipationAgreement {
+  id: string;
+  project_id: string;
+  initial_founder_bps: number;
+  initial_ignitux_bps: number;
+  /** Le droit sur les dividendes distribués, propre à l'accord. Jamais du capital. */
+  dividend_right_bps: number;
+  status: ParticipationAgreementStatus;
+  effective_on: string;
+  contract_reference: string | null;
+  ecosystem_offre: string;
+  transmitted_on: string | null;
+}
+
+export interface ParticipationMilestone {
+  id: string;
+  position: number;
+  label: string | null;
+  /** La part d'IGNITUX visée APRÈS le palier, en points de base. */
+  target_ignitux_bps: number;
+  /** Écrites pour ce projet. Vide = « à définir » : rien n'est inventé. */
+  conditions: string[];
+  status: ParticipationMilestoneStatus;
+  validated_at: string | null;
+  validation_note: string | null;
+  founder_acknowledged_at: string | null;
+  effective_on: string | null;
+}
+
+export interface DividendRightEntry {
+  id: string;
+  distributed_cents: number;
+  right_bps: number;
+  due_cents: number;
+  occurred_on: string;
+  status: 'du' | 'regle';
+  settled_on: string | null;
+  note: string | null;
+}
+
+export interface ParticipationViewer {
+  /** Pour l'affichage seulement : chaque écriture est revérifiée par le serveur. */
+  isIgnituxOperator: boolean;
+}
+
+export interface ParticipationView {
+  /** null = ce projet n'a pas d'accord de participation. */
+  agreement: ParticipationAgreement | null;
+  viewer: ParticipationViewer;
+  notice?: string;
+  phase?: ParticipationPhase;
+  /** COUCHE 1 — le capital. */
+  capital?: Pick<CapTable, 'holders' | 'totalBasisPoints' | 'discrepancyBasisPoints' | 'founderHasMajority'>;
+  history?: Array<{ holderName: string; shareBasisPoints: number; reason: string; occurredAt: string }>;
+  milestones?: ParticipationMilestone[];
+  /** COUCHE 2 — le droit économique, séparé du capital. */
+  dividendRight?: {
+    rightBasisPoints: number;
+    active: boolean;
+    entries: DividendRightEntry[];
+    totalDueCents: number;
+    totalSettledCents: number;
+  };
+  /** COUCHE 3 — l'accès à l'écosystème, défini par l'accord. */
+  ecosystem?: { offre: string; label: string; active: boolean };
+}
+
 export interface DividendDistribution {
   id: string;
   holder_id: string;
@@ -2363,6 +2434,78 @@ export const api = {
     request<void>(`/financing/rounds/${roundId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getParticipation: (token: string, projectId: string) =>
+    request<ParticipationView>(`/projects/${projectId}/participation`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  createParticipationAgreement: (
+    token: string,
+    projectId: string,
+    agreement: {
+      founderName: string;
+      effectiveOn: string;
+      founderBasisPoints?: number;
+      ignituxBasisPoints?: number;
+      dividendRightBasisPoints?: number;
+      ecosystemOffre?: string;
+    },
+  ) =>
+    request<{ id: string }>(`/projects/${projectId}/participation/agreement`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(agreement),
+    }),
+
+  addParticipationMilestone: (
+    token: string,
+    projectId: string,
+    milestone: { label?: string; targetIgnituxBasisPoints: number; conditions?: string[] },
+  ) =>
+    request<{ id: string }>(`/projects/${projectId}/participation/milestones`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(milestone),
+    }),
+
+  validateParticipationMilestone: (token: string, milestoneId: string, note?: string) =>
+    request<{ id: string }>(`/participation/milestones/${milestoneId}/validate`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(note ? { note } : {}),
+    }),
+
+  executeParticipationMilestone: (token: string, milestoneId: string, effectiveOn: string) =>
+    request<{ id: string }>(`/participation/milestones/${milestoneId}/execute`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ effectiveOn }),
+    }),
+
+  acknowledgeParticipationMilestone: (token: string, milestoneId: string) =>
+    request<{ id: string }>(`/participation/milestones/${milestoneId}/acknowledge`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  recordParticipationDividend: (
+    token: string,
+    projectId: string,
+    dividend: { distributedCents: number; occurredOn: string; note?: string },
+  ) =>
+    request<{ id: string }>(`/projects/${projectId}/participation/dividends`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(dividend),
+    }),
+
+  settleParticipationDividendRight: (token: string, entryId: string, settledOn: string) =>
+    request<{ id: string }>(`/participation/dividend-rights/${entryId}/settle`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ settledOn }),
     }),
 
   getCapTable: (token: string, projectId: string) =>

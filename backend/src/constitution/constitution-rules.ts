@@ -49,6 +49,18 @@ export type ConstitutionAction =
       /** null quand la répartition ne totalise pas 100 % : on ne tranche pas. */
       totalBasisPointsAfter: number | null;
     }
+  /** Un palier de participation s'apprête à modifier le capital. (art. 22) */
+  | {
+      kind: 'execute_participation_milestone';
+      ignituxBasisPointsBefore: number;
+      ignituxBasisPointsAfter: number;
+      founderBasisPointsAfter: number;
+    }
+  /**
+   * Un droit économique sur les dividendes s'apprête à être constaté. (art. 22)
+   * `null` : le capital d'IGNITUX n'est pas connu.
+   */
+  | { kind: 'record_dividend_right'; ignituxCapitalBasisPoints: number | null }
   /** Un module s'apprête à rendre une indication sur laquelle quelqu'un va décider. (art. 7) */
   | { kind: 'publish_guidance'; module: string; notice: string | null }
   /** Une écriture comptable s'apprête à être enregistrée. (art. 22) */
@@ -354,6 +366,17 @@ export const CONSTITUTION_RULES: readonly ConstitutionRule[] = [
       "Le porteur de projet reste propriétaire principal : une répartition qui le ferait " +
       'passer sous la majorité est refusée.',
     check(action) {
+      if (action.kind === 'execute_participation_milestone') {
+        // Un palier boucle toujours à 100 % (porteur + IGNITUX) : pas de
+        // donnée partielle à ménager ici.
+        if (action.founderBasisPointsAfter * 2 <= TOTAL_BASIS_POINTS) {
+          return (
+            `Ce palier laisserait le porteur à ${(action.founderBasisPointsAfter / 100).toFixed(2)} %, ` +
+            "soit sans majorité. Le modèle IGNITUX pose que l'entrepreneur reste propriétaire principal."
+          );
+        }
+        return null;
+      }
       if (action.kind !== 'set_equity') return null;
       // Sur une répartition qui ne boucle pas à 100 %, on ne se prononce
       // pas : bloquer sur une donnée partielle empêcherait de saisir la
@@ -366,6 +389,46 @@ export const CONSTITUTION_RULES: readonly ConstitutionRule[] = [
         );
       }
       return null;
+    },
+  },
+  {
+    id: 'ignitux-ne-remonte-pas',
+    articleSlug: 'v1-22-financement-ethique',
+    severity: 'blocking',
+    description:
+      "La part d'IGNITUX au capital ne fait que diminuer, de palier en palier, jusqu'à 0 % : " +
+      'un palier qui la maintiendrait ou la ferait remonter est refusé.',
+    check(action) {
+      if (action.kind !== 'execute_participation_milestone') return null;
+      if (action.ignituxBasisPointsAfter < action.ignituxBasisPointsBefore) return null;
+      return (
+        `Ce palier porterait la part d'IGNITUX de ${(action.ignituxBasisPointsBefore / 100).toFixed(2)} % ` +
+        `à ${(action.ignituxBasisPointsAfter / 100).toFixed(2)} %. Dans le modèle IGNITUX, cette part ` +
+        'ne peut que diminuer.'
+      );
+    },
+  },
+  {
+    id: 'droit-dividendes-apres-transmission',
+    articleSlug: 'v1-22-financement-ethique',
+    severity: 'blocking',
+    description:
+      "Le droit économique d'IGNITUX sur les dividendes n'existe qu'une fois le capital " +
+      "entièrement transmis (IGNITUX à 0 %) : avant, IGNITUX ne reçoit que ce que sa part de " +
+      'capital lui donne, sans droit supplémentaire.',
+    check(action) {
+      if (action.kind !== 'record_dividend_right') return null;
+      if (action.ignituxCapitalBasisPoints === 0) return null;
+      if (action.ignituxCapitalBasisPoints === null) {
+        return (
+          "Le capital d'IGNITUX n'est pas connu pour ce projet : on ne constate pas un droit sur " +
+          'les dividendes sur une donnée absente.'
+        );
+      }
+      return (
+        `IGNITUX détient encore ${(action.ignituxCapitalBasisPoints / 100).toFixed(2)} % du capital. ` +
+        "Le droit sur les dividendes ne commence qu'à 0 % : avant, IGNITUX est payé par sa part de capital."
+      );
     },
   },
   {

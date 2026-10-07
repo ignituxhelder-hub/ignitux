@@ -105,6 +105,7 @@ export class FinancingService {
 
   async removeHolder(userId: string, holderId: string) {
     const holder = await this.findHolderForOwner(userId, holderId);
+    await this.assertNotAgreementHolder(holder);
     // L'historique des parts part en cascade avec le détenteur : garder
     // des événements orphelins produirait une répartition qui ne boucle
     // plus et que personne ne saurait expliquer.
@@ -123,6 +124,7 @@ export class FinancingService {
     occurredAt: Date,
   ) {
     const holder = await this.findHolderForOwner(userId, holderId);
+    await this.assertNotAgreementHolder(holder);
 
     if (shareBasisPoints < 0 || shareBasisPoints > TOTAL_BASIS_POINTS) {
       throw new BadRequestException('Une part doit être comprise entre 0 et 100 %.');
@@ -273,6 +275,35 @@ export class FinancingService {
     }
 
     return { founderBasisPoints, totalBasisPoints };
+  }
+
+  /**
+   * Les deux détenteurs d'un accord de participation IGNITUX ne se modifient
+   * pas à la main.
+   *
+   * Leur capital évolue par paliers, validés par IGNITUX
+   * (`ParticipationService`). Laisser le porteur écrire lui-même
+   * « IGNITUX : 0 % » serait lui laisser décider seul du moment où il
+   * récupère son capital — exactement ce que l'accord interdit. Supprimer
+   * un de ces détenteurs effacerait aussi, en cascade, toute l'histoire de
+   * la transmission.
+   *
+   * Un projet sans accord n'est pas concerné, ni un autre détenteur du même
+   * projet : le suivi manuel du capital fonctionne comme avant.
+   */
+  private async assertNotAgreementHolder(holder: { id: string; project_id: string }) {
+    const agreement = await this.prisma.participation_agreements.findFirst({
+      where: { project_id: holder.project_id },
+    });
+    if (
+      agreement &&
+      (agreement.founder_holder_id === holder.id || agreement.ignitux_holder_id === holder.id)
+    ) {
+      throw new BadRequestException(
+        "Ce détenteur est lié à l'accord de participation IGNITUX : sa part évolue par les " +
+          "paliers de l'accord, validés par IGNITUX, et ne se saisit pas à la main.",
+      );
+    }
   }
 
   private async findHolderForOwner(userId: string, holderId: string) {

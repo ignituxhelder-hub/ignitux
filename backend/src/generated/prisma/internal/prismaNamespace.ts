@@ -427,6 +427,9 @@ export const ModelName = {
   equity_holders: 'equity_holders',
   equity_events: 'equity_events',
   dividend_distributions: 'dividend_distributions',
+  participation_agreements: 'participation_agreements',
+  participation_milestones: 'participation_milestones',
+  dividend_right_entries: 'dividend_right_entries',
   billing_documents: 'billing_documents',
   billing_lines: 'billing_lines',
   billing_payments: 'billing_payments',
@@ -480,7 +483,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "company_bylaws" | "bylaw_associates" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "company_bylaws" | "bylaw_associates" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "participation_agreements" | "participation_milestones" | "dividend_right_entries" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2701,6 +2704,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.dividend_distributionsCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.Dividend_distributionsCountAggregateOutputType> | number
+        }
+      }
+    }
+    participation_agreements: {
+      payload: Prisma.$participation_agreementsPayload<ExtArgs>
+      fields: Prisma.participation_agreementsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.participation_agreementsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_agreementsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.participation_agreementsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_agreementsPayload>
+        }
+        findFirst: {
+          args: Prisma.participation_agreementsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_agreementsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.participation_agreementsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_agreementsPayload>
+        }
+        findMany: {
+          args: Prisma.participation_agreementsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_agreementsPayload>[]
+        }
+        create: {
+          args: Prisma.participation_agreementsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_agreementsPayload>
+        }
+        createMany: {
+          args: Prisma.participation_agreementsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.participation_agreementsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_agreementsPayload>[]
+        }
+        delete: {
+          args: Prisma.participation_agreementsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_agreementsPayload>
+        }
+        update: {
+          args: Prisma.participation_agreementsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_agreementsPayload>
+        }
+        deleteMany: {
+          args: Prisma.participation_agreementsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.participation_agreementsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.participation_agreementsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_agreementsPayload>[]
+        }
+        upsert: {
+          args: Prisma.participation_agreementsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_agreementsPayload>
+        }
+        aggregate: {
+          args: Prisma.Participation_agreementsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateParticipation_agreements>
+        }
+        groupBy: {
+          args: Prisma.participation_agreementsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Participation_agreementsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.participation_agreementsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Participation_agreementsCountAggregateOutputType> | number
+        }
+      }
+    }
+    participation_milestones: {
+      payload: Prisma.$participation_milestonesPayload<ExtArgs>
+      fields: Prisma.participation_milestonesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.participation_milestonesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_milestonesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.participation_milestonesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_milestonesPayload>
+        }
+        findFirst: {
+          args: Prisma.participation_milestonesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_milestonesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.participation_milestonesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_milestonesPayload>
+        }
+        findMany: {
+          args: Prisma.participation_milestonesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_milestonesPayload>[]
+        }
+        create: {
+          args: Prisma.participation_milestonesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_milestonesPayload>
+        }
+        createMany: {
+          args: Prisma.participation_milestonesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.participation_milestonesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_milestonesPayload>[]
+        }
+        delete: {
+          args: Prisma.participation_milestonesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_milestonesPayload>
+        }
+        update: {
+          args: Prisma.participation_milestonesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_milestonesPayload>
+        }
+        deleteMany: {
+          args: Prisma.participation_milestonesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.participation_milestonesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.participation_milestonesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_milestonesPayload>[]
+        }
+        upsert: {
+          args: Prisma.participation_milestonesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$participation_milestonesPayload>
+        }
+        aggregate: {
+          args: Prisma.Participation_milestonesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateParticipation_milestones>
+        }
+        groupBy: {
+          args: Prisma.participation_milestonesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Participation_milestonesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.participation_milestonesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Participation_milestonesCountAggregateOutputType> | number
+        }
+      }
+    }
+    dividend_right_entries: {
+      payload: Prisma.$dividend_right_entriesPayload<ExtArgs>
+      fields: Prisma.dividend_right_entriesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.dividend_right_entriesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_right_entriesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.dividend_right_entriesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_right_entriesPayload>
+        }
+        findFirst: {
+          args: Prisma.dividend_right_entriesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_right_entriesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.dividend_right_entriesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_right_entriesPayload>
+        }
+        findMany: {
+          args: Prisma.dividend_right_entriesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_right_entriesPayload>[]
+        }
+        create: {
+          args: Prisma.dividend_right_entriesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_right_entriesPayload>
+        }
+        createMany: {
+          args: Prisma.dividend_right_entriesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.dividend_right_entriesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_right_entriesPayload>[]
+        }
+        delete: {
+          args: Prisma.dividend_right_entriesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_right_entriesPayload>
+        }
+        update: {
+          args: Prisma.dividend_right_entriesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_right_entriesPayload>
+        }
+        deleteMany: {
+          args: Prisma.dividend_right_entriesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.dividend_right_entriesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.dividend_right_entriesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_right_entriesPayload>[]
+        }
+        upsert: {
+          args: Prisma.dividend_right_entriesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dividend_right_entriesPayload>
+        }
+        aggregate: {
+          args: Prisma.Dividend_right_entriesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDividend_right_entries>
+        }
+        groupBy: {
+          args: Prisma.dividend_right_entriesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Dividend_right_entriesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.dividend_right_entriesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Dividend_right_entriesCountAggregateOutputType> | number
         }
       }
     }
@@ -5948,6 +6173,63 @@ export const Dividend_distributionsScalarFieldEnum = {
 export type Dividend_distributionsScalarFieldEnum = (typeof Dividend_distributionsScalarFieldEnum)[keyof typeof Dividend_distributionsScalarFieldEnum]
 
 
+export const Participation_agreementsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  founder_holder_id: 'founder_holder_id',
+  ignitux_holder_id: 'ignitux_holder_id',
+  initial_founder_bps: 'initial_founder_bps',
+  initial_ignitux_bps: 'initial_ignitux_bps',
+  dividend_right_bps: 'dividend_right_bps',
+  status: 'status',
+  effective_on: 'effective_on',
+  contract_reference: 'contract_reference',
+  ecosystem_offre: 'ecosystem_offre',
+  transmitted_on: 'transmitted_on',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Participation_agreementsScalarFieldEnum = (typeof Participation_agreementsScalarFieldEnum)[keyof typeof Participation_agreementsScalarFieldEnum]
+
+
+export const Participation_milestonesScalarFieldEnum = {
+  id: 'id',
+  agreement_id: 'agreement_id',
+  position: 'position',
+  label: 'label',
+  target_ignitux_bps: 'target_ignitux_bps',
+  conditions: 'conditions',
+  status: 'status',
+  validated_at: 'validated_at',
+  validated_by: 'validated_by',
+  validation_note: 'validation_note',
+  founder_acknowledged_at: 'founder_acknowledged_at',
+  effective_on: 'effective_on',
+  executed_at: 'executed_at',
+  equity_event_ids: 'equity_event_ids',
+  created_at: 'created_at'
+} as const
+
+export type Participation_milestonesScalarFieldEnum = (typeof Participation_milestonesScalarFieldEnum)[keyof typeof Participation_milestonesScalarFieldEnum]
+
+
+export const Dividend_right_entriesScalarFieldEnum = {
+  id: 'id',
+  agreement_id: 'agreement_id',
+  distributed_cents: 'distributed_cents',
+  right_bps: 'right_bps',
+  due_cents: 'due_cents',
+  occurred_on: 'occurred_on',
+  status: 'status',
+  settled_on: 'settled_on',
+  note: 'note',
+  created_at: 'created_at'
+} as const
+
+export type Dividend_right_entriesScalarFieldEnum = (typeof Dividend_right_entriesScalarFieldEnum)[keyof typeof Dividend_right_entriesScalarFieldEnum]
+
+
 export const Billing_documentsScalarFieldEnum = {
   id: 'id',
   owner_id: 'owner_id',
@@ -6790,6 +7072,9 @@ export type GlobalOmitConfig = {
   equity_holders?: Prisma.equity_holdersOmit
   equity_events?: Prisma.equity_eventsOmit
   dividend_distributions?: Prisma.dividend_distributionsOmit
+  participation_agreements?: Prisma.participation_agreementsOmit
+  participation_milestones?: Prisma.participation_milestonesOmit
+  dividend_right_entries?: Prisma.dividend_right_entriesOmit
   billing_documents?: Prisma.billing_documentsOmit
   billing_lines?: Prisma.billing_linesOmit
   billing_payments?: Prisma.billing_paymentsOmit

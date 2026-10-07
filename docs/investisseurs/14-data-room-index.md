@@ -24,7 +24,7 @@ G. Technique.
 | Coûts IA réels | A, F | Prêt, mesuré (`PRICING.md`), avec le point de vigilance sur le plafond à 10 % |
 | Comptes de l'entreprise | B, D, F | **[À DÉFINIR — Fondateur]**, hors périmètre du dépôt de code |
 | Cap table | B, D, E, F | **[À DÉFINIR — Fondateur]**, absente du dépôt |
-| Documentation juridique du modèle 51/49 | B, E | N'existe pas encore — suivi technique seulement, pas de contrat (voir `10-risques-et-reponses.md` point 1) |
+| Documentation juridique du modèle de participation (51/49 au départ) | B, E | N'existe pas encore — suivi technique seulement, pas de contrat (voir `10-risques-et-reponses.md` point 1) |
 | Avis juridique sur le statut réglementaire du module Financement & Investisseurs | B, E | **À produire en priorité** — voir `10-risques-et-reponses.md` point 1 |
 
 ## Ce qui est confidentiel et ne doit pas être envoyé avant un accord de confidentialité (NDA)
