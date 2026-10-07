@@ -1,13 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   api,
   ApiError,
   SECTEURS_PROJET,
+  type ComplianceAiRun,
+  type ComplianceAiState,
   type ComplianceGroupe,
   type ComplianceRequirement,
 } from '@/lib/api';
+import { executerEnSerie } from '@/lib/executer-en-serie';
+import { ResultatIa } from './resultat-ia';
 
 /**
  * Le code du référentiel vers un nom lisible.
@@ -16,6 +20,16 @@ import {
  * plutôt que d'être traduit au hasard — mieux vaut « BE » qu'un pays faux.
  */
 const NOMS_DE_PAYS: Record<string, string> = { FR: 'France' };
+
+/** La ligne renvoyée par run/validate/refuse, réduite à l'état que la liste affiche. */
+function etatIa(run: ComplianceAiRun): ComplianceAiState {
+  return {
+    status: run.status,
+    result_kind: run.result_kind,
+    result: run.result,
+    refusal_reason: run.refusal_reason,
+  };
+}
 
 interface ComplianceSectionProps {
   token: string | null;
@@ -80,6 +94,21 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
   const [error, setError] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [secteurEnCours, setSecteurEnCours] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [isRunning, setIsRunning] = useState(false);
+  const [progress, setProgress] = useState<{ courant: number; total: number } | null>(null);
+  const [limite, setLimite] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  // Garde de ré-entrée : un state ne bouge qu'au rendu suivant, un double clic passerait.
+  const enCours = useRef(false);
+  // Faux dès que l'écran est quitté : un lot qui coûte des appels IA doit s'arrêter.
+  const actif = useRef(true);
+  useEffect(() => {
+    actif.current = true;
+    return () => {
+      actif.current = false;
+    };
+  }, []);
 
   function load() {
     if (!token) return;
@@ -140,6 +169,108 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
     }
   }
 
+  function remplacerIa(requirementId: string, ai: ComplianceAiState, completed?: boolean) {
+    setRequirements((prev) =>
+      prev.map((r) =>
+        r.id === requirementId ? { ...r, ai, completed: completed ?? r.completed } : r,
+      ),
+    );
+  }
+
+  function retirerDeLaSelection(requirementId: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.delete(requirementId);
+      return next;
+    });
+  }
+
+  function basculer(requirementId: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(requirementId)) next.delete(requirementId);
+      else next.add(requirementId);
+      return next;
+    });
+  }
+
+  async function lancerLot(ids: string[]) {
+    if (!token || ids.length === 0 || enCours.current) return;
+    enCours.current = true;
+    setError(null);
+    setLimite(null);
+    setIsRunning(true);
+    setProgress({ courant: 0, total: ids.length });
+    let rang = 0;
+    try {
+      const bilan = await executerEnSerie(
+        ids,
+        (id) => api.runCompliance(token, projectId, id),
+        (info) => {
+          if (!actif.current) return;
+          if (info.etat === 'en_cours') {
+            rang += 1;
+            setProgress({ courant: rang, total: ids.length });
+          } else if (info.etat === 'ok' && info.resultat) {
+            remplacerIa(info.id, etatIa(info.resultat));
+            retirerDeLaSelection(info.id);
+          } else if (info.etat === 'echec') {
+            remplacerIa(info.id, { status: 'echec', result_kind: null, result: null, refusal_reason: null });
+            retirerDeLaSelection(info.id);
+          } else if (info.etat === 'arret' && info.message) {
+            setError(info.message);
+          }
+        },
+        () => !actif.current,
+      );
+      if (!actif.current) return;
+      if (bilan.arretePourLimite) {
+        const n = bilan.restants.length;
+        setLimite(`Limite atteinte : ${n} élément${n > 1 ? 's' : ''} non traité${n > 1 ? 's' : ''}`);
+      }
+    } finally {
+      enCours.current = false;
+      if (actif.current) {
+        setIsRunning(false);
+        setProgress(null);
+      }
+    }
+  }
+
+  async function valider(requirementId: string) {
+    if (!token || readOnly) return;
+    setError(null);
+    setBusyId(requirementId);
+    try {
+      const run = await api.validateCompliance(token, projectId, requirementId);
+      // Valider côté serveur coche l'exigence : on le reflète sans recharger.
+      if (actif.current) remplacerIa(requirementId, etatIa(run), true);
+    } catch (err) {
+      if (actif.current) setError(err instanceof ApiError ? err.message : 'Impossible de valider ce résultat.');
+    } finally {
+      if (actif.current) setBusyId(null);
+    }
+  }
+
+  async function refuser(requirementId: string, motif?: string) {
+    if (!token || readOnly) return;
+    setError(null);
+    setBusyId(requirementId);
+    try {
+      const run = await api.refuseCompliance(token, projectId, requirementId, motif);
+      if (actif.current) remplacerIa(requirementId, etatIa(run));
+    } catch (err) {
+      if (actif.current) setError(err instanceof ApiError ? err.message : 'Impossible de refuser ce résultat.');
+    } finally {
+      if (actif.current) setBusyId(null);
+    }
+  }
+
+  // Une démarche déjà cochée, ou dont le résultat attend/est validé, n'est pas relancée en lot.
+  const lancable = (r: ComplianceRequirement) =>
+    !r.completed && r.ai?.status !== 'a_valider' && r.ai?.status !== 'valide';
+  const coches = requirements.filter((r) => selected.has(r.id) && lancable(r)).map((r) => r.id);
+
   const nomDuPays = pays ? (NOMS_DE_PAYS[pays.code] ?? pays.code) : null;
   const parId = new Map(requirements.map((r) => [r.id, r]));
 
@@ -190,6 +321,28 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
         </p>
       )}
       {error && <p className="error">{error}</p>}
+      {limite && <p className="error">{limite}</p>}
+      {!isLoading && !readOnly && requirements.length > 0 && (
+        <div style={{ marginBottom: '1rem' }}>
+          <button type="button" disabled={coches.length === 0 || isRunning} onClick={() => lancerLot(coches)}>
+            Faire faire par IGINI
+          </button>{' '}
+          {isRunning && progress ? (
+            <span className="muted">
+              {progress.courant} / {progress.total}
+            </span>
+          ) : (
+            coches.length > 0 && (
+              <span className="muted">
+                {`${coches.length} élément${coches.length > 1 ? 's' : ''}, ~${coches.length} appel${coches.length > 1 ? 's' : ''} IA`}
+              </span>
+            )
+          )}
+          <p className="muted" style={{ margin: '0.25rem 0 0', fontSize: '0.8rem' }}>
+            IGINI prépare, il ne dépose rien à ta place.
+          </p>
+        </div>
+      )}
       {!isLoading && !readOnly && secteur === null && requirements.length > 0 && (
         <DemanderLeSecteur onChoisir={choisirSecteur} enCours={secteurEnCours} />
       )}
@@ -232,6 +385,52 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
                       </a>
                     </span>
                   </label>
+                  {!readOnly && lancable(requirement) && (
+                    <label
+                      className="muted"
+                      style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.5rem', fontSize: '0.85rem' }}
+                    >
+                      <input
+                        type="checkbox"
+                        aria-label={`Faire faire : ${requirement.title}`}
+                        checked={selected.has(requirement.id)}
+                        disabled={isRunning}
+                        onChange={() => basculer(requirement.id)}
+                      />
+                      <span>Faire préparer par IGINI</span>
+                    </label>
+                  )}
+                  {!readOnly &&
+                    requirement.ai?.status === 'a_valider' &&
+                    requirement.ai.result &&
+                    requirement.ai.result_kind && (
+                      <ResultatIa
+                        kind={requirement.ai.result_kind}
+                        contenu={requirement.ai.result}
+                        libelleValider="J'ai fait / J'ai déposé"
+                        disabled={busyId === requirement.id}
+                        onValider={() => valider(requirement.id)}
+                        onRefuser={(motif) => refuser(requirement.id, motif)}
+                      />
+                    )}
+                  {!readOnly && requirement.ai?.status === 'echec' && (
+                    <p style={{ margin: '0.5rem 0 0' }}>
+                      IGINI n&apos;a pas pu préparer cette démarche{' '}
+                      <button
+                        className="secondary"
+                        type="button"
+                        disabled={isRunning}
+                        onClick={() => lancerLot([requirement.id])}
+                      >
+                        Réessayer
+                      </button>
+                    </p>
+                  )}
+                  {requirement.ai?.status === 'refuse' && (
+                    <p className="muted" style={{ margin: '0.5rem 0 0' }}>
+                      Refusé{requirement.ai.refusal_reason ? ` : ${requirement.ai.refusal_reason}` : ''}
+                    </p>
+                  )}
                 </li>
               ))}
             </ul>
