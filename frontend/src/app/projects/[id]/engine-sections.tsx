@@ -14,6 +14,8 @@ import {
   type Task,
   type TaskStatus,
 } from '@/lib/api';
+import { executerEnSerie } from '@/lib/executer-en-serie';
+import { ResultatIa } from './resultat-ia';
 
 interface SectionProps {
   token: string | null;
@@ -333,6 +335,11 @@ export function TasksSection({
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [isRunning, setIsRunning] = useState(false);
+  const [progress, setProgress] = useState<{ courant: number; total: number } | null>(null);
+  const [limite, setLimite] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -383,10 +390,119 @@ export function TasksSection({
     }
   }
 
+  function remplacer(updated: Task) {
+    setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+  }
+
+  function basculer(taskId: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(taskId)) next.delete(taskId);
+      else next.add(taskId);
+      return next;
+    });
+  }
+
+  async function lancerLot(ids: string[]) {
+    if (!token || ids.length === 0) return;
+    setError(null);
+    setLimite(null);
+    setIsRunning(true);
+    setProgress({ courant: 0, total: ids.length });
+    let rang = 0;
+    try {
+      const bilan = await executerEnSerie(
+        ids,
+        (id) => api.runTask(token, projectId, id),
+        (info) => {
+          if (info.etat === 'en_cours') {
+            rang += 1;
+            setProgress({ courant: rang, total: ids.length });
+          } else if (info.etat === 'ok' && info.resultat) {
+            remplacer(info.resultat);
+            setSelected((prev) => {
+              const next = new Set(prev);
+              next.delete(info.id);
+              return next;
+            });
+          } else if (info.etat === 'echec') {
+            setTasks((prev) => prev.map((t) => (t.id === info.id ? { ...t, ai_status: 'echec' } : t)));
+            setSelected((prev) => {
+              const next = new Set(prev);
+              next.delete(info.id);
+              return next;
+            });
+          } else if (info.etat === 'arret' && info.message) {
+            setError(info.message);
+          }
+        },
+      );
+      if (bilan.arretePourLimite) {
+        const n = bilan.restants.length;
+        setLimite(`Limite atteinte : ${n} élément${n > 1 ? 's' : ''} non traité${n > 1 ? 's' : ''}`);
+      }
+      onChanged?.();
+    } finally {
+      setIsRunning(false);
+      setProgress(null);
+    }
+  }
+
+  async function handleValider(taskId: string) {
+    if (!token) return;
+    setError(null);
+    setBusyId(taskId);
+    try {
+      remplacer(await api.validateTask(token, projectId, taskId));
+      onChanged?.();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Impossible de valider ce résultat.');
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleRefuser(taskId: string, motif?: string) {
+    if (!token) return;
+    setError(null);
+    setBusyId(taskId);
+    try {
+      remplacer(await api.refuseTask(token, projectId, taskId, motif));
+      onChanged?.();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Impossible de refuser ce résultat.');
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  // Une tâche à valider a déjà son résultat : on ne la relance pas dans un lot.
+  const lancable = (t: Task) => t.status !== 'done' && t.ai_status !== 'a_valider';
+  const coches = tasks.filter((t) => selected.has(t.id) && lancable(t)).map((t) => t.id);
+
   return (
     <div className="card" style={{ marginTop: '1.5rem' }}>
       <h2 style={{ marginTop: 0 }}>Tâches</h2>
       {error && <p className="error">{error}</p>}
+      {limite && <p className="error">{limite}</p>}
+      {!readOnly && (
+        <div style={{ marginBottom: '1rem' }}>
+          <button type="button" disabled={coches.length === 0 || isRunning} onClick={() => lancerLot(coches)}>
+            Faire faire par IGINI
+          </button>{' '}
+          {isRunning && progress ? (
+            <span className="muted">
+              {progress.courant} / {progress.total}
+            </span>
+          ) : (
+            coches.length > 0 && (
+              <span className="muted">
+                {`${coches.length} élément${coches.length > 1 ? 's' : ''}, ~${coches.length} appel${coches.length > 1 ? 's' : ''} IA`}
+              </span>
+            )
+          )}
+        </div>
+      )}
       {!readOnly && (
         <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
           <input
@@ -407,7 +523,20 @@ export function TasksSection({
         {tasks.map((task) => (
           <div className="project-item" style={{ cursor: 'default' }} key={task.id}>
             <div className="top-bar">
-              <span>{task.title}</span>
+              {!readOnly && lancable(task) ? (
+                <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <input
+                    type="checkbox"
+                    aria-label={`Faire faire : ${task.title}`}
+                    checked={selected.has(task.id)}
+                    disabled={isRunning}
+                    onChange={() => basculer(task.id)}
+                  />
+                  <span>{task.title}</span>
+                </label>
+              ) : (
+                <span>{task.title}</span>
+              )}
               {readOnly ? (
                 <span className="muted">{STATUS_LABELS[task.status]}</span>
               ) : (
@@ -425,6 +554,34 @@ export function TasksSection({
               )}
             </div>
             <span className="muted">{SOURCE_LABELS[task.source] ?? task.source}</span>
+            {!readOnly && task.ai_status === 'a_valider' && task.ai_result && task.ai_result_kind && (
+              <ResultatIa
+                kind={task.ai_result_kind}
+                contenu={task.ai_result}
+                libelleValider="Valider"
+                disabled={busyId === task.id}
+                onValider={() => handleValider(task.id)}
+                onRefuser={(motif) => handleRefuser(task.id, motif)}
+              />
+            )}
+            {!readOnly && task.ai_status === 'echec' && (
+              <p style={{ margin: '0.5rem 0 0' }}>
+                IGINI n&apos;a pas pu faire cette tâche{' '}
+                <button
+                  className="secondary"
+                  type="button"
+                  disabled={isRunning}
+                  onClick={() => lancerLot([task.id])}
+                >
+                  Réessayer
+                </button>
+              </p>
+            )}
+            {task.ai_status === 'refuse' && (
+              <p className="muted" style={{ margin: '0.5rem 0 0' }}>
+                Refusé{task.ai_refusal_reason ? ` : ${task.ai_refusal_reason}` : ''}
+              </p>
+            )}
           </div>
         ))}
       </div>
