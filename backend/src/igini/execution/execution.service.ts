@@ -23,6 +23,26 @@ légale (article, numéro de loi, organisme) absente de la source : dis plutôt 
 
 export type ComplianceAiRun = project_compliance_ai_runs;
 
+/** Idempotence : un résultat existe déjà, inutile de payer un second appel. */
+function dejaExecute(aiStatus: string | null | undefined): boolean {
+  return !!aiStatus && DEJA_EXECUTEES.includes(aiStatus);
+}
+
+/**
+ * Un motif de refus guide la nouvelle tentative, quel que soit le statut
+ * courant (refus -> échec -> relance garde le motif).
+ */
+function contexteRefus(motif: string | null | undefined): string | undefined {
+  return motif ? `Une première version a été refusée par la personne. Motif : ${motif}` : undefined;
+}
+
+/** Valider ou refuser n'a de sens que sur un résultat « à valider ». */
+function exigerAValider(aiStatus: string | null | undefined, message: string): void {
+  if (aiStatus !== 'a_valider') {
+    throw new BadRequestException(message);
+  }
+}
+
 /** Statuts IA qui rendent un nouveau lancement inutile (résultat déjà là). */
 const DEJA_EXECUTEES = ['a_valider', 'valide'];
 
@@ -43,39 +63,24 @@ export class ExecutionService {
   async runTask(userId: string, projectId: string, taskId: string) {
     const task = await this.getTask(userId, projectId, taskId);
 
-    // Idempotence : un résultat existe déjà, inutile de payer un second appel.
-    if (task.ai_status && DEJA_EXECUTEES.includes(task.ai_status)) {
+    if (dejaExecute(task.ai_status)) {
       return task;
     }
 
-    // Un motif de refus guide la nouvelle tentative, même si un échec est
-    // intervenu entre-temps (refus -> échec -> relance garde le motif).
-    const contexte = task.ai_refusal_reason
-      ? `Une première version a été refusée par la personne. Motif : ${task.ai_refusal_reason}`
-      : undefined;
-
-    let resultat;
-    try {
-      resultat = await this.claude.generateStructuredOutput({
-        schema: ExecutionResultSchema,
+    const resultat = await this.appelerClaude(
+      {
         system: SYSTEM_PROMPT,
-        userContent: buildProjectPrompt(task.title, task.description, contexte),
+        userContent: buildProjectPrompt(task.title, task.description, contexteRefus(task.ai_refusal_reason)),
         logContext: "Échec de l'exécution d'une tâche via Claude",
         userErrorMessage: "L'exécution de la tâche a échoué, réessaie dans un instant.",
         usage: { userId, projectId, generator: 'executer' },
-      });
-    } catch (erreur) {
-      // Offre, quota, plafond de coût, générateurs coupés (403/503) : rien
-      // n'a été tenté, la tâche reste « non traitée » et on ne l'écrit pas.
-      const status = erreur instanceof HttpException ? erreur.getStatus() : undefined;
-      if (status !== 403 && status !== 503) {
-        await this.prisma.tasks.update({
+      },
+      () =>
+        this.prisma.tasks.update({
           where: { id: taskId },
           data: { ai_status: 'echec', ai_run_at: new Date() },
-        });
-      }
-      throw erreur;
-    }
+        }),
+    );
 
     // Hors du try : un échec d'enregistrement ne doit pas écrire « echec ».
     return this.prisma.tasks.update({
@@ -92,9 +97,7 @@ export class ExecutionService {
 
   async validateTask(userId: string, projectId: string, taskId: string) {
     const task = await this.getTask(userId, projectId, taskId);
-    if (task.ai_status !== 'a_valider') {
-      throw new BadRequestException("Aucun résultat d'IGINI à valider pour cette tâche.");
-    }
+    exigerAValider(task.ai_status, "Aucun résultat d'IGINI à valider pour cette tâche.");
 
     const misAJour = await this.prisma.tasks.update({
       where: { id: taskId },
@@ -107,9 +110,7 @@ export class ExecutionService {
 
   async refuseTask(userId: string, projectId: string, taskId: string, reason?: string) {
     const task = await this.getTask(userId, projectId, taskId);
-    if (task.ai_status !== 'a_valider') {
-      throw new BadRequestException("Aucun résultat d'IGINI à refuser pour cette tâche.");
-    }
+    exigerAValider(task.ai_status, "Aucun résultat d'IGINI à refuser pour cette tâche.");
     // `status` n'est volontairement pas touché : refuser le résultat de l'IA
     // ne dit rien de l'avancement réel de la tâche.
     return this.prisma.tasks.update({
@@ -123,8 +124,7 @@ export class ExecutionService {
   async runCompliance(userId: string, projectId: string, requirementId: string): Promise<ComplianceAiRun> {
     const { exigence, run } = await this.getCompliance(userId, projectId, requirementId);
 
-    // Idempotence : un résultat existe déjà, inutile de payer un second appel.
-    if (run && DEJA_EXECUTEES.includes(run.status)) {
+    if (run && dejaExecute(run.status)) {
       return run;
     }
 
@@ -134,29 +134,21 @@ export class ExecutionService {
       `Source : ${exigence.source_name} (${exigence.source_url})`,
       `Pays : ${exigence.country} — catégorie : ${exigence.category}`,
     ];
-    // Le motif guide la nouvelle tentative, quel que soit le statut courant.
-    if (run?.refusal_reason) {
-      parts.push(`\nUne première version a été refusée par la personne. Motif : ${run.refusal_reason}`);
+    const contexte = contexteRefus(run?.refusal_reason);
+    if (contexte) {
+      parts.push(`\n${contexte}`);
     }
 
-    let resultat;
-    try {
-      resultat = await this.claude.generateStructuredOutput({
-        schema: ExecutionResultSchema,
+    const resultat = await this.appelerClaude(
+      {
         system: SYSTEM_PROMPT_CONFORMITE,
         userContent: parts.join('\n'),
         logContext: "Échec de l'exécution d'une exigence de conformité via Claude",
         userErrorMessage: "L'exécution de la démarche a échoué, réessaie dans un instant.",
         usage: { userId, projectId, generator: 'executer' },
-      });
-    } catch (erreur) {
-      // Offre, quota, plafond, générateurs coupés (403/503) : rien n'a été tenté.
-      const status = erreur instanceof HttpException ? erreur.getStatus() : undefined;
-      if (status !== 403 && status !== 503) {
-        await this.saveCompliance(projectId, requirementId, { status: 'echec' });
-      }
-      throw erreur;
-    }
+      },
+      () => this.saveCompliance(projectId, requirementId, { status: 'echec' }),
+    );
 
     // Hors du try : un échec d'enregistrement ne doit pas écrire « echec ».
     return this.saveCompliance(projectId, requirementId, {
@@ -169,9 +161,7 @@ export class ExecutionService {
 
   async validateCompliance(userId: string, projectId: string, requirementId: string): Promise<ComplianceAiRun> {
     const { run } = await this.getCompliance(userId, projectId, requirementId);
-    if (run?.status !== 'a_valider') {
-      throw new BadRequestException("Aucun résultat d'IGINI à valider pour cette exigence.");
-    }
+    exigerAValider(run?.status, "Aucun résultat d'IGINI à valider pour cette exigence.");
     await this.compliance.markChecked(userId, projectId, requirementId);
     return this.saveCompliance(projectId, requirementId, { status: 'valide' });
   }
@@ -183,14 +173,40 @@ export class ExecutionService {
     reason?: string,
   ): Promise<ComplianceAiRun> {
     const { run } = await this.getCompliance(userId, projectId, requirementId);
-    if (run?.status !== 'a_valider') {
-      throw new BadRequestException("Aucun résultat d'IGINI à refuser pour cette exigence.");
-    }
+    exigerAValider(run?.status, "Aucun résultat d'IGINI à refuser pour cette exigence.");
     // Rien n'est coché : refuser le brouillon ne dit rien de la démarche réelle.
     return this.saveCompliance(projectId, requirementId, {
       status: 'refuse',
       refusal_reason: reason ?? null,
     });
+  }
+
+  /**
+   * Appel Claude commun aux tâches et à la conformité. Offre, quota, plafond de
+   * coût, générateurs coupés (403/503) : rien n'a été tenté, on relance sans
+   * rien écrire. Toute autre erreur appelle `onEchec` (qui écrit « echec »)
+   * puis est relancée. Seul l'appel est dans le try : l'enregistrement du
+   * résultat, fait par l'appelant, ne peut donc jamais écrire « echec ».
+   */
+  private async appelerClaude(
+    appel: {
+      system: string;
+      userContent: string;
+      logContext: string;
+      userErrorMessage: string;
+      usage: { userId: string; projectId: string; generator: 'executer' };
+    },
+    onEchec: () => Promise<unknown>,
+  ) {
+    try {
+      return await this.claude.generateStructuredOutput({ schema: ExecutionResultSchema, ...appel });
+    } catch (erreur) {
+      const status = erreur instanceof HttpException ? erreur.getStatus() : undefined;
+      if (status !== 403 && status !== 503) {
+        await onEchec();
+      }
+      throw erreur;
+    }
   }
 
   private saveCompliance(
