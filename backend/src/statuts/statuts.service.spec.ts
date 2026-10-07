@@ -21,8 +21,19 @@ describe('StatutsService — génération', () => {
   beforeEach(async () => {
     prisma = {
       projects: { findFirst: vi.fn() },
-      company_bylaws: { upsert: vi.fn(), findUnique: vi.fn(), findFirst: vi.fn(), update: vi.fn() },
+      company_bylaws: {
+        create: vi.fn(),
+        findUnique: vi.fn(),
+        findFirst: vi.fn(),
+        updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+      },
+      bylaw_associates: {
+        deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
+        createMany: vi.fn().mockResolvedValue({ count: 1 }),
+      },
     };
+    // Transaction interactive simulée : le callback reçoit le même client.
+    prisma.$transaction = vi.fn((fn: (tx: unknown) => unknown) => fn(prisma));
     claude = { generateStructuredOutput: vi.fn().mockResolvedValue({ content: 'texte généré' }) };
     prisma.company_bylaws.findFirst.mockResolvedValue(null);
     constitution = { guard: vi.fn().mockResolvedValue(undefined) };
@@ -62,20 +73,21 @@ describe('StatutsService — génération', () => {
     expect(claude.generateStructuredOutput).not.toHaveBeenCalled();
   });
 
-  it('génère un brouillon pour une forme valide avec les parts à 100 %', async () => {
+  it('crée un brouillon quand aucune ligne n’existe encore', async () => {
     prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'user-1', confirmed_legal_form: 'SASU', title: 'Mon projet' });
     claude.generateStructuredOutput.mockResolvedValue({ content: 'Article 1 — Forme...' });
-    prisma.company_bylaws.upsert.mockResolvedValue({ id: 'b1', status: 'brouillon' });
+    prisma.company_bylaws.findUnique.mockResolvedValue(null);
+    prisma.company_bylaws.create.mockResolvedValue({ id: 'b1', status: 'brouillon', associates: [] });
 
-    await service.genererPourProjet('user-1', 'p1', dtoValide);
+    await expect(service.genererPourProjet('user-1', 'p1', dtoValide)).resolves.toMatchObject({ id: 'b1' });
 
     expect(claude.generateStructuredOutput).toHaveBeenCalledWith(
       expect.objectContaining({ usage: { userId: 'user-1', projectId: 'p1', generator: 'former' } }),
     );
-    expect(prisma.company_bylaws.upsert).toHaveBeenCalledWith({
-      where: { project_id: 'p1' },
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+    expect(prisma.company_bylaws.create).toHaveBeenCalledWith({
       include: { associates: true },
-      create: expect.objectContaining({
+      data: expect.objectContaining({
         owner_id: 'user-1',
         project_id: 'p1',
         legal_form: 'SASU',
@@ -86,14 +98,56 @@ describe('StatutsService — génération', () => {
         status: 'brouillon',
         associates: { create: [{ full_name: 'Jean Dupont', share_basis_points: 10000 }] },
       }),
-      update: expect.objectContaining({
-        legal_form: 'SASU',
-        capital_cents: 100000,
-        content: 'Article 1 — Forme...',
-        status: 'brouillon',
-        associates: { deleteMany: {}, create: [{ full_name: 'Jean Dupont', share_basis_points: 10000 }] },
-      }),
     });
+    expect(prisma.company_bylaws.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('rend une ConflictException si une autre requête a créé la ligne entre-temps (P2002)', async () => {
+    prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'user-1', confirmed_legal_form: 'SASU', title: 'Mon projet' });
+    prisma.company_bylaws.findUnique.mockResolvedValue(null);
+    prisma.company_bylaws.create.mockRejectedValue(Object.assign(new Error('unique'), { code: 'P2002' }));
+
+    await expect(service.genererPourProjet('user-1', 'p1', dtoValide)).rejects.toThrow(ConflictException);
+  });
+
+  it('remplace un brouillon existant par une écriture gardée sur le statut brouillon', async () => {
+    prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'user-1', confirmed_legal_form: 'SASU', title: 'Mon projet' });
+    claude.generateStructuredOutput.mockResolvedValue({ content: 'Nouveau texte' });
+    prisma.company_bylaws.findUnique
+      .mockResolvedValueOnce({ id: 'b1' })
+      .mockResolvedValueOnce({ id: 'b1', content: 'Nouveau texte', associates: [{ full_name: 'Jean Dupont' }] });
+
+    const resultat = await service.genererPourProjet('user-1', 'p1', dtoValide);
+
+    expect(prisma.company_bylaws.updateMany).toHaveBeenCalledWith({
+      where: { project_id: 'p1', status: 'brouillon' },
+      data: expect.objectContaining({ content: 'Nouveau texte', status: 'brouillon', capital_cents: 100000 }),
+    });
+    expect(prisma.bylaw_associates.deleteMany).toHaveBeenCalledWith({ where: { bylaws_id: 'b1' } });
+    expect(prisma.bylaw_associates.createMany).toHaveBeenCalledWith({
+      data: [{ bylaws_id: 'b1', full_name: 'Jean Dupont', share_basis_points: 10000 }],
+    });
+    expect(prisma.company_bylaws.findUnique).toHaveBeenLastCalledWith({
+      where: { id: 'b1' },
+      include: { associates: true },
+    });
+    expect(resultat).toMatchObject({ content: 'Nouveau texte', associates: [{ full_name: 'Jean Dupont' }] });
+  });
+
+  it('n’écrase jamais une ligne devenue retenue pendant l’appel Claude', async () => {
+    // Le pré-contrôle voit un brouillon, puis quelqu'un retient pendant les
+    // dizaines de secondes de génération : l'écriture gardée ne touche rien.
+    prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'user-1', confirmed_legal_form: 'SASU', title: 'Mon projet' });
+    prisma.company_bylaws.findFirst.mockResolvedValue({ status: 'brouillon' });
+    prisma.company_bylaws.findUnique.mockResolvedValue({ id: 'b1' });
+    prisma.company_bylaws.updateMany.mockResolvedValue({ count: 0 });
+
+    await expect(service.genererPourProjet('user-1', 'p1', dtoValide)).rejects.toThrow(ConflictException);
+
+    expect(claude.generateStructuredOutput).toHaveBeenCalledTimes(1);
+    expect(prisma.bylaw_associates.deleteMany).not.toHaveBeenCalled();
+    expect(prisma.bylaw_associates.createMany).not.toHaveBeenCalled();
+    expect(prisma.company_bylaws.create).not.toHaveBeenCalled();
   });
 
   it('refuse des parts qui dépassent 100 % cumulées sur plusieurs associés', async () => {
@@ -118,20 +172,26 @@ describe('StatutsService — génération', () => {
 
     expect(prisma.company_bylaws.findFirst).toHaveBeenCalledWith({ where: { project_id: 'p1' }, select: { status: true } });
     expect(claude.generateStructuredOutput).not.toHaveBeenCalled();
-    expect(prisma.company_bylaws.upsert).not.toHaveBeenCalled();
+    expect(prisma.company_bylaws.updateMany).not.toHaveBeenCalled();
+    expect(prisma.company_bylaws.create).not.toHaveBeenCalled();
   });
 
   describe('édition et régénération', () => {
-    it('modifie le texte tant que le statut est brouillon', async () => {
+    it('modifie le texte tant que le statut est brouillon, par une écriture gardée', async () => {
       prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'brouillon' });
-      prisma.company_bylaws.update.mockResolvedValue({ id: 'b1', content: 'nouveau texte' });
+      prisma.company_bylaws.findUnique.mockResolvedValue({ id: 'b1', content: 'nouveau texte', associates: [] });
 
-      await service.modifierTexte('user-1', 'p1', 'nouveau texte');
+      await expect(service.modifierTexte('user-1', 'p1', 'nouveau texte')).resolves.toMatchObject({
+        content: 'nouveau texte',
+      });
 
       expect(prisma.company_bylaws.findFirst).toHaveBeenCalledWith({ where: { project_id: 'p1', owner_id: 'user-1' } });
-      expect(prisma.company_bylaws.update).toHaveBeenCalledWith({
-        where: { id: 'b1' },
+      expect(prisma.company_bylaws.updateMany).toHaveBeenCalledWith({
+        where: { id: 'b1', status: 'brouillon' },
         data: { content: 'nouveau texte' },
+      });
+      expect(prisma.company_bylaws.findUnique).toHaveBeenCalledWith({
+        where: { id: 'b1' },
         include: { associates: true },
       });
     });
@@ -139,7 +199,14 @@ describe('StatutsService — génération', () => {
     it('refuse de modifier une version retenue', async () => {
       prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'retenue' });
       await expect(service.modifierTexte('user-1', 'p1', 'x')).rejects.toThrow(ConflictException);
-      expect(prisma.company_bylaws.update).not.toHaveBeenCalled();
+      expect(prisma.company_bylaws.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('refuse de modifier si la version a été retenue entre la lecture et l’écriture', async () => {
+      prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'brouillon' });
+      prisma.company_bylaws.updateMany.mockResolvedValue({ count: 0 });
+      await expect(service.modifierTexte('user-1', 'p1', 'x')).rejects.toThrow(ConflictException);
+      expect(prisma.company_bylaws.findUnique).not.toHaveBeenCalled();
     });
 
     it('refuse de modifier des statuts introuvables pour ce propriétaire', async () => {
@@ -151,19 +218,19 @@ describe('StatutsService — génération', () => {
       prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'retenue' });
       await expect(service.regenererPourProjet('user-1', 'p1', dtoValide)).rejects.toThrow(/retenue/i);
       expect(claude.generateStructuredOutput).not.toHaveBeenCalled();
-      expect(prisma.company_bylaws.upsert).not.toHaveBeenCalled();
+      expect(prisma.company_bylaws.updateMany).not.toHaveBeenCalled();
     });
 
     it('régénère un brouillon via une nouvelle génération Claude', async () => {
       prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'brouillon' });
       prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'user-1', confirmed_legal_form: 'SASU', title: 'Mon projet' });
       claude.generateStructuredOutput.mockResolvedValue({ content: 'Nouveau texte' });
-      prisma.company_bylaws.upsert.mockResolvedValue({ id: 'b1', status: 'brouillon' });
+      prisma.company_bylaws.findUnique.mockResolvedValue({ id: 'b1', status: 'brouillon', associates: [] });
 
       await service.regenererPourProjet('user-1', 'p1', dtoValide);
 
       expect(claude.generateStructuredOutput).toHaveBeenCalledTimes(1);
-      expect(prisma.company_bylaws.upsert).toHaveBeenCalledTimes(1);
+      expect(prisma.company_bylaws.updateMany).toHaveBeenCalledTimes(1);
     });
 
     it('refuse de régénérer des statuts inexistants', async () => {
@@ -174,16 +241,19 @@ describe('StatutsService — génération', () => {
   });
 
   describe('retenir et lister', () => {
-    it('retient une version brouillon', async () => {
+    it('retient une version brouillon, par une écriture gardée', async () => {
       prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'brouillon' });
-      prisma.company_bylaws.update.mockResolvedValue({ id: 'b1', status: 'retenue' });
+      prisma.company_bylaws.findUnique.mockResolvedValue({ id: 'b1', status: 'retenue', associates: [] });
 
-      await service.retenirPourProjet('user-1', 'p1');
+      await expect(service.retenirPourProjet('user-1', 'p1')).resolves.toMatchObject({ status: 'retenue' });
 
       expect(prisma.company_bylaws.findFirst).toHaveBeenCalledWith({ where: { project_id: 'p1', owner_id: 'user-1' } });
-      expect(prisma.company_bylaws.update).toHaveBeenCalledWith({
-        where: { id: 'b1' },
+      expect(prisma.company_bylaws.updateMany).toHaveBeenCalledWith({
+        where: { id: 'b1', status: { not: 'retenue' } },
         data: { status: 'retenue', finalized_at: expect.any(Date) },
+      });
+      expect(prisma.company_bylaws.findUnique).toHaveBeenCalledWith({
+        where: { id: 'b1' },
         include: { associates: true },
       });
     });
@@ -191,13 +261,20 @@ describe('StatutsService — génération', () => {
     it('refuse de retenir une version déjà retenue, sans rien écrire', async () => {
       prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'retenue' });
       await expect(service.retenirPourProjet('user-1', 'p1')).rejects.toThrow(ConflictException);
-      expect(prisma.company_bylaws.update).not.toHaveBeenCalled();
+      expect(prisma.company_bylaws.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('refuse de retenir si une autre requête a retenu entre la lecture et l’écriture', async () => {
+      prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'brouillon' });
+      prisma.company_bylaws.updateMany.mockResolvedValue({ count: 0 });
+      await expect(service.retenirPourProjet('user-1', 'p1')).rejects.toThrow(ConflictException);
+      expect(prisma.company_bylaws.findUnique).not.toHaveBeenCalled();
     });
 
     it('refuse de retenir des statuts introuvables pour ce propriétaire', async () => {
       prisma.company_bylaws.findFirst.mockResolvedValue(null);
       await expect(service.retenirPourProjet('user-1', 'p1')).rejects.toThrow(NotFoundException);
-      expect(prisma.company_bylaws.update).not.toHaveBeenCalled();
+      expect(prisma.company_bylaws.updateMany).not.toHaveBeenCalled();
     });
 
     it('rend null quand aucun statut n’existe pour le projet', async () => {

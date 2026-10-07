@@ -8,6 +8,11 @@ import type { GenerateBylawsDto } from './dto/statuts.dto.js';
 /** Les quatre formes qui créent une personne morale distincte — voir la spec. */
 const FORMES_AVEC_PERSONNE_MORALE = ['EURL', 'SASU', 'SARL', 'SAS'] as const;
 
+/** Contrainte unique violée (`P2002`), testée sur la forme — même convention que billing.service. */
+function isUniqueViolation(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'P2002';
+}
+
 /**
  * STATUTS — le brouillon du document fondateur de l'entreprise.
  *
@@ -90,39 +95,66 @@ export class StatutsService {
       generated_by: 'igini',
       generated_model: CLAUDE_MODEL,
     };
+    const associes = dto.associates.map((a) => ({
+      full_name: a.fullName,
+      share_basis_points: a.shareBasisPoints,
+    }));
 
-    // upsert, pas create : une régénération rappelle cette même
-    // méthode, et `project_id` est @unique sur ce modèle (une ligne par
-    // projet, pas un historique — voir la spec). Les associés sont
-    // entièrement remplacés plutôt que fusionnés : une régénération peut
-    // changer leur nombre, fusionner ligne à ligne n'aurait pas de sens.
-    // `include` : toutes les routes rendent la même forme complète que le GET
-    // (associés compris), le client n'a pas à deviner ce qui manque.
-    return this.prisma.company_bylaws.upsert({
-      where: { project_id: projectId },
-      include: { associates: true },
-      create: {
-        owner_id: ownerId,
-        project_id: projectId,
-        ...champsCommuns,
-        associates: {
-          create: dto.associates.map((a) => ({
-            full_name: a.fullName,
-            share_basis_points: a.shareBasisPoints,
-          })),
-        },
-      },
-      update: {
-        ...champsCommuns,
-        associates: {
-          deleteMany: {},
-          create: dto.associates.map((a) => ({
-            full_name: a.fullName,
-            share_basis_points: a.shareBasisPoints,
-          })),
-        },
-      },
-    });
+    // Écriture GARDÉE, dans une transaction courte (l'appel Claude est déjà
+    // fait, il n'est surtout pas dedans). Le pré-contrôle plus haut date
+    // d'avant la génération — des dizaines de secondes — et une « Retenue »
+    // a pu passer entre-temps : un upsert aveugle la défairait sans bruit.
+    // Ici on n'écrit que si la ligne est toujours un brouillon.
+    //
+    // Une ligne par projet (`project_id` @unique, pas un historique — voir la
+    // spec). Les associés sont entièrement remplacés plutôt que fusionnés :
+    // une régénération peut changer leur nombre. Toutes les routes rendent la
+    // même forme complète que le GET (associés compris).
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const ligne = await tx.company_bylaws.findUnique({
+          where: { project_id: projectId },
+          select: { id: true },
+        });
+
+        if (!ligne) {
+          return tx.company_bylaws.create({
+            data: {
+              owner_id: ownerId,
+              project_id: projectId,
+              ...champsCommuns,
+              associates: { create: associes },
+            },
+            include: { associates: true },
+          });
+        }
+
+        const { count } = await tx.company_bylaws.updateMany({
+          where: { project_id: projectId, status: 'brouillon' },
+          data: champsCommuns,
+        });
+        if (count === 0) {
+          throw new ConflictException(
+            'Cette version vient d’être retenue : elle ne peut plus être régénérée. Recharge la page.',
+          );
+        }
+        await tx.bylaw_associates.deleteMany({ where: { bylaws_id: ligne.id } });
+        await tx.bylaw_associates.createMany({
+          data: associes.map((a) => ({ bylaws_id: ligne.id, ...a })),
+        });
+        return tx.company_bylaws.findUnique({
+          where: { id: ligne.id },
+          include: { associates: true },
+        });
+      });
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        throw new ConflictException(
+          'Des statuts viennent d’être créés pour ce projet par une autre demande. Recharge la page.',
+        );
+      }
+      throw error;
+    }
   }
 
   async modifierTexte(ownerId: string, projectId: string, content: string) {
@@ -130,9 +162,17 @@ export class StatutsService {
     if (bylaws.status === 'retenue') {
       throw new ConflictException('Cette version est retenue : elle ne peut plus être modifiée.');
     }
-    return this.prisma.company_bylaws.update({
-      where: { id: bylaws.id },
+    // Gardée sur le statut : une retenue concurrente entre la lecture et
+    // l'écriture ne doit pas être suivie d'une modification du texte retenu.
+    const { count } = await this.prisma.company_bylaws.updateMany({
+      where: { id: bylaws.id, status: 'brouillon' },
       data: { content },
+    });
+    if (count === 0) {
+      throw new ConflictException('Cette version est retenue : elle ne peut plus être modifiée.');
+    }
+    return this.prisma.company_bylaws.findUnique({
+      where: { id: bylaws.id },
       include: { associates: true },
     });
   }
@@ -142,8 +182,8 @@ export class StatutsService {
     if (bylaws.status === 'retenue') {
       throw new ConflictException('Cette version est retenue : elle ne peut plus être régénérée.');
     }
-    // genererPourProjet fait déjà un upsert sur project_id : la ligne existante
-    // est remplacée (contenu + associés), pas dupliquée.
+    // genererPourProjet remplace la ligne existante (écriture gardée sur le
+    // statut brouillon), elle ne la duplique pas.
     return this.genererPourProjet(ownerId, projectId, dto);
   }
 
@@ -152,9 +192,16 @@ export class StatutsService {
     if (bylaws.status === 'retenue') {
       throw new ConflictException('Cette version est déjà retenue.');
     }
-    return this.prisma.company_bylaws.update({
-      where: { id: bylaws.id },
+    // Gardée : deux « Retenir » simultanés ne réécrivent pas finalized_at.
+    const { count } = await this.prisma.company_bylaws.updateMany({
+      where: { id: bylaws.id, status: { not: 'retenue' } },
       data: { status: 'retenue', finalized_at: new Date() },
+    });
+    if (count === 0) {
+      throw new ConflictException('Cette version est déjà retenue.');
+    }
+    return this.prisma.company_bylaws.findUnique({
+      where: { id: bylaws.id },
       include: { associates: true },
     });
   }
