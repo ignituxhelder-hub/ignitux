@@ -90,6 +90,22 @@ juste à lire les journaux du premier démarrage s'il refuse.
 5. Revenir sur Render, mettre à jour `FRONTEND_URL` avec l'URL Vercel finale (sinon CORS
    refuse les requêtes du frontend).
 
+## À faire AVANT de déployer « IGINI exécute les tâches et la conformité »
+
+Cette fonctionnalité a besoin d'une migration de la base de production : `20261007100000_taches_ia`.
+Elle ajoute seulement : quelques colonnes à la table `tasks` et une nouvelle table
+`project_compliance_ai_runs`. Rien n'est supprimé ni modifié dans les données existantes.
+
+Elle doit être appliquée **avant** de déployer le code, sinon l'application cherchera des colonnes
+qui n'existent pas encore. C'est vous (le fondateur) qui la lancez, depuis votre propre PowerShell,
+dans le dossier `backend`, dans cet ordre :
+
+1. Vérifier (lecture seule, ne change rien) : `node scripts/verifier-base.mjs .env.production`
+   — la réponse doit être « ADDITIF ». Sinon, s'arrêter et demander.
+2. Sauvegarder : `node scripts/sauvegarde.mjs --env .env.production`
+3. Appliquer : `node scripts/migrer-prod.mjs` (montre la cible sans rien faire — vérifier que c'est
+   bien `ignitux_prod`), puis `node scripts/migrer-prod.mjs --appliquer`.
+
 ## URLs de production
 
 *(à compléter une fois le déploiement réel fait — Tâche 8)*

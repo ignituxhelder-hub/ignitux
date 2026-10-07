@@ -357,7 +357,7 @@ model tasks {
   due_date    DateTime? @db.Timestamptz(6)
   // Exécution par IGINI (ajout additif, tout nullable : les tâches existantes
   // n'ont simplement aucune exécution IA).
-  // 'running' | 'done' | 'refused' | 'failed'
+  // 'a_valider' | 'valide' | 'refuse' | 'echec'
   ai_status         String?
   // Nature du résultat : 'draft' | 'checklist' | etc. (null tant qu'il n'y en a pas)
   ai_result_kind    String?
@@ -479,7 +479,7 @@ model project_compliance_ai_runs {
   project        projects                @relation(fields: [project_id], references: [id], onDelete: Cascade)
   requirement_id String                  @db.Uuid
   requirement    compliance_requirements @relation(fields: [requirement_id], references: [id], onDelete: Cascade)
-  // 'running' | 'done' | 'refused' | 'failed'
+  // 'a_valider' | 'valide' | 'refuse' | 'echec'
   status         String
   result_kind    String?
   result         String?
