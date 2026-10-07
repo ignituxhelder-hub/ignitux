@@ -34,6 +34,14 @@ export async function startApp(): Promise<INestApplication<Server>> {
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
   );
   await app.init();
+  // Le serveur écoute UNE fois pour toute la suite, sur un port libre choisi par
+  // le système. Sans cela, supertest en ouvre un nouveau — sur un autre port —
+  // à chaque requête, puis le ferme. Node 24 réutilise par défaut les
+  // connexions déjà ouvertes (keep-alive) : une connexion restée ouverte vers
+  // un ancien port tombait parfois sur un serveur plus récent et était coupée
+  // (ECONNRESET, « Connection reset by peer »), au hasard, en CI. `app.close()`,
+  // appelé par chaque suite, ferme ce serveur.
+  await app.listen(0);
   return app;
 }
 
