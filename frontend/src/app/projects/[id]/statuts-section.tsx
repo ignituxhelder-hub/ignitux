@@ -125,6 +125,9 @@ export function StatutsSection({
 
   const charger = useCallback(async () => {
     if (!aPersonneMorale) return;
+    // Un rechargement (nouveau jeton, nouveau projet) repasse par « Chargement… » :
+    // jamais l'ancien contenu affiché comme s'il était celui qu'on attend.
+    setProjetCharge(null);
     setChargementEchoue(false);
     try {
       const recu = await api.getStatuts(token, projectId);
@@ -144,7 +147,6 @@ export function StatutsSection({
   }, [charger]);
 
   const reessayer = () => {
-    setProjetCharge(null);
     void charger();
   };
 
@@ -238,7 +240,9 @@ export function StatutsSection({
   const retenir = async () => {
     // Irréversible : on le dit, et on attend un accord explicite.
     const accord = window.confirm(
-      'Retenir cette version la verrouille définitivement : tu ne pourras plus ni la modifier ni la régénérer. Continuer ?',
+      'Retenir cette version la verrouille définitivement : tu ne pourras plus ni la modifier ni la régénérer.\n\n' +
+        "Retenir n'est pas une validation juridique : fais relire le texte par un professionnel " +
+        '(avocat, expert-comptable) avant tout dépôt. Continuer ?',
     );
     if (!accord) return;
     setError(null);
@@ -431,6 +435,11 @@ export function StatutsSection({
               Brouillon à relire — jamais un document prêt à déposer sans contrôle.
             </p>
           )}
+          {/* Dans les deux états : « retenue » veut dire choisie, pas validée juridiquement. */}
+          <p className="notice">
+            Texte généré par IA : il ne remplace pas la relecture par un professionnel (avocat,
+            expert-comptable) avant tout dépôt.
+          </p>
           {bylaws.legal_form !== confirmedLegalForm && (
             <p className="error">
               Ce texte a été généré pour « {bylaws.legal_form} », mais la forme confirmée sur ce

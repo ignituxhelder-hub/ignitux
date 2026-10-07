@@ -515,6 +515,49 @@ describe('StatutsSection', () => {
       expect(screen.getByRole('button', { name: /télécharger en pdf/i })).toBeEnabled();
     });
 
+    it('avertit en brouillon comme en retenue : texte généré par IA, à faire relire par un professionnel', async () => {
+      mockApiRoutes({ 'GET /projects/p1/statuts': { status: 200, body: brouillon() } });
+      const { unmount } = rendre();
+      await screen.findByDisplayValue('Article 1 — Forme');
+      expect(screen.getByText(/généré par IA.*avocat, expert-comptable/i)).toBeInTheDocument();
+      unmount();
+
+      mockApiRoutes({
+        'GET /projects/p1/statuts': {
+          status: 200,
+          body: { ...brouillon(), status: 'retenue', finalized_at: '2026-10-03T10:00:00.000Z' },
+        },
+      });
+      rendre();
+      await screen.findByText(/Version retenue le/);
+      expect(screen.getByText(/généré par IA.*avocat, expert-comptable/i)).toBeInTheDocument();
+    });
+
+    it('la confirmation de Retenir dit que ce n’est pas une validation juridique', async () => {
+      mockApiRoutes({ 'GET /projects/p1/statuts': { status: 200, body: brouillon() } });
+      const confirmer = vi.spyOn(window, 'confirm').mockReturnValue(false);
+      rendre();
+      fireEvent.click(await screen.findByRole('button', { name: /retenir cette version/i }));
+
+      expect(confirmer).toHaveBeenCalledWith(expect.stringMatching(/pas une validation juridique/));
+      expect(confirmer).toHaveBeenCalledWith(expect.stringMatching(/avocat, expert-comptable/));
+    });
+
+    it('repasse en « Chargement… » quand un rechargement démarre, au lieu de garder l’ancien contenu', async () => {
+      mockApiRoutes({ 'GET /projects/p1/statuts': { status: 200, body: brouillon() } });
+      const { rerender } = rendre();
+      await screen.findByDisplayValue('Article 1 — Forme');
+
+      // Un nouveau jeton relance le chargement ; la réponse n'arrive jamais ici.
+      global.fetch = vi.fn().mockReturnValue(new Promise(() => undefined)) as unknown as typeof fetch;
+      rerender(
+        <StatutsSection token="tok-nouveau" projectId={PROJECT_ID} confirmedLegalForm="SASU" onFormConfirmed={vi.fn()} />,
+      );
+
+      expect(await screen.findByText('Chargement…')).toBeInTheDocument();
+      expect(screen.queryByDisplayValue('Article 1 — Forme')).not.toBeInTheDocument();
+    });
+
     it('ne retient rien si la confirmation est refusée', async () => {
       mockApiRoutes({ 'GET /projects/p1/statuts': { status: 200, body: brouillon() } });
       const confirmer = vi.spyOn(window, 'confirm').mockReturnValue(false);
