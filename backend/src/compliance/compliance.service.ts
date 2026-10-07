@@ -154,12 +154,24 @@ export class ComplianceService implements OnModuleInit {
     const declare = country ?? (await this.paysDeclare(userId));
     const pays = declare ?? 'FR';
 
-    const [requirements, checks, projet] = await Promise.all([
+    const [requirements, checks, aiRuns, projet] = await Promise.all([
       this.prisma.compliance_requirements.findMany({
         where: { country: pays },
         orderBy: [{ category: 'asc' }, { title: 'asc' }],
       }),
       this.prisma.project_compliance_checks.findMany({ where: { project_id: projectId } }),
+      // Une seule requête pour tout le projet (pas de N+1) : l'état de la
+      // dernière exécution d'IGINI, lisible aussi des collaborateurs.
+      this.prisma.project_compliance_ai_runs.findMany({
+        where: { project_id: projectId },
+        select: {
+          requirement_id: true,
+          status: true,
+          result_kind: true,
+          result: true,
+          refusal_reason: true,
+        },
+      }),
       this.prisma.projects.findUnique({
         where: { id: projectId },
         select: { sector: true },
@@ -177,10 +189,23 @@ export class ComplianceService implements OnModuleInit {
       notice: COMPLIANCE_DISCLAIMER,
     });
 
-    const avecEtat = requirements.map((requirement) => ({
-      ...requirement,
-      completed: completedRequirementIds.has(requirement.id),
-    }));
+    const aiParExigence = new Map(aiRuns.map((run) => [run.requirement_id, run]));
+
+    const avecEtat = requirements.map((requirement) => {
+      const run = aiParExigence.get(requirement.id);
+      return {
+        ...requirement,
+        completed: completedRequirementIds.has(requirement.id),
+        ai: run
+          ? {
+              status: run.status,
+              result_kind: run.result_kind,
+              result: run.result,
+              refusal_reason: run.refusal_reason,
+            }
+          : null,
+      };
+    });
 
     return {
       disclaimer: COMPLIANCE_DISCLAIMER,

@@ -18,6 +18,7 @@ describe('ComplianceService', () => {
       upsert: ReturnType<typeof vi.fn>;
       deleteMany: ReturnType<typeof vi.fn>;
     };
+    project_compliance_ai_runs: { findMany: ReturnType<typeof vi.fn> };
     projects: { findFirst: ReturnType<typeof vi.fn>; findUnique: ReturnType<typeof vi.fn> };
     user_profiles: { findUnique: ReturnType<typeof vi.fn> };
     constitution_violations: { createMany: ReturnType<typeof vi.fn> };
@@ -32,6 +33,7 @@ describe('ComplianceService', () => {
         groupBy: vi.fn(),
       },
       project_compliance_checks: { findMany: vi.fn(), upsert: vi.fn(), deleteMany: vi.fn() },
+      project_compliance_ai_runs: { findMany: vi.fn().mockResolvedValue([]) },
       projects: { findFirst: vi.fn(), findUnique: vi.fn().mockResolvedValue(null) },
       user_profiles: { findUnique: vi.fn().mockResolvedValue(null) },
       constitution_violations: { createMany: vi.fn() },
@@ -108,9 +110,46 @@ describe('ComplianceService', () => {
       const result = await service.listForProject('u2-collaborateur', 'p1');
 
       expect(result.requirements).toEqual([
-        { id: 'r1', title: 'A', completed: true },
-        { id: 'r2', title: 'B', completed: false },
+        { id: 'r1', title: 'A', completed: true, ai: null },
+        { id: 'r2', title: 'B', completed: false, ai: null },
       ]);
+    });
+
+    // L'état IA est lu en une seule requête groupée pour tout le projet,
+    // et visible aussi des collaborateurs (lecture seule).
+    it("expose l'état IA par exigence (run a_valider -> status/result ; sans run -> null)", async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.compliance_requirements.findMany.mockResolvedValue([
+        { id: 'r1', title: 'A' },
+        { id: 'r2', title: 'B' },
+        { id: 'r3', title: 'C' },
+      ]);
+      prisma.project_compliance_checks.findMany.mockResolvedValue([]);
+      prisma.project_compliance_ai_runs.findMany.mockResolvedValue([
+        {
+          id: 'x',
+          requirement_id: 'r1',
+          status: 'a_valider',
+          result_kind: 'brouillon',
+          result: 'Texte du brouillon',
+          refusal_reason: null,
+        },
+      ]);
+
+      const result = await service.listForProject('u2-collaborateur', 'p1');
+
+      expect(result.requirements[0].ai).toEqual({
+        status: 'a_valider',
+        result_kind: 'brouillon',
+        result: 'Texte du brouillon',
+        refusal_reason: null,
+      });
+      expect(result.requirements[1].ai).toBeNull();
+      expect(result.requirements[2].ai).toBeNull();
+      expect(prisma.project_compliance_ai_runs.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.project_compliance_ai_runs.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { project_id: 'p1' } }),
+      );
     });
 
     // Le champ « Pays d'activité » promet d'ouvrir la section Conformité.
