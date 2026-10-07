@@ -23,6 +23,15 @@ const TACHE = {
   ai_result: null,
   ai_refusal_reason: null,
   ai_run_at: null,
+  source: 'manual',
+};
+
+const PROJET = {
+  id: 'p1',
+  owner_id: 'u1',
+  title: 'Boulangerie Soleil',
+  description: 'Une boulangerie bio de quartier',
+  sector: 'Alimentation',
 };
 
 const EXIGENCE = {
@@ -61,7 +70,7 @@ describe('ExecutionService', () => {
 
   beforeEach(async () => {
     prisma = {
-      projects: { findFirst: vi.fn().mockResolvedValue({ id: 'p1' }) },
+      projects: { findFirst: vi.fn().mockResolvedValue({ ...PROJET }) },
       tasks: {
         findFirst: vi.fn().mockResolvedValue({ ...TACHE }),
         update: vi.fn().mockImplementation(({ data }) => Promise.resolve({ ...TACHE, ...data })),
@@ -189,6 +198,40 @@ describe('ExecutionService', () => {
     expect(prisma.tasks.update.mock.calls[0][0].data.ai_status).toBe('a_valider');
   });
 
+  it("6c. le prompt de la tâche contient le projet (titre, description, secteur) et la tâche", async () => {
+    claude.generateStructuredOutput.mockResolvedValue({ kind: 'livrable', titre: 'x', contenu: 'y' });
+
+    await service.runTask('u1', 'p1', 't1');
+
+    const content = claude.generateStructuredOutput.mock.calls[0][0].userContent;
+    expect(content).toContain(PROJET.title);
+    expect(content).toContain(PROJET.description);
+    expect(content).toContain('Alimentation');
+    expect(content).toContain('Tâche à faire');
+    expect(content).toContain(TACHE.title);
+    expect(content).not.toContain('Remarque du propriétaire');
+  });
+
+  it('6d. le motif de refus est présenté comme la remarque du propriétaire', async () => {
+    prisma.tasks.findFirst.mockResolvedValue({ ...TACHE, ai_status: 'refuse', ai_refusal_reason: 'Trop vague' });
+    claude.generateStructuredOutput.mockResolvedValue({ kind: 'livrable', titre: 'x', contenu: 'y' });
+
+    await service.runTask('u1', 'p1', 't1');
+
+    const content = claude.generateStructuredOutput.mock.calls[0][0].userContent;
+    expect(content).toContain('Remarque du propriétaire sur la version précédente :\nTrop vague');
+    expect(content).not.toContain("Ce qu'IGINI sait déjà");
+  });
+
+  it("6e. une tâche issue de l'automatisation est refusée avant tout appel Claude", async () => {
+    prisma.tasks.findFirst.mockResolvedValue({ ...TACHE, source: 'automation' });
+
+    await expect(service.runTask('u1', 'p1', 't1')).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(claude.generateStructuredOutput).not.toHaveBeenCalled();
+    expect(prisma.tasks.update).not.toHaveBeenCalled();
+  });
+
   it('6b. refus puis échec puis relance : le motif reste dans le prompt', async () => {
     prisma.tasks.findFirst.mockResolvedValue({
       ...TACHE,
@@ -295,6 +338,19 @@ describe('ExecutionService', () => {
       expect(content).toContain(EXIGENCE.description);
       expect(content).toContain(EXIGENCE.source_name);
       expect(content).toContain(EXIGENCE.source_url);
+    });
+
+    it('C2b. le prompt contient le projet et le motif de refus sous son bon intitulé', async () => {
+      run('refuse', { refusal_reason: 'Trop vague' });
+      claude.generateStructuredOutput.mockResolvedValue({ kind: 'livrable', titre: 'x', contenu: 'y' });
+
+      await service.runCompliance('u1', 'p1', 'r1');
+
+      const content = claude.generateStructuredOutput.mock.calls[0][0].userContent;
+      expect(content).toContain(PROJET.title);
+      expect(content).toContain(PROJET.description);
+      expect(content).toContain('Exigence de conformité');
+      expect(content).toContain('Remarque du propriétaire sur la version précédente :\nTrop vague');
     });
 
     it.each(['a_valider', 'valide'])('C3. déjà %s : renvoyé tel quel sans appel Claude', async (st) => {

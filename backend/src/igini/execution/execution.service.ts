@@ -1,13 +1,15 @@
 import { BadRequestException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { ComplianceService } from '../../compliance/compliance.service.js';
 import type { project_compliance_ai_runs } from '../../generated/prisma/client.js';
-import { assertOwnsProject } from '../../prisma/assert-owns-project.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { AutomationService } from '../automation/automation.service.js';
-import { buildProjectPrompt } from '../claude/build-project-prompt.js';
 import { ClaudeService } from '../claude/claude.service.js';
 import { buildSystemPrompt } from '../claude/igini-identity.js';
 import { ExecutionResultSchema, formaterResultat } from './execution-schema.js';
+import { promptExigence, promptTache } from './execution-prompts.js';
+
+/** Statuts IA possibles d'un résultat (tâche ou exigence). */
+type StatutIa = 'a_valider' | 'valide' | 'refuse' | 'echec';
 
 const SYSTEM_PROMPT = buildSystemPrompt(`Ici, on te confie une tâche du projet. Si le travail est
 rédigeable (texte, brouillon, tableau, message), fais-le réellement et renvoie-le comme livrable.
@@ -26,14 +28,6 @@ export type ComplianceAiRun = project_compliance_ai_runs;
 /** Idempotence : un résultat existe déjà, inutile de payer un second appel. */
 function dejaExecute(aiStatus: string | null | undefined): boolean {
   return !!aiStatus && DEJA_EXECUTEES.includes(aiStatus);
-}
-
-/**
- * Un motif de refus guide la nouvelle tentative, quel que soit le statut
- * courant (refus -> échec -> relance garde le motif).
- */
-function contexteRefus(motif: string | null | undefined): string | undefined {
-  return motif ? `Une première version a été refusée par la personne. Motif : ${motif}` : undefined;
 }
 
 /** Valider ou refuser n'a de sens que sur un résultat « à valider ». */
@@ -61,7 +55,15 @@ export class ExecutionService {
   ) {}
 
   async runTask(userId: string, projectId: string, taskId: string) {
-    const task = await this.getTask(userId, projectId, taskId);
+    const { task, projet } = await this.getTask(userId, projectId, taskId);
+
+    // Une tâche d'étape (créée par l'automatisation) se fait avec l'étape
+    // elle-même ; la valider ferait recréer la même tâche.
+    if (task.source === 'automation') {
+      throw new BadRequestException(
+        "Cette tâche se fait avec l'étape correspondante, pas avec « Faire faire par IGINI ».",
+      );
+    }
 
     if (dejaExecute(task.ai_status)) {
       return task;
@@ -70,7 +72,7 @@ export class ExecutionService {
     const resultat = await this.appelerClaude(
       {
         system: SYSTEM_PROMPT,
-        userContent: buildProjectPrompt(task.title, task.description, contexteRefus(task.ai_refusal_reason)),
+        userContent: promptTache(projet, task, task.ai_refusal_reason),
         logContext: "Échec de l'exécution d'une tâche via Claude",
         userErrorMessage: "L'exécution de la tâche a échoué, réessaie dans un instant.",
         usage: { userId, projectId, generator: 'executer' },
@@ -96,7 +98,7 @@ export class ExecutionService {
   }
 
   async validateTask(userId: string, projectId: string, taskId: string) {
-    const task = await this.getTask(userId, projectId, taskId);
+    const { task } = await this.getTask(userId, projectId, taskId);
     exigerAValider(task.ai_status, "Aucun résultat d'IGINI à valider pour cette tâche.");
 
     const misAJour = await this.prisma.tasks.update({
@@ -109,7 +111,7 @@ export class ExecutionService {
   }
 
   async refuseTask(userId: string, projectId: string, taskId: string, reason?: string) {
-    const task = await this.getTask(userId, projectId, taskId);
+    const { task } = await this.getTask(userId, projectId, taskId);
     exigerAValider(task.ai_status, "Aucun résultat d'IGINI à refuser pour cette tâche.");
     // `status` n'est volontairement pas touché : refuser le résultat de l'IA
     // ne dit rien de l'avancement réel de la tâche.
@@ -122,27 +124,16 @@ export class ExecutionService {
   // ---- Conformité : même logique, sur project_compliance_ai_runs ----
 
   async runCompliance(userId: string, projectId: string, requirementId: string): Promise<ComplianceAiRun> {
-    const { exigence, run } = await this.getCompliance(userId, projectId, requirementId);
+    const { exigence, run, projet } = await this.getCompliance(userId, projectId, requirementId);
 
     if (run && dejaExecute(run.status)) {
       return run;
     }
 
-    const parts = [
-      `Exigence : ${exigence.title}`,
-      `Description : ${exigence.description}`,
-      `Source : ${exigence.source_name} (${exigence.source_url})`,
-      `Pays : ${exigence.country} — catégorie : ${exigence.category}`,
-    ];
-    const contexte = contexteRefus(run?.refusal_reason);
-    if (contexte) {
-      parts.push(`\n${contexte}`);
-    }
-
     const resultat = await this.appelerClaude(
       {
         system: SYSTEM_PROMPT_CONFORMITE,
-        userContent: parts.join('\n'),
+        userContent: promptExigence(projet, exigence, run?.refusal_reason),
         logContext: "Échec de l'exécution d'une exigence de conformité via Claude",
         userErrorMessage: "L'exécution de la démarche a échoué, réessaie dans un instant.",
         usage: { userId, projectId, generator: 'executer' },
@@ -212,7 +203,7 @@ export class ExecutionService {
   private saveCompliance(
     projectId: string,
     requirementId: string,
-    data: { status: string; result_kind?: string; result?: string; refusal_reason?: string | null },
+    data: { status: StatutIa; result_kind?: string; result?: string; refusal_reason?: string | null },
   ) {
     return this.prisma.project_compliance_ai_runs.upsert({
       where: { project_id_requirement_id: { project_id: projectId, requirement_id: requirementId } },
@@ -223,7 +214,7 @@ export class ExecutionService {
 
   /** Propriété du projet, exigence connue, puis l'éventuel run existant. */
   private async getCompliance(userId: string, projectId: string, requirementId: string) {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    const projet = await this.getProjet(userId, projectId);
     const exigence = await this.prisma.compliance_requirements.findUnique({
       where: { id: requirementId },
     });
@@ -233,18 +224,29 @@ export class ExecutionService {
     const run = await this.prisma.project_compliance_ai_runs.findUnique({
       where: { project_id_requirement_id: { project_id: projectId, requirement_id: requirementId } },
     });
-    return { exigence, run };
+    return { exigence, run, projet };
   }
 
   /** Propriété du projet puis appartenance de la tâche, avant tout appel IA. */
   private async getTask(userId: string, projectId: string, taskId: string) {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    const projet = await this.getProjet(userId, projectId);
     const task = await this.prisma.tasks.findFirst({
       where: { id: taskId, project_id: projectId },
     });
     if (!task) {
       throw new NotFoundException('Tâche introuvable.');
     }
-    return task;
+    return { task, projet };
+  }
+
+  /** Propriété du projet ; renvoie le projet pour nourrir le prompt. */
+  private async getProjet(userId: string, projectId: string) {
+    const projet = await this.prisma.projects.findFirst({
+      where: { id: projectId, owner_id: userId },
+    });
+    if (!projet) {
+      throw new NotFoundException('Projet introuvable.');
+    }
+    return projet;
   }
 }

@@ -359,11 +359,12 @@ model tasks {
   // n'ont simplement aucune exécution IA).
   // 'a_valider' | 'valide' | 'refuse' | 'echec'
   ai_status         String?
-  // Nature du résultat : 'draft' | 'checklist' | etc. (null tant qu'il n'y en a pas)
+  // Nature du résultat : 'livrable' | 'instructions' (null tant qu'il n'y en a pas)
   ai_result_kind    String?
   // Le résultat produit par IGINI — un brouillon à relire, jamais un acte.
   ai_result         String?
-  // Pourquoi IGINI a refusé d'exécuter (hors périmètre, avis juridique, etc.).
+  // Pourquoi la personne a refusé le résultat d'IGINI : renvoyé dans le prompt
+  // de la nouvelle tentative.
   ai_refusal_reason String?
   ai_run_at         DateTime? @db.Timestamptz(6)
   created_at  DateTime? @default(now()) @db.Timestamptz(6)

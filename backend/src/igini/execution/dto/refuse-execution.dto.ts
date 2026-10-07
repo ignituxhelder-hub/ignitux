@@ -4,6 +4,6 @@ import { IsOptional, IsString, MaxLength } from 'class-validator';
 export class RefuseExecutionDto {
   @IsOptional()
   @IsString()
-  @MaxLength(500)
+  @MaxLength(500, { message: 'reason ne doit pas dépasser 500 caractères.' })
   reason?: string;
 }
