@@ -376,9 +376,36 @@ export interface Project {
   description: string | null;
   /** Le secteur du projet. null tant qu il n a pas ete demande. */
   sector: string | null;
+  /** La forme juridique confirmee par la personne. null tant qu elle n a pas tranche. */
+  confirmed_legal_form: string | null;
   is_public: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface BylawAssociate {
+  id: string;
+  full_name: string;
+  share_basis_points: number;
+}
+
+export interface CompanyBylaws {
+  id: string;
+  legal_form: string;
+  capital_cents: number;
+  head_office: string;
+  duration_years: number;
+  content: string;
+  status: 'brouillon' | 'retenue';
+  finalized_at: string | null;
+  associates: BylawAssociate[];
+}
+
+export interface GenerateBylawsInput {
+  capitalCents: number;
+  headOffice: string;
+  durationYears: number;
+  associates: { fullName: string; shareBasisPoints: number }[];
 }
 
 export interface Collaborator {
@@ -1825,6 +1852,25 @@ export const api = {
   getProject: (token: string, id: string) =>
     request<Project>(`/projects/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  confirmerFormeJuridique: (token: string, projectId: string, legalForm: string | null) =>
+    request<Project>(`/projects/${projectId}/forme-juridique`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ legalForm }),
+    }),
+
+  getStatuts: (token: string, projectId: string) =>
+    request<CompanyBylaws | null>(`/projects/${projectId}/statuts`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  genererStatuts: (token: string, projectId: string, dto: GenerateBylawsInput) =>
+    request<CompanyBylaws>(`/projects/${projectId}/statuts`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(dto),
     }),
 
   createProject: (token: string, title: string, description: string) =>
