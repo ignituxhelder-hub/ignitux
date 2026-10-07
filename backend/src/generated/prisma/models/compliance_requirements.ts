@@ -232,6 +232,7 @@ export type compliance_requirementsWhereInput = {
   verified_on?: Prisma.DateTimeNullableFilter<"compliance_requirements"> | Date | string | null
   created_at?: Prisma.DateTimeNullableFilter<"compliance_requirements"> | Date | string | null
   checks?: Prisma.Project_compliance_checksListRelationFilter
+  ai_runs?: Prisma.Project_compliance_ai_runsListRelationFilter
 }
 
 export type compliance_requirementsOrderByWithRelationInput = {
@@ -247,6 +248,7 @@ export type compliance_requirementsOrderByWithRelationInput = {
   verified_on?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   checks?: Prisma.project_compliance_checksOrderByRelationAggregateInput
+  ai_runs?: Prisma.project_compliance_ai_runsOrderByRelationAggregateInput
 }
 
 export type compliance_requirementsWhereUniqueInput = Prisma.AtLeast<{
@@ -265,6 +267,7 @@ export type compliance_requirementsWhereUniqueInput = Prisma.AtLeast<{
   verified_on?: Prisma.DateTimeNullableFilter<"compliance_requirements"> | Date | string | null
   created_at?: Prisma.DateTimeNullableFilter<"compliance_requirements"> | Date | string | null
   checks?: Prisma.Project_compliance_checksListRelationFilter
+  ai_runs?: Prisma.Project_compliance_ai_runsListRelationFilter
 }, "id" | "slug">
 
 export type compliance_requirementsOrderByWithAggregationInput = {
@@ -314,6 +317,7 @@ export type compliance_requirementsCreateInput = {
   verified_on?: Date | string | null
   created_at?: Date | string | null
   checks?: Prisma.project_compliance_checksCreateNestedManyWithoutRequirementInput
+  ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutRequirementInput
 }
 
 export type compliance_requirementsUncheckedCreateInput = {
@@ -329,6 +333,7 @@ export type compliance_requirementsUncheckedCreateInput = {
   verified_on?: Date | string | null
   created_at?: Date | string | null
   checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutRequirementInput
+  ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutRequirementInput
 }
 
 export type compliance_requirementsUpdateInput = {
@@ -344,6 +349,7 @@ export type compliance_requirementsUpdateInput = {
   verified_on?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checks?: Prisma.project_compliance_checksUpdateManyWithoutRequirementNestedInput
+  ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutRequirementNestedInput
 }
 
 export type compliance_requirementsUncheckedUpdateInput = {
@@ -359,6 +365,7 @@ export type compliance_requirementsUncheckedUpdateInput = {
   verified_on?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutRequirementNestedInput
+  ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutRequirementNestedInput
 }
 
 export type compliance_requirementsCreateManyInput = {
@@ -471,6 +478,20 @@ export type compliance_requirementsUpdateOneRequiredWithoutChecksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.compliance_requirementsUpdateToOneWithWhereWithoutChecksInput, Prisma.compliance_requirementsUpdateWithoutChecksInput>, Prisma.compliance_requirementsUncheckedUpdateWithoutChecksInput>
 }
 
+export type compliance_requirementsCreateNestedOneWithoutAi_runsInput = {
+  create?: Prisma.XOR<Prisma.compliance_requirementsCreateWithoutAi_runsInput, Prisma.compliance_requirementsUncheckedCreateWithoutAi_runsInput>
+  connectOrCreate?: Prisma.compliance_requirementsCreateOrConnectWithoutAi_runsInput
+  connect?: Prisma.compliance_requirementsWhereUniqueInput
+}
+
+export type compliance_requirementsUpdateOneRequiredWithoutAi_runsNestedInput = {
+  create?: Prisma.XOR<Prisma.compliance_requirementsCreateWithoutAi_runsInput, Prisma.compliance_requirementsUncheckedCreateWithoutAi_runsInput>
+  connectOrCreate?: Prisma.compliance_requirementsCreateOrConnectWithoutAi_runsInput
+  upsert?: Prisma.compliance_requirementsUpsertWithoutAi_runsInput
+  connect?: Prisma.compliance_requirementsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.compliance_requirementsUpdateToOneWithWhereWithoutAi_runsInput, Prisma.compliance_requirementsUpdateWithoutAi_runsInput>, Prisma.compliance_requirementsUncheckedUpdateWithoutAi_runsInput>
+}
+
 export type compliance_requirementsCreateWithoutChecksInput = {
   id?: string
   slug: string
@@ -483,6 +504,7 @@ export type compliance_requirementsCreateWithoutChecksInput = {
   sectors?: Prisma.compliance_requirementsCreatesectorsInput | string[]
   verified_on?: Date | string | null
   created_at?: Date | string | null
+  ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutRequirementInput
 }
 
 export type compliance_requirementsUncheckedCreateWithoutChecksInput = {
@@ -497,6 +519,7 @@ export type compliance_requirementsUncheckedCreateWithoutChecksInput = {
   sectors?: Prisma.compliance_requirementsCreatesectorsInput | string[]
   verified_on?: Date | string | null
   created_at?: Date | string | null
+  ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutRequirementInput
 }
 
 export type compliance_requirementsCreateOrConnectWithoutChecksInput = {
@@ -527,6 +550,7 @@ export type compliance_requirementsUpdateWithoutChecksInput = {
   sectors?: Prisma.compliance_requirementsUpdatesectorsInput | string[]
   verified_on?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutRequirementNestedInput
 }
 
 export type compliance_requirementsUncheckedUpdateWithoutChecksInput = {
@@ -541,6 +565,83 @@ export type compliance_requirementsUncheckedUpdateWithoutChecksInput = {
   sectors?: Prisma.compliance_requirementsUpdatesectorsInput | string[]
   verified_on?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutRequirementNestedInput
+}
+
+export type compliance_requirementsCreateWithoutAi_runsInput = {
+  id?: string
+  slug: string
+  country: string
+  category: string
+  title: string
+  description: string
+  source_name: string
+  source_url: string
+  sectors?: Prisma.compliance_requirementsCreatesectorsInput | string[]
+  verified_on?: Date | string | null
+  created_at?: Date | string | null
+  checks?: Prisma.project_compliance_checksCreateNestedManyWithoutRequirementInput
+}
+
+export type compliance_requirementsUncheckedCreateWithoutAi_runsInput = {
+  id?: string
+  slug: string
+  country: string
+  category: string
+  title: string
+  description: string
+  source_name: string
+  source_url: string
+  sectors?: Prisma.compliance_requirementsCreatesectorsInput | string[]
+  verified_on?: Date | string | null
+  created_at?: Date | string | null
+  checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutRequirementInput
+}
+
+export type compliance_requirementsCreateOrConnectWithoutAi_runsInput = {
+  where: Prisma.compliance_requirementsWhereUniqueInput
+  create: Prisma.XOR<Prisma.compliance_requirementsCreateWithoutAi_runsInput, Prisma.compliance_requirementsUncheckedCreateWithoutAi_runsInput>
+}
+
+export type compliance_requirementsUpsertWithoutAi_runsInput = {
+  update: Prisma.XOR<Prisma.compliance_requirementsUpdateWithoutAi_runsInput, Prisma.compliance_requirementsUncheckedUpdateWithoutAi_runsInput>
+  create: Prisma.XOR<Prisma.compliance_requirementsCreateWithoutAi_runsInput, Prisma.compliance_requirementsUncheckedCreateWithoutAi_runsInput>
+  where?: Prisma.compliance_requirementsWhereInput
+}
+
+export type compliance_requirementsUpdateToOneWithWhereWithoutAi_runsInput = {
+  where?: Prisma.compliance_requirementsWhereInput
+  data: Prisma.XOR<Prisma.compliance_requirementsUpdateWithoutAi_runsInput, Prisma.compliance_requirementsUncheckedUpdateWithoutAi_runsInput>
+}
+
+export type compliance_requirementsUpdateWithoutAi_runsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  source_name?: Prisma.StringFieldUpdateOperationsInput | string
+  source_url?: Prisma.StringFieldUpdateOperationsInput | string
+  sectors?: Prisma.compliance_requirementsUpdatesectorsInput | string[]
+  verified_on?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  checks?: Prisma.project_compliance_checksUpdateManyWithoutRequirementNestedInput
+}
+
+export type compliance_requirementsUncheckedUpdateWithoutAi_runsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  source_name?: Prisma.StringFieldUpdateOperationsInput | string
+  source_url?: Prisma.StringFieldUpdateOperationsInput | string
+  sectors?: Prisma.compliance_requirementsUpdatesectorsInput | string[]
+  verified_on?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutRequirementNestedInput
 }
 
 
@@ -550,10 +651,12 @@ export type compliance_requirementsUncheckedUpdateWithoutChecksInput = {
 
 export type Compliance_requirementsCountOutputType = {
   checks: number
+  ai_runs: number
 }
 
 export type Compliance_requirementsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   checks?: boolean | Compliance_requirementsCountOutputTypeCountChecksArgs
+  ai_runs?: boolean | Compliance_requirementsCountOutputTypeCountAi_runsArgs
 }
 
 /**
@@ -573,6 +676,13 @@ export type Compliance_requirementsCountOutputTypeCountChecksArgs<ExtArgs extend
   where?: Prisma.project_compliance_checksWhereInput
 }
 
+/**
+ * Compliance_requirementsCountOutputType without action
+ */
+export type Compliance_requirementsCountOutputTypeCountAi_runsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.project_compliance_ai_runsWhereInput
+}
+
 
 export type compliance_requirementsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -587,6 +697,7 @@ export type compliance_requirementsSelect<ExtArgs extends runtime.Types.Extensio
   verified_on?: boolean
   created_at?: boolean
   checks?: boolean | Prisma.compliance_requirements$checksArgs<ExtArgs>
+  ai_runs?: boolean | Prisma.compliance_requirements$ai_runsArgs<ExtArgs>
   _count?: boolean | Prisma.Compliance_requirementsCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["compliance_requirements"]>
 
@@ -635,6 +746,7 @@ export type compliance_requirementsSelectScalar = {
 export type compliance_requirementsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "country" | "category" | "title" | "description" | "source_name" | "source_url" | "sectors" | "verified_on" | "created_at", ExtArgs["result"]["compliance_requirements"]>
 export type compliance_requirementsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   checks?: boolean | Prisma.compliance_requirements$checksArgs<ExtArgs>
+  ai_runs?: boolean | Prisma.compliance_requirements$ai_runsArgs<ExtArgs>
   _count?: boolean | Prisma.Compliance_requirementsCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type compliance_requirementsIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -644,6 +756,7 @@ export type $compliance_requirementsPayload<ExtArgs extends runtime.Types.Extens
   name: "compliance_requirements"
   objects: {
     checks: Prisma.$project_compliance_checksPayload<ExtArgs>[]
+    ai_runs: Prisma.$project_compliance_ai_runsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1052,6 +1165,7 @@ readonly fields: compliance_requirementsFieldRefs;
 export interface Prisma__compliance_requirementsClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   checks<T extends Prisma.compliance_requirements$checksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.compliance_requirements$checksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$project_compliance_checksPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ai_runs<T extends Prisma.compliance_requirements$ai_runsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.compliance_requirements$ai_runsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$project_compliance_ai_runsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1506,6 +1620,30 @@ export type compliance_requirements$checksArgs<ExtArgs extends runtime.Types.Ext
   take?: number
   skip?: number
   distinct?: Prisma.Project_compliance_checksScalarFieldEnum | Prisma.Project_compliance_checksScalarFieldEnum[]
+}
+
+/**
+ * compliance_requirements.ai_runs
+ */
+export type compliance_requirements$ai_runsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the project_compliance_ai_runs
+   */
+  select?: Prisma.project_compliance_ai_runsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the project_compliance_ai_runs
+   */
+  omit?: Prisma.project_compliance_ai_runsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.project_compliance_ai_runsInclude<ExtArgs> | null
+  where?: Prisma.project_compliance_ai_runsWhereInput
+  orderBy?: Prisma.project_compliance_ai_runsOrderByWithRelationInput | Prisma.project_compliance_ai_runsOrderByWithRelationInput[]
+  cursor?: Prisma.project_compliance_ai_runsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Project_compliance_ai_runsScalarFieldEnum | Prisma.Project_compliance_ai_runsScalarFieldEnum[]
 }
 
 /**

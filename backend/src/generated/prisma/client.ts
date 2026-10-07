@@ -164,6 +164,14 @@ export type compliance_requirements = Prisma.compliance_requirementsModel
  */
 export type project_compliance_checks = Prisma.project_compliance_checksModel
 /**
+ * Model project_compliance_ai_runs
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ * COMPLIANCE — dernière exécution d'IGINI pour une démarche d'un projet
+ * (un brouillon à relire, jamais un acte accompli). Une seule ligne par
+ * (projet, démarche) : relancer remplace le résultat précédent.
+ */
+export type project_compliance_ai_runs = Prisma.project_compliance_ai_runsModel
+/**
  * Model marketplace_profiles
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  * MARKETPLACE — annuaire de mentors/investisseurs et mise en relation par

@@ -72,6 +72,7 @@ export const ModelName = {
   build_plans: 'build_plans',
   compliance_requirements: 'compliance_requirements',
   project_compliance_checks: 'project_compliance_checks',
+  project_compliance_ai_runs: 'project_compliance_ai_runs',
   marketplace_profiles: 'marketplace_profiles',
   marketplace_contacts: 'marketplace_contacts',
   automation_runs: 'automation_runs',
@@ -338,6 +339,11 @@ export const TasksScalarFieldEnum = {
   assignee: 'assignee',
   source: 'source',
   due_date: 'due_date',
+  ai_status: 'ai_status',
+  ai_result_kind: 'ai_result_kind',
+  ai_result: 'ai_result',
+  ai_refusal_reason: 'ai_refusal_reason',
+  ai_run_at: 'ai_run_at',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
@@ -406,6 +412,21 @@ export const Project_compliance_checksScalarFieldEnum = {
 } as const
 
 export type Project_compliance_checksScalarFieldEnum = (typeof Project_compliance_checksScalarFieldEnum)[keyof typeof Project_compliance_checksScalarFieldEnum]
+
+
+export const Project_compliance_ai_runsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  requirement_id: 'requirement_id',
+  status: 'status',
+  result_kind: 'result_kind',
+  result: 'result',
+  refusal_reason: 'refusal_reason',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Project_compliance_ai_runsScalarFieldEnum = (typeof Project_compliance_ai_runsScalarFieldEnum)[keyof typeof Project_compliance_ai_runsScalarFieldEnum]
 
 
 export const Marketplace_profilesScalarFieldEnum = {

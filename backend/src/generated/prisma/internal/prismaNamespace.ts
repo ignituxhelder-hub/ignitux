@@ -418,6 +418,7 @@ export const ModelName = {
   build_plans: 'build_plans',
   compliance_requirements: 'compliance_requirements',
   project_compliance_checks: 'project_compliance_checks',
+  project_compliance_ai_runs: 'project_compliance_ai_runs',
   marketplace_profiles: 'marketplace_profiles',
   marketplace_contacts: 'marketplace_contacts',
   automation_runs: 'automation_runs',
@@ -478,7 +479,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "project_compliance_ai_runs" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2033,6 +2034,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.project_compliance_checksCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.Project_compliance_checksCountAggregateOutputType> | number
+        }
+      }
+    }
+    project_compliance_ai_runs: {
+      payload: Prisma.$project_compliance_ai_runsPayload<ExtArgs>
+      fields: Prisma.project_compliance_ai_runsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.project_compliance_ai_runsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_ai_runsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.project_compliance_ai_runsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_ai_runsPayload>
+        }
+        findFirst: {
+          args: Prisma.project_compliance_ai_runsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_ai_runsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.project_compliance_ai_runsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_ai_runsPayload>
+        }
+        findMany: {
+          args: Prisma.project_compliance_ai_runsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_ai_runsPayload>[]
+        }
+        create: {
+          args: Prisma.project_compliance_ai_runsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_ai_runsPayload>
+        }
+        createMany: {
+          args: Prisma.project_compliance_ai_runsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.project_compliance_ai_runsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_ai_runsPayload>[]
+        }
+        delete: {
+          args: Prisma.project_compliance_ai_runsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_ai_runsPayload>
+        }
+        update: {
+          args: Prisma.project_compliance_ai_runsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_ai_runsPayload>
+        }
+        deleteMany: {
+          args: Prisma.project_compliance_ai_runsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.project_compliance_ai_runsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.project_compliance_ai_runsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_ai_runsPayload>[]
+        }
+        upsert: {
+          args: Prisma.project_compliance_ai_runsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$project_compliance_ai_runsPayload>
+        }
+        aggregate: {
+          args: Prisma.Project_compliance_ai_runsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProject_compliance_ai_runs>
+        }
+        groupBy: {
+          args: Prisma.project_compliance_ai_runsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Project_compliance_ai_runsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.project_compliance_ai_runsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Project_compliance_ai_runsCountAggregateOutputType> | number
         }
       }
     }
@@ -5608,6 +5683,11 @@ export const TasksScalarFieldEnum = {
   assignee: 'assignee',
   source: 'source',
   due_date: 'due_date',
+  ai_status: 'ai_status',
+  ai_result_kind: 'ai_result_kind',
+  ai_result: 'ai_result',
+  ai_refusal_reason: 'ai_refusal_reason',
+  ai_run_at: 'ai_run_at',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
@@ -5676,6 +5756,21 @@ export const Project_compliance_checksScalarFieldEnum = {
 } as const
 
 export type Project_compliance_checksScalarFieldEnum = (typeof Project_compliance_checksScalarFieldEnum)[keyof typeof Project_compliance_checksScalarFieldEnum]
+
+
+export const Project_compliance_ai_runsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  requirement_id: 'requirement_id',
+  status: 'status',
+  result_kind: 'result_kind',
+  result: 'result',
+  refusal_reason: 'refusal_reason',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Project_compliance_ai_runsScalarFieldEnum = (typeof Project_compliance_ai_runsScalarFieldEnum)[keyof typeof Project_compliance_ai_runsScalarFieldEnum]
 
 
 export const Marketplace_profilesScalarFieldEnum = {
@@ -6599,6 +6694,7 @@ export type GlobalOmitConfig = {
   build_plans?: Prisma.build_plansOmit
   compliance_requirements?: Prisma.compliance_requirementsOmit
   project_compliance_checks?: Prisma.project_compliance_checksOmit
+  project_compliance_ai_runs?: Prisma.project_compliance_ai_runsOmit
   marketplace_profiles?: Prisma.marketplace_profilesOmit
   marketplace_contacts?: Prisma.marketplace_contactsOmit
   automation_runs?: Prisma.automation_runsOmit

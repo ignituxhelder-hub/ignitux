@@ -33,6 +33,11 @@ export type TasksMinAggregateOutputType = {
   assignee: string | null
   source: string | null
   due_date: Date | null
+  ai_status: string | null
+  ai_result_kind: string | null
+  ai_result: string | null
+  ai_refusal_reason: string | null
+  ai_run_at: Date | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -46,6 +51,11 @@ export type TasksMaxAggregateOutputType = {
   assignee: string | null
   source: string | null
   due_date: Date | null
+  ai_status: string | null
+  ai_result_kind: string | null
+  ai_result: string | null
+  ai_refusal_reason: string | null
+  ai_run_at: Date | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -59,6 +69,11 @@ export type TasksCountAggregateOutputType = {
   assignee: number
   source: number
   due_date: number
+  ai_status: number
+  ai_result_kind: number
+  ai_result: number
+  ai_refusal_reason: number
+  ai_run_at: number
   created_at: number
   updated_at: number
   _all: number
@@ -74,6 +89,11 @@ export type TasksMinAggregateInputType = {
   assignee?: true
   source?: true
   due_date?: true
+  ai_status?: true
+  ai_result_kind?: true
+  ai_result?: true
+  ai_refusal_reason?: true
+  ai_run_at?: true
   created_at?: true
   updated_at?: true
 }
@@ -87,6 +107,11 @@ export type TasksMaxAggregateInputType = {
   assignee?: true
   source?: true
   due_date?: true
+  ai_status?: true
+  ai_result_kind?: true
+  ai_result?: true
+  ai_refusal_reason?: true
+  ai_run_at?: true
   created_at?: true
   updated_at?: true
 }
@@ -100,6 +125,11 @@ export type TasksCountAggregateInputType = {
   assignee?: true
   source?: true
   due_date?: true
+  ai_status?: true
+  ai_result_kind?: true
+  ai_result?: true
+  ai_refusal_reason?: true
+  ai_run_at?: true
   created_at?: true
   updated_at?: true
   _all?: true
@@ -186,6 +216,11 @@ export type TasksGroupByOutputType = {
   assignee: string
   source: string
   due_date: Date | null
+  ai_status: string | null
+  ai_result_kind: string | null
+  ai_result: string | null
+  ai_refusal_reason: string | null
+  ai_run_at: Date | null
   created_at: Date | null
   updated_at: Date | null
   _count: TasksCountAggregateOutputType | null
@@ -220,6 +255,11 @@ export type tasksWhereInput = {
   assignee?: Prisma.StringFilter<"tasks"> | string
   source?: Prisma.StringFilter<"tasks"> | string
   due_date?: Prisma.DateTimeNullableFilter<"tasks"> | Date | string | null
+  ai_status?: Prisma.StringNullableFilter<"tasks"> | string | null
+  ai_result_kind?: Prisma.StringNullableFilter<"tasks"> | string | null
+  ai_result?: Prisma.StringNullableFilter<"tasks"> | string | null
+  ai_refusal_reason?: Prisma.StringNullableFilter<"tasks"> | string | null
+  ai_run_at?: Prisma.DateTimeNullableFilter<"tasks"> | Date | string | null
   created_at?: Prisma.DateTimeNullableFilter<"tasks"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"tasks"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
@@ -234,6 +274,11 @@ export type tasksOrderByWithRelationInput = {
   assignee?: Prisma.SortOrder
   source?: Prisma.SortOrder
   due_date?: Prisma.SortOrderInput | Prisma.SortOrder
+  ai_status?: Prisma.SortOrderInput | Prisma.SortOrder
+  ai_result_kind?: Prisma.SortOrderInput | Prisma.SortOrder
+  ai_result?: Prisma.SortOrderInput | Prisma.SortOrder
+  ai_refusal_reason?: Prisma.SortOrderInput | Prisma.SortOrder
+  ai_run_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
   project?: Prisma.projectsOrderByWithRelationInput
@@ -251,6 +296,11 @@ export type tasksWhereUniqueInput = Prisma.AtLeast<{
   assignee?: Prisma.StringFilter<"tasks"> | string
   source?: Prisma.StringFilter<"tasks"> | string
   due_date?: Prisma.DateTimeNullableFilter<"tasks"> | Date | string | null
+  ai_status?: Prisma.StringNullableFilter<"tasks"> | string | null
+  ai_result_kind?: Prisma.StringNullableFilter<"tasks"> | string | null
+  ai_result?: Prisma.StringNullableFilter<"tasks"> | string | null
+  ai_refusal_reason?: Prisma.StringNullableFilter<"tasks"> | string | null
+  ai_run_at?: Prisma.DateTimeNullableFilter<"tasks"> | Date | string | null
   created_at?: Prisma.DateTimeNullableFilter<"tasks"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"tasks"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
@@ -265,6 +315,11 @@ export type tasksOrderByWithAggregationInput = {
   assignee?: Prisma.SortOrder
   source?: Prisma.SortOrder
   due_date?: Prisma.SortOrderInput | Prisma.SortOrder
+  ai_status?: Prisma.SortOrderInput | Prisma.SortOrder
+  ai_result_kind?: Prisma.SortOrderInput | Prisma.SortOrder
+  ai_result?: Prisma.SortOrderInput | Prisma.SortOrder
+  ai_refusal_reason?: Prisma.SortOrderInput | Prisma.SortOrder
+  ai_run_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.tasksCountOrderByAggregateInput
@@ -284,6 +339,11 @@ export type tasksScalarWhereWithAggregatesInput = {
   assignee?: Prisma.StringWithAggregatesFilter<"tasks"> | string
   source?: Prisma.StringWithAggregatesFilter<"tasks"> | string
   due_date?: Prisma.DateTimeNullableWithAggregatesFilter<"tasks"> | Date | string | null
+  ai_status?: Prisma.StringNullableWithAggregatesFilter<"tasks"> | string | null
+  ai_result_kind?: Prisma.StringNullableWithAggregatesFilter<"tasks"> | string | null
+  ai_result?: Prisma.StringNullableWithAggregatesFilter<"tasks"> | string | null
+  ai_refusal_reason?: Prisma.StringNullableWithAggregatesFilter<"tasks"> | string | null
+  ai_run_at?: Prisma.DateTimeNullableWithAggregatesFilter<"tasks"> | Date | string | null
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"tasks"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableWithAggregatesFilter<"tasks"> | Date | string | null
 }
@@ -296,6 +356,11 @@ export type tasksCreateInput = {
   assignee?: string
   source?: string
   due_date?: Date | string | null
+  ai_status?: string | null
+  ai_result_kind?: string | null
+  ai_result?: string | null
+  ai_refusal_reason?: string | null
+  ai_run_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   project: Prisma.projectsCreateNestedOneWithoutTasksInput
@@ -310,6 +375,11 @@ export type tasksUncheckedCreateInput = {
   assignee?: string
   source?: string
   due_date?: Date | string | null
+  ai_status?: string | null
+  ai_result_kind?: string | null
+  ai_result?: string | null
+  ai_refusal_reason?: string | null
+  ai_run_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
 }
@@ -322,6 +392,11 @@ export type tasksUpdateInput = {
   assignee?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   due_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ai_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_result_kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_result?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_refusal_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_run_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   project?: Prisma.projectsUpdateOneRequiredWithoutTasksNestedInput
@@ -336,6 +411,11 @@ export type tasksUncheckedUpdateInput = {
   assignee?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   due_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ai_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_result_kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_result?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_refusal_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_run_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -349,6 +429,11 @@ export type tasksCreateManyInput = {
   assignee?: string
   source?: string
   due_date?: Date | string | null
+  ai_status?: string | null
+  ai_result_kind?: string | null
+  ai_result?: string | null
+  ai_refusal_reason?: string | null
+  ai_run_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
 }
@@ -361,6 +446,11 @@ export type tasksUpdateManyMutationInput = {
   assignee?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   due_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ai_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_result_kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_result?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_refusal_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_run_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -374,6 +464,11 @@ export type tasksUncheckedUpdateManyInput = {
   assignee?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   due_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ai_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_result_kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_result?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_refusal_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_run_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -397,6 +492,11 @@ export type tasksCountOrderByAggregateInput = {
   assignee?: Prisma.SortOrder
   source?: Prisma.SortOrder
   due_date?: Prisma.SortOrder
+  ai_status?: Prisma.SortOrder
+  ai_result_kind?: Prisma.SortOrder
+  ai_result?: Prisma.SortOrder
+  ai_refusal_reason?: Prisma.SortOrder
+  ai_run_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -410,6 +510,11 @@ export type tasksMaxOrderByAggregateInput = {
   assignee?: Prisma.SortOrder
   source?: Prisma.SortOrder
   due_date?: Prisma.SortOrder
+  ai_status?: Prisma.SortOrder
+  ai_result_kind?: Prisma.SortOrder
+  ai_result?: Prisma.SortOrder
+  ai_refusal_reason?: Prisma.SortOrder
+  ai_run_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -423,6 +528,11 @@ export type tasksMinOrderByAggregateInput = {
   assignee?: Prisma.SortOrder
   source?: Prisma.SortOrder
   due_date?: Prisma.SortOrder
+  ai_status?: Prisma.SortOrder
+  ai_result_kind?: Prisma.SortOrder
+  ai_result?: Prisma.SortOrder
+  ai_refusal_reason?: Prisma.SortOrder
+  ai_run_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -477,6 +587,11 @@ export type tasksCreateWithoutProjectInput = {
   assignee?: string
   source?: string
   due_date?: Date | string | null
+  ai_status?: string | null
+  ai_result_kind?: string | null
+  ai_result?: string | null
+  ai_refusal_reason?: string | null
+  ai_run_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
 }
@@ -489,6 +604,11 @@ export type tasksUncheckedCreateWithoutProjectInput = {
   assignee?: string
   source?: string
   due_date?: Date | string | null
+  ai_status?: string | null
+  ai_result_kind?: string | null
+  ai_result?: string | null
+  ai_refusal_reason?: string | null
+  ai_run_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
 }
@@ -531,6 +651,11 @@ export type tasksScalarWhereInput = {
   assignee?: Prisma.StringFilter<"tasks"> | string
   source?: Prisma.StringFilter<"tasks"> | string
   due_date?: Prisma.DateTimeNullableFilter<"tasks"> | Date | string | null
+  ai_status?: Prisma.StringNullableFilter<"tasks"> | string | null
+  ai_result_kind?: Prisma.StringNullableFilter<"tasks"> | string | null
+  ai_result?: Prisma.StringNullableFilter<"tasks"> | string | null
+  ai_refusal_reason?: Prisma.StringNullableFilter<"tasks"> | string | null
+  ai_run_at?: Prisma.DateTimeNullableFilter<"tasks"> | Date | string | null
   created_at?: Prisma.DateTimeNullableFilter<"tasks"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"tasks"> | Date | string | null
 }
@@ -543,6 +668,11 @@ export type tasksCreateManyProjectInput = {
   assignee?: string
   source?: string
   due_date?: Date | string | null
+  ai_status?: string | null
+  ai_result_kind?: string | null
+  ai_result?: string | null
+  ai_refusal_reason?: string | null
+  ai_run_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
 }
@@ -555,6 +685,11 @@ export type tasksUpdateWithoutProjectInput = {
   assignee?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   due_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ai_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_result_kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_result?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_refusal_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_run_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -567,6 +702,11 @@ export type tasksUncheckedUpdateWithoutProjectInput = {
   assignee?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   due_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ai_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_result_kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_result?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_refusal_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_run_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -579,6 +719,11 @@ export type tasksUncheckedUpdateManyWithoutProjectInput = {
   assignee?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   due_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ai_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_result_kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_result?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_refusal_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ai_run_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -594,6 +739,11 @@ export type tasksSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   assignee?: boolean
   source?: boolean
   due_date?: boolean
+  ai_status?: boolean
+  ai_result_kind?: boolean
+  ai_result?: boolean
+  ai_refusal_reason?: boolean
+  ai_run_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
@@ -608,6 +758,11 @@ export type tasksSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   assignee?: boolean
   source?: boolean
   due_date?: boolean
+  ai_status?: boolean
+  ai_result_kind?: boolean
+  ai_result?: boolean
+  ai_refusal_reason?: boolean
+  ai_run_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
@@ -622,6 +777,11 @@ export type tasksSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   assignee?: boolean
   source?: boolean
   due_date?: boolean
+  ai_status?: boolean
+  ai_result_kind?: boolean
+  ai_result?: boolean
+  ai_refusal_reason?: boolean
+  ai_run_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
@@ -636,11 +796,16 @@ export type tasksSelectScalar = {
   assignee?: boolean
   source?: boolean
   due_date?: boolean
+  ai_status?: boolean
+  ai_result_kind?: boolean
+  ai_result?: boolean
+  ai_refusal_reason?: boolean
+  ai_run_at?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type tasksOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "title" | "description" | "status" | "assignee" | "source" | "due_date" | "created_at" | "updated_at", ExtArgs["result"]["tasks"]>
+export type tasksOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "title" | "description" | "status" | "assignee" | "source" | "due_date" | "ai_status" | "ai_result_kind" | "ai_result" | "ai_refusal_reason" | "ai_run_at" | "created_at" | "updated_at", ExtArgs["result"]["tasks"]>
 export type tasksInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
 }
@@ -665,6 +830,11 @@ export type $tasksPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     assignee: string
     source: string
     due_date: Date | null
+    ai_status: string | null
+    ai_result_kind: string | null
+    ai_result: string | null
+    ai_refusal_reason: string | null
+    ai_run_at: Date | null
     created_at: Date | null
     updated_at: Date | null
   }, ExtArgs["result"]["tasks"]>
@@ -1099,6 +1269,11 @@ export interface tasksFieldRefs {
   readonly assignee: Prisma.FieldRef<"tasks", 'String'>
   readonly source: Prisma.FieldRef<"tasks", 'String'>
   readonly due_date: Prisma.FieldRef<"tasks", 'DateTime'>
+  readonly ai_status: Prisma.FieldRef<"tasks", 'String'>
+  readonly ai_result_kind: Prisma.FieldRef<"tasks", 'String'>
+  readonly ai_result: Prisma.FieldRef<"tasks", 'String'>
+  readonly ai_refusal_reason: Prisma.FieldRef<"tasks", 'String'>
+  readonly ai_run_at: Prisma.FieldRef<"tasks", 'DateTime'>
   readonly created_at: Prisma.FieldRef<"tasks", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"tasks", 'DateTime'>
 }

@@ -219,6 +219,7 @@ export type projectsWhereInput = {
   community_comments?: Prisma.Community_commentsListRelationFilter
   collaborators?: Prisma.Project_collaboratorsListRelationFilter
   compliance_checks?: Prisma.Project_compliance_checksListRelationFilter
+  compliance_ai_runs?: Prisma.Project_compliance_ai_runsListRelationFilter
   score_snapshots?: Prisma.Score_snapshotsListRelationFilter
   automation_runs?: Prisma.Automation_runsListRelationFilter
   workflow_definitions?: Prisma.Workflow_definitionsListRelationFilter
@@ -260,6 +261,7 @@ export type projectsOrderByWithRelationInput = {
   community_comments?: Prisma.community_commentsOrderByRelationAggregateInput
   collaborators?: Prisma.project_collaboratorsOrderByRelationAggregateInput
   compliance_checks?: Prisma.project_compliance_checksOrderByRelationAggregateInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsOrderByRelationAggregateInput
   score_snapshots?: Prisma.score_snapshotsOrderByRelationAggregateInput
   automation_runs?: Prisma.automation_runsOrderByRelationAggregateInput
   workflow_definitions?: Prisma.workflow_definitionsOrderByRelationAggregateInput
@@ -304,6 +306,7 @@ export type projectsWhereUniqueInput = Prisma.AtLeast<{
   community_comments?: Prisma.Community_commentsListRelationFilter
   collaborators?: Prisma.Project_collaboratorsListRelationFilter
   compliance_checks?: Prisma.Project_compliance_checksListRelationFilter
+  compliance_ai_runs?: Prisma.Project_compliance_ai_runsListRelationFilter
   score_snapshots?: Prisma.Score_snapshotsListRelationFilter
   automation_runs?: Prisma.Automation_runsListRelationFilter
   workflow_definitions?: Prisma.Workflow_definitionsListRelationFilter
@@ -372,6 +375,7 @@ export type projectsCreateInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -412,6 +416,7 @@ export type projectsUncheckedCreateInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -452,6 +457,7 @@ export type projectsUpdateInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -492,6 +498,7 @@ export type projectsUncheckedUpdateInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -814,6 +821,20 @@ export type projectsUpdateOneRequiredWithoutCompliance_checksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutCompliance_checksInput, Prisma.projectsUpdateWithoutCompliance_checksInput>, Prisma.projectsUncheckedUpdateWithoutCompliance_checksInput>
 }
 
+export type projectsCreateNestedOneWithoutCompliance_ai_runsInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutCompliance_ai_runsInput, Prisma.projectsUncheckedCreateWithoutCompliance_ai_runsInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutCompliance_ai_runsInput
+  connect?: Prisma.projectsWhereUniqueInput
+}
+
+export type projectsUpdateOneRequiredWithoutCompliance_ai_runsNestedInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutCompliance_ai_runsInput, Prisma.projectsUncheckedCreateWithoutCompliance_ai_runsInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutCompliance_ai_runsInput
+  upsert?: Prisma.projectsUpsertWithoutCompliance_ai_runsInput
+  connect?: Prisma.projectsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutCompliance_ai_runsInput, Prisma.projectsUpdateWithoutCompliance_ai_runsInput>, Prisma.projectsUncheckedUpdateWithoutCompliance_ai_runsInput>
+}
+
 export type projectsCreateNestedOneWithoutAutomation_runsInput = {
   create?: Prisma.XOR<Prisma.projectsCreateWithoutAutomation_runsInput, Prisma.projectsUncheckedCreateWithoutAutomation_runsInput>
   connectOrCreate?: Prisma.projectsCreateOrConnectWithoutAutomation_runsInput
@@ -1088,6 +1109,7 @@ export type projectsCreateWithoutOwnerInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -1127,6 +1149,7 @@ export type projectsUncheckedCreateWithoutOwnerInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -1206,6 +1229,7 @@ export type projectsCreateWithoutAnalysesInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -1245,6 +1269,7 @@ export type projectsUncheckedCreateWithoutAnalysesInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -1300,6 +1325,7 @@ export type projectsUpdateWithoutAnalysesInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -1339,6 +1365,7 @@ export type projectsUncheckedUpdateWithoutAnalysesInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -1378,6 +1405,7 @@ export type projectsCreateWithoutLegal_form_recommendationsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -1417,6 +1445,7 @@ export type projectsUncheckedCreateWithoutLegal_form_recommendationsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -1472,6 +1501,7 @@ export type projectsUpdateWithoutLegal_form_recommendationsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -1511,6 +1541,7 @@ export type projectsUncheckedUpdateWithoutLegal_form_recommendationsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -1550,6 +1581,7 @@ export type projectsCreateWithoutFinancing_plansInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -1589,6 +1621,7 @@ export type projectsUncheckedCreateWithoutFinancing_plansInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -1644,6 +1677,7 @@ export type projectsUpdateWithoutFinancing_plansInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -1683,6 +1717,7 @@ export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -1722,6 +1757,7 @@ export type projectsCreateWithoutDevelopment_plansInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -1761,6 +1797,7 @@ export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -1816,6 +1853,7 @@ export type projectsUpdateWithoutDevelopment_plansInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -1855,6 +1893,7 @@ export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -1894,6 +1933,7 @@ export type projectsCreateWithoutTransmission_plansInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -1933,6 +1973,7 @@ export type projectsUncheckedCreateWithoutTransmission_plansInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -1988,6 +2029,7 @@ export type projectsUpdateWithoutTransmission_plansInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -2027,6 +2069,7 @@ export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -2066,6 +2109,7 @@ export type projectsCreateWithoutMemoriesInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -2105,6 +2149,7 @@ export type projectsUncheckedCreateWithoutMemoriesInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -2160,6 +2205,7 @@ export type projectsUpdateWithoutMemoriesInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -2199,6 +2245,7 @@ export type projectsUncheckedUpdateWithoutMemoriesInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -2238,6 +2285,7 @@ export type projectsCreateWithoutConceptsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -2277,6 +2325,7 @@ export type projectsUncheckedCreateWithoutConceptsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -2332,6 +2381,7 @@ export type projectsUpdateWithoutConceptsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -2371,6 +2421,7 @@ export type projectsUncheckedUpdateWithoutConceptsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -2410,6 +2461,7 @@ export type projectsCreateWithoutTasksInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -2449,6 +2501,7 @@ export type projectsUncheckedCreateWithoutTasksInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -2504,6 +2557,7 @@ export type projectsUpdateWithoutTasksInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -2543,6 +2597,7 @@ export type projectsUncheckedUpdateWithoutTasksInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -2582,6 +2637,7 @@ export type projectsCreateWithoutCommunity_commentsInput = {
   tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -2621,6 +2677,7 @@ export type projectsUncheckedCreateWithoutCommunity_commentsInput = {
   tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -2676,6 +2733,7 @@ export type projectsUpdateWithoutCommunity_commentsInput = {
   tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -2715,6 +2773,7 @@ export type projectsUncheckedUpdateWithoutCommunity_commentsInput = {
   tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -2754,6 +2813,7 @@ export type projectsCreateWithoutCollaboratorsInput = {
   tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -2793,6 +2853,7 @@ export type projectsUncheckedCreateWithoutCollaboratorsInput = {
   tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -2848,6 +2909,7 @@ export type projectsUpdateWithoutCollaboratorsInput = {
   tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -2887,6 +2949,7 @@ export type projectsUncheckedUpdateWithoutCollaboratorsInput = {
   tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -2926,6 +2989,7 @@ export type projectsCreateWithoutBuild_plansInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -2965,6 +3029,7 @@ export type projectsUncheckedCreateWithoutBuild_plansInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -3020,6 +3085,7 @@ export type projectsUpdateWithoutBuild_plansInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -3059,6 +3125,7 @@ export type projectsUncheckedUpdateWithoutBuild_plansInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -3098,6 +3165,7 @@ export type projectsCreateWithoutCompliance_checksInput = {
   tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -3137,6 +3205,7 @@ export type projectsUncheckedCreateWithoutCompliance_checksInput = {
   tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -3192,6 +3261,7 @@ export type projectsUpdateWithoutCompliance_checksInput = {
   tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -3231,6 +3301,183 @@ export type projectsUncheckedUpdateWithoutCompliance_checksInput = {
   tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
+  score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutProjectNestedInput
+  financing_rounds?: Prisma.financing_roundsUncheckedUpdateManyWithoutProjectNestedInput
+  equity_holders?: Prisma.equity_holdersUncheckedUpdateManyWithoutProjectNestedInput
+  equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
+  dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
+  buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+}
+
+export type projectsCreateWithoutCompliance_ai_runsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  sector?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  owner: Prisma.usersCreateNestedOneWithoutProjectsInput
+  analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutProjectInput
+  financing_rounds?: Prisma.financing_roundsCreateNestedManyWithoutProjectInput
+  equity_holders?: Prisma.equity_holdersCreateNestedManyWithoutProjectInput
+  equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
+  dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
+  buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+}
+
+export type projectsUncheckedCreateWithoutCompliance_ai_runsInput = {
+  id?: string
+  owner_id: string
+  title: string
+  description?: string | null
+  sector?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutProjectInput
+  financing_rounds?: Prisma.financing_roundsUncheckedCreateNestedManyWithoutProjectInput
+  equity_holders?: Prisma.equity_holdersUncheckedCreateNestedManyWithoutProjectInput
+  equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
+  dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
+  buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+}
+
+export type projectsCreateOrConnectWithoutCompliance_ai_runsInput = {
+  where: Prisma.projectsWhereUniqueInput
+  create: Prisma.XOR<Prisma.projectsCreateWithoutCompliance_ai_runsInput, Prisma.projectsUncheckedCreateWithoutCompliance_ai_runsInput>
+}
+
+export type projectsUpsertWithoutCompliance_ai_runsInput = {
+  update: Prisma.XOR<Prisma.projectsUpdateWithoutCompliance_ai_runsInput, Prisma.projectsUncheckedUpdateWithoutCompliance_ai_runsInput>
+  create: Prisma.XOR<Prisma.projectsCreateWithoutCompliance_ai_runsInput, Prisma.projectsUncheckedCreateWithoutCompliance_ai_runsInput>
+  where?: Prisma.projectsWhereInput
+}
+
+export type projectsUpdateToOneWithWhereWithoutCompliance_ai_runsInput = {
+  where?: Prisma.projectsWhereInput
+  data: Prisma.XOR<Prisma.projectsUpdateWithoutCompliance_ai_runsInput, Prisma.projectsUncheckedUpdateWithoutCompliance_ai_runsInput>
+}
+
+export type projectsUpdateWithoutCompliance_ai_runsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
+  analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutProjectNestedInput
+  financing_rounds?: Prisma.financing_roundsUpdateManyWithoutProjectNestedInput
+  equity_holders?: Prisma.equity_holdersUpdateManyWithoutProjectNestedInput
+  equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
+  dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
+  buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+}
+
+export type projectsUncheckedUpdateWithoutCompliance_ai_runsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -3271,6 +3518,7 @@ export type projectsCreateWithoutAutomation_runsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
   workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
@@ -3310,6 +3558,7 @@ export type projectsUncheckedCreateWithoutAutomation_runsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
   workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
@@ -3365,6 +3614,7 @@ export type projectsUpdateWithoutAutomation_runsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
   workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
@@ -3404,6 +3654,7 @@ export type projectsUncheckedUpdateWithoutAutomation_runsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
@@ -3443,6 +3694,7 @@ export type projectsCreateWithoutFinancing_roundsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -3482,6 +3734,7 @@ export type projectsUncheckedCreateWithoutFinancing_roundsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -3537,6 +3790,7 @@ export type projectsUpdateWithoutFinancing_roundsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -3576,6 +3830,7 @@ export type projectsUncheckedUpdateWithoutFinancing_roundsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -3615,6 +3870,7 @@ export type projectsCreateWithoutEquity_holdersInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -3654,6 +3910,7 @@ export type projectsUncheckedCreateWithoutEquity_holdersInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -3709,6 +3966,7 @@ export type projectsUpdateWithoutEquity_holdersInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -3748,6 +4006,7 @@ export type projectsUncheckedUpdateWithoutEquity_holdersInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -3787,6 +4046,7 @@ export type projectsCreateWithoutEquity_eventsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -3826,6 +4086,7 @@ export type projectsUncheckedCreateWithoutEquity_eventsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -3881,6 +4142,7 @@ export type projectsUpdateWithoutEquity_eventsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -3920,6 +4182,7 @@ export type projectsUncheckedUpdateWithoutEquity_eventsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -3959,6 +4222,7 @@ export type projectsCreateWithoutDividendsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -3998,6 +4262,7 @@ export type projectsUncheckedCreateWithoutDividendsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -4053,6 +4318,7 @@ export type projectsUpdateWithoutDividendsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -4092,6 +4358,7 @@ export type projectsUncheckedUpdateWithoutDividendsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -4131,6 +4398,7 @@ export type projectsCreateWithoutBilling_documentsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -4170,6 +4438,7 @@ export type projectsUncheckedCreateWithoutBilling_documentsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -4225,6 +4494,7 @@ export type projectsUpdateWithoutBilling_documentsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -4264,6 +4534,7 @@ export type projectsUncheckedUpdateWithoutBilling_documentsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -4303,6 +4574,7 @@ export type projectsCreateWithoutCrm_contactsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -4342,6 +4614,7 @@ export type projectsUncheckedCreateWithoutCrm_contactsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -4397,6 +4670,7 @@ export type projectsUpdateWithoutCrm_contactsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -4436,6 +4710,7 @@ export type projectsUncheckedUpdateWithoutCrm_contactsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -4475,6 +4750,7 @@ export type projectsCreateWithoutStock_itemsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -4514,6 +4790,7 @@ export type projectsUncheckedCreateWithoutStock_itemsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -4569,6 +4846,7 @@ export type projectsUpdateWithoutStock_itemsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -4608,6 +4886,7 @@ export type projectsUncheckedUpdateWithoutStock_itemsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -4647,6 +4926,7 @@ export type projectsCreateWithoutAgenda_eventsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -4686,6 +4966,7 @@ export type projectsUncheckedCreateWithoutAgenda_eventsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -4741,6 +5022,7 @@ export type projectsUpdateWithoutAgenda_eventsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -4780,6 +5062,7 @@ export type projectsUncheckedUpdateWithoutAgenda_eventsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -4819,6 +5102,7 @@ export type projectsCreateWithoutWorkflow_definitionsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
@@ -4858,6 +5142,7 @@ export type projectsUncheckedCreateWithoutWorkflow_definitionsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
@@ -4913,6 +5198,7 @@ export type projectsUpdateWithoutWorkflow_definitionsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
@@ -4952,6 +5238,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_definitionsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
@@ -4991,6 +5278,7 @@ export type projectsCreateWithoutWorkflow_runsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -5030,6 +5318,7 @@ export type projectsUncheckedCreateWithoutWorkflow_runsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -5085,6 +5374,7 @@ export type projectsUpdateWithoutWorkflow_runsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -5124,6 +5414,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_runsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -5163,6 +5454,7 @@ export type projectsCreateWithoutBuyback_objectivesInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -5202,6 +5494,7 @@ export type projectsUncheckedCreateWithoutBuyback_objectivesInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -5257,6 +5550,7 @@ export type projectsUpdateWithoutBuyback_objectivesInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -5296,6 +5590,7 @@ export type projectsUncheckedUpdateWithoutBuyback_objectivesInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -5335,6 +5630,7 @@ export type projectsCreateWithoutFinancedProjectsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -5374,6 +5670,7 @@ export type projectsUncheckedCreateWithoutFinancedProjectsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -5429,6 +5726,7 @@ export type projectsUpdateWithoutFinancedProjectsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -5468,6 +5766,7 @@ export type projectsUncheckedUpdateWithoutFinancedProjectsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -5507,6 +5806,7 @@ export type projectsCreateWithoutScore_snapshotsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
   workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
@@ -5546,6 +5846,7 @@ export type projectsUncheckedCreateWithoutScore_snapshotsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
   workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
@@ -5601,6 +5902,7 @@ export type projectsUpdateWithoutScore_snapshotsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
   workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
@@ -5640,6 +5942,7 @@ export type projectsUncheckedUpdateWithoutScore_snapshotsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
@@ -5679,6 +5982,7 @@ export type projectsCreateWithoutReal_estate_propertiesInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -5718,6 +6022,7 @@ export type projectsUncheckedCreateWithoutReal_estate_propertiesInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -5773,6 +6078,7 @@ export type projectsUpdateWithoutReal_estate_propertiesInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -5812,6 +6118,7 @@ export type projectsUncheckedUpdateWithoutReal_estate_propertiesInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -5851,6 +6158,7 @@ export type projectsCreateWithoutFleet_vehiclesInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -5890,6 +6198,7 @@ export type projectsUncheckedCreateWithoutFleet_vehiclesInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -5945,6 +6254,7 @@ export type projectsUpdateWithoutFleet_vehiclesInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -5984,6 +6294,7 @@ export type projectsUncheckedUpdateWithoutFleet_vehiclesInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -6023,6 +6334,7 @@ export type projectsCreateWithoutAd_campaignsInput = {
   community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
@@ -6062,6 +6374,7 @@ export type projectsUncheckedCreateWithoutAd_campaignsInput = {
   community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
   collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
   score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
   automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
@@ -6117,6 +6430,7 @@ export type projectsUpdateWithoutAd_campaignsInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -6156,6 +6470,7 @@ export type projectsUncheckedUpdateWithoutAd_campaignsInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -6204,6 +6519,7 @@ export type projectsUpdateWithoutOwnerInput = {
   community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
@@ -6243,6 +6559,7 @@ export type projectsUncheckedUpdateWithoutOwnerInput = {
   community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
   collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
   compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
   score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
   automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
   workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
@@ -6290,6 +6607,7 @@ export type ProjectsCountOutputType = {
   community_comments: number
   collaborators: number
   compliance_checks: number
+  compliance_ai_runs: number
   score_snapshots: number
   automation_runs: number
   workflow_definitions: number
@@ -6321,6 +6639,7 @@ export type ProjectsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensio
   community_comments?: boolean | ProjectsCountOutputTypeCountCommunity_commentsArgs
   collaborators?: boolean | ProjectsCountOutputTypeCountCollaboratorsArgs
   compliance_checks?: boolean | ProjectsCountOutputTypeCountCompliance_checksArgs
+  compliance_ai_runs?: boolean | ProjectsCountOutputTypeCountCompliance_ai_runsArgs
   score_snapshots?: boolean | ProjectsCountOutputTypeCountScore_snapshotsArgs
   automation_runs?: boolean | ProjectsCountOutputTypeCountAutomation_runsArgs
   workflow_definitions?: boolean | ProjectsCountOutputTypeCountWorkflow_definitionsArgs
@@ -6431,6 +6750,13 @@ export type ProjectsCountOutputTypeCountCollaboratorsArgs<ExtArgs extends runtim
  */
 export type ProjectsCountOutputTypeCountCompliance_checksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.project_compliance_checksWhereInput
+}
+
+/**
+ * ProjectsCountOutputType without action
+ */
+export type ProjectsCountOutputTypeCountCompliance_ai_runsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.project_compliance_ai_runsWhereInput
 }
 
 /**
@@ -6568,6 +6894,7 @@ export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   community_comments?: boolean | Prisma.projects$community_commentsArgs<ExtArgs>
   collaborators?: boolean | Prisma.projects$collaboratorsArgs<ExtArgs>
   compliance_checks?: boolean | Prisma.projects$compliance_checksArgs<ExtArgs>
+  compliance_ai_runs?: boolean | Prisma.projects$compliance_ai_runsArgs<ExtArgs>
   score_snapshots?: boolean | Prisma.projects$score_snapshotsArgs<ExtArgs>
   automation_runs?: boolean | Prisma.projects$automation_runsArgs<ExtArgs>
   workflow_definitions?: boolean | Prisma.projects$workflow_definitionsArgs<ExtArgs>
@@ -6638,6 +6965,7 @@ export type projectsInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   community_comments?: boolean | Prisma.projects$community_commentsArgs<ExtArgs>
   collaborators?: boolean | Prisma.projects$collaboratorsArgs<ExtArgs>
   compliance_checks?: boolean | Prisma.projects$compliance_checksArgs<ExtArgs>
+  compliance_ai_runs?: boolean | Prisma.projects$compliance_ai_runsArgs<ExtArgs>
   score_snapshots?: boolean | Prisma.projects$score_snapshotsArgs<ExtArgs>
   automation_runs?: boolean | Prisma.projects$automation_runsArgs<ExtArgs>
   workflow_definitions?: boolean | Prisma.projects$workflow_definitionsArgs<ExtArgs>
@@ -6680,6 +7008,7 @@ export type $projectsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     community_comments: Prisma.$community_commentsPayload<ExtArgs>[]
     collaborators: Prisma.$project_collaboratorsPayload<ExtArgs>[]
     compliance_checks: Prisma.$project_compliance_checksPayload<ExtArgs>[]
+    compliance_ai_runs: Prisma.$project_compliance_ai_runsPayload<ExtArgs>[]
     score_snapshots: Prisma.$score_snapshotsPayload<ExtArgs>[]
     automation_runs: Prisma.$automation_runsPayload<ExtArgs>[]
     workflow_definitions: Prisma.$workflow_definitionsPayload<ExtArgs>[]
@@ -7114,6 +7443,7 @@ export interface Prisma__projectsClient<T, Null = never, ExtArgs extends runtime
   community_comments<T extends Prisma.projects$community_commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$community_commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$community_commentsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   collaborators<T extends Prisma.projects$collaboratorsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$collaboratorsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$project_collaboratorsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   compliance_checks<T extends Prisma.projects$compliance_checksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$compliance_checksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$project_compliance_checksPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  compliance_ai_runs<T extends Prisma.projects$compliance_ai_runsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$compliance_ai_runsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$project_compliance_ai_runsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   score_snapshots<T extends Prisma.projects$score_snapshotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$score_snapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$score_snapshotsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   automation_runs<T extends Prisma.projects$automation_runsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$automation_runsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$automation_runsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   workflow_definitions<T extends Prisma.projects$workflow_definitionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$workflow_definitionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$workflow_definitionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -7854,6 +8184,30 @@ export type projects$compliance_checksArgs<ExtArgs extends runtime.Types.Extensi
   take?: number
   skip?: number
   distinct?: Prisma.Project_compliance_checksScalarFieldEnum | Prisma.Project_compliance_checksScalarFieldEnum[]
+}
+
+/**
+ * projects.compliance_ai_runs
+ */
+export type projects$compliance_ai_runsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the project_compliance_ai_runs
+   */
+  select?: Prisma.project_compliance_ai_runsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the project_compliance_ai_runs
+   */
+  omit?: Prisma.project_compliance_ai_runsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.project_compliance_ai_runsInclude<ExtArgs> | null
+  where?: Prisma.project_compliance_ai_runsWhereInput
+  orderBy?: Prisma.project_compliance_ai_runsOrderByWithRelationInput | Prisma.project_compliance_ai_runsOrderByWithRelationInput[]
+  cursor?: Prisma.project_compliance_ai_runsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Project_compliance_ai_runsScalarFieldEnum | Prisma.Project_compliance_ai_runsScalarFieldEnum[]
 }
 
 /**

@@ -95,6 +95,7 @@ model projects {
   community_comments   community_comments[]
   collaborators        project_collaborators[]
   compliance_checks    project_compliance_checks[]
+  compliance_ai_runs   project_compliance_ai_runs[]
   score_snapshots      score_snapshots[]
   automation_runs      automation_runs[]
   workflow_definitions workflow_definitions[]
@@ -354,6 +355,17 @@ model tasks {
   // Échéance facultative, affichée par Agenda à côté des rendez-vous. Ajout
   // additif : les tâches créées avant ce champ n'en ont simplement pas.
   due_date    DateTime? @db.Timestamptz(6)
+  // Exécution par IGINI (ajout additif, tout nullable : les tâches existantes
+  // n'ont simplement aucune exécution IA).
+  // 'running' | 'done' | 'refused' | 'failed'
+  ai_status         String?
+  // Nature du résultat : 'draft' | 'checklist' | etc. (null tant qu'il n'y en a pas)
+  ai_result_kind    String?
+  // Le résultat produit par IGINI — un brouillon à relire, jamais un acte.
+  ai_result         String?
+  // Pourquoi IGINI a refusé d'exécuter (hors périmètre, avis juridique, etc.).
+  ai_refusal_reason String?
+  ai_run_at         DateTime? @db.Timestamptz(6)
   created_at  DateTime? @default(now()) @db.Timestamptz(6)
   updated_at  DateTime? @updatedAt @db.Timestamptz(6)
 
@@ -439,6 +451,7 @@ model compliance_requirements {
   created_at  DateTime? @default(now()) @db.Timestamptz(6)
 
   checks project_compliance_checks[]
+  ai_runs project_compliance_ai_runs[]
 
   @@index([country])
 }
@@ -451,6 +464,28 @@ model project_compliance_checks {
   requirement_id String                  @db.Uuid
   requirement    compliance_requirements @relation(fields: [requirement_id], references: [id], onDelete: Cascade)
   completed_at   DateTime?               @default(now()) @db.Timestamptz(6)
+
+  @@unique([project_id, requirement_id])
+  @@index([project_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+/// COMPLIANCE — dernière exécution d'IGINI pour une démarche d'un projet
+/// (un brouillon à relire, jamais un acte accompli). Une seule ligne par
+/// (projet, démarche) : relancer remplace le résultat précédent.
+model project_compliance_ai_runs {
+  id             String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id     String                  @db.Uuid
+  project        projects                @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  requirement_id String                  @db.Uuid
+  requirement    compliance_requirements @relation(fields: [requirement_id], references: [id], onDelete: Cascade)
+  // 'running' | 'done' | 'refused' | 'failed'
+  status         String
+  result_kind    String?
+  result         String?
+  refusal_reason String?
+  created_at     DateTime?               @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?               @updatedAt @db.Timestamptz(6)
 
   @@unique([project_id, requirement_id])
   @@index([project_id])
