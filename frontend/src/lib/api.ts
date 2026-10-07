@@ -3087,7 +3087,6 @@ export const api = {
     input: {
       amountCents: number;
       occurredOn: string;
-      applyPerpetualShare: boolean;
       reference?: string;
       note?: string;
     },

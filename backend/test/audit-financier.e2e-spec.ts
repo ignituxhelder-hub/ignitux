@@ -118,7 +118,7 @@ describe('Audit financier (e2e)', () => {
       const versement = await api(app)
         .post(`/projets-finances/${financedId}/dividendes`)
         .set(...auth(porteur))
-        .send({ amountCents: 100000, occurredOn: '2026-09-30', applyPerpetualShare: false })
+        .send({ amountCents: 100000, occurredOn: '2026-09-30' })
         .expect(201);
 
       expect(versement.body.distributedCents).toBe(100000);

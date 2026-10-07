@@ -55,8 +55,9 @@ Même instance Supabase, donc données isolées mais pas infrastructure. Voir `d
   immuabilité après émission. **Ce n'est pas un logiciel certifié** : l'avertissement accompagne
   chaque réponse de l'API.
 - **Financement** — apports, détenteurs de parts, historique daté de la répartition, dividendes
-  réellement versés. Le modèle 51/49 est encodé, la part perpétuelle de 5 % calculée, et la
-  majorité du porteur protégée par le moteur constitutionnel.
+  réellement versés. Le modèle de participation est encodé (accord par projet, paliers validés par
+  IGNITUX, droit de 5 % sur les dividendes une fois le capital transmis), et la majorité du porteur
+  est protégée par le moteur constitutionnel.
 - **Rachat progressif** — les trois conditions du modèle (rentabilité, autonomie, stabilité) sont
   définies **par le porteur lui-même**, qui déclare aussi quand elles sont atteintes. Ignitux ne
   fabrique aucun seuil et ne calcule aucun prix de rachat.
