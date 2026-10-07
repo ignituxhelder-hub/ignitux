@@ -175,12 +175,9 @@ jobs:
       IGINI_AI_ENABLED: 'false'
       MAIL_TRANSPORT: log
       TRUST_PROXY: 'false'
-      # Clé de test publiée par Cloudflare : siteverify répond « succès » pour
-      # n'importe quel jeton. Sans elle, l'inscription refuse tout jeton (400)
-      # et chaque test de bout en bout échoue à créer son compte avant d'avoir
-      # rien vérifié. Jamais utilisable en production : production-preflight.ts
-      # la refuse.
-      TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
+      # Pas de TURNSTILE_SECRET_KEY ici, et c'est voulu : les tests de bout en
+      # bout simulent le contrôle anti-robot (voir backend/test/e2e-app.ts) au
+      # lieu d'appeler Cloudflare à chaque inscription.
 
     steps:
       - uses: actions/checkout@v4
@@ -219,8 +216,15 @@ jobs:
       - name: Construire le serveur
         run: npm run build
 
+      # Cette étape démarre le VRAI serveur (pas le simulacre des tests de bout
+      # en bout) et s'y inscrit : le contrôle anti-robot s'applique donc, et il
+      # lui faut une clé. Celle-ci est la clé de test publiée par Cloudflare, qui
+      # accepte n'importe quel jeton ; production-preflight.ts la refuse en
+      # production. Elle n'est donnée qu'ici, pas à toute la suite.
       - name: Le courrier part-il vraiment ?
         run: node ../scripts/courrier-reel.mjs --port 3002
+        env:
+          TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
 
   # LES IMAGES SE CONSTRUISENT-ELLES ?
   #
