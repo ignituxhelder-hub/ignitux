@@ -175,6 +175,12 @@ jobs:
       IGINI_AI_ENABLED: 'false'
       MAIL_TRANSPORT: log
       TRUST_PROXY: 'false'
+      # Clé de test publiée par Cloudflare : siteverify répond « succès » pour
+      # n'importe quel jeton. Sans elle, l'inscription refuse tout jeton (400)
+      # et chaque test de bout en bout échoue à créer son compte avant d'avoir
+      # rien vérifié. Jamais utilisable en production : production-preflight.ts
+      # la refuse.
+      TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
 
     steps:
       - uses: actions/checkout@v4
