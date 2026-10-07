@@ -216,8 +216,15 @@ jobs:
       - name: Construire le serveur
         run: npm run build
 
+      # Cette étape démarre le VRAI serveur (pas le simulacre des tests de bout
+      # en bout) et s'y inscrit : le contrôle anti-robot s'applique donc, et il
+      # lui faut une clé. Celle-ci est la clé de test publiée par Cloudflare, qui
+      # accepte n'importe quel jeton ; production-preflight.ts la refuse en
+      # production. Elle n'est donnée qu'ici, pas à toute la suite.
       - name: Le courrier part-il vraiment ?
         run: node ../scripts/courrier-reel.mjs --port 3002
+        env:
+          TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
 
   # LES IMAGES SE CONSTRUISENT-ELLES ?
   #
