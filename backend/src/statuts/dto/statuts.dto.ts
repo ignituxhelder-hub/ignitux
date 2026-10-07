@@ -27,6 +27,9 @@ export class AssociateInputDto {
 export class GenerateBylawsDto {
   @IsInt()
   @Min(1, { message: 'Le capital doit être strictement positif.' })
+  // Plafond de la colonne `Int` (capital_cents) : au-delà, Postgres refuserait
+  // l'écriture APRÈS l'appel Claude, payé pour rien. Mieux vaut un 400 tout de suite.
+  @Max(2_147_483_647, { message: 'Le capital dépasse le maximum enregistrable (21 474 836,47 €).' })
   capitalCents: number;
 
   @IsString()
