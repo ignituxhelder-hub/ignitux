@@ -1,9 +1,11 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Res, UseGuards } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { GenerateBylawsDto, UpdateBylawsContentDto } from './dto/statuts.dto.js';
+import { genererPdfStatuts } from './bylaws-pdf.js';
 import { StatutsService } from './statuts.service.js';
 
 @ApiTags('statuts')
@@ -49,5 +51,24 @@ export class StatutsController {
     @Body() dto: GenerateBylawsDto,
   ) {
     return this.statutsService.regenererPourProjet(user.id, projectId, dto);
+  }
+
+  @Get('pdf')
+  async telechargerPdf(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Res() res: Response,
+  ) {
+    const bylaws = await this.statutsService.obtenirPourProjet(user.id, projectId);
+    if (!bylaws) {
+      throw new NotFoundException('Statuts introuvables pour ce projet.');
+    }
+    const pdf = await genererPdfStatuts(bylaws.content);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename="statuts.pdf"',
+      'Cache-Control': 'no-store',
+    });
+    res.send(pdf);
   }
 }

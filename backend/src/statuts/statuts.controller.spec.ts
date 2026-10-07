@@ -1,4 +1,6 @@
+import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import request from 'supertest';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { StatutsController } from './statuts.controller.js';
 import { StatutsService } from './statuts.service.js';
@@ -53,5 +55,75 @@ describe('StatutsController', () => {
     service.obtenirPourProjet = vi.fn().mockResolvedValue(null);
     await controller.obtenir(user, 'p1');
     expect(service.obtenirPourProjet).toHaveBeenCalledWith('user-1', 'p1');
+  });
+
+  it('renvoie le PDF des statuts retenus ou en brouillon', async () => {
+    service.obtenirPourProjet = vi.fn().mockResolvedValue({ id: 'b1', content: 'Article 1...' });
+    const res = { set: vi.fn(), send: vi.fn() } as any;
+
+    await controller.telechargerPdf(user, 'p1', res);
+
+    expect(res.set).toHaveBeenCalledWith(expect.objectContaining({ 'Content-Type': 'application/pdf' }));
+    expect(res.send).toHaveBeenCalled();
+  });
+
+  it('404 si aucun statut n’existe pour le projet', async () => {
+    service.obtenirPourProjet = vi.fn().mockResolvedValue(null);
+    const res = { set: vi.fn(), send: vi.fn() } as any;
+
+    await expect(controller.telechargerPdf(user, 'p1', res)).rejects.toThrow();
+  });
+});
+
+describe('StatutsController GET pdf (HTTP)', () => {
+  const projectId = '11111111-1111-4111-8111-111111111111';
+  let app: INestApplication;
+  let service: Record<string, ReturnType<typeof vi.fn>>;
+
+  beforeEach(async () => {
+    service = { obtenirPourProjet: vi.fn() };
+    const moduleRef = await Test.createTestingModule({
+      controllers: [StatutsController],
+      providers: [{ provide: StatutsService, useValue: service }],
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({
+        canActivate: (ctx: any) => {
+          ctx.switchToHttp().getRequest().user = { id: 'user-1', email: 'a@b.c' };
+          return true;
+        },
+      })
+      .compile();
+    app = moduleRef.createNestApplication();
+    await app.init();
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('200 avec un vrai PDF et les bons en-têtes', async () => {
+    service.obtenirPourProjet.mockResolvedValue({ id: 'b1', content: 'Article 1 — Forme\n« La société »' });
+
+    const res = await request(app.getHttpServer())
+      .get(`/projects/${projectId}/statuts/pdf`)
+      .buffer(true)
+      .parse((r, cb) => {
+        const chunks: Buffer[] = [];
+        r.on('data', (c: Buffer) => chunks.push(c));
+        r.on('end', () => cb(null, Buffer.concat(chunks)));
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toContain('application/pdf');
+    expect(res.headers['content-disposition']).toContain('attachment');
+    expect(res.headers['cache-control']).toBe('no-store');
+    expect((res.body as Buffer).subarray(0, 5).toString('ascii')).toBe('%PDF-');
+    expect(service.obtenirPourProjet).toHaveBeenCalledWith('user-1', projectId);
+  });
+
+  it('404 quand le service renvoie null', async () => {
+    service.obtenirPourProjet.mockResolvedValue(null);
+    await request(app.getHttpServer()).get(`/projects/${projectId}/statuts/pdf`).expect(404);
   });
 });
