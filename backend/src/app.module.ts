@@ -23,6 +23,7 @@ import { CommunityModule } from './community/community.module.js';
 import { KnowledgeModule } from './igini/knowledge/knowledge.module.js';
 import { MemoryModule } from './igini/memory/memory.module.js';
 import { ScoringModule } from './igini/scoring/scoring.module.js';
+import { ExecutionModule } from './igini/execution/execution.module.js';
 import { WorkflowModule } from './igini/workflow/workflow.module.js';
 import { MarketplaceModule } from './marketplace/marketplace.module.js';
 import { OffresModule } from './offres/offres.module.js';
@@ -50,6 +51,7 @@ import { PubliciteModule } from './publicite/publicite.module.js';
     MemoryModule,
     KnowledgeModule,
     WorkflowModule,
+    ExecutionModule,
     ScoringModule,
     CommunityModule,
     ComplianceModule,
