@@ -6,15 +6,23 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { StatutsController } from './statuts.controller.js';
 import { StatutsService } from './statuts.service.js';
 
-/** Texte (hex WinAnsi) des flux décompressés du PDF. */
+/**
+ * Texte (hex WinAnsi) des flux décompressés du PDF. Lève si aucun flux ne se
+ * décompresse : sinon un `not.toContain` passerait à vide.
+ */
 function flux(b: Buffer): string {
   let out = '';
+  let decompresses = 0;
   for (const m of b.toString('latin1').matchAll(/stream\r?\n([\s\S]*?)endstream/g)) {
     try {
       out += [...inflateSync(Buffer.from(m[1], 'latin1')).toString('latin1').matchAll(/<([0-9a-f]+)>/g)].map((x) => x[1]).join('');
+      decompresses++;
     } catch {
       // flux non Flate : ignoré
     }
+  }
+  if (decompresses === 0) {
+    throw new Error('Aucun flux du PDF n’a pu être décompressé : le test ne vérifierait rien.');
   }
   return out;
 }
@@ -163,6 +171,10 @@ describe('StatutsController GET pdf (HTTP)', () => {
 
     it('une version retenue ne porte pas le marqueur', async () => {
       expect(await telecharger('retenue')).not.toContain('42726f75696c6c6f6e');
+    });
+
+    it('une version retenue porte l’avertissement juridique en pied de page', async () => {
+      expect(await telecharger('retenue')).toContain(Buffer.from('avocat', 'latin1').toString('hex'));
     });
   });
 
