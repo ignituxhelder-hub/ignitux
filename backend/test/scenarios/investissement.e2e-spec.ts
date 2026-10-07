@@ -171,25 +171,23 @@ describe('SCÉNARIO — porteuse chez elle, investisseuse chez lui', () => {
       const versement = await api(app)
         .post(`/projets-finances/${chezCamille}/dividendes`)
         .set(...auth(camille))
-        .send({ amountCents: 50000, occurredOn: '2026-09-30', applyPerpetualShare: true })
+        .send({ amountCents: 50000, occurredOn: '2026-09-30' })
         .expect(201);
 
-      expect(versement.body.ignituxCents).toBe(2500);
+      // Réparti en entier : plus aucun prélèvement dans ce moteur.
+      expect(versement.body).not.toHaveProperty('ignituxCents');
       expect(versement.body.allocations).toHaveLength(1);
       expect(versement.body.allocations[0].investorId).toBe(brunoInvestisseur);
-      expect(versement.body.allocations[0].amountCents).toBe(47500);
+      expect(versement.body.allocations[0].amountCents).toBe(50000);
     });
 
     it('Bruno verse 300 € sur LE SIEN — Camille les reçoit', async () => {
       const versement = await api(app)
         .post(`/projets-finances/${chezBruno}/dividendes`)
         .set(...auth(bruno))
-        .send({ amountCents: 30000, occurredOn: '2026-09-30', applyPerpetualShare: false })
+        .send({ amountCents: 30000, occurredOn: '2026-09-30' })
         .expect(201);
 
-      // Pas de prélèvement ici : Bruno a dit que la règle ne s'applique pas
-      // à son projet, et le produit ne devine pas.
-      expect(versement.body.ignituxCents).toBe(0);
       expect(versement.body.allocations[0].investorId).toBe(camilleInvestisseur);
       expect(versement.body.allocations[0].amountCents).toBe(30000);
     });
@@ -235,7 +233,7 @@ describe('SCÉNARIO — porteuse chez elle, investisseuse chez lui', () => {
       expect(portefeuille.body.parProjet).toHaveLength(1);
       expect(portefeuille.body.parProjet[0].financedProjectId).toBe(chezCamille);
       expect(portefeuille.body.global.investedCents).toBe(200000);
-      expect(portefeuille.body.global.dividendsCents).toBe(47500);
+      expect(portefeuille.body.global.dividendsCents).toBe(50000);
     });
 
     it('aucun des deux ne lit le registre de l’autre', async () => {

@@ -77,9 +77,9 @@ Quatre honnêtetés tenues à l'écran :
 - **Un écart de répartition est signalé, jamais normalisé.** 90 % au lieu de 100 % s'affiche
   tel quel : redistribuer l'écart reviendrait à décider à la place des personnes qui
   détiennent ces parts.
-- **La part perpétuelle de 5 % se coche explicitement.** Pas de valeur par défaut : tous les
-  projets ne sont pas entrés au capital selon le modèle 51/49, et prélever par défaut
-  reviendrait à décider à la place du porteur.
+- **Un dividende réparti à des investisseurs l'est en entier.** Aucun prélèvement : le droit
+  d'IGNITUX sur les dividendes existe seulement dans l'accord de participation, une fois le capital
+  entièrement transmis (voir `decisions.md`).
 
 ---
 

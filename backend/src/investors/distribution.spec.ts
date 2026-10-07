@@ -1,9 +1,8 @@
-import { PERPETUAL_DIVIDEND_BASIS_POINTS } from '../financing/financing-model.js';
+import * as distribution from './distribution.js';
 import {
   allocatePro,
   portfolioTotals,
   signIsCoherent,
-  splitDividend,
   validateDistribution,
   type DistributionShare,
   type MovementRow,
@@ -131,38 +130,20 @@ describe('validateDistribution', () => {
   });
 });
 
-describe('splitDividend', () => {
-  it("prélève les 5 % d'Ignitux avant le prorata", () => {
-    // Le modèle dit « 5 % des dividendes réellement versés ». Les 5 %
-    // sortent donc du montant versé, avant partage.
-    const split = splitDividend(100000, [part('a', 1), part('b', 1)], true);
-
-    expect(split.ignituxCents).toBe(5000);
-    expect(split.investorsCents).toBe(95000);
-    expect(somme(split.allocations)).toBe(95000);
-    // Et rien ne s'est perdu entre les deux étapes.
-    expect(split.ignituxCents + somme(split.allocations)).toBe(100000);
+describe('dividendes', () => {
+  // L'ancien prélèvement de 5 % du moteur investisseurs a été retiré. Le droit
+  // économique d'IGNITUX existe désormais ailleurs (participation/), seulement
+  // après transmission complète du capital, et ne passe jamais par ici : un
+  // dividende versé à des investisseurs se répartit en entier, au prorata.
+  it("ne prélève plus rien : l'ancien calcul n'existe plus", () => {
+    expect(distribution).not.toHaveProperty('splitDividend');
+    expect(distribution).not.toHaveProperty('PERPETUAL_DIVIDEND_BASIS_POINTS');
   });
 
-  it('ne prélève rien quand la règle ne s\'applique pas', () => {
-    // Un projet financé sans qu'Ignitux entre au capital. Le produit ne
-    // devine pas : l'appelant dit.
-    const split = splitDividend(100000, [part('a', 1)], false);
-    expect(split.ignituxCents).toBe(0);
-    expect(split.investorsCents).toBe(100000);
-  });
+  it('répartit un dividende en entier, sans reste ni prélèvement', () => {
+    const allocations = allocatePro(100000, [part('a', 1), part('b', 1)]);
 
-  it('reste exact au centime, prélèvement compris', () => {
-    // 3 333 centimes : 5 % = 166,65 → 167. Reste 3 166 entre trois.
-    const split = splitDividend(3333, [part('a', 1), part('b', 1), part('c', 1)], true);
-    expect(split.ignituxCents + somme(split.allocations)).toBe(3333);
-  });
-
-  it('utilise la règle du modèle, pas une copie', () => {
-    // Si quelqu'un changeait le taux dans financing-model.ts, ce test
-    // suivrait au lieu de figer 5 % une seconde fois.
-    const split = splitDividend(1_000_000, [part('a', 1)], true);
-    expect(split.ignituxCents).toBe((1_000_000 * PERPETUAL_DIVIDEND_BASIS_POINTS) / 10000);
+    expect(somme(allocations)).toBe(100000);
   });
 });
 

@@ -1,3 +1,4 @@
+import * as model from './financing-model.js';
 import {
   buildCapTable,
   FINANCING_SCOPE_NOTICE,
@@ -5,7 +6,6 @@ import {
   founderTrajectory,
   IGNITUX_ENTRY_BASIS_POINTS,
   isFinancingSource,
-  perpetualShareCents,
   TOTAL_BASIS_POINTS,
 } from './financing-model.js';
 
@@ -269,19 +269,12 @@ describe('modèle économique IGNITUX', () => {
     expect(FOUNDER_ENTRY_BASIS_POINTS * 2).toBeGreaterThan(TOTAL_BASIS_POINTS);
   });
 
-  describe('part perpétuelle de 5 %', () => {
-    it("calcule 5 % d'un dividende versé", () => {
-      expect(perpetualShareCents(100000)).toBe(5000);
-    });
-
-    it('arrondit au centime le plus proche', () => {
-      // 5 % de 1,23 € = 0,0615 € → 0,06 €.
-      expect(perpetualShareCents(123)).toBe(6);
-    });
-
-    it('vaut zéro sur un dividende nul', () => {
-      expect(perpetualShareCents(0)).toBe(0);
-    });
+  it("n'a plus de calcul de prélèvement de 5 % : le droit vit dans participation/", () => {
+    // L'ancien mécanisme du moteur investisseurs a été retiré. Le droit sur les
+    // dividendes du modèle de participation n'est pas ici, et ne doit pas y
+    // revenir : deux « 5 % » dans deux modules finiraient par se confondre.
+    expect(model).not.toHaveProperty('perpetualShareCents');
+    expect(model).not.toHaveProperty('PERPETUAL_DIVIDEND_BASIS_POINTS');
   });
 
   it('reconnaît les sources de financement valides', () => {

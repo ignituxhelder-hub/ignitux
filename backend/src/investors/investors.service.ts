@@ -13,7 +13,6 @@ import {
   isMovementKind,
   portfolioTotals,
   signIsCoherent,
-  splitDividend,
   validateDistribution,
   type Allocation,
   type DistributionShare,
@@ -61,18 +60,6 @@ export interface DistributionInput {
   occurredOn: Date;
   reference?: string;
   note?: string;
-}
-
-export interface DividendInput extends DistributionInput {
-  /**
-   * La part perpétuelle d'Ignitux s'applique-t-elle ? Le produit ne devine
-   * pas : le prélèvement n'est pas appliqué par défaut.
-   *
-   * Ancien mécanisme, distinct du droit économique d'IGNITUX du modèle de
-   * participation (`participation/`), qui n'existe qu'après la transmission
-   * complète du capital.
-   */
-  applyPerpetualShare: boolean;
 }
 
 export interface ProjectPortfolioLine {
@@ -346,17 +333,23 @@ export class InvestorsService {
 
   /** Remboursement de capital, réparti au prorata des montants investis. */
   distributeRepayment(ownerId: string, financedProjectId: string, input: DistributionInput) {
-    return this.distribute(ownerId, financedProjectId, input, 'remboursement_capital', false);
+    return this.distribute(ownerId, financedProjectId, input, 'remboursement_capital');
   }
 
-  /** Versement de dividendes, part perpétuelle d'Ignitux prélevée d'abord. */
-  distributeDividend(ownerId: string, financedProjectId: string, input: DividendInput) {
-    return this.distribute(ownerId, financedProjectId, input, 'dividende', input.applyPerpetualShare);
+  /**
+   * Versement de dividendes, réparti en entier au prorata des montants investis.
+   *
+   * Aucun prélèvement n'existe ici. Le droit d'IGNITUX sur les dividendes est
+   * porté par l'accord de participation (`participation/`), n'existe qu'après
+   * la transmission complète du capital, et s'enregistre à part.
+   */
+  distributeDividend(ownerId: string, financedProjectId: string, input: DistributionInput) {
+    return this.distribute(ownerId, financedProjectId, input, 'dividende');
   }
 
   /** Versement de gains, réparti comme un remboursement. */
   distributeGain(ownerId: string, financedProjectId: string, input: DistributionInput) {
-    return this.distribute(ownerId, financedProjectId, input, 'gain', false);
+    return this.distribute(ownerId, financedProjectId, input, 'gain');
   }
 
   /**
@@ -371,7 +364,6 @@ export class InvestorsService {
     financedProjectId: string,
     input: DistributionInput,
     kind: MovementKind,
-    applyPerpetualShare: boolean,
   ) {
     const financed = await this.requireOwnedFinancedProject(ownerId, financedProjectId);
 
@@ -390,15 +382,7 @@ export class InvestorsService {
       throw new BadRequestException(problems.map((p) => p.message).join(' '));
     }
 
-    let allocations: Allocation[];
-    let ignituxCents = 0;
-    if (kind === 'dividende') {
-      const split = splitDividend(input.amountCents, shares, applyPerpetualShare);
-      allocations = split.allocations;
-      ignituxCents = split.ignituxCents;
-    } else {
-      allocations = allocatePro(input.amountCents, shares);
-    }
+    const allocations: Allocation[] = allocatePro(input.amountCents, shares);
 
     // Le garde-fou constitutionnel, une fois par mouvement : chaque
     // allocation vise une participation, et cette participation doit
@@ -480,8 +464,6 @@ export class InvestorsService {
       distributionId,
       kind,
       amountCents: input.amountCents,
-      /** Retenu au titre des 5 % perpétuels. Pas encore versé : voir plus bas. */
-      ignituxCents,
       distributedCents: allocations.reduce((total, a) => total + a.amountCents, 0),
       allocations,
       /**

@@ -198,16 +198,15 @@ describe('Investisseurs et remboursements (e2e)', () => {
       const r = await api(app)
         .post(`/projets-finances/${projetB}/dividendes`)
         .set(...auth(porteurB))
-        .send({ amountCents: 20000, occurredOn: '2026-07-15', applyPerpetualShare: true })
+        .send({ amountCents: 20000, occurredOn: '2026-07-15' })
         .expect(201);
 
-      // Les 5 % d'Ignitux sortent d'abord : 1 000 centimes.
-      expect(r.body.ignituxCents).toBe(1000);
-      expect(r.body.distributedCents).toBe(19000);
+      // Le dividende est réparti en entier : aucun prélèvement n'existe plus ici.
+      // Le droit d'IGNITUX sur les dividendes vit dans le modèle de participation.
+      expect(r.body).not.toHaveProperty('ignituxCents');
+      expect(r.body.distributedCents).toBe(20000);
       expect(r.body.allocations).toHaveLength(1);
       expect(r.body.allocations[0].investorId).toBe(investisseur1Id);
-      // Et rien ne s'est perdu entre le prélèvement et le partage.
-      expect(r.body.ignituxCents + r.body.distributedCents).toBe(20000);
     });
 
     it("n'a rien versé à l'investisseur 2, qui n'est pas sur ce projet", async () => {
@@ -217,14 +216,13 @@ describe('Investisseurs et remboursements (e2e)', () => {
       expect(recus).toEqual([]);
     });
 
-    it('exige que la règle des 5 % soit dite explicitement', async () => {
-      // Pas de défaut à `true` : tous les projets financés ne sont pas
-      // entrés au capital selon le modèle 51/49. Prélever par défaut
-      // reviendrait à décider à la place du porteur.
+    it("refuse l'ancien champ applyPerpetualShare : le prélèvement n'existe plus", async () => {
+      // Un client qui demanderait encore le prélèvement ne doit pas croire
+      // qu'il a eu lieu : le champ est refusé, pas ignoré en silence.
       await api(app)
         .post(`/projets-finances/${projetB}/dividendes`)
         .set(...auth(porteurB))
-        .send({ amountCents: 10000, occurredOn: '2026-07-15' })
+        .send({ amountCents: 10000, occurredOn: '2026-07-15', applyPerpetualShare: true })
         .expect(400);
     });
   });
@@ -247,10 +245,10 @@ describe('Investisseurs et remboursements (e2e)', () => {
       expect(parId[projetA].totals.repaidCents).toBe(61000);
       expect(parId[projetA].totals.dividendsCents).toBe(0);
 
-      // Projet B : 3 000 € mis, aucun remboursement, 190 € de dividende.
+      // Projet B : 3 000 € mis, aucun remboursement, 200 € de dividende.
       expect(parId[projetB].totals.investedCents).toBe(300000);
       expect(parId[projetB].totals.repaidCents).toBe(0);
-      expect(parId[projetB].totals.dividendsCents).toBe(19000);
+      expect(parId[projetB].totals.dividendsCents).toBe(20000);
     });
 
     it('donne un global qui est exactement la somme des lignes', async () => {

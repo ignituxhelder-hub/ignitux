@@ -6,7 +6,6 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import {
   CorrectMovementDto,
   DistributionDto,
-  DividendDto,
   OpenFinancingDto,
   RecordParticipationDto,
   RegisterInvestorDto,
@@ -149,14 +148,13 @@ export class FinancedProjectsController {
   dividend(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: DividendDto,
+    @Body() dto: DistributionDto,
   ) {
     return this.investors.distributeDividend(user.id, id, {
       amountCents: dto.amountCents,
       occurredOn: new Date(dto.occurredOn),
       reference: dto.reference,
       note: dto.note,
-      applyPerpetualShare: dto.applyPerpetualShare,
     });
   }
 
