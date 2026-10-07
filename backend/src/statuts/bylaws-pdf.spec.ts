@@ -5,15 +5,24 @@ import { genererPdfStatuts } from './bylaws-pdf.js';
 const entete = (b: Buffer) => b.subarray(0, 5).toString('ascii');
 const FINAL = { brouillon: false };
 
-/** Contenu décompressé de tous les flux du PDF, en latin1 (1 octet = 1 caractère). */
+/**
+ * Contenu décompressé de tous les flux du PDF, en latin1 (1 octet = 1 caractère).
+ * Lève si aucun flux ne se décompresse : sinon un changement de compression
+ * rendrait chaque `not.toContain` vrai pour une mauvaise raison.
+ */
 function flux(b: Buffer): string {
   let out = '';
+  let decompresses = 0;
   for (const m of b.toString('latin1').matchAll(/stream\r?\n([\s\S]*?)endstream/g)) {
     try {
       out += inflateSync(Buffer.from(m[1], 'latin1')).toString('latin1') + '\n';
+      decompresses++;
     } catch {
       // flux non compressé ou non Flate : ignoré
     }
+  }
+  if (decompresses === 0) {
+    throw new Error('Aucun flux du PDF n’a pu être décompressé : le test ne vérifierait rien.');
   }
   return out;
 }
@@ -73,5 +82,39 @@ describe('genererPdfStatuts', () => {
       expect(octetsTexte(buffer)).not.toContain('42726f75696c6c6f6e');
       expect(buffer.toString('latin1')).not.toContain('Helvetica-Bold');
     });
+  });
+
+  describe('avertissement juridique en pied de page (version retenue)', () => {
+    const hex = (s: string) => Buffer.from(s, 'latin1').toString('hex');
+    const AVOCAT = hex('avocat');
+    const VALIDATION = hex('validation juridique');
+
+    it('figure sur une version retenue, après le corps', async () => {
+      const buffer = await genererPdfStatuts('Corps du texte', FINAL);
+      const texte = octetsTexte(buffer);
+      expect(texte).toContain(AVOCAT);
+      expect(texte).toContain(hex('expert-comptable'));
+      expect(texte).toContain(VALIDATION);
+      expect(texte.indexOf(AVOCAT)).toBeGreaterThan(texte.indexOf('436f727073')); // Corps
+    });
+
+    it('figure sur chaque page d’un long document retenu', async () => {
+      const ligne = 'La société est une société par actions simplifiée régie par la loi.';
+      const buffer = await genererPdfStatuts(Array.from({ length: 300 }, () => ligne).join('\n'), FINAL);
+      const pages = buffer.toString('latin1').match(/\/Type \/Page\b(?!s)/g) ?? [];
+      const occurrences = octetsTexte(buffer).split(AVOCAT).length - 1;
+      expect(pages.length).toBeGreaterThan(3);
+      expect(occurrences).toBe(pages.length);
+    });
+
+    it('n’est pas ajouté à un brouillon, qui garde son marqueur en tête', async () => {
+      const buffer = await genererPdfStatuts('Corps du texte', { brouillon: true });
+      expect(octetsTexte(buffer)).not.toContain(AVOCAT);
+    });
+  });
+
+  it('l’outil de lecture des flux lève quand rien ne se décompresse', () => {
+    const fauxPdf = Buffer.from('%PDF-1.3\n1 0 obj\nstream\npas du deflate\nendstream\n', 'latin1');
+    expect(() => octetsTexte(fauxPdf)).toThrow(/décompressé/);
   });
 });
