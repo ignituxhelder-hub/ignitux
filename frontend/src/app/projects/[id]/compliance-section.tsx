@@ -101,6 +101,8 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
   const [busyId, setBusyId] = useState<string | null>(null);
   // Garde de ré-entrée : un state ne bouge qu'au rendu suivant, un double clic passerait.
   const enCours = useRef(false);
+  // Motif d'échec renvoyé par le serveur, par exigence (perdu au rechargement).
+  const [raisons, setRaisons] = useState<Record<string, string>>({});
   // Faux dès que l'écran est quitté : un lot qui coûte des appels IA doit s'arrêter.
   const actif = useRef(true);
   useEffect(() => {
@@ -198,6 +200,7 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
     if (!token || ids.length === 0 || enCours.current) return;
     enCours.current = true;
     setError(null);
+    setRaisons({});
     setLimite(null);
     setIsRunning(true);
     setProgress({ courant: 0, total: ids.length });
@@ -215,6 +218,8 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
             remplacerIa(info.id, etatIa(info.resultat));
             retirerDeLaSelection(info.id);
           } else if (info.etat === 'echec') {
+            const motif = info.message;
+            if (motif) setRaisons((prev) => ({ ...prev, [info.id]: motif }));
             remplacerIa(info.id, { status: 'echec', result_kind: null, result: null, refusal_reason: null });
             retirerDeLaSelection(info.id);
           } else if (info.etat === 'arret' && info.message) {
@@ -224,9 +229,13 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
         () => !actif.current,
       );
       if (!actif.current) return;
+      const n = bilan.restants.length;
+      const pluriel = `${n} élément${n > 1 ? 's' : ''} non traité${n > 1 ? 's' : ''}`;
       if (bilan.arretePourLimite) {
-        const n = bilan.restants.length;
-        setLimite(`Limite atteinte : ${n} élément${n > 1 ? 's' : ''} non traité${n > 1 ? 's' : ''}`);
+        setLimite(`Limite atteinte : ${pluriel}`);
+      } else if (bilan.arretReseau) {
+        // Les cases restent cochées : un clic relance ce qui n'a pas été traité.
+        setLimite(`Connexion perdue : ${pluriel}`);
       }
     } finally {
       enCours.current = false;
@@ -424,6 +433,11 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
                       >
                         Réessayer
                       </button>
+                      {raisons[requirement.id] && (
+                        <span className="muted" style={{ display: 'block' }}>
+                          {raisons[requirement.id]}
+                        </span>
+                      )}
                     </p>
                   )}
                   {requirement.ai?.status === 'refuse' && (

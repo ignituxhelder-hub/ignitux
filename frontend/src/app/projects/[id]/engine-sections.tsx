@@ -337,6 +337,10 @@ export function TasksSection({
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [isRunning, setIsRunning] = useState(false);
+  // Garde synchrone : l'état React n'est pas encore à jour au 2e clic d'un double-clic.
+  const enCours = useRef(false);
+  // Motif d'échec renvoyé par le serveur, par tâche (perdu au rechargement).
+  const [raisons, setRaisons] = useState<Record<string, string>>({});
   const [progress, setProgress] = useState<{ courant: number; total: number } | null>(null);
   const [limite, setLimite] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -412,8 +416,10 @@ export function TasksSection({
   }
 
   async function lancerLot(ids: string[]) {
-    if (!token || ids.length === 0 || isRunning) return;
+    if (!token || ids.length === 0 || enCours.current) return;
+    enCours.current = true;
     setError(null);
+    setRaisons({});
     setLimite(null);
     setIsRunning(true);
     setProgress({ courant: 0, total: ids.length });
@@ -435,6 +441,8 @@ export function TasksSection({
               return next;
             });
           } else if (info.etat === 'echec') {
+            const motif = info.message;
+            if (motif) setRaisons((prev) => ({ ...prev, [info.id]: motif }));
             setTasks((prev) => prev.map((t) => (t.id === info.id ? { ...t, ai_status: 'echec' } : t)));
             setSelected((prev) => {
               const next = new Set(prev);
@@ -448,12 +456,17 @@ export function TasksSection({
         () => !actif.current,
       );
       if (!actif.current) return;
+      const n = bilan.restants.length;
+      const pluriel = `${n} élément${n > 1 ? 's' : ''} non traité${n > 1 ? 's' : ''}`;
       if (bilan.arretePourLimite) {
-        const n = bilan.restants.length;
-        setLimite(`Limite atteinte : ${n} élément${n > 1 ? 's' : ''} non traité${n > 1 ? 's' : ''}`);
+        setLimite(`Limite atteinte : ${pluriel}`);
+      } else if (bilan.arretReseau) {
+        // Les cases restent cochées : un clic relance ce qui n'a pas été traité.
+        setLimite(`Connexion perdue : ${pluriel}`);
       }
       onChanged?.();
     } finally {
+      enCours.current = false;
       if (actif.current) {
         setIsRunning(false);
         setProgress(null);
@@ -490,7 +503,8 @@ export function TasksSection({
   }
 
   // Une tâche à valider a déjà son résultat : on ne la relance pas dans un lot.
-  const lancable = (t: Task) => t.status !== 'done' && t.ai_status !== 'a_valider' && t.ai_status !== 'valide';
+  // Une tâche d'étape (source « automation ») se fait avec l'étape elle-même.
+  const lancable = (t: Task) => t.source !== 'automation' && t.status !== 'done' && t.ai_status !== 'a_valider' && t.ai_status !== 'valide';
   const coches = tasks.filter((t) => selected.has(t.id) && lancable(t)).map((t) => t.id);
 
   return (
@@ -588,6 +602,11 @@ export function TasksSection({
                 >
                   Réessayer
                 </button>
+                {raisons[task.id] && (
+                  <span className="muted" style={{ display: 'block' }}>
+                    {raisons[task.id]}
+                  </span>
+                )}
               </p>
             )}
             {task.ai_status === 'refuse' && (

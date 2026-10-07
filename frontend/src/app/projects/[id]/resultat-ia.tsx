@@ -33,6 +33,7 @@ export function ResultatIa({ kind, contenu, libelleValider, onValider, onRefuser
             aria-label="Motif du refus (facultatif)"
             placeholder="Motif (facultatif)"
             value={motif}
+            maxLength={500}
             onChange={(e) => setMotif(e.target.value)}
             style={{ flex: 1 }}
           />

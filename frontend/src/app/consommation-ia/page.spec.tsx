@@ -88,6 +88,31 @@ describe('AiUsagePage', () => {
     expect(screen.getAllByText(/3,40/).length).toBeGreaterThan(0);
   });
 
+  it('nomme le générateur « executer » « Exécution de tâches »', async () => {
+    const base = mois();
+    mockApiRoutes(
+      routes({
+        'GET /igini/usage/mois-en-cours': {
+          status: 200,
+          body: mois({
+            par_generateur: [
+              ...base.par_generateur,
+              { generateur: 'executer', appels: 4, tokens_entree: 800, tokens_sortie: 300, dont_reflexion: 0, cout_euros: 0.5 },
+            ],
+          }),
+        },
+      }),
+    );
+
+    render(
+      <AuthProvider>
+        <AiUsagePage />
+      </AuthProvider>,
+    );
+
+    expect((await screen.findAllByText('Exécution de tâches')).length).toBeGreaterThan(0);
+  });
+
   // Le coût est dérivé d'une grille, pas facturé. Sans la date de la grille,
   // le montant n'est pas vérifiable.
   it('date la grille tarifaire et dit que le coût est une estimation', async () => {

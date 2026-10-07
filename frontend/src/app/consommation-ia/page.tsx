@@ -14,6 +14,7 @@ const GENERATEURS: Record<string, string> = {
   financer: 'Financer',
   developper: 'Développer',
   transmettre: 'Transmettre',
+  executer: 'Exécution de tâches',
 };
 
 /** Euros décimaux → texte. Distinct de `euros()`, qui part de centimes entiers. */

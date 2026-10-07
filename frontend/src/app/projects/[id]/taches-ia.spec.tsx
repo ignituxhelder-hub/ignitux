@@ -264,6 +264,80 @@ describe('TasksSection — lot en cours', () => {
     expect(appels.filter((a) => a.endsWith('/run'))).toHaveLength(3);
   }, TIMEOUT);
 
+
+  it('Connexion perdue : le lot s arrête, rien n est marqué en échec, les cases restent cochées', async () => {
+    const appels: string[] = [];
+    mockFetch({
+      'GET /projects/p1/tasks': { status: 200, body: [tache('t1'), tache('t2'), tache('t3')] },
+    });
+    const base = global.fetch as unknown as (u: string, o?: RequestInit) => Promise<unknown>;
+    global.fetch = vi.fn().mockImplementation((url: string, options?: RequestInit) => {
+      if ((options?.method ?? 'GET') === 'POST') {
+        appels.push(new URL(url).pathname);
+        return Promise.reject(new TypeError('Failed to fetch'));
+      }
+      return base(url, options);
+    }) as unknown as typeof fetch;
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText('Tâche t1');
+    for (const id of ["t1","t2","t3"]) fireEvent.click(screen.getByLabelText('Faire faire : Tâche ' + id));
+    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+
+    expect(await screen.findByText('Connexion perdue : 3 éléments non traités')).toBeInTheDocument();
+    expect(appels).toHaveLength(1);
+    expect(screen.queryByText("IGINI n'a pas pu faire cette tâche")).not.toBeInTheDocument();
+    for (const id of ["t1","t2","t3"]) expect(screen.getByLabelText('Faire faire : Tâche ' + id)).toBeChecked();
+  }, TIMEOUT);
+
+  it("affiche le motif d'échec du serveur sous l'intitulé générique", async () => {
+    mockFetch({
+      'GET /projects/p1/tasks': { status: 200, body: [tache('t1'), tache('t2'), tache('t3')] },
+      'POST /projects/p1/tasks/t1/run': { status: 500, body: { message: 'Le modèle a répondu hors format.' } },
+    });
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText('Tâche t1');
+    fireEvent.click(screen.getByLabelText('Faire faire : Tâche t1'));
+    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+
+    expect(await screen.findByText("IGINI n'a pas pu faire cette tâche")).toBeInTheDocument();
+    expect(screen.getByText('Le modèle a répondu hors format.')).toBeInTheDocument();
+  }, TIMEOUT);
+
+  it('une tâche issue de l automatisation n a pas de case à cocher', async () => {
+    mockFetch({
+      'GET /projects/p1/tasks': { status: 200, body: [tache('t1', { source: 'automation' }), tache('t2')] },
+    });
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText('Tâche t1');
+    expect(screen.queryByLabelText('Faire faire : Tâche t1')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Faire faire : Tâche t2')).toBeInTheDocument();
+  }, TIMEOUT);
+
+  it('un double clic synchrone ne lance qu un seul lot', async () => {
+    const { appels } = mockFetch({
+      'GET /projects/p1/tasks': { status: 200, body: [tache('t1'), tache('t2')] },
+      'POST /projects/p1/tasks/t1/run': { status: 200, body: resultat('t1') },
+      'POST /projects/p1/tasks/t2/run': { status: 200, body: resultat('t2') },
+    });
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText('Tâche t1');
+    fireEvent.click(screen.getByLabelText('Faire faire : Tâche t1'));
+    fireEvent.click(screen.getByLabelText('Faire faire : Tâche t2'));
+    const bouton = screen.getByRole('button', { name: /Faire faire par IGINI/ });
+    fireEvent.click(bouton);
+    fireEvent.click(bouton);
+
+    expect(await screen.findByText('Texte t2')).toBeInTheDocument();
+    expect(appels.filter((a) => a.endsWith('/run'))).toEqual([
+      'POST /projects/p1/tasks/t1/run',
+      'POST /projects/p1/tasks/t2/run',
+    ]);
+  }, TIMEOUT);
+
   it('un 503 arrête le lot avec « Limite atteinte »', async () => {
     const { appels } = mockFetch({
       'GET /projects/p1/tasks': { status: 200, body: [tache('t1'), tache('t2'), tache('t3')] },

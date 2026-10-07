@@ -193,6 +193,47 @@ describe('ComplianceSection — IGINI prépare les démarches', () => {
     expect(screen.getByLabelText('Faire faire : Démarche r3')).toBeChecked();
   }, TIMEOUT);
 
+
+  it('Connexion perdue : le lot s arrête, rien n est marqué en échec, les cases restent cochées', async () => {
+    const appels: string[] = [];
+    mockFetch({
+      'GET /projects/p1/compliance': checklist([exigence('r1'), exigence('r2'), exigence('r3')]),
+    });
+    const base = global.fetch as unknown as (u: string, o?: RequestInit) => Promise<unknown>;
+    global.fetch = vi.fn().mockImplementation((url: string, options?: RequestInit) => {
+      if ((options?.method ?? 'GET') === 'POST') {
+        appels.push(new URL(url).pathname);
+        return Promise.reject(new TypeError('Failed to fetch'));
+      }
+      return base(url, options);
+    }) as unknown as typeof fetch;
+    render(<ComplianceSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText('Démarche r1');
+    for (const id of ["r1","r2","r3"]) fireEvent.click(screen.getByLabelText('Faire faire : Démarche ' + id));
+    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+
+    expect(await screen.findByText('Connexion perdue : 3 éléments non traités')).toBeInTheDocument();
+    expect(appels).toHaveLength(1);
+    expect(screen.queryByText("IGINI n'a pas pu préparer cette démarche")).not.toBeInTheDocument();
+    for (const id of ["r1","r2","r3"]) expect(screen.getByLabelText('Faire faire : Démarche ' + id)).toBeChecked();
+  }, TIMEOUT);
+
+  it("affiche le motif d'échec du serveur sous l'intitulé générique", async () => {
+    mockFetch({
+      'GET /projects/p1/compliance': checklist([exigence('r1'), exigence('r2'), exigence('r3')]),
+      'POST /projects/p1/compliance/r1/run': { status: 500, body: { message: 'Le modèle a répondu hors format.' } },
+    });
+    render(<ComplianceSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText('Démarche r1');
+    fireEvent.click(screen.getByLabelText('Faire faire : Démarche r1'));
+    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+
+    expect(await screen.findByText("IGINI n'a pas pu préparer cette démarche")).toBeInTheDocument();
+    expect(screen.getByText('Le modèle a répondu hors format.')).toBeInTheDocument();
+  }, TIMEOUT);
+
   it('ne lance plus rien une fois le composant démonté', async () => {
     const appels: string[] = [];
     const attente: Record<string, (r: Reponse) => void> = {};

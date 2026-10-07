@@ -24,7 +24,7 @@ describe('executerEnSerie', () => {
     expect(lancer).toHaveBeenLastCalledWith('b');
 
     resolveurs[1]('ok');
-    expect(await fini).toEqual({ traites: 2, arretePourLimite: false, restants: [], annule: false });
+    expect(await fini).toEqual({ traites: 2, arretePourLimite: false, restants: [], arretReseau: false, annule: false });
   });
 
   it('ne fait rien avec une liste vide', async () => {
@@ -33,7 +33,7 @@ describe('executerEnSerie', () => {
 
     const bilan = await executerEnSerie([], lancer, onProgres);
 
-    expect(bilan).toEqual({ traites: 0, arretePourLimite: false, restants: [], annule: false });
+    expect(bilan).toEqual({ traites: 0, arretePourLimite: false, restants: [], arretReseau: false, annule: false });
     expect(lancer).not.toHaveBeenCalled();
     expect(onProgres).not.toHaveBeenCalled();
   });
@@ -50,7 +50,7 @@ describe('executerEnSerie', () => {
 
     const bilan = await executerEnSerie(['id1', 'id2', 'id3'], lancer, onProgres);
 
-    expect(bilan).toEqual({ traites: 3, arretePourLimite: false, restants: [], annule: false });
+    expect(bilan).toEqual({ traites: 3, arretePourLimite: false, restants: [], arretReseau: false, annule: false });
     expect(journal).toEqual(['debut id1', 'fin id1', 'debut id2', 'fin id2', 'debut id3', 'fin id3']);
     expect(onProgres).toHaveBeenCalledWith({ id: 'id2', etat: 'en_cours' });
     expect(onProgres).toHaveBeenCalledWith({ id: 'id2', etat: 'ok', resultat: 'r-id2' });
@@ -65,7 +65,7 @@ describe('executerEnSerie', () => {
 
     const bilan = await executerEnSerie(['id1', 'id2', 'id3'], lancer, onProgres);
 
-    expect(bilan).toEqual({ traites: 1, arretePourLimite: true, restants: ['id2', 'id3'], annule: false });
+    expect(bilan).toEqual({ traites: 1, arretePourLimite: true, restants: ['id2', 'id3'], arretReseau: false, annule: false });
     expect(lancer).not.toHaveBeenCalledWith('id3');
     expect(onProgres).toHaveBeenCalledWith({ id: 'id2', etat: 'arret', message: 'Quota mensuel épuisé.' });
     expect(onProgres).not.toHaveBeenCalledWith(expect.objectContaining({ id: 'id3', etat: 'arret' }));
@@ -79,7 +79,7 @@ describe('executerEnSerie', () => {
     const onProgres = vi.fn();
     const bilan = await executerEnSerie(['a', 'b'], lancer, onProgres);
 
-    expect(bilan).toEqual({ traites: 0, arretePourLimite: true, restants: ['a', 'b'], annule: false });
+    expect(bilan).toEqual({ traites: 0, arretePourLimite: true, restants: ['a', 'b'], arretReseau: false, annule: false });
     expect(lancer).toHaveBeenCalledTimes(1);
     const arrets = onProgres.mock.calls.filter(([info]) => info.etat === 'arret');
     expect(arrets).toEqual([[{ id: 'a', etat: 'arret', message: 'Générateurs indisponibles.' }]]);
@@ -94,7 +94,7 @@ describe('executerEnSerie', () => {
 
     const bilan = await executerEnSerie(['id1', 'id2', 'id3'], lancer, onProgres);
 
-    expect(bilan).toEqual({ traites: 2, arretePourLimite: false, restants: [], annule: false });
+    expect(bilan).toEqual({ traites: 2, arretePourLimite: false, restants: [], arretReseau: false, annule: false });
     expect(lancer).toHaveBeenCalledWith('id3');
     expect(onProgres).toHaveBeenCalledWith({ id: 'id2', etat: 'echec', message: 'réseau coupé' });
   });
@@ -107,7 +107,30 @@ describe('executerEnSerie', () => {
 
     const bilan = await executerEnSerie(['id1', 'id2'], lancer, vi.fn());
 
-    expect(bilan).toEqual({ traites: 1, arretePourLimite: false, restants: [], annule: false });
+    expect(bilan).toEqual({ traites: 1, arretePourLimite: false, restants: [], arretReseau: false, annule: false });
+  });
+});
+
+describe('executerEnSerie — réseau perdu', () => {
+  it("s'arrête sur un statut 0 : ni échec, ni suite, restants = non traités", async () => {
+    const lancer = vi.fn(async (id: string) => {
+      if (id === 'id2') throw new ApiError('Pas de réseau.', 0);
+      return id;
+    });
+    const onProgres = vi.fn();
+
+    const bilan = await executerEnSerie(['id1', 'id2', 'id3'], lancer, onProgres);
+
+    expect(bilan).toEqual({
+      traites: 1,
+      arretePourLimite: false,
+      restants: ['id2', 'id3'],
+      arretReseau: true,
+      annule: false,
+    });
+    expect(lancer).not.toHaveBeenCalledWith('id3');
+    expect(onProgres).toHaveBeenCalledWith({ id: 'id2', etat: 'arret', message: 'Pas de réseau.' });
+    expect(onProgres).not.toHaveBeenCalledWith(expect.objectContaining({ etat: 'echec' }));
   });
 });
 
@@ -123,7 +146,7 @@ describe('executerEnSerie — annulation', () => {
     const bilan = await executerEnSerie(['a', 'b', 'c'], lancer, onProgres, () => annule);
 
     expect(lancer).toHaveBeenCalledTimes(1);
-    expect(bilan).toEqual({ traites: 1, arretePourLimite: false, restants: ['b', 'c'], annule: true });
+    expect(bilan).toEqual({ traites: 1, arretePourLimite: false, restants: ['b', 'c'], arretReseau: false, annule: true });
     expect(onProgres).not.toHaveBeenCalledWith(expect.objectContaining({ etat: 'arret' }));
   });
 });
