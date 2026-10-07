@@ -96,8 +96,11 @@ export class StatutsService {
     // projet, pas un historique — voir la spec). Les associés sont
     // entièrement remplacés plutôt que fusionnés : une régénération peut
     // changer leur nombre, fusionner ligne à ligne n'aurait pas de sens.
+    // `include` : toutes les routes rendent la même forme complète que le GET
+    // (associés compris), le client n'a pas à deviner ce qui manque.
     return this.prisma.company_bylaws.upsert({
       where: { project_id: projectId },
+      include: { associates: true },
       create: {
         owner_id: ownerId,
         project_id: projectId,
@@ -127,7 +130,11 @@ export class StatutsService {
     if (bylaws.status === 'retenue') {
       throw new ConflictException('Cette version est retenue : elle ne peut plus être modifiée.');
     }
-    return this.prisma.company_bylaws.update({ where: { id: bylaws.id }, data: { content } });
+    return this.prisma.company_bylaws.update({
+      where: { id: bylaws.id },
+      data: { content },
+      include: { associates: true },
+    });
   }
 
   async regenererPourProjet(ownerId: string, projectId: string, dto: GenerateBylawsDto) {
@@ -148,6 +155,7 @@ export class StatutsService {
     return this.prisma.company_bylaws.update({
       where: { id: bylaws.id },
       data: { status: 'retenue', finalized_at: new Date() },
+      include: { associates: true },
     });
   }
 

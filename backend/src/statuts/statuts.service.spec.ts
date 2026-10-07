@@ -74,6 +74,7 @@ describe('StatutsService — génération', () => {
     );
     expect(prisma.company_bylaws.upsert).toHaveBeenCalledWith({
       where: { project_id: 'p1' },
+      include: { associates: true },
       create: expect.objectContaining({
         owner_id: 'user-1',
         project_id: 'p1',
@@ -128,7 +129,11 @@ describe('StatutsService — génération', () => {
       await service.modifierTexte('user-1', 'p1', 'nouveau texte');
 
       expect(prisma.company_bylaws.findFirst).toHaveBeenCalledWith({ where: { project_id: 'p1', owner_id: 'user-1' } });
-      expect(prisma.company_bylaws.update).toHaveBeenCalledWith({ where: { id: 'b1' }, data: { content: 'nouveau texte' } });
+      expect(prisma.company_bylaws.update).toHaveBeenCalledWith({
+        where: { id: 'b1' },
+        data: { content: 'nouveau texte' },
+        include: { associates: true },
+      });
     });
 
     it('refuse de modifier une version retenue', async () => {
@@ -179,6 +184,7 @@ describe('StatutsService — génération', () => {
       expect(prisma.company_bylaws.update).toHaveBeenCalledWith({
         where: { id: 'b1' },
         data: { status: 'retenue', finalized_at: expect.any(Date) },
+        include: { associates: true },
       });
     });
 
