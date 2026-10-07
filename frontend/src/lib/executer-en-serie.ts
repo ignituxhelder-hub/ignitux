@@ -14,6 +14,8 @@ export interface BilanExecution {
   arretePourLimite: boolean;
   /** Ids jamais lancés : celui qui a déclenché la limite, puis les suivants. */
   restants: string[];
+  /** Vrai si l'appelant a annulé le lot (ex. écran quitté) avant la fin. */
+  annule: boolean;
 }
 
 // 403 : offre ou quota mensuel épuisé. 503 : générateurs coupés ou plafond de coût.
@@ -35,10 +37,14 @@ export async function executerEnSerie<T>(
   ids: string[],
   lancer: (id: string) => Promise<T>,
   onProgres: (info: ProgresExecution<T>) => void,
+  estAnnule?: () => boolean,
 ): Promise<BilanExecution> {
   let traites = 0;
 
   for (let i = 0; i < ids.length; i++) {
+    if (estAnnule?.()) {
+      return { traites, arretePourLimite: false, restants: ids.slice(i), annule: true };
+    }
     const id = ids[i];
     onProgres({ id, etat: 'en_cours' });
     try {
@@ -48,11 +54,11 @@ export async function executerEnSerie<T>(
     } catch (erreur) {
       if (estUneLimite(erreur)) {
         onProgres({ id, etat: 'arret', message: erreur.message });
-        return { traites, arretePourLimite: true, restants: ids.slice(i) };
+        return { traites, arretePourLimite: true, restants: ids.slice(i), annule: false };
       }
       onProgres({ id, etat: 'echec', message: messageDe(erreur) });
     }
   }
 
-  return { traites, arretePourLimite: false, restants: [] };
+  return { traites, arretePourLimite: false, restants: [], annule: false };
 }

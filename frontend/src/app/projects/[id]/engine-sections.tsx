@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import {
   api,
   ApiError,
@@ -340,6 +340,14 @@ export function TasksSection({
   const [progress, setProgress] = useState<{ courant: number; total: number } | null>(null);
   const [limite, setLimite] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  // Faux dès que l'écran est quitté : un lot qui coûte des appels IA doit s'arrêter.
+  const actif = useRef(true);
+  useEffect(() => {
+    actif.current = true;
+    return () => {
+      actif.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!token) return;
@@ -404,7 +412,7 @@ export function TasksSection({
   }
 
   async function lancerLot(ids: string[]) {
-    if (!token || ids.length === 0) return;
+    if (!token || ids.length === 0 || isRunning) return;
     setError(null);
     setLimite(null);
     setIsRunning(true);
@@ -415,6 +423,7 @@ export function TasksSection({
         ids,
         (id) => api.runTask(token, projectId, id),
         (info) => {
+          if (!actif.current) return;
           if (info.etat === 'en_cours') {
             rang += 1;
             setProgress({ courant: rang, total: ids.length });
@@ -436,15 +445,19 @@ export function TasksSection({
             setError(info.message);
           }
         },
+        () => !actif.current,
       );
+      if (!actif.current) return;
       if (bilan.arretePourLimite) {
         const n = bilan.restants.length;
         setLimite(`Limite atteinte : ${n} élément${n > 1 ? 's' : ''} non traité${n > 1 ? 's' : ''}`);
       }
       onChanged?.();
     } finally {
-      setIsRunning(false);
-      setProgress(null);
+      if (actif.current) {
+        setIsRunning(false);
+        setProgress(null);
+      }
     }
   }
 
@@ -477,7 +490,7 @@ export function TasksSection({
   }
 
   // Une tâche à valider a déjà son résultat : on ne la relance pas dans un lot.
-  const lancable = (t: Task) => t.status !== 'done' && t.ai_status !== 'a_valider';
+  const lancable = (t: Task) => t.status !== 'done' && t.ai_status !== 'a_valider' && t.ai_status !== 'valide';
   const coches = tasks.filter((t) => selected.has(t.id) && lancable(t)).map((t) => t.id);
 
   return (

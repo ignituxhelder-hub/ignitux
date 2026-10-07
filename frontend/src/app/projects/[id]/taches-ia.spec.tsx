@@ -179,3 +179,116 @@ describe('TasksSection — IGINI fait les tâches', () => {
     expect(screen.queryByRole('button', { name: 'Valider' })).not.toBeInTheDocument();
   }, TIMEOUT);
 });
+
+describe('TasksSection — lot en cours', () => {
+  const resultat = (id: string) =>
+    tache(id, { ai_status: 'a_valider', ai_result_kind: 'livrable', ai_result: `Texte ${id}` });
+
+  /** fetch dont les /run restent en attente jusqu'à `liberer(id, reponse)`. */
+  function mockFetchDiffere(liste: unknown[]) {
+    const appels: string[] = [];
+    const attente: Record<string, (r: Reponse) => void> = {};
+    global.fetch = vi.fn().mockImplementation((url: string, options?: RequestInit) => {
+      const key = `${options?.method ?? 'GET'} ${new URL(url).pathname}`;
+      appels.push(key);
+      const fabrique = (rep: Reponse) => ({
+        ok: rep.status >= 200 && rep.status < 300,
+        status: rep.status,
+        json: () => Promise.resolve(rep.body),
+        text: () => Promise.resolve(JSON.stringify(rep.body)),
+      });
+      if (key === 'GET /projects/p1/tasks') return Promise.resolve(fabrique({ status: 200, body: liste }));
+      return new Promise((resolve) => {
+        attente[key] = (rep) => resolve(fabrique(rep));
+      });
+    }) as unknown as typeof fetch;
+    return { appels, liberer: (id: string, rep: Reponse) => attente[`POST /projects/p1/tasks/${id}/run`](rep) };
+  }
+
+  it('affiche la progression, désactive le bouton et ignore un second clic', async () => {
+    const { appels, liberer } = mockFetchDiffere([tache('t1'), tache('t2')]);
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText('Tâche t1');
+    fireEvent.click(screen.getByLabelText('Faire faire : Tâche t1'));
+    fireEvent.click(screen.getByLabelText('Faire faire : Tâche t2'));
+    const bouton = screen.getByRole('button', { name: /Faire faire par IGINI/ });
+    fireEvent.click(bouton);
+
+    expect(await screen.findByText('1 / 2')).toBeInTheDocument();
+    expect(bouton).toBeDisabled();
+    fireEvent.click(bouton);
+    await waitFor(() => expect(appels.filter((a) => a.endsWith('/run'))).toHaveLength(1));
+
+    liberer('t1', { status: 200, body: resultat('t1') });
+    expect(await screen.findByText('2 / 2')).toBeInTheDocument();
+    liberer('t2', { status: 200, body: resultat('t2') });
+    expect(await screen.findByText('Texte t2')).toBeInTheDocument();
+    expect(appels.filter((a) => a.endsWith('/run'))).toHaveLength(2);
+  }, TIMEOUT);
+
+  it('ne lance plus rien une fois le composant démonté', async () => {
+    const { appels, liberer } = mockFetchDiffere([tache('t1'), tache('t2')]);
+    const onChanged = vi.fn();
+    const { unmount } = render(<TasksSection token={TOKEN} projectId={PROJECT_ID} onChanged={onChanged} />);
+
+    await screen.findByText('Tâche t1');
+    fireEvent.click(screen.getByLabelText('Faire faire : Tâche t1'));
+    fireEvent.click(screen.getByLabelText('Faire faire : Tâche t2'));
+    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+    await waitFor(() => expect(appels.filter((a) => a.endsWith('/run'))).toHaveLength(1));
+
+    unmount();
+    liberer('t1', { status: 200, body: resultat('t1') });
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(appels.filter((a) => a.endsWith('/run'))).toEqual(['POST /projects/p1/tasks/t1/run']);
+    expect(onChanged).not.toHaveBeenCalled();
+  }, TIMEOUT);
+
+  it("une erreur hors limite n'arrête pas le lot", async () => {
+    const { appels } = mockFetch({
+      'GET /projects/p1/tasks': { status: 200, body: [tache('t1'), tache('t2'), tache('t3')] },
+      'POST /projects/p1/tasks/t1/run': { status: 200, body: resultat('t1') },
+      'POST /projects/p1/tasks/t2/run': { status: 500, body: { message: 'Panne.' } },
+      'POST /projects/p1/tasks/t3/run': { status: 200, body: resultat('t3') },
+    });
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText('Tâche t1');
+    for (const id of ['t1', 't2', 't3']) fireEvent.click(screen.getByLabelText(`Faire faire : Tâche ${id}`));
+    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+
+    expect(await screen.findByText('Texte t3')).toBeInTheDocument();
+    expect(screen.getByText("IGINI n'a pas pu faire cette tâche")).toBeInTheDocument();
+    expect(appels.filter((a) => a.endsWith('/run'))).toHaveLength(3);
+  }, TIMEOUT);
+
+  it('un 503 arrête le lot avec « Limite atteinte »', async () => {
+    const { appels } = mockFetch({
+      'GET /projects/p1/tasks': { status: 200, body: [tache('t1'), tache('t2'), tache('t3')] },
+      'POST /projects/p1/tasks/t1/run': { status: 503, body: { message: 'Coupé.' } },
+    });
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText('Tâche t1');
+    for (const id of ['t1', 't2', 't3']) fireEvent.click(screen.getByLabelText(`Faire faire : Tâche ${id}`));
+    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+
+    expect(await screen.findByText('Limite atteinte : 3 éléments non traités')).toBeInTheDocument();
+    expect(appels.filter((a) => a.endsWith('/run'))).toHaveLength(1);
+  }, TIMEOUT);
+
+  it('une tâche déjà validée (statut remis à faire) n\'a pas de case', async () => {
+    mockFetch({
+      'GET /projects/p1/tasks': {
+        status: 200,
+        body: [tache('t1', { ai_status: 'valide', ai_result_kind: 'livrable', ai_result: 'X' })],
+      },
+    });
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText('Tâche t1');
+    expect(screen.queryByLabelText('Faire faire : Tâche t1')).not.toBeInTheDocument();
+  }, TIMEOUT);
+});
