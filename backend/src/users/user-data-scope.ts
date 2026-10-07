@@ -164,6 +164,7 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   workflow_events: exported('journaux_techniques'),
   automation_runs: exported('journaux_techniques'),
   project_compliance_checks: exported('journaux_techniques'),
+  project_compliance_ai_runs: exported('journaux_techniques'),
   constitution_violations: exported('journaux_techniques'),
   ai_usage_events: exported('journaux_techniques'),
 

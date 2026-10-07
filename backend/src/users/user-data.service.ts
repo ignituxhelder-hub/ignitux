@@ -113,6 +113,7 @@ export class UserDataService {
       workflowEvents,
       automationRuns,
       complianceChecks,
+      complianceAiRuns,
       violations,
       appelsIa,
       comptesComptables,
@@ -159,6 +160,7 @@ export class UserDataService {
       this.prisma.workflow_events.findMany({ where: { run_id: { in: runIds } } }),
       this.prisma.automation_runs.findMany({ where: byProject }),
       this.prisma.project_compliance_checks.findMany({ where: byProject }),
+      this.prisma.project_compliance_ai_runs.findMany({ where: byProject }),
       this.prisma.constitution_violations.findMany({ where: { user_id: userId } }),
       this.prisma.ai_usage_events.findMany({ where: { user_id: userId } }),
       // Comptabilité et banque : filtrées sur le propriétaire, puisque ces
@@ -260,6 +262,7 @@ export class UserDataService {
           evenements_de_processus: workflowEvents,
           executions_de_l_automatisation: automationRuns,
           demarches_de_conformite_cochees: complianceChecks,
+          executions_ia_de_conformite: complianceAiRuns,
           violations_constitutionnelles: violations,
           // Ce que les générateurs IGINI ont réellement consommé pour cette
           // personne : modèle, tokens, date. C'est une donnée la concernant,

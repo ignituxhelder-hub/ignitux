@@ -218,6 +218,18 @@ describe('UserDataService', () => {
       ]);
     });
 
+    it("inclut les résultats d'exécution IA de conformité (texte du résultat compris)", async () => {
+      prisma.project_compliance_ai_runs.findMany.mockResolvedValue([
+        { id: 'a1', result: 'Texte produit par IGINI' },
+      ]);
+
+      const exported = await service.exportUserData('u1');
+
+      expect(exported.donnees.journaux_techniques.executions_ia_de_conformite).toEqual([
+        { id: 'a1', result: 'Texte produit par IGINI' },
+      ]);
+    });
+
     it('inclut le journal des violations qui concernent la personne', async () => {
       prisma.constitution_violations.findMany.mockResolvedValue([{ id: 'v1', user_id: 'u1' }]);
 
