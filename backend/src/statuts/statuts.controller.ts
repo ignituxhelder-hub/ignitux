@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
@@ -27,6 +28,8 @@ export class StatutsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  // Chaque appel coûte un appel API Claude — limite dédiée contre les abus.
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   generer(
     @CurrentUser() user: AuthenticatedUser,
     @Param('projectId', ParseUUIDPipe) projectId: string,
@@ -45,6 +48,8 @@ export class StatutsController {
   }
 
   @Post('regenerer')
+  // Même limite que la génération : c'est le même appel Claude.
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   regenerer(
     @CurrentUser() user: AuthenticatedUser,
     @Param('projectId', ParseUUIDPipe) projectId: string,
