@@ -26,3 +26,11 @@ export const ExecutionResultSchema = z.object({
 });
 
 export type ExecutionResult = z.infer<typeof ExecutionResultSchema>;
+
+/** Texte stocké : le contenu, suivi des étapes en liste numérotée s'il y en a. */
+export function formaterResultat(resultat: ExecutionResult): string {
+  const etapes = resultat.etapes?.length
+    ? '\n\n' + resultat.etapes.map((etape, i) => `${i + 1}. ${etape}`).join('\n')
+    : '';
+  return `${resultat.contenu}${etapes}`;
+}
