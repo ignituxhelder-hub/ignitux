@@ -46,6 +46,17 @@ export class StatutsService {
       );
     }
 
+    // Une version retenue peut servir de base à un dépôt : on ne l'écrase jamais,
+    // quelle que soit la route d'entrée (génération directe ou régénération).
+    // Garde placée avant l'appel Claude, qui coûte de l'argent.
+    const existant = await this.prisma.company_bylaws.findFirst({
+      where: { project_id: projectId },
+      select: { status: true },
+    });
+    if (existant?.status === 'retenue') {
+      throw new ConflictException('Cette version est retenue : elle ne peut plus être régénérée.');
+    }
+
     const userContent =
       `Projet : ${project.title}\n` +
       `Forme juridique : ${forme}\n` +
@@ -80,7 +91,7 @@ export class StatutsService {
       generated_model: CLAUDE_MODEL,
     };
 
-    // upsert, pas create : une régénération (Task 4) rappelle cette même
+    // upsert, pas create : une régénération rappelle cette même
     // méthode, et `project_id` est @unique sur ce modèle (une ligne par
     // projet, pas un historique — voir la spec). Les associés sont
     // entièrement remplacés plutôt que fusionnés : une régénération peut

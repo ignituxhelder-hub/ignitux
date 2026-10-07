@@ -23,7 +23,8 @@ describe('StatutsService — génération', () => {
       projects: { findFirst: vi.fn() },
       company_bylaws: { upsert: vi.fn(), findUnique: vi.fn(), findFirst: vi.fn(), update: vi.fn() },
     };
-    claude = { generateStructuredOutput: vi.fn() };
+    claude = { generateStructuredOutput: vi.fn().mockResolvedValue({ content: 'texte généré' }) };
+    prisma.company_bylaws.findFirst.mockResolvedValue(null);
     constitution = { guard: vi.fn().mockResolvedValue(undefined) };
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -105,6 +106,18 @@ describe('StatutsService — génération', () => {
     };
     await expect(service.genererPourProjet('user-1', 'p1', dtoInvalide)).rejects.toThrow(BadRequestException);
     expect(claude.generateStructuredOutput).not.toHaveBeenCalled();
+  });
+
+  it('refuse de générer si une version retenue existe déjà, sans appeler Claude ni écraser', async () => {
+    prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'user-1', confirmed_legal_form: 'SASU', title: 'Mon projet' });
+    prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'retenue' });
+    claude.generateStructuredOutput.mockResolvedValue({ content: 'Texte qui ne doit jamais être écrit' });
+
+    await expect(service.genererPourProjet('user-1', 'p1', dtoValide)).rejects.toThrow(ConflictException);
+
+    expect(prisma.company_bylaws.findFirst).toHaveBeenCalledWith({ where: { project_id: 'p1' }, select: { status: true } });
+    expect(claude.generateStructuredOutput).not.toHaveBeenCalled();
+    expect(prisma.company_bylaws.upsert).not.toHaveBeenCalled();
   });
 
   describe('édition et régénération', () => {
