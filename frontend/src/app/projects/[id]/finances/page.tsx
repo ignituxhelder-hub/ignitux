@@ -829,8 +829,9 @@ function FormulaireVersement({
             style={{ width: 'auto' }}
           />
           <span style={{ textTransform: 'none', letterSpacing: 0 }}>
-            Prélever la part perpétuelle de 5 % (modèle IGNITUX 51/49). À cocher
-            explicitement : tous les projets ne sont pas entrés au capital selon ce modèle.
+            Prélever la part perpétuelle de 5 % (ancien mécanisme du suivi des investisseurs,
+            distinct du droit économique IGNITUX de l’accord de participation). À cocher
+            explicitement : tous les projets ne sont pas concernés.
           </span>
         </label>
       )}

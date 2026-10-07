@@ -66,8 +66,11 @@ export interface DistributionInput {
 export interface DividendInput extends DistributionInput {
   /**
    * La part perpétuelle d'Ignitux s'applique-t-elle ? Le produit ne devine
-   * pas : tous les projets financés ne sont pas entrés au capital selon le
-   * modèle 51/49.
+   * pas : le prélèvement n'est pas appliqué par défaut.
+   *
+   * Ancien mécanisme, distinct du droit économique d'IGNITUX du modèle de
+   * participation (`participation/`), qui n'existe qu'après la transmission
+   * complète du capital.
    */
   applyPerpetualShare: boolean;
 }

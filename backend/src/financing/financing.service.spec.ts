@@ -17,6 +17,7 @@ describe('FinancingService', () => {
     dividend_distributions: { create: Mock; findMany: Mock };
     constitution_violations: { createMany: Mock };
     buyback_objectives: { findMany: Mock; findUnique: Mock; upsert: Mock; update: Mock };
+    participation_agreements: { findFirst: Mock };
   };
 
   const OWNED = { id: 'p1', owner_id: 'u1' };
@@ -39,6 +40,8 @@ describe('FinancingService', () => {
       },
       equity_events: { create: vi.fn().mockResolvedValue({ id: 'e1' }), findMany: vi.fn().mockResolvedValue([]) },
       constitution_violations: { createMany: vi.fn() },
+      // Aucun accord par défaut : un projet sans accord se comporte comme avant.
+      participation_agreements: { findFirst: vi.fn().mockResolvedValue(null) },
       buyback_objectives: {
         findMany: vi.fn().mockResolvedValue([]),
         findUnique: vi.fn().mockResolvedValue(null),
@@ -140,6 +143,46 @@ describe('FinancingService', () => {
         service.recordEquityChange('u2', 'h1', 5000, 'Tentative', new Date()),
       ).rejects.toBeInstanceOf(NotFoundException);
       expect(prisma.equity_events.create).not.toHaveBeenCalled();
+    });
+
+    describe("quand le projet a un accord de participation IGNITUX", () => {
+      beforeEach(() => {
+        prisma.participation_agreements.findFirst.mockResolvedValue({
+          id: 'a1',
+          project_id: 'p1',
+          founder_holder_id: 'h1',
+          ignitux_holder_id: 'h2',
+        });
+      });
+
+      it("refuse la saisie manuelle de la part du porteur : elle passe par les paliers", async () => {
+        await expect(
+          service.recordEquityChange('u1', 'h1', 10000, 'Je me donne tout', new Date()),
+        ).rejects.toBeInstanceOf(BadRequestException);
+        expect(prisma.equity_events.create).not.toHaveBeenCalled();
+      });
+
+      it("refuse la saisie manuelle de la part d'IGNITUX", async () => {
+        prisma.equity_holders.findFirst.mockResolvedValue({ id: 'h2', project_id: 'p1' });
+
+        await expect(
+          service.recordEquityChange('u1', 'h2', 0, 'Je sors IGNITUX', new Date()),
+        ).rejects.toBeInstanceOf(BadRequestException);
+        expect(prisma.equity_events.create).not.toHaveBeenCalled();
+      });
+
+      it("refuse de supprimer un détenteur de l'accord : l'historique partirait avec lui", async () => {
+        await expect(service.removeHolder('u1', 'h1')).rejects.toBeInstanceOf(BadRequestException);
+        expect(prisma.equity_holders.delete).not.toHaveBeenCalled();
+      });
+
+      it("laisse saisir à la main un autre détenteur du même projet", async () => {
+        prisma.equity_holders.findFirst.mockResolvedValue({ id: 'h3', project_id: 'p1' });
+
+        await service.recordEquityChange('u1', 'h3', 0, 'Associé tiers', new Date());
+
+        expect(prisma.equity_events.create).toHaveBeenCalled();
+      });
     });
   });
 

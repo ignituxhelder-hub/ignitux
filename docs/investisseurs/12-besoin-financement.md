@@ -20,7 +20,7 @@ fournit la structure pour la prendre, pas la décision elle-même.
 | Sonde de disponibilité | gratuit | `docs/en-attente-paiement.md` |
 | Salaire(s)/rémunération fondateur | **[À DÉFINIR — fondateur]** | non présent dans le dépôt |
 | Recrutement (dev, commercial, autre) | **[À DÉFINIR — fondateur]** | non présent dans le dépôt |
-| Juridique (montage 51/49, statuts, conformité) | **[À DÉFINIR — devis à obtenir]** | signalé comme nécessaire dans `docs/status.md`, `RAPPORT-SESSION.md`, aucun montant |
+| Juridique (montage de participation, statuts, conformité) | **[À DÉFINIR — devis à obtenir]** | signalé comme nécessaire dans `docs/status.md`, `RAPPORT-SESSION.md`, aucun montant |
 | Marketing / acquisition | **[À DÉFINIR — fondateur]** | aucune stratégie chiffrée dans le dépôt |
 | Conformité internationale (Suisse, Portugal) | bloquée par l'absence de sources officielles, pas un poste budgétaire pour l'instant | `docs/status.md` |
 
@@ -49,13 +49,13 @@ fondateur, un éventuel recrutement, et le juridique — trois postes que le dé
 - **Montant** : **[À DÉFINIR]**
 - **Durée de runway visée** : **[À DÉFINIR]** (typiquement 12 à 18 mois)
 - **Utilisation des fonds** : tout le scénario A, plus au moins un recrutement (développement ou
-  commercial — **[À DÉFINIR laquelle]**), un budget juridique pour le montage 51/49 et les statuts,
+  commercial — **[À DÉFINIR laquelle]**), un budget juridique pour le montage de participation (51/49 au départ) et les statuts,
   un budget d'acquisition initial.
 - **Objectifs atteignables** : premiers utilisateurs payants réels, premier revenu mesurable,
   clarification du statut réglementaire du module Financement & Investisseurs (voir
   `10-risques-et-reponses.md`).
 - **À vérifier avant de retenir ce montant** : coût réel d'un recrutement dans la zone géographique
-  visée ; devis juridique réel pour le 51/49.
+  visée ; devis juridique réel pour le montage de participation.
 
 ## Scénario C — accélération
 

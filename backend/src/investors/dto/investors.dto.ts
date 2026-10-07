@@ -101,9 +101,13 @@ export class DistributionDto {
 
 export class DividendDto extends DistributionDto {
   /**
-   * Obligatoire, et non défaut à `true` : tous les projets financés ne sont
-   * pas entrés au capital selon le modèle 51/49. Prélever 5 % par défaut
-   * reviendrait à décider à la place du porteur.
+   * Obligatoire, et non défaut à `true` : prélever 5 % par défaut reviendrait
+   * à décider à la place du porteur.
+   *
+   * ANCIEN MÉCANISME, à ne pas confondre avec le droit économique d'IGNITUX du
+   * modèle de participation (`participation/`) : celui-là n'existe qu'après la
+   * transmission complète du capital et s'enregistre à part. Celui-ci reste
+   * pour ne rien casser sur les projets existants.
    */
   @IsBoolean({ message: 'applyPerpetualShare doit être dit explicitement : true ou false.' })
   applyPerpetualShare: boolean;

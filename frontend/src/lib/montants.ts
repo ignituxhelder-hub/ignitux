@@ -49,3 +49,19 @@ export function centimesDepuisEuros(saisie: string): number | null {
   if (!Number.isFinite(nombre)) return null;
   return Math.round(nombre * 100);
 }
+
+/**
+ * Saisie en pourcentage (« 12,5 », « 36 % ») → points de base entiers.
+ * null si illisible, vide, négative, au-delà de 100 % ou avec plus de deux
+ * décimales (un point de base est le plus petit pas représentable).
+ *
+ * Passe par le texte et non par `Number(x) * 100` : 0,29 * 100 vaut
+ * 28,999999999999996 en virgule flottante.
+ */
+export function pointsDeBaseDepuisPourcentage(saisie: string): number | null {
+  const propre = saisie.replace(/[\s%]/g, '').replace(',', '.');
+  const m = /^(\d+)(?:\.(\d{1,2}))?$/.exec(propre);
+  if (!m) return null;
+  const points = Number(m[1]) * 100 + Number((m[2] ?? '').padEnd(2, '0') || '0');
+  return points > 10000 ? null : points;
+}

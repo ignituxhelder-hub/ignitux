@@ -143,6 +143,13 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   equity_events: exported('financement'),
   dividend_distributions: exported('financement'),
   buyback_objectives: exported('financement'),
+  // L'accord de participation IGNITUX d'un projet, ses paliers et le droit
+  // sur les dividendes constaté : trois tables, une seule catégorie. Elles
+  // sortent ensemble (l'accord porte ses paliers et ses lignes), séparément
+  // des parts de capital, parce que le droit économique n'est pas du capital.
+  participation_agreements: exported('financement'),
+  participation_milestones: exported('financement'),
+  dividend_right_entries: exported('financement'),
 
   // Investissements. Seules les lignes de la personne sortent : ces tables
   // contiennent aussi celles des autres investisseurs des mêmes projets.

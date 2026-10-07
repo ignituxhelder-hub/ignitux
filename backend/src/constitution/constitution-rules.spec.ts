@@ -313,6 +313,79 @@ describe('moteur de règles constitutionnel', () => {
     });
   });
 
+  describe('participation IGNITUX (article 22)', () => {
+    it("refuse qu'un palier fasse remonter la part d'IGNITUX", () => {
+      const violations = reviewAction({
+        kind: 'execute_participation_milestone',
+        ignituxBasisPointsBefore: 2000,
+        ignituxBasisPointsAfter: 3000,
+        founderBasisPointsAfter: 7000,
+      });
+
+      expect(violations.map((v) => v.ruleId)).toContain('ignitux-ne-remonte-pas');
+    });
+
+    it("refuse un palier qui laisse la part d'IGNITUX inchangée", () => {
+      expect(
+        reviewAction({
+          kind: 'execute_participation_milestone',
+          ignituxBasisPointsBefore: 2000,
+          ignituxBasisPointsAfter: 2000,
+          founderBasisPointsAfter: 8000,
+        }).map((v) => v.ruleId),
+      ).toContain('ignitux-ne-remonte-pas');
+    });
+
+    it("accepte une baisse, quelle que soit la valeur intermédiaire", () => {
+      for (const after of [4000, 3733, 1, 0]) {
+        expect(
+          reviewAction({
+            kind: 'execute_participation_milestone',
+            ignituxBasisPointsBefore: 4900,
+            ignituxBasisPointsAfter: after,
+            founderBasisPointsAfter: 10000 - after,
+          }),
+        ).toEqual([]);
+      }
+    });
+
+    it('refuse un palier qui ne laisserait pas le porteur majoritaire', () => {
+      // Pendant la phase partagée, le porteur reste majoritaire : le
+      // palier doit le faire monter, pas le faire passer sous 50 %.
+      expect(
+        reviewAction({
+          kind: 'execute_participation_milestone',
+          ignituxBasisPointsBefore: 6000,
+          ignituxBasisPointsAfter: 5000,
+          founderBasisPointsAfter: 5000,
+        }).map((v) => v.ruleId),
+      ).toContain('majorite-du-porteur');
+    });
+
+    it('refuse le droit sur les dividendes tant qu’IGNITUX détient du capital', () => {
+      const violations = reviewAction({
+        kind: 'record_dividend_right',
+        ignituxCapitalBasisPoints: 2000,
+      });
+
+      expect(violations.map((v) => v.ruleId)).toContain('droit-dividendes-apres-transmission');
+    });
+
+    it('refuse le droit sur les dividendes quand le capital est inconnu', () => {
+      expect(
+        reviewAction({ kind: 'record_dividend_right', ignituxCapitalBasisPoints: null }).map(
+          (v) => v.ruleId,
+        ),
+      ).toContain('droit-dividendes-apres-transmission');
+    });
+
+    it('accepte le droit sur les dividendes quand IGNITUX est à 0 % du capital', () => {
+      expect(
+        reviewAction({ kind: 'record_dividend_right', ignituxCapitalBasisPoints: 0 }),
+      ).toEqual([]);
+    });
+  });
+
   describe('responsabilité (article 7)', () => {
     it("refuse de rendre une indication sans son avertissement", () => {
       // L'article dit que la personne reste responsable de ses décisions.

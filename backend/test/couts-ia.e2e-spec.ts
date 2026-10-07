@@ -27,8 +27,18 @@ describe('Coûts IA (e2e)', () => {
   let usage: AiUsageService;
   let compte: TestAccount;
   let projectId: string;
+  let betaInitiale: string | undefined;
 
   beforeAll(async () => {
+    // Ce fichier éprouve les plafonds du catalogue commercial (« Découverte :
+    // trois analyses »). Pendant la bêta V1 — active par défaut, voir
+    // config/beta-v1.ts — un compte sans abonnement obtient Entrepreneur, et
+    // ces chiffres changent. Le test déclare donc la condition dont il
+    // dépend, au lieu de supposer l'environnement : .env.test comme la CI ne
+    // la fixent pas.
+    betaInitiale = process.env.IGNITUX_BETA_V1;
+    process.env.IGNITUX_BETA_V1 = 'false';
+
     app = await startApp();
     prisma = app.get(PrismaService);
     usage = app.get(AiUsageService);
@@ -43,6 +53,9 @@ describe('Coûts IA (e2e)', () => {
   });
 
   afterAll(async () => {
+    if (betaInitiale === undefined) delete process.env.IGNITUX_BETA_V1;
+    else process.env.IGNITUX_BETA_V1 = betaInitiale;
+
     // Les lignes du journal n'ont pas de clé étrangère : la suppression du
     // compte les anonymise mais ne les efface pas. C'est voulu en
     // production, mais dans la base de test ce sont des restes — on les

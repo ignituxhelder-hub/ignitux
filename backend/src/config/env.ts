@@ -78,6 +78,12 @@ const envSchema = z.object({
   IGNITUX_TVA: z.string().optional(),
   IGNITUX_IBAN: z.string().optional(),
   IGNITUX_BIC: z.string().optional(),
+  /**
+   * Les e-mails (séparés par des virgules) des personnes qui parlent pour
+   * IGNITUX : créer un accord de participation, valider un palier. Absente ou
+   * vide, personne ne le peut. Voir participation/operateurs.ts.
+   */
+  IGNITUX_OPERATEURS: z.string().optional(),
   /** 'aucun' tant qu'aucun encaissement n'est branché. Voir offres.service.ts. */
   PAIEMENT_FOURNISSEUR: z.string().optional(),
   // Pendant la bêta V1, sans moyen de paiement configuré : un compte sans
