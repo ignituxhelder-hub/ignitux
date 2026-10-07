@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   api,
   ApiError,
+  OfflineReadError,
   readOfflineState,
   replayOfflineQueue,
   setOfflineStorage,
@@ -175,6 +176,54 @@ describe('api', () => {
         await expect(api.createProject('token', 'Mon projet', 'Une description')).rejects.toBeTruthy();
 
         expect([...storage.entries.values()].join(' ')).toContain('Mon projet');
+      });
+    });
+
+    /**
+     * Les statuts sont un document juridique : rejouer plus tard une
+     * régénération (appel Claude payant), une retenue ou un changement de
+     * forme juridique, à un moment où la personne ne regarde plus, ferait
+     * plus de mal qu'un échec immédiat.
+     */
+    describe('les écritures de statuts n’entrent jamais en file', () => {
+      function horsLigne() {
+        global.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+      }
+      const dto = {
+        capitalCents: 100000,
+        headOffice: '1 rue X',
+        durationYears: 99,
+        associates: [{ fullName: 'A', shareBasisPoints: 10000 }],
+      };
+
+      it.each([
+        ['retenirStatuts', () => api.retenirStatuts('token', 'p1')],
+        ['genererStatuts', () => api.genererStatuts('token', 'p1', dto)],
+        ['regenererStatuts', () => api.regenererStatuts('token', 'p1', dto)],
+        ['modifierStatuts', () => api.modifierStatuts('token', 'p1', 'texte')],
+        ['confirmerFormeJuridique', () => api.confirmerFormeJuridique('token', 'p1', 'SAS')],
+      ])('%s échoue tout de suite, sans rien mettre en file', async (_nom, appel) => {
+        const storage = fakeStorage();
+        setOfflineStorage(storage);
+        horsLigne();
+
+        const erreur = await appel().catch((e: unknown) => e);
+        expect(erreur).toBeInstanceOf(ApiError);
+        expect(erreur).toMatchObject({ status: 0 });
+        expect(readOfflineState().pending).toHaveLength(0);
+        expect(storage.entries.size).toBe(0);
+      });
+
+      it('sert toujours la lecture des statuts depuis le cache', async () => {
+        const storage = fakeStorage();
+        setOfflineStorage(storage);
+        mockFetchOnce(200, { id: 'b1', content: 'Article 1' });
+        await api.getStatuts('token', 'p1');
+
+        horsLigne();
+        const erreur = await api.getStatuts('token', 'p1').catch((e: unknown) => e);
+        expect(erreur).toBeInstanceOf(OfflineReadError);
+        expect((erreur as OfflineReadError).data).toMatchObject({ content: 'Article 1' });
       });
     });
 

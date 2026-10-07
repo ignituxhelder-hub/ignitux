@@ -203,10 +203,26 @@ const JAMAIS_EN_FILE = [
   '/users/signup',
 ];
 
+/**
+ * Écritures jamais mises en file, reconnues par motif (l'identifiant de projet
+ * varie). Les statuts sont un document juridique : rejouer plus tard une
+ * génération (appel Claude payant), une régénération, une retenue ou un
+ * changement de forme juridique, à un moment où la personne ne regarde plus
+ * l'écran, ferait plus de mal qu'un échec immédiat. Les lectures (GET)
+ * restent servies par le cache comme les autres.
+ */
+const ECRITURES_JAMAIS_EN_FILE = [
+  /^\/projects\/[^/?#]+\/statuts(?:\/[^?#]*)?(?:[?#].*)?$/,
+  /^\/projects\/[^/?#]+\/forme-juridique(?:[?#].*)?$/,
+];
+
 function handleOffline<T>(path: string, options: RequestInit): Promise<T> {
   const method = (options.method ?? 'GET').toUpperCase();
 
-  if (JAMAIS_EN_FILE.some((route) => path === route || path.startsWith(`${route}/`))) {
+  if (
+    JAMAIS_EN_FILE.some((route) => path === route || path.startsWith(`${route}/`)) ||
+    (method !== 'GET' && ECRITURES_JAMAIS_EN_FILE.some((motif) => motif.test(path)))
+  ) {
     throw new ApiError(
       'Pas de réseau. Ce type de demande ne peut pas être mis de côté pour plus ' +
         'tard — réessaie une fois la connexion revenue. Rien n’a été enregistré ' +
