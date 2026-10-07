@@ -74,9 +74,9 @@ du « plafond de 10 % » telle qu'écrite aujourd'hui.
 ## Ce qui reste hors modèle économique actuel
 
 - Aucun encaissement réel (pas de Stripe/Mollie/autre branché) **[Doc: en-attente-paiement.md]**.
-- Le modèle 51/49 de participation au capital des projets financés par IGNITUX est **suivi** dans le
-  code (registre, répartition, rachat) mais **le barème lui-même** (taux d'entrée, règle de
-  dilution) n'est pas un calcul du produit — c'est une donnée que le porteur de projet définit
-  lui-même pour son propre projet **[Bible, RAPPORT-SESSION]**. Le montage juridique du modèle
-  51/49 au niveau d'IGNITUX (la part perpétuelle de 5 %) n'a lui-même aucun contrat généré à ce
-  jour **[Status]**.
+- Le modèle de participation (accord par projet, paliers validés par IGNITUX, droit sur les
+  dividendes une fois le capital entièrement transmis) est **suivi** dans le code. Les valeurs de
+  départ (51/49, 5 %) sont des valeurs par défaut recopiées dans chaque accord ; **les conditions qui
+  déclenchent un palier ne sont pas définies par le produit** : elles sont écrites projet par projet
+  **[Code, Doc]**. Le montage juridique de ce modèle n'a aucun contrat généré à ce jour et n'a pas été
+  relu par un juriste **[Status]**.

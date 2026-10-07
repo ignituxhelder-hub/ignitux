@@ -234,6 +234,43 @@ export type equity_events = Prisma.equity_eventsModel
  */
 export type dividend_distributions = Prisma.dividend_distributionsModel
 /**
+ * Model participation_agreements
+ * PARTICIPATION IGNITUX — l'accord qui lie un projet à IGNITUX.
+ * 
+ * Un accord = trois choses distinctes, jamais mélangées :
+ * 1. le CAPITAL, qui reste dans `equity_events` (seule autorité) ;
+ * 2. le DROIT ÉCONOMIQUE, un pourcentage des dividendes distribués, dû
+ * uniquement quand IGNITUX est à 0 % du capital (`dividend_right_entries`) ;
+ * 3. l'ACCÈS À L'ÉCOSYSTÈME, porté par `ecosystem_offre`, indépendant du
+ * capital : il ne disparaît pas quand IGNITUX passe à 0 %.
+ * 
+ * Les parts de départ et le taux du droit sont ceux DE CET ACCORD, copiés à
+ * sa création depuis des valeurs par défaut. Aucun délai, aucune échéance :
+ * la progression passe par `participation_milestones`, validés à la main.
+ */
+export type participation_agreements = Prisma.participation_agreementsModel
+/**
+ * Model participation_milestones
+ * PARTICIPATION IGNITUX — un palier de la transmission du capital.
+ * 
+ * Un palier n'est JAMAIS déclenché par le temps : aucune colonne ici ne
+ * porte une durée ni une échéance automatique. Il passe de 'prevu' à
+ * 'valide' quand IGNITUX constate que les conditions définies pour ce projet
+ * sont remplies, puis à 'execute' quand le capital est réellement modifié.
+ * L'entrepreneur peut en prendre connaissance (`founder_acknowledged_at`),
+ * ce qui ne remplace jamais la validation d'IGNITUX.
+ */
+export type participation_milestones = Prisma.participation_milestonesModel
+/**
+ * Model dividend_right_entries
+ * PARTICIPATION IGNITUX — le droit économique sur un dividende distribué.
+ * 
+ * Registre SÉPARÉ du capital : ces lignes ne sont jamais des parts. Une ligne
+ * naît d'un dividende réellement distribué, et seulement après transmission
+ * complète du capital. Sans dividende, aucune ligne, aucun paiement.
+ */
+export type dividend_right_entries = Prisma.dividend_right_entriesModel
+/**
  * Model billing_documents
  * FACTURATION — un document commercial : devis, facture ou avoir.
  * 

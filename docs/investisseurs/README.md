@@ -40,7 +40,7 @@ exécutif de tout l'audit, avec réponse directe à « peut-on démarcher des in
   le fichier 22).
 - Ce n'est pas une promesse que le produit est fini : la Bible elle-même distingue ce qui est
   démontré de ce qui est partiel, et ce dossier reprend cette distinction sans l'adoucir.
-- Ce n'est pas un avis juridique sur le montage 51/49 ni sur le statut réglementaire du module
+- Ce n'est pas un avis juridique sur le montage de participation (51/49 au départ) ni sur le statut réglementaire du module
   Financement & Investisseurs — un point d'attention sérieux, détaillé dans `10-risques-et-reponses.md`.
 
 ## Méthode et sources

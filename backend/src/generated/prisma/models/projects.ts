@@ -236,6 +236,7 @@ export type projectsWhereInput = {
   equity_events?: Prisma.Equity_eventsListRelationFilter
   dividends?: Prisma.Dividend_distributionsListRelationFilter
   buyback_objectives?: Prisma.Buyback_objectivesListRelationFilter
+  participation_agreement?: Prisma.XOR<Prisma.Participation_agreementsNullableScalarRelationFilter, Prisma.participation_agreementsWhereInput> | null
   financedProjects?: Prisma.XOR<Prisma.Financed_projectsNullableScalarRelationFilter, Prisma.financed_projectsWhereInput> | null
 }
 
@@ -278,6 +279,7 @@ export type projectsOrderByWithRelationInput = {
   equity_events?: Prisma.equity_eventsOrderByRelationAggregateInput
   dividends?: Prisma.dividend_distributionsOrderByRelationAggregateInput
   buyback_objectives?: Prisma.buyback_objectivesOrderByRelationAggregateInput
+  participation_agreement?: Prisma.participation_agreementsOrderByWithRelationInput
   financedProjects?: Prisma.financed_projectsOrderByWithRelationInput
 }
 
@@ -323,6 +325,7 @@ export type projectsWhereUniqueInput = Prisma.AtLeast<{
   equity_events?: Prisma.Equity_eventsListRelationFilter
   dividends?: Prisma.Dividend_distributionsListRelationFilter
   buyback_objectives?: Prisma.Buyback_objectivesListRelationFilter
+  participation_agreement?: Prisma.XOR<Prisma.Participation_agreementsNullableScalarRelationFilter, Prisma.participation_agreementsWhereInput> | null
   financedProjects?: Prisma.XOR<Prisma.Financed_projectsNullableScalarRelationFilter, Prisma.financed_projectsWhereInput> | null
 }, "id">
 
@@ -392,6 +395,7 @@ export type projectsCreateInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -433,6 +437,7 @@ export type projectsUncheckedCreateInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -474,6 +479,7 @@ export type projectsUpdateInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -515,6 +521,7 @@ export type projectsUncheckedUpdateInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -905,6 +912,20 @@ export type projectsUpdateOneRequiredWithoutDividendsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutDividendsInput, Prisma.projectsUpdateWithoutDividendsInput>, Prisma.projectsUncheckedUpdateWithoutDividendsInput>
 }
 
+export type projectsCreateNestedOneWithoutParticipation_agreementInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutParticipation_agreementInput, Prisma.projectsUncheckedCreateWithoutParticipation_agreementInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutParticipation_agreementInput
+  connect?: Prisma.projectsWhereUniqueInput
+}
+
+export type projectsUpdateOneRequiredWithoutParticipation_agreementNestedInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutParticipation_agreementInput, Prisma.projectsUncheckedCreateWithoutParticipation_agreementInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutParticipation_agreementInput
+  upsert?: Prisma.projectsUpsertWithoutParticipation_agreementInput
+  connect?: Prisma.projectsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutParticipation_agreementInput, Prisma.projectsUpdateWithoutParticipation_agreementInput>, Prisma.projectsUncheckedUpdateWithoutParticipation_agreementInput>
+}
+
 export type projectsCreateNestedOneWithoutBilling_documentsInput = {
   create?: Prisma.XOR<Prisma.projectsCreateWithoutBilling_documentsInput, Prisma.projectsUncheckedCreateWithoutBilling_documentsInput>
   connectOrCreate?: Prisma.projectsCreateOrConnectWithoutBilling_documentsInput
@@ -1126,6 +1147,7 @@ export type projectsCreateWithoutOwnerInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -1166,6 +1188,7 @@ export type projectsUncheckedCreateWithoutOwnerInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -1246,6 +1269,7 @@ export type projectsCreateWithoutAnalysesInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -1286,6 +1310,7 @@ export type projectsUncheckedCreateWithoutAnalysesInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -1342,6 +1367,7 @@ export type projectsUpdateWithoutAnalysesInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -1382,6 +1408,7 @@ export type projectsUncheckedUpdateWithoutAnalysesInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -1422,6 +1449,7 @@ export type projectsCreateWithoutLegal_form_recommendationsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -1462,6 +1490,7 @@ export type projectsUncheckedCreateWithoutLegal_form_recommendationsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -1518,6 +1547,7 @@ export type projectsUpdateWithoutLegal_form_recommendationsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -1558,6 +1588,7 @@ export type projectsUncheckedUpdateWithoutLegal_form_recommendationsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -1598,6 +1629,7 @@ export type projectsCreateWithoutFinancing_plansInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -1638,6 +1670,7 @@ export type projectsUncheckedCreateWithoutFinancing_plansInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -1694,6 +1727,7 @@ export type projectsUpdateWithoutFinancing_plansInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -1734,6 +1768,7 @@ export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -1774,6 +1809,7 @@ export type projectsCreateWithoutDevelopment_plansInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -1814,6 +1850,7 @@ export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -1870,6 +1907,7 @@ export type projectsUpdateWithoutDevelopment_plansInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -1910,6 +1948,7 @@ export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -1950,6 +1989,7 @@ export type projectsCreateWithoutTransmission_plansInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -1990,6 +2030,7 @@ export type projectsUncheckedCreateWithoutTransmission_plansInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -2046,6 +2087,7 @@ export type projectsUpdateWithoutTransmission_plansInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -2086,6 +2128,7 @@ export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -2126,6 +2169,7 @@ export type projectsCreateWithoutMemoriesInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -2166,6 +2210,7 @@ export type projectsUncheckedCreateWithoutMemoriesInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -2222,6 +2267,7 @@ export type projectsUpdateWithoutMemoriesInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -2262,6 +2308,7 @@ export type projectsUncheckedUpdateWithoutMemoriesInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -2302,6 +2349,7 @@ export type projectsCreateWithoutConceptsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -2342,6 +2390,7 @@ export type projectsUncheckedCreateWithoutConceptsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -2398,6 +2447,7 @@ export type projectsUpdateWithoutConceptsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -2438,6 +2488,7 @@ export type projectsUncheckedUpdateWithoutConceptsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -2478,6 +2529,7 @@ export type projectsCreateWithoutTasksInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -2518,6 +2570,7 @@ export type projectsUncheckedCreateWithoutTasksInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -2574,6 +2627,7 @@ export type projectsUpdateWithoutTasksInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -2614,6 +2668,7 @@ export type projectsUncheckedUpdateWithoutTasksInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -2654,6 +2709,7 @@ export type projectsCreateWithoutCommunity_commentsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -2694,6 +2750,7 @@ export type projectsUncheckedCreateWithoutCommunity_commentsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -2750,6 +2807,7 @@ export type projectsUpdateWithoutCommunity_commentsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -2790,6 +2848,7 @@ export type projectsUncheckedUpdateWithoutCommunity_commentsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -2830,6 +2889,7 @@ export type projectsCreateWithoutCollaboratorsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -2870,6 +2930,7 @@ export type projectsUncheckedCreateWithoutCollaboratorsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -2926,6 +2987,7 @@ export type projectsUpdateWithoutCollaboratorsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -2966,6 +3028,7 @@ export type projectsUncheckedUpdateWithoutCollaboratorsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -3006,6 +3069,7 @@ export type projectsCreateWithoutBuild_plansInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -3046,6 +3110,7 @@ export type projectsUncheckedCreateWithoutBuild_plansInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -3102,6 +3167,7 @@ export type projectsUpdateWithoutBuild_plansInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -3142,6 +3208,7 @@ export type projectsUncheckedUpdateWithoutBuild_plansInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -3182,6 +3249,7 @@ export type projectsCreateWithoutCompliance_checksInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -3222,6 +3290,7 @@ export type projectsUncheckedCreateWithoutCompliance_checksInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -3278,6 +3347,7 @@ export type projectsUpdateWithoutCompliance_checksInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -3318,6 +3388,7 @@ export type projectsUncheckedUpdateWithoutCompliance_checksInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -3358,6 +3429,7 @@ export type projectsCreateWithoutCompliance_ai_runsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -3398,6 +3470,7 @@ export type projectsUncheckedCreateWithoutCompliance_ai_runsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -3454,6 +3527,7 @@ export type projectsUpdateWithoutCompliance_ai_runsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -3494,6 +3568,7 @@ export type projectsUncheckedUpdateWithoutCompliance_ai_runsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -3534,6 +3609,7 @@ export type projectsCreateWithoutAutomation_runsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -3574,6 +3650,7 @@ export type projectsUncheckedCreateWithoutAutomation_runsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -3630,6 +3707,7 @@ export type projectsUpdateWithoutAutomation_runsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -3670,6 +3748,7 @@ export type projectsUncheckedUpdateWithoutAutomation_runsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -3710,6 +3789,7 @@ export type projectsCreateWithoutFinancing_roundsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -3750,6 +3830,7 @@ export type projectsUncheckedCreateWithoutFinancing_roundsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -3806,6 +3887,7 @@ export type projectsUpdateWithoutFinancing_roundsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -3846,6 +3928,7 @@ export type projectsUncheckedUpdateWithoutFinancing_roundsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -3886,6 +3969,7 @@ export type projectsCreateWithoutEquity_holdersInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -3926,6 +4010,7 @@ export type projectsUncheckedCreateWithoutEquity_holdersInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -3982,6 +4067,7 @@ export type projectsUpdateWithoutEquity_holdersInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -4022,6 +4108,7 @@ export type projectsUncheckedUpdateWithoutEquity_holdersInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -4062,6 +4149,7 @@ export type projectsCreateWithoutEquity_eventsInput = {
   equity_holders?: Prisma.equity_holdersCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -4102,6 +4190,7 @@ export type projectsUncheckedCreateWithoutEquity_eventsInput = {
   equity_holders?: Prisma.equity_holdersUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -4158,6 +4247,7 @@ export type projectsUpdateWithoutEquity_eventsInput = {
   equity_holders?: Prisma.equity_holdersUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -4198,6 +4288,7 @@ export type projectsUncheckedUpdateWithoutEquity_eventsInput = {
   equity_holders?: Prisma.equity_holdersUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -4238,6 +4329,7 @@ export type projectsCreateWithoutDividendsInput = {
   equity_holders?: Prisma.equity_holdersCreateNestedManyWithoutProjectInput
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -4278,6 +4370,7 @@ export type projectsUncheckedCreateWithoutDividendsInput = {
   equity_holders?: Prisma.equity_holdersUncheckedCreateNestedManyWithoutProjectInput
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -4334,6 +4427,7 @@ export type projectsUpdateWithoutDividendsInput = {
   equity_holders?: Prisma.equity_holdersUpdateManyWithoutProjectNestedInput
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -4373,6 +4467,187 @@ export type projectsUncheckedUpdateWithoutDividendsInput = {
   financing_rounds?: Prisma.financing_roundsUncheckedUpdateManyWithoutProjectNestedInput
   equity_holders?: Prisma.equity_holdersUncheckedUpdateManyWithoutProjectNestedInput
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
+  buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
+  financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+}
+
+export type projectsCreateWithoutParticipation_agreementInput = {
+  id?: string
+  title: string
+  description?: string | null
+  sector?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  owner: Prisma.usersCreateNestedOneWithoutProjectsInput
+  analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
+  score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutProjectInput
+  financing_rounds?: Prisma.financing_roundsCreateNestedManyWithoutProjectInput
+  equity_holders?: Prisma.equity_holdersCreateNestedManyWithoutProjectInput
+  equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
+  dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
+  buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+}
+
+export type projectsUncheckedCreateWithoutParticipation_agreementInput = {
+  id?: string
+  owner_id: string
+  title: string
+  description?: string | null
+  sector?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
+  score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutProjectInput
+  financing_rounds?: Prisma.financing_roundsUncheckedCreateNestedManyWithoutProjectInput
+  equity_holders?: Prisma.equity_holdersUncheckedCreateNestedManyWithoutProjectInput
+  equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
+  dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
+  buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+}
+
+export type projectsCreateOrConnectWithoutParticipation_agreementInput = {
+  where: Prisma.projectsWhereUniqueInput
+  create: Prisma.XOR<Prisma.projectsCreateWithoutParticipation_agreementInput, Prisma.projectsUncheckedCreateWithoutParticipation_agreementInput>
+}
+
+export type projectsUpsertWithoutParticipation_agreementInput = {
+  update: Prisma.XOR<Prisma.projectsUpdateWithoutParticipation_agreementInput, Prisma.projectsUncheckedUpdateWithoutParticipation_agreementInput>
+  create: Prisma.XOR<Prisma.projectsCreateWithoutParticipation_agreementInput, Prisma.projectsUncheckedCreateWithoutParticipation_agreementInput>
+  where?: Prisma.projectsWhereInput
+}
+
+export type projectsUpdateToOneWithWhereWithoutParticipation_agreementInput = {
+  where?: Prisma.projectsWhereInput
+  data: Prisma.XOR<Prisma.projectsUpdateWithoutParticipation_agreementInput, Prisma.projectsUncheckedUpdateWithoutParticipation_agreementInput>
+}
+
+export type projectsUpdateWithoutParticipation_agreementInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
+  analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
+  score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutProjectNestedInput
+  financing_rounds?: Prisma.financing_roundsUpdateManyWithoutProjectNestedInput
+  equity_holders?: Prisma.equity_holdersUpdateManyWithoutProjectNestedInput
+  equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
+  dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
+  buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+}
+
+export type projectsUncheckedUpdateWithoutParticipation_agreementInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
+  score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutProjectNestedInput
+  financing_rounds?: Prisma.financing_roundsUncheckedUpdateManyWithoutProjectNestedInput
+  equity_holders?: Prisma.equity_holdersUncheckedUpdateManyWithoutProjectNestedInput
+  equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
+  dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
@@ -4414,6 +4689,7 @@ export type projectsCreateWithoutBilling_documentsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -4454,6 +4730,7 @@ export type projectsUncheckedCreateWithoutBilling_documentsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -4510,6 +4787,7 @@ export type projectsUpdateWithoutBilling_documentsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -4550,6 +4828,7 @@ export type projectsUncheckedUpdateWithoutBilling_documentsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -4590,6 +4869,7 @@ export type projectsCreateWithoutCrm_contactsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -4630,6 +4910,7 @@ export type projectsUncheckedCreateWithoutCrm_contactsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -4686,6 +4967,7 @@ export type projectsUpdateWithoutCrm_contactsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -4726,6 +5008,7 @@ export type projectsUncheckedUpdateWithoutCrm_contactsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -4766,6 +5049,7 @@ export type projectsCreateWithoutStock_itemsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -4806,6 +5090,7 @@ export type projectsUncheckedCreateWithoutStock_itemsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -4862,6 +5147,7 @@ export type projectsUpdateWithoutStock_itemsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -4902,6 +5188,7 @@ export type projectsUncheckedUpdateWithoutStock_itemsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -4942,6 +5229,7 @@ export type projectsCreateWithoutAgenda_eventsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -4982,6 +5270,7 @@ export type projectsUncheckedCreateWithoutAgenda_eventsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -5038,6 +5327,7 @@ export type projectsUpdateWithoutAgenda_eventsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -5078,6 +5368,7 @@ export type projectsUncheckedUpdateWithoutAgenda_eventsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -5118,6 +5409,7 @@ export type projectsCreateWithoutWorkflow_definitionsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -5158,6 +5450,7 @@ export type projectsUncheckedCreateWithoutWorkflow_definitionsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -5214,6 +5507,7 @@ export type projectsUpdateWithoutWorkflow_definitionsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -5254,6 +5548,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_definitionsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -5294,6 +5589,7 @@ export type projectsCreateWithoutWorkflow_runsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -5334,6 +5630,7 @@ export type projectsUncheckedCreateWithoutWorkflow_runsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -5390,6 +5687,7 @@ export type projectsUpdateWithoutWorkflow_runsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -5430,6 +5728,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_runsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -5470,6 +5769,7 @@ export type projectsCreateWithoutBuyback_objectivesInput = {
   equity_holders?: Prisma.equity_holdersCreateNestedManyWithoutProjectInput
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -5510,6 +5810,7 @@ export type projectsUncheckedCreateWithoutBuyback_objectivesInput = {
   equity_holders?: Prisma.equity_holdersUncheckedCreateNestedManyWithoutProjectInput
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -5566,6 +5867,7 @@ export type projectsUpdateWithoutBuyback_objectivesInput = {
   equity_holders?: Prisma.equity_holdersUpdateManyWithoutProjectNestedInput
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -5606,6 +5908,7 @@ export type projectsUncheckedUpdateWithoutBuyback_objectivesInput = {
   equity_holders?: Prisma.equity_holdersUncheckedUpdateManyWithoutProjectNestedInput
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -5647,6 +5950,7 @@ export type projectsCreateWithoutFinancedProjectsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutFinancedProjectsInput = {
@@ -5687,6 +5991,7 @@ export type projectsUncheckedCreateWithoutFinancedProjectsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutFinancedProjectsInput = {
@@ -5743,6 +6048,7 @@ export type projectsUpdateWithoutFinancedProjectsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutFinancedProjectsInput = {
@@ -5783,6 +6089,7 @@ export type projectsUncheckedUpdateWithoutFinancedProjectsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutScore_snapshotsInput = {
@@ -5822,6 +6129,7 @@ export type projectsCreateWithoutScore_snapshotsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -5862,6 +6170,7 @@ export type projectsUncheckedCreateWithoutScore_snapshotsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -5918,6 +6227,7 @@ export type projectsUpdateWithoutScore_snapshotsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -5958,6 +6268,7 @@ export type projectsUncheckedUpdateWithoutScore_snapshotsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -5998,6 +6309,7 @@ export type projectsCreateWithoutReal_estate_propertiesInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -6038,6 +6350,7 @@ export type projectsUncheckedCreateWithoutReal_estate_propertiesInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -6094,6 +6407,7 @@ export type projectsUpdateWithoutReal_estate_propertiesInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -6134,6 +6448,7 @@ export type projectsUncheckedUpdateWithoutReal_estate_propertiesInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -6174,6 +6489,7 @@ export type projectsCreateWithoutFleet_vehiclesInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -6214,6 +6530,7 @@ export type projectsUncheckedCreateWithoutFleet_vehiclesInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -6270,6 +6587,7 @@ export type projectsUpdateWithoutFleet_vehiclesInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -6310,6 +6628,7 @@ export type projectsUncheckedUpdateWithoutFleet_vehiclesInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -6350,6 +6669,7 @@ export type projectsCreateWithoutAd_campaignsInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
 }
 
@@ -6390,6 +6710,7 @@ export type projectsUncheckedCreateWithoutAd_campaignsInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
 }
 
@@ -6446,6 +6767,7 @@ export type projectsUpdateWithoutAd_campaignsInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -6486,6 +6808,7 @@ export type projectsUncheckedUpdateWithoutAd_campaignsInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -6536,6 +6859,7 @@ export type projectsUpdateWithoutOwnerInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
 }
 
@@ -6576,6 +6900,7 @@ export type projectsUncheckedUpdateWithoutOwnerInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
 }
 
@@ -6911,6 +7236,7 @@ export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   equity_events?: boolean | Prisma.projects$equity_eventsArgs<ExtArgs>
   dividends?: boolean | Prisma.projects$dividendsArgs<ExtArgs>
   buyback_objectives?: boolean | Prisma.projects$buyback_objectivesArgs<ExtArgs>
+  participation_agreement?: boolean | Prisma.projects$participation_agreementArgs<ExtArgs>
   financedProjects?: boolean | Prisma.projects$financedProjectsArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["projects"]>
@@ -6982,6 +7308,7 @@ export type projectsInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   equity_events?: boolean | Prisma.projects$equity_eventsArgs<ExtArgs>
   dividends?: boolean | Prisma.projects$dividendsArgs<ExtArgs>
   buyback_objectives?: boolean | Prisma.projects$buyback_objectivesArgs<ExtArgs>
+  participation_agreement?: boolean | Prisma.projects$participation_agreementArgs<ExtArgs>
   financedProjects?: boolean | Prisma.projects$financedProjectsArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -7025,6 +7352,7 @@ export type $projectsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     equity_events: Prisma.$equity_eventsPayload<ExtArgs>[]
     dividends: Prisma.$dividend_distributionsPayload<ExtArgs>[]
     buyback_objectives: Prisma.$buyback_objectivesPayload<ExtArgs>[]
+    participation_agreement: Prisma.$participation_agreementsPayload<ExtArgs> | null
     financedProjects: Prisma.$financed_projectsPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -7460,6 +7788,7 @@ export interface Prisma__projectsClient<T, Null = never, ExtArgs extends runtime
   equity_events<T extends Prisma.projects$equity_eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$equity_eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$equity_eventsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   dividends<T extends Prisma.projects$dividendsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$dividendsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$dividend_distributionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   buyback_objectives<T extends Prisma.projects$buyback_objectivesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$buyback_objectivesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$buyback_objectivesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  participation_agreement<T extends Prisma.projects$participation_agreementArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$participation_agreementArgs<ExtArgs>>): Prisma.Prisma__participation_agreementsClient<runtime.Types.Result.GetResult<Prisma.$participation_agreementsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   financedProjects<T extends Prisma.projects$financedProjectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$financedProjectsArgs<ExtArgs>>): Prisma.Prisma__financed_projectsClient<runtime.Types.Result.GetResult<Prisma.$financed_projectsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -8592,6 +8921,25 @@ export type projects$buyback_objectivesArgs<ExtArgs extends runtime.Types.Extens
   take?: number
   skip?: number
   distinct?: Prisma.Buyback_objectivesScalarFieldEnum | Prisma.Buyback_objectivesScalarFieldEnum[]
+}
+
+/**
+ * projects.participation_agreement
+ */
+export type projects$participation_agreementArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the participation_agreements
+   */
+  select?: Prisma.participation_agreementsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the participation_agreements
+   */
+  omit?: Prisma.participation_agreementsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.participation_agreementsInclude<ExtArgs> | null
+  where?: Prisma.participation_agreementsWhereInput
 }
 
 /**

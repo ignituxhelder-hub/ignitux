@@ -190,6 +190,8 @@ export type equity_holdersWhereInput = {
   equity_events?: Prisma.Equity_eventsListRelationFilter
   dividends?: Prisma.Dividend_distributionsListRelationFilter
   participations?: Prisma.ParticipationsListRelationFilter
+  founder_agreement?: Prisma.XOR<Prisma.Participation_agreementsNullableScalarRelationFilter, Prisma.participation_agreementsWhereInput> | null
+  ignitux_agreement?: Prisma.XOR<Prisma.Participation_agreementsNullableScalarRelationFilter, Prisma.participation_agreementsWhereInput> | null
 }
 
 export type equity_holdersOrderByWithRelationInput = {
@@ -202,6 +204,8 @@ export type equity_holdersOrderByWithRelationInput = {
   equity_events?: Prisma.equity_eventsOrderByRelationAggregateInput
   dividends?: Prisma.dividend_distributionsOrderByRelationAggregateInput
   participations?: Prisma.participationsOrderByRelationAggregateInput
+  founder_agreement?: Prisma.participation_agreementsOrderByWithRelationInput
+  ignitux_agreement?: Prisma.participation_agreementsOrderByWithRelationInput
 }
 
 export type equity_holdersWhereUniqueInput = Prisma.AtLeast<{
@@ -217,6 +221,8 @@ export type equity_holdersWhereUniqueInput = Prisma.AtLeast<{
   equity_events?: Prisma.Equity_eventsListRelationFilter
   dividends?: Prisma.Dividend_distributionsListRelationFilter
   participations?: Prisma.ParticipationsListRelationFilter
+  founder_agreement?: Prisma.XOR<Prisma.Participation_agreementsNullableScalarRelationFilter, Prisma.participation_agreementsWhereInput> | null
+  ignitux_agreement?: Prisma.XOR<Prisma.Participation_agreementsNullableScalarRelationFilter, Prisma.participation_agreementsWhereInput> | null
 }, "id">
 
 export type equity_holdersOrderByWithAggregationInput = {
@@ -250,6 +256,8 @@ export type equity_holdersCreateInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutHolderInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutHolderInput
   participations?: Prisma.participationsCreateNestedManyWithoutEquity_holderInput
+  founder_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutFounder_holderInput
+  ignitux_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutIgnitux_holderInput
 }
 
 export type equity_holdersUncheckedCreateInput = {
@@ -261,6 +269,8 @@ export type equity_holdersUncheckedCreateInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutHolderInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutHolderInput
   participations?: Prisma.participationsUncheckedCreateNestedManyWithoutEquity_holderInput
+  founder_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutFounder_holderInput
+  ignitux_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutIgnitux_holderInput
 }
 
 export type equity_holdersUpdateInput = {
@@ -272,6 +282,8 @@ export type equity_holdersUpdateInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutHolderNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutHolderNestedInput
   participations?: Prisma.participationsUpdateManyWithoutEquity_holderNestedInput
+  founder_agreement?: Prisma.participation_agreementsUpdateOneWithoutFounder_holderNestedInput
+  ignitux_agreement?: Prisma.participation_agreementsUpdateOneWithoutIgnitux_holderNestedInput
 }
 
 export type equity_holdersUncheckedUpdateInput = {
@@ -283,6 +295,8 @@ export type equity_holdersUncheckedUpdateInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutHolderNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutHolderNestedInput
   participations?: Prisma.participationsUncheckedUpdateManyWithoutEquity_holderNestedInput
+  founder_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutFounder_holderNestedInput
+  ignitux_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutIgnitux_holderNestedInput
 }
 
 export type equity_holdersCreateManyInput = {
@@ -422,6 +436,34 @@ export type equity_holdersUpdateOneRequiredWithoutDividendsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.equity_holdersUpdateToOneWithWhereWithoutDividendsInput, Prisma.equity_holdersUpdateWithoutDividendsInput>, Prisma.equity_holdersUncheckedUpdateWithoutDividendsInput>
 }
 
+export type equity_holdersCreateNestedOneWithoutFounder_agreementInput = {
+  create?: Prisma.XOR<Prisma.equity_holdersCreateWithoutFounder_agreementInput, Prisma.equity_holdersUncheckedCreateWithoutFounder_agreementInput>
+  connectOrCreate?: Prisma.equity_holdersCreateOrConnectWithoutFounder_agreementInput
+  connect?: Prisma.equity_holdersWhereUniqueInput
+}
+
+export type equity_holdersCreateNestedOneWithoutIgnitux_agreementInput = {
+  create?: Prisma.XOR<Prisma.equity_holdersCreateWithoutIgnitux_agreementInput, Prisma.equity_holdersUncheckedCreateWithoutIgnitux_agreementInput>
+  connectOrCreate?: Prisma.equity_holdersCreateOrConnectWithoutIgnitux_agreementInput
+  connect?: Prisma.equity_holdersWhereUniqueInput
+}
+
+export type equity_holdersUpdateOneRequiredWithoutFounder_agreementNestedInput = {
+  create?: Prisma.XOR<Prisma.equity_holdersCreateWithoutFounder_agreementInput, Prisma.equity_holdersUncheckedCreateWithoutFounder_agreementInput>
+  connectOrCreate?: Prisma.equity_holdersCreateOrConnectWithoutFounder_agreementInput
+  upsert?: Prisma.equity_holdersUpsertWithoutFounder_agreementInput
+  connect?: Prisma.equity_holdersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.equity_holdersUpdateToOneWithWhereWithoutFounder_agreementInput, Prisma.equity_holdersUpdateWithoutFounder_agreementInput>, Prisma.equity_holdersUncheckedUpdateWithoutFounder_agreementInput>
+}
+
+export type equity_holdersUpdateOneRequiredWithoutIgnitux_agreementNestedInput = {
+  create?: Prisma.XOR<Prisma.equity_holdersCreateWithoutIgnitux_agreementInput, Prisma.equity_holdersUncheckedCreateWithoutIgnitux_agreementInput>
+  connectOrCreate?: Prisma.equity_holdersCreateOrConnectWithoutIgnitux_agreementInput
+  upsert?: Prisma.equity_holdersUpsertWithoutIgnitux_agreementInput
+  connect?: Prisma.equity_holdersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.equity_holdersUpdateToOneWithWhereWithoutIgnitux_agreementInput, Prisma.equity_holdersUpdateWithoutIgnitux_agreementInput>, Prisma.equity_holdersUncheckedUpdateWithoutIgnitux_agreementInput>
+}
+
 export type equity_holdersCreateNestedOneWithoutParticipationsInput = {
   create?: Prisma.XOR<Prisma.equity_holdersCreateWithoutParticipationsInput, Prisma.equity_holdersUncheckedCreateWithoutParticipationsInput>
   connectOrCreate?: Prisma.equity_holdersCreateOrConnectWithoutParticipationsInput
@@ -446,6 +488,8 @@ export type equity_holdersCreateWithoutProjectInput = {
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutHolderInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutHolderInput
   participations?: Prisma.participationsCreateNestedManyWithoutEquity_holderInput
+  founder_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutFounder_holderInput
+  ignitux_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutIgnitux_holderInput
 }
 
 export type equity_holdersUncheckedCreateWithoutProjectInput = {
@@ -456,6 +500,8 @@ export type equity_holdersUncheckedCreateWithoutProjectInput = {
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutHolderInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutHolderInput
   participations?: Prisma.participationsUncheckedCreateNestedManyWithoutEquity_holderInput
+  founder_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutFounder_holderInput
+  ignitux_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutIgnitux_holderInput
 }
 
 export type equity_holdersCreateOrConnectWithoutProjectInput = {
@@ -503,6 +549,8 @@ export type equity_holdersCreateWithoutEquity_eventsInput = {
   project: Prisma.projectsCreateNestedOneWithoutEquity_holdersInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutHolderInput
   participations?: Prisma.participationsCreateNestedManyWithoutEquity_holderInput
+  founder_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutFounder_holderInput
+  ignitux_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutIgnitux_holderInput
 }
 
 export type equity_holdersUncheckedCreateWithoutEquity_eventsInput = {
@@ -513,6 +561,8 @@ export type equity_holdersUncheckedCreateWithoutEquity_eventsInput = {
   created_at?: Date | string | null
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutHolderInput
   participations?: Prisma.participationsUncheckedCreateNestedManyWithoutEquity_holderInput
+  founder_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutFounder_holderInput
+  ignitux_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutIgnitux_holderInput
 }
 
 export type equity_holdersCreateOrConnectWithoutEquity_eventsInput = {
@@ -539,6 +589,8 @@ export type equity_holdersUpdateWithoutEquity_eventsInput = {
   project?: Prisma.projectsUpdateOneRequiredWithoutEquity_holdersNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutHolderNestedInput
   participations?: Prisma.participationsUpdateManyWithoutEquity_holderNestedInput
+  founder_agreement?: Prisma.participation_agreementsUpdateOneWithoutFounder_holderNestedInput
+  ignitux_agreement?: Prisma.participation_agreementsUpdateOneWithoutIgnitux_holderNestedInput
 }
 
 export type equity_holdersUncheckedUpdateWithoutEquity_eventsInput = {
@@ -549,6 +601,8 @@ export type equity_holdersUncheckedUpdateWithoutEquity_eventsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutHolderNestedInput
   participations?: Prisma.participationsUncheckedUpdateManyWithoutEquity_holderNestedInput
+  founder_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutFounder_holderNestedInput
+  ignitux_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutIgnitux_holderNestedInput
 }
 
 export type equity_holdersCreateWithoutDividendsInput = {
@@ -559,6 +613,8 @@ export type equity_holdersCreateWithoutDividendsInput = {
   project: Prisma.projectsCreateNestedOneWithoutEquity_holdersInput
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutHolderInput
   participations?: Prisma.participationsCreateNestedManyWithoutEquity_holderInput
+  founder_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutFounder_holderInput
+  ignitux_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutIgnitux_holderInput
 }
 
 export type equity_holdersUncheckedCreateWithoutDividendsInput = {
@@ -569,6 +625,8 @@ export type equity_holdersUncheckedCreateWithoutDividendsInput = {
   created_at?: Date | string | null
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutHolderInput
   participations?: Prisma.participationsUncheckedCreateNestedManyWithoutEquity_holderInput
+  founder_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutFounder_holderInput
+  ignitux_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutIgnitux_holderInput
 }
 
 export type equity_holdersCreateOrConnectWithoutDividendsInput = {
@@ -595,6 +653,8 @@ export type equity_holdersUpdateWithoutDividendsInput = {
   project?: Prisma.projectsUpdateOneRequiredWithoutEquity_holdersNestedInput
   equity_events?: Prisma.equity_eventsUpdateManyWithoutHolderNestedInput
   participations?: Prisma.participationsUpdateManyWithoutEquity_holderNestedInput
+  founder_agreement?: Prisma.participation_agreementsUpdateOneWithoutFounder_holderNestedInput
+  ignitux_agreement?: Prisma.participation_agreementsUpdateOneWithoutIgnitux_holderNestedInput
 }
 
 export type equity_holdersUncheckedUpdateWithoutDividendsInput = {
@@ -605,6 +665,136 @@ export type equity_holdersUncheckedUpdateWithoutDividendsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutHolderNestedInput
   participations?: Prisma.participationsUncheckedUpdateManyWithoutEquity_holderNestedInput
+  founder_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutFounder_holderNestedInput
+  ignitux_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutIgnitux_holderNestedInput
+}
+
+export type equity_holdersCreateWithoutFounder_agreementInput = {
+  id?: string
+  name: string
+  is_founder?: boolean
+  created_at?: Date | string | null
+  project: Prisma.projectsCreateNestedOneWithoutEquity_holdersInput
+  equity_events?: Prisma.equity_eventsCreateNestedManyWithoutHolderInput
+  dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutHolderInput
+  participations?: Prisma.participationsCreateNestedManyWithoutEquity_holderInput
+  ignitux_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutIgnitux_holderInput
+}
+
+export type equity_holdersUncheckedCreateWithoutFounder_agreementInput = {
+  id?: string
+  project_id: string
+  name: string
+  is_founder?: boolean
+  created_at?: Date | string | null
+  equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutHolderInput
+  dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutHolderInput
+  participations?: Prisma.participationsUncheckedCreateNestedManyWithoutEquity_holderInput
+  ignitux_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutIgnitux_holderInput
+}
+
+export type equity_holdersCreateOrConnectWithoutFounder_agreementInput = {
+  where: Prisma.equity_holdersWhereUniqueInput
+  create: Prisma.XOR<Prisma.equity_holdersCreateWithoutFounder_agreementInput, Prisma.equity_holdersUncheckedCreateWithoutFounder_agreementInput>
+}
+
+export type equity_holdersCreateWithoutIgnitux_agreementInput = {
+  id?: string
+  name: string
+  is_founder?: boolean
+  created_at?: Date | string | null
+  project: Prisma.projectsCreateNestedOneWithoutEquity_holdersInput
+  equity_events?: Prisma.equity_eventsCreateNestedManyWithoutHolderInput
+  dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutHolderInput
+  participations?: Prisma.participationsCreateNestedManyWithoutEquity_holderInput
+  founder_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutFounder_holderInput
+}
+
+export type equity_holdersUncheckedCreateWithoutIgnitux_agreementInput = {
+  id?: string
+  project_id: string
+  name: string
+  is_founder?: boolean
+  created_at?: Date | string | null
+  equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutHolderInput
+  dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutHolderInput
+  participations?: Prisma.participationsUncheckedCreateNestedManyWithoutEquity_holderInput
+  founder_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutFounder_holderInput
+}
+
+export type equity_holdersCreateOrConnectWithoutIgnitux_agreementInput = {
+  where: Prisma.equity_holdersWhereUniqueInput
+  create: Prisma.XOR<Prisma.equity_holdersCreateWithoutIgnitux_agreementInput, Prisma.equity_holdersUncheckedCreateWithoutIgnitux_agreementInput>
+}
+
+export type equity_holdersUpsertWithoutFounder_agreementInput = {
+  update: Prisma.XOR<Prisma.equity_holdersUpdateWithoutFounder_agreementInput, Prisma.equity_holdersUncheckedUpdateWithoutFounder_agreementInput>
+  create: Prisma.XOR<Prisma.equity_holdersCreateWithoutFounder_agreementInput, Prisma.equity_holdersUncheckedCreateWithoutFounder_agreementInput>
+  where?: Prisma.equity_holdersWhereInput
+}
+
+export type equity_holdersUpdateToOneWithWhereWithoutFounder_agreementInput = {
+  where?: Prisma.equity_holdersWhereInput
+  data: Prisma.XOR<Prisma.equity_holdersUpdateWithoutFounder_agreementInput, Prisma.equity_holdersUncheckedUpdateWithoutFounder_agreementInput>
+}
+
+export type equity_holdersUpdateWithoutFounder_agreementInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  is_founder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  project?: Prisma.projectsUpdateOneRequiredWithoutEquity_holdersNestedInput
+  equity_events?: Prisma.equity_eventsUpdateManyWithoutHolderNestedInput
+  dividends?: Prisma.dividend_distributionsUpdateManyWithoutHolderNestedInput
+  participations?: Prisma.participationsUpdateManyWithoutEquity_holderNestedInput
+  ignitux_agreement?: Prisma.participation_agreementsUpdateOneWithoutIgnitux_holderNestedInput
+}
+
+export type equity_holdersUncheckedUpdateWithoutFounder_agreementInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  project_id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  is_founder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutHolderNestedInput
+  dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutHolderNestedInput
+  participations?: Prisma.participationsUncheckedUpdateManyWithoutEquity_holderNestedInput
+  ignitux_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutIgnitux_holderNestedInput
+}
+
+export type equity_holdersUpsertWithoutIgnitux_agreementInput = {
+  update: Prisma.XOR<Prisma.equity_holdersUpdateWithoutIgnitux_agreementInput, Prisma.equity_holdersUncheckedUpdateWithoutIgnitux_agreementInput>
+  create: Prisma.XOR<Prisma.equity_holdersCreateWithoutIgnitux_agreementInput, Prisma.equity_holdersUncheckedCreateWithoutIgnitux_agreementInput>
+  where?: Prisma.equity_holdersWhereInput
+}
+
+export type equity_holdersUpdateToOneWithWhereWithoutIgnitux_agreementInput = {
+  where?: Prisma.equity_holdersWhereInput
+  data: Prisma.XOR<Prisma.equity_holdersUpdateWithoutIgnitux_agreementInput, Prisma.equity_holdersUncheckedUpdateWithoutIgnitux_agreementInput>
+}
+
+export type equity_holdersUpdateWithoutIgnitux_agreementInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  is_founder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  project?: Prisma.projectsUpdateOneRequiredWithoutEquity_holdersNestedInput
+  equity_events?: Prisma.equity_eventsUpdateManyWithoutHolderNestedInput
+  dividends?: Prisma.dividend_distributionsUpdateManyWithoutHolderNestedInput
+  participations?: Prisma.participationsUpdateManyWithoutEquity_holderNestedInput
+  founder_agreement?: Prisma.participation_agreementsUpdateOneWithoutFounder_holderNestedInput
+}
+
+export type equity_holdersUncheckedUpdateWithoutIgnitux_agreementInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  project_id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  is_founder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutHolderNestedInput
+  dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutHolderNestedInput
+  participations?: Prisma.participationsUncheckedUpdateManyWithoutEquity_holderNestedInput
+  founder_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutFounder_holderNestedInput
 }
 
 export type equity_holdersCreateWithoutParticipationsInput = {
@@ -615,6 +805,8 @@ export type equity_holdersCreateWithoutParticipationsInput = {
   project: Prisma.projectsCreateNestedOneWithoutEquity_holdersInput
   equity_events?: Prisma.equity_eventsCreateNestedManyWithoutHolderInput
   dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutHolderInput
+  founder_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutFounder_holderInput
+  ignitux_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutIgnitux_holderInput
 }
 
 export type equity_holdersUncheckedCreateWithoutParticipationsInput = {
@@ -625,6 +817,8 @@ export type equity_holdersUncheckedCreateWithoutParticipationsInput = {
   created_at?: Date | string | null
   equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutHolderInput
   dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutHolderInput
+  founder_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutFounder_holderInput
+  ignitux_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutIgnitux_holderInput
 }
 
 export type equity_holdersCreateOrConnectWithoutParticipationsInput = {
@@ -651,6 +845,8 @@ export type equity_holdersUpdateWithoutParticipationsInput = {
   project?: Prisma.projectsUpdateOneRequiredWithoutEquity_holdersNestedInput
   equity_events?: Prisma.equity_eventsUpdateManyWithoutHolderNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutHolderNestedInput
+  founder_agreement?: Prisma.participation_agreementsUpdateOneWithoutFounder_holderNestedInput
+  ignitux_agreement?: Prisma.participation_agreementsUpdateOneWithoutIgnitux_holderNestedInput
 }
 
 export type equity_holdersUncheckedUpdateWithoutParticipationsInput = {
@@ -661,6 +857,8 @@ export type equity_holdersUncheckedUpdateWithoutParticipationsInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutHolderNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutHolderNestedInput
+  founder_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutFounder_holderNestedInput
+  ignitux_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutIgnitux_holderNestedInput
 }
 
 export type equity_holdersCreateManyProjectInput = {
@@ -678,6 +876,8 @@ export type equity_holdersUpdateWithoutProjectInput = {
   equity_events?: Prisma.equity_eventsUpdateManyWithoutHolderNestedInput
   dividends?: Prisma.dividend_distributionsUpdateManyWithoutHolderNestedInput
   participations?: Prisma.participationsUpdateManyWithoutEquity_holderNestedInput
+  founder_agreement?: Prisma.participation_agreementsUpdateOneWithoutFounder_holderNestedInput
+  ignitux_agreement?: Prisma.participation_agreementsUpdateOneWithoutIgnitux_holderNestedInput
 }
 
 export type equity_holdersUncheckedUpdateWithoutProjectInput = {
@@ -688,6 +888,8 @@ export type equity_holdersUncheckedUpdateWithoutProjectInput = {
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutHolderNestedInput
   dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutHolderNestedInput
   participations?: Prisma.participationsUncheckedUpdateManyWithoutEquity_holderNestedInput
+  founder_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutFounder_holderNestedInput
+  ignitux_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutIgnitux_holderNestedInput
 }
 
 export type equity_holdersUncheckedUpdateManyWithoutProjectInput = {
@@ -756,6 +958,8 @@ export type equity_holdersSelect<ExtArgs extends runtime.Types.Extensions.Intern
   equity_events?: boolean | Prisma.equity_holders$equity_eventsArgs<ExtArgs>
   dividends?: boolean | Prisma.equity_holders$dividendsArgs<ExtArgs>
   participations?: boolean | Prisma.equity_holders$participationsArgs<ExtArgs>
+  founder_agreement?: boolean | Prisma.equity_holders$founder_agreementArgs<ExtArgs>
+  ignitux_agreement?: boolean | Prisma.equity_holders$ignitux_agreementArgs<ExtArgs>
   _count?: boolean | Prisma.Equity_holdersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["equity_holders"]>
 
@@ -791,6 +995,8 @@ export type equity_holdersInclude<ExtArgs extends runtime.Types.Extensions.Inter
   equity_events?: boolean | Prisma.equity_holders$equity_eventsArgs<ExtArgs>
   dividends?: boolean | Prisma.equity_holders$dividendsArgs<ExtArgs>
   participations?: boolean | Prisma.equity_holders$participationsArgs<ExtArgs>
+  founder_agreement?: boolean | Prisma.equity_holders$founder_agreementArgs<ExtArgs>
+  ignitux_agreement?: boolean | Prisma.equity_holders$ignitux_agreementArgs<ExtArgs>
   _count?: boolean | Prisma.Equity_holdersCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type equity_holdersIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -807,6 +1013,8 @@ export type $equity_holdersPayload<ExtArgs extends runtime.Types.Extensions.Inte
     equity_events: Prisma.$equity_eventsPayload<ExtArgs>[]
     dividends: Prisma.$dividend_distributionsPayload<ExtArgs>[]
     participations: Prisma.$participationsPayload<ExtArgs>[]
+    founder_agreement: Prisma.$participation_agreementsPayload<ExtArgs> | null
+    ignitux_agreement: Prisma.$participation_agreementsPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1212,6 +1420,8 @@ export interface Prisma__equity_holdersClient<T, Null = never, ExtArgs extends r
   equity_events<T extends Prisma.equity_holders$equity_eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.equity_holders$equity_eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$equity_eventsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   dividends<T extends Prisma.equity_holders$dividendsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.equity_holders$dividendsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$dividend_distributionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   participations<T extends Prisma.equity_holders$participationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.equity_holders$participationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$participationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  founder_agreement<T extends Prisma.equity_holders$founder_agreementArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.equity_holders$founder_agreementArgs<ExtArgs>>): Prisma.Prisma__participation_agreementsClient<runtime.Types.Result.GetResult<Prisma.$participation_agreementsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  ignitux_agreement<T extends Prisma.equity_holders$ignitux_agreementArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.equity_holders$ignitux_agreementArgs<ExtArgs>>): Prisma.Prisma__participation_agreementsClient<runtime.Types.Result.GetResult<Prisma.$participation_agreementsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1716,6 +1926,44 @@ export type equity_holders$participationsArgs<ExtArgs extends runtime.Types.Exte
   take?: number
   skip?: number
   distinct?: Prisma.ParticipationsScalarFieldEnum | Prisma.ParticipationsScalarFieldEnum[]
+}
+
+/**
+ * equity_holders.founder_agreement
+ */
+export type equity_holders$founder_agreementArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the participation_agreements
+   */
+  select?: Prisma.participation_agreementsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the participation_agreements
+   */
+  omit?: Prisma.participation_agreementsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.participation_agreementsInclude<ExtArgs> | null
+  where?: Prisma.participation_agreementsWhereInput
+}
+
+/**
+ * equity_holders.ignitux_agreement
+ */
+export type equity_holders$ignitux_agreementArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the participation_agreements
+   */
+  select?: Prisma.participation_agreementsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the participation_agreements
+   */
+  omit?: Prisma.participation_agreementsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.participation_agreementsInclude<ExtArgs> | null
+  where?: Prisma.participation_agreementsWhereInput
 }
 
 /**

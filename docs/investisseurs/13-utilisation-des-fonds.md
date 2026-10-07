@@ -9,7 +9,7 @@ ici** : la répartition ci-dessous est une structure à remplir, pas une allocat
 | Poste | Description | Part du montant total | Justification |
 |---|---|---|---|
 | Infrastructure technique | Hébergement, domaine, email, budget IA, paiement, monitoring | **[À DÉFINIR]** | Postes identifiés et chiffrés individuellement dans `docs/en-attente-paiement.md` |
-| Juridique et conformité | Statuts, montage 51/49, RGPD formalisé, éventuelle revue réglementaire du module Financement & Investisseurs (voir `10-risques-et-reponses.md`) | **[À DÉFINIR]** | Aucun devis dans le dépôt ; à obtenir |
+| Juridique et conformité | Statuts, montage de participation (51/49 au départ), RGPD formalisé, éventuelle revue réglementaire du module Financement & Investisseurs (voir `10-risques-et-reponses.md`) | **[À DÉFINIR]** | Aucun devis dans le dépôt ; à obtenir |
 | Développement (recrutement ou sous-traitance) | Fusion des trois chantiers en worktree, suite de la roadmap Bible ch. 9 | **[À DÉFINIR]** | Dépend du choix : le fondateur seul, ou renfort |
 | Rémunération du fondateur | Temps plein sur le projet | **[À DÉFINIR]** | Non présent dans le dépôt — décision personnelle du fondateur |
 | Acquisition / marketing | Premiers canaux d'acquisition | **[À DÉFINIR]** | Aucune stratégie testée à ce jour, voir `09-concurrence.md` et le domaine 9 (acquisition clients) dans `04-dossier-investisseur.md` |

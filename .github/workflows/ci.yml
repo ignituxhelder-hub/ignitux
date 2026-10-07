@@ -175,6 +175,12 @@ jobs:
       IGINI_AI_ENABLED: 'false'
       MAIL_TRANSPORT: log
       TRUST_PROXY: 'false'
+      # Clé de test publiée par Cloudflare : siteverify répond « succès » pour
+      # n'importe quel jeton. Sans elle, l'inscription refuse tout jeton (400)
+      # et chaque test de bout en bout échoue à créer son compte avant d'avoir
+      # rien vérifié. Jamais utilisable en production : production-preflight.ts
+      # la refuse.
+      TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
 
     steps:
       - uses: actions/checkout@v4
@@ -269,9 +275,16 @@ jobs:
         run: |
           docker run --rm --network host             -e DATABASE_URL=postgresql://ignitux:ignitux@localhost:5432/ignitux             -v "$PWD/backend:/w" -w /w node:24-slim             sh -c "npm ci --silent && npx prisma migrate deploy"
 
+      # L'image tourne en NODE_ENV=production : le contrôle de démarrage
+      # (config/production-preflight.ts) refuse donc tout réglage de production
+      # manquant ou local, et le serveur s'arrête avant de répondre. On lui donne
+      # ici des valeurs d'allure valide mais FACTICES — ce job vérifie que
+      # l'image démarre, pas qu'elle est configurée. Le contrôle, lui, reste
+      # entier : une clé Turnstile de test, par exemple, y serait toujours
+      # refusée, d'où la chaîne inventée.
       - name: L'image du serveur répond-elle ?
         run: |
-          docker run -d --name serveur-fumee --network host             -e DATABASE_URL=postgresql://ignitux:ignitux@localhost:5432/ignitux             -e JWT_SECRET=secret-de-ci-sans-valeur-hors-de-ce-job-mais-assez-long             -e FRONTEND_URL=http://localhost:3001             -e TRUST_PROXY=false -e MAIL_TRANSPORT=log -e IGINI_AI_ENABLED=false             -e PORT=3000             ignitux-backend:ci
+          docker run -d --name serveur-fumee --network host             -e DATABASE_URL=postgresql://ignitux:ignitux@localhost:5432/ignitux             -e JWT_SECRET=secret-de-ci-sans-valeur-hors-de-ce-job-mais-assez-long             -e FRONTEND_URL=https://ci-fumee.ignitux.fr             -e IGNITUX_RAISON_SOCIALE="Ignitux (test de fumée CI)"             -e IGNITUX_ADRESSE="1 rue de la Fumée, 75000 Paris"             -e IGNITUX_EMAIL=ci-fumee@ignitux.fr             -e TURNSTILE_SECRET_KEY=0xCI-FUMEE-cle-factice-jamais-valide             -e TRUST_PROXY=false -e MAIL_TRANSPORT=log -e IGINI_AI_ENABLED=false             -e PORT=3000             ignitux-backend:ci
 
           for i in $(seq 1 45); do
             if curl -fsS http://localhost:3000/health > /dev/null 2>&1; then

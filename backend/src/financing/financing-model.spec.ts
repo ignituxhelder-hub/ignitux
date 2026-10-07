@@ -223,10 +223,30 @@ describe('trajectoire du porteur', () => {
 });
 
 describe('modèle économique IGNITUX', () => {
-  it("annonce la répartition d'entrée et la part perpétuelle", () => {
+  it("annonce la structure de départ et le droit sur les dividendes", () => {
     expect(FINANCING_SCOPE_NOTICE).toContain('51 %');
     expect(FINANCING_SCOPE_NOTICE).toContain('49 %');
     expect(FINANCING_SCOPE_NOTICE).toContain('5 %');
+  });
+
+  it("présente 51/49 comme une valeur de départ de l'accord, jamais comme une règle", () => {
+    expect(FINANCING_SCOPE_NOTICE).toMatch(/valeur de départ/);
+    expect(FINANCING_SCOPE_NOTICE).toMatch(/propre à chaque accord/);
+    expect(FINANCING_SCOPE_NOTICE).toMatch(/jamais une règle/);
+  });
+
+  it("dit que la part d'IGNITUX ne fait que baisser, sans dépendre du temps", () => {
+    expect(FINANCING_SCOPE_NOTICE).toMatch(/ne fait que baisser/);
+    expect(FINANCING_SCOPE_NOTICE).toMatch(/jusqu'à 0 %/);
+    expect(FINANCING_SCOPE_NOTICE).toMatch(/aucun palier ne dépend du temps/i);
+  });
+
+  it("sépare le droit sur les dividendes du capital et le réserve à l'après-transmission", () => {
+    expect(FINANCING_SCOPE_NOTICE).toMatch(/une fois le capital entièrement transmis/);
+    expect(FINANCING_SCOPE_NOTICE).toMatch(/pas une part de capital/);
+    // L'ancienne formulation faisait croire à un prélèvement dès l'entrée.
+    expect(FINANCING_SCOPE_NOTICE).not.toMatch(/à vie/);
+    expect(FINANCING_SCOPE_NOTICE).not.toMatch(/rachat progressif jusqu'à 100 %/);
   });
 
   it('continue de dire ce qui reste non calculé', () => {

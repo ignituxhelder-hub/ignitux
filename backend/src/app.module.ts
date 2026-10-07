@@ -11,6 +11,7 @@ import { ConstitutionModule } from './constitution/constitution.module.js';
 import { CrmModule } from './crm/crm.module.js';
 import { BankingModule } from './banking/banking.module.js';
 import { FinancingModule } from './financing/financing.module.js';
+import { ParticipationModule } from './participation/participation.module.js';
 import { FinanceAuditModule } from './finance-audit/finance-audit.module.js';
 import { InvestorsModule } from './investors/investors.module.js';
 import { RolesModule } from './roles/roles.module.js';
@@ -59,6 +60,7 @@ import { PubliciteModule } from './publicite/publicite.module.js';
     CrmModule,
     BillingModule,
     FinancingModule,
+    ParticipationModule,
     LedgerModule,
     BankingModule,
     InvestorsModule,

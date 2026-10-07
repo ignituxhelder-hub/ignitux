@@ -955,3 +955,62 @@ décision technique à prendre seul.
 **Où** — `backend/prisma/migrations/`, `backend/prisma/migrations/migration_lock.toml`,
 `.github/workflows/ci.yml`, `backend/src/observability/readiness.service.ts` (le message
 `schema`/`colonnes` recommande maintenant `migrate deploy`, plus `db push`).
+
+## La participation d'IGNITUX : trois couches, un accord, des paliers validés par IGNITUX
+
+**Quoi** — un module `backend/src/participation/` et trois tables (`participation_agreements`,
+`participation_milestones`, `dividend_right_entries`) portent le modèle de participation. Il sépare
+trois choses qui ne se mélangent jamais :
+
+1. **Le capital** — reste dans `equity_holders` / `equity_events`, seule autorité. La structure de
+   départ actuelle est 51 % entrepreneur / 49 % IGNITUX ; la part d'IGNITUX ne fait que baisser,
+   par paliers, jusqu'à 0 %. L'historique est conservé : un palier *ajoute* des événements.
+2. **Le droit économique** — 5 % des dividendes réellement distribués, **uniquement** une fois
+   IGNITUX à 0 % du capital. Enregistré dans `dividend_right_entries`, jamais dans le capital.
+   Aucun dividende distribué, aucune ligne, aucun paiement.
+3. **L'accès à l'écosystème** — porté par `ecosystem_offre` sur l'accord (défaut : `construction`,
+   modifiable par accord). `OffresService.offreDe` retient la meilleure offre entre l'abonnement et
+   les accords actifs ou transmis, sans lire le capital : l'accès ne disparaît pas à 0 %.
+
+**Pourquoi pas de règle de temps** — aucune colonne, aucune fonction ne porte une durée ou une
+échéance. Un palier passe de `prevu` à `valide` quand IGNITUX constate que les conditions écrites
+*pour ce projet* sont remplies, puis à `execute` à une date effective choisie. Un palier sans
+condition ne peut pas être validé : il n'y a rien à constater, et le produit n'en invente pas.
+51/49 et 5 % ne sont que des valeurs **par défaut**, recopiées dans l'accord à sa création ; l'accord
+ne relit jamais ces constantes (`participation-model.ts` est leur source unique).
+
+**Qui peut quoi** — créer l'accord, prévoir / valider / exécuter un palier et régler un droit sont
+réservés à IGNITUX (`IGNITUX_OPERATEURS`, liste d'e-mails, vide = personne). Créer l'accord est aussi
+réservé : sinon l'entrepreneur pourrait s'écrire un taux de 0 % ou se donner une offre payante.
+L'entrepreneur lit, *prend connaissance* d'un palier (ce qui ne valide rien) et constate ses
+dividendes distribués. La saisie manuelle des parts des deux détenteurs d'un accord est refusée
+(`FinancingService`), sinon le porteur contournerait la validation ; un projet sans accord se
+comporte exactement comme avant.
+
+**Règles constitutionnelles** (art. 22) — `ignitux-ne-remonte-pas`,
+`droit-dividendes-apres-transmission`, et `majorite-du-porteur` étendue à l'exécution d'un palier.
+
+**L'ancien mécanisme des 5 %** — le moteur investisseurs peut encore prélever 5 % d'un versement, à
+la demande et à n'importe quel moment (`applyPerpetualShare`). **Ce n'est pas le droit économique
+d'IGNITUX.** Il est conservé pour ne casser aucun projet existant, relibellé comme « ancien
+mécanisme » dans l'interface, et sera nettoyé dans une étape ultérieure.
+
+**Ce qui n'est pas fait** — aucune valorisation, aucun prix de rachat, aucun virement. Le registre
+dit ce qui est dû, il ne le prélève pas. Le droit sur les dividendes est constaté sur la déclaration
+du porteur : aucune vérification externe n'existe. Le statut juridique de ce mécanisme n'a pas été
+relu par un juriste.
+
+**Limite connue** — pour voir l'écran, un opérateur IGNITUX doit avoir accès au projet (propriétaire
+ou collaborateur) : l'écran vit sur la page du projet. Ses écritures, elles, ne dépendent que de son
+e-mail.
+
+**Migration** — `20261003140000_participation_ignitux`, purement additive (trois `CREATE TABLE`).
+Rejouée avec les migrations précédentes sur un Postgres en mémoire ; non appliquée aux bases
+`ignitux_test` / `ignitux_prod` (voir l'entrée sur les migrations : elles n'ont pas de point de
+départ).
+
+**Où** — `backend/src/participation/`, `backend/prisma/schema.prisma`,
+`backend/src/financing/financing-model.ts` (avis de périmètre reformulé),
+`backend/src/offres/offres.service.ts`, `backend/src/projects/projects.service.ts` (contexte IGINI),
+`backend/src/constitution/constitution-rules.ts`, `backend/src/users/user-data-scope.ts` (export),
+`frontend/src/app/projects/[id]/participation-section.tsx`.

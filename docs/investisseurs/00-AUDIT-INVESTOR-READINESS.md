@@ -79,8 +79,8 @@ Démontré = code existant, couvert par des tests automatisés qui passent, sur 
 Trois catégories bien distinctes, à ne pas confondre :
 
 **A. Manque = décision du fondateur, pas du code** [Bible, ResteAFaire] : hébergement, domaine,
-fournisseur d'email, budget IA à ouvrir, rôle des « Gardiens » (article 17), montage juridique du
-51/49, fournisseur de paiement, SIRET/immatriculation.
+fournisseur d'email, budget IA à ouvrir, rôle des « Gardiens » (article 17), montage juridique de la
+participation (51/49 au départ), fournisseur de paiement, SIRET/immatriculation.
 
 **B. Manque = intégration de travail déjà fait** : le chantier « poste de travail »/PWA (non commité
 sur `main`), l'orchestrateur conversationnel IGINI, le générateur « Former », la boutique Shopify
@@ -113,7 +113,7 @@ financier destiné à un investisseur n'existait avant ce dossier.
 Ceux que ce dossier vient de produire (`docs/investisseurs/`) couvrent le narratif, le produit, les
 risques et la prospection. Restent à créer, **et cela ne peut être fait que par toi ou avec un
 professionnel** : statuts de société (si non encore faits), cap table, tout document contractuel du
-montage 51/49, un modèle financier chiffré réel (le squelette est dans `13-utilisation-des-fonds.md`
+montage de participation (51/49 au départ), un modèle financier chiffré réel (le squelette est dans `13-utilisation-des-fonds.md`
 et `05-modele-economique.md`, les chiffres sont à toi).
 
 ## 7. Quelles informations le fondateur doit fournir ?

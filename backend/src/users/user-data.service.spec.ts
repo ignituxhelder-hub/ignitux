@@ -230,6 +230,22 @@ describe('UserDataService', () => {
       ]);
     });
 
+    it("inclut l'accord de participation IGNITUX, ses paliers et son droit sur les dividendes, dans le financement", async () => {
+      // Trois couches distinctes (capital, droit économique, accès) : le droit
+      // sur les dividendes ne doit pas se perdre dans les parts de capital.
+      const accord = {
+        id: 'a1',
+        dividend_right_bps: 500,
+        milestones: [{ id: 'm1', position: 1, target_ignitux_bps: 3000 }],
+        dividend_rights: [{ id: 'd1', due_cents: 50000 }],
+      };
+      prisma.participation_agreements.findMany.mockResolvedValue([accord]);
+
+      const exported = await service.exportUserData('u1');
+
+      expect(exported.donnees.financement.accords_de_participation).toEqual([accord]);
+    });
+
     it('inclut le journal des violations qui concernent la personne', async () => {
       prisma.constitution_violations.findMany.mockResolvedValue([{ id: 'v1', user_id: 'u1' }]);
 

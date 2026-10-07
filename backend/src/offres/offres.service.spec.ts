@@ -10,6 +10,7 @@ describe('OffresService', () => {
       findUnique: ReturnType<typeof vi.fn>;
       upsert: ReturnType<typeof vi.fn>;
     };
+    participation_agreements: { findMany: ReturnType<typeof vi.fn> };
   };
   let fournisseurInitial: string | undefined;
   let betaInitial: string | undefined;
@@ -22,6 +23,8 @@ describe('OffresService', () => {
 
     prisma = {
       subscriptions: { findUnique: vi.fn().mockResolvedValue(null), upsert: vi.fn() },
+      // Aucun accord par défaut : l'offre se lit comme avant.
+      participation_agreements: { findMany: vi.fn().mockResolvedValue([]) },
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -86,6 +89,67 @@ describe('OffresService', () => {
       prisma.subscriptions.findUnique.mockRejectedValue(new Error('base injoignable'));
 
       await expect(service.offreDe('u1')).resolves.toBe('decouverte');
+    });
+  });
+
+  describe('lire l’offre garantie par un accord de participation', () => {
+    beforeEach(() => {
+      process.env.IGNITUX_BETA_V1 = 'false';
+    });
+
+    it('donne l’offre de l’accord à quelqu’un qui n’a aucun abonnement', async () => {
+      prisma.participation_agreements.findMany.mockResolvedValue([{ ecosystem_offre: 'construction' }]);
+
+      await expect(service.offreDe('u1')).resolves.toBe('construction');
+    });
+
+    it('ne cherche que les accords actifs ou transmis du porteur — jamais le capital', async () => {
+      prisma.participation_agreements.findMany.mockResolvedValue([{ ecosystem_offre: 'construction' }]);
+
+      await service.offreDe('u1');
+
+      expect(prisma.participation_agreements.findMany.mock.calls[0][0].where).toEqual({
+        project: { owner_id: 'u1' },
+        status: { in: ['actif', 'transmis'] },
+      });
+    });
+
+    it('garde la meilleure offre entre l’abonnement et l’accord', async () => {
+      prisma.subscriptions.findUnique.mockResolvedValue({ offre: 'construction', ends_on: null });
+      prisma.participation_agreements.findMany.mockResolvedValue([{ ecosystem_offre: 'entrepreneur' }]);
+
+      await expect(service.offreDe('u1')).resolves.toBe('construction');
+    });
+
+    it('relève l’abonnement quand l’accord garantit mieux', async () => {
+      prisma.subscriptions.findUnique.mockResolvedValue({ offre: 'entrepreneur', ends_on: null });
+      prisma.participation_agreements.findMany.mockResolvedValue([{ ecosystem_offre: 'construction' }]);
+
+      await expect(service.offreDe('u1')).resolves.toBe('construction');
+    });
+
+    it('prend la meilleure offre quand la personne a plusieurs accords', async () => {
+      prisma.participation_agreements.findMany.mockResolvedValue([
+        { ecosystem_offre: 'entrepreneur' },
+        { ecosystem_offre: 'construction' },
+      ]);
+
+      await expect(service.offreDe('u1')).resolves.toBe('construction');
+    });
+
+    it('ignore une offre d’accord inconnue du catalogue', async () => {
+      prisma.participation_agreements.findMany.mockResolvedValue([{ ecosystem_offre: 'illimitee' }]);
+
+      await expect(service.offreDe('u1')).resolves.toBe('decouverte');
+    });
+
+    // Un incident sur la lecture des accords ne doit pas retirer ce que
+    // l'abonnement donne.
+    it('retombe sur l’abonnement si la lecture des accords échoue, sans propager', async () => {
+      prisma.subscriptions.findUnique.mockResolvedValue({ offre: 'entrepreneur', ends_on: null });
+      prisma.participation_agreements.findMany.mockRejectedValue(new Error('base injoignable'));
+
+      await expect(service.offreDe('u1')).resolves.toBe('entrepreneur');
     });
   });
 

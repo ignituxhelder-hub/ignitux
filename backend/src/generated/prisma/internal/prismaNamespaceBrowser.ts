@@ -80,6 +80,9 @@ export const ModelName = {
   equity_holders: 'equity_holders',
   equity_events: 'equity_events',
   dividend_distributions: 'dividend_distributions',
+  participation_agreements: 'participation_agreements',
+  participation_milestones: 'participation_milestones',
+  dividend_right_entries: 'dividend_right_entries',
   billing_documents: 'billing_documents',
   billing_lines: 'billing_lines',
   billing_payments: 'billing_payments',
@@ -515,6 +518,63 @@ export const Dividend_distributionsScalarFieldEnum = {
 } as const
 
 export type Dividend_distributionsScalarFieldEnum = (typeof Dividend_distributionsScalarFieldEnum)[keyof typeof Dividend_distributionsScalarFieldEnum]
+
+
+export const Participation_agreementsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  founder_holder_id: 'founder_holder_id',
+  ignitux_holder_id: 'ignitux_holder_id',
+  initial_founder_bps: 'initial_founder_bps',
+  initial_ignitux_bps: 'initial_ignitux_bps',
+  dividend_right_bps: 'dividend_right_bps',
+  status: 'status',
+  effective_on: 'effective_on',
+  contract_reference: 'contract_reference',
+  ecosystem_offre: 'ecosystem_offre',
+  transmitted_on: 'transmitted_on',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Participation_agreementsScalarFieldEnum = (typeof Participation_agreementsScalarFieldEnum)[keyof typeof Participation_agreementsScalarFieldEnum]
+
+
+export const Participation_milestonesScalarFieldEnum = {
+  id: 'id',
+  agreement_id: 'agreement_id',
+  position: 'position',
+  label: 'label',
+  target_ignitux_bps: 'target_ignitux_bps',
+  conditions: 'conditions',
+  status: 'status',
+  validated_at: 'validated_at',
+  validated_by: 'validated_by',
+  validation_note: 'validation_note',
+  founder_acknowledged_at: 'founder_acknowledged_at',
+  effective_on: 'effective_on',
+  executed_at: 'executed_at',
+  equity_event_ids: 'equity_event_ids',
+  created_at: 'created_at'
+} as const
+
+export type Participation_milestonesScalarFieldEnum = (typeof Participation_milestonesScalarFieldEnum)[keyof typeof Participation_milestonesScalarFieldEnum]
+
+
+export const Dividend_right_entriesScalarFieldEnum = {
+  id: 'id',
+  agreement_id: 'agreement_id',
+  distributed_cents: 'distributed_cents',
+  right_bps: 'right_bps',
+  due_cents: 'due_cents',
+  occurred_on: 'occurred_on',
+  status: 'status',
+  settled_on: 'settled_on',
+  note: 'note',
+  created_at: 'created_at'
+} as const
+
+export type Dividend_right_entriesScalarFieldEnum = (typeof Dividend_right_entriesScalarFieldEnum)[keyof typeof Dividend_right_entriesScalarFieldEnum]
 
 
 export const Billing_documentsScalarFieldEnum = {

@@ -159,7 +159,7 @@ export class FinanceAuditService {
    * répartir ligne par ligne autrement — et il le signale déjà dans la table
    * de capitalisation (`discrepancyBasisPoints`). Ce qu'il ne dit nulle part,
    * c'est **combien de projets** sont restés dans cet état. Or tant qu'une
-   * répartition ne boucle pas, la garantie des 51 % ne se prononce pas :
+   * répartition ne boucle pas, la garantie que le porteur reste majoritaire ne se prononce pas :
    * `founderHasMajority` vaut `null`, et la protection du porteur est donc
    * en sommeil sans que personne ne l'ait décidé.
    */
@@ -192,7 +192,7 @@ export class FinanceAuditService {
         code: 'capital-incomplet',
         label: 'Projets dont la répartition du capital ne boucle pas à 100 %',
         why:
-          'Tant qu’elle ne boucle pas, la garantie des 51 % ne se prononce pas : la protection ' +
+          'Tant qu’elle ne boucle pas, la garantie que le porteur reste majoritaire ne se prononce pas : la protection ' +
           'du porteur est en sommeil sans que personne ne l’ait décidé.',
         count: lignes.length,
         sample: lignes.map((l) => l.project_id).slice(0, 5),
