@@ -36,6 +36,7 @@ import { AutomationSection } from './automation-section';
 import { WorkflowSection } from './workflow-section';
 import { BuybackSection, FinancingSection } from './financing-section';
 import { CollaboratorsSection } from './collaborators-section';
+import { StatutsSection } from './statuts-section';
 import { ComplianceSection } from './compliance-section';
 import { KnowledgeSection, MemorySection, ScoreHistorySection, ScoreSection, TasksSection } from './engine-sections';
 
@@ -754,6 +755,18 @@ export default function ProjectDetailPage() {
       {montrer('financement') && <FinancingSection token={token} projectId={id} readOnly={!isOwner} />}
       {montrer('capital') && <BuybackSection token={token} projectId={id} readOnly={!isOwner} />}
       {montrer('collaborateurs') && isOwner && <CollaboratorsSection token={token} projectId={id} />}
+      {/* Les statuts relevent de la construction de la société ; leur création est
+          réservée au propriétaire côté serveur, donc la section l'est aussi. */}
+      {montrer('construction') && isOwner && (
+        <StatutsSection
+          token={token}
+          projectId={id}
+          confirmedLegalForm={project?.confirmed_legal_form ?? null}
+          onFormConfirmed={(form) =>
+            setProject((courant) => (courant ? { ...courant, confirmed_legal_form: form } : courant))
+          }
+        />
+      )}
 
       {vueAvancee && parcours && <SectionsFermees parcours={parcours} />}
     </main>

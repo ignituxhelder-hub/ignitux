@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { api, ApiError, type CompanyBylaws, type GenerateBylawsInput } from '@/lib/api';
-import { centimesDepuisEuros } from '@/lib/montants';
+import { centimesDepuisEuros, jour } from '@/lib/montants';
 
 const FORMES = ['micro-entreprise', 'EI', 'EURL', 'SASU', 'SARL', 'SAS'] as const;
 const FORMES_AVEC_PERSONNE_MORALE = new Set(['EURL', 'SASU', 'SARL', 'SAS']);
@@ -55,6 +55,12 @@ function construireDemande(saisie: {
   return { dto: { capitalCents, headOffice: saisie.headOffice.trim(), durationYears, associates } };
 }
 
+/** Centimes ou points de base → saisie française (« 1000 », « 33,33 »). */
+function saisieDepuisCentiemes(valeur: number): string {
+  const unites = valeur / 100;
+  return Number.isInteger(unites) ? String(unites) : unites.toFixed(2).replace('.', ',');
+}
+
 /**
  * STATUTS — brouillon à relire, jamais un document prêt à déposer sans
  * contrôle. Même principe que Former et que le mandat : une aide, pas une
@@ -73,7 +79,12 @@ export function StatutsSection({
 }) {
   const [formeChoisie, setFormeChoisie] = useState(confirmedLegalForm ?? 'micro-entreprise');
   const [bylaws, setBylaws] = useState<CompanyBylaws | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Le projet pour lequel le chargement a abouti. Dérivé plutôt qu'un
+  // booléen posé dans l'effet : quand la forme confirmée passe de « aucune »
+  // à une société, le tout premier rendu doit déjà être « Chargement… », sinon
+  // le formulaire de génération vide clignote avant que le chargement ne
+  // démarre — et quelqu'un qui a déjà des statuts ne doit jamais le voir.
+  const [projetCharge, setProjetCharge] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [capital, setCapital] = useState('');
@@ -81,22 +92,24 @@ export function StatutsSection({
   const [durationYears, setDurationYears] = useState('99');
   const [associes, setAssocies] = useState<AssocieSaisie[]>([{ fullName: '', sharePercent: '100' }]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isRetaining, setIsRetaining] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const aPersonneMorale = confirmedLegalForm ? FORMES_AVEC_PERSONNE_MORALE.has(confirmedLegalForm) : false;
+  const isLoading = aPersonneMorale && projetCharge !== projectId;
+  const isBusy = isGenerating || isSaving || isRetaining || isDownloading;
 
   const charger = useCallback(async () => {
-    if (!aPersonneMorale) {
-      setIsLoading(false);
-      return;
-    }
-    setIsLoading(true);
+    if (!aPersonneMorale) return;
     try {
       setBylaws(await api.getStatuts(token, projectId));
       setError(null);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de charger les statuts.');
     } finally {
-      setIsLoading(false);
+      setProjetCharge(projectId);
     }
   }, [token, projectId, aPersonneMorale]);
 
@@ -123,11 +136,79 @@ export function StatutsSection({
     }
     setIsGenerating(true);
     try {
-      setBylaws(await api.genererStatuts(token, projectId, demande.dto));
+      if (isRegenerating) {
+        setBylaws(await api.regenererStatuts(token, projectId, demande.dto));
+        setIsRegenerating(false);
+      } else {
+        setBylaws(await api.genererStatuts(token, projectId, demande.dto));
+      }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'La génération a échoué.');
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  /** Rouvre le formulaire, prérempli avec les données des statuts actuels. */
+  const ouvrirRegeneration = () => {
+    if (!bylaws) return;
+    setError(null);
+    setCapital(saisieDepuisCentiemes(bylaws.capital_cents));
+    setHeadOffice(bylaws.head_office);
+    setDurationYears(String(bylaws.duration_years));
+    setAssocies(
+      bylaws.associates.length > 0
+        ? bylaws.associates.map((a) => ({
+            fullName: a.full_name,
+            sharePercent: saisieDepuisCentiemes(a.share_basis_points),
+          }))
+        : [{ fullName: '', sharePercent: '100' }],
+    );
+    setIsRegenerating(true);
+  };
+
+  const enregistrer = async () => {
+    if (!bylaws) return;
+    setError(null);
+    setIsSaving(true);
+    try {
+      setBylaws(await api.modifierStatuts(token, projectId, bylaws.content));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Impossible d'enregistrer les modifications.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const retenir = async () => {
+    setError(null);
+    setIsRetaining(true);
+    try {
+      setBylaws(await api.retenirStatuts(token, projectId));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Impossible de retenir cette version.');
+    } finally {
+      setIsRetaining(false);
+    }
+  };
+
+  const telecharger = async () => {
+    setError(null);
+    setIsDownloading(true);
+    try {
+      const blob = await api.telechargerStatutsPdf(token, projectId);
+      const url = URL.createObjectURL(blob);
+      const lien = document.createElement('a');
+      lien.href = url;
+      lien.download = 'statuts.pdf';
+      lien.click();
+      // Pas de révocation synchrone : certains navigateurs n'ont pas encore
+      // démarré le téléchargement quand le clic revient.
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Impossible de télécharger le PDF.');
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -178,11 +259,17 @@ export function StatutsSection({
         </p>
       )}
 
-      {confirmedLegalForm && aPersonneMorale && !bylaws && (
+      {confirmedLegalForm && aPersonneMorale && (!bylaws || isRegenerating) && (
         <>
           <p className="notice">
             Ce qui suit est un brouillon à relire — jamais un document prêt à déposer sans contrôle.
           </p>
+          {isRegenerating && (
+            <p className="error">
+              Attention : régénérer remplace le texte actuel. Les modifications que tu y as faites à
+              la main seront perdues.
+            </p>
+          )}
           <label htmlFor="statuts-capital">Capital social (€)</label>
           <input
             id="statuts-capital"
@@ -230,7 +317,57 @@ export function StatutsSection({
             Ajouter un associé
           </button>
           <button className="primary" type="button" onClick={genererStatuts} disabled={isGenerating}>
-            {isGenerating ? 'Génération…' : 'Générer les statuts'}
+            {isGenerating ? 'Génération…' : isRegenerating ? 'Régénérer les statuts' : 'Générer les statuts'}
+          </button>
+          {isRegenerating && (
+            <button className="secondary" type="button" onClick={() => setIsRegenerating(false)} disabled={isGenerating}>
+              Annuler
+            </button>
+          )}
+        </>
+      )}
+
+      {confirmedLegalForm && aPersonneMorale && bylaws && !isRegenerating && (
+        <>
+          {bylaws.status === 'brouillon' && (
+            <p className="notice">
+              Brouillon à relire — jamais un document prêt à déposer sans contrôle.
+            </p>
+          )}
+          {bylaws.legal_form !== confirmedLegalForm && (
+            <p className="error">
+              Ce texte a été généré pour « {bylaws.legal_form} », mais la forme confirmée sur ce
+              projet est maintenant « {confirmedLegalForm} ». Le contenu n&apos;a pas suivi ce
+              changement automatiquement — régénère si tu veux qu&apos;il corresponde à la forme
+              actuelle.
+            </p>
+          )}
+          <label htmlFor="statuts-texte">Texte des statuts</label>
+          <textarea
+            id="statuts-texte"
+            aria-label="Texte des statuts"
+            value={bylaws.content}
+            readOnly={bylaws.status === 'retenue'}
+            onChange={(e) => setBylaws({ ...bylaws, content: e.target.value })}
+            rows={20}
+            style={{ width: '100%' }}
+          />
+          {bylaws.status === 'brouillon' && (
+            <>
+              <button className="secondary" type="button" onClick={enregistrer} disabled={isBusy}>
+                {isSaving ? 'Enregistrement…' : 'Enregistrer les modifications'}
+              </button>
+              <button className="secondary" type="button" onClick={ouvrirRegeneration} disabled={isBusy}>
+                Régénérer
+              </button>
+              <button className="primary" type="button" onClick={retenir} disabled={isBusy}>
+                {isRetaining ? 'Enregistrement…' : 'Retenir cette version'}
+              </button>
+            </>
+          )}
+          {bylaws.status === 'retenue' && <p className="muted">Version retenue le {jour(bylaws.finalized_at)}</p>}
+          <button className="secondary" type="button" onClick={telecharger} disabled={isBusy}>
+            {isDownloading ? 'Téléchargement…' : 'Télécharger en PDF'}
           </button>
         </>
       )}

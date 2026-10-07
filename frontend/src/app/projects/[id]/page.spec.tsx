@@ -163,6 +163,25 @@ describe('ProjectDetailPage', () => {
     expect(screen.queryByText("Aucun plan pour l'instant.")).not.toBeInTheDocument();
   });
 
+  it('montre la section Statuts au propriétaire, qui peut y confirmer la forme juridique', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      'PATCH /projects/p1/forme-juridique': { status: 200, body: { ...PROJECT, confirmed_legal_form: 'micro-entreprise' } },
+      ...ENGINE_ROUTES,
+    });
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByRole('heading', { name: 'Statuts' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /confirmer cette forme/i }));
+    // La confirmation remonte à la page : la section passe à l'étape suivante.
+    expect(await screen.findByText(/n'ont pas de personne morale/i)).toBeInTheDocument();
+  });
+
   describe('grille d’icônes des étapes', () => {
     it('ouvre le contenu d’une seule étape à la fois, au clic sur son icône', async () => {
       mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
@@ -647,6 +666,8 @@ describe('ProjectDetailPage', () => {
     expect(screen.queryByRole('button', { name: /supprimer le projet/i })).not.toBeInTheDocument();
     // La gestion des collaborateurs reste réservée au propriétaire.
     expect(screen.queryByText('Collaborateurs')).not.toBeInTheDocument();
+    // Les statuts se créent côté propriétaire : un collaborateur ne voit pas la section.
+    expect(screen.queryByRole('heading', { name: 'Statuts' })).not.toBeInTheDocument();
 
     // Les 4 moteurs transverses sont visibles en lecture seule pour un collaborateur.
     // Par leur titre : « Tâches » est aussi le libellé d'un repère du

@@ -1873,6 +1873,41 @@ export const api = {
       body: JSON.stringify(dto),
     }),
 
+  modifierStatuts: (token: string, projectId: string, content: string) =>
+    request<CompanyBylaws>(`/projects/${projectId}/statuts`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ content }),
+    }),
+
+  regenererStatuts: (token: string, projectId: string, dto: GenerateBylawsInput) =>
+    request<CompanyBylaws>(`/projects/${projectId}/statuts/regenerer`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(dto),
+    }),
+
+  retenirStatuts: (token: string, projectId: string) =>
+    request<CompanyBylaws>(`/projects/${projectId}/statuts/retenir`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  /**
+   * Le PDF est protégé par le jeton : pas de lien `<a href>` direct. On
+   * récupère les octets avec l'en-tête Authorization, puis l'appelant
+   * déclenche le téléchargement via un lien temporaire vers un blob.
+   */
+  telechargerStatutsPdf: async (token: string, projectId: string): Promise<Blob> => {
+    const res = await fetch(`${API_URL}/projects/${projectId}/statuts/pdf`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      throw new ApiError('Impossible de télécharger le PDF.', res.status);
+    }
+    return res.blob();
+  },
+
   createProject: (token: string, title: string, description: string) =>
     request<Project>('/projects', {
       method: 'POST',
