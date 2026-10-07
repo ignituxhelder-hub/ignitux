@@ -140,6 +140,25 @@ export class StatutsService {
     return this.genererPourProjet(ownerId, projectId, dto);
   }
 
+  async retenirPourProjet(ownerId: string, projectId: string) {
+    const bylaws = await this.findForOwner(ownerId, projectId);
+    if (bylaws.status === 'retenue') {
+      throw new ConflictException('Cette version est déjà retenue.');
+    }
+    return this.prisma.company_bylaws.update({
+      where: { id: bylaws.id },
+      data: { status: 'retenue', finalized_at: new Date() },
+    });
+  }
+
+  /** Rend null (pas d'exception) quand rien n'existe encore : « pas de statuts » est un état normal. */
+  obtenirPourProjet(ownerId: string, projectId: string) {
+    return this.prisma.company_bylaws.findFirst({
+      where: { project_id: projectId, owner_id: ownerId },
+      include: { associates: true },
+    });
+  }
+
   private async findForOwner(ownerId: string, projectId: string) {
     const bylaws = await this.prisma.company_bylaws.findFirst({
       where: { project_id: projectId, owner_id: ownerId },

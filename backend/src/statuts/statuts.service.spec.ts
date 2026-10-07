@@ -167,4 +167,45 @@ describe('StatutsService — génération', () => {
       expect(claude.generateStructuredOutput).not.toHaveBeenCalled();
     });
   });
+
+  describe('retenir et lister', () => {
+    it('retient une version brouillon', async () => {
+      prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'brouillon' });
+      prisma.company_bylaws.update.mockResolvedValue({ id: 'b1', status: 'retenue' });
+
+      await service.retenirPourProjet('user-1', 'p1');
+
+      expect(prisma.company_bylaws.findFirst).toHaveBeenCalledWith({ where: { project_id: 'p1', owner_id: 'user-1' } });
+      expect(prisma.company_bylaws.update).toHaveBeenCalledWith({
+        where: { id: 'b1' },
+        data: { status: 'retenue', finalized_at: expect.any(Date) },
+      });
+    });
+
+    it('refuse de retenir une version déjà retenue, sans rien écrire', async () => {
+      prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'retenue' });
+      await expect(service.retenirPourProjet('user-1', 'p1')).rejects.toThrow(ConflictException);
+      expect(prisma.company_bylaws.update).not.toHaveBeenCalled();
+    });
+
+    it('refuse de retenir des statuts introuvables pour ce propriétaire', async () => {
+      prisma.company_bylaws.findFirst.mockResolvedValue(null);
+      await expect(service.retenirPourProjet('user-1', 'p1')).rejects.toThrow(NotFoundException);
+      expect(prisma.company_bylaws.update).not.toHaveBeenCalled();
+    });
+
+    it('rend null quand aucun statut n’existe pour le projet', async () => {
+      prisma.company_bylaws.findFirst.mockResolvedValue(null);
+      await expect(service.obtenirPourProjet('user-1', 'p1')).resolves.toBeNull();
+    });
+
+    it('rend la ligne existante avec ses associés, limitée au propriétaire', async () => {
+      prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', associates: [] });
+      await expect(service.obtenirPourProjet('user-1', 'p1')).resolves.toEqual({ id: 'b1', associates: [] });
+      expect(prisma.company_bylaws.findFirst).toHaveBeenCalledWith({
+        where: { project_id: 'p1', owner_id: 'user-1' },
+        include: { associates: true },
+      });
+    });
+  });
 });

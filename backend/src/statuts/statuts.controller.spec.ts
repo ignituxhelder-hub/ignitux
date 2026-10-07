@@ -42,4 +42,16 @@ describe('StatutsController', () => {
     await controller.regenerer(user, 'p1', dto);
     expect(service.regenererPourProjet).toHaveBeenCalledWith('user-1', 'p1', dto);
   });
+
+  it('transmet la rétention', async () => {
+    service.retenirPourProjet = vi.fn().mockResolvedValue({ id: 'b1' });
+    await controller.retenir(user, 'p1');
+    expect(service.retenirPourProjet).toHaveBeenCalledWith('user-1', 'p1');
+  });
+
+  it('expose la lecture pour le projet', async () => {
+    service.obtenirPourProjet = vi.fn().mockResolvedValue(null);
+    await controller.obtenir(user, 'p1');
+    expect(service.obtenirPourProjet).toHaveBeenCalledWith('user-1', 'p1');
+  });
 });

@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
@@ -12,6 +12,16 @@ import { StatutsService } from './statuts.service.js';
 @Controller('projects/:projectId/statuts')
 export class StatutsController {
   constructor(private readonly statutsService: StatutsService) {}
+
+  @Get()
+  obtenir(@CurrentUser() user: AuthenticatedUser, @Param('projectId', ParseUUIDPipe) projectId: string) {
+    return this.statutsService.obtenirPourProjet(user.id, projectId);
+  }
+
+  @Post('retenir')
+  retenir(@CurrentUser() user: AuthenticatedUser, @Param('projectId', ParseUUIDPipe) projectId: string) {
+    return this.statutsService.retenirPourProjet(user.id, projectId);
+  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
