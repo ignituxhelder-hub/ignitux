@@ -126,6 +126,16 @@ export class UserDataService {
       participationsInvestisseur,
       mouvementsInvestisseur,
       projetsOuvertsAuFinancement,
+      abonnement,
+      verificationsDIdentite,
+      mandats,
+      relevesDeScores,
+      stocks,
+      agenda,
+      flotte,
+      caisse,
+      biensImmobiliers,
+      campagnesPublicitaires,
     ] = await Promise.all([
       this.prisma.tasks.findMany({ where: byProject }),
       this.prisma.memories.findMany({ where: { user_id: userId } }),
@@ -202,6 +212,67 @@ export class UserDataService {
         orderBy: [{ occurred_on: 'asc' }],
       }),
       this.prisma.financed_projects.findMany({ where: { entrepreneur_user_id: userId } }),
+      // Compte : l'offre souscrite, les vérifications d'identité et les
+      // mandats donnés à Ignitux — déclarés exportés dans user-data-scope.
+      this.prisma.subscriptions.findUnique({ where: { user_id: userId } }),
+      // Sans les images de la pièce d'identité : des octets bruts dans un
+      // fichier JSON destiné à circuler par email feraient voyager une copie
+      // du document lui-même, que la personne détient déjà puisqu'elle l'a
+      // envoyé. Tout ce qu'Ignitux en a tiré, en revanche, sort — c'est cela
+      // qu'elle a le droit de vérifier.
+      this.prisma.identity_verifications.findMany({
+        where: { owner_id: userId },
+        select: {
+          id: true,
+          document_type: true,
+          extracted_first_name: true,
+          extracted_last_name: true,
+          extracted_birth_date: true,
+          extracted_document_number: true,
+          extracted_expiry_date: true,
+          mrz_checksum_valid: true,
+          name_matches_account: true,
+          status: true,
+          rejection_reason: true,
+          reviewed_at: true,
+          created_at: true,
+        },
+      }),
+      this.prisma.mandates.findMany({ where: { owner_id: userId } }),
+      // Les relevés de scores décrivent les projets de la personne.
+      this.prisma.score_snapshots.findMany({
+        where: byProject,
+        orderBy: [{ captured_on: 'asc' }],
+      }),
+      // Stocks, agenda, flotte : filtrés sur le propriétaire ; les tables
+      // filles (mouvements, entrées) suivent par leur parent — même geste
+      // que les écritures comptables et leurs lignes.
+      this.prisma.stock_items.findMany({
+        where: { owner_id: userId },
+        include: { movements: true },
+      }),
+      this.prisma.agenda_events.findMany({
+        where: { owner_id: userId },
+        orderBy: { occurred_at: 'asc' },
+      }),
+      this.prisma.fleet_vehicles.findMany({
+        where: { owner_id: userId },
+        include: { entries: true },
+      }),
+      // Caisse, immobilier, publicité : des mouvements d'argent de la
+      // personne, rangés avec sa comptabilité (voir user-data-scope.ts).
+      this.prisma.cash_register_entries.findMany({
+        where: { owner_id: userId },
+        orderBy: { occurred_on: 'asc' },
+      }),
+      this.prisma.real_estate_properties.findMany({
+        where: { owner_id: userId },
+        include: { movements: true },
+      }),
+      this.prisma.ad_campaigns.findMany({
+        where: { owner_id: userId },
+        include: { entries: true },
+      }),
     ]);
 
     return {
@@ -219,7 +290,15 @@ export class UserDataService {
         // Ils ne detiennent aucune donnee, mais dire lesquels etaient pris
         // explique la forme du reste du fichier.
         // Le bureau : ce qu'elle y a ajouté ou retiré elle-même.
-        compte: { ...compte, roles_tenus: roles, profil: monProfil, bureau },
+        compte: {
+          ...compte,
+          roles_tenus: roles,
+          profil: monProfil,
+          bureau,
+          abonnement,
+          verifications_d_identite: verificationsDIdentite,
+          mandats_donnes_a_ignitux: mandats,
+        },
         projets_et_contenus: {
           projets: projects,
           taches: tasks,
@@ -230,6 +309,12 @@ export class UserDataService {
           collaborateurs_que_j_ai_invites: collaboratorsInvited,
           processus: workflows,
           etapes_de_processus: workflowSteps,
+          releves_de_scores: relevesDeScores,
+          // Chaque article avec ses mouvements, chaque véhicule avec ses
+          // entrées.
+          stocks,
+          agenda,
+          flotte,
         },
         contenus_generes_par_igini: {
           analyses,
@@ -257,6 +342,9 @@ export class UserDataService {
           comptabilite_plan_de_comptes: comptesComptables,
           comptabilite_ecritures: ecritures,
           comptes_bancaires: comptesBancaires,
+          caisse,
+          biens_immobiliers: biensImmobiliers,
+          campagnes_publicitaires: campagnesPublicitaires,
         },
         financement: {
           apports: rounds,

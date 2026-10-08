@@ -147,15 +147,21 @@ describe('UserDataService', () => {
       // une colonne inattendue de `users` fait toujours echouer le test.
       // `roles_tenus` ne vient pas de `users` — c'est la table user_roles,
       // qui ne contient ni secret ni donnee de tiers ; `bureau` non plus,
-      // c'est la table user_applications.
+      // c'est la table user_applications. `abonnement`,
+      // `verifications_d_identite` et `mandats_donnes_a_ignitux` viennent de
+      // leurs propres tables (subscriptions, identity_verifications,
+      // mandates), toutes trois classées dans le groupe « compte ».
       expect(Object.keys(exported.donnees.compte).sort()).toEqual([
+        'abonnement',
         'bureau',
         'compte_cree_le',
         'email',
         'email_verifie_le',
         'id',
+        'mandats_donnes_a_ignitux',
         'profil',
         'roles_tenus',
+        'verifications_d_identite',
       ]);
       expect(JSON.stringify(exported)).not.toContain('SECRET-A-NE-JAMAIS-DIFFUSER');
     });
@@ -286,6 +292,40 @@ describe('UserDataService', () => {
         where: { user_id: 'u1' },
         orderBy: { created_at: 'asc' },
       });
+    });
+
+    it("exporte les vérifications d'identité sans les images de la pièce", async () => {
+      // Ce qu'Ignitux a tiré de la pièce sort ; les octets du recto et du
+      // verso, non — ils feraient circuler une copie du document par email.
+      await service.exportUserData('u1');
+
+      const [args] = prisma.identity_verifications.findMany.mock.calls[0] as [
+        { where: unknown; select: Record<string, boolean> },
+      ];
+      expect(args.where).toEqual({ owner_id: 'u1' });
+      expect(args.select).not.toHaveProperty('document_front');
+      expect(args.select).not.toHaveProperty('document_back');
+      expect(args.select.extracted_last_name).toBe(true);
+    });
+
+    it('ne lit stocks, flotte, caisse, immobilier et publicité que chez la personne', async () => {
+      // Ces tables ont un propriétaire direct : aucune raison de passer par
+      // les projets, et surtout aucune de lire celles d'un autre compte.
+      await service.exportUserData('u1');
+
+      for (const table of [
+        'stock_items',
+        'agenda_events',
+        'fleet_vehicles',
+        'cash_register_entries',
+        'real_estate_properties',
+        'ad_campaigns',
+        'mandates',
+      ]) {
+        expect(prisma[table].findMany).toHaveBeenCalledWith(
+          expect.objectContaining({ where: { owner_id: 'u1' } }),
+        );
+      }
     });
 
     it("ne cherche pas de messages reçus quand la personne n'a pas de profil", async () => {
