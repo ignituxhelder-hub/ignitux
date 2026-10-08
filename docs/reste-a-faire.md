@@ -13,20 +13,24 @@ Fait depuis l'inventaire du 26 septembre, et maintenant dans `main` :
   **Statuts** (brouillon puis « retenu », PDF, avertissement juridique).
 - Vérification d'identité et mandats.
 - Chat IGINI, boutique en ligne (Shopify, optionnelle), tâches IA.
+- **Dossier de création** (8/10) : liste des pièces selon la forme, récapitulatif PDF,
+  guide pas à pas du guichet unique, suivi du dépôt. La personne dépose elle-même ;
+  Ignitux ne dépose ni ne paie rien.
+- Export RGPD complété (14 tables qui n'étaient pas lues), avec un test qui l'empêche de se périmer.
+- Confirmation avant de changer de forme quand des statuts sont retenus.
 - Modèle de participation IGNITUX (100/0, droit de 5 % sur les dividendes) —
   sa relecture par un juriste n'a pas eu lieu (voir `docs/juridique/`).
 
 **Migrations écrites mais appliquées nulle part** (base partagée de dev) :
 `statuts`, `participation_ignitux`, `taches_ia`, `chat_igini`, `boutique`,
-`identite_et_mandats`. Avant de les appliquer : une ligne orpheline
+`identite_et_mandats`, `dossier_creation`. Avant de les appliquer : une ligne orpheline
 `20261003120000_statuts` existe dans `_prisma_migrations` de la base partagée,
 de propriétaire inconnu — l'identifier avant tout `migrate resolve`/`reset`.
 
 **Reste à faire sans payer :**
-- Dépôt du dossier de création (sous-projet suivant du chantier « Ignitux crée
-  l'entreprise ») : spec à écrire, parcours guidé sans dépôt au nom d'un tiers.
-- Confirmation à ajouter quand on repasse de société à micro-entreprise/EI
-  alors que des statuts « retenus » existent.
+- Rattacher le projet à l'entreprise immatriculée, avec compta et banque (sous-projet 4).
+- Décider si des statuts retenus peuvent être déverrouillés quand la forme change.
+- Décider si les photos de pièce d'identité entrent dans l'export RGPD (avis juridique).
 - Lancer une première fois `npm run test:charge` contre le serveur local.
 - Équipe : toujours reportée (permissions « chacun voit ce qu'il doit voir »).
 
