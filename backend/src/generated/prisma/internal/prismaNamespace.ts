@@ -472,7 +472,8 @@ export const ModelName = {
   ad_campaigns: 'ad_campaigns',
   ad_campaign_entries: 'ad_campaign_entries',
   identity_verifications: 'identity_verifications',
-  mandates: 'mandates'
+  mandates: 'mandates',
+  creation_filings: 'creation_filings'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -488,7 +489,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "company_bylaws" | "bylaw_associates" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "chat_messages" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "project_compliance_ai_runs" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "participation_agreements" | "participation_milestones" | "dividend_right_entries" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "shopify_connections" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries" | "identity_verifications" | "mandates"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "company_bylaws" | "bylaw_associates" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "chat_messages" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "project_compliance_ai_runs" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "participation_agreements" | "participation_milestones" | "dividend_right_entries" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "shopify_connections" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries" | "identity_verifications" | "mandates" | "creation_filings"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -6116,6 +6117,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    creation_filings: {
+      payload: Prisma.$creation_filingsPayload<ExtArgs>
+      fields: Prisma.creation_filingsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.creation_filingsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$creation_filingsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.creation_filingsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$creation_filingsPayload>
+        }
+        findFirst: {
+          args: Prisma.creation_filingsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$creation_filingsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.creation_filingsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$creation_filingsPayload>
+        }
+        findMany: {
+          args: Prisma.creation_filingsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$creation_filingsPayload>[]
+        }
+        create: {
+          args: Prisma.creation_filingsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$creation_filingsPayload>
+        }
+        createMany: {
+          args: Prisma.creation_filingsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.creation_filingsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$creation_filingsPayload>[]
+        }
+        delete: {
+          args: Prisma.creation_filingsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$creation_filingsPayload>
+        }
+        update: {
+          args: Prisma.creation_filingsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$creation_filingsPayload>
+        }
+        deleteMany: {
+          args: Prisma.creation_filingsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.creation_filingsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.creation_filingsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$creation_filingsPayload>[]
+        }
+        upsert: {
+          args: Prisma.creation_filingsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$creation_filingsPayload>
+        }
+        aggregate: {
+          args: Prisma.Creation_filingsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCreation_filings>
+        }
+        groupBy: {
+          args: Prisma.creation_filingsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Creation_filingsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.creation_filingsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Creation_filingsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -7249,6 +7324,21 @@ export const MandatesScalarFieldEnum = {
 export type MandatesScalarFieldEnum = (typeof MandatesScalarFieldEnum)[keyof typeof MandatesScalarFieldEnum]
 
 
+export const Creation_filingsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  project_id: 'project_id',
+  status: 'status',
+  checked_items: 'checked_items',
+  deposited_at: 'deposited_at',
+  filing_reference: 'filing_reference',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Creation_filingsScalarFieldEnum = (typeof Creation_filingsScalarFieldEnum)[keyof typeof Creation_filingsScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -7596,6 +7686,7 @@ export type GlobalOmitConfig = {
   ad_campaign_entries?: Prisma.ad_campaign_entriesOmit
   identity_verifications?: Prisma.identity_verificationsOmit
   mandates?: Prisma.mandatesOmit
+  creation_filings?: Prisma.creation_filingsOmit
 }
 
 /* Types for Logging */

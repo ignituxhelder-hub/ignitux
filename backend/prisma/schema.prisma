@@ -44,6 +44,7 @@ model users {
   /// machine à l autre. null tant qu elle n a pas choisi.
   active_role               String?
   company_bylaws   company_bylaws[]
+  creation_filings creation_filings[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -124,6 +125,7 @@ model projects {
   participation_agreement participation_agreements?
   financedProjects     financed_projects?
   bylaws           company_bylaws?
+  creation_filing  creation_filings?
 
   mandates             mandates[]
 
@@ -1959,4 +1961,23 @@ model mandates {
 
   @@index([owner_id])
   @@index([project_id])
+}
+
+/// Dossier de création : l'état de préparation du dépôt au guichet unique,
+/// une ligne par projet. Ignitux ne dépose rien : la personne coche les
+/// pièces qu'elle seule peut fournir et note elle-même le dépôt.
+model creation_filings {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_id         String    @db.Uuid
+  owner            users     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  project_id       String    @unique @db.Uuid
+  project          projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  status           String    @default("preparation") // 'preparation' | 'depose'
+  checked_items    String[]  @default([])
+  deposited_at     DateTime? @db.Timestamptz(6)
+  filing_reference String?
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @updatedAt @db.Timestamptz(6)
+
+  @@index([owner_id])
 }

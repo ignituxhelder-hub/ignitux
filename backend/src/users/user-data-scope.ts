@@ -88,6 +88,10 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   stock_items: exported('projets_et_contenus'),
   stock_movements: exported('projets_et_contenus'),
   agenda_events: exported('projets_et_contenus'),
+  // Le dossier de création : l'avancement de la préparation du dépôt, que
+  // la personne tient elle-même (pièces cochées, date et référence du dépôt).
+  // Un contenu de travail du projet, pas un contenu généré par IGINI.
+  creation_filings: exported('projets_et_contenus'),
   // Suivi de flotte : même nature que stocks/agenda, la dépense d'entretien
   // n'en fait pas un enregistrement financier au sens des CGU.
   fleet_vehicles: exported('projets_et_contenus'),

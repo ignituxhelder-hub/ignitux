@@ -215,6 +215,7 @@ export type usersWhereInput = {
   identity_verifications?: Prisma.Identity_verificationsListRelationFilter
   mandates?: Prisma.MandatesListRelationFilter
   company_bylaws?: Prisma.Company_bylawsListRelationFilter
+  creation_filings?: Prisma.Creation_filingsListRelationFilter
 }
 
 export type usersOrderByWithRelationInput = {
@@ -249,6 +250,7 @@ export type usersOrderByWithRelationInput = {
   identity_verifications?: Prisma.identity_verificationsOrderByRelationAggregateInput
   mandates?: Prisma.mandatesOrderByRelationAggregateInput
   company_bylaws?: Prisma.company_bylawsOrderByRelationAggregateInput
+  creation_filings?: Prisma.creation_filingsOrderByRelationAggregateInput
 }
 
 export type usersWhereUniqueInput = Prisma.AtLeast<{
@@ -286,6 +288,7 @@ export type usersWhereUniqueInput = Prisma.AtLeast<{
   identity_verifications?: Prisma.Identity_verificationsListRelationFilter
   mandates?: Prisma.MandatesListRelationFilter
   company_bylaws?: Prisma.Company_bylawsListRelationFilter
+  creation_filings?: Prisma.Creation_filingsListRelationFilter
 }, "id" | "email">
 
 export type usersOrderByWithAggregationInput = {
@@ -344,6 +347,7 @@ export type usersCreateInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateInput = {
@@ -378,6 +382,7 @@ export type usersUncheckedCreateInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUpdateInput = {
@@ -412,6 +417,7 @@ export type usersUpdateInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateInput = {
@@ -446,6 +452,7 @@ export type usersUncheckedUpdateInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateManyInput = {
@@ -869,6 +876,20 @@ export type usersUpdateOneRequiredWithoutMandatesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutMandatesInput, Prisma.usersUpdateWithoutMandatesInput>, Prisma.usersUncheckedUpdateWithoutMandatesInput>
 }
 
+export type usersCreateNestedOneWithoutCreation_filingsInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutCreation_filingsInput, Prisma.usersUncheckedCreateWithoutCreation_filingsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutCreation_filingsInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutCreation_filingsNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutCreation_filingsInput, Prisma.usersUncheckedCreateWithoutCreation_filingsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutCreation_filingsInput
+  upsert?: Prisma.usersUpsertWithoutCreation_filingsInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutCreation_filingsInput, Prisma.usersUpdateWithoutCreation_filingsInput>, Prisma.usersUncheckedUpdateWithoutCreation_filingsInput>
+}
+
 export type usersCreateWithoutAuth_tokensInput = {
   id?: string
   email: string
@@ -900,6 +921,7 @@ export type usersCreateWithoutAuth_tokensInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutAuth_tokensInput = {
@@ -933,6 +955,7 @@ export type usersUncheckedCreateWithoutAuth_tokensInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutAuth_tokensInput = {
@@ -982,6 +1005,7 @@ export type usersUpdateWithoutAuth_tokensInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutAuth_tokensInput = {
@@ -1015,6 +1039,7 @@ export type usersUncheckedUpdateWithoutAuth_tokensInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutProjectsInput = {
@@ -1048,6 +1073,7 @@ export type usersCreateWithoutProjectsInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutProjectsInput = {
@@ -1081,6 +1107,7 @@ export type usersUncheckedCreateWithoutProjectsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutProjectsInput = {
@@ -1130,6 +1157,7 @@ export type usersUpdateWithoutProjectsInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutProjectsInput = {
@@ -1163,6 +1191,7 @@ export type usersUncheckedUpdateWithoutProjectsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutCompany_bylawsInput = {
@@ -1196,6 +1225,7 @@ export type usersCreateWithoutCompany_bylawsInput = {
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutCompany_bylawsInput = {
@@ -1229,6 +1259,7 @@ export type usersUncheckedCreateWithoutCompany_bylawsInput = {
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutCompany_bylawsInput = {
@@ -1278,6 +1309,7 @@ export type usersUpdateWithoutCompany_bylawsInput = {
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCompany_bylawsInput = {
@@ -1311,6 +1343,7 @@ export type usersUncheckedUpdateWithoutCompany_bylawsInput = {
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutMemoriesInput = {
@@ -1344,6 +1377,7 @@ export type usersCreateWithoutMemoriesInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutMemoriesInput = {
@@ -1377,6 +1411,7 @@ export type usersUncheckedCreateWithoutMemoriesInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutMemoriesInput = {
@@ -1426,6 +1461,7 @@ export type usersUpdateWithoutMemoriesInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMemoriesInput = {
@@ -1459,6 +1495,7 @@ export type usersUncheckedUpdateWithoutMemoriesInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutChat_messagesInput = {
@@ -1492,6 +1529,7 @@ export type usersCreateWithoutChat_messagesInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutChat_messagesInput = {
@@ -1525,6 +1563,7 @@ export type usersUncheckedCreateWithoutChat_messagesInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutChat_messagesInput = {
@@ -1574,6 +1613,7 @@ export type usersUpdateWithoutChat_messagesInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutChat_messagesInput = {
@@ -1607,6 +1647,7 @@ export type usersUncheckedUpdateWithoutChat_messagesInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutConceptsInput = {
@@ -1640,6 +1681,7 @@ export type usersCreateWithoutConceptsInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutConceptsInput = {
@@ -1673,6 +1715,7 @@ export type usersUncheckedCreateWithoutConceptsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutConceptsInput = {
@@ -1722,6 +1765,7 @@ export type usersUpdateWithoutConceptsInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutConceptsInput = {
@@ -1755,6 +1799,7 @@ export type usersUncheckedUpdateWithoutConceptsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutCommunity_commentsInput = {
@@ -1788,6 +1833,7 @@ export type usersCreateWithoutCommunity_commentsInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutCommunity_commentsInput = {
@@ -1821,6 +1867,7 @@ export type usersUncheckedCreateWithoutCommunity_commentsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutCommunity_commentsInput = {
@@ -1870,6 +1917,7 @@ export type usersUpdateWithoutCommunity_commentsInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCommunity_commentsInput = {
@@ -1903,6 +1951,7 @@ export type usersUncheckedUpdateWithoutCommunity_commentsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutCollaborationsInput = {
@@ -1936,6 +1985,7 @@ export type usersCreateWithoutCollaborationsInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutCollaborationsInput = {
@@ -1969,6 +2019,7 @@ export type usersUncheckedCreateWithoutCollaborationsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutCollaborationsInput = {
@@ -2018,6 +2069,7 @@ export type usersUpdateWithoutCollaborationsInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCollaborationsInput = {
@@ -2051,6 +2103,7 @@ export type usersUncheckedUpdateWithoutCollaborationsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutMarketplace_profileInput = {
@@ -2084,6 +2137,7 @@ export type usersCreateWithoutMarketplace_profileInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutMarketplace_profileInput = {
@@ -2117,6 +2171,7 @@ export type usersUncheckedCreateWithoutMarketplace_profileInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutMarketplace_profileInput = {
@@ -2166,6 +2221,7 @@ export type usersUpdateWithoutMarketplace_profileInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMarketplace_profileInput = {
@@ -2199,6 +2255,7 @@ export type usersUncheckedUpdateWithoutMarketplace_profileInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutMarketplace_contacts_sentInput = {
@@ -2232,6 +2289,7 @@ export type usersCreateWithoutMarketplace_contacts_sentInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutMarketplace_contacts_sentInput = {
@@ -2265,6 +2323,7 @@ export type usersUncheckedCreateWithoutMarketplace_contacts_sentInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutMarketplace_contacts_sentInput = {
@@ -2314,6 +2373,7 @@ export type usersUpdateWithoutMarketplace_contacts_sentInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMarketplace_contacts_sentInput = {
@@ -2347,6 +2407,7 @@ export type usersUncheckedUpdateWithoutMarketplace_contacts_sentInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutBilling_documentsInput = {
@@ -2380,6 +2441,7 @@ export type usersCreateWithoutBilling_documentsInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutBilling_documentsInput = {
@@ -2413,6 +2475,7 @@ export type usersUncheckedCreateWithoutBilling_documentsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutBilling_documentsInput = {
@@ -2462,6 +2525,7 @@ export type usersUpdateWithoutBilling_documentsInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutBilling_documentsInput = {
@@ -2495,6 +2559,7 @@ export type usersUncheckedUpdateWithoutBilling_documentsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutCrm_companiesInput = {
@@ -2528,6 +2593,7 @@ export type usersCreateWithoutCrm_companiesInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutCrm_companiesInput = {
@@ -2561,6 +2627,7 @@ export type usersUncheckedCreateWithoutCrm_companiesInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutCrm_companiesInput = {
@@ -2610,6 +2677,7 @@ export type usersUpdateWithoutCrm_companiesInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCrm_companiesInput = {
@@ -2643,6 +2711,7 @@ export type usersUncheckedUpdateWithoutCrm_companiesInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutCrm_contactsInput = {
@@ -2676,6 +2745,7 @@ export type usersCreateWithoutCrm_contactsInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutCrm_contactsInput = {
@@ -2709,6 +2779,7 @@ export type usersUncheckedCreateWithoutCrm_contactsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutCrm_contactsInput = {
@@ -2758,6 +2829,7 @@ export type usersUpdateWithoutCrm_contactsInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCrm_contactsInput = {
@@ -2791,6 +2863,7 @@ export type usersUncheckedUpdateWithoutCrm_contactsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutStock_itemsInput = {
@@ -2824,6 +2897,7 @@ export type usersCreateWithoutStock_itemsInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutStock_itemsInput = {
@@ -2857,6 +2931,7 @@ export type usersUncheckedCreateWithoutStock_itemsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutStock_itemsInput = {
@@ -2906,6 +2981,7 @@ export type usersUpdateWithoutStock_itemsInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutStock_itemsInput = {
@@ -2939,6 +3015,7 @@ export type usersUncheckedUpdateWithoutStock_itemsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutAgenda_eventsInput = {
@@ -2972,6 +3049,7 @@ export type usersCreateWithoutAgenda_eventsInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutAgenda_eventsInput = {
@@ -3005,6 +3083,7 @@ export type usersUncheckedCreateWithoutAgenda_eventsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutAgenda_eventsInput = {
@@ -3054,6 +3133,7 @@ export type usersUpdateWithoutAgenda_eventsInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutAgenda_eventsInput = {
@@ -3087,6 +3167,7 @@ export type usersUncheckedUpdateWithoutAgenda_eventsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutCash_register_entriesInput = {
@@ -3120,6 +3201,7 @@ export type usersCreateWithoutCash_register_entriesInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutCash_register_entriesInput = {
@@ -3153,6 +3235,7 @@ export type usersUncheckedCreateWithoutCash_register_entriesInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutCash_register_entriesInput = {
@@ -3202,6 +3285,7 @@ export type usersUpdateWithoutCash_register_entriesInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCash_register_entriesInput = {
@@ -3235,6 +3319,7 @@ export type usersUncheckedUpdateWithoutCash_register_entriesInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutRolesInput = {
@@ -3268,6 +3353,7 @@ export type usersCreateWithoutRolesInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutRolesInput = {
@@ -3301,6 +3387,7 @@ export type usersUncheckedCreateWithoutRolesInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutRolesInput = {
@@ -3350,6 +3437,7 @@ export type usersUpdateWithoutRolesInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutRolesInput = {
@@ -3383,6 +3471,7 @@ export type usersUncheckedUpdateWithoutRolesInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutApplicationsInput = {
@@ -3416,6 +3505,7 @@ export type usersCreateWithoutApplicationsInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutApplicationsInput = {
@@ -3449,6 +3539,7 @@ export type usersUncheckedCreateWithoutApplicationsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutApplicationsInput = {
@@ -3498,6 +3589,7 @@ export type usersUpdateWithoutApplicationsInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutApplicationsInput = {
@@ -3531,6 +3623,7 @@ export type usersUncheckedUpdateWithoutApplicationsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutProfileInput = {
@@ -3564,6 +3657,7 @@ export type usersCreateWithoutProfileInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutProfileInput = {
@@ -3597,6 +3691,7 @@ export type usersUncheckedCreateWithoutProfileInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutProfileInput = {
@@ -3646,6 +3741,7 @@ export type usersUpdateWithoutProfileInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutProfileInput = {
@@ -3679,6 +3775,7 @@ export type usersUncheckedUpdateWithoutProfileInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutSubscriptionInput = {
@@ -3712,6 +3809,7 @@ export type usersCreateWithoutSubscriptionInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutSubscriptionInput = {
@@ -3745,6 +3843,7 @@ export type usersUncheckedCreateWithoutSubscriptionInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutSubscriptionInput = {
@@ -3794,6 +3893,7 @@ export type usersUpdateWithoutSubscriptionInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutSubscriptionInput = {
@@ -3827,6 +3927,7 @@ export type usersUncheckedUpdateWithoutSubscriptionInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutReal_estate_propertiesInput = {
@@ -3860,6 +3961,7 @@ export type usersCreateWithoutReal_estate_propertiesInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutReal_estate_propertiesInput = {
@@ -3893,6 +3995,7 @@ export type usersUncheckedCreateWithoutReal_estate_propertiesInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutReal_estate_propertiesInput = {
@@ -3942,6 +4045,7 @@ export type usersUpdateWithoutReal_estate_propertiesInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutReal_estate_propertiesInput = {
@@ -3975,6 +4079,7 @@ export type usersUncheckedUpdateWithoutReal_estate_propertiesInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutFleet_vehiclesInput = {
@@ -4008,6 +4113,7 @@ export type usersCreateWithoutFleet_vehiclesInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutFleet_vehiclesInput = {
@@ -4041,6 +4147,7 @@ export type usersUncheckedCreateWithoutFleet_vehiclesInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutFleet_vehiclesInput = {
@@ -4090,6 +4197,7 @@ export type usersUpdateWithoutFleet_vehiclesInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutFleet_vehiclesInput = {
@@ -4123,6 +4231,7 @@ export type usersUncheckedUpdateWithoutFleet_vehiclesInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutAd_campaignsInput = {
@@ -4156,6 +4265,7 @@ export type usersCreateWithoutAd_campaignsInput = {
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutAd_campaignsInput = {
@@ -4189,6 +4299,7 @@ export type usersUncheckedCreateWithoutAd_campaignsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutAd_campaignsInput = {
@@ -4238,6 +4349,7 @@ export type usersUpdateWithoutAd_campaignsInput = {
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutAd_campaignsInput = {
@@ -4271,6 +4383,7 @@ export type usersUncheckedUpdateWithoutAd_campaignsInput = {
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutIdentity_verificationsInput = {
@@ -4304,6 +4417,7 @@ export type usersCreateWithoutIdentity_verificationsInput = {
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutIdentity_verificationsInput = {
@@ -4337,6 +4451,7 @@ export type usersUncheckedCreateWithoutIdentity_verificationsInput = {
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutIdentity_verificationsInput = {
@@ -4386,6 +4501,7 @@ export type usersUpdateWithoutIdentity_verificationsInput = {
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutIdentity_verificationsInput = {
@@ -4419,6 +4535,7 @@ export type usersUncheckedUpdateWithoutIdentity_verificationsInput = {
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersCreateWithoutMandatesInput = {
@@ -4452,6 +4569,7 @@ export type usersCreateWithoutMandatesInput = {
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
 }
 
 export type usersUncheckedCreateWithoutMandatesInput = {
@@ -4485,6 +4603,7 @@ export type usersUncheckedCreateWithoutMandatesInput = {
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type usersCreateOrConnectWithoutMandatesInput = {
@@ -4534,6 +4653,7 @@ export type usersUpdateWithoutMandatesInput = {
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMandatesInput = {
@@ -4567,6 +4687,159 @@ export type usersUncheckedUpdateWithoutMandatesInput = {
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
+}
+
+export type usersCreateWithoutCreation_filingsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
+  identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
+  company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+}
+
+export type usersUncheckedCreateWithoutCreation_filingsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
+  identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
+  company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+}
+
+export type usersCreateOrConnectWithoutCreation_filingsInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutCreation_filingsInput, Prisma.usersUncheckedCreateWithoutCreation_filingsInput>
+}
+
+export type usersUpsertWithoutCreation_filingsInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutCreation_filingsInput, Prisma.usersUncheckedUpdateWithoutCreation_filingsInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutCreation_filingsInput, Prisma.usersUncheckedCreateWithoutCreation_filingsInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutCreation_filingsInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutCreation_filingsInput, Prisma.usersUncheckedUpdateWithoutCreation_filingsInput>
+}
+
+export type usersUpdateWithoutCreation_filingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
+  identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
+  company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+}
+
+export type usersUncheckedUpdateWithoutCreation_filingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
+  identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
+  company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 
@@ -4597,6 +4870,7 @@ export type UsersCountOutputType = {
   identity_verifications: number
   mandates: number
   company_bylaws: number
+  creation_filings: number
 }
 
 export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4622,6 +4896,7 @@ export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   identity_verifications?: boolean | UsersCountOutputTypeCountIdentity_verificationsArgs
   mandates?: boolean | UsersCountOutputTypeCountMandatesArgs
   company_bylaws?: boolean | UsersCountOutputTypeCountCompany_bylawsArgs
+  creation_filings?: boolean | UsersCountOutputTypeCountCreation_filingsArgs
 }
 
 /**
@@ -4788,6 +5063,13 @@ export type UsersCountOutputTypeCountCompany_bylawsArgs<ExtArgs extends runtime.
   where?: Prisma.company_bylawsWhereInput
 }
 
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountCreation_filingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.creation_filingsWhereInput
+}
+
 
 export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -4821,6 +5103,7 @@ export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   identity_verifications?: boolean | Prisma.users$identity_verificationsArgs<ExtArgs>
   mandates?: boolean | Prisma.users$mandatesArgs<ExtArgs>
   company_bylaws?: boolean | Prisma.users$company_bylawsArgs<ExtArgs>
+  creation_filings?: boolean | Prisma.users$creation_filingsArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["users"]>
 
@@ -4878,6 +5161,7 @@ export type usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   identity_verifications?: boolean | Prisma.users$identity_verificationsArgs<ExtArgs>
   mandates?: boolean | Prisma.users$mandatesArgs<ExtArgs>
   company_bylaws?: boolean | Prisma.users$company_bylawsArgs<ExtArgs>
+  creation_filings?: boolean | Prisma.users$creation_filingsArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type usersIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -4911,6 +5195,7 @@ export type $usersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     identity_verifications: Prisma.$identity_verificationsPayload<ExtArgs>[]
     mandates: Prisma.$mandatesPayload<ExtArgs>[]
     company_bylaws: Prisma.$company_bylawsPayload<ExtArgs>[]
+    creation_filings: Prisma.$creation_filingsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -5343,6 +5628,7 @@ export interface Prisma__usersClient<T, Null = never, ExtArgs extends runtime.Ty
   identity_verifications<T extends Prisma.users$identity_verificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$identity_verificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$identity_verificationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mandates<T extends Prisma.users$mandatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$mandatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$mandatesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   company_bylaws<T extends Prisma.users$company_bylawsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$company_bylawsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$company_bylawsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  creation_filings<T extends Prisma.users$creation_filingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$creation_filingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$creation_filingsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6353,6 +6639,30 @@ export type users$company_bylawsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.Company_bylawsScalarFieldEnum | Prisma.Company_bylawsScalarFieldEnum[]
+}
+
+/**
+ * users.creation_filings
+ */
+export type users$creation_filingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the creation_filings
+   */
+  select?: Prisma.creation_filingsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the creation_filings
+   */
+  omit?: Prisma.creation_filingsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.creation_filingsInclude<ExtArgs> | null
+  where?: Prisma.creation_filingsWhereInput
+  orderBy?: Prisma.creation_filingsOrderByWithRelationInput | Prisma.creation_filingsOrderByWithRelationInput[]
+  cursor?: Prisma.creation_filingsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Creation_filingsScalarFieldEnum | Prisma.Creation_filingsScalarFieldEnum[]
 }
 
 /**

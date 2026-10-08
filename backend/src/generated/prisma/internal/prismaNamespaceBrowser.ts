@@ -126,7 +126,8 @@ export const ModelName = {
   ad_campaigns: 'ad_campaigns',
   ad_campaign_entries: 'ad_campaign_entries',
   identity_verifications: 'identity_verifications',
-  mandates: 'mandates'
+  mandates: 'mandates',
+  creation_filings: 'creation_filings'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1237,6 +1238,21 @@ export const MandatesScalarFieldEnum = {
 } as const
 
 export type MandatesScalarFieldEnum = (typeof MandatesScalarFieldEnum)[keyof typeof MandatesScalarFieldEnum]
+
+
+export const Creation_filingsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  project_id: 'project_id',
+  status: 'status',
+  checked_items: 'checked_items',
+  deposited_at: 'deposited_at',
+  filing_reference: 'filing_reference',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Creation_filingsScalarFieldEnum = (typeof Creation_filingsScalarFieldEnum)[keyof typeof Creation_filingsScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -657,3 +657,10 @@ export type identity_verifications = Prisma.identity_verificationsModel
  * 
  */
 export type mandates = Prisma.mandatesModel
+/**
+ * Model creation_filings
+ * Dossier de création : l'état de préparation du dépôt au guichet unique,
+ * une ligne par projet. Ignitux ne dépose rien : la personne coche les
+ * pièces qu'elle seule peut fournir et note elle-même le dépôt.
+ */
+export type creation_filings = Prisma.creation_filingsModel
