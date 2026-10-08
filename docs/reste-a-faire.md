@@ -6,6 +6,32 @@ ensuite.
 
 ---
 
+## MISE À JOUR DU 8 OCTOBRE 2026
+
+Fait depuis l'inventaire du 26 septembre, et maintenant dans `main` :
+- Générateur « Former » (recommandation de forme juridique) et générateur de
+  **Statuts** (brouillon puis « retenu », PDF, avertissement juridique).
+- Vérification d'identité et mandats.
+- Chat IGINI, boutique en ligne (Shopify, optionnelle), tâches IA.
+- Modèle de participation IGNITUX (100/0, droit de 5 % sur les dividendes) —
+  sa relecture par un juriste n'a pas eu lieu (voir `docs/juridique/`).
+
+**Migrations écrites mais appliquées nulle part** (base partagée de dev) :
+`statuts`, `participation_ignitux`, `taches_ia`, `chat_igini`, `boutique`,
+`identite_et_mandats`. Avant de les appliquer : une ligne orpheline
+`20261003120000_statuts` existe dans `_prisma_migrations` de la base partagée,
+de propriétaire inconnu — l'identifier avant tout `migrate resolve`/`reset`.
+
+**Reste à faire sans payer :**
+- Dépôt du dossier de création (sous-projet suivant du chantier « Ignitux crée
+  l'entreprise ») : spec à écrire, parcours guidé sans dépôt au nom d'un tiers.
+- Confirmation à ajouter quand on repasse de société à micro-entreprise/EI
+  alors que des statuts « retenus » existent.
+- Lancer une première fois `npm run test:charge` contre le serveur local.
+- Équipe : toujours reportée (permissions « chacun voit ce qu'il doit voir »).
+
+---
+
 ## BLOQUANTS — sans ça, on n'ouvre pas
 
 ### 1. Hébergement et domaine *(attend Helder)*
