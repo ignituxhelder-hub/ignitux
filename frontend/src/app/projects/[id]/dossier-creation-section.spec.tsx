@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { api, OfflineReadError } from '@/lib/api';
 import { mockApiRoutes } from '@/test-utils/mocks';
 import { DossierCreationSection } from './dossier-creation-section';
 
@@ -250,6 +251,89 @@ describe('DossierCreationSection', () => {
     await waitFor(() => expect(appels('GET')).toHaveLength(2));
   });
 
+  it('après un passage SAS → micro-entreprise, une case restante ne verrouille pas les autres', async () => {
+    // Un serveur qui renverrait encore `capital_depose` (plus cochable pour
+    // une micro-entreprise) : le PATCH ne doit envoyer que des pièces cochables.
+    const micro = (checkedItems: string[]) =>
+      dossier(
+        {
+          forme: 'micro-entreprise',
+          pieces: [
+            { id: 'forme_confirmee', titre: 'Forme juridique confirmée', etat: 'pret', detail: '', cochable: false },
+            { id: 'justificatif_siege', titre: 'Justificatif de siège', etat: 'a_faire', detail: '', cochable: true },
+            { id: 'capital_depose', titre: 'Attestation de dépôt du capital', etat: 'non_concerne', detail: '', cochable: false },
+          ],
+        },
+        { checkedItems },
+      );
+    mockApiRoutes({
+      [`GET ${ROUTE}`]: { status: 200, body: micro(['capital_depose']) },
+      [`PATCH ${ROUTE}`]: { status: 200, body: micro(['justificatif_siege']) },
+    });
+    rendre('micro-entreprise');
+
+    fireEvent.click(await screen.findByLabelText('Justificatif de siège'));
+
+    await waitFor(() => expect(screen.getByLabelText('Justificatif de siège')).toBeChecked());
+    expect(JSON.parse(appels('PATCH')[0][1].body)).toEqual({ checkedItems: ['justificatif_siege'] });
+  });
+
+  it('affiche la date du dépôt au jour de Paris, comme le PDF', async () => {
+    mockApiRoutes({
+      [`GET ${ROUTE}`]: {
+        status: 200,
+        body: dossier({}, { status: 'depose', depositedAt: '2026-10-08T23:30:00.000Z' }),
+      },
+    });
+    rendre();
+
+    expect(await screen.findByText(/marqué comme déposé le 09\/10\/2026/i)).toBeInTheDocument();
+  });
+
+  it('se recharge quand refreshSignal change (statuts générés ou retenus au-dessus)', async () => {
+    mockApiRoutes({ [`GET ${ROUTE}`]: { status: 200, body: dossier() } });
+    const { rerender } = render(
+      <DossierCreationSection token={TOKEN} projectId={PROJECT_ID} confirmedLegalForm="SAS" refreshSignal={0} />,
+    );
+    await screen.findByRole('heading', { name: 'Pièces du dossier' });
+    expect(appels('GET')).toHaveLength(1);
+
+    rerender(<DossierCreationSection token={TOKEN} projectId={PROJECT_ID} confirmedLegalForm="SAS" refreshSignal={1} />);
+
+    await waitFor(() => expect(appels('GET')).toHaveLength(2));
+    expect(await screen.findByRole('heading', { name: 'Pièces du dossier' })).toBeInTheDocument();
+  });
+
+  it('ignore une réponse de chargement périmée qui arrive après la plus récente', async () => {
+    const resolveurs: Array<(r: unknown) => void> = [];
+    global.fetch = vi.fn().mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveurs.push(resolve);
+        }),
+    ) as unknown as typeof fetch;
+    const reponse = (corps: unknown) => ({ ok: true, status: 200, json: () => Promise.resolve(corps) });
+
+    const { rerender } = render(
+      <DossierCreationSection token={TOKEN} projectId={PROJECT_ID} confirmedLegalForm="SAS" />,
+    );
+    await waitFor(() => expect(resolveurs).toHaveLength(1));
+    rerender(<DossierCreationSection token={TOKEN} projectId={PROJECT_ID} confirmedLegalForm="SASU" />);
+    await waitFor(() => expect(resolveurs).toHaveLength(2));
+
+    // La plus récente (SASU) répond d'abord, l'ancienne (SAS) ensuite.
+    await act(async () => {
+      resolveurs[1](reponse(dossier({ forme: 'SASU' })));
+    });
+    expect(await screen.findByText('Forme juridique : SASU.')).toBeInTheDocument();
+    await act(async () => {
+      resolveurs[0](reponse(dossier({ forme: 'SAS' })));
+    });
+
+    expect(screen.getByText('Forme juridique : SASU.')).toBeInTheDocument();
+    expect(screen.queryByText('Forme juridique : SAS.')).not.toBeInTheDocument();
+  });
+
   it('un chargement échoué montre l’erreur et « Réessayer », jamais une liste vide', async () => {
     let n = 0;
     global.fetch = vi.fn().mockImplementation(() => {
@@ -270,6 +354,18 @@ describe('DossierCreationSection', () => {
 
     expect(await screen.findByRole('heading', { name: 'Pièces du dossier' })).toBeInTheDocument();
     expect(screen.queryByText('Serveur indisponible.')).not.toBeInTheDocument();
+  });
+
+  it('hors ligne, n’affiche pas la copie en cache comme l’état réel : erreur et « Réessayer »', async () => {
+    vi.spyOn(api, 'getDossierCreation').mockRejectedValue(
+      new OfflineReadError(dossier({}, { checkedItems: ['capital_depose'] }), '2026-10-01T10:00:00.000Z'),
+    );
+    rendre();
+
+    expect(await screen.findByRole('button', { name: 'Réessayer' })).toBeInTheDocument();
+    expect(screen.getByText(/pas de réseau : le dossier ne s’affiche pas hors ligne/i)).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Pièces du dossier' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
   });
 
   it('une réponse illisible est traitée comme un échec, pas comme un dossier vide', async () => {

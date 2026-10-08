@@ -1,10 +1,26 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { api, ApiError, type DossierCreation, type EtatPieceDossier } from '@/lib/api';
-import { jour } from '@/lib/montants';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { api, ApiError, OfflineReadError, type DossierCreation, type EtatPieceDossier } from '@/lib/api';
 
 const REFERENCE_MAX = 100;
+
+/**
+ * Jour du dépôt à l'heure de Paris — exactement comme le récapitulatif PDF
+ * (backend, Europe/Paris), quel que soit le fuseau de l'appareil.
+ */
+const FORMAT_JOUR_PARIS = new Intl.DateTimeFormat('fr-FR', {
+  timeZone: 'Europe/Paris',
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+});
+
+function jourParis(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? '—' : FORMAT_JOUR_PARIS.format(d);
+}
 
 /** L'état de chaque pièce se lit en toutes lettres : jamais la couleur seule. */
 const LIBELLE_ETAT: Record<EtatPieceDossier, string> = {
@@ -46,13 +62,16 @@ export function DossierCreationSection({
   token,
   projectId,
   confirmedLegalForm,
+  refreshSignal = 0,
 }: {
   token: string;
   projectId: string;
   /** Sert à recharger quand la forme change : les pièces en dépendent. */
   confirmedLegalForm: string | null;
+  /** Incrémenté quand les statuts changent (section Statuts) : la pièce « statuts » en dépend. */
+  refreshSignal?: number;
 }) {
-  const cleChargement = `${projectId}|${confirmedLegalForm ?? ''}`;
+  const cleChargement = `${projectId}|${confirmedLegalForm ?? ''}|${refreshSignal}`;
   const [dossier, setDossier] = useState<DossierCreation | null>(null);
   // Dérivé plutôt qu'un booléen posé dans l'effet (même raison que les
   // statuts) : le premier rendu après un changement est déjà « Chargement… ».
@@ -66,20 +85,38 @@ export function DossierCreationSection({
   const isLoading = cleChargee !== cleChargement;
   const isBusy = isSaving || isDownloading;
 
+  // Numéro du dernier chargement lancé : une réponse plus ancienne qui
+  // arrive après (changement de forme, rechargement rapide) est ignorée,
+  // sinon elle écraserait le dossier à jour par un dossier périmé.
+  const dernierChargement = useRef(0);
+
   const charger = useCallback(async () => {
+    const numero = ++dernierChargement.current;
+    const courant = () => numero === dernierChargement.current;
     setCleChargee(null);
     setChargementEchoue(false);
     try {
       const recu = await api.getDossierCreation(token, projectId);
+      if (!courant()) return;
       if (!estDossier(recu)) throw new ApiError(REPONSE_ILLISIBLE, 0);
       setDossier(recu);
       setError(null);
     } catch (err) {
+      if (!courant()) return;
+      // Hors ligne, l'API lève OfflineReadError avec une copie en cache :
+      // on ne l'affiche pas (des cases et un dépôt périmés seraient pris
+      // pour l'état réel) — on montre l'échec et « Réessayer ».
       setDossier(null);
       setChargementEchoue(true);
-      setError(err instanceof ApiError ? err.message : 'Impossible de charger le dossier de création.');
+      setError(
+        err instanceof OfflineReadError
+          ? 'Pas de réseau : le dossier ne s’affiche pas hors ligne. Réessaie une fois la connexion revenue.'
+          : err instanceof ApiError
+            ? err.message
+            : 'Impossible de charger le dossier de création.',
+      );
     } finally {
-      setCleChargee(cleChargement);
+      if (courant()) setCleChargee(cleChargement);
     }
   }, [token, projectId, cleChargement]);
 
@@ -106,7 +143,11 @@ export function DossierCreationSection({
 
   const basculerPiece = (pieceId: string, coche: boolean) => {
     if (!dossier) return;
-    const courantes = dossier.filing.checkedItems;
+    // Seulement les pièces cochables aujourd'hui : une case restée d'une
+    // ancienne forme (capital_depose après SAS → micro-entreprise) ferait
+    // refuser tout l'envoi par le serveur et verrouillerait les cases.
+    const cochables = new Set(dossier.pieces.filter((p) => p.cochable).map((p) => p.id));
+    const courantes = dossier.filing.checkedItems.filter((id) => cochables.has(id));
     const nouvelles = coche ? [...courantes.filter((id) => id !== pieceId), pieceId] : courantes.filter((id) => id !== pieceId);
     void ecrire(() => api.cocherPiecesDossier(token, projectId, nouvelles), "Impossible d'enregistrer la pièce.");
   };
@@ -266,7 +307,7 @@ export function DossierCreationSection({
       {depose ? (
         <>
           <p>
-            Dossier marqué comme déposé le {jour(filing.depositedAt)}.
+            Dossier marqué comme déposé le {jourParis(filing.depositedAt)}.
             {filing.filingReference && <> Référence : {filing.filingReference}.</>}
           </p>
           <button className="secondary" type="button" onClick={rouvrir} disabled={isBusy}>

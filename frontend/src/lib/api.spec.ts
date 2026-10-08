@@ -311,7 +311,10 @@ describe('api', () => {
         expect(storage.entries.size).toBe(0);
       });
 
-      it('sert toujours la lecture du dossier depuis le cache', async () => {
+      // La lecture reste mise en cache, mais n'est jamais servie comme un
+      // succès : hors ligne, elle lève OfflineReadError (copie datée). La
+      // section du dossier choisit de ne pas l'afficher et montre « Réessayer ».
+      it('hors ligne, la lecture du dossier lève OfflineReadError avec la copie en cache (pas un succès)', async () => {
         const storage = fakeStorage();
         setOfflineStorage(storage);
         mockFetchOnce(200, { forme: 'SAS', pieces: [] });
