@@ -69,6 +69,18 @@ describe('calculerPieces', () => {
     expect(piece(sources({ statuts: { status: 'retenue' } }), 'statuts').etat).toBe('pret');
   });
 
+  it('statuts retenus écrits pour la forme confirmée : prêts', () => {
+    expect(piece(sources({ forme: 'SASU', statuts: { status: 'retenue', legalForm: 'SASU' } }), 'statuts').etat).toBe('pret');
+  });
+
+  it('statuts retenus écrits pour une autre forme : à faire, avec les deux formes nommées', () => {
+    const p = piece(sources({ forme: 'SAS', statuts: { status: 'retenue', legalForm: 'SASU' } }), 'statuts');
+    expect(p.etat).toBe('a_faire');
+    expect(p.detail).toBe(
+      'Tes statuts retenus sont écrits pour une SASU ; ta forme confirmée est SAS — ils doivent être réécrits pour SAS avant le dépôt (une version retenue ne se régénère pas ici).',
+    );
+  });
+
   it('identité en attente : à faire avec détail', () => {
     const p = piece(sources({ identites: [{ status: 'en_attente' }] }), 'identite');
     expect(p.etat).toBe('a_faire');

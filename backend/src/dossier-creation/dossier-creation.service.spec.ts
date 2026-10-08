@@ -1,7 +1,23 @@
+import { inflateSync } from 'node:zlib';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { DossierCreationService } from './dossier-creation.service.js';
+
+/** Octets WinAnsi (hex) des chaînes écrites par pdfkit (même lecture que dossier-pdf.spec). */
+function octetsTexte(b: Buffer): string {
+  let out = '';
+  for (const m of b.toString('latin1').matchAll(/stream\r?\n([\s\S]*?)endstream/g)) {
+    try {
+      const texte = inflateSync(Buffer.from(m[1], 'latin1')).toString('latin1');
+      out += [...texte.matchAll(/<([0-9a-f]+)>/g)].map((x) => x[1]).join('');
+    } catch {
+      // flux non Flate : ignoré
+    }
+  }
+  return out;
+}
+const hex = (s: string) => Buffer.from(s, 'latin1').toString('hex');
 
 describe('DossierCreationService', () => {
   let service: DossierCreationService;
@@ -103,6 +119,70 @@ describe('DossierCreationService', () => {
         }),
       );
     });
+
+    it('statuts retenus pour une autre forme que la forme confirmée : à faire, formes nommées', async () => {
+      prisma.projects.findFirst.mockResolvedValue(projet('SAS'));
+      prisma.company_bylaws.findFirst.mockResolvedValue({ status: 'retenue', legal_form: 'SASU', associates: [] });
+      const statuts = (await service.obtenir('user-1', 'p1')).pieces.find((p) => p.id === 'statuts');
+      expect(statuts?.etat).toBe('a_faire');
+      expect(statuts?.detail).toContain('écrits pour une SASU');
+      expect(statuts?.detail).toContain('ta forme confirmée est SAS');
+    });
+
+    it('statuts retenus pour la forme confirmée : prêts', async () => {
+      prisma.company_bylaws.findFirst.mockResolvedValue({ status: 'retenue', legal_form: 'SASU', associates: [] });
+      const statuts = (await service.obtenir('user-1', 'p1')).pieces.find((p) => p.id === 'statuts');
+      expect(statuts?.etat).toBe('pret');
+    });
+
+    it('après un changement de forme, ne renvoie que les cases encore cochables', async () => {
+      prisma.projects.findFirst.mockResolvedValue(projet('micro-entreprise'));
+      prisma.creation_filings.findFirst.mockResolvedValue({
+        status: 'preparation',
+        checked_items: ['capital_depose', 'justificatif_siege', 'declaration_beneficiaires'],
+        deposited_at: null,
+        filing_reference: null,
+      });
+      const dossier = await service.obtenir('user-1', 'p1');
+      expect(dossier.filing.checkedItems).toEqual(['justificatif_siege']);
+    });
+  });
+
+  describe('changement de forme SAS → micro-entreprise avec des cases restantes', () => {
+    beforeEach(() => {
+      prisma.projects.findFirst.mockResolvedValue(projet('micro-entreprise'));
+      prisma.creation_filings.findFirst.mockResolvedValue({
+        status: 'preparation',
+        checked_items: ['capital_depose'],
+        deposited_at: null,
+        filing_reference: null,
+      });
+    });
+
+    it('les cases ne sont pas verrouillées : cocher à partir de la liste renvoyée passe', async () => {
+      const { filing } = await service.obtenir('user-1', 'p1');
+      expect(filing.checkedItems).toEqual([]);
+      await expect(service.cocher('user-1', 'p1', [...filing.checkedItems, 'justificatif_siege'])).resolves.toBeDefined();
+      // L'écriture remplace la liste : la case restante disparaît de la base.
+      expect(prisma.creation_filings.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({ update: { checked_items: ['justificatif_siege'] } }),
+      );
+    });
+
+    it('le PDF ne reprend ni la section Société ni des statuts restants', async () => {
+      prisma.company_bylaws.findFirst.mockResolvedValue({
+        status: 'retenue',
+        legal_form: 'SAS',
+        head_office: 'Adresse-restante',
+        capital_cents: 100000,
+        associates: [{ full_name: 'Associe-restant', share_basis_points: 10000 }],
+      });
+      const texte = octetsTexte(await service.recapitulatifPdf('user-1', 'p1'));
+      expect(texte).toContain(hex('Forme juridique'));
+      expect(texte).not.toContain(hex('Adresse-restante'));
+      expect(texte).not.toContain(hex('Associe-restant'));
+      expect(texte).not.toContain(hex('Pas encore de statuts'));
+    });
   });
 
   describe('cocher', () => {
@@ -136,9 +216,20 @@ describe('DossierCreationService', () => {
       await expect(service.cocher('user-1', 'p1', ['justificatif_siege'])).resolves.toBeDefined();
     });
 
-    it('409 si une création concurrente viole l’unicité', async () => {
+    it('une création concurrente de la ligne (P2002) : réessaie une fois, et l’écriture passe', async () => {
+      const unique = Object.assign(new Error('unique'), { code: 'P2002' });
+      prisma.creation_filings.upsert.mockRejectedValueOnce(unique).mockResolvedValueOnce({});
+      await expect(service.cocher('user-1', 'p1', ['justificatif_siege'])).resolves.toBeDefined();
+      expect(prisma.creation_filings.upsert).toHaveBeenCalledTimes(2);
+      expect(prisma.creation_filings.upsert).toHaveBeenLastCalledWith(
+        expect.objectContaining({ update: { checked_items: ['justificatif_siege'] } }),
+      );
+    });
+
+    it('409 seulement si le second essai viole encore l’unicité', async () => {
       prisma.creation_filings.upsert.mockRejectedValue(Object.assign(new Error('unique'), { code: 'P2002' }));
       await expect(service.cocher('user-1', 'p1', [])).rejects.toThrow(ConflictException);
+      expect(prisma.creation_filings.upsert).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -168,13 +259,19 @@ describe('DossierCreationService', () => {
       await expect(service.marquerDepose('user-1', 'p1')).rejects.toThrow(ConflictException);
     });
 
-    it('deux dépôts simultanés : un seul passe, l’autre reçoit 409', async () => {
-      let restants = 1;
-      prisma.creation_filings.updateMany.mockImplementation(async () => {
-        const count = restants > 0 ? 1 : 0;
-        restants -= count;
-        return { count };
-      });
+    // Ce test ne prouve pas l'atomicité de Postgres (un mock ne le peut pas) :
+    // il simule une ligne qui n'applique que les écritures dont le `where`
+    // correspond, et prouve que le service s'appuie sur la garde du statut —
+    // le second dépôt ne réécrit ni la date ni la référence du premier.
+    it('deux dépôts simultanés : la garde sur le statut garde le premier, le second reçoit 409', async () => {
+      const ligne: Record<string, unknown> = { status: 'preparation', deposited_at: null, filing_reference: null };
+      prisma.creation_filings.updateMany.mockImplementation(
+        async ({ where, data }: { where: { status?: string }; data: Record<string, unknown> }) => {
+          if (where.status !== undefined && where.status !== ligne.status) return { count: 0 };
+          Object.assign(ligne, data);
+          return { count: 1 };
+        },
+      );
       const resultats = await Promise.allSettled([
         service.marquerDepose('user-1', 'p1', 'A'),
         service.marquerDepose('user-1', 'p1', 'B'),
@@ -182,6 +279,7 @@ describe('DossierCreationService', () => {
       expect(resultats.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
       const rejet = resultats.find((r) => r.status === 'rejected') as PromiseRejectedResult;
       expect(rejet.reason).toBeInstanceOf(ConflictException);
+      expect(ligne).toMatchObject({ status: 'depose', filing_reference: 'A' });
     });
 
     it('une création concurrente de la ligne n’est pas une erreur', async () => {

@@ -38,7 +38,7 @@ export interface SourcesPieces {
   /** `projects.confirmed_legal_form`. */
   forme: string | null;
   /** `company_bylaws` du projet, s'il existe. */
-  statuts: { status: string } | null;
+  statuts: { status: string; legalForm?: string | null } | null;
   /** Vérifications d'identité du propriétaire, la plus récente d'abord. */
   identites: readonly { status: string }[];
   /** Un mandat du projet `active` et signé (`signed_at` non nul). */
@@ -137,6 +137,22 @@ export function calculerPieces(sources: SourcesPieces): Piece[] {
 
   if (!societe) {
     pieces.push(nonConcernee('statuts', 'Statuts de la société'));
+  } else if (
+    sources.statuts?.status === 'retenue' &&
+    sources.statuts.legalForm &&
+    sources.statuts.legalForm !== sources.forme
+  ) {
+    // Retenus (donc verrouillés) mais écrits pour une forme qui n'est plus
+    // la forme confirmée : ils ne peuvent pas servir au dépôt tels quels.
+    pieces.push({
+      id: 'statuts',
+      titre: 'Statuts de la société',
+      etat: 'a_faire',
+      detail:
+        `Tes statuts retenus sont écrits pour une ${sources.statuts.legalForm} ; ` +
+        `ta forme confirmée est ${sources.forme} — ils doivent être réécrits pour ${sources.forme} avant le dépôt (une version retenue ne se régénère pas ici).`,
+      cochable: false,
+    });
   } else if (sources.statuts?.status === 'retenue') {
     pieces.push({ id: 'statuts', titre: 'Statuts de la société', etat: 'pret', detail: 'Tu as retenu une version des statuts.', cochable: false });
   } else if (sources.statuts) {

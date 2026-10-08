@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { PrismaService } from '../prisma/prisma.service.js';
 import { genererPdfDossier } from './dossier-pdf.js';
 import { etapesPourForme, fraisPourForme, type Etape, type Frais } from './guide.js';
-import { calculerPieces, piecesCochablesPourForme, type Piece } from './pieces.js';
+import { calculerPieces, familleDeForme, piecesCochablesPourForme, type Piece } from './pieces.js';
 
 /** Contrainte unique violée (`P2002`) — même convention que statuts.service. */
 function isUniqueViolation(error: unknown): boolean {
@@ -60,17 +60,27 @@ export class DossierCreationService {
       throw new BadRequestException('checkedItems ne doit pas contenir de doublons.');
     }
 
-    try {
-      await this.prisma.creation_filings.upsert({
+    const ecrire = () =>
+      this.prisma.creation_filings.upsert({
         where: { project_id: projectId },
         create: { owner_id: ownerId, project_id: projectId, checked_items: checkedItems },
         update: { checked_items: checkedItems },
       });
+    try {
+      await ecrire();
     } catch (error) {
-      if (isUniqueViolation(error)) {
-        throw new ConflictException('Le dossier vient d’être modifié par une autre demande. Recharge la page.');
+      if (!isUniqueViolation(error)) throw error;
+      // Deux premiers PATCH simultanés : l'autre vient de créer la ligne.
+      // Comme assurerLigne, ce n'est pas une erreur — on réessaie une fois,
+      // et ce second upsert passe par la branche update.
+      try {
+        await ecrire();
+      } catch (retry) {
+        if (isUniqueViolation(retry)) {
+          throw new ConflictException('Le dossier vient d’être modifié par une autre demande. Recharge la page.');
+        }
+        throw retry;
       }
-      throw error;
     }
     return this.obtenir(ownerId, projectId);
   }
@@ -109,10 +119,13 @@ export class DossierCreationService {
 
   async recapitulatifPdf(ownerId: string, projectId: string): Promise<Buffer> {
     const { project, bylaws, dossier } = await this.charger(ownerId, projectId);
+    // Une micro-entreprise ou une EI n'a pas de statuts : des statuts restés
+    // d'une forme précédente ne doivent jamais apparaître dans son récapitulatif.
+    const societe = familleDeForme(dossier.forme) === 'societe';
     return genererPdfDossier({
       projetTitre: project.title,
       forme: dossier.forme,
-      statuts: bylaws
+      statuts: societe && bylaws
         ? {
             headOffice: bylaws.head_office,
             capitalCents: bylaws.capital_cents,
@@ -148,10 +161,15 @@ export class DossierCreationService {
     ]);
 
     const forme = project.confirmed_legal_form ?? null;
+    // Après un changement de forme (SAS → micro-entreprise), des cases
+    // devenues sans objet (capital_depose…) peuvent rester en base. On ne les
+    // renvoie pas : le client repart de cette liste pour son PATCH, qui serait
+    // sinon refusé (400) et verrouillerait toutes les cases.
+    const cochables: readonly string[] = piecesCochablesPourForme(forme);
     const depot: EtatDepot = filing
       ? {
           status: filing.status === 'depose' ? 'depose' : 'preparation',
-          checkedItems: filing.checked_items,
+          checkedItems: filing.checked_items.filter((id) => cochables.includes(id)),
           depositedAt: filing.deposited_at,
           filingReference: filing.filing_reference,
         }
@@ -161,7 +179,7 @@ export class DossierCreationService {
       forme,
       pieces: calculerPieces({
         forme,
-        statuts: bylaws ? { status: bylaws.status } : null,
+        statuts: bylaws ? { status: bylaws.status, legalForm: bylaws.legal_form } : null,
         identites,
         mandatActifSigne: mandat !== null,
         piecesCochees: depot.checkedItems,
