@@ -1,0 +1,225 @@
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { DossierCreationService } from './dossier-creation.service.js';
+
+describe('DossierCreationService', () => {
+  let service: DossierCreationService;
+  let prisma: any;
+
+  const projet = (confirmed_legal_form: string | null = 'SASU') => ({ id: 'p1', title: 'Mon projet', confirmed_legal_form });
+
+  beforeEach(async () => {
+    prisma = {
+      projects: { findFirst: vi.fn().mockResolvedValue(projet()) },
+      company_bylaws: { findFirst: vi.fn().mockResolvedValue(null) },
+      identity_verifications: { findMany: vi.fn().mockResolvedValue([]) },
+      mandates: { findFirst: vi.fn().mockResolvedValue(null) },
+      creation_filings: {
+        findFirst: vi.fn().mockResolvedValue(null),
+        upsert: vi.fn().mockResolvedValue({}),
+        updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+      },
+    };
+    const moduleRef = await Test.createTestingModule({
+      providers: [DossierCreationService, { provide: PrismaService, useValue: prisma }],
+    }).compile();
+    service = moduleRef.get(DossierCreationService);
+  });
+
+  describe('vérification du propriétaire', () => {
+    it('cherche le projet filtré sur le propriétaire', async () => {
+      await service.obtenir('user-1', 'p1');
+      expect(prisma.projects.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: 'p1', owner_id: 'user-1' } }),
+      );
+    });
+
+    // Un collaborateur n'est pas propriétaire : même requête, même 404.
+    it.each([
+      ['obtenir', (s: DossierCreationService) => s.obtenir('autre', 'p1')],
+      ['cocher', (s: DossierCreationService) => s.cocher('autre', 'p1', [])],
+      ['marquerDepose', (s: DossierCreationService) => s.marquerDepose('autre', 'p1')],
+      ['rouvrir', (s: DossierCreationService) => s.rouvrir('autre', 'p1')],
+      ['recapitulatifPdf', (s: DossierCreationService) => s.recapitulatifPdf('autre', 'p1')],
+    ])('%s : 404 pour un non-propriétaire, sans rien lire ni écrire d’autre', async (_nom, appel) => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+      await expect(appel(service)).rejects.toThrow(NotFoundException);
+      expect(prisma.company_bylaws.findFirst).not.toHaveBeenCalled();
+      expect(prisma.identity_verifications.findMany).not.toHaveBeenCalled();
+      expect(prisma.creation_filings.upsert).not.toHaveBeenCalled();
+      expect(prisma.creation_filings.updateMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('obtenir', () => {
+    it('rend forme, pièces, étapes, frais et un dépôt en préparation quand rien n’existe', async () => {
+      const dossier = await service.obtenir('user-1', 'p1');
+      expect(dossier.forme).toBe('SASU');
+      expect(dossier.pieces.map((p) => p.id)).toContain('capital_depose');
+      expect(dossier.etapes.map((e) => e.id)).toEqual(['statuts', 'capital', 'annonce', 'depot', 'kbis']);
+      expect(dossier.frais.miseAJour).toBe('octobre 2026');
+      expect(dossier.filing).toEqual({ status: 'preparation', checkedItems: [], depositedAt: null, filingReference: null });
+    });
+
+    it('forme non confirmée : pas d’erreur, une seule pièce, aucune étape', async () => {
+      prisma.projects.findFirst.mockResolvedValue(projet(null));
+      const dossier = await service.obtenir('user-1', 'p1');
+      expect(dossier.forme).toBeNull();
+      expect(dossier.pieces).toEqual([expect.objectContaining({ id: 'forme_confirmee', etat: 'a_faire' })]);
+      expect(dossier.etapes).toEqual([]);
+    });
+
+    it('lit le statut d’identité sans jamais charger les images de la pièce', async () => {
+      prisma.identity_verifications.findMany.mockResolvedValue([{ status: 'validee' }]);
+      const dossier = await service.obtenir('user-1', 'p1');
+      expect(prisma.identity_verifications.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { owner_id: 'user-1' }, select: { status: true } }),
+      );
+      expect(dossier.pieces.find((p) => p.id === 'identite')?.etat).toBe('pret');
+    });
+
+    it('statuts retenus, mandat signé et cases cochées se reflètent dans les pièces', async () => {
+      prisma.company_bylaws.findFirst.mockResolvedValue({ status: 'retenue', associates: [] });
+      prisma.mandates.findFirst.mockResolvedValue({ id: 'm1' });
+      prisma.creation_filings.findFirst.mockResolvedValue({
+        status: 'depose',
+        checked_items: ['capital_depose'],
+        deposited_at: new Date('2026-10-08T10:00:00Z'),
+        filing_reference: 'REF-1',
+      });
+      const dossier = await service.obtenir('user-1', 'p1');
+      const etats = Object.fromEntries(dossier.pieces.map((p) => [p.id, p.etat]));
+      expect(etats).toMatchObject({ statuts: 'pret', mandat: 'pret', capital_depose: 'pret', justificatif_siege: 'a_faire' });
+      expect(dossier.filing).toEqual({
+        status: 'depose',
+        checkedItems: ['capital_depose'],
+        depositedAt: new Date('2026-10-08T10:00:00Z'),
+        filingReference: 'REF-1',
+      });
+      expect(prisma.mandates.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { project_id: 'p1', owner_id: 'user-1', status: 'active', signed_at: { not: null } },
+        }),
+      );
+    });
+  });
+
+  describe('cocher', () => {
+    it('enregistre les pièces cochées (upsert sur le projet)', async () => {
+      await service.cocher('user-1', 'p1', ['justificatif_siege', 'capital_depose']);
+      expect(prisma.creation_filings.upsert).toHaveBeenCalledWith({
+        where: { project_id: 'p1' },
+        create: { owner_id: 'user-1', project_id: 'p1', checked_items: ['justificatif_siege', 'capital_depose'] },
+        update: { checked_items: ['justificatif_siege', 'capital_depose'] },
+      });
+    });
+
+    it('accepte un tableau vide', async () => {
+      await expect(service.cocher('user-1', 'p1', [])).resolves.toBeDefined();
+      expect(prisma.creation_filings.upsert).toHaveBeenCalledWith(expect.objectContaining({ update: { checked_items: [] } }));
+    });
+
+    it('400 pour un id inconnu', async () => {
+      await expect(service.cocher('user-1', 'p1', ['statuts'])).rejects.toThrow(BadRequestException);
+      expect(prisma.creation_filings.upsert).not.toHaveBeenCalled();
+    });
+
+    it('400 pour des doublons', async () => {
+      await expect(service.cocher('user-1', 'p1', ['capital_depose', 'capital_depose'])).rejects.toThrow(BadRequestException);
+      expect(prisma.creation_filings.upsert).not.toHaveBeenCalled();
+    });
+
+    it('400 pour une pièce non concernée par la forme (capital d’une micro-entreprise)', async () => {
+      prisma.projects.findFirst.mockResolvedValue(projet('micro-entreprise'));
+      await expect(service.cocher('user-1', 'p1', ['capital_depose'])).rejects.toThrow(BadRequestException);
+      await expect(service.cocher('user-1', 'p1', ['justificatif_siege'])).resolves.toBeDefined();
+    });
+
+    it('409 si une création concurrente viole l’unicité', async () => {
+      prisma.creation_filings.upsert.mockRejectedValue(Object.assign(new Error('unique'), { code: 'P2002' }));
+      await expect(service.cocher('user-1', 'p1', [])).rejects.toThrow(ConflictException);
+    });
+  });
+
+  describe('marquerDepose', () => {
+    it('crée la ligne au besoin puis écrit en gardant sur le statut preparation', async () => {
+      await service.marquerDepose('user-1', 'p1', '  J-2026-001  ');
+      expect(prisma.creation_filings.upsert).toHaveBeenCalledWith({
+        where: { project_id: 'p1' },
+        create: { owner_id: 'user-1', project_id: 'p1' },
+        update: {},
+      });
+      expect(prisma.creation_filings.updateMany).toHaveBeenCalledWith({
+        where: { project_id: 'p1', owner_id: 'user-1', status: 'preparation' },
+        data: { status: 'depose', deposited_at: expect.any(Date), filing_reference: 'J-2026-001' },
+      });
+    });
+
+    it('référence absente ou vide : null', async () => {
+      await service.marquerDepose('user-1', 'p1', '   ');
+      expect(prisma.creation_filings.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ filing_reference: null }) }),
+      );
+    });
+
+    it('409 si déjà déposé (aucune ligne en préparation mise à jour)', async () => {
+      prisma.creation_filings.updateMany.mockResolvedValue({ count: 0 });
+      await expect(service.marquerDepose('user-1', 'p1')).rejects.toThrow(ConflictException);
+    });
+
+    it('deux dépôts simultanés : un seul passe, l’autre reçoit 409', async () => {
+      let restants = 1;
+      prisma.creation_filings.updateMany.mockImplementation(async () => {
+        const count = restants > 0 ? 1 : 0;
+        restants -= count;
+        return { count };
+      });
+      const resultats = await Promise.allSettled([
+        service.marquerDepose('user-1', 'p1', 'A'),
+        service.marquerDepose('user-1', 'p1', 'B'),
+      ]);
+      expect(resultats.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+      const rejet = resultats.find((r) => r.status === 'rejected') as PromiseRejectedResult;
+      expect(rejet.reason).toBeInstanceOf(ConflictException);
+    });
+
+    it('une création concurrente de la ligne n’est pas une erreur', async () => {
+      prisma.creation_filings.upsert.mockRejectedValue(Object.assign(new Error('unique'), { code: 'P2002' }));
+      await expect(service.marquerDepose('user-1', 'p1')).resolves.toBeDefined();
+    });
+  });
+
+  describe('rouvrir', () => {
+    it('repasse en préparation et efface date et référence, gardé sur le statut depose', async () => {
+      await service.rouvrir('user-1', 'p1');
+      expect(prisma.creation_filings.updateMany).toHaveBeenCalledWith({
+        where: { project_id: 'p1', owner_id: 'user-1', status: 'depose' },
+        data: { status: 'preparation', deposited_at: null, filing_reference: null },
+      });
+    });
+
+    it('409 si le dossier n’est pas déposé', async () => {
+      prisma.creation_filings.updateMany.mockResolvedValue({ count: 0 });
+      await expect(service.rouvrir('user-1', 'p1')).rejects.toThrow(ConflictException);
+    });
+  });
+
+  describe('recapitulatifPdf', () => {
+    it('se génère sans statuts ni identité', async () => {
+      const pdf = await service.recapitulatifPdf('user-1', 'p1');
+      expect(pdf.subarray(0, 5).toString('ascii')).toBe('%PDF-');
+    });
+
+    it('se génère avec des statuts et leurs associés', async () => {
+      prisma.company_bylaws.findFirst.mockResolvedValue({
+        status: 'retenue',
+        head_office: 'Paris',
+        capital_cents: 100000,
+        associates: [{ full_name: 'Alice', share_basis_points: 10000 }],
+      });
+      const pdf = await service.recapitulatifPdf('user-1', 'p1');
+      expect(pdf.subarray(0, 5).toString('ascii')).toBe('%PDF-');
+    });
+  });
+});
