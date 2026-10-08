@@ -38,6 +38,7 @@ import { BuybackSection, FinancingSection } from './financing-section';
 import { ParticipationSection } from './participation-section';
 import { CollaboratorsSection } from './collaborators-section';
 import { StatutsSection } from './statuts-section';
+import { DossierCreationSection } from './dossier-creation-section';
 import { ComplianceSection } from './compliance-section';
 import { KnowledgeSection, MemorySection, ScoreHistorySection, ScoreSection, TasksSection } from './engine-sections';
 import { MandatSection } from './mandat-section';
@@ -633,6 +634,15 @@ export default function ProjectDetailPage() {
               onFormConfirmed={(form) =>
                 setProject((courant) => (courant ? { ...courant, confirmed_legal_form: form } : courant))
               }
+            />
+          )}
+          {/* Le dossier de création suit les statuts ; réservé au propriétaire
+              côté serveur (un collaborateur reçoit un 404), donc ici aussi. */}
+          {isOwner && (
+            <DossierCreationSection
+              token={token}
+              projectId={id}
+              confirmedLegalForm={project?.confirmed_legal_form ?? null}
             />
           )}
         </>

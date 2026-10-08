@@ -98,6 +98,18 @@ const ENGINE_ROUTES = {
       requirements: [],
     },
   },
+  // Le dossier de création est monté sous les statuts (propriétaire) : une
+  // forme réaliste, sans quoi le fallback (200 []) l'afficherait en erreur.
+  'GET /projects/p1/dossier-creation': {
+    status: 200,
+    body: {
+      forme: null,
+      pieces: [],
+      etapes: [],
+      frais: { miseAJour: 'octobre 2026', lignes: [], avertissement: '', sources: [] },
+      filing: { status: 'preparation', checkedItems: [], depositedAt: null, filingReference: null },
+    },
+  },
   'GET /projects/p1/automation/runs': { status: 200, body: [] },
   'GET /projects/p1/workflows': { status: 200, body: [] },
   'GET /workflows/templates': { status: 200, body: [] },
@@ -189,6 +201,22 @@ describe('ProjectDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /confirmer cette forme/i }));
     // La confirmation remonte à la page : la section passe à l'étape suivante.
     expect(await screen.findByText(/n'ont pas de personne morale/i)).toBeInTheDocument();
+  });
+
+  it('montre le dossier de création au propriétaire, sous les statuts', async () => {
+    mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    expect(screen.queryByRole('heading', { name: 'Dossier de création' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Forme juridique' }));
+    expect(await screen.findByRole('heading', { name: 'Dossier de création' })).toBeInTheDocument();
+    expect(await screen.findByText(/confirme d'abord la forme juridique \(section statuts/i)).toBeInTheDocument();
   });
 
   describe('grille d’icônes des étapes', () => {
@@ -708,6 +736,13 @@ describe('ProjectDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Forme juridique' }));
     expect(await screen.findByRole('heading', { name: 'Forme juridique' })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Statuts' })).not.toBeInTheDocument();
+    // Le dossier de création non plus : le serveur le réserve au propriétaire.
+    expect(screen.queryByRole('heading', { name: 'Dossier de création' })).not.toBeInTheDocument();
+    expect(
+      (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.some(([url]) =>
+        String(url).includes('/dossier-creation'),
+      ),
+    ).toBe(false);
 
     // Les outils transverses sont accessibles en lecture seule pour un
     // collaborateur — chacun derrière sa propre icône, ouverte à son tour.
