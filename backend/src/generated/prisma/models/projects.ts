@@ -247,6 +247,7 @@ export type projectsWhereInput = {
   participation_agreement?: Prisma.XOR<Prisma.Participation_agreementsNullableScalarRelationFilter, Prisma.participation_agreementsWhereInput> | null
   financedProjects?: Prisma.XOR<Prisma.Financed_projectsNullableScalarRelationFilter, Prisma.financed_projectsWhereInput> | null
   bylaws?: Prisma.XOR<Prisma.Company_bylawsNullableScalarRelationFilter, Prisma.company_bylawsWhereInput> | null
+  mandates?: Prisma.MandatesListRelationFilter
 }
 
 export type projectsOrderByWithRelationInput = {
@@ -292,6 +293,7 @@ export type projectsOrderByWithRelationInput = {
   participation_agreement?: Prisma.participation_agreementsOrderByWithRelationInput
   financedProjects?: Prisma.financed_projectsOrderByWithRelationInput
   bylaws?: Prisma.company_bylawsOrderByWithRelationInput
+  mandates?: Prisma.mandatesOrderByRelationAggregateInput
 }
 
 export type projectsWhereUniqueInput = Prisma.AtLeast<{
@@ -340,6 +342,7 @@ export type projectsWhereUniqueInput = Prisma.AtLeast<{
   participation_agreement?: Prisma.XOR<Prisma.Participation_agreementsNullableScalarRelationFilter, Prisma.participation_agreementsWhereInput> | null
   financedProjects?: Prisma.XOR<Prisma.Financed_projectsNullableScalarRelationFilter, Prisma.financed_projectsWhereInput> | null
   bylaws?: Prisma.XOR<Prisma.Company_bylawsNullableScalarRelationFilter, Prisma.company_bylawsWhereInput> | null
+  mandates?: Prisma.MandatesListRelationFilter
 }, "id">
 
 export type projectsOrderByWithAggregationInput = {
@@ -414,6 +417,7 @@ export type projectsCreateInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateInput = {
@@ -458,6 +462,7 @@ export type projectsUncheckedCreateInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUpdateInput = {
@@ -502,6 +507,7 @@ export type projectsUpdateInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateInput = {
@@ -546,6 +552,7 @@ export type projectsUncheckedUpdateInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateManyInput = {
@@ -1153,6 +1160,20 @@ export type projectsUpdateOneWithoutAd_campaignsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutAd_campaignsInput, Prisma.projectsUpdateWithoutAd_campaignsInput>, Prisma.projectsUncheckedUpdateWithoutAd_campaignsInput>
 }
 
+export type projectsCreateNestedOneWithoutMandatesInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutMandatesInput, Prisma.projectsUncheckedCreateWithoutMandatesInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutMandatesInput
+  connect?: Prisma.projectsWhereUniqueInput
+}
+
+export type projectsUpdateOneRequiredWithoutMandatesNestedInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutMandatesInput, Prisma.projectsUncheckedCreateWithoutMandatesInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutMandatesInput
+  upsert?: Prisma.projectsUpsertWithoutMandatesInput
+  connect?: Prisma.projectsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutMandatesInput, Prisma.projectsUpdateWithoutMandatesInput>, Prisma.projectsUncheckedUpdateWithoutMandatesInput>
+}
+
 export type projectsCreateWithoutOwnerInput = {
   id?: string
   title: string
@@ -1194,6 +1215,7 @@ export type projectsCreateWithoutOwnerInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutOwnerInput = {
@@ -1237,6 +1259,7 @@ export type projectsUncheckedCreateWithoutOwnerInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutOwnerInput = {
@@ -1321,6 +1344,7 @@ export type projectsCreateWithoutAnalysesInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutAnalysesInput = {
@@ -1364,6 +1388,7 @@ export type projectsUncheckedCreateWithoutAnalysesInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutAnalysesInput = {
@@ -1423,6 +1448,7 @@ export type projectsUpdateWithoutAnalysesInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutAnalysesInput = {
@@ -1466,6 +1492,7 @@ export type projectsUncheckedUpdateWithoutAnalysesInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutLegal_form_recommendationsInput = {
@@ -1509,6 +1536,7 @@ export type projectsCreateWithoutLegal_form_recommendationsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutLegal_form_recommendationsInput = {
@@ -1552,6 +1580,7 @@ export type projectsUncheckedCreateWithoutLegal_form_recommendationsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutLegal_form_recommendationsInput = {
@@ -1611,6 +1640,7 @@ export type projectsUpdateWithoutLegal_form_recommendationsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutLegal_form_recommendationsInput = {
@@ -1654,6 +1684,7 @@ export type projectsUncheckedUpdateWithoutLegal_form_recommendationsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutBylawsInput = {
@@ -1697,6 +1728,7 @@ export type projectsCreateWithoutBylawsInput = {
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutBylawsInput = {
@@ -1740,6 +1772,7 @@ export type projectsUncheckedCreateWithoutBylawsInput = {
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutBylawsInput = {
@@ -1799,6 +1832,7 @@ export type projectsUpdateWithoutBylawsInput = {
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutBylawsInput = {
@@ -1842,6 +1876,7 @@ export type projectsUncheckedUpdateWithoutBylawsInput = {
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutFinancing_plansInput = {
@@ -1885,6 +1920,7 @@ export type projectsCreateWithoutFinancing_plansInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutFinancing_plansInput = {
@@ -1928,6 +1964,7 @@ export type projectsUncheckedCreateWithoutFinancing_plansInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutFinancing_plansInput = {
@@ -1987,6 +2024,7 @@ export type projectsUpdateWithoutFinancing_plansInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
@@ -2030,6 +2068,7 @@ export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutDevelopment_plansInput = {
@@ -2073,6 +2112,7 @@ export type projectsCreateWithoutDevelopment_plansInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
@@ -2116,6 +2156,7 @@ export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutDevelopment_plansInput = {
@@ -2175,6 +2216,7 @@ export type projectsUpdateWithoutDevelopment_plansInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
@@ -2218,6 +2260,7 @@ export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutTransmission_plansInput = {
@@ -2261,6 +2304,7 @@ export type projectsCreateWithoutTransmission_plansInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutTransmission_plansInput = {
@@ -2304,6 +2348,7 @@ export type projectsUncheckedCreateWithoutTransmission_plansInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutTransmission_plansInput = {
@@ -2363,6 +2408,7 @@ export type projectsUpdateWithoutTransmission_plansInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
@@ -2406,6 +2452,7 @@ export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutMemoriesInput = {
@@ -2449,6 +2496,7 @@ export type projectsCreateWithoutMemoriesInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutMemoriesInput = {
@@ -2492,6 +2540,7 @@ export type projectsUncheckedCreateWithoutMemoriesInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutMemoriesInput = {
@@ -2551,6 +2600,7 @@ export type projectsUpdateWithoutMemoriesInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutMemoriesInput = {
@@ -2594,6 +2644,7 @@ export type projectsUncheckedUpdateWithoutMemoriesInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutConceptsInput = {
@@ -2637,6 +2688,7 @@ export type projectsCreateWithoutConceptsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutConceptsInput = {
@@ -2680,6 +2732,7 @@ export type projectsUncheckedCreateWithoutConceptsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutConceptsInput = {
@@ -2739,6 +2792,7 @@ export type projectsUpdateWithoutConceptsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutConceptsInput = {
@@ -2782,6 +2836,7 @@ export type projectsUncheckedUpdateWithoutConceptsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutTasksInput = {
@@ -2825,6 +2880,7 @@ export type projectsCreateWithoutTasksInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutTasksInput = {
@@ -2868,6 +2924,7 @@ export type projectsUncheckedCreateWithoutTasksInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutTasksInput = {
@@ -2927,6 +2984,7 @@ export type projectsUpdateWithoutTasksInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutTasksInput = {
@@ -2970,6 +3028,7 @@ export type projectsUncheckedUpdateWithoutTasksInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutCommunity_commentsInput = {
@@ -3013,6 +3072,7 @@ export type projectsCreateWithoutCommunity_commentsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutCommunity_commentsInput = {
@@ -3056,6 +3116,7 @@ export type projectsUncheckedCreateWithoutCommunity_commentsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutCommunity_commentsInput = {
@@ -3115,6 +3176,7 @@ export type projectsUpdateWithoutCommunity_commentsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutCommunity_commentsInput = {
@@ -3158,6 +3220,7 @@ export type projectsUncheckedUpdateWithoutCommunity_commentsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutCollaboratorsInput = {
@@ -3201,6 +3264,7 @@ export type projectsCreateWithoutCollaboratorsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutCollaboratorsInput = {
@@ -3244,6 +3308,7 @@ export type projectsUncheckedCreateWithoutCollaboratorsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutCollaboratorsInput = {
@@ -3303,6 +3368,7 @@ export type projectsUpdateWithoutCollaboratorsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutCollaboratorsInput = {
@@ -3346,6 +3412,7 @@ export type projectsUncheckedUpdateWithoutCollaboratorsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutBuild_plansInput = {
@@ -3389,6 +3456,7 @@ export type projectsCreateWithoutBuild_plansInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutBuild_plansInput = {
@@ -3432,6 +3500,7 @@ export type projectsUncheckedCreateWithoutBuild_plansInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutBuild_plansInput = {
@@ -3491,6 +3560,7 @@ export type projectsUpdateWithoutBuild_plansInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutBuild_plansInput = {
@@ -3534,6 +3604,7 @@ export type projectsUncheckedUpdateWithoutBuild_plansInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutCompliance_checksInput = {
@@ -3577,6 +3648,7 @@ export type projectsCreateWithoutCompliance_checksInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutCompliance_checksInput = {
@@ -3620,6 +3692,7 @@ export type projectsUncheckedCreateWithoutCompliance_checksInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutCompliance_checksInput = {
@@ -3679,6 +3752,7 @@ export type projectsUpdateWithoutCompliance_checksInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutCompliance_checksInput = {
@@ -3722,6 +3796,7 @@ export type projectsUncheckedUpdateWithoutCompliance_checksInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutCompliance_ai_runsInput = {
@@ -3765,6 +3840,7 @@ export type projectsCreateWithoutCompliance_ai_runsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutCompliance_ai_runsInput = {
@@ -3808,6 +3884,7 @@ export type projectsUncheckedCreateWithoutCompliance_ai_runsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutCompliance_ai_runsInput = {
@@ -3867,6 +3944,7 @@ export type projectsUpdateWithoutCompliance_ai_runsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutCompliance_ai_runsInput = {
@@ -3910,6 +3988,7 @@ export type projectsUncheckedUpdateWithoutCompliance_ai_runsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutAutomation_runsInput = {
@@ -3953,6 +4032,7 @@ export type projectsCreateWithoutAutomation_runsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutAutomation_runsInput = {
@@ -3996,6 +4076,7 @@ export type projectsUncheckedCreateWithoutAutomation_runsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutAutomation_runsInput = {
@@ -4055,6 +4136,7 @@ export type projectsUpdateWithoutAutomation_runsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutAutomation_runsInput = {
@@ -4098,6 +4180,7 @@ export type projectsUncheckedUpdateWithoutAutomation_runsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutFinancing_roundsInput = {
@@ -4141,6 +4224,7 @@ export type projectsCreateWithoutFinancing_roundsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutFinancing_roundsInput = {
@@ -4184,6 +4268,7 @@ export type projectsUncheckedCreateWithoutFinancing_roundsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutFinancing_roundsInput = {
@@ -4243,6 +4328,7 @@ export type projectsUpdateWithoutFinancing_roundsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutFinancing_roundsInput = {
@@ -4286,6 +4372,7 @@ export type projectsUncheckedUpdateWithoutFinancing_roundsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutEquity_holdersInput = {
@@ -4329,6 +4416,7 @@ export type projectsCreateWithoutEquity_holdersInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutEquity_holdersInput = {
@@ -4372,6 +4460,7 @@ export type projectsUncheckedCreateWithoutEquity_holdersInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutEquity_holdersInput = {
@@ -4431,6 +4520,7 @@ export type projectsUpdateWithoutEquity_holdersInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutEquity_holdersInput = {
@@ -4474,6 +4564,7 @@ export type projectsUncheckedUpdateWithoutEquity_holdersInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutEquity_eventsInput = {
@@ -4517,6 +4608,7 @@ export type projectsCreateWithoutEquity_eventsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutEquity_eventsInput = {
@@ -4560,6 +4652,7 @@ export type projectsUncheckedCreateWithoutEquity_eventsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutEquity_eventsInput = {
@@ -4619,6 +4712,7 @@ export type projectsUpdateWithoutEquity_eventsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutEquity_eventsInput = {
@@ -4662,6 +4756,7 @@ export type projectsUncheckedUpdateWithoutEquity_eventsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutDividendsInput = {
@@ -4705,6 +4800,7 @@ export type projectsCreateWithoutDividendsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutDividendsInput = {
@@ -4748,6 +4844,7 @@ export type projectsUncheckedCreateWithoutDividendsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutDividendsInput = {
@@ -4807,6 +4904,7 @@ export type projectsUpdateWithoutDividendsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutDividendsInput = {
@@ -4850,6 +4948,7 @@ export type projectsUncheckedUpdateWithoutDividendsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutParticipation_agreementInput = {
@@ -4893,6 +4992,7 @@ export type projectsCreateWithoutParticipation_agreementInput = {
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutParticipation_agreementInput = {
@@ -4936,6 +5036,7 @@ export type projectsUncheckedCreateWithoutParticipation_agreementInput = {
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutParticipation_agreementInput = {
@@ -4995,6 +5096,7 @@ export type projectsUpdateWithoutParticipation_agreementInput = {
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutParticipation_agreementInput = {
@@ -5038,6 +5140,7 @@ export type projectsUncheckedUpdateWithoutParticipation_agreementInput = {
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutBilling_documentsInput = {
@@ -5081,6 +5184,7 @@ export type projectsCreateWithoutBilling_documentsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutBilling_documentsInput = {
@@ -5124,6 +5228,7 @@ export type projectsUncheckedCreateWithoutBilling_documentsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutBilling_documentsInput = {
@@ -5183,6 +5288,7 @@ export type projectsUpdateWithoutBilling_documentsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutBilling_documentsInput = {
@@ -5226,6 +5332,7 @@ export type projectsUncheckedUpdateWithoutBilling_documentsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutCrm_contactsInput = {
@@ -5269,6 +5376,7 @@ export type projectsCreateWithoutCrm_contactsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutCrm_contactsInput = {
@@ -5312,6 +5420,7 @@ export type projectsUncheckedCreateWithoutCrm_contactsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutCrm_contactsInput = {
@@ -5371,6 +5480,7 @@ export type projectsUpdateWithoutCrm_contactsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutCrm_contactsInput = {
@@ -5414,6 +5524,7 @@ export type projectsUncheckedUpdateWithoutCrm_contactsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutStock_itemsInput = {
@@ -5457,6 +5568,7 @@ export type projectsCreateWithoutStock_itemsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutStock_itemsInput = {
@@ -5500,6 +5612,7 @@ export type projectsUncheckedCreateWithoutStock_itemsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutStock_itemsInput = {
@@ -5559,6 +5672,7 @@ export type projectsUpdateWithoutStock_itemsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutStock_itemsInput = {
@@ -5602,6 +5716,7 @@ export type projectsUncheckedUpdateWithoutStock_itemsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutAgenda_eventsInput = {
@@ -5645,6 +5760,7 @@ export type projectsCreateWithoutAgenda_eventsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutAgenda_eventsInput = {
@@ -5688,6 +5804,7 @@ export type projectsUncheckedCreateWithoutAgenda_eventsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutAgenda_eventsInput = {
@@ -5747,6 +5864,7 @@ export type projectsUpdateWithoutAgenda_eventsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutAgenda_eventsInput = {
@@ -5790,6 +5908,7 @@ export type projectsUncheckedUpdateWithoutAgenda_eventsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutWorkflow_definitionsInput = {
@@ -5833,6 +5952,7 @@ export type projectsCreateWithoutWorkflow_definitionsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutWorkflow_definitionsInput = {
@@ -5876,6 +5996,7 @@ export type projectsUncheckedCreateWithoutWorkflow_definitionsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutWorkflow_definitionsInput = {
@@ -5935,6 +6056,7 @@ export type projectsUpdateWithoutWorkflow_definitionsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutWorkflow_definitionsInput = {
@@ -5978,6 +6100,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_definitionsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutWorkflow_runsInput = {
@@ -6021,6 +6144,7 @@ export type projectsCreateWithoutWorkflow_runsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutWorkflow_runsInput = {
@@ -6064,6 +6188,7 @@ export type projectsUncheckedCreateWithoutWorkflow_runsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutWorkflow_runsInput = {
@@ -6123,6 +6248,7 @@ export type projectsUpdateWithoutWorkflow_runsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutWorkflow_runsInput = {
@@ -6166,6 +6292,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_runsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutBuyback_objectivesInput = {
@@ -6209,6 +6336,7 @@ export type projectsCreateWithoutBuyback_objectivesInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutBuyback_objectivesInput = {
@@ -6252,6 +6380,7 @@ export type projectsUncheckedCreateWithoutBuyback_objectivesInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutBuyback_objectivesInput = {
@@ -6311,6 +6440,7 @@ export type projectsUpdateWithoutBuyback_objectivesInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutBuyback_objectivesInput = {
@@ -6354,6 +6484,7 @@ export type projectsUncheckedUpdateWithoutBuyback_objectivesInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutFinancedProjectsInput = {
@@ -6397,6 +6528,7 @@ export type projectsCreateWithoutFinancedProjectsInput = {
   buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutFinancedProjectsInput = {
@@ -6440,6 +6572,7 @@ export type projectsUncheckedCreateWithoutFinancedProjectsInput = {
   buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutFinancedProjectsInput = {
@@ -6499,6 +6632,7 @@ export type projectsUpdateWithoutFinancedProjectsInput = {
   buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutFinancedProjectsInput = {
@@ -6542,6 +6676,7 @@ export type projectsUncheckedUpdateWithoutFinancedProjectsInput = {
   buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutScore_snapshotsInput = {
@@ -6585,6 +6720,7 @@ export type projectsCreateWithoutScore_snapshotsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutScore_snapshotsInput = {
@@ -6628,6 +6764,7 @@ export type projectsUncheckedCreateWithoutScore_snapshotsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutScore_snapshotsInput = {
@@ -6687,6 +6824,7 @@ export type projectsUpdateWithoutScore_snapshotsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutScore_snapshotsInput = {
@@ -6730,6 +6868,7 @@ export type projectsUncheckedUpdateWithoutScore_snapshotsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutReal_estate_propertiesInput = {
@@ -6773,6 +6912,7 @@ export type projectsCreateWithoutReal_estate_propertiesInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutReal_estate_propertiesInput = {
@@ -6816,6 +6956,7 @@ export type projectsUncheckedCreateWithoutReal_estate_propertiesInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutReal_estate_propertiesInput = {
@@ -6875,6 +7016,7 @@ export type projectsUpdateWithoutReal_estate_propertiesInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutReal_estate_propertiesInput = {
@@ -6918,6 +7060,7 @@ export type projectsUncheckedUpdateWithoutReal_estate_propertiesInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutFleet_vehiclesInput = {
@@ -6961,6 +7104,7 @@ export type projectsCreateWithoutFleet_vehiclesInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutFleet_vehiclesInput = {
@@ -7004,6 +7148,7 @@ export type projectsUncheckedCreateWithoutFleet_vehiclesInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutFleet_vehiclesInput = {
@@ -7063,6 +7208,7 @@ export type projectsUpdateWithoutFleet_vehiclesInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutFleet_vehiclesInput = {
@@ -7106,6 +7252,7 @@ export type projectsUncheckedUpdateWithoutFleet_vehiclesInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutAd_campaignsInput = {
@@ -7149,6 +7296,7 @@ export type projectsCreateWithoutAd_campaignsInput = {
   participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutAd_campaignsInput = {
@@ -7192,6 +7340,7 @@ export type projectsUncheckedCreateWithoutAd_campaignsInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
   financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
   bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutAd_campaignsInput = {
@@ -7251,6 +7400,7 @@ export type projectsUpdateWithoutAd_campaignsInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutAd_campaignsInput = {
@@ -7286,6 +7436,199 @@ export type projectsUncheckedUpdateWithoutAd_campaignsInput = {
   agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
   real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
   fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
+  financing_rounds?: Prisma.financing_roundsUncheckedUpdateManyWithoutProjectNestedInput
+  equity_holders?: Prisma.equity_holdersUncheckedUpdateManyWithoutProjectNestedInput
+  equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
+  dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
+  buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
+  financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
+}
+
+export type projectsCreateWithoutMandatesInput = {
+  id?: string
+  title: string
+  description?: string | null
+  sector?: string | null
+  confirmed_legal_form?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  owner: Prisma.usersCreateNestedOneWithoutProjectsInput
+  analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
+  score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutProjectInput
+  financing_rounds?: Prisma.financing_roundsCreateNestedManyWithoutProjectInput
+  equity_holders?: Prisma.equity_holdersCreateNestedManyWithoutProjectInput
+  equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
+  dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
+  buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
+  financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+}
+
+export type projectsUncheckedCreateWithoutMandatesInput = {
+  id?: string
+  owner_id: string
+  title: string
+  description?: string | null
+  sector?: string | null
+  confirmed_legal_form?: string | null
+  is_public?: boolean
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
+  score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutProjectInput
+  financing_rounds?: Prisma.financing_roundsUncheckedCreateNestedManyWithoutProjectInput
+  equity_holders?: Prisma.equity_holdersUncheckedCreateNestedManyWithoutProjectInput
+  equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
+  dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
+  buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
+  financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+}
+
+export type projectsCreateOrConnectWithoutMandatesInput = {
+  where: Prisma.projectsWhereUniqueInput
+  create: Prisma.XOR<Prisma.projectsCreateWithoutMandatesInput, Prisma.projectsUncheckedCreateWithoutMandatesInput>
+}
+
+export type projectsUpsertWithoutMandatesInput = {
+  update: Prisma.XOR<Prisma.projectsUpdateWithoutMandatesInput, Prisma.projectsUncheckedUpdateWithoutMandatesInput>
+  create: Prisma.XOR<Prisma.projectsCreateWithoutMandatesInput, Prisma.projectsUncheckedCreateWithoutMandatesInput>
+  where?: Prisma.projectsWhereInput
+}
+
+export type projectsUpdateToOneWithWhereWithoutMandatesInput = {
+  where?: Prisma.projectsWhereInput
+  data: Prisma.XOR<Prisma.projectsUpdateWithoutMandatesInput, Prisma.projectsUncheckedUpdateWithoutMandatesInput>
+}
+
+export type projectsUpdateWithoutMandatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
+  analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
+  score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutProjectNestedInput
+  financing_rounds?: Prisma.financing_roundsUpdateManyWithoutProjectNestedInput
+  equity_holders?: Prisma.equity_holdersUpdateManyWithoutProjectNestedInput
+  equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
+  dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
+  buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
+  financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+}
+
+export type projectsUncheckedUpdateWithoutMandatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
+  score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutProjectNestedInput
   financing_rounds?: Prisma.financing_roundsUncheckedUpdateManyWithoutProjectNestedInput
   equity_holders?: Prisma.equity_holdersUncheckedUpdateManyWithoutProjectNestedInput
   equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
@@ -7348,6 +7691,7 @@ export type projectsUpdateWithoutOwnerInput = {
   participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutOwnerInput = {
@@ -7391,6 +7735,7 @@ export type projectsUncheckedUpdateWithoutOwnerInput = {
   participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
   financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
   bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateManyWithoutOwnerInput = {
@@ -7439,6 +7784,7 @@ export type ProjectsCountOutputType = {
   equity_events: number
   dividends: number
   buyback_objectives: number
+  mandates: number
 }
 
 export type ProjectsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -7471,6 +7817,7 @@ export type ProjectsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensio
   equity_events?: boolean | ProjectsCountOutputTypeCountEquity_eventsArgs
   dividends?: boolean | ProjectsCountOutputTypeCountDividendsArgs
   buyback_objectives?: boolean | ProjectsCountOutputTypeCountBuyback_objectivesArgs
+  mandates?: boolean | ProjectsCountOutputTypeCountMandatesArgs
 }
 
 /**
@@ -7686,6 +8033,13 @@ export type ProjectsCountOutputTypeCountBuyback_objectivesArgs<ExtArgs extends r
   where?: Prisma.buyback_objectivesWhereInput
 }
 
+/**
+ * ProjectsCountOutputType without action
+ */
+export type ProjectsCountOutputTypeCountMandatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.mandatesWhereInput
+}
+
 
 export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -7730,6 +8084,7 @@ export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   participation_agreement?: boolean | Prisma.projects$participation_agreementArgs<ExtArgs>
   financedProjects?: boolean | Prisma.projects$financedProjectsArgs<ExtArgs>
   bylaws?: boolean | Prisma.projects$bylawsArgs<ExtArgs>
+  mandates?: boolean | Prisma.projects$mandatesArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["projects"]>
 
@@ -7806,6 +8161,7 @@ export type projectsInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   participation_agreement?: boolean | Prisma.projects$participation_agreementArgs<ExtArgs>
   financedProjects?: boolean | Prisma.projects$financedProjectsArgs<ExtArgs>
   bylaws?: boolean | Prisma.projects$bylawsArgs<ExtArgs>
+  mandates?: boolean | Prisma.projects$mandatesArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type projectsIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -7851,6 +8207,7 @@ export type $projectsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     participation_agreement: Prisma.$participation_agreementsPayload<ExtArgs> | null
     financedProjects: Prisma.$financed_projectsPayload<ExtArgs> | null
     bylaws: Prisma.$company_bylawsPayload<ExtArgs> | null
+    mandates: Prisma.$mandatesPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -8294,6 +8651,7 @@ export interface Prisma__projectsClient<T, Null = never, ExtArgs extends runtime
   participation_agreement<T extends Prisma.projects$participation_agreementArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$participation_agreementArgs<ExtArgs>>): Prisma.Prisma__participation_agreementsClient<runtime.Types.Result.GetResult<Prisma.$participation_agreementsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   financedProjects<T extends Prisma.projects$financedProjectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$financedProjectsArgs<ExtArgs>>): Prisma.Prisma__financed_projectsClient<runtime.Types.Result.GetResult<Prisma.$financed_projectsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   bylaws<T extends Prisma.projects$bylawsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$bylawsArgs<ExtArgs>>): Prisma.Prisma__company_bylawsClient<runtime.Types.Result.GetResult<Prisma.$company_bylawsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  mandates<T extends Prisma.projects$mandatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$mandatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$mandatesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9483,6 +9841,30 @@ export type projects$bylawsArgs<ExtArgs extends runtime.Types.Extensions.Interna
    */
   include?: Prisma.company_bylawsInclude<ExtArgs> | null
   where?: Prisma.company_bylawsWhereInput
+}
+
+/**
+ * projects.mandates
+ */
+export type projects$mandatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the mandates
+   */
+  select?: Prisma.mandatesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the mandates
+   */
+  omit?: Prisma.mandatesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.mandatesInclude<ExtArgs> | null
+  where?: Prisma.mandatesWhereInput
+  orderBy?: Prisma.mandatesOrderByWithRelationInput | Prisma.mandatesOrderByWithRelationInput[]
+  cursor?: Prisma.mandatesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MandatesScalarFieldEnum | Prisma.MandatesScalarFieldEnum[]
 }
 
 /**

@@ -62,6 +62,11 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   // son abonnement — la reference chez le fournisseur de paiement comprise,
   // qui est le seul fil permettant de retrouver ses propres paiements.
   subscriptions: exported('compte'),
+  // Vérification d'identité et mandats donnés à Ignitux pour agir comme
+  // mandataire : même nature qu'un abonnement, une relation contractuelle
+  // avec Ignitux, pas une donnée métier de projet.
+  identity_verifications: exported('compte'),
+  mandates: exported('compte'),
 
   projects: exported('projets_et_contenus'),
   tasks: exported('projets_et_contenus'),

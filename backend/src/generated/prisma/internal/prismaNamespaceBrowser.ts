@@ -122,7 +122,9 @@ export const ModelName = {
   fleet_vehicles: 'fleet_vehicles',
   fleet_entries: 'fleet_entries',
   ad_campaigns: 'ad_campaigns',
-  ad_campaign_entries: 'ad_campaign_entries'
+  ad_campaign_entries: 'ad_campaign_entries',
+  identity_verifications: 'identity_verifications',
+  mandates: 'mandates'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1164,6 +1166,47 @@ export const Ad_campaign_entriesScalarFieldEnum = {
 } as const
 
 export type Ad_campaign_entriesScalarFieldEnum = (typeof Ad_campaign_entriesScalarFieldEnum)[keyof typeof Ad_campaign_entriesScalarFieldEnum]
+
+
+export const Identity_verificationsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  document_type: 'document_type',
+  document_front: 'document_front',
+  document_back: 'document_back',
+  extracted_first_name: 'extracted_first_name',
+  extracted_last_name: 'extracted_last_name',
+  extracted_birth_date: 'extracted_birth_date',
+  extracted_document_number: 'extracted_document_number',
+  extracted_expiry_date: 'extracted_expiry_date',
+  mrz_checksum_valid: 'mrz_checksum_valid',
+  name_matches_account: 'name_matches_account',
+  status: 'status',
+  rejection_reason: 'rejection_reason',
+  reviewed_by: 'reviewed_by',
+  reviewed_at: 'reviewed_at',
+  created_at: 'created_at'
+} as const
+
+export type Identity_verificationsScalarFieldEnum = (typeof Identity_verificationsScalarFieldEnum)[keyof typeof Identity_verificationsScalarFieldEnum]
+
+
+export const MandatesScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  project_id: 'project_id',
+  identity_verification_id: 'identity_verification_id',
+  purpose: 'purpose',
+  mandate_text: 'mandate_text',
+  signed_full_name: 'signed_full_name',
+  signed_at: 'signed_at',
+  signer_ip: 'signer_ip',
+  status: 'status',
+  revoked_at: 'revoked_at',
+  created_at: 'created_at'
+} as const
+
+export type MandatesScalarFieldEnum = (typeof MandatesScalarFieldEnum)[keyof typeof MandatesScalarFieldEnum]
 
 
 export const SortOrder = {

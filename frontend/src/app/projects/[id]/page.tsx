@@ -40,6 +40,7 @@ import { CollaboratorsSection } from './collaborators-section';
 import { StatutsSection } from './statuts-section';
 import { ComplianceSection } from './compliance-section';
 import { KnowledgeSection, MemorySection, ScoreHistorySection, ScoreSection, TasksSection } from './engine-sections';
+import { MandatSection } from './mandat-section';
 
 /**
  * Demande au serveur si les 5 générateurs IGINI sont disponibles.
@@ -818,6 +819,8 @@ export default function ProjectDetailPage() {
           onChanged={onGenerated}
         />
       )}
+      {/* MANDAT — une autorisation que le porteur donne, pas un résultat de générateur IGINI. Propriétaire seulement (assertOwnsProject côté serveur). */}
+      {isOwner && <MandatSection token={token} projectId={id} />}
       {montrer('conformite') && etapeOuverte === 'conformite' && (
         <ComplianceSection token={token} projectId={id} readOnly={!isOwner} />
       )}

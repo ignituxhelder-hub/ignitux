@@ -67,6 +67,47 @@ describe('api', () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
+  describe('identité', () => {
+    it('récupère une face de document en binaire, avec le jeton', async () => {
+      const blob = new Blob([new Uint8Array([0x89, 0x50])], { type: 'image/png' });
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        blob: () => Promise.resolve(blob),
+      }) as unknown as typeof fetch;
+
+      const resultat = await api.getDocumentVerification('tok', 'v1', 'back');
+
+      expect(resultat).toBe(blob);
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/identite/verifications/v1/document/back'),
+        expect.objectContaining({ headers: { Authorization: 'Bearer tok' } }),
+      );
+    });
+
+    it('lève une ApiError quand le document est introuvable', async () => {
+      mockFetchOnce(404, { message: "Cette vérification n'a pas de verso." });
+
+      await expect(api.getDocumentVerification('tok', 'v1', 'back')).rejects.toMatchObject({
+        status: 404,
+      });
+    });
+
+    it('envoie le consentement explicite avec la signature du mandat', async () => {
+      mockFetchOnce(200, { id: 'm1' });
+
+      await api.signerMandat('tok', 'm1', 'Jean Dupont', true);
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/identite/mandats/m1/signer'),
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ nomComplet: 'Jean Dupont', accepte: true }),
+        }),
+      );
+    });
+  });
+
   describe('cache local et données personnelles', () => {
     /** Un stockage minimal, itérable comme celui attendu par le cache. */
     function fakeStorage() {
@@ -107,6 +148,22 @@ describe('api', () => {
       mockFetchOnce(200, { resume: {}, avertissements: [] });
 
       await api.getDeletionPreview('token');
+
+      expect(storage.entries.size).toBe(0);
+    });
+
+    it.each([
+      ['getMesVerifications', () => api.getMesVerifications('token')],
+      ['getVerificationsEnAttente', () => api.getVerificationsEnAttente('token')],
+      ['getTexteMandat', () => api.getTexteMandat('token')],
+    ])("ne met pas en cache les données d'identité (%s)", async (_nom, appel) => {
+      // La file de revue porte l'identité de tiers : rien de tout cela ne
+      // doit rester en clair dans le navigateur d'un administrateur.
+      const storage = fakeStorage();
+      setOfflineStorage(storage);
+      mockFetchOnce(200, [{ id: 'v1', document_type: 'passeport' }]);
+
+      await appel();
 
       expect(storage.entries.size).toBe(0);
     });

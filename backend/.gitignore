@@ -74,3 +74,9 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Sauvegardes logiques : elles contiennent de vraies donnees personnelles.
 sauvegardes/
+
+# Residu possible si tesseract.js retombe un jour sur son cache par defaut
+# (le repertoire courant) au lieu du modele vendorise et suivi par git dans
+# src/identite/tessdata/fra.traineddata (voir ocr-extraction.ts). Ancre a la
+# racine du backend pour ne pas ignorer la copie vendorisee.
+/fra.traineddata

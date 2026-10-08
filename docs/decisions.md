@@ -1046,3 +1046,57 @@ jour serait refusé (400) jusqu'à son rechargement.
 **Où** — `backend/src/investors/` (`distribution.ts`, `investors.service.ts`, `investors.controller.ts`,
 `dto/investors.dto.ts`), `backend/src/financing/financing-model.ts`,
 `frontend/src/app/projects/[id]/finances/page.tsx`, `frontend/src/lib/api.ts`.
+
+---
+
+## Vérification d'identité et mandats : ce qui bloque un vrai dépôt, pas ce code
+
+**Quand** — 1er octobre 2026.
+
+**Ce qui existe** — le module `backend/src/identite/` (vérification d'identité,
+revue administrateur, mandats) construit sur
+`docs/superpowers/specs/2026-09-30-identite-mandats-design.md`. Ce module
+fonctionne et est testé ; ce qui suit n'est pas un défaut du code, ce sont des
+conditions externes qui doivent être levées avant qu'Ignitux dépose un
+premier dossier réel pour un vrai tiers en tant que mandataire.
+
+**Trois points à faire trancher par un avocat avant tout dépôt réel** (repris
+tels quels de la spec, §« Risques ») :
+
+1. Le statut de mandataire d'Ignitux pour déposer des formalités d'entreprise
+   au nom d'un tiers — la pratique d'autres plateformes (LegalPlace,
+   LegalStart) n'est pas une confirmation légale pour Ignitux.
+2. Le niveau de signature électronique simple choisi (relecture du texte +
+   case de consentement + nom retapé) est-il suffisant pour la valeur
+   juridique d'un mandat de cette nature, ou une signature qualifiée
+   devient-elle nécessaire dès qu'un dépôt réel a lieu ?
+3. Obligations de conservation/traçabilité des pièces d'identité au-delà du
+   RGPD général, si des obligations spécifiques aux professions exerçant des
+   formalités pour autrui s'appliquent à Ignitux.
+
+**Une limite technique à connaître, distincte des trois points ci-dessus** —
+la validation automatique du MRZ (checksum ICAO 9303) ne couvre aujourd'hui
+que le format passeport (TD3, 2 lignes de 44 caractères). Les cartes
+d'identité et titres de séjour portent leur MRZ au format TD1 (3 lignes de 30
+caractères), non encore parsé (`backend/src/identite/mrz-checksum.ts`,
+documenté dans son propre commentaire). Conséquence concrète : pour une carte
+d'identité ou un titre de séjour, `mrz_checksum_valid` et la date
+d'expiration extraite restent toujours `null`, et le rejet automatique des
+documents expirés (`IdentiteService.soumettreDocument`) ne se déclenche
+jamais pour ces deux types de document — seul le passeport en bénéficie
+aujourd'hui. L'OCR ne lit d'ailleurs que le recto
+(`ocr-extraction.ts`/`soumettreDocument`), alors que le MRZ d'une carte
+d'identité française récente (CNIe) est au verso : même en ajoutant le
+parsing TD1, il faudrait aussi étendre l'extraction au verso pour que ça
+serve à quelque chose. La revue humaine (`/identite/revue`) reste donc le
+seul vrai contrôle pour ces deux types de document, pas une redondance avec
+un contrôle automatique qui n'existe pas encore pour eux.
+
+**Ce qui reste, et qui n'est pas du code** — les trois points juridiques
+ci-dessus. Aucun des deux premiers générateurs IGINI suivants du chantier
+« Ignitux crée l'entreprise » (génération des statuts, préparation du dossier
+de dépôt) ne doit supposer une réponse à ces questions — ils peuvent se
+construire sur la brique de confiance (identité + mandat) sans qu'elle soit
+tranchée, mais aucun dépôt réel ne doit partir avant qu'elle le soit.
+
+**Où** — `backend/src/identite/`, `docs/superpowers/specs/2026-09-30-identite-mandats-design.md`.
