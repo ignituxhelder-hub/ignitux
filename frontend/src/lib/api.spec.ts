@@ -284,6 +284,46 @@ describe('api', () => {
       });
     });
 
+    /**
+     * Le dossier de création : cocher une pièce, marquer comme déposé ou
+     * rouvrir sont des déclarations sur ce que la personne a fait elle-même.
+     * Les rejouer plus tard, à son insu, pourrait affirmer un dépôt annulé
+     * entre-temps.
+     */
+    describe('les écritures du dossier de création n’entrent jamais en file', () => {
+      function horsLigne() {
+        global.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+      }
+
+      it.each([
+        ['cocherPiecesDossier', () => api.cocherPiecesDossier('token', 'p1', ['justificatif_siege'])],
+        ['marquerDossierDepose', () => api.marquerDossierDepose('token', 'p1', 'REF-1')],
+        ['rouvrirDossier', () => api.rouvrirDossier('token', 'p1')],
+      ])('%s échoue tout de suite, sans rien mettre en file', async (_nom, appel) => {
+        const storage = fakeStorage();
+        setOfflineStorage(storage);
+        horsLigne();
+
+        const erreur = await appel().catch((e: unknown) => e);
+        expect(erreur).toBeInstanceOf(ApiError);
+        expect(erreur).toMatchObject({ status: 0 });
+        expect(readOfflineState().pending).toHaveLength(0);
+        expect(storage.entries.size).toBe(0);
+      });
+
+      it('sert toujours la lecture du dossier depuis le cache', async () => {
+        const storage = fakeStorage();
+        setOfflineStorage(storage);
+        mockFetchOnce(200, { forme: 'SAS', pieces: [] });
+        await api.getDossierCreation('token', 'p1');
+
+        horsLigne();
+        const erreur = await api.getDossierCreation('token', 'p1').catch((e: unknown) => e);
+        expect(erreur).toBeInstanceOf(OfflineReadError);
+        expect((erreur as OfflineReadError).data).toMatchObject({ forme: 'SAS' });
+      });
+    });
+
     it('continue de mettre en cache une lecture ordinaire', async () => {
       // Sinon le test précédent passerait pour une mauvaise raison : il
       // suffirait que le cache soit cassé partout.

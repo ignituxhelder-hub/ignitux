@@ -297,6 +297,11 @@ const JAMAIS_EN_FILE_MOTIFS = [
 const ECRITURES_JAMAIS_EN_FILE = [
   /^\/projects\/[^/?#]+\/statuts(?:\/[^?#]*)?(?:[?#].*)?$/,
   /^\/projects\/[^/?#]+\/forme-juridique(?:[?#].*)?$/,
+  // Le dossier de création : cocher une pièce, marquer comme déposé ou
+  // rouvrir sont des déclarations de la personne sur ce qu'elle a fait
+  // elle-même. Les rejouer plus tard, à son insu, pourrait affirmer un dépôt
+  // qu'elle a entre-temps annulé (ou l'inverse).
+  /^\/projects\/[^/?#]+\/dossier-creation(?:\/(?:depose|rouvrir))?(?:[?#].*)?$/,
 ];
 
 function handleOffline<T>(path: string, options: RequestInit): Promise<T> {
@@ -499,6 +504,22 @@ export interface CompanyBylaws {
   status: 'brouillon' | 'retenue';
   finalized_at: string | null;
   associates: BylawAssociate[];
+}
+
+export type EtatPieceDossier = 'pret' | 'a_faire' | 'non_concerne';
+
+/** Réponse du dossier de création — en camelCase, telle que le serveur l'envoie. */
+export interface DossierCreation {
+  forme: string | null;
+  pieces: { id: string; titre: string; etat: EtatPieceDossier; detail: string; cochable: boolean }[];
+  etapes: { id: string; titre: string; texte: string; lien: string; lienLibelle: string }[];
+  frais: { miseAJour: string; lignes: string[]; avertissement: string; sources: { libelle: string; url: string }[] };
+  filing: {
+    status: 'preparation' | 'depose';
+    checkedItems: string[];
+    depositedAt: string | null;
+    filingReference: string | null;
+  };
 }
 
 export interface GenerateBylawsInput {
@@ -2139,6 +2160,42 @@ export const api = {
     });
     if (!res.ok) {
       throw new ApiError('Impossible de télécharger le PDF.', res.status);
+    }
+    return res.blob();
+  },
+
+  getDossierCreation: (token: string, projectId: string) =>
+    request<DossierCreation>(`/projects/${projectId}/dossier-creation`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  cocherPiecesDossier: (token: string, projectId: string, checkedItems: string[]) =>
+    request<DossierCreation>(`/projects/${projectId}/dossier-creation`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ checkedItems }),
+    }),
+
+  marquerDossierDepose: (token: string, projectId: string, filingReference?: string) =>
+    request<DossierCreation>(`/projects/${projectId}/dossier-creation/depose`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(filingReference ? { filingReference } : {}),
+    }),
+
+  rouvrirDossier: (token: string, projectId: string) =>
+    request<DossierCreation>(`/projects/${projectId}/dossier-creation/rouvrir`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  /** Même principe que le PDF des statuts : protégé par le jeton, récupéré en blob. */
+  telechargerDossierPdf: async (token: string, projectId: string): Promise<Blob> => {
+    const res = await fetch(`${API_URL}/projects/${projectId}/dossier-creation/pdf`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      throw new ApiError('Impossible de télécharger le récapitulatif.', res.status);
     }
     return res.blob();
   },
