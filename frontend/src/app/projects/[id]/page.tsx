@@ -168,6 +168,9 @@ export default function ProjectDetailPage() {
   // Incrémenté après chaque génération réussie : signale aux sections dérivées
   // (score, tâches, automatisation, connaissance) qu'elles doivent se recharger.
   const [refreshSignal, setRefreshSignal] = useState(0);
+  // Incrémenté quand les statuts sont générés, régénérés ou retenus : le
+  // dossier de création (pièce « statuts ») se recharge alors.
+  const [versionStatuts, setVersionStatuts] = useState(0);
   const [parcours, setParcours] = useState<JourneyView | null>(null);
   const [vueAvancee, setVueAvancee] = useState(false);
   // Laquelle des six étapes (voir lib/etapes-projet.ts) affiche son contenu en
@@ -634,6 +637,7 @@ export default function ProjectDetailPage() {
               onFormConfirmed={(form) =>
                 setProject((courant) => (courant ? { ...courant, confirmed_legal_form: form } : courant))
               }
+              onChanged={() => setVersionStatuts((v) => v + 1)}
             />
           )}
           {/* Le dossier de création suit les statuts ; réservé au propriétaire
@@ -643,6 +647,7 @@ export default function ProjectDetailPage() {
               token={token}
               projectId={id}
               confirmedLegalForm={project?.confirmed_legal_form ?? null}
+              refreshSignal={versionStatuts}
             />
           )}
         </>

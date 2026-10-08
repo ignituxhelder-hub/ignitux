@@ -379,6 +379,72 @@ describe('StatutsSection', () => {
       expect(await screen.findByText('Contenu trop long.')).toBeInTheDocument();
     });
 
+    it('prévient onChanged après une génération, une régénération et une rétention réussies — jamais après un échec', async () => {
+      const onChanged = vi.fn();
+      mockApiRoutes({
+        'GET /projects/p1/statuts': { status: 200, body: brouillon() },
+        'POST /projects/p1/statuts/regenerer': { status: 201, body: { ...brouillon(), content: 'Nouveau texte' } },
+        'POST /projects/p1/statuts/retenir': {
+          status: 201,
+          body: { ...brouillon(), content: 'Nouveau texte', status: 'retenue', finalized_at: '2026-10-03T10:00:00.000Z' },
+        },
+      });
+      render(
+        <StatutsSection
+          token={TOKEN}
+          projectId={PROJECT_ID}
+          confirmedLegalForm="SASU"
+          onFormConfirmed={vi.fn()}
+          onChanged={onChanged}
+        />,
+      );
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Régénérer' }));
+      fireEvent.click(screen.getByRole('button', { name: /régénérer les statuts/i }));
+      await screen.findByDisplayValue('Nouveau texte');
+      expect(onChanged).toHaveBeenCalledTimes(1);
+
+      fireEvent.click(screen.getByRole('button', { name: /retenir cette version/i }));
+      await screen.findByText(/Version retenue le/);
+      expect(onChanged).toHaveBeenCalledTimes(2);
+    });
+
+    it('prévient onChanged après une première génération, pas après une génération refusée', async () => {
+      const onChanged = vi.fn();
+      let posts = 0;
+      global.fetch = vi.fn().mockImplementation((url: string, options?: RequestInit) => {
+        const chemin = new URL(String(url)).pathname;
+        if (options?.method === 'POST' && chemin === '/projects/p1/statuts') {
+          posts += 1;
+          return Promise.resolve(
+            posts === 1
+              ? { ok: false, status: 400, json: () => Promise.resolve({ message: 'Génération refusée.' }) }
+              : { ok: true, status: 201, json: () => Promise.resolve(bylaws({ content: 'Texte généré' })) },
+          );
+        }
+        // GET des statuts : aucun ; les autres lectures (recommandations) : vide.
+        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(chemin === '/projects/p1/statuts' ? null : []) });
+      }) as unknown as typeof fetch;
+      render(
+        <StatutsSection
+          token={TOKEN}
+          projectId={PROJECT_ID}
+          confirmedLegalForm="SASU"
+          onFormConfirmed={vi.fn()}
+          onChanged={onChanged}
+        />,
+      );
+      await screen.findByLabelText('Capital social (€)');
+      remplirFormulaire();
+      fireEvent.click(screen.getByRole('button', { name: /générer les statuts/i }));
+      expect(await screen.findByText('Génération refusée.')).toBeInTheDocument();
+      expect(onChanged).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole('button', { name: /générer les statuts/i }));
+      expect(await screen.findByDisplayValue('Texte généré')).toBeInTheDocument();
+      expect(onChanged).toHaveBeenCalledTimes(1);
+    });
+
     it("montre l'erreur de l'API quand la rétention échoue", async () => {
       mockApiRoutes({
         'GET /projects/p1/statuts': { status: 200, body: brouillon() },

@@ -79,11 +79,17 @@ export function StatutsSection({
   projectId,
   confirmedLegalForm,
   onFormConfirmed,
+  onChanged,
 }: {
   token: string;
   projectId: string;
   confirmedLegalForm: string | null;
   onFormConfirmed: (form: string) => void;
+  /**
+   * Appelé après une génération, une régénération ou une rétention réussie :
+   * d'autres sections (le dossier de création) dépendent de l'état des statuts.
+   */
+  onChanged?: () => void;
 }) {
   // Vide tant que rien n'est choisi : jamais une forme présélectionnée « au
   // hasard » — la personne confirme une décision, on ne la prend pas pour elle.
@@ -212,6 +218,7 @@ export function StatutsSection({
       } else {
         recevoir(await api.genererStatuts(token, projectId, demande.dto));
       }
+      onChanged?.();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'La génération a échoué.');
     } finally {
@@ -259,6 +266,7 @@ export function StatutsSection({
     setIsRetaining(true);
     try {
       recevoir(await api.retenirStatuts(token, projectId));
+      onChanged?.();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de retenir cette version.');
     } finally {
