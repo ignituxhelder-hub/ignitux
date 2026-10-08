@@ -20,6 +20,7 @@ import { RefuserEcritureDepassee } from '../hors-ligne/ecriture-depassee.decorat
 import { EcritureDepasseeGuard } from '../hors-ligne/ecriture-depassee.guard.js';
 import { AddCollaboratorDto } from './dto/add-collaborator.dto.js';
 import { CreateProjectDto } from './dto/create-project.dto.js';
+import { UpdateLegalFormDto } from './dto/update-legal-form.dto.js';
 import { UpdateProjectDto } from './dto/update-project.dto.js';
 import { UpdateSectorDto } from './dto/update-sector.dto.js';
 import { UpdateVisibilityDto } from './dto/update-visibility.dto.js';
@@ -73,6 +74,16 @@ export class ProjectsController {
     @Body() dto: UpdateSectorDto,
   ) {
     return this.projectsService.setSectorForOwner(user.id, id, dto.sector ?? null);
+  }
+
+  @RefuserEcritureDepassee('projects')
+  @Patch(':id/forme-juridique')
+  updateLegalForm(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateLegalFormDto,
+  ) {
+    return this.projectsService.setConfirmedLegalFormForOwner(user.id, id, dto.legalForm ?? null);
   }
 
   @RefuserEcritureDepassee('projects')

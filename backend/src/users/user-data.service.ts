@@ -94,6 +94,7 @@ export class UserDataService {
       workflowSteps,
       analyses,
       legalFormRecommendations,
+      statuts,
       buildPlans,
       financingPlans,
       developmentPlans,
@@ -140,6 +141,9 @@ export class UserDataService {
         where: byProject,
         include: { assumptions: true, alternatives: true, sources: true },
       }),
+      // Les statuts et leurs associés (des tiers nommés par la personne) :
+      // déclarés exportés dans user-data-scope, il faut aussi les lire.
+      this.prisma.company_bylaws.findMany({ where: byProject, include: { associates: true } }),
       this.prisma.build_plans.findMany({ where: byProject }),
       this.prisma.financing_plans.findMany({ where: byProject }),
       this.prisma.development_plans.findMany({ where: byProject }),
@@ -225,6 +229,7 @@ export class UserDataService {
         contenus_generes_par_igini: {
           analyses,
           formes_juridiques_recommandees: legalFormRecommendations,
+          statuts,
           plans_de_construction: buildPlans,
           plans_de_financement: financingPlans,
           plans_de_developpement: developmentPlans,

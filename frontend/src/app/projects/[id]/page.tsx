@@ -37,6 +37,7 @@ import { WorkflowSection } from './workflow-section';
 import { BuybackSection, FinancingSection } from './financing-section';
 import { ParticipationSection } from './participation-section';
 import { CollaboratorsSection } from './collaborators-section';
+import { StatutsSection } from './statuts-section';
 import { ComplianceSection } from './compliance-section';
 import { KnowledgeSection, MemorySection, ScoreHistorySection, ScoreSection, TasksSection } from './engine-sections';
 
@@ -607,19 +608,33 @@ export default function ProjectDetailPage() {
       )}
 
       {montrer('analyse') && etapeOuverte === 'forme-juridique' && (
-        <GenerationSection
-          title="Forme juridique"
-          buttonLabel="Proposer une forme juridique"
-          buttonBusyLabel="Recommandation en cours…"
-          emptyLabel="Aucune recommandation pour l'instant — dès qu'une analyse dépasse 75/100, IGINI en prépare une automatiquement (ça prend une minute ou deux : reviens sur cette page pour la voir), ou lance-la toi-même."
-          items={legalForms}
-          isBusy={legalForm.isBusy}
-          error={legalForm.error}
-          onGenerate={legalForm.generate}
-          renderItem={(item) => <FormeJuridiqueResultat recommandation={item} key={item.id} />}
-          readOnly={!isOwner}
-          iginiStatus={iginiStatus}
-        />
+        <>
+          <GenerationSection
+            title="Forme juridique"
+            buttonLabel="Proposer une forme juridique"
+            buttonBusyLabel="Recommandation en cours…"
+            emptyLabel="Aucune recommandation pour l'instant — dès qu'une analyse dépasse 75/100, IGINI en prépare une automatiquement (ça prend une minute ou deux : reviens sur cette page pour la voir), ou lance-la toi-même."
+            items={legalForms}
+            isBusy={legalForm.isBusy}
+            error={legalForm.error}
+            onGenerate={legalForm.generate}
+            renderItem={(item) => <FormeJuridiqueResultat recommandation={item} key={item.id} />}
+            readOnly={!isOwner}
+            iginiStatus={iginiStatus}
+          />
+          {/* Les statuts suivent la forme juridique : même étape. Leur création est
+              réservée au propriétaire côté serveur, donc la section l'est aussi. */}
+          {isOwner && (
+            <StatutsSection
+              token={token}
+              projectId={id}
+              confirmedLegalForm={project?.confirmed_legal_form ?? null}
+              onFormConfirmed={(form) =>
+                setProject((courant) => (courant ? { ...courant, confirmed_legal_form: form } : courant))
+              }
+            />
+          )}
+        </>
       )}
 
       {montrer('construction') && etapeOuverte === 'construction' && (

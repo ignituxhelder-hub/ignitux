@@ -14,6 +14,7 @@ describe('ProjectsController', () => {
     updateForOwner: ReturnType<typeof vi.fn>;
     deleteForOwner: ReturnType<typeof vi.fn>;
     setVisibilityForOwner: ReturnType<typeof vi.fn>;
+    setConfirmedLegalFormForOwner: ReturnType<typeof vi.fn>;
     listCollaborators: ReturnType<typeof vi.fn>;
     addCollaborator: ReturnType<typeof vi.fn>;
     removeCollaborator: ReturnType<typeof vi.fn>;
@@ -43,6 +44,7 @@ describe('ProjectsController', () => {
       updateForOwner: vi.fn(),
       deleteForOwner: vi.fn(),
       setVisibilityForOwner: vi.fn(),
+      setConfirmedLegalFormForOwner: vi.fn(),
       listCollaborators: vi.fn(),
       addCollaborator: vi.fn(),
       removeCollaborator: vi.fn(),
@@ -130,6 +132,22 @@ describe('ProjectsController', () => {
 
     expect(projectsService.setVisibilityForOwner).toHaveBeenCalledWith('u1', 'p1', true);
     expect(result).toEqual({ id: 'p1', is_public: true });
+  });
+
+  it('updateLegalForm transmet la forme juridique confirmée', async () => {
+    projectsService.setConfirmedLegalFormForOwner.mockResolvedValue({ id: 'p1' });
+
+    await controller.updateLegalForm(currentUser, 'p1', { legalForm: 'SASU' });
+
+    expect(projectsService.setConfirmedLegalFormForOwner).toHaveBeenCalledWith('u1', 'p1', 'SASU');
+  });
+
+  it('updateLegalForm transmet null pour retirer la confirmation', async () => {
+    projectsService.setConfirmedLegalFormForOwner.mockResolvedValue({ id: 'p1' });
+
+    await controller.updateLegalForm(currentUser, 'p1', { legalForm: null });
+
+    expect(projectsService.setConfirmedLegalFormForOwner).toHaveBeenCalledWith('u1', 'p1', null);
   });
 
   it('listCollaborators délègue au service avec l\'utilisateur courant', async () => {

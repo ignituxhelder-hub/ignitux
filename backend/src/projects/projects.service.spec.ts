@@ -327,6 +327,30 @@ describe('ProjectsService', () => {
     });
   });
 
+  describe('setConfirmedLegalFormForOwner', () => {
+    it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.setConfirmedLegalFormForOwner('u1', 'p1', 'SASU'),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(prisma.projects.update).not.toHaveBeenCalled();
+    });
+
+    it('confirme une forme juridique une fois la propriété vérifiée', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.projects.update.mockResolvedValue({ id: 'p1', confirmed_legal_form: 'SASU' });
+
+      const result = await service.setConfirmedLegalFormForOwner('u1', 'p1', 'SASU');
+
+      expect(prisma.projects.update).toHaveBeenCalledWith({
+        where: { id: 'p1' },
+        data: { confirmed_legal_form: 'SASU' },
+      });
+      expect(result).toEqual({ id: 'p1', confirmed_legal_form: 'SASU' });
+    });
+  });
+
   describe('findOneForViewer', () => {
     it("lève une NotFoundException si l'utilisateur n'est ni propriétaire ni collaborateur", async () => {
       prisma.projects.findFirst.mockResolvedValue(null);

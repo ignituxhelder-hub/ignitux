@@ -100,6 +100,12 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   legal_form_assumptions: exported('contenus_generes_par_igini'),
   legal_form_alternatives: exported('contenus_generes_par_igini'),
   legal_form_sources: exported('contenus_generes_par_igini'),
+  // Les statuts générés pour un projet : un contenu que la personne a
+  // produit via IGINI pour son propre projet, même nature que les autres
+  // contenus générés (groupe « contenus_generes_par_igini »), pas une
+  // donnée de compte.
+  company_bylaws: exported('contenus_generes_par_igini'),
+  bylaw_associates: exported('contenus_generes_par_igini'),
   build_plans: exported('contenus_generes_par_igini'),
   financing_plans: exported('contenus_generes_par_igini'),
   development_plans: exported('contenus_generes_par_igini'),

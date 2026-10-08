@@ -165,6 +165,32 @@ describe('ProjectDetailPage', () => {
     expect(screen.queryByText("Aucun plan pour l'instant.")).not.toBeInTheDocument();
   });
 
+  it('montre la section Statuts au propriétaire, qui peut y confirmer la forme juridique', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      'PATCH /projects/p1/forme-juridique': { status: 200, body: { ...PROJECT, confirmed_legal_form: 'micro-entreprise' } },
+      ...ENGINE_ROUTES,
+    });
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    // Comme les autres étapes : la section n'apparaît qu'après un clic sur son icône.
+    expect(screen.queryByRole('heading', { name: 'Statuts' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Forme juridique' }));
+    expect(await screen.findByRole('heading', { name: 'Statuts' })).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Forme juridique', { selector: 'select' }), {
+      target: { value: 'micro-entreprise' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /confirmer cette forme/i }));
+    // La confirmation remonte à la page : la section passe à l'étape suivante.
+    expect(await screen.findByText(/n'ont pas de personne morale/i)).toBeInTheDocument();
+  });
+
   describe('grille d’icônes des étapes', () => {
     it('range le titre et la description derrière leur propre icône', async () => {
       mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
@@ -677,6 +703,11 @@ describe('ProjectDetailPage', () => {
     expect(screen.queryByRole('button', { name: /supprimer le projet/i })).not.toBeInTheDocument();
     // La gestion des collaborateurs reste réservée au propriétaire.
     expect(screen.queryByText('Collaborateurs')).not.toBeInTheDocument();
+    // Les statuts se créent côté propriétaire : un collaborateur ne voit pas la section.
+    // L'étape est bien ouverte (sa recommandation s'affiche), mais sans Statuts : seul le propriétaire les voit.
+    fireEvent.click(screen.getByRole('button', { name: 'Forme juridique' }));
+    expect(await screen.findByRole('heading', { name: 'Forme juridique' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Statuts' })).not.toBeInTheDocument();
 
     // Les outils transverses sont accessibles en lecture seule pour un
     // collaborateur — chacun derrière sa propre icône, ouverte à son tour.

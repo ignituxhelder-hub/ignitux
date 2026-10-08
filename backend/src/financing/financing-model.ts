@@ -53,32 +53,6 @@ export const FINANCING_SCOPE_NOTICE =
 export const FOUNDER_ENTRY_BASIS_POINTS = DEFAULT_ENTRY_SPLIT.founderBasisPoints;
 export const IGNITUX_ENTRY_BASIS_POINTS = DEFAULT_ENTRY_SPLIT.ignituxBasisPoints;
 
-/**
- * ANCIEN MÉCANISME du moteur investisseurs — à ne pas confondre avec le droit
- * économique du nouveau modèle de participation.
- *
- * Le moteur investisseurs (`investors/`) peut prélever 5 % d'un versement
- * quand on le lui demande explicitement, à n'importe quel moment. Ce n'est PAS
- * le droit économique d'IGNITUX : celui-là n'existe qu'une fois le capital
- * entièrement transmis, est porté par l'accord et enregistré à part
- * (`participation/`, `dividend_right_entries`). Cette constante reste pour ne
- * rien casser sur les projets existants ; elle sera nettoyée dans une étape
- * ultérieure, une fois le nouveau mécanisme adopté partout.
- *
- * 5 % = 500 points de base, sur les dividendes RÉELLEMENT VERSÉS, jamais sur
- * le chiffre d'affaires ni sur le bénéfice brut.
- */
-export const PERPETUAL_DIVIDEND_BASIS_POINTS = 500;
-
-/**
- * Part revenant à Ignitux sur un dividende versé. Arrondi au centime
- * supérieur écarté volontairement : on arrondit au plus proche, comme
- * partout ailleurs dans le code monétaire de ce projet.
- */
-export function perpetualShareCents(distributedCents: number): number {
-  return Math.round((distributedCents * PERPETUAL_DIVIDEND_BASIS_POINTS) / 10000);
-}
-
 export const FINANCING_SOURCES = ['ignitux', 'porteur', 'pret', 'subvention', 'autre'] as const;
 export type FinancingSource = (typeof FINANCING_SOURCES)[number];
 

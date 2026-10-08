@@ -854,6 +854,9 @@ le total cesserait de décrire la réalité.
 
 ## La part perpétuelle de 5 % se dit, elle ne se devine pas
 
+> **Remplacée le 7 octobre 2026** : ce prélèvement a été retiré du moteur investisseurs (voir la
+> dernière entrée de ce fichier). Le texte ci-dessous est conservé comme historique.
+
 **Quoi** — `POST /projets-finances/:id/dividendes` exige `applyPerpetualShare` explicitement.
 Aucun défaut.
 
@@ -990,10 +993,9 @@ comporte exactement comme avant.
 **Règles constitutionnelles** (art. 22) — `ignitux-ne-remonte-pas`,
 `droit-dividendes-apres-transmission`, et `majorite-du-porteur` étendue à l'exécution d'un palier.
 
-**L'ancien mécanisme des 5 %** — le moteur investisseurs peut encore prélever 5 % d'un versement, à
-la demande et à n'importe quel moment (`applyPerpetualShare`). **Ce n'est pas le droit économique
-d'IGNITUX.** Il est conservé pour ne casser aucun projet existant, relibellé comme « ancien
-mécanisme » dans l'interface, et sera nettoyé dans une étape ultérieure.
+**L'ancien mécanisme des 5 %** — le moteur investisseurs pouvait prélever 5 % d'un versement, à la
+demande et à n'importe quel moment (`applyPerpetualShare`). **Ce n'était pas le droit économique
+d'IGNITUX.** Il a été conservé le temps de la transition, puis retiré (voir la dernière entrée).
 
 **Ce qui n'est pas fait** — aucune valorisation, aucun prix de rachat, aucun virement. Le registre
 dit ce qui est dû, il ne le prélève pas. Le droit sur les dividendes est constaté sur la déclaration
@@ -1014,3 +1016,33 @@ départ).
 `backend/src/offres/offres.service.ts`, `backend/src/projects/projects.service.ts` (contexte IGINI),
 `backend/src/constitution/constitution-rules.ts`, `backend/src/users/user-data-scope.ts` (export),
 `frontend/src/app/projects/[id]/participation-section.tsx`.
+
+
+## Le prélèvement de 5 % du moteur investisseurs est retiré
+
+**Quoi** — le moteur investisseurs ne prélève plus rien sur un dividende : il est réparti en entier,
+au prorata des montants investis, comme un remboursement ou un gain. Disparus : le champ
+`applyPerpetualShare` de `POST /projets-finances/:id/dividendes` (désormais **refusé** s'il est
+envoyé, pas ignoré), `splitDividend`, `perpetualShareCents`, `PERPETUAL_DIVIDEND_BASIS_POINTS`,
+le champ `ignituxCents` de la réponse, et la case à cocher de l'écran Finances.
+
+**Pourquoi** — c'était un second « 5 % », sans rapport avec le droit économique d'IGNITUX du modèle de
+participation : il pouvait être appliqué à n'importe quel moment, alors que le droit n'existe qu'une
+fois le capital entièrement transmis. Deux 5 % dans deux modules finissaient par se confondre. Le
+fondateur a demandé de le retirer.
+
+**Pourquoi un refus et non un oubli silencieux** — un client qui demanderait encore le prélèvement ne
+doit pas croire qu'il a eu lieu. Le champ inconnu fait échouer la requête (400).
+
+**Données existantes** — rien à migrer. Le prélèvement n'était jamais enregistré : `ignituxCents` était
+calculé puis renvoyé, sans ligne en base. Les dividendes déjà répartis gardent leurs montants.
+
+**Ordre de déploiement** — le frontend (Vercel) se redéploie tout seul à la fusion, le backend
+(Render) se déploie à la main. Tant que le backend n'est pas redéployé, l'ancien backend exige encore
+`applyPerpetualShare` : enregistrer un dividende échoue (400). **Redéployer Render juste après la
+fusion.** Dans l'autre sens, un frontend resté en cache qui enverrait encore ce champ à un backend à
+jour serait refusé (400) jusqu'à son rechargement.
+
+**Où** — `backend/src/investors/` (`distribution.ts`, `investors.service.ts`, `investors.controller.ts`,
+`dto/investors.dto.ts`), `backend/src/financing/financing-model.ts`,
+`frontend/src/app/projects/[id]/finances/page.tsx`, `frontend/src/lib/api.ts`.

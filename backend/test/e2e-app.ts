@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import type { Server } from 'node:http';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
+import { TurnstileVerificationService } from '../src/users/turnstile-verification.service.js';
 
 /**
  * Démarre l'application complète, configurée **exactement** comme en
@@ -14,13 +15,33 @@ import { AppModule } from '../src/app.module.js';
  * avoir vérifié une protection qui n'existe pas au moment où elle sert.
  */
 export async function startApp(): Promise<INestApplication<Server>> {
-  const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+  // Le contrôle anti-robot est simulé, jamais appelé pour de vrai. Chaque
+  // inscription interrogeait sinon le serveur de Cloudflare (5 s de patience,
+  // refus s'il ne répond pas) : avec des dizaines de comptes par exécution,
+  // une seule lenteur réseau faisait tomber une suite entière, et la CI
+  // devenait rouge sans que le produit y soit pour rien. Le vrai service garde
+  // ses propres tests (turnstile-verification.service.spec.ts, users.controller.spec.ts) ;
+  // aucun test de bout en bout n'éprouve son refus.
+  //
+  // Le simulacre refuse encore un jeton vide, pour que « sans jeton » reste un échec.
+  const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+    .overrideProvider(TurnstileVerificationService)
+    .useValue({ verify: (token: string) => Promise.resolve(token.trim().length > 0) })
+    .compile();
 
   const app = moduleRef.createNestApplication<INestApplication<Server>>();
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
   );
   await app.init();
+  // Le serveur écoute UNE fois pour toute la suite, sur un port libre choisi par
+  // le système. Sans cela, supertest en ouvre un nouveau — sur un autre port —
+  // à chaque requête, puis le ferme. Node 24 réutilise par défaut les
+  // connexions déjà ouvertes (keep-alive) : une connexion restée ouverte vers
+  // un ancien port tombait parfois sur un serveur plus récent et était coupée
+  // (ECONNRESET, « Connection reset by peer »), au hasard, en CI. `app.close()`,
+  // appelé par chaque suite, ferme ce serveur.
+  await app.listen(0);
   return app;
 }
 
@@ -52,8 +73,8 @@ export async function createAccount(app: INestApplication<Server>): Promise<Test
   // il serait le bon, et le test passerait sans rien vérifier.
   const password = `MotDePasse-E2E-${sequence}-${Date.now()}`;
 
-  // .env.test porte la clé de test Cloudflare : « jeton-e2e » n'a besoin
-  // d'être qu'une chaîne non vide, siteverify l'accepte sans la vérifier.
+  // Le contrôle anti-robot est simulé (voir startApp) : « jeton-e2e » n'a besoin
+  // d'être qu'une chaîne non vide.
   const signup = await api(app)
     .post('/users/signup')
     .send({ email, password, captchaToken: 'jeton-e2e' })

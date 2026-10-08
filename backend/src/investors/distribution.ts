@@ -1,5 +1,3 @@
-import { PERPETUAL_DIVIDEND_BASIS_POINTS, perpetualShareCents } from '../financing/financing-model.js';
-
 /**
  * RÉPARTIR UN VERSEMENT ENTRE LES INVESTISSEURS D'UN PROJET.
  *
@@ -141,43 +139,6 @@ export function allocatePro(
     amountCents: ligne.entier,
   }));
 }
-
-export interface DividendSplit {
-  /** Ce qui revient à Ignitux au titre des 5 % perpétuels. */
-  ignituxCents: number;
-  /** Ce qui reste à répartir entre les investisseurs. */
-  investorsCents: number;
-  allocations: Allocation[];
-}
-
-/**
- * Répartit un dividende, en prélevant d'abord la part perpétuelle d'Ignitux.
- *
- * Les 5 % sortent **du montant versé**, avant le prorata : c'est ce que dit
- * le modèle — « 5 % des dividendes réellement versés ». Le calcul réutilise
- * `perpetualShareCents` plutôt que de refaire la règle ; une seconde
- * implémentation de la même règle finit toujours par diverger de la
- * première.
- *
- * `applyPerpetualShare` à false quand le projet n'est pas soumis à cette
- * règle — un projet financé sans qu'Ignitux entre au capital, par exemple.
- * Le produit ne devine pas : l'appelant dit.
- */
-export function splitDividend(
-  amountCents: number,
-  shares: ReadonlyArray<DistributionShare>,
-  applyPerpetualShare: boolean,
-): DividendSplit {
-  const ignituxCents = applyPerpetualShare ? perpetualShareCents(amountCents) : 0;
-  const investorsCents = amountCents - ignituxCents;
-  return {
-    ignituxCents,
-    investorsCents,
-    allocations: allocatePro(investorsCents, shares),
-  };
-}
-
-export { PERPETUAL_DIVIDEND_BASIS_POINTS };
 
 export const MOVEMENT_KINDS = [
   'investissement',

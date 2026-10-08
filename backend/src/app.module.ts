@@ -37,6 +37,7 @@ import { CaisseModule } from './caisse/caisse.module.js';
 import { ImmobilierModule } from './immobilier/immobilier.module.js';
 import { VehiculesModule } from './vehicules/vehicules.module.js';
 import { PubliciteModule } from './publicite/publicite.module.js';
+import { StatutsModule } from './statuts/statuts.module.js';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { PubliciteModule } from './publicite/publicite.module.js';
     ImmobilierModule,
     VehiculesModule,
     PubliciteModule,
+    StatutsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: LimiteurQuiSExplique }],

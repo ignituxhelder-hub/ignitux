@@ -230,6 +230,23 @@ describe('UserDataService', () => {
       ]);
     });
 
+    it('inclut les statuts générés, avec leurs associés, pour les projets de la personne', async () => {
+      prisma.projects.findMany.mockResolvedValue([{ id: 'p1' }]);
+      prisma.company_bylaws.findMany.mockResolvedValue([
+        { id: 'b1', project_id: 'p1', associates: [{ full_name: 'Alice', share_basis_points: 10000 }] },
+      ]);
+
+      const exported = await service.exportUserData('u1');
+
+      expect(prisma.company_bylaws.findMany).toHaveBeenCalledWith({
+        where: { project_id: { in: ['p1'] } },
+        include: { associates: true },
+      });
+      expect(exported.donnees.contenus_generes_par_igini.statuts).toEqual([
+        { id: 'b1', project_id: 'p1', associates: [{ full_name: 'Alice', share_basis_points: 10000 }] },
+      ]);
+    });
+
     it("inclut l'accord de participation IGNITUX, ses paliers et son droit sur les dividendes, dans le financement", async () => {
       // Trois couches distinctes (capital, droit économique, accès) : le droit
       // sur les dividendes ne doit pas se perdre dans les parts de capital.

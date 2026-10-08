@@ -725,7 +725,6 @@ function FormulaireVersement({
   const [montant, setMontant] = useState('');
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [reference, setReference] = useState('');
-  const [partPerpetuelle, setPartPerpetuelle] = useState(false);
   const [enCours, setEnCours] = useState(false);
 
   async function soumettre(e: FormEvent) {
@@ -745,10 +744,7 @@ function FormulaireVersement({
       if (nature === 'remboursement') {
         await api.recordRepayment(token, financedProjectId, commun);
       } else {
-        await api.recordInvestorDividend(token, financedProjectId, {
-          ...commun,
-          applyPerpetualShare: partPerpetuelle,
-        });
+        await api.recordInvestorDividend(token, financedProjectId, commun);
       }
       setMontant('');
       setReference('');
@@ -815,26 +811,6 @@ function FormulaireVersement({
           placeholder="n° de virement"
         />
       </label>
-      {nature === 'dividende' && (
-        <label
-          className="field"
-          style={{ marginBottom: 0, flexBasis: '100%', flexDirection: 'row', gap: '0.5rem' }}
-          htmlFor="versement-part-perpetuelle"
-        >
-          <input
-            id="versement-part-perpetuelle"
-            type="checkbox"
-            checked={partPerpetuelle}
-            onChange={(e) => setPartPerpetuelle(e.target.checked)}
-            style={{ width: 'auto' }}
-          />
-          <span style={{ textTransform: 'none', letterSpacing: 0 }}>
-            Prélever la part perpétuelle de 5 % (ancien mécanisme du suivi des investisseurs,
-            distinct du droit économique IGNITUX de l’accord de participation). À cocher
-            explicitement : tous les projets ne sont pas concernés.
-          </span>
-        </label>
-      )}
       <button className="secondary" type="submit" disabled={enCours} style={{ alignSelf: 'end' }}>
         {enCours ? 'Enregistrement…' : 'Enregistrer le versement'}
       </button>
