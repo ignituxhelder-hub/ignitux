@@ -98,6 +98,37 @@ describe('genererPdfDossier', () => {
     expect(texte).toContain(hex('08/10/2026'));
     expect(texte).toContain(hex('J00123'));
   });
+
+  it('date du dépôt au jour de Paris, comme l’interface (23 h 30 UTC le 8 = le 9 à Paris)', async () => {
+    const texte = octetsTexte(
+      await genererPdfDossier(
+        donnees({ depot: { status: 'depose', depositedAt: new Date('2026-10-08T23:30:00Z'), filingReference: null } }),
+      ),
+    );
+    expect(texte).toContain(hex('09/10/2026'));
+    expect(texte).not.toContain(hex('08/10/2026'));
+  });
+
+  it.each(['micro-entreprise', 'EI'])(
+    '%s : ni section Société, ni « Pas encore de statuts », ni statuts restants',
+    async (forme) => {
+      const texte = octetsTexte(
+        await genererPdfDossier(
+          donnees({
+            forme,
+            statuts: { headOffice: 'Adresse-restante', capitalCents: 100000, associes: [{ fullName: 'Associe-restant', shareBasisPoints: 10000 }] },
+            pieces: calculerPieces({ forme, statuts: null, identites: [], mandatActifSigne: false, piecesCochees: [] }),
+            frais: fraisPourForme(forme),
+          }),
+        ),
+      );
+      expect(texte).toContain(hex(forme));
+      expect(texte).not.toContain(hex('Société'));
+      expect(texte).not.toContain(hex('Pas encore de statuts'));
+      expect(texte).not.toContain(hex('Adresse-restante'));
+      expect(texte).not.toContain(hex('Associe-restant'));
+    },
+  );
 });
 
 describe('formaterEuros', () => {

@@ -1,6 +1,6 @@
 import PDFDocument from 'pdfkit';
 import type { Frais } from './guide.js';
-import type { EtatPiece, Piece } from './pieces.js';
+import { familleDeForme, type EtatPiece, type Piece } from './pieces.js';
 
 /** Voyage avec le fichier, sur chaque page : le PDF se détache de l'interface. */
 export const AVERTISSEMENT_DOSSIER =
@@ -37,10 +37,20 @@ function formaterPourcentage(basisPoints: number): string {
   return `${(basisPoints / 100).toFixed(2).replace('.', ',')} %`;
 }
 
-function formaterDate(date: Date): string {
-  const jj = String(date.getUTCDate()).padStart(2, '0');
-  const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
-  return `${jj}/${mm}/${date.getUTCFullYear()}`;
+/**
+ * Jour du dépôt à l'heure de Paris, « jj/mm/aaaa » : le même jour que celui
+ * affiché par l'interface (qui formate aussi en Europe/Paris), même pour un
+ * dépôt marqué entre minuit et 2 h, heure française.
+ */
+const FORMAT_JOUR_PARIS = new Intl.DateTimeFormat('fr-FR', {
+  timeZone: 'Europe/Paris',
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+});
+
+export function formaterDate(date: Date): string {
+  return FORMAT_JOUR_PARIS.format(date);
 }
 
 /**
@@ -70,8 +80,18 @@ export function genererPdfDossier(donnees: DonneesRecapitulatif): Promise<Buffer
     doc.text(`Projet : ${donnees.projetTitre}`);
     doc.text(`Forme juridique : ${donnees.forme ?? 'non confirmée'}`);
 
-    titre('Société');
-    if (donnees.statuts) {
+    // Micro-entreprise / EI : pas de société, donc ni section « Société » ni
+    // statuts — même s'il en reste d'une forme précédente.
+    if (familleDeForme(donnees.forme) !== 'individuelle') {
+      ecrireSociete();
+    }
+
+    function ecrireSociete() {
+      titre('Société');
+      if (!donnees.statuts) {
+        doc.text('Pas encore de statuts : siège, capital et associés seront repris ici une fois les statuts générés.');
+        return;
+      }
       doc.text(`Siège : ${donnees.statuts.headOffice}`);
       doc.text(`Capital : ${formaterEuros(donnees.statuts.capitalCents)}`);
       if (donnees.statuts.associes.length > 0) {
@@ -80,8 +100,6 @@ export function genererPdfDossier(donnees: DonneesRecapitulatif): Promise<Buffer
           doc.text(`- ${associe.fullName} : ${formaterPourcentage(associe.shareBasisPoints)}`, { indent: 15 });
         }
       }
-    } else {
-      doc.text('Pas encore de statuts : siège, capital et associés seront repris ici une fois les statuts générés.');
     }
 
     titre('Pièces du dossier');
