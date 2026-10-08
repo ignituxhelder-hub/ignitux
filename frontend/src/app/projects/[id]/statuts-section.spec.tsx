@@ -670,6 +670,52 @@ describe('StatutsSection', () => {
       expect(appelsAvecMethode('PATCH')).toHaveLength(0);
     });
 
+    describe('changer de forme alors que des statuts sont retenus', () => {
+      const retenus = () => ({ ...brouillon(), status: 'retenue', finalized_at: '2026-10-03T10:00:00.000Z' });
+
+      async function choisirSarl(attendre: string | RegExp = /retenu/i) {
+        const onFormConfirmed = vi.fn();
+        render(<StatutsSection token={TOKEN} projectId={PROJECT_ID} confirmedLegalForm="SASU" onFormConfirmed={onFormConfirmed} />);
+        await screen.findByText(attendre);
+        fireEvent.click(screen.getByRole('button', { name: /modifier la forme/i }));
+        fireEvent.change(screen.getByLabelText('Forme juridique'), { target: { value: 'SARL' } });
+        fireEvent.click(screen.getByRole('button', { name: /confirmer cette forme/i }));
+        return onFormConfirmed;
+      }
+
+      it("demande confirmation, et n'enregistre rien si la personne refuse", async () => {
+        mockApiRoutes({ 'GET /projects/p1/statuts': { status: 200, body: retenus() } });
+        const confirmation = vi.spyOn(window, 'confirm').mockReturnValue(false);
+        const onFormConfirmed = await choisirSarl();
+        expect(confirmation).toHaveBeenCalledTimes(1);
+        expect(confirmation.mock.calls[0][0]).toMatch(/SASU/);
+        expect(confirmation.mock.calls[0][0]).toMatch(/SARL/);
+        expect(appelsAvecMethode('PATCH')).toHaveLength(0);
+        expect(onFormConfirmed).not.toHaveBeenCalled();
+      });
+
+      it("enregistre le changement quand la personne accepte", async () => {
+        mockApiRoutes({
+          'GET /projects/p1/statuts': { status: 200, body: retenus() },
+          'PATCH /projects/p1/forme-juridique': { status: 200, body: { id: 'p1', confirmed_legal_form: 'SARL' } },
+        });
+        vi.spyOn(window, 'confirm').mockReturnValue(true);
+        const onFormConfirmed = await choisirSarl();
+        await waitFor(() => expect(onFormConfirmed).toHaveBeenCalledWith('SARL'));
+      });
+
+      it('ne demande rien tant que les statuts ne sont pas retenus', async () => {
+        mockApiRoutes({
+          'GET /projects/p1/statuts': { status: 200, body: brouillon() },
+          'PATCH /projects/p1/forme-juridique': { status: 200, body: { id: 'p1', confirmed_legal_form: 'SARL' } },
+        });
+        const confirmation = vi.spyOn(window, 'confirm').mockReturnValue(true);
+        const onFormConfirmed = await choisirSarl(/Article 1/);
+        await waitFor(() => expect(onFormConfirmed).toHaveBeenCalledWith('SARL'));
+        expect(confirmation).not.toHaveBeenCalled();
+      });
+    });
+
     it('ne montre jamais le formulaire vide quand la forme est confirmée et que des statuts existent', async () => {
       mockApiRoutes({ 'GET /projects/p1/statuts': { status: 200, body: brouillon() } });
       const { rerender, container } = render(

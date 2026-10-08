@@ -171,6 +171,16 @@ export function StatutsSection({
 
   const confirmerForme = async () => {
     if (!formeChoisie) return;
+    // Des statuts retenus sont verrouillés pour de bon : changer de forme les
+    // laisse écrits pour une forme qui n'est plus la bonne. On le dit avant.
+    if (bylaws?.status === 'retenue' && bylaws.legal_form !== formeChoisie) {
+      const accord = window.confirm(
+        `Tes statuts retenus sont écrits pour une ${bylaws.legal_form}. Si tu passes à ${formeChoisie}, ` +
+          'ils ne correspondront plus à ta forme et resteront verrouillés : tu ne pourras pas les modifier.\n\n' +
+          'Changer quand même de forme juridique ?',
+      );
+      if (!accord) return;
+    }
     setError(null);
     try {
       await api.confirmerFormeJuridique(token, projectId, formeChoisie);
