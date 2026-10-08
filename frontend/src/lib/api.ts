@@ -1367,6 +1367,30 @@ export interface StockMovement {
   created_at: string;
 }
 
+export interface BoutiqueEnLigneEtat {
+  connectee: boolean;
+  shopDomain: string | null;
+  forfaitDeclare: string | null;
+  prixDeclareCentimes: number | null;
+  connectedAt: string | null;
+}
+
+export interface ShopifyProduct {
+  id: string;
+  title: string;
+  status: string;
+  totalInventory: number;
+}
+
+export interface ShopifyOrder {
+  id: string;
+  name: string;
+  displayFinancialStatus: string;
+  totalPriceCents: number;
+  currency: string;
+  createdAt: string;
+}
+
 export interface AgendaEvent {
   id: string;
   owner_id: string;
@@ -2469,6 +2493,60 @@ export const api = {
 
   getTrialBalance: (token: string) =>
     request<TrialBalance>('/comptabilite/balance', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  // ── BOUTIQUE EN LIGNE ────────────────────────────────────────────────────
+  getBoutiqueEnLigneEtat: (token: string, projectId: string) =>
+    request<BoutiqueEnLigneEtat>(`/projects/${projectId}/boutique-en-ligne`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  demarrerConnexionBoutique: (token: string, projectId: string, shopDomain: string) =>
+    request<{ url: string }>(`/projects/${projectId}/boutique-en-ligne/connexion`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ shopDomain }),
+    }),
+
+  finaliserConnexionBoutique: (
+    token: string,
+    projectId: string,
+    donnees: { code: string; shop: string; state: string; hmac: string },
+  ) =>
+    request<void>(`/projects/${projectId}/boutique-en-ligne/finaliser`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(donnees),
+    }),
+
+  deconnecterBoutique: (token: string, projectId: string) =>
+    request<void>(`/projects/${projectId}/boutique-en-ligne/deconnexion`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  declarerForfaitBoutique: (token: string, projectId: string, forfait: string, prixCentimes: number) =>
+    request<void>(`/projects/${projectId}/boutique-en-ligne/forfait`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ forfait, prixCentimes }),
+    }),
+
+  listerProduitsBoutique: (token: string, projectId: string) =>
+    request<ShopifyProduct[]>(`/projects/${projectId}/boutique-en-ligne/produits`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  creerProduitBoutique: (token: string, projectId: string, titre: string, description?: string) =>
+    request<ShopifyProduct>(`/projects/${projectId}/boutique-en-ligne/produits`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ titre, description }),
+    }),
+
+  listerCommandesBoutique: (token: string, projectId: string) =>
+    request<ShopifyOrder[]>(`/projects/${projectId}/boutique-en-ligne/commandes`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
 

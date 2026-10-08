@@ -34,6 +34,7 @@ export const APPLICATION_IDS = [
   'constitution',
   'compte',
   'caisse',
+  'boutique-en-ligne',
   'stocks',
   'agenda',
   'immobilier',
@@ -59,7 +60,8 @@ export type Signal =
   | 'documents'
   | 'ecritures'
   | 'comptesBancaires'
-  | 'investissements';
+  | 'investissements'
+  | 'boutiqueConnectee';
 
 export interface Application {
   id: ApplicationId;
@@ -383,6 +385,25 @@ export const APPLICATIONS: readonly Application[] = [
     cadre:
       'Un logiciel de caisse doit être certifié en France (art. 286 I 3° bis du CGI) : elle ' +
       "s'appuiera sur une solution certifiée plutôt que d'en réinventer une.",
+  },
+  {
+    id: 'boutique-en-ligne',
+    nom: 'Boutique en ligne',
+    resume: 'Créer et gérer ton site et ta boutique en ligne : catalogue, paiement, commandes.',
+    categorie: 'vendre',
+    statut: 'disponible',
+    route: '/boutique-en-ligne',
+    publics: ['entrepreneur'],
+    essentielle: false,
+    signal: 'boutiqueConnectee',
+    pourquoi:
+      'Tu as des contacts : crée ta boutique en ligne ici, pour vendre directement depuis Ignitux.',
+    apres: 'contacts',
+    offre: 'outilsDeGestion',
+    secteurs: [],
+    cadre:
+      'Le paiement et les données bancaires des clients ne transitent jamais par Ignitux : ' +
+      'Shopify reste l’opérateur de paiement et le responsable de la conformité PCI-DSS.',
   },
   {
     id: 'agenda',

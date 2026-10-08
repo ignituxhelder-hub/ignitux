@@ -8,6 +8,7 @@ const RIEN = {
   ecritures: 0,
   comptesBancaires: 0,
   investissements: 0,
+  boutiqueConnectee: 0,
 };
 
 function contexte(partiel: Partial<ContexteActivation> = {}): ContexteActivation {

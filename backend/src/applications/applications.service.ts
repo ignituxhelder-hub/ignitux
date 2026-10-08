@@ -39,6 +39,7 @@ export class ApplicationsService {
       investisseur,
       offreId,
       bureau,
+      boutiquesConnectees,
     ] = await Promise.all([
         this.prisma.user_roles.findMany({ where: { user_id: userId }, select: { role: true } }),
         this.prisma.projects.findMany({ where: { owner_id: userId }, select: { sector: true } }),
@@ -51,6 +52,9 @@ export class ApplicationsService {
         this.prisma.user_applications.findMany({
           where: { user_id: userId },
           select: { app_id: true, choix: true },
+        }),
+        this.prisma.shopify_connections.count({
+          where: { disconnected_at: null, project: { owner_id: userId } },
         }),
       ]);
 
@@ -83,6 +87,7 @@ export class ApplicationsService {
         ecritures,
         comptesBancaires,
         investissements,
+        boutiqueConnectee: boutiquesConnectees,
       },
       secteurs,
       outilsDeGestion: offre(offreId).capacites.outilsDeGestion,

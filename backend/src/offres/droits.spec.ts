@@ -197,3 +197,19 @@ describe('droits ouverts par une offre', () => {
     }
   });
 });
+
+describe('outil de gestion — boutique en ligne', () => {
+  it('refuse en Découverte et en Entrepreneur, nomme Construction', () => {
+    for (const id of ['decouverte', 'entrepreneur'] as const) {
+      const verdict = peut(id, { kind: 'outil_de_gestion', outil: 'boutique_en_ligne' });
+      expect(verdict.autorise, id).toBe(false);
+      expect(verdict.offreQuiOuvre, id).toBe('construction');
+    }
+  });
+
+  it('autorise en Construction', () => {
+    expect(
+      peut('construction', { kind: 'outil_de_gestion', outil: 'boutique_en_ligne' }).autorise,
+    ).toBe(true);
+  });
+});

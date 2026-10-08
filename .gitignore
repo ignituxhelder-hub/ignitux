@@ -15,6 +15,10 @@ frontend/.tmp/
 # Worktrees git isolés pour l'implémentation d'un plan (superpowers).
 .worktrees/
 
+# Espace de travail des plans superpowers (ledger, briefs de tâches) :
+# scratch propre à une exécution locale, jamais versionné.
+.superpowers/
+
 # OS
 .DS_Store
 Thumbs.db

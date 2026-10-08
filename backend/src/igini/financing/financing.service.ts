@@ -29,7 +29,9 @@ d'une idée de projet, et éventuellement ce que tu sais déjà d'elle (analyse,
 — jamais d'étape ultérieure, puisque celles-ci n'existent pas encore à ce stade). Propose une
 stratégie de financement réaliste, cohérente avec ce contexte s'il existe : ne recommande pas une
 levée de fonds en capital-risque pour une idée qui n'a pas encore été validée, et reste concret sur
-les montants et les sources.`);
+les montants et les sources. Si le projet suppose de vendre en ligne, inclus l'abonnement à une
+plateforme e-commerce (Shopify ou équivalent, environ 25 à 100 dollars par mois selon le forfait)
+parmi les postes de dépense du budget prévisionnel.`);
 
 @Injectable()
 export class FinancingService {

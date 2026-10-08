@@ -132,6 +132,29 @@ une première fois contre le serveur réel (pas seulement le serveur de test
 jetable utilisé pour valider le script) et à décider d'un seuil qui
 inquiète, si jamais l'usage grossit.
 
+### 14. Compte Shopify Partner *(attend Helder, avant tout usage réel de la Boutique en ligne)*
+
+Le code (`backend/src/boutique-en-ligne/`) est prêt et testé, mais rien ne
+peut fonctionner sans une vraie application Shopify Partner créée dans son
+tableau de bord — `SHOPIFY_API_KEY`/`SHOPIFY_API_SECRET` restent vides tant
+que ça n'existe pas. Trois points à trancher à ce moment-là, pas avant :
+
+- **Mode de distribution.** Une application « personnalisée » (custom
+  distribution) ne s'installe que sur une seule boutique. Connecter les
+  boutiques de plusieurs entrepreneurs différents demande une distribution
+  publique (peut rester non répertoriée), qui passe par une revue Shopify
+  et impose les webhooks RGPD obligatoires (`customers/data_request`,
+  `customers/redact`, `shop/redact`) — non implémentés ici, hors périmètre
+  de cette première version.
+- **Version de l'API.** `SHOPIFY_API_VERSION` (dans
+  `shopify-admin-client.ts`) est fixée à `2025-01` au moment d'écrire ce
+  code (27/09/2026) ; Shopify ne garde chaque version qu'environ 12 mois.
+  À vérifier et mettre à jour contre la documentation Shopify du moment
+  avant la création de l'application réelle.
+- **`read_orders` protégé.** Lire les commandes exige l'approbation
+  Shopify pour les « données client protégées », une démarche séparée de
+  la création de l'application elle-même.
+
 ---
 
 ## VISION 2.0 — travaux futurs

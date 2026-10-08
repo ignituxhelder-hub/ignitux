@@ -332,6 +332,11 @@ export type crm_interactions = Prisma.crm_interactionsModel
  */
 export type stock_items = Prisma.stock_itemsModel
 /**
+ * Model shopify_connections
+ * 
+ */
+export type shopify_connections = Prisma.shopify_connectionsModel
+/**
  * Model stock_movements
  * STOCKS — une entrée ou une sortie sur un article. `quantity` est signée :
  * positive pour une entrée, négative pour une sortie. Historique immuable

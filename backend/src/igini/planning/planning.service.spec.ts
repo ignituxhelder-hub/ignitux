@@ -50,4 +50,19 @@ describe('PlanningService', () => {
       }),
     );
   });
+
+  it('mentionne un compte Shopify comme ressource pour un projet de vente en ligne', async () => {
+    claude.generateStructuredOutput.mockResolvedValue({
+      summary: 'x',
+      estimated_timeline: 'x',
+      milestones: ['x'],
+      key_resources: ['x'],
+    });
+
+    await service.createBuildPlan('Boutique en ligne', 'Vendre des bougies', ATTRIBUTION);
+
+    expect(claude.generateStructuredOutput).toHaveBeenCalledWith(
+      expect.objectContaining({ system: expect.stringContaining('Shopify') }),
+    );
+  });
 });

@@ -40,6 +40,7 @@ import { ImmobilierModule } from './immobilier/immobilier.module.js';
 import { VehiculesModule } from './vehicules/vehicules.module.js';
 import { PubliciteModule } from './publicite/publicite.module.js';
 import { StatutsModule } from './statuts/statuts.module.js';
+import { BoutiqueEnLigneModule } from './boutique-en-ligne/boutique-en-ligne.module.js';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { StatutsModule } from './statuts/statuts.module.js';
     IdentiteModule,
     AgendaModule,
     CaisseModule,
+    BoutiqueEnLigneModule,
     ImmobilierModule,
     VehiculesModule,
     PubliciteModule,

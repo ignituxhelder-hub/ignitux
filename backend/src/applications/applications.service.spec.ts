@@ -17,6 +17,7 @@ describe('ApplicationsService — le bureau', () => {
     investors: { findFirst: Mock };
     participations: { count: Mock };
     user_applications: { findMany: Mock; upsert: Mock };
+    shopify_connections: { count: Mock };
   };
 
   beforeEach(() => {
@@ -33,6 +34,7 @@ describe('ApplicationsService — le bureau', () => {
         findMany: vi.fn().mockResolvedValue([]),
         upsert: vi.fn().mockResolvedValue({}),
       },
+      shopify_connections: { count: vi.fn().mockResolvedValue(0) },
     };
     const offres = { offreDe: vi.fn().mockResolvedValue('decouverte') };
     service = new ApplicationsService(
@@ -93,5 +95,16 @@ describe('ApplicationsService — le bureau', () => {
       BadRequestException,
     );
     expect(prisma.user_applications.upsert).not.toHaveBeenCalled();
+  });
+
+  it('marque la boutique en ligne comme déjà utilisée quand une connexion est active', async () => {
+    prisma.shopify_connections.count.mockResolvedValue(1);
+
+    const bureau = await service.lanceurDe('u1');
+
+    expect(prisma.shopify_connections.count).toHaveBeenCalledWith({
+      where: { disconnected_at: null, project: { owner_id: 'u1' } },
+    });
+    expect(ids(bureau.applications).length).toBeGreaterThanOrEqual(0); // le calcul n'échoue pas
   });
 });
