@@ -1,5 +1,5 @@
 /**
- * LES SIX GÉNÉRATEURS, NOMMÉS UNE SEULE FOIS.
+ * LES GÉNÉRATEURS D'IGINI, ET LE CHAT, NOMMÉS UNE SEULE FOIS.
  *
  * Fichier à part, et sans aucune dépendance : le journal de consommation,
  * le catalogue des offres et les contrôles de droits ont tous besoin de ces
@@ -17,6 +17,15 @@
  * Ces chaînes sont écrites en base (`ai_usage_events.generator`). Les
  * renommer demande une migration des lignes existantes, pas seulement un
  * remplacement dans les sources.
+ *
+ * `discuter` (les tours de conversation de l'orchestrateur IGINI) est ici
+ * pour la même raison de traçabilité des coûts que les générateurs, mais
+ * suit une règle différente : aucun appel ne passe par
+ * `OffresService.exiger()` pour lui (voir `ClaudeService.converseWithTools`)
+ * — seul le plafond de coût global le protège. Un tour de conversation qui
+ * déclenche un générateur (ex. `analyser`) journalise CE générateur sous
+ * son propre nom existant, via le code déjà en place ; `discuter` ne
+ * journalise jamais que les tours de l'orchestrateur lui-même.
  */
 /** Les six générateurs de méthode : ceux que les offres annoncent. */
 export const GENERATEURS_METHODE = [
@@ -33,8 +42,12 @@ export const GENERATEURS_METHODE = [
  * « executer » — l'exécution d'une tâche par IGINI. Ce septième nom n'est
  * dans la liste d'aucune offre (voir `droits.ts`), mais il consomme les
  * générations du mois comme les autres.
+ *
+ * Et « discuter » : les tours de l'orchestrateur du chat. Journalisé pour
+ * le coût seulement — dans aucune offre, jamais soumis à
+ * `OffresService.exiger()` (voir plus haut).
  */
-export const GENERATOR_NAMES = [...GENERATEURS_METHODE, 'executer'] as const;
+export const GENERATOR_NAMES = [...GENERATEURS_METHODE, 'executer', 'discuter'] as const;
 
 export type GeneratorName = (typeof GENERATOR_NAMES)[number];
 

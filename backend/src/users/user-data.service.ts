@@ -118,6 +118,7 @@ export class UserDataService {
       complianceAiRuns,
       violations,
       appelsIa,
+      conversationAvecIgini,
       comptesComptables,
       ecritures,
       comptesBancaires,
@@ -174,6 +175,10 @@ export class UserDataService {
       this.prisma.project_compliance_ai_runs.findMany({ where: byProject }),
       this.prisma.constitution_violations.findMany({ where: { user_id: userId } }),
       this.prisma.ai_usage_events.findMany({ where: { user_id: userId } }),
+      this.prisma.chat_messages.findMany({
+        where: { user_id: userId },
+        orderBy: { created_at: 'asc' },
+      }),
       // Comptabilité et banque : filtrées sur le propriétaire, puisque ces
       // tables contiennent aussi les livres d'IGNITUX.
       this.prisma.ledger_accounts.findMany({ where: { owner_type: 'user', owner_id: userId } }),
@@ -234,6 +239,9 @@ export class UserDataService {
           plans_de_financement: financingPlans,
           plans_de_developpement: developmentPlans,
           plans_de_transmission: transmissionPlans,
+          // Le fil de conversation avec l'orchestrateur, non rattaché à un
+          // projet — voir user-data-scope.ts.
+          conversation_avec_igini: conversationAvecIgini,
         },
         relations_professionnelles: {
           entreprises: companies,

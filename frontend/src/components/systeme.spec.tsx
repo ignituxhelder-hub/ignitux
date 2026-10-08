@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
-import { createRouterMock, signInAs } from '@/test-utils/mocks';
+import { createRouterMock, mockApiRoutes, signInAs } from '@/test-utils/mocks';
 import { Systeme } from './systeme';
 
 const router = createRouterMock();
@@ -97,5 +97,25 @@ describe('Systeme', () => {
       expect(router.push).toHaveBeenCalledWith('/accueil');
       expect(taches()).toEqual([]);
     });
+
+    it('affiche l’icône de chat quand la barre des tâches est visible', async () => {
+      afficher();
+      expect(await screen.findByRole('button', { name: 'Discuter avec Igini' })).toBeInTheDocument();
+    });
+
+    it('ouvre le panneau de chat au clic sur l’icône, et referme l’icône', async () => {
+      mockApiRoutes({ 'GET /chat/messages': { status: 200, body: [] } });
+      afficher();
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Discuter avec Igini' }));
+
+      expect(await screen.findByRole('dialog', { name: 'Discuter avec Igini' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Discuter avec Igini' })).not.toBeInTheDocument();
+    });
+  });
+
+  it("n'affiche pas l’icône de chat sans connexion", () => {
+    afficher();
+    expect(screen.queryByRole('button', { name: 'Discuter avec Igini' })).not.toBeInTheDocument();
   });
 });

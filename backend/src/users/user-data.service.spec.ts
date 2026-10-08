@@ -273,6 +273,21 @@ describe('UserDataService', () => {
       ).toHaveLength(1);
     });
 
+    it('inclut le fil de conversation avec Igini, non rattaché à un projet', async () => {
+      prisma.chat_messages.findMany.mockResolvedValue([
+        { id: 'm1', role: 'user', content: 'Salut' },
+        { id: 'm2', role: 'igini', content: 'Bonjour !' },
+      ]);
+
+      const exported = await service.exportUserData('u1');
+
+      expect(exported.donnees.contenus_generes_par_igini.conversation_avec_igini).toHaveLength(2);
+      expect(prisma.chat_messages.findMany).toHaveBeenCalledWith({
+        where: { user_id: 'u1' },
+        orderBy: { created_at: 'asc' },
+      });
+    });
+
     it("ne cherche pas de messages reçus quand la personne n'a pas de profil", async () => {
       // Sans profil Marketplace, `to_profile_id` n'existe pas : interroger
       // la table avec `undefined` renverrait les messages de tout le monde.

@@ -693,6 +693,84 @@ if (!iaAllumee) {
   }
 }
 
+// ── 8bis. Chat orchestré : la règle de confirmation tient-elle ? ───────────
+//
+// Un jugement de langage naturel, jamais un fait de code : les tests
+// unitaires prouvent que le code n'exécute jamais un outil sur le dernier
+// tour, pas que le modèle s'abstient réellement d'appeler un générateur
+// quand la personne n'a rien demandé. Coûte deux appels réels (un
+// orchestrateur économique, pas claude-opus-5).
+
+titre('Chat orchestré');
+
+// Générateurs qui comptent comme « déclenchés » pour ces deux vérifications.
+const NOMS_GENERATEURS = ['analyser', 'construire', 'financer', 'developper', 'transmettre'];
+
+/** Combien d'appels à `generateur` figurent dans l'historique, là, maintenant. */
+async function nombreAppels(generateur) {
+  const { corps } = await appel('/igini/usage/historique');
+  return (corps?.appels ?? []).filter((a) => a.generateur === generateur).length;
+}
+
+if (!iaAllumee) {
+  noter('ignore', 'Le chat ne déclenche rien sur une remarque vague', 'générateurs éteints');
+  noter('ignore', 'Le chat déclenche bien un générateur sur demande explicite', 'générateurs éteints');
+} else if (!AVEC_IA) {
+  noter(
+    'ignore',
+    'Chat orchestré : règle de confirmation',
+    'non lancée : ajouter --avec-ia (consomme du budget)',
+  );
+} else {
+  // Trouvaille de la revue finale : la section 8 qui précède a déjà
+  // consommé les 3 analyses incluses en Découverte (une analyse réelle,
+  // puis deux de plus pour prouver le refus de la 4e). Les deux
+  // vérifications ci-dessous comparent donc un AVANT/APRÈS propre à
+  // chaque appel plutôt qu'un compte absolu — et la seconde accepte que le
+  // générateur soit refusé pour cause de quota déjà épuisé, du moment que
+  // le refus est expliqué en conversation plutôt que planté brut.
+  await verifier('Une remarque vague ne déclenche aucun générateur', async () => {
+    const avant = await Promise.all(NOMS_GENERATEURS.map(nombreAppels));
+    const { statut, corps } = await appel('/chat/messages', {
+      method: 'POST',
+      body: JSON.stringify({ content: 'Je me demande ce que je devrais faire de mon projet.' }),
+    });
+    if (statut !== 201) throw new Error(`HTTP ${statut}`);
+    if (!corps?.content) throw new Error('réponse sans contenu');
+    const apres = await Promise.all(NOMS_GENERATEURS.map(nombreAppels));
+    const declenche = NOMS_GENERATEURS.find((_nom, i) => apres[i] > avant[i]);
+    if (declenche) throw new Error(`un générateur a tourné sans demande : ${declenche}`);
+    return `réponse reçue, aucun générateur déclenché (${corps.content.length} caractères)`;
+  });
+
+  await verifier(
+    'Une demande explicite déclenche le générateur, ou en explique le refus poliment',
+    async () => {
+      if (!projetId) throw new Error('aucun projet');
+      const avant = await nombreAppels('analyser');
+      const { statut, corps } = await appel('/chat/messages', {
+        method: 'POST',
+        body: JSON.stringify({
+          content: `Lance une analyse pour le projet dont l'identifiant est ${projetId}.`,
+        }),
+      });
+      if (statut !== 201) throw new Error(`HTTP ${statut}`);
+      const apres = await nombreAppels('analyser');
+      const declenche = apres > avant;
+      const texte = String(corps?.content ?? '');
+      // Le prompt système demande d'expliquer un refus « dans ses mots » —
+      // pas de mot magique garanti, donc un motif large plutôt qu'exact.
+      const expliqueLeRefus = /quota|analyses incluses|offre|plafond|découverte/i.test(texte);
+      if (!declenche && !expliqueLeRefus) {
+        throw new Error(`ni déclenché, ni refus expliqué : « ${texte.slice(0, 80)} »`);
+      }
+      return declenche
+        ? `analyse déclenchée, réponse : « ${texte.slice(0, 60)}… »`
+        : `quota déjà épuisé par la section précédente, refus expliqué : « ${texte.slice(0, 60)}… »`;
+    },
+  );
+}
+
 // ── 9. Le partage d'un projet ─────────────────────────────────────────────
 //
 // Le chemin par lequel on accorde délibérément l'accès à quelqu'un est

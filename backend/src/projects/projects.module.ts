@@ -36,5 +36,9 @@ import { ProjectsService } from './projects.service.js';
   ],
   controllers: [ProjectsController],
   providers: [ProjectsService],
+  // Exporté pour que ChatModule puisse appeler les mêmes méthodes que les
+  // boutons (analyzeForOwner, createBuildPlanForOwner, ...) depuis les
+  // outils de l'orchestrateur, sans dupliquer leur logique.
+  exports: [ProjectsService],
 })
 export class ProjectsModule {}

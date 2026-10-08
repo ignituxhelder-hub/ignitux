@@ -22,6 +22,7 @@ import { ProfileModule } from './profile/profile.module.js';
 import { LedgerModule } from './ledger/ledger.module.js';
 import { CommunityModule } from './community/community.module.js';
 import { KnowledgeModule } from './igini/knowledge/knowledge.module.js';
+import { ChatModule } from './igini/chat/chat.module.js';
 import { MemoryModule } from './igini/memory/memory.module.js';
 import { ScoringModule } from './igini/scoring/scoring.module.js';
 import { ExecutionModule } from './igini/execution/execution.module.js';
@@ -52,6 +53,7 @@ import { StatutsModule } from './statuts/statuts.module.js';
     AuthModule,
     ProjectsModule,
     MemoryModule,
+    ChatModule,
     KnowledgeModule,
     WorkflowModule,
     ExecutionModule,

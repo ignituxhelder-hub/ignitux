@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Icone } from '@/components/icones';
+import { ChatIgini } from './chat-igini';
 import { useAuth } from '@/lib/auth';
 import {
   applicationDe,
@@ -38,6 +39,7 @@ export function Systeme({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { token, isReady } = useAuth();
   const [taches, setTaches] = useState<Tache[]>([]);
+  const [chatOuvert, setChatOuvert] = useState(false);
 
   const app = applicationDe(chemin);
   const surBureau = chemin === BUREAU;
@@ -156,6 +158,21 @@ export function Systeme({ children }: { children: ReactNode }) {
           })}
         </div>
       </nav>
+
+      {!chatOuvert && (
+        <button
+          type="button"
+          className="bouton-chat-igini"
+          onClick={() => setChatOuvert(true)}
+          aria-label="Discuter avec Igini"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M2 3h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H8l-4 4v-4H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+          </svg>
+        </button>
+      )}
+
+      {chatOuvert && <ChatIgini onClose={() => setChatOuvert(false)} />}
     </>
   );
 }
