@@ -40,6 +40,18 @@ describe('frais à prévoir', () => {
     expect(frais.lignes.length).toBeGreaterThan(0);
   });
 
+  // Formulations prudentes : on ne prétend pas savoir de quoi dépend chaque
+  // tarif (département, type d'activité) — seulement que ça dépend de la
+  // forme et de la situation, et qu'il faut vérifier sur les sites officiels.
+  it.each(['SAS', 'EI', 'micro-entreprise'])('%s : ni département ni type d’activité présentés comme facteurs de prix', (forme) => {
+    const frais = fraisPourForme(forme);
+    const texte = [...frais.lignes, frais.avertissement].join(' ').toLowerCase();
+    expect(texte).not.toContain('département');
+    expect(texte).not.toMatch(/artisanale|commerciale|libérale/);
+    expect(frais.lignes.join(' ')).toMatch(/dépend(ent)? de la forme et de (la|ta) situation/);
+    expect(frais.lignes.join(' ').toLowerCase()).toContain('sites officiels');
+  });
+
   it('n’annonce aucun montant chiffré', () => {
     for (const forme of ['SAS', 'EI', null]) {
       const frais = fraisPourForme(forme);

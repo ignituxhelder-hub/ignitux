@@ -112,8 +112,8 @@ export interface Frais {
 }
 
 const AVERTISSEMENT_FRAIS =
-  `Indications à jour en ${FRAIS_MIS_A_JOUR}, sans montant : les tarifs varient selon la forme, ` +
-  'l’activité, le département et le prestataire, et changent régulièrement. ' +
+  `Indications à jour en ${FRAIS_MIS_A_JOUR}, sans montant : les tarifs dépendent de la forme et de ta situation, ` +
+  'peuvent varier selon le prestataire, et changent régulièrement. ' +
   'Vérifie les montants sur les sites officiels avant de payer. Ignitux n’avance ni ne paie aucun de ces frais.';
 
 const SOURCES_FRAIS = [
@@ -126,15 +126,15 @@ export function fraisPourForme(forme: string | null): Frais {
   const lignes =
     famille === 'societe'
       ? [
-          'Annonce légale de constitution : tarif réglementé, qui dépend de la forme et du département.',
+          'Annonce légale de constitution : le montant dépend de la forme et de ta situation ; vérifie-le sur les sites officiels.',
           'Frais d’immatriculation (greffe) : tarif réglementé, affiché au moment du paiement sur le guichet unique.',
           'Dépôt du capital : gratuit ou payant selon la banque, le notaire ou la Caisse des dépôts.',
           'Relecture des statuts par un professionnel (avocat, expert-comptable) : honoraires libres, facultatif mais conseillé.',
         ]
       : famille === 'individuelle'
         ? [
-            'Déclaration de début d’activité : gratuite ou payante selon l’activité (artisanale, commerciale, libérale) ; ' +
-              'le montant éventuel est affiché sur le guichet unique avant paiement.',
+            'Déclaration de début d’activité : d’éventuels frais dépendent de la forme et de ta situation ; ' +
+              'vérifie-les sur les sites officiels, le montant éventuel est affiché sur le guichet unique avant paiement.',
           ]
         : ['Les frais dépendent de la forme juridique : confirme-la pour voir les postes à prévoir.'];
   return { miseAJour: FRAIS_MIS_A_JOUR, lignes, avertissement: AVERTISSEMENT_FRAIS, sources: SOURCES_FRAIS };
