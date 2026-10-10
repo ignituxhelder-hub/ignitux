@@ -22,6 +22,9 @@ export interface DossierCreation {
   etapes: readonly Etape[];
   frais: Frais;
   filing: EtatDepot;
+  /** Vrai quand une fiche d'immatriculation existe pour le projet. Ne change jamais filing.status. */
+  immatriculee: boolean;
+  registration: { siren: string; registeredOn: string } | null;
 }
 
 const DEPOT_VIDE: EtatDepot = { status: 'preparation', checkedItems: [], depositedAt: null, filingReference: null };
@@ -140,7 +143,7 @@ export class DossierCreationService {
 
   private async charger(ownerId: string, projectId: string) {
     const project = await this.projetDuProprietaire(ownerId, projectId);
-    const [bylaws, identites, mandat, filing] = await Promise.all([
+    const [bylaws, identites, mandat, filing, immatriculation] = await Promise.all([
       this.prisma.company_bylaws.findFirst({
         where: { project_id: projectId, owner_id: ownerId },
         include: { associates: true },
@@ -157,6 +160,10 @@ export class DossierCreationService {
       }),
       this.prisma.creation_filings.findFirst({
         where: { project_id: projectId, owner_id: ownerId },
+      }),
+      this.prisma.company_registrations.findFirst({
+        where: { project_id: projectId, owner_id: ownerId },
+        select: { siren: true, registered_on: true },
       }),
     ]);
 
@@ -187,6 +194,10 @@ export class DossierCreationService {
       etapes: etapesPourForme(forme),
       frais: fraisPourForme(forme),
       filing: depot,
+      immatriculee: immatriculation !== null,
+      registration: immatriculation
+        ? { siren: immatriculation.siren, registeredOn: immatriculation.registered_on.toISOString().slice(0, 10) }
+        : null,
     };
     return { project, bylaws, dossier };
   }

@@ -36,6 +36,7 @@ describe('DossierCreationService', () => {
         upsert: vi.fn().mockResolvedValue({}),
         updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       },
+      company_registrations: { findFirst: vi.fn().mockResolvedValue(null) },
     };
     const moduleRef = await Test.createTestingModule({
       providers: [DossierCreationService, { provide: PrismaService, useValue: prisma }],
@@ -65,6 +66,7 @@ describe('DossierCreationService', () => {
       expect(prisma.identity_verifications.findMany).not.toHaveBeenCalled();
       expect(prisma.creation_filings.upsert).not.toHaveBeenCalled();
       expect(prisma.creation_filings.updateMany).not.toHaveBeenCalled();
+      expect(prisma.company_registrations.findFirst).not.toHaveBeenCalled();
     });
   });
 
@@ -76,6 +78,29 @@ describe('DossierCreationService', () => {
       expect(dossier.etapes.map((e) => e.id)).toEqual(['statuts', 'capital', 'annonce', 'depot', 'kbis']);
       expect(dossier.frais.miseAJour).toBe('octobre 2026');
       expect(dossier.filing).toEqual({ status: 'preparation', checkedItems: [], depositedAt: null, filingReference: null });
+    });
+
+    it('sans fiche d’immatriculation : non immatriculée, registration null', async () => {
+      const dossier = await service.obtenir('user-1', 'p1');
+      expect(dossier.immatriculee).toBe(false);
+      expect(dossier.registration).toBeNull();
+    });
+
+    it('avec une fiche : immatriculée, SIREN et date rendus, filing.status inchangé', async () => {
+      prisma.company_registrations.findFirst.mockResolvedValue({ siren: '443061841', registered_on: new Date('2026-10-01T00:00:00Z') });
+      prisma.creation_filings.findFirst.mockResolvedValue({
+        status: 'preparation',
+        checked_items: [],
+        deposited_at: null,
+        filing_reference: null,
+      });
+      const dossier = await service.obtenir('user-1', 'p1');
+      expect(prisma.company_registrations.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { project_id: 'p1', owner_id: 'user-1' } }),
+      );
+      expect(dossier.immatriculee).toBe(true);
+      expect(dossier.registration).toEqual({ siren: '443061841', registeredOn: '2026-10-01' });
+      expect(dossier.filing.status).toBe('preparation');
     });
 
     it('forme non confirmée : pas d’erreur, une seule pièce, aucune étape', async () => {
