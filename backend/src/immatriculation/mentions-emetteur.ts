@@ -39,10 +39,20 @@ export function formaterSiret(siret: string): string {
   return siret.replace(/^(\d{3})(\d{3})(\d{3})(\d{5})$/, '$1 $2 $3 $4');
 }
 
+/**
+ * Les formes d'entrepreneur individuel, dont la mention légale est
+ * « Entrepreneur individuel (EI) » (le régime micro n'est pas une forme
+ * juridique) — et qui n'ont pas de capital social.
+ */
+const FORMES_ENTREPRENEUR_INDIVIDUEL = ['micro-entreprise', 'EI'];
+const MENTION_EI = 'Entrepreneur individuel (EI)';
+
 export function mentionsEmetteur(source: SourceMentions): string {
   const lignes: string[] = [source.legalName];
 
-  if (source.legalForm) {
+  if (source.legalForm && FORMES_ENTREPRENEUR_INDIVIDUEL.includes(source.legalForm)) {
+    lignes.push(MENTION_EI);
+  } else if (source.legalForm) {
     lignes.push(
       source.capitalCents !== null && source.capitalCents > 0
         ? `${source.legalForm} au capital de ${formaterEuros(source.capitalCents)}`

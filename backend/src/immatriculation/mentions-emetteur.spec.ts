@@ -40,11 +40,20 @@ describe('mentionsEmetteur', () => {
     ).toEqual(['Ma Société', 'Siège : 1 rue de la Paix, 75002 Paris', 'SIREN : 443 061 841']);
   });
 
-  it('forme sans capital connu : la forme seule', () => {
-    expect(mentionsEmetteur({ ...base, legalForm: 'micro-entreprise', capitalCents: null })).toContain(
-      '\nmicro-entreprise\n',
-    );
+  it('société sans capital connu : la forme seule', () => {
+    expect(mentionsEmetteur({ ...base, legalForm: 'SASU', capitalCents: null })).toContain('\nSASU\nSiège');
   });
+
+  it.each(['micro-entreprise', 'EI'])(
+    '%s : la mention légale « Entrepreneur individuel (EI) », jamais de ligne de capital',
+    (forme) => {
+      // Même si un capital traînait dans la source : une EI n'en a pas.
+      const lignes = mentionsEmetteur({ ...base, legalForm: forme, capitalCents: 100000 }).split('\n');
+      expect(lignes[1]).toBe('Entrepreneur individuel (EI)');
+      expect(lignes.join('\n')).not.toContain('capital');
+      expect(lignes.join('\n')).not.toContain('micro-entreprise');
+    },
+  );
 });
 
 describe('capitalConnuCents', () => {
