@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState, type FormEvent } from 'react';
+import { Suspense, useEffect, useState, type FormEvent } from 'react';
 import {
   api,
   ApiError,
@@ -12,7 +12,7 @@ import {
 } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
-export default function BoutiqueEnLignePage() {
+function BoutiqueEnLigne() {
   const { token, isReady } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -282,5 +282,15 @@ export default function BoutiqueEnLignePage() {
         </div>
       )}
     </div>
+  );
+}
+
+// useSearchParams() exige une frontière Suspense : sans elle, `next build`
+// refuse de pré-rendre la page et la construction entière échoue.
+export default function BoutiqueEnLignePage() {
+  return (
+    <Suspense fallback={<p className="loading">Chargement…</p>}>
+      <BoutiqueEnLigne />
+    </Suspense>
   );
 }
