@@ -70,7 +70,7 @@ export interface QuotaVerdict {
  * `null` ne veut pas dire « illimité » : il veut dire **ce n'est pas ici
  * qu'on compte les appels**. Le nombre d'analyses incluses est une promesse
  * commerciale, et elle vit dans le catalogue des offres — 3 en Découverte,
- * 30 en Entrepreneur, 150 en Construction. Chaque génération la fait
+ * 35 en Entrepreneur (l'offre unique à 20 €). Chaque génération la fait
  * respecter en passant par `OffresService.exiger`.
  *
  * Ce repli valait 5, écrit du temps d'une offre unique à 20 €/mois pour 5

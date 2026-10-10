@@ -40,7 +40,7 @@ export const DEFAULT_ENTRY_SPLIT = {
 export const DEFAULT_DIVIDEND_RIGHT_BASIS_POINTS = 500;
 
 /** L'offre que le contrat garantit par défaut. Modifiable par accord. */
-export const DEFAULT_ECOSYSTEM_OFFRE = 'construction';
+export const DEFAULT_ECOSYSTEM_OFFRE = 'entrepreneur';
 
 export interface AgreementTerms {
   founderBasisPoints: number;

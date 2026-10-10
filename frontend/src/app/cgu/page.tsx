@@ -28,7 +28,7 @@ export default function CguPage() {
         <p style={{ marginBottom: 0 }}>
           Ces conditions régissent l&apos;accès à Ignitux et à IGINI, ouverts à toute
           personne qui crée un compte. L&apos;offre Découverte, gratuite, est accordée par
-          défaut ; les offres payantes (Entrepreneur, Construction) seront proposées dès
+          défaut ; les offres payantes (Entrepreneur) seront proposées dès
           qu&apos;un moyen de paiement sera activé. Le produit reste en développement actif —
           voir « Ce que tu peux attendre du service » ci-dessous.
         </p>

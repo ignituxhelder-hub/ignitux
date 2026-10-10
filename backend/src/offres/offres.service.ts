@@ -4,8 +4,8 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { peut, type Action, type Verdict } from './droits.js';
 import {
   CATALOGUE,
-  estOffre,
   EVALUATION_FINANCEMENT,
+  normaliserOffre,
   offre,
   OFFRE_PAR_DEFAUT,
   prixCentimes,
@@ -29,7 +29,7 @@ function rang(id: OffreId): number {
  *
  * Tant qu'aucun fournisseur de paiement n'est configuré, changer d'offre
  * vers une offre payante est refusé. Ce n'est pas une précaution excessive :
- * une route qui accorde Construction sans rien encaisser est une route qui
+ * une route qui accorde l'offre payante sans rien encaisser est une route qui
  * donne le produit, et elle finirait par être trouvée.
  *
  * Le jour où l'encaissement existe, c'est le fournisseur qui confirmera le
@@ -79,7 +79,9 @@ export class OffresService {
         where: { project: { owner_id: userId }, status: { in: ['actif', 'transmis'] } },
         select: { ecosystem_offre: true },
       });
-      const offres = accords.map((a) => a.ecosystem_offre).filter(estOffre);
+      const offres = accords
+        .map((a) => normaliserOffre(a.ecosystem_offre))
+        .filter((o): o is OffreId => o !== null);
       return offres.length === 0 ? null : offres.reduce((meilleure, o) => (rang(o) > rang(meilleure) ? o : meilleure));
     } catch (error) {
       this.logger.error(
@@ -100,7 +102,7 @@ export class OffresService {
       // Un engagement terminé retombe sur le repli plutôt que de laisser
       // ouvert : l'inverse ferait payer une fois pour toujours.
       if (ligne.ends_on && ligne.ends_on.getTime() < Date.now()) return this.repli();
-      return estOffre(ligne.offre) ? ligne.offre : this.repli();
+      return normaliserOffre(ligne.offre) ?? this.repli();
     } catch (error) {
       this.logger.error(
         `Lecture de l'offre impossible pour ${userId} — repli sur ${this.repli()}. ` +

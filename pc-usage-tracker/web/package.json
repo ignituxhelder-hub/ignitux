@@ -1,0 +1,29 @@
+{
+  "name": "pc-usage-tracker-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Tableau de bord de comptabilisation du temps d'utilisation du serveur IGNITUX.",
+  "scripts": {
+    "dev": "vite --port 4101 --host",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --port 4101",
+    "test": "vitest run",
+    "lint": "eslint src tests"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.0.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.5"
+  }
+}

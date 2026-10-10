@@ -50,9 +50,18 @@ describe('OffresService', () => {
     });
 
     it('lit l’offre en base', async () => {
+      prisma.subscriptions.findUnique.mockResolvedValue({ offre: 'entrepreneur', ends_on: null });
+
+      await expect(service.offreDe('u1')).resolves.toBe('entrepreneur');
+    });
+
+    // Construction a été fusionnée dans Entrepreneur : une ligne qui porte
+    // encore l'ancien nom ne doit pas faire perdre ce qui a été payé.
+    it('lit l’ancienne offre « construction » comme Entrepreneur', async () => {
+      process.env.IGNITUX_BETA_V1 = 'false';
       prisma.subscriptions.findUnique.mockResolvedValue({ offre: 'construction', ends_on: null });
 
-      await expect(service.offreDe('u1')).resolves.toBe('construction');
+      await expect(service.offreDe('u1')).resolves.toBe('entrepreneur');
     });
 
     // Laisser ouvert après la fin ferait payer une fois pour toujours.
@@ -98,13 +107,19 @@ describe('OffresService', () => {
     });
 
     it('donne l’offre de l’accord à quelqu’un qui n’a aucun abonnement', async () => {
+      prisma.participation_agreements.findMany.mockResolvedValue([{ ecosystem_offre: 'entrepreneur' }]);
+
+      await expect(service.offreDe('u1')).resolves.toBe('entrepreneur');
+    });
+
+    it('lit un accord signé avec l’ancienne offre « construction » comme Entrepreneur', async () => {
       prisma.participation_agreements.findMany.mockResolvedValue([{ ecosystem_offre: 'construction' }]);
 
-      await expect(service.offreDe('u1')).resolves.toBe('construction');
+      await expect(service.offreDe('u1')).resolves.toBe('entrepreneur');
     });
 
     it('ne cherche que les accords actifs ou transmis du porteur — jamais le capital', async () => {
-      prisma.participation_agreements.findMany.mockResolvedValue([{ ecosystem_offre: 'construction' }]);
+      prisma.participation_agreements.findMany.mockResolvedValue([{ ecosystem_offre: 'entrepreneur' }]);
 
       await service.offreDe('u1');
 
@@ -115,26 +130,26 @@ describe('OffresService', () => {
     });
 
     it('garde la meilleure offre entre l’abonnement et l’accord', async () => {
-      prisma.subscriptions.findUnique.mockResolvedValue({ offre: 'construction', ends_on: null });
-      prisma.participation_agreements.findMany.mockResolvedValue([{ ecosystem_offre: 'entrepreneur' }]);
+      prisma.subscriptions.findUnique.mockResolvedValue({ offre: 'entrepreneur', ends_on: null });
+      prisma.participation_agreements.findMany.mockResolvedValue([{ ecosystem_offre: 'decouverte' }]);
 
-      await expect(service.offreDe('u1')).resolves.toBe('construction');
+      await expect(service.offreDe('u1')).resolves.toBe('entrepreneur');
     });
 
     it('relève l’abonnement quand l’accord garantit mieux', async () => {
-      prisma.subscriptions.findUnique.mockResolvedValue({ offre: 'entrepreneur', ends_on: null });
-      prisma.participation_agreements.findMany.mockResolvedValue([{ ecosystem_offre: 'construction' }]);
+      prisma.subscriptions.findUnique.mockResolvedValue({ offre: 'decouverte', ends_on: null });
+      prisma.participation_agreements.findMany.mockResolvedValue([{ ecosystem_offre: 'entrepreneur' }]);
 
-      await expect(service.offreDe('u1')).resolves.toBe('construction');
+      await expect(service.offreDe('u1')).resolves.toBe('entrepreneur');
     });
 
     it('prend la meilleure offre quand la personne a plusieurs accords', async () => {
       prisma.participation_agreements.findMany.mockResolvedValue([
+        { ecosystem_offre: 'decouverte' },
         { ecosystem_offre: 'entrepreneur' },
-        { ecosystem_offre: 'construction' },
       ]);
 
-      await expect(service.offreDe('u1')).resolves.toBe('construction');
+      await expect(service.offreDe('u1')).resolves.toBe('entrepreneur');
     });
 
     it('ignore une offre d’accord inconnue du catalogue', async () => {
@@ -193,13 +208,15 @@ describe('OffresService', () => {
     });
 
     it('refuse en portant l’offre qui ouvrirait, pas seulement un message', async () => {
+      // Hors bêta : le repli est Découverte, qui n'a pas les outils de gestion.
+      process.env.IGNITUX_BETA_V1 = 'false';
       const erreur = await service
         .exiger('u1', { kind: 'outil_de_gestion', outil: 'comptabilite' })
         .catch((e) => e);
 
       expect(erreur).toBeInstanceOf(ForbiddenException);
       const corps = erreur.getResponse();
-      expect(corps.offreQuiOuvre).toBe('construction');
+      expect(corps.offreQuiOuvre).toBe('entrepreneur');
       expect(corps.seRenouvelleLeMoisProchain).toBe(false);
     });
 
@@ -215,10 +232,10 @@ describe('OffresService', () => {
   });
 
   describe('changer d’offre', () => {
-    // Une route qui accorde Construction sans rien encaisser est une route
+    // Une route qui accorde l’offre payante sans rien encaisser est une route
     // qui donne le produit, et elle finirait par être trouvée.
     it('refuse une offre payante quand rien n’encaisse, et le dit', async () => {
-      const erreur = await service.changer('u1', 'construction').catch((e) => e);
+      const erreur = await service.changer('u1', 'entrepreneur').catch((e) => e);
 
       expect(erreur).toBeInstanceOf(ForbiddenException);
       expect(String(erreur.getResponse().message ?? erreur.message)).toMatch(

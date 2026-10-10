@@ -36,7 +36,7 @@ function view(overrides: Overrides = {}, viewer = { isIgnituxOperator: false }) 
       status: 'actif',
       effective_on: '2026-10-01',
       contract_reference: null,
-      ecosystem_offre: 'construction',
+      ecosystem_offre: 'entrepreneur',
       transmitted_on: null,
     },
     notice: NOTICE,
@@ -58,7 +58,7 @@ function view(overrides: Overrides = {}, viewer = { isIgnituxOperator: false }) 
     ],
     milestones: [milestone()],
     dividendRight: { rightBasisPoints: 500, active: false, entries: [], totalDueCents: 0, totalSettledCents: 0 },
-    ecosystem: { offre: 'construction', label: 'Construction', active: true },
+    ecosystem: { offre: 'entrepreneur', label: 'Entrepreneur', active: true },
     viewer,
     ...overrides,
   };
@@ -217,7 +217,7 @@ describe('ParticipationSection', () => {
       render(<ParticipationSection token={TOKEN} projectId={PROJECT_ID} />);
 
       const acces = (await screen.findByRole('heading', { name: 'Accès à l’écosystème IGNITUX' })).closest('section')!;
-      expect(within(acces).getByText(/Construction/)).toBeInTheDocument();
+      expect(within(acces).getByText(/Entrepreneur/)).toBeInTheDocument();
       expect(within(acces).getByText(/indépendant de ta part de capital/)).toBeInTheDocument();
     });
   });

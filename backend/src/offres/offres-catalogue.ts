@@ -34,12 +34,31 @@
  * autre problème, et les mélanger rendrait les deux illisibles.
  */
 
-/** Les abonnements. Le financement n'en est pas un — voir plus bas. */
-export const OFFRES = ['decouverte', 'entrepreneur', 'construction'] as const;
+/** Les abonnements : le gratuit, et une offre payante qui contient tout. Le financement n'en est pas un — voir plus bas. */
+export const OFFRES = ['decouverte', 'entrepreneur'] as const;
 export type OffreId = (typeof OFFRES)[number];
 
 export function estOffre(valeur: string): valeur is OffreId {
   return (OFFRES as readonly string[]).includes(valeur);
+}
+
+/**
+ * Les offres qui ont existé et n'existent plus, avec celle qui les remplace.
+ *
+ * « construction » (59 €) a été fusionnée dans « entrepreneur » : elle ne
+ * promettait rien de plus que l'offre unique d'aujourd'hui. Des lignes en base
+ * — abonnements, accords de participation — portent encore l'ancien nom ; les
+ * ignorer les ferait retomber sur le gratuit, c'est-à-dire retirer à quelqu'un
+ * ce qu'il a payé ou signé.
+ */
+const OFFRES_FUSIONNEES: Readonly<Record<string, OffreId>> = {
+  construction: 'entrepreneur',
+};
+
+/** L'offre actuelle correspondant à une valeur lue en base, ou `null` si inconnue. */
+export function normaliserOffre(valeur: string): OffreId | null {
+  if (estOffre(valeur)) return valeur;
+  return OFFRES_FUSIONNEES[valeur] ?? null;
 }
 
 /**
@@ -127,65 +146,34 @@ export const CATALOGUE: readonly Offre[] = [
   {
     id: 'entrepreneur',
     label: 'Entrepreneur',
-    prixCentimes: 990,
+    prixCentimes: 2000,
     resume:
-      'Autant de projets que nécessaire, et les six générateurs pour passer de ' +
-      "l'idée au plan.",
+      'Tout Ignitux dans une seule offre : autant de projets que nécessaire, les six ' +
+      'générateurs, la comptabilité, la facturation, la banque, les investisseurs et les ' +
+      'collaborateurs.',
     argument:
-      "Tu as vu ce que l'analyse donne. Former, construire, financer, développer et " +
-      'transmettre sont les cinq étapes suivantes, et elles produisent des documents ' +
-      "que tu n'aurais pas écrits seul.",
-    capacites: {
-      projets: null,
-      generateurs: [...GENERATEURS_METHODE],
-      appelsIaParMois: 30,
-      outilsDeGestion: false,
-      investisseurs: false,
-      collaborateurs: 0,
-    },
-  },
-  {
-    id: 'construction',
-    label: 'Construction',
-    prixCentimes: 5900,
-    resume:
-      'Tout ce qui précède, plus la comptabilité, la facturation, la banque, les ' +
-      'investisseurs et les collaborateurs.',
-    argument:
-      "Une entreprise qui tourne ne se pilote plus dans un plan : elle facture, elle " +
-      'tient ses comptes, elle rend des comptes à ceux qui l’ont financée.',
+      "Tu as vu ce que l'analyse donne. Le reste du parcours — former, construire, financer, " +
+      'développer, transmettre — et les outils pour piloter une entreprise qui tourne sont ' +
+      'réunis ici, pour un seul prix.',
     capacites: {
       projets: null,
       generateurs: [...GENERATEURS_METHODE],
       /*
-       * 35 et non 150, depuis le 26 septembre 2026.
+       * 35 par mois, depuis la fusion des offres Entrepreneur (9,90 €) et
+       * Construction (59 €) en une seule à 20 €.
        *
-       * Le catalogue vendait 150 analyses tandis que le plafond de coût par
-       * utilisateur — `DEFAULT_COST_MICRO_EUR_PER_MONTH`, 2 €/mois — coupait
-       * bien avant. Le produit ne mentait pas à l'usage : il nomme le plafond
-       * qui mord (`analyses_selon`). Mais il vendait un chiffre qu'il ne
-       * pouvait pas tenir, et la personne qui l'apprenait était celle qui
-       * venait de payer.
+       * Le chiffre vient du plafond de coût par utilisateur —
+       * `DEFAULT_COST_MICRO_EUR_PER_MONTH`, 2 €/mois, soit 10 % de 20 €. 55 appels
+       * réels mesurés donnent 0,0511 € de moyenne ; 35 × 0,0511 = 1,79 €, sous
+       * les 2 €, avec de la marge. Le maximum théorique serait 39.
        *
-       * D'où vient 35, et pas un chiffre rond. Deux contraintes le serrent :
+       * Ce que 35 ne garantit PAS : l'appel le plus cher observé coûte 0,0914 €
+       * (`construire`). Quelqu'un qui n'utiliserait que celui-là serait coupé
+       * vers la 22ᵉ. Le plafond de coût est commun à toutes les offres, ce
+       * n'est pas un défaut propre à celle-ci.
        *
-       *   — le plafond de coût. 55 appels réels mesurés donnent 0,0511 € de
-       *     moyenne ; 35 × 0,0511 = 1,79 €, sous les 2 €, avec de la marge.
-       *     Le maximum théorique serait 39 ;
-       *   — le catalogue lui-même. Un test exige qu'une offre plus chère ne
-       *     donne JAMAIS moins que la précédente, et Entrepreneur en promet
-       *     30. Descendre à 30 aurait cassé cette échelle : on aurait payé
-       *     59 € pour le même quota que 9,90 €.
-       *
-       * Ce que 35 ne garantit PAS, et il vaut mieux l'écrire : l'appel le plus
-       * cher observé coûte 0,0914 € (`construire`). Quelqu'un qui n'utiliserait
-       * que celui-là serait coupé vers la 22ᵉ. L'offre Entrepreneur a
-       * exactement la même propriété, et depuis plus longtemps — c'est le
-       * plafond qui est commun aux deux, pas un défaut de cette offre-ci.
-       *
-       * Construction ne vend d'ailleurs pas des analyses : elle vend la
-       * comptabilité, la facturation, la banque, les investisseurs et les
-       * collaborateurs. Les trois lignes ci-dessous sont ce qu'on paie.
+       * Un test attache ce quota au plafond : relever l'un sans l'autre fait
+       * échouer la suite.
        */
       appelsIaParMois: 35,
       outilsDeGestion: true,

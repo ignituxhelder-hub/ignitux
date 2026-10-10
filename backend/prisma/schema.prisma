@@ -756,7 +756,7 @@ model participation_agreements {
   contract_reference  String?
   /// L'offre que le contrat garantit à l'entrepreneur. Chaîne libre comme
   /// `subscriptions.offre` : le catalogue reste l'autorité.
-  ecosystem_offre     String         @default("construction")
+  ecosystem_offre     String         @default("entrepreneur")
   /// Le jour où IGNITUX est passé à 0 % du capital. C'est ce qui ouvre le
   /// droit sur les dividendes.
   transmitted_on      DateTime?      @db.Date

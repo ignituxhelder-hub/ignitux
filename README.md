@@ -9,8 +9,9 @@ Plateforme pour transformer une idée en réalité : analyser, construire, finan
 IGNITUX est l'écosystème, IGINI est l'intelligence qui l'anime — voir [`backend/src/igini/README.md`](backend/src/igini/README.md). Documentation complète : [`docs/`](docs/README.md) (architecture, état réel du projet, décisions assumées).
 
 - [`backend/`](backend) — API NestJS + Prisma (Postgres) : comptes, authentification JWT, projets.
-  - [`backend/src/igini/`](backend/src/igini) — IGINI, le cerveau : les 5 générateurs IA, le moteur Claude
-    partagé, et les 5 moteurs transverses (mémoire, connaissance, workflow, score, automatisation).
+  - [`backend/src/igini/`](backend/src/igini) — IGINI, le cerveau : les générateurs IA (les 5 étapes
+    et Former, la forme juridique), le chat IGINI, le moteur Claude partagé, et les 5 moteurs
+    transverses (mémoire, connaissance, workflow, score, automatisation).
   - [`backend/src/community/`](backend/src/community) — IGNITUX (pas IGINI) : projets publics et
     encouragements entre porteurs de projet.
 - [`frontend/`](frontend) — App Next.js consommant l'API : inscription, connexion, gestion des projets.
@@ -68,6 +69,15 @@ Le backend autorise déjà les requêtes CORS depuis `http://localhost:3001` (co
 
 **Comptes**
 - Inscription / connexion (JWT), mots de passe hashés (bcrypt), rate-limiting contre le bruteforce
+- Inscription protégée par Cloudflare Turnstile — la clé secrète est exigée au démarrage en production
+- Vérification d'identité : pièce d'identité lue par OCR, MRZ contrôlée (ICAO 9303), puis revue par
+  un administrateur. Une identité vérifiée permet de signer et de révoquer des **mandats**
+
+**Offres** — deux seulement
+- **Découverte**, gratuite
+- **Entrepreneur**, 20 €/mois : outils de gestion, investisseurs, collaborateurs sans limite,
+  35 générations IA par mois. L'ancienne offre Construction y est fusionnée ; les abonnements qui
+  la portaient encore sont lus et migrés comme Entrepreneur
 
 **Projets**
 - Création, lecture, modification, suppression — chaque projet appartient à un utilisateur
@@ -90,6 +100,18 @@ plafonné par personne et par mois, et chaque appel est journalisé avec ses jet
 - **Financer** — plan de financement : budget estimé, sources, postes de dépense
 - **Développer** — plan de croissance : leviers, indicateurs clés, risques de passage à l'échelle
 - **Transmettre** — plan de transmission : options de transfert, documentation requise, check-list
+- **Former** — recommandation de forme juridique, affichée sur la page projet
+
+**Chat IGINI** — une conversation qui agit sur le projet par 7 outils (3 tours au plus par
+message), et qui peut enregistrer une réponse comme souvenir. Même verrou, même budget.
+
+**Créer l'entreprise**
+- **Statuts** — confirmation de la forme juridique, brouillon généré par IGINI, édition directe,
+  régénération, version retenue et export PDF
+- **Dossier de création** — pièces à réunir (calculées selon la forme), guide du dépôt, frais,
+  dépôt déclaré et récapitulatif PDF. Réservé au propriétaire du projet
+- **Tâches de conformité assistées** — IGINI exécute une exigence, la personne valide ou refuse ;
+  rien n'est appliqué sans elle
 
 **Moteurs transverses d'IGINI**, avec leur section sur la fiche projet du frontend :
 - **Mémoire** — souvenirs (décisions, préférences, apprentissages, faits) liés à un utilisateur/projet
@@ -118,6 +140,8 @@ plafonné par personne et par mois, et chaque appel est journalisé avec ses jet
 - **Aucun virement n’est émis, aucun compte n’est synchronisé avec une banque, et aucun IBAN
   complet n’est conservé** — seulement ses quatre derniers caractères, tant qu’aucun fournisseur
   bancaire n’a été choisi
+- **Boutique en ligne** — connexion d'une boutique Shopify (OAuth), lecture des produits et des
+  commandes. Les jetons sont chiffrés au repos (AES-256-GCM)
 
 **Communauté**
 - Un projet peut être rendu public par son propriétaire (`/projects/:id/visibility`)

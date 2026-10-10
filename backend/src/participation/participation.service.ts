@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConstitutionService } from '../constitution/constitution.service.js';
 import { buildCapTable } from '../financing/financing-model.js';
-import { estOffre, offre } from '../offres/offres-catalogue.js';
+import { normaliserOffre, offre } from '../offres/offres-catalogue.js';
 import { assertHasProjectAccess } from '../prisma/assert-has-project-access.js';
 import { assertOwnsProject } from '../prisma/assert-owns-project.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -117,9 +117,10 @@ export class ParticipationService {
     const problems = validateAgreementTerms(terms);
     if (problems.length > 0) this.refuse(problems);
 
-    const ecosystemOffre = input.ecosystemOffre ?? DEFAULT_ECOSYSTEM_OFFRE;
-    if (!estOffre(ecosystemOffre)) {
-      throw new BadRequestException(`L'offre « ${ecosystemOffre} » n'existe pas dans le catalogue.`);
+    const ecosystemOffreDemandee = input.ecosystemOffre ?? DEFAULT_ECOSYSTEM_OFFRE;
+    const ecosystemOffre = normaliserOffre(ecosystemOffreDemandee);
+    if (ecosystemOffre === null) {
+      throw new BadRequestException(`L'offre « ${ecosystemOffreDemandee} » n'existe pas dans le catalogue.`);
     }
 
     if (await this.prisma.participation_agreements.findFirst({ where: { project_id: projectId } })) {
@@ -505,8 +506,11 @@ export class ParticipationService {
       },
       // COUCHE 3 — l'accès à l'écosystème, défini par l'accord.
       ecosystem: {
-        offre: agreement.ecosystem_offre,
-        label: estOffre(agreement.ecosystem_offre) ? offre(agreement.ecosystem_offre).label : agreement.ecosystem_offre,
+        offre: normaliserOffre(agreement.ecosystem_offre) ?? agreement.ecosystem_offre,
+        label: (() => {
+          const courante = normaliserOffre(agreement.ecosystem_offre);
+          return courante ? offre(courante).label : agreement.ecosystem_offre;
+        })(),
         active: agreement.status !== 'clos',
       },
     };

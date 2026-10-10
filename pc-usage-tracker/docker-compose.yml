@@ -1,0 +1,44 @@
+# Mode conteneurisé (optionnel) du service de comptabilisation.
+#
+# Le cas d'usage principal reste le service Windows natif (voir le README,
+# section « Déploiement »), qui tourne directement sur l'hôte et accède au
+# moteur Docker nativement, sans partage de socket. Cette composition existe
+# pour développer ou tester sans installer Node localement, ou pour exécuter
+# le tracker sur un hôte Linux/WSL2.
+#
+# Sur Docker Desktop pour Windows (backend WSL2), le socket Unix
+# /var/run/docker.sock est exposé aux conteneurs Linux : le montage
+# ci-dessous fonctionne tel quel. Il est monté en lecture seule : le tracker
+# n'a besoin que de lister les conteneurs, jamais d'en créer ou d'en arrêter.
+services:
+  server:
+    build:
+      context: ./server
+    environment:
+      PORT: '4100'
+      HOURLY_RATE_EUR: ${HOURLY_RATE_EUR:-0.10}
+      CONTAINER_NAME_FILTER: ${CONTAINER_NAME_FILTER:-ignitux}
+      POLL_INTERVAL_MS: ${POLL_INTERVAL_MS:-5000}
+      ESTIMATED_WATTAGE: ${ESTIMATED_WATTAGE:-150}
+      ELECTRICITY_PRICE_PER_KWH: ${ELECTRICITY_PRICE_PER_KWH:-0.2516}
+      DATABASE_PATH: /data/usage.db
+    volumes:
+      - donnees:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - '127.0.0.1:4100:4100'
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./web
+      args:
+        VITE_API_URL: http://localhost:4100
+    depends_on:
+      - server
+    ports:
+      - '127.0.0.1:4101:4101'
+    restart: unless-stopped
+
+volumes:
+  donnees:

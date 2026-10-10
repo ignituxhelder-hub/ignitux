@@ -1,0 +1,12 @@
+/node_modules
+/dist
+/coverage
+*.tsbuildinfo
+
+.env
+.env.*
+!.env.example
+
+# Sorties de tsc -b (tsconfig.node.json composite) — seul vite.config.ts est la source.
+/vite.config.js
+/vite.config.d.ts
