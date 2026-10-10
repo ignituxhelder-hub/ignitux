@@ -291,4 +291,79 @@ describe('StatutsService — génération', () => {
       });
     });
   });
+
+  describe('déverrouiller quand la forme juridique a changé', () => {
+    const projetSas = { id: 'p1', owner_id: 'user-1', confirmed_legal_form: 'SAS', title: 'Mon projet' };
+
+    it('repasse en brouillon une version retenue écrite pour une autre forme, par une écriture gardée', async () => {
+      prisma.projects.findFirst.mockResolvedValue(projetSas);
+      prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'retenue', legal_form: 'SASU' });
+      prisma.company_bylaws.findUnique.mockResolvedValue({ id: 'b1', status: 'brouillon', finalized_at: null, associates: [] });
+
+      await expect(service.deverrouillerPourProjet('user-1', 'p1')).resolves.toMatchObject({ status: 'brouillon' });
+
+      expect(prisma.projects.findFirst).toHaveBeenCalledWith({ where: { id: 'p1', owner_id: 'user-1' } });
+      expect(prisma.company_bylaws.findFirst).toHaveBeenCalledWith({ where: { project_id: 'p1', owner_id: 'user-1' } });
+      expect(prisma.company_bylaws.updateMany).toHaveBeenCalledWith({
+        where: { id: 'b1', status: 'retenue' },
+        data: { status: 'brouillon', finalized_at: null },
+      });
+      expect(prisma.company_bylaws.findUnique).toHaveBeenCalledWith({
+        where: { id: 'b1' },
+        include: { associates: true },
+      });
+      expect(claude.generateStructuredOutput).not.toHaveBeenCalled();
+    });
+
+    it('refuse si la forme confirmée est la même que celle des statuts', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ ...projetSas, confirmed_legal_form: 'SASU' });
+      prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'retenue', legal_form: 'SASU' });
+
+      await expect(service.deverrouillerPourProjet('user-1', 'p1')).rejects.toThrow(
+        'Tes statuts correspondent à ta forme juridique : ils restent verrouillés.',
+      );
+      expect(prisma.company_bylaws.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('refuse si la version n’est pas retenue', async () => {
+      prisma.projects.findFirst.mockResolvedValue(projetSas);
+      prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'brouillon', legal_form: 'SASU' });
+
+      await expect(service.deverrouillerPourProjet('user-1', 'p1')).rejects.toThrow('Aucun statut retenu à déverrouiller.');
+      expect(prisma.company_bylaws.updateMany).not.toHaveBeenCalled();
+    });
+
+    it.each([null, 'micro-entreprise', 'EI'])(
+      'refuse si la forme confirmée (%s) n’est pas une forme à personne morale',
+      async (forme) => {
+        prisma.projects.findFirst.mockResolvedValue({ ...projetSas, confirmed_legal_form: forme });
+        prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'retenue', legal_form: 'SASU' });
+
+        await expect(service.deverrouillerPourProjet('user-1', 'p1')).rejects.toThrow(ConflictException);
+        expect(prisma.company_bylaws.updateMany).not.toHaveBeenCalled();
+      },
+    );
+
+    it('refuse si une autre requête a déjà déverrouillé entre la lecture et l’écriture', async () => {
+      prisma.projects.findFirst.mockResolvedValue(projetSas);
+      prisma.company_bylaws.findFirst.mockResolvedValue({ id: 'b1', status: 'retenue', legal_form: 'SASU' });
+      prisma.company_bylaws.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(service.deverrouillerPourProjet('user-1', 'p1')).rejects.toThrow(ConflictException);
+      expect(prisma.company_bylaws.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('refuse si le projet n’appartient pas à l’appelant', async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+      await expect(service.deverrouillerPourProjet('user-1', 'p1')).rejects.toThrow(NotFoundException);
+      expect(prisma.company_bylaws.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('refuse si aucun statut n’existe pour ce propriétaire', async () => {
+      prisma.projects.findFirst.mockResolvedValue(projetSas);
+      prisma.company_bylaws.findFirst.mockResolvedValue(null);
+      await expect(service.deverrouillerPourProjet('user-1', 'p1')).rejects.toThrow(NotFoundException);
+      expect(prisma.company_bylaws.updateMany).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -206,6 +206,54 @@ export class StatutsService {
     });
   }
 
+  /**
+   * Déverrouille une version retenue devenue fausse : la forme juridique
+   * confirmée du projet a changé depuis (décision Helder du 2026-10-10).
+   * Sans cette sortie, la personne restait bloquée : une version retenue ne se
+   * modifie ni ne se régénère.
+   *
+   * Autorisé SEULEMENT si la version est retenue ET que la forme confirmée est
+   * une des 4 formes à personne morale ET qu'elle diffère de celle des
+   * statuts. Effet : retour en brouillon, `finalized_at` effacé — la personne
+   * régénère pour la nouvelle forme puis retient à nouveau. Ne touche rien
+   * d'autre (registre, immatriculation).
+   */
+  async deverrouillerPourProjet(ownerId: string, projectId: string) {
+    const project = await this.prisma.projects.findFirst({
+      where: { id: projectId, owner_id: ownerId },
+    });
+    if (!project) {
+      throw new NotFoundException('Projet introuvable.');
+    }
+    const bylaws = await this.findForOwner(ownerId, projectId);
+    if (bylaws.status !== 'retenue') {
+      throw new ConflictException('Aucun statut retenu à déverrouiller.');
+    }
+    const forme = project.confirmed_legal_form;
+    if (!forme || !FORMES_AVEC_PERSONNE_MORALE.includes(forme as (typeof FORMES_AVEC_PERSONNE_MORALE)[number])) {
+      throw new ConflictException(
+        "Ta forme juridique confirmée n'est pas une forme de société (EURL, SASU, SARL, SAS) : " +
+          'tes statuts restent verrouillés.',
+      );
+    }
+    if (forme === bylaws.legal_form) {
+      throw new ConflictException('Tes statuts correspondent à ta forme juridique : ils restent verrouillés.');
+    }
+    // Gardée : deux déverrouillages simultanés (ou un déverrouillage déjà
+    // passé) ne réécrivent rien.
+    const { count } = await this.prisma.company_bylaws.updateMany({
+      where: { id: bylaws.id, status: 'retenue' },
+      data: { status: 'brouillon', finalized_at: null },
+    });
+    if (count === 0) {
+      throw new ConflictException('Aucun statut retenu à déverrouiller.');
+    }
+    return this.prisma.company_bylaws.findUnique({
+      where: { id: bylaws.id },
+      include: { associates: true },
+    });
+  }
+
   /** Rend null (pas d'exception) quand rien n'existe encore : « pas de statuts » est un état normal. */
   obtenirPourProjet(ownerId: string, projectId: string) {
     return this.prisma.company_bylaws.findFirst({

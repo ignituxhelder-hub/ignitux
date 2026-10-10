@@ -107,6 +107,16 @@ describe('StatutsController — validation HTTP des corps', () => {
     expect((await poster(corpsValide(), '/regenerer')).status).toBe(201);
     expect(service.regenererPourProjet).toHaveBeenCalledTimes(1);
   });
+
+  it('expose le déverrouillage en POST sans corps', async () => {
+    service.deverrouillerPourProjet = vi.fn().mockResolvedValue({ id: 'b1', status: 'brouillon', associates: [] });
+
+    const res = await poster({}, '/deverrouiller');
+
+    expect(res.status).toBe(201);
+    expect(res.body).toMatchObject({ status: 'brouillon' });
+    expect(service.deverrouillerPourProjet).toHaveBeenCalledWith('user-1', projectId);
+  });
 });
 
 describe('StatutsController — limite de débit des routes qui appellent Claude', () => {

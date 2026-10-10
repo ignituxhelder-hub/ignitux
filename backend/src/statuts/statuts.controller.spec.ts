@@ -73,6 +73,12 @@ describe('StatutsController', () => {
     expect(service.retenirPourProjet).toHaveBeenCalledWith('user-1', 'p1');
   });
 
+  it('transmet le déverrouillage', async () => {
+    service.deverrouillerPourProjet = vi.fn().mockResolvedValue({ id: 'b1', status: 'brouillon' });
+    await controller.deverrouiller(user, 'p1');
+    expect(service.deverrouillerPourProjet).toHaveBeenCalledWith('user-1', 'p1');
+  });
+
   it('expose la lecture pour le projet', async () => {
     service.obtenirPourProjet = vi.fn().mockResolvedValue(null);
     await controller.obtenir(user, 'p1');

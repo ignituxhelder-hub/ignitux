@@ -26,6 +26,12 @@ export class StatutsController {
     return this.statutsService.retenirPourProjet(user.id, projectId);
   }
 
+  /** Retenue -> brouillon, seulement si la forme confirmée a changé depuis (409 sinon). */
+  @Post('deverrouiller')
+  deverrouiller(@CurrentUser() user: AuthenticatedUser, @Param('projectId', ParseUUIDPipe) projectId: string) {
+    return this.statutsService.deverrouillerPourProjet(user.id, projectId);
+  }
+
   @Post()
   @HttpCode(HttpStatus.CREATED)
   // Chaque appel coûte un appel API Claude — limite dédiée contre les abus.

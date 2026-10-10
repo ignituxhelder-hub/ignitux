@@ -150,7 +150,7 @@ export function calculerPieces(sources: SourcesPieces): Piece[] {
       etat: 'a_faire',
       detail:
         `Tes statuts retenus sont écrits pour une ${sources.statuts.legalForm} ; ` +
-        `ta forme confirmée est ${sources.forme} — ils doivent être réécrits pour ${sources.forme} avant le dépôt (une version retenue ne se régénère pas ici).`,
+        `ta forme confirmée est ${sources.forme} : déverrouille-les dans la section Statuts pour les réécrire pour ${sources.forme} avant le dépôt.`,
       cochable: false,
     });
   } else if (sources.statuts?.status === 'retenue') {

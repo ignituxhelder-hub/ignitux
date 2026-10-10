@@ -77,7 +77,7 @@ describe('calculerPieces', () => {
     const p = piece(sources({ forme: 'SAS', statuts: { status: 'retenue', legalForm: 'SASU' } }), 'statuts');
     expect(p.etat).toBe('a_faire');
     expect(p.detail).toBe(
-      'Tes statuts retenus sont écrits pour une SASU ; ta forme confirmée est SAS — ils doivent être réécrits pour SAS avant le dépôt (une version retenue ne se régénère pas ici).',
+      'Tes statuts retenus sont écrits pour une SASU ; ta forme confirmée est SAS : déverrouille-les dans la section Statuts pour les réécrire pour SAS avant le dépôt.',
     );
   });
 
