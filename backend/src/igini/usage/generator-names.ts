@@ -47,7 +47,7 @@ export const GENERATEURS_METHODE = [
  * le coût seulement — dans aucune offre, jamais soumis à
  * `OffresService.exiger()` (voir plus haut).
  */
-export const GENERATOR_NAMES = [...GENERATEURS_METHODE, 'executer', 'discuter'] as const;
+export const GENERATOR_NAMES = [...GENERATEURS_METHODE, 'executer', 'discuter', 'evaluer'] as const;
 
 export type GeneratorName = (typeof GENERATOR_NAMES)[number];
 

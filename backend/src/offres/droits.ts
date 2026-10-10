@@ -39,6 +39,7 @@ export type Action =
   | { kind: 'generer'; generateur: GenerateurId; appelsCeMois: number }
   | { kind: 'outil_de_gestion'; outil: 'comptabilite' | 'facturation' | 'banque' | 'boutique_en_ligne' }
   | { kind: 'ouvrir_financement' }
+  | { kind: 'evaluer_financement' }
   | { kind: 'inviter_collaborateur'; collaborateursActuels: number };
 
 export interface Verdict {
@@ -89,6 +90,13 @@ function refus(
   };
 }
 
+/**
+ * Les générateurs qui ne sont pas des étapes de la méthode : toute offre qui
+ * a le droit d'y accéder les lance, et seul le quota mensuel les borne.
+ * « evaluer » passe d'abord par le droit `evaluer_financement`.
+ */
+const HORS_METHODE: readonly GenerateurId[] = ['executer', 'evaluer'];
+
 export function peut(offreId: OffreId, action: Action): Verdict {
   const { capacites } = offre(offreId);
 
@@ -109,7 +117,7 @@ export function peut(offreId: OffreId, action: Action): Verdict {
     case 'generer': {
       // « executer » n'est pas un des six générateurs de méthode : toute
       // offre le permet, et seul le quota mensuel de générations le borne.
-      const horsListe = action.generateur === 'executer';
+      const horsListe = HORS_METHODE.includes(action.generateur);
       if (!horsListe && !capacites.generateurs.includes(action.generateur)) {
         const quiOuvre = premiereOffreQui(offreId, (c) =>
           c.generateurs.includes(action.generateur),
@@ -150,6 +158,14 @@ export function peut(offreId: OffreId, action: Action): Verdict {
         'Ouvrir un projet au financement et tenir un registre d’investisseurs ne sont pas ' +
           'dans ton offre.',
         premiereOffreQui(offreId, (c) => c.investisseurs),
+      );
+    }
+
+    case 'evaluer_financement': {
+      if (capacites.evaluationFinancement) return OUI;
+      return refus(
+        'L’évaluation de financement n’est pas dans ton offre.',
+        premiereOffreQui(offreId, (c) => c.evaluationFinancement),
       );
     }
 

@@ -153,6 +153,7 @@ describe('droits ouverts par une offre', () => {
       ['decouverte', { kind: 'outil_de_gestion', outil: 'facturation' }],
       ['decouverte', { kind: 'ouvrir_financement' }],
       ['decouverte', { kind: 'inviter_collaborateur', collaborateursActuels: 0 }],
+      ['decouverte', { kind: 'evaluer_financement' }],
     ];
 
     // Un refus sans phrase est une impasse : la personne voit un bouton
@@ -206,5 +207,27 @@ describe('outil de gestion — boutique en ligne', () => {
     expect(
       peut('entrepreneur', { kind: 'outil_de_gestion', outil: 'boutique_en_ligne' }).autorise,
     ).toBe(true);
+  });
+});
+
+describe('évaluation de financement', () => {
+  it('refuse l’évaluation en Découverte et nomme Entrepreneur', () => {
+    const v = peut('decouverte', { kind: 'evaluer_financement' });
+    expect(v.autorise).toBe(false);
+    expect(v.offreQuiOuvre).toBe('entrepreneur');
+    expect(v.raison).toContain('L’évaluation de financement n’est pas dans ton offre.');
+  });
+
+  it('autorise l’évaluation en Entrepreneur', () => {
+    expect(peut('entrepreneur', { kind: 'evaluer_financement' }).autorise).toBe(true);
+  });
+
+  it('laisse « evaluer » passer comme générateur hors méthode, borné par le quota', () => {
+    expect(
+      peut('entrepreneur', { kind: 'generer', generateur: 'evaluer', appelsCeMois: 0 }).autorise,
+    ).toBe(true);
+    expect(
+      peut('entrepreneur', { kind: 'generer', generateur: 'evaluer', appelsCeMois: 35 }).autorise,
+    ).toBe(false);
   });
 });
