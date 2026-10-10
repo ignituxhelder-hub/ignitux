@@ -72,7 +72,7 @@ describe('ComplianceSection — IGINI prépare les démarches', () => {
     render(<ComplianceSection token={TOKEN} projectId={PROJECT_ID} />);
 
     const bouton = await screen.findByRole('button', { name: /Faire faire par IGINI/ });
-    expect(screen.getByText('IGINI prépare, il ne dépose rien à ta place.')).toBeInTheDocument();
+    expect(screen.getByText('IGINI lit la fiche officielle et prépare le document, il ne dépose rien à ta place.')).toBeInTheDocument();
     expect(bouton).toBeDisabled();
 
     fireEvent.click(screen.getByLabelText('Faire faire : Démarche r1'));

@@ -297,6 +297,8 @@ describe('ExecutionService', () => {
   });
 
   describe('conformité', () => {
+    // Une réponse de ClaudeService pour la conformité : sortie structurée + pages réellement lues.
+    const REPONSE = { kind: 'livrable', titre: 'x', contenu: 'y', ce_que_dit_la_source: [], pagesLues: [] };
     const run = (statut: string | null, extra = {}) =>
       prisma.project_compliance_ai_runs.findUnique.mockResolvedValue(
         statut ? { ...RUN, status: statut, ...extra } : null,
@@ -308,6 +310,8 @@ describe('ExecutionService', () => {
         titre: 'Immat',
         contenu: 'À faire.',
         etapes: ['Créer un compte', 'Payer'],
+        ce_que_dit_la_source: [],
+        pagesLues: [],
       });
 
       await service.runCompliance('u1', 'p1', 'r1');
@@ -329,7 +333,7 @@ describe('ExecutionService', () => {
     });
 
     it("C2. le prompt contient titre, description, source_name et source_url de l'exigence", async () => {
-      claude.generateStructuredOutput.mockResolvedValue({ kind: 'livrable', titre: 'x', contenu: 'y' });
+      claude.generateStructuredOutput.mockResolvedValue({ ...REPONSE });
 
       await service.runCompliance('u1', 'p1', 'r1');
 
@@ -342,7 +346,7 @@ describe('ExecutionService', () => {
 
     it('C2b. le prompt contient le projet et le motif de refus sous son bon intitulé', async () => {
       run('refuse', { refusal_reason: 'Trop vague' });
-      claude.generateStructuredOutput.mockResolvedValue({ kind: 'livrable', titre: 'x', contenu: 'y' });
+      claude.generateStructuredOutput.mockResolvedValue({ ...REPONSE });
 
       await service.runCompliance('u1', 'p1', 'r1');
 
@@ -393,7 +397,7 @@ describe('ExecutionService', () => {
     );
 
     it("C5c. échec d'enregistrement : l'erreur remonte sans écriture 'echec'", async () => {
-      claude.generateStructuredOutput.mockResolvedValue({ kind: 'livrable', titre: 'x', contenu: 'y' });
+      claude.generateStructuredOutput.mockResolvedValue({ ...REPONSE });
       const erreur = new Error('db down');
       prisma.project_compliance_ai_runs.upsert.mockRejectedValue(erreur);
 
@@ -403,9 +407,61 @@ describe('ExecutionService', () => {
       expect(prisma.project_compliance_ai_runs.upsert.mock.calls[0][0].update.status).toBe('a_valider');
     });
 
+    it('C9. IGINI lit la source : web_fetch limité au seul site de la source', async () => {
+      claude.generateStructuredOutput.mockResolvedValue({ ...REPONSE });
+
+      await service.runCompliance('u1', 'p1', 'r1');
+
+      expect(claude.generateStructuredOutput.mock.calls[0][0].webFetch).toEqual({
+        allowedDomains: ['www.service-public.fr'],
+        maxUses: 2,
+        maxContentTokens: 20000,
+      });
+      expect(claude.generateStructuredOutput.mock.calls[0][0].webSearch).toBeUndefined();
+    });
+
+    it('C10. page lue : ce que dit la source en tête, puis le travail, puis la preuve de lecture', async () => {
+      claude.generateStructuredOutput.mockResolvedValue({
+        ...REPONSE,
+        contenu: 'Brouillon prêt.',
+        ce_que_dit_la_source: ['Le dépôt se fait en ligne', 'Un justificatif de domicile est demandé'],
+        pagesLues: [
+          { url: 'https://www.service-public.fr/x', titre: 'Immatriculation', luLe: '2026-10-10T08:00:00Z' },
+        ],
+      });
+
+      await service.runCompliance('u1', 'p1', 'r1');
+
+      const texte: string = prisma.project_compliance_ai_runs.upsert.mock.calls[0][0].update.result;
+      expect(texte).not.toContain('n’a pas pu lire');
+      expect(texte.indexOf('Ce que dit la source pour ton projet :')).toBe(0);
+      expect(texte).toContain('- Le dépôt se fait en ligne');
+      expect(texte.indexOf('Brouillon prêt.')).toBeGreaterThan(texte.indexOf('justificatif'));
+      expect(texte).toContain('IGINI a lu :\n- Immatriculation — https://www.service-public.fr/x (le 10/10/2026)');
+    });
+
+    it("C11. aucune page lue : l'avertissement passe en tête, et aucun « ce que dit la source » de mémoire", async () => {
+      // Le modèle a rempli le résumé alors que rien n'a été lu : ce résumé
+      // vient de sa mémoire et ne doit pas être présenté comme la source.
+      claude.generateStructuredOutput.mockResolvedValue({
+        ...REPONSE,
+        contenu: 'Brouillon générique.',
+        ce_que_dit_la_source: ['Un point inventé'],
+        pagesLues: [],
+      });
+
+      await service.runCompliance('u1', 'p1', 'r1');
+
+      const texte: string = prisma.project_compliance_ai_runs.upsert.mock.calls[0][0].update.result;
+      expect(texte.startsWith('⚠️ IGINI n’a pas pu lire la page officielle (https://www.service-public.fr/x)')).toBe(true);
+      expect(texte).not.toContain('Un point inventé');
+      expect(texte).not.toContain('IGINI a lu');
+      expect(texte).toContain('Brouillon générique.');
+    });
+
     it.each(['refuse', 'echec'])('C6. le motif de refus est transmis (statut %s)', async (st) => {
       run(st, { refusal_reason: 'Trop vague' });
-      claude.generateStructuredOutput.mockResolvedValue({ kind: 'livrable', titre: 'x', contenu: 'y' });
+      claude.generateStructuredOutput.mockResolvedValue({ ...REPONSE });
 
       await service.runCompliance('u1', 'p1', 'r1');
 
