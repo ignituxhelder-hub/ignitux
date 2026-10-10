@@ -1,0 +1,41 @@
+{
+  "langue": { "label": "Langue" },
+  "igini": { "descripteur": "l'intelligence d'Ignitux" },
+  "accueil": {
+    "seConnecter": "Se connecter",
+    "creerCompte": "Créer un compte",
+    "eyebrow": "Découvrir · Construire · Transmettre",
+    "titre": "Transformer une idée en réalité",
+    "iginiMention": "t'accompagne pour analyser, construire, financer, développer et transmettre ton projet — depuis un seul endroit. La vérité avant tout.",
+    "commencer": "Commencer gratuitement",
+    "dejaCompte": "J'ai déjà un compte",
+    "methode": "La méthode en 5 étapes",
+    "etapes": {
+      "analyser": { "nom": "Analyser", "description": "Résumé, score de faisabilité, points forts, risques, prochaines étapes." },
+      "construire": { "nom": "Construire", "description": "Plan de construction : jalons, délai estimé, ressources clés." },
+      "financer": { "nom": "Financer", "description": "Plan de financement : budget estimé, sources, postes de dépense." },
+      "developper": { "nom": "Développer", "description": "Plan de croissance : leviers, indicateurs clés, risques de passage à l'échelle." },
+      "transmettre": { "nom": "Transmettre", "description": "Plan de transmission : options de transfert, documentation, check-list." }
+    },
+    "gardeEnTete": "Ce qu'IGINI garde en tête",
+    "moteurs": {
+      "memoire": { "nom": "Mémoire", "description": "Ce qu'IGINI retient de tes décisions, préférences et apprentissages." },
+      "connaissance": { "nom": "Connaissance", "description": "Un graphe de concepts pour relier les idées de ton projet entre elles." },
+      "workflow": { "nom": "Workflow", "description": "Les suggestions d'IGINI deviennent des tâches suivables — jamais exécutées à ta place." },
+      "score": { "nom": "Score", "description": "Un tableau de bord honnête de ton avancement, sans chiffre inventé." }
+    },
+    "communaute": "Communauté",
+    "communauteTexte": "Rends un projet public quand tu es prêt, et reçois des encouragements d'autres porteurs de projet — rien de plus pour l'instant, pas de messagerie privée ni de classement.",
+    "pret": "Prêt à donner vie à ton idée ?"
+  },
+  "connexion": {
+    "titre": "Se connecter",
+    "email": "Email",
+    "motDePasse": "Mot de passe",
+    "envoi": "Connexion…",
+    "impossible": "Connexion impossible.",
+    "oublie": "Mot de passe oublié ?",
+    "pasDeCompte": "Pas encore de compte ?",
+    "inscrire": "S'inscrire"
+  }
+}

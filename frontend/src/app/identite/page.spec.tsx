@@ -17,7 +17,7 @@ vi.mock('next/navigation', () => ({ useRouter: () => router }));
 
 describe('IdentitePage', () => {
   beforeEach(() => {
-    vi.mocked(useAuth).mockReturnValue({ token: 'tok', isReady: true } as any);
+    vi.mocked(useAuth).mockReturnValue({ token: 'tok', isReady: true } as unknown as ReturnType<typeof useAuth>);
   });
 
   it('affiche « Aucune vérification » quand la liste est vide', async () => {

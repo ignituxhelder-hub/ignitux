@@ -746,6 +746,17 @@ a.secondary:hover {
   gap: 1.25rem;
 }
 
+/* Sélecteur de langue : discret, à la hauteur d'une cible tactile. */
+.selecteur-langue {
+  width: auto;
+  min-height: 2.75rem;
+  padding: 0 0.5rem;
+  background: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+  border-radius: 0.5rem;
+}
+
 /* --------------------------------------------------------------------------
    Le lanceur (/accueil) : titres de section et boutique. Les icônes et
    les pages sont plus bas, avec « Le bureau comme un écran de téléphone ».

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
@@ -8,6 +9,7 @@ import { ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
 export default function LoginPage() {
+  const t = useTranslations('connexion');
   const { login } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -24,7 +26,7 @@ export default function LoginPage() {
       // Le lanceur, pas une page : on arrive dans Ignitux, pas dans un outil.
       router.replace('/accueil');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Connexion impossible.');
+      setError(err instanceof ApiError ? err.message : t('impossible'));
     } finally {
       setIsSubmitting(false);
     }
@@ -33,11 +35,11 @@ export default function LoginPage() {
   return (
     <main className="page">
       <Brand />
-      <h1>Se connecter</h1>
+      <h1>{t('titre')}</h1>
       <form className="card" onSubmit={handleSubmit}>
         {error && <p className="error">{error}</p>}
         <div className="field">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">{t('email')}</label>
           <input
             id="email"
             type="email"
@@ -48,7 +50,7 @@ export default function LoginPage() {
           />
         </div>
         <div className="field">
-          <label htmlFor="password">Mot de passe</label>
+          <label htmlFor="password">{t('motDePasse')}</label>
           <input
             id="password"
             type="password"
@@ -59,17 +61,17 @@ export default function LoginPage() {
           />
         </div>
         <button className="primary" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Connexion…' : 'Se connecter'}
+          {isSubmitting ? t('envoi') : t('titre')}
         </button>
       </form>
       {/* `lien-action` : ce lien est seul dans son paragraphe, donc c'est une
           action et non un mot dans une phrase. La classe lui donne une zone
           sensible qu'un doigt atteint. */}
       <p className="muted lien-action" style={{ marginTop: '1rem' }}>
-        <Link href="/forgot-password">Mot de passe oublié ?</Link>
+        <Link href="/forgot-password">{t('oublie')}</Link>
       </p>
       <p className="muted" style={{ marginTop: '0.5rem' }}>
-        Pas encore de compte ? <Link href="/signup">S&apos;inscrire</Link>
+        {t('pasDeCompte')} <Link href="/signup">{t('inscrire')}</Link>
       </p>
     </main>
   );

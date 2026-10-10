@@ -1,0 +1,41 @@
+{
+  "langue": { "label": "Language" },
+  "igini": { "descripteur": "Ignitux's intelligence" },
+  "accueil": {
+    "seConnecter": "Log in",
+    "creerCompte": "Create an account",
+    "eyebrow": "Discover · Build · Pass on",
+    "titre": "Turn an idea into reality",
+    "iginiMention": "helps you analyse, build, fund, grow and pass on your project — all from one place. Truth above all.",
+    "commencer": "Start for free",
+    "dejaCompte": "I already have an account",
+    "methode": "The method in 5 steps",
+    "etapes": {
+      "analyser": { "nom": "Analyse", "description": "Summary, feasibility score, strengths, risks, next steps." },
+      "construire": { "nom": "Build", "description": "Build plan: milestones, estimated timeline, key resources." },
+      "financer": { "nom": "Fund", "description": "Funding plan: estimated budget, sources, spending items." },
+      "developper": { "nom": "Grow", "description": "Growth plan: levers, key indicators, scaling risks." },
+      "transmettre": { "nom": "Pass on", "description": "Transfer plan: handover options, documentation, checklist." }
+    },
+    "gardeEnTete": "What IGINI keeps in mind",
+    "moteurs": {
+      "memoire": { "nom": "Memory", "description": "What IGINI remembers of your decisions, preferences and lessons learned." },
+      "connaissance": { "nom": "Knowledge", "description": "A graph of concepts linking the ideas of your project together." },
+      "workflow": { "nom": "Workflow", "description": "IGINI's suggestions become trackable tasks — never carried out on your behalf." },
+      "score": { "nom": "Score", "description": "An honest dashboard of your progress, with no invented figures." }
+    },
+    "communaute": "Community",
+    "communauteTexte": "Make a project public when you are ready and receive encouragement from other project owners — nothing more for now, no private messaging and no rankings.",
+    "pret": "Ready to bring your idea to life?"
+  },
+  "connexion": {
+    "titre": "Log in",
+    "email": "Email",
+    "motDePasse": "Password",
+    "envoi": "Logging in…",
+    "impossible": "Unable to log in.",
+    "oublie": "Forgot your password?",
+    "pasDeCompte": "No account yet?",
+    "inscrire": "Sign up"
+  }
+}
