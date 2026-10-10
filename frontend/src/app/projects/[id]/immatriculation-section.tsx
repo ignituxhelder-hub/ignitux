@@ -450,7 +450,6 @@ export function ImmatriculationSection({
     const enErreur = !!erreursChamps[champ];
     const decrit = [aide, enErreur ? `${ID_CHAMP[champ]}-erreur` : undefined].filter(Boolean).join(' ');
     return {
-      id: ID_CHAMP[champ],
       'aria-invalid': enErreur ? (true as const) : undefined,
       'aria-describedby': decrit || undefined,
     };
@@ -542,6 +541,7 @@ export function ImmatriculationSection({
           )}
           <label htmlFor={ID_CHAMP.siren}>SIREN (9 chiffres, obligatoire)</label>
           <input
+            id={ID_CHAMP.siren}
             {...attributsChamp('siren')}
             inputMode="numeric"
             autoComplete="off"
@@ -554,6 +554,7 @@ export function ImmatriculationSection({
           {erreurChamp('siren')}
           <label htmlFor={ID_CHAMP.siret}>SIRET du siège (14 chiffres, facultatif)</label>
           <input
+            id={ID_CHAMP.siret}
             {...attributsChamp('siret')}
             inputMode="numeric"
             autoComplete="off"
@@ -564,6 +565,7 @@ export function ImmatriculationSection({
           {erreurChamp('siret')}
           <label htmlFor={ID_CHAMP.vatNumber}>Numéro de TVA intracommunautaire (facultatif)</label>
           <input
+            id={ID_CHAMP.vatNumber}
             {...attributsChamp('vatNumber')}
             autoComplete="off"
             value={saisie.vatNumber}
@@ -573,6 +575,7 @@ export function ImmatriculationSection({
           {erreurChamp('vatNumber')}
           <label htmlFor={ID_CHAMP.legalName}>Dénomination (obligatoire)</label>
           <input
+            id={ID_CHAMP.legalName}
             {...attributsChamp('legalName', proposeLegalName ? 'immatriculation-denomination-aide' : undefined)}
             required
             aria-required="true"
@@ -588,6 +591,7 @@ export function ImmatriculationSection({
           {erreurChamp('legalName')}
           <label htmlFor={ID_CHAMP.headOffice}>Adresse du siège (obligatoire)</label>
           <input
+            id={ID_CHAMP.headOffice}
             {...attributsChamp('headOffice', proposeHeadOffice ? 'immatriculation-siege-aide' : undefined)}
             required
             aria-required="true"
@@ -603,6 +607,7 @@ export function ImmatriculationSection({
           {erreurChamp('headOffice')}
           <label htmlFor={ID_CHAMP.registeredOn}>Date d’immatriculation (obligatoire)</label>
           <input
+            id={ID_CHAMP.registeredOn}
             {...attributsChamp('registeredOn')}
             type="date"
             required
