@@ -474,7 +474,9 @@ export const ModelName = {
   identity_verifications: 'identity_verifications',
   mandates: 'mandates',
   creation_filings: 'creation_filings',
-  company_registrations: 'company_registrations'
+  company_registrations: 'company_registrations',
+  financing_evaluations: 'financing_evaluations',
+  financing_evaluation_edits: 'financing_evaluation_edits'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -490,7 +492,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "company_bylaws" | "bylaw_associates" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "chat_messages" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "project_compliance_ai_runs" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "participation_agreements" | "participation_milestones" | "dividend_right_entries" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "shopify_connections" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries" | "identity_verifications" | "mandates" | "creation_filings" | "company_registrations"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "company_bylaws" | "bylaw_associates" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "chat_messages" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "project_compliance_ai_runs" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "participation_agreements" | "participation_milestones" | "dividend_right_entries" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "shopify_connections" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries" | "identity_verifications" | "mandates" | "creation_filings" | "company_registrations" | "financing_evaluations" | "financing_evaluation_edits"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -6266,6 +6268,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    financing_evaluations: {
+      payload: Prisma.$financing_evaluationsPayload<ExtArgs>
+      fields: Prisma.financing_evaluationsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.financing_evaluationsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluationsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.financing_evaluationsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluationsPayload>
+        }
+        findFirst: {
+          args: Prisma.financing_evaluationsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluationsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.financing_evaluationsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluationsPayload>
+        }
+        findMany: {
+          args: Prisma.financing_evaluationsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluationsPayload>[]
+        }
+        create: {
+          args: Prisma.financing_evaluationsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluationsPayload>
+        }
+        createMany: {
+          args: Prisma.financing_evaluationsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.financing_evaluationsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluationsPayload>[]
+        }
+        delete: {
+          args: Prisma.financing_evaluationsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluationsPayload>
+        }
+        update: {
+          args: Prisma.financing_evaluationsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluationsPayload>
+        }
+        deleteMany: {
+          args: Prisma.financing_evaluationsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.financing_evaluationsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.financing_evaluationsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluationsPayload>[]
+        }
+        upsert: {
+          args: Prisma.financing_evaluationsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluationsPayload>
+        }
+        aggregate: {
+          args: Prisma.Financing_evaluationsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFinancing_evaluations>
+        }
+        groupBy: {
+          args: Prisma.financing_evaluationsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Financing_evaluationsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.financing_evaluationsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Financing_evaluationsCountAggregateOutputType> | number
+        }
+      }
+    }
+    financing_evaluation_edits: {
+      payload: Prisma.$financing_evaluation_editsPayload<ExtArgs>
+      fields: Prisma.financing_evaluation_editsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.financing_evaluation_editsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluation_editsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.financing_evaluation_editsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluation_editsPayload>
+        }
+        findFirst: {
+          args: Prisma.financing_evaluation_editsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluation_editsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.financing_evaluation_editsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluation_editsPayload>
+        }
+        findMany: {
+          args: Prisma.financing_evaluation_editsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluation_editsPayload>[]
+        }
+        create: {
+          args: Prisma.financing_evaluation_editsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluation_editsPayload>
+        }
+        createMany: {
+          args: Prisma.financing_evaluation_editsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.financing_evaluation_editsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluation_editsPayload>[]
+        }
+        delete: {
+          args: Prisma.financing_evaluation_editsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluation_editsPayload>
+        }
+        update: {
+          args: Prisma.financing_evaluation_editsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluation_editsPayload>
+        }
+        deleteMany: {
+          args: Prisma.financing_evaluation_editsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.financing_evaluation_editsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.financing_evaluation_editsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluation_editsPayload>[]
+        }
+        upsert: {
+          args: Prisma.financing_evaluation_editsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$financing_evaluation_editsPayload>
+        }
+        aggregate: {
+          args: Prisma.Financing_evaluation_editsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFinancing_evaluation_edits>
+        }
+        groupBy: {
+          args: Prisma.financing_evaluation_editsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Financing_evaluation_editsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.financing_evaluation_editsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Financing_evaluation_editsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -7434,12 +7584,54 @@ export const Company_registrationsScalarFieldEnum = {
 export type Company_registrationsScalarFieldEnum = (typeof Company_registrationsScalarFieldEnum)[keyof typeof Company_registrationsScalarFieldEnum]
 
 
+export const Financing_evaluationsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  requested_by: 'requested_by',
+  status: 'status',
+  verdict: 'verdict',
+  report: 'report',
+  ai_draft: 'ai_draft',
+  admin_note: 'admin_note',
+  refusal_reason: 'refusal_reason',
+  redo_instruction: 'redo_instruction',
+  failure_reason: 'failure_reason',
+  reviewed_by: 'reviewed_by',
+  reviewed_at: 'reviewed_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Financing_evaluationsScalarFieldEnum = (typeof Financing_evaluationsScalarFieldEnum)[keyof typeof Financing_evaluationsScalarFieldEnum]
+
+
+export const Financing_evaluation_editsScalarFieldEnum = {
+  id: 'id',
+  evaluation_id: 'evaluation_id',
+  editor_id: 'editor_id',
+  section: 'section',
+  before: 'before',
+  after: 'after',
+  created_at: 'created_at'
+} as const
+
+export type Financing_evaluation_editsScalarFieldEnum = (typeof Financing_evaluation_editsScalarFieldEnum)[keyof typeof Financing_evaluation_editsScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -7456,6 +7648,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -7538,6 +7739,20 @@ export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
  * Reference to a field of type 'Bytes[]'
  */
 export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -7783,6 +7998,8 @@ export type GlobalOmitConfig = {
   mandates?: Prisma.mandatesOmit
   creation_filings?: Prisma.creation_filingsOmit
   company_registrations?: Prisma.company_registrationsOmit
+  financing_evaluations?: Prisma.financing_evaluationsOmit
+  financing_evaluation_edits?: Prisma.financing_evaluation_editsOmit
 }
 
 /* Types for Logging */

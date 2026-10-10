@@ -46,6 +46,9 @@ model users {
   company_bylaws   company_bylaws[]
   creation_filings creation_filings[]
   company_registrations company_registrations[]
+  evaluations_demandees  financing_evaluations[]      @relation("evaluation_demandeur")
+  evaluations_revues     financing_evaluations[]      @relation("evaluation_relecteur")
+  evaluation_edits       financing_evaluation_edits[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -128,6 +131,7 @@ model projects {
   bylaws           company_bylaws?
   creation_filing  creation_filings?
   company_registration company_registrations?
+  financing_evaluations financing_evaluations[]
 
   mandates             mandates[]
 
@@ -2018,4 +2022,52 @@ model company_registrations {
 
   @@unique([owner_id, siren])
   @@index([owner_id])
+}
+
+/// Évaluation de financement : IGINI rédige le rapport, un administrateur le
+/// revoit, l'entrepreneur ne lit le contenu qu'une fois validé.
+/// Spec : docs/superpowers/specs/2026-10-11-evaluation-financement-design.md
+model financing_evaluations {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id       String    @db.Uuid
+  project          projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  requested_by     String    @db.Uuid
+  requester        users     @relation("evaluation_demandeur", fields: [requested_by], references: [id], onDelete: Cascade)
+  /// en_preparation | echec | en_revue | a_refaire | validee | refusee
+  status           String    @default("en_preparation")
+  /// financable | financable_apres_corrections | pas_financable_en_l_etat
+  verdict          String?
+  /// Le rapport courant, éventuellement corrigé par l'administrateur.
+  report           Json?
+  /// Le rapport tel qu'IGINI l'a rendu, jamais modifié : base de la traçabilité.
+  ai_draft         Json?
+  admin_note       String?
+  refusal_reason   String?
+  redo_instruction String?
+  failure_reason   String?
+  reviewed_by      String?   @db.Uuid
+  reviewer         users?    @relation("evaluation_relecteur", fields: [reviewed_by], references: [id], onDelete: SetNull)
+  reviewed_at      DateTime? @db.Timestamptz(6)
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @updatedAt @db.Timestamptz(6)
+  edits            financing_evaluation_edits[]
+
+  @@index([project_id, created_at])
+  @@index([status, created_at])
+}
+
+/// Chaque modification d'une section par un administrateur : qui, quand,
+/// avant, après.
+model financing_evaluation_edits {
+  id            String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  evaluation_id String                @db.Uuid
+  evaluation    financing_evaluations @relation(fields: [evaluation_id], references: [id], onDelete: Cascade)
+  editor_id     String?               @db.Uuid
+  editor        users?                @relation(fields: [editor_id], references: [id], onDelete: SetNull)
+  section       String
+  before        Json?
+  after         Json?
+  created_at    DateTime              @default(now()) @db.Timestamptz(6)
+
+  @@index([evaluation_id])
 }

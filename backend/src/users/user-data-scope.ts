@@ -122,6 +122,10 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   bylaw_associates: exported('contenus_generes_par_igini'),
   build_plans: exported('contenus_generes_par_igini'),
   financing_plans: exported('contenus_generes_par_igini'),
+  // L'évaluation de financement et les corrections de l'administrateur sur
+  // ce rapport : un contenu généré pour le projet de la personne.
+  financing_evaluations: exported('contenus_generes_par_igini'),
+  financing_evaluation_edits: exported('contenus_generes_par_igini'),
   development_plans: exported('contenus_generes_par_igini'),
   transmission_plans: exported('contenus_generes_par_igini'),
   // Le fil de conversation avec Igini : contrairement aux cinq lignes

@@ -128,7 +128,9 @@ export const ModelName = {
   identity_verifications: 'identity_verifications',
   mandates: 'mandates',
   creation_filings: 'creation_filings',
-  company_registrations: 'company_registrations'
+  company_registrations: 'company_registrations',
+  financing_evaluations: 'financing_evaluations',
+  financing_evaluation_edits: 'financing_evaluation_edits'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1276,12 +1278,54 @@ export const Company_registrationsScalarFieldEnum = {
 export type Company_registrationsScalarFieldEnum = (typeof Company_registrationsScalarFieldEnum)[keyof typeof Company_registrationsScalarFieldEnum]
 
 
+export const Financing_evaluationsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  requested_by: 'requested_by',
+  status: 'status',
+  verdict: 'verdict',
+  report: 'report',
+  ai_draft: 'ai_draft',
+  admin_note: 'admin_note',
+  refusal_reason: 'refusal_reason',
+  redo_instruction: 'redo_instruction',
+  failure_reason: 'failure_reason',
+  reviewed_by: 'reviewed_by',
+  reviewed_at: 'reviewed_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Financing_evaluationsScalarFieldEnum = (typeof Financing_evaluationsScalarFieldEnum)[keyof typeof Financing_evaluationsScalarFieldEnum]
+
+
+export const Financing_evaluation_editsScalarFieldEnum = {
+  id: 'id',
+  evaluation_id: 'evaluation_id',
+  editor_id: 'editor_id',
+  section: 'section',
+  before: 'before',
+  after: 'after',
+  created_at: 'created_at'
+} as const
+
+export type Financing_evaluation_editsScalarFieldEnum = (typeof Financing_evaluation_editsScalarFieldEnum)[keyof typeof Financing_evaluation_editsScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -1298,4 +1342,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

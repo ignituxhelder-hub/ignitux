@@ -129,6 +129,7 @@ export class UserDataService {
       statuts,
       buildPlans,
       financingPlans,
+      evaluationsDeFinancement,
       developmentPlans,
       transmissionPlans,
       companies,
@@ -191,6 +192,7 @@ export class UserDataService {
       this.prisma.company_bylaws.findMany({ where: byProject, include: { associates: true } }),
       this.prisma.build_plans.findMany({ where: byProject }),
       this.prisma.financing_plans.findMany({ where: byProject }),
+      this.prisma.financing_evaluations.findMany({ where: byProject, include: { edits: true } }),
       this.prisma.development_plans.findMany({ where: byProject }),
       this.prisma.transmission_plans.findMany({ where: byProject }),
       this.prisma.crm_companies.findMany({ where: { owner_id: userId } }),
@@ -369,6 +371,7 @@ export class UserDataService {
           statuts,
           plans_de_construction: buildPlans,
           plans_de_financement: financingPlans,
+          evaluations_de_financement: evaluationsDeFinancement,
           plans_de_developpement: developmentPlans,
           plans_de_transmission: transmissionPlans,
           // Le fil de conversation avec l'orchestrateur, non rattaché à un

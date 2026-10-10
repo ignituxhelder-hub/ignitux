@@ -671,3 +671,16 @@ export type creation_filings = Prisma.creation_filingsModel
  * vérifie pas auprès de l'État. Une ligne par projet.
  */
 export type company_registrations = Prisma.company_registrationsModel
+/**
+ * Model financing_evaluations
+ * Évaluation de financement : IGINI rédige le rapport, un administrateur le
+ * revoit, l'entrepreneur ne lit le contenu qu'une fois validé.
+ * Spec : docs/superpowers/specs/2026-10-11-evaluation-financement-design.md
+ */
+export type financing_evaluations = Prisma.financing_evaluationsModel
+/**
+ * Model financing_evaluation_edits
+ * Chaque modification d'une section par un administrateur : qui, quand,
+ * avant, après.
+ */
+export type financing_evaluation_edits = Prisma.financing_evaluation_editsModel
