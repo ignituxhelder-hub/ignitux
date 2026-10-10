@@ -258,6 +258,26 @@ export class LedgerService implements OnModuleInit {
     });
   }
 
+  /**
+   * Une écriture, avec ses lignes et leurs comptes — seulement si elle
+   * appartient à ce propriétaire. null sinon : l'écriture d'un autre ne se
+   * distingue pas d'une écriture inexistante.
+   */
+  findEntry(owner: LedgerOwner, entryId: string) {
+    return this.prisma.ledger_entries.findFirst({
+      where: { ...ownerWhere(owner), id: entryId },
+      include: { lines: { include: { account: true } } },
+    });
+  }
+
+  /** La plus ancienne écriture de ce propriétaire qui porte cette référence, ou null. */
+  findEntryByReference(owner: LedgerOwner, reference: string) {
+    return this.prisma.ledger_entries.findFirst({
+      where: { ...ownerWhere(owner), reference },
+      orderBy: { created_at: 'asc' },
+    });
+  }
+
   // ── La balance ──────────────────────────────────────────────────────────
 
   async trialBalance(owner: LedgerOwner, currency = 'EUR'): Promise<TrialBalance> {

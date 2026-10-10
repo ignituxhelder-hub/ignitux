@@ -87,8 +87,24 @@ describe('ImmatriculationController — validation HTTP', () => {
     expect(service.enregistrer).not.toHaveBeenCalled();
   });
 
-  it('PUT : refuse une date qui n’est pas AAAA-MM-JJ', async () => {
-    expect((await put({ ...corpsValide(), registeredOn: '01/10/2026' })).status).toBe(400);
+  it('PUT : refuse une date qui n’est pas AAAA-MM-JJ, en français et sans nom de champ', async () => {
+    const res = await put({ ...corpsValide(), registeredOn: '01/10/2026' });
+    expect(res.status).toBe(400);
+    expect(res.body.message).toEqual(['La date d’immatriculation s’écrit AAAA-MM-JJ.']);
+  });
+
+  it.each([
+    ['legalName', { legalName: '' }, 'La dénomination est obligatoire.'],
+    ['legalName', { legalName: 'x'.repeat(201) }, 'La dénomination fait au plus 200 caractères.'],
+    ['headOffice', { headOffice: 'x'.repeat(301) }, 'L’adresse du siège fait au plus 300 caractères.'],
+    ['siren', { siren: 443061841 }, 'Le SIREN s’écrit en chiffres, sous forme de texte.'],
+    ['siret', { siret: 'x'.repeat(31) }, 'Le SIRET est trop long.'],
+    ['vatNumber', { vatNumber: 12 }, 'Le numéro de TVA s’écrit sous forme de texte.'],
+  ])('PUT : message français pour %s', async (champ, modif, message) => {
+    const res = await put({ ...corpsValide(), ...modif });
+    expect(res.status).toBe(400);
+    expect(res.body.message).toContain(message);
+    for (const m of res.body.message as string[]) expect(m).not.toContain(champ);
   });
 
   it('PUT : refuse une dénomination de plus de 200 caractères', async () => {
@@ -105,10 +121,45 @@ describe('ImmatriculationController — validation HTTP', () => {
     expect((await request(serveur).get(url())).status).toBe(200);
     expect((await request(serveur).delete(url())).status).toBe(200);
     expect((await request(serveur).get(url('/capital'))).status).toBe(200);
-    expect((await request(serveur).post(url('/capital'))).status).toBe(201);
+    expect((await request(serveur).post(url('/capital')).send({ montantCents: 100000, date: '2026-10-01' })).status).toBe(201);
     expect(service.obtenir).toHaveBeenCalledWith('user-1', projectId);
     expect(service.supprimer).toHaveBeenCalledWith('user-1', projectId);
     expect(service.obtenirCapital).toHaveBeenCalledWith('user-1', projectId);
-    expect(service.enregistrerCapital).toHaveBeenCalledWith('user-1', projectId);
+    expect(service.enregistrerCapital).toHaveBeenCalledWith('user-1', projectId, {
+      montantCents: 100000,
+      date: '2026-10-01',
+    });
+  });
+
+  describe('POST capital : ce que la personne a vu', () => {
+    const post = (corps: unknown) => request(app.getHttpServer()).post(url('/capital')).send(corps as object);
+
+    it.each([
+      ['sans corps', {}],
+      ['montant absent', { date: '2026-10-01' }],
+      ['date absente', { montantCents: 100000 }],
+      ['montant décimal', { montantCents: 1000.5, date: '2026-10-01' }],
+      ['montant en texte', { montantCents: '100000', date: '2026-10-01' }],
+      ['montant nul', { montantCents: 0, date: '2026-10-01' }],
+      ['date mal écrite', { montantCents: 100000, date: '01/10/2026' }],
+      ['champ en trop', { montantCents: 100000, date: '2026-10-01', comptes: ['512'] }],
+    ])('400 %s, sans rien enregistrer', async (_cas, corps) => {
+      expect((await post(corps)).status).toBe(400);
+      expect(service.enregistrerCapital).not.toHaveBeenCalled();
+    });
+
+    it('messages en français, sans nom de champ', async () => {
+      const res = await post({ montantCents: 1.5, date: 'hier' });
+      expect(res.body.message).toEqual(
+        expect.arrayContaining([
+          'Le montant confirmé est un nombre entier de centimes.',
+          'La date de l’écriture s’écrit AAAA-MM-JJ.',
+        ]),
+      );
+      for (const m of res.body.message as string[]) {
+        expect(m).not.toContain('montantCents');
+        expect(m).not.toMatch(/^date\b/);
+      }
+    });
   });
 });

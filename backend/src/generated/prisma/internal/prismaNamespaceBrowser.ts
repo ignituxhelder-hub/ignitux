@@ -1268,6 +1268,7 @@ export const Company_registrationsScalarFieldEnum = {
   head_office: 'head_office',
   registered_on: 'registered_on',
   capital_entry_id: 'capital_entry_id',
+  capital_reserved_at: 'capital_reserved_at',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const

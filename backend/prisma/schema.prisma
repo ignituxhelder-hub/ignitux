@@ -2009,6 +2009,10 @@ model company_registrations {
   /// réservée par une écriture gardée, avant que l'écriture comptable
   /// existe — voir immatriculation.service.ts.
   capital_entry_id String?   @db.Uuid
+  /// Quand `capital_entry_id` a été réservé. Une réservation sans écriture
+  /// comptable correspondante depuis plus de deux minutes est tenue pour
+  /// abandonnée (demande interrompue) et peut être reprise.
+  capital_reserved_at DateTime? @db.Timestamptz(6)
   created_at       DateTime? @default(now()) @db.Timestamptz(6)
   updated_at       DateTime? @updatedAt @db.Timestamptz(6)
 

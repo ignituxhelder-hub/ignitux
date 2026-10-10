@@ -14,6 +14,7 @@ import {
   COMPTE_CAPITAL,
   estFormeAvecPersonneMorale,
   propositionCapital,
+  type LignePropositionCapital,
   type PropositionCapital,
 } from './capital.js';
 import { normaliserFiche, type SaisieFiche } from './identifiants.js';
@@ -45,15 +46,76 @@ export interface EtatImmatriculation {
   suggestion: { legalName: string; headOffice: string } | null;
 }
 
+/** L'écriture de capital telle qu'elle est DANS le journal — jamais recalculée. */
+export interface EcritureCapitalEnregistree {
+  entryId: string;
+  /** `AAAA-MM-JJ`. */
+  date: string;
+  libelle: string;
+  montantCents: number;
+  lignes: LignePropositionCapital[];
+}
+
 export interface EtatCapital {
+  /** null quand l'écriture est déjà enregistrée (voir `enregistree`) ou impossible (voir `raison`). */
   proposition: PropositionCapital | null;
+  /** Vrai seulement si une écriture de ce propriétaire existe au journal sous l'identifiant posé. */
   dejaEnregistree: boolean;
-  /** Pourquoi il n'y a pas de proposition (null quand il y en a une). */
+  enregistree: EcritureCapitalEnregistree | null;
+  /** Une autre demande vient de réserver la fiche et n'a pas encore écrit. */
+  enregistrementEnCours: boolean;
+  /** Pourquoi il n'y a pas de proposition (null quand il y en a une, ou quand c'est déjà enregistré). */
   raison: string | null;
 }
 
+/** Ce que la personne a vu et confirmé : rien d'autre n'est enregistré. */
+export interface ConfirmationCapital {
+  montantCents: number;
+  /** `AAAA-MM-JJ`. */
+  date: string;
+}
+
+/**
+ * Au-delà, une réservation sans écriture au journal est tenue pour
+ * abandonnée (demande coupée en route) : elle peut être reprise. En deçà,
+ * une autre demande est sans doute en train d'écrire.
+ */
+export const DELAI_RESERVATION_MS = 2 * 60 * 1000;
+
 const SIREN_DEJA_UTILISE = 'Ce SIREN est déjà enregistré sur un autre de tes projets.';
 const CAPITAL_DEJA_ENREGISTRE = 'L’écriture de capital a déjà été enregistrée pour cette fiche.';
+const ENREGISTREMENT_EN_COURS = 'Un enregistrement est en cours, réessaie dans un instant.';
+const PROPOSITION_CHANGEE = 'La proposition a changé depuis son affichage — recharge-la avant d’enregistrer.';
+
+/** Où en est le lien entre la fiche et le journal. */
+type EtatLien =
+  | { type: 'aucun' }
+  | { type: 'enregistre'; ecriture: EcritureCapitalEnregistree }
+  | { type: 'en-cours' }
+  | { type: 'abandonne'; reservation: string };
+
+interface EcritureDuJournal {
+  id: string;
+  occurred_on: Date;
+  label: string;
+  lines: { debit_cents: number; credit_cents: number; account: { code: string; label: string; kind: string } }[];
+}
+
+function versEcriture(entry: EcritureDuJournal): EcritureCapitalEnregistree {
+  return {
+    entryId: entry.id,
+    date: entry.occurred_on.toISOString().slice(0, 10),
+    libelle: entry.label,
+    montantCents: entry.lines.reduce((total, ligne) => total + ligne.debit_cents, 0),
+    lignes: entry.lines.map((ligne) => ({
+      compte: ligne.account.code,
+      libelleCompte: ligne.account.label,
+      natureCompte: ligne.account.kind as LignePropositionCapital['natureCompte'],
+      debitCents: ligne.debit_cents,
+      creditCents: ligne.credit_cents,
+    })),
+  };
+}
 
 interface LigneFiche {
   id: string;
@@ -65,6 +127,7 @@ interface LigneFiche {
   head_office: string;
   registered_on: Date;
   capital_entry_id: string | null;
+  capital_reserved_at?: Date | null;
   created_at: Date | null;
   updated_at: Date | null;
 }
@@ -184,16 +247,25 @@ export class ImmatriculationService {
     if (!fiche) {
       throw new NotFoundException('Aucune fiche d’immatriculation pour ce projet.');
     }
-    if (fiche.capital_entry_id) {
+    const lien = await this.etatLien(ownerId, fiche);
+    if (lien.type === 'enregistre') {
       throw new ConflictException(
         'Une écriture de capital a été enregistrée à partir de cette fiche : elle ne peut plus être supprimée. ' +
           'Tu peux toujours la corriger.',
       );
     }
-    // Gardée : une écriture de capital posée entre la lecture et la
-    // suppression ne doit pas perdre sa fiche.
+    if (lien.type === 'en-cours') {
+      throw new ConflictException(ENREGISTREMENT_EN_COURS);
+    }
+    // Gardée sur la valeur lue (nulle, ou réservation abandonnée) : une
+    // écriture de capital posée entre la lecture et la suppression ne doit
+    // pas perdre sa fiche.
     const { count } = await this.prisma.company_registrations.deleteMany({
-      where: { id: fiche.id, owner_id: ownerId, capital_entry_id: null },
+      where: {
+        id: fiche.id,
+        owner_id: ownerId,
+        capital_entry_id: lien.type === 'abandonne' ? lien.reservation : null,
+      },
     });
     if (count === 0) {
       throw new ConflictException('La fiche vient de changer (écriture de capital enregistrée ?). Recharge la page.');
@@ -207,20 +279,42 @@ export class ImmatriculationService {
       this.ficheDuProjet(ownerId, projectId),
       this.statutsDuProjet(ownerId, projectId),
     ]);
-    return this.etatCapital(project.confirmed_legal_form, fiche, statuts);
+    const lien = await this.etatLien(ownerId, fiche);
+    if (lien.type === 'enregistre') {
+      // L'écriture réelle, même si la forme ou les statuts ont changé depuis :
+      // ce qui est dans les livres prime sur ce qu'on proposerait aujourd'hui.
+      return {
+        proposition: null,
+        dejaEnregistree: true,
+        enregistree: lien.ecriture,
+        enregistrementEnCours: false,
+        raison: null,
+      };
+    }
+    return {
+      ...this.etatCapital(project.confirmed_legal_form, fiche, statuts),
+      enregistrementEnCours: lien.type === 'en-cours',
+    };
   }
 
   /**
    * Enregistre l'écriture Débit 512 / Crédit 101 — sur demande explicite
    * seulement, et une seule fois par fiche.
    *
-   * Ordre voulu : (1) réserver la fiche par une écriture gardée sur
-   * `capital_entry_id: null` — deux POST simultanés ne peuvent pas passer
-   * tous les deux ; (2) vérifier/ouvrir les comptes ; (3) `recordEntry` ;
-   * (4) remplacer la réservation par l'identifiant de l'écriture. Un échec
-   * avant (3) libère la réservation ; un échec en (4) est signalé tel quel.
+   * Ordre voulu : (0) la proposition recalculée doit être celle que la
+   * personne a vue (montant et date), sinon 409 ; (1) réserver la fiche par
+   * une écriture gardée sur la valeur lue de `capital_entry_id` (nulle, ou
+   * réservation abandonnée depuis plus de 2 minutes) — deux POST simultanés
+   * ne peuvent pas passer tous les deux ; (2) vérifier/ouvrir les comptes ;
+   * (3) `recordEntry` ; (4) remplacer la réservation par l'identifiant de
+   * l'écriture. Un échec avant (3) libère la réservation ; un échec en (4)
+   * est signalé tel quel.
    */
-  async enregistrerCapital(ownerId: string, projectId: string): Promise<EtatCapital & { entryId: string }> {
+  async enregistrerCapital(
+    ownerId: string,
+    projectId: string,
+    confirmation: ConfirmationCapital,
+  ): Promise<EtatCapital & { entryId: string }> {
     const project = await this.projetDuProprietaire(ownerId, projectId);
     const [fiche, statuts] = await Promise.all([
       this.ficheDuProjet(ownerId, projectId),
@@ -229,32 +323,57 @@ export class ImmatriculationService {
     if (!fiche) {
       throw new NotFoundException('Saisis d’abord la fiche d’immatriculation.');
     }
-    if (fiche.capital_entry_id) {
+    const lien = await this.etatLien(ownerId, fiche);
+    if (lien.type === 'enregistre') {
       throw new ConflictException(CAPITAL_DEJA_ENREGISTRE);
+    }
+    if (lien.type === 'en-cours') {
+      throw new ConflictException(ENREGISTREMENT_EN_COURS);
     }
     const etat = this.etatCapital(project.confirmed_legal_form, fiche, statuts);
     if (!etat.proposition) {
       throw new BadRequestException(etat.raison ?? 'Aucune écriture de capital à proposer.');
     }
     const proposition = etat.proposition;
+    if (proposition.montantCents !== confirmation.montantCents || proposition.date !== confirmation.date) {
+      throw new ConflictException(PROPOSITION_CHANGEE);
+    }
+
+    const owner = userOwner(ownerId);
+    const reference = `SIREN ${fiche.siren}`;
+    if (lien.type === 'abandonne') {
+      // Une réservation abandonnée peut cacher une écriture faite dont le
+      // lien n'a jamais été posé. Dans le doute, on n'écrit pas une seconde
+      // fois : mieux vaut un refus clair qu'un capital compté deux fois.
+      const orpheline = await this.ledger.findEntryByReference(owner, reference);
+      if (orpheline) {
+        throw new ConflictException(
+          `Une écriture « ${reference} » existe déjà dans ta comptabilité (écriture ${orpheline.id}) sans être ` +
+            'reliée à cette fiche. Rien n’a été enregistré une seconde fois : signale-le au support.',
+        );
+      }
+    }
 
     const reservation = randomUUID();
     const { count } = await this.prisma.company_registrations.updateMany({
-      where: { id: fiche.id, owner_id: ownerId, capital_entry_id: null },
-      data: { capital_entry_id: reservation },
+      where: {
+        id: fiche.id,
+        owner_id: ownerId,
+        capital_entry_id: lien.type === 'abandonne' ? lien.reservation : null,
+      },
+      data: { capital_entry_id: reservation, capital_reserved_at: new Date() },
     });
     if (count === 0) {
       throw new ConflictException(CAPITAL_DEJA_ENREGISTRE);
     }
 
-    const owner = userOwner(ownerId);
     let entryId: string;
     try {
       const comptes = await this.assurerComptes(owner);
       const entry = await this.ledger.recordEntry(owner, {
         occurredOn: fiche.registered_on,
         label: proposition.libelle,
-        reference: `SIREN ${fiche.siren}`,
+        reference,
         currency: 'EUR',
         lines: proposition.lignes.map((ligne) => ({
           accountId: comptes.get(ligne.compte)!,
@@ -287,19 +406,39 @@ export class ImmatriculationService {
 
   // ── Interne ─────────────────────────────────────────────────────────────
 
+  /**
+   * `dejaEnregistree` ne se croit pas sur parole : un identifiant posé sur
+   * la fiche n'est une écriture que si le journal de CE propriétaire en a
+   * une sous cet identifiant. Sinon c'est une réservation — récente (une
+   * autre demande écrit) ou abandonnée (reprenable).
+   */
+  private async etatLien(ownerId: string, fiche: LigneFiche | null, maintenant = Date.now()): Promise<EtatLien> {
+    if (!fiche?.capital_entry_id) return { type: 'aucun' };
+    const entry = await this.ledger.findEntry(userOwner(ownerId), fiche.capital_entry_id);
+    if (entry) return { type: 'enregistre', ecriture: versEcriture(entry) };
+    const reserveeLe = fiche.capital_reserved_at;
+    if (reserveeLe && maintenant - reserveeLe.getTime() < DELAI_RESERVATION_MS) {
+      return { type: 'en-cours' };
+    }
+    return { type: 'abandonne', reservation: fiche.capital_entry_id };
+  }
+
+  /** La proposition recalculée — sans regarder le journal (voir `etatLien`). */
   private etatCapital(
     forme: string | null,
     fiche: LigneFiche | null,
     statuts: { status: string; legal_form: string; capital_cents: number } | null,
-  ): EtatCapital {
-    const dejaEnregistree = !!fiche?.capital_entry_id;
+  ): Omit<EtatCapital, 'enregistrementEnCours'> {
+    const dejaEnregistree = false;
+    const enregistree = null;
     if (!fiche) {
-      return { proposition: null, dejaEnregistree, raison: 'Saisis d’abord la fiche d’immatriculation.' };
+      return { proposition: null, dejaEnregistree, enregistree, raison: 'Saisis d’abord la fiche d’immatriculation.' };
     }
     if (!estFormeAvecPersonneMorale(forme)) {
       return {
         proposition: null,
         dejaEnregistree,
+        enregistree,
         raison: 'Cette forme juridique n’a pas de capital social : aucune écriture de capital à proposer.',
       };
     }
@@ -313,17 +452,19 @@ export class ImmatriculationService {
       return {
         proposition: null,
         dejaEnregistree,
+        enregistree,
         raison: 'Le capital n’est connu qu’à partir de statuts retenus pour la forme juridique confirmée.',
       };
     }
-    return { proposition, dejaEnregistree, raison: null };
+    return { proposition, dejaEnregistree, enregistree, raison: null };
   }
 
   /**
    * Les comptes 512 et 101 de la personne, ouverts par le service s'ils
    * manquent, avec les libellés du plan comptable du dépôt. Un compte
-   * existant dans une autre devise est refusé ici, avec un message clair,
-   * plutôt que par une erreur générique du moteur.
+   * existant dans une autre devise, ou d'une autre nature que celle du plan
+   * (512 actif, 101 capitaux), est refusé ici avec un message clair plutôt
+   * que par une erreur générique du moteur — ou, pire, accepté à contresens.
    */
   private async assurerComptes(owner: LedgerOwner): Promise<Map<string, string>> {
     const ids = new Map<string, string>();
@@ -345,6 +486,11 @@ export class ImmatriculationService {
           `Ton compte ${voulu.code} est tenu en ${compte.currency} : l’écriture de capital, en euros, ne peut pas y être enregistrée.`,
         );
       }
+      if (compte.kind !== voulu.kind) {
+        throw new BadRequestException(
+          `Ton compte ${voulu.code} est de nature « ${compte.kind} » : l’écriture de capital attend un compte de nature « ${voulu.kind} ».`,
+        );
+      }
       ids.set(voulu.code, compte.id);
     }
     return ids;
@@ -354,7 +500,7 @@ export class ImmatriculationService {
     try {
       await this.prisma.company_registrations.updateMany({
         where: { id: ficheId, capital_entry_id: reservation },
-        data: { capital_entry_id: null },
+        data: { capital_entry_id: null, capital_reserved_at: null },
       });
     } catch {
       const motif = cause instanceof Error ? cause.message : String(cause);

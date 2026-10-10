@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
-import { PutRegistrationDto } from './dto/immatriculation.dto.js';
+import { ConfirmerCapitalDto, PutRegistrationDto } from './dto/immatriculation.dto.js';
 import { ImmatriculationService } from './immatriculation.service.js';
 
 @ApiTags('immatriculation')
@@ -44,9 +44,19 @@ export class ImmatriculationController {
     return this.immatriculationService.obtenirCapital(user.id, projectId);
   }
 
-  /** Jamais appelé en arrière-plan : l'interface demande une confirmation explicite. */
+  /**
+   * Jamais appelé en arrière-plan : l'interface demande une confirmation
+   * explicite et renvoie le montant et la date qu'elle a affichés.
+   */
   @Post('capital')
-  enregistrerCapital(@CurrentUser() user: AuthenticatedUser, @Param('projectId', ParseUUIDPipe) projectId: string) {
-    return this.immatriculationService.enregistrerCapital(user.id, projectId);
+  enregistrerCapital(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Body() dto: ConfirmerCapitalDto,
+  ) {
+    return this.immatriculationService.enregistrerCapital(user.id, projectId, {
+      montantCents: dto.montantCents,
+      date: dto.date,
+    });
   }
 }

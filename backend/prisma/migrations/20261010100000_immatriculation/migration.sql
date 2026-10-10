@@ -17,6 +17,7 @@ CREATE TABLE "company_registrations" (
     "head_office" TEXT NOT NULL,
     "registered_on" DATE NOT NULL,
     "capital_entry_id" UUID,
+    "capital_reserved_at" TIMESTAMPTZ(6),
     "created_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6),
 

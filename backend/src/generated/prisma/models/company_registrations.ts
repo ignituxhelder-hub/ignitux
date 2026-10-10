@@ -37,6 +37,7 @@ export type Company_registrationsMinAggregateOutputType = {
   head_office: string | null
   registered_on: Date | null
   capital_entry_id: string | null
+  capital_reserved_at: Date | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -52,6 +53,7 @@ export type Company_registrationsMaxAggregateOutputType = {
   head_office: string | null
   registered_on: Date | null
   capital_entry_id: string | null
+  capital_reserved_at: Date | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -67,6 +69,7 @@ export type Company_registrationsCountAggregateOutputType = {
   head_office: number
   registered_on: number
   capital_entry_id: number
+  capital_reserved_at: number
   created_at: number
   updated_at: number
   _all: number
@@ -84,6 +87,7 @@ export type Company_registrationsMinAggregateInputType = {
   head_office?: true
   registered_on?: true
   capital_entry_id?: true
+  capital_reserved_at?: true
   created_at?: true
   updated_at?: true
 }
@@ -99,6 +103,7 @@ export type Company_registrationsMaxAggregateInputType = {
   head_office?: true
   registered_on?: true
   capital_entry_id?: true
+  capital_reserved_at?: true
   created_at?: true
   updated_at?: true
 }
@@ -114,6 +119,7 @@ export type Company_registrationsCountAggregateInputType = {
   head_office?: true
   registered_on?: true
   capital_entry_id?: true
+  capital_reserved_at?: true
   created_at?: true
   updated_at?: true
   _all?: true
@@ -202,6 +208,7 @@ export type Company_registrationsGroupByOutputType = {
   head_office: string
   registered_on: Date
   capital_entry_id: string | null
+  capital_reserved_at: Date | null
   created_at: Date | null
   updated_at: Date | null
   _count: Company_registrationsCountAggregateOutputType | null
@@ -238,6 +245,7 @@ export type company_registrationsWhereInput = {
   head_office?: Prisma.StringFilter<"company_registrations"> | string
   registered_on?: Prisma.DateTimeFilter<"company_registrations"> | Date | string
   capital_entry_id?: Prisma.UuidNullableFilter<"company_registrations"> | string | null
+  capital_reserved_at?: Prisma.DateTimeNullableFilter<"company_registrations"> | Date | string | null
   created_at?: Prisma.DateTimeNullableFilter<"company_registrations"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"company_registrations"> | Date | string | null
   owner?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
@@ -255,6 +263,7 @@ export type company_registrationsOrderByWithRelationInput = {
   head_office?: Prisma.SortOrder
   registered_on?: Prisma.SortOrder
   capital_entry_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  capital_reserved_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
   owner?: Prisma.usersOrderByWithRelationInput
@@ -276,6 +285,7 @@ export type company_registrationsWhereUniqueInput = Prisma.AtLeast<{
   head_office?: Prisma.StringFilter<"company_registrations"> | string
   registered_on?: Prisma.DateTimeFilter<"company_registrations"> | Date | string
   capital_entry_id?: Prisma.UuidNullableFilter<"company_registrations"> | string | null
+  capital_reserved_at?: Prisma.DateTimeNullableFilter<"company_registrations"> | Date | string | null
   created_at?: Prisma.DateTimeNullableFilter<"company_registrations"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"company_registrations"> | Date | string | null
   owner?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
@@ -293,6 +303,7 @@ export type company_registrationsOrderByWithAggregationInput = {
   head_office?: Prisma.SortOrder
   registered_on?: Prisma.SortOrder
   capital_entry_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  capital_reserved_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.company_registrationsCountOrderByAggregateInput
@@ -314,6 +325,7 @@ export type company_registrationsScalarWhereWithAggregatesInput = {
   head_office?: Prisma.StringWithAggregatesFilter<"company_registrations"> | string
   registered_on?: Prisma.DateTimeWithAggregatesFilter<"company_registrations"> | Date | string
   capital_entry_id?: Prisma.UuidNullableWithAggregatesFilter<"company_registrations"> | string | null
+  capital_reserved_at?: Prisma.DateTimeNullableWithAggregatesFilter<"company_registrations"> | Date | string | null
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"company_registrations"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableWithAggregatesFilter<"company_registrations"> | Date | string | null
 }
@@ -327,6 +339,7 @@ export type company_registrationsCreateInput = {
   head_office: string
   registered_on: Date | string
   capital_entry_id?: string | null
+  capital_reserved_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutCompany_registrationsInput
@@ -344,6 +357,7 @@ export type company_registrationsUncheckedCreateInput = {
   head_office: string
   registered_on: Date | string
   capital_entry_id?: string | null
+  capital_reserved_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
 }
@@ -357,6 +371,7 @@ export type company_registrationsUpdateInput = {
   head_office?: Prisma.StringFieldUpdateOperationsInput | string
   registered_on?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capital_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capital_reserved_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutCompany_registrationsNestedInput
@@ -374,6 +389,7 @@ export type company_registrationsUncheckedUpdateInput = {
   head_office?: Prisma.StringFieldUpdateOperationsInput | string
   registered_on?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capital_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capital_reserved_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -389,6 +405,7 @@ export type company_registrationsCreateManyInput = {
   head_office: string
   registered_on: Date | string
   capital_entry_id?: string | null
+  capital_reserved_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
 }
@@ -402,6 +419,7 @@ export type company_registrationsUpdateManyMutationInput = {
   head_office?: Prisma.StringFieldUpdateOperationsInput | string
   registered_on?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capital_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capital_reserved_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -417,6 +435,7 @@ export type company_registrationsUncheckedUpdateManyInput = {
   head_office?: Prisma.StringFieldUpdateOperationsInput | string
   registered_on?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capital_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capital_reserved_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -452,6 +471,7 @@ export type company_registrationsCountOrderByAggregateInput = {
   head_office?: Prisma.SortOrder
   registered_on?: Prisma.SortOrder
   capital_entry_id?: Prisma.SortOrder
+  capital_reserved_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -467,6 +487,7 @@ export type company_registrationsMaxOrderByAggregateInput = {
   head_office?: Prisma.SortOrder
   registered_on?: Prisma.SortOrder
   capital_entry_id?: Prisma.SortOrder
+  capital_reserved_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -482,6 +503,7 @@ export type company_registrationsMinOrderByAggregateInput = {
   head_office?: Prisma.SortOrder
   registered_on?: Prisma.SortOrder
   capital_entry_id?: Prisma.SortOrder
+  capital_reserved_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -569,6 +591,7 @@ export type company_registrationsCreateWithoutOwnerInput = {
   head_office: string
   registered_on: Date | string
   capital_entry_id?: string | null
+  capital_reserved_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   project: Prisma.projectsCreateNestedOneWithoutCompany_registrationInput
@@ -584,6 +607,7 @@ export type company_registrationsUncheckedCreateWithoutOwnerInput = {
   head_office: string
   registered_on: Date | string
   capital_entry_id?: string | null
+  capital_reserved_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
 }
@@ -628,6 +652,7 @@ export type company_registrationsScalarWhereInput = {
   head_office?: Prisma.StringFilter<"company_registrations"> | string
   registered_on?: Prisma.DateTimeFilter<"company_registrations"> | Date | string
   capital_entry_id?: Prisma.UuidNullableFilter<"company_registrations"> | string | null
+  capital_reserved_at?: Prisma.DateTimeNullableFilter<"company_registrations"> | Date | string | null
   created_at?: Prisma.DateTimeNullableFilter<"company_registrations"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"company_registrations"> | Date | string | null
 }
@@ -641,6 +666,7 @@ export type company_registrationsCreateWithoutProjectInput = {
   head_office: string
   registered_on: Date | string
   capital_entry_id?: string | null
+  capital_reserved_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutCompany_registrationsInput
@@ -656,6 +682,7 @@ export type company_registrationsUncheckedCreateWithoutProjectInput = {
   head_office: string
   registered_on: Date | string
   capital_entry_id?: string | null
+  capital_reserved_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
 }
@@ -685,6 +712,7 @@ export type company_registrationsUpdateWithoutProjectInput = {
   head_office?: Prisma.StringFieldUpdateOperationsInput | string
   registered_on?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capital_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capital_reserved_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutCompany_registrationsNestedInput
@@ -700,6 +728,7 @@ export type company_registrationsUncheckedUpdateWithoutProjectInput = {
   head_office?: Prisma.StringFieldUpdateOperationsInput | string
   registered_on?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capital_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capital_reserved_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -714,6 +743,7 @@ export type company_registrationsCreateManyOwnerInput = {
   head_office: string
   registered_on: Date | string
   capital_entry_id?: string | null
+  capital_reserved_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
 }
@@ -727,6 +757,7 @@ export type company_registrationsUpdateWithoutOwnerInput = {
   head_office?: Prisma.StringFieldUpdateOperationsInput | string
   registered_on?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capital_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capital_reserved_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   project?: Prisma.projectsUpdateOneRequiredWithoutCompany_registrationNestedInput
@@ -742,6 +773,7 @@ export type company_registrationsUncheckedUpdateWithoutOwnerInput = {
   head_office?: Prisma.StringFieldUpdateOperationsInput | string
   registered_on?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capital_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capital_reserved_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -756,6 +788,7 @@ export type company_registrationsUncheckedUpdateManyWithoutOwnerInput = {
   head_office?: Prisma.StringFieldUpdateOperationsInput | string
   registered_on?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capital_entry_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capital_reserved_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -773,6 +806,7 @@ export type company_registrationsSelect<ExtArgs extends runtime.Types.Extensions
   head_office?: boolean
   registered_on?: boolean
   capital_entry_id?: boolean
+  capital_reserved_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -790,6 +824,7 @@ export type company_registrationsSelectCreateManyAndReturn<ExtArgs extends runti
   head_office?: boolean
   registered_on?: boolean
   capital_entry_id?: boolean
+  capital_reserved_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -807,6 +842,7 @@ export type company_registrationsSelectUpdateManyAndReturn<ExtArgs extends runti
   head_office?: boolean
   registered_on?: boolean
   capital_entry_id?: boolean
+  capital_reserved_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -824,11 +860,12 @@ export type company_registrationsSelectScalar = {
   head_office?: boolean
   registered_on?: boolean
   capital_entry_id?: boolean
+  capital_reserved_at?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type company_registrationsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_id" | "project_id" | "siren" | "siret" | "vat_number" | "legal_name" | "head_office" | "registered_on" | "capital_entry_id" | "created_at" | "updated_at", ExtArgs["result"]["company_registrations"]>
+export type company_registrationsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_id" | "project_id" | "siren" | "siret" | "vat_number" | "legal_name" | "head_office" | "registered_on" | "capital_entry_id" | "capital_reserved_at" | "created_at" | "updated_at", ExtArgs["result"]["company_registrations"]>
 export type company_registrationsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
@@ -865,6 +902,12 @@ export type $company_registrationsPayload<ExtArgs extends runtime.Types.Extensio
      * existe — voir immatriculation.service.ts.
      */
     capital_entry_id: string | null
+    /**
+     * Quand `capital_entry_id` a été réservé. Une réservation sans écriture
+     * comptable correspondante depuis plus de deux minutes est tenue pour
+     * abandonnée (demande interrompue) et peut être reprise.
+     */
+    capital_reserved_at: Date | null
     created_at: Date | null
     updated_at: Date | null
   }, ExtArgs["result"]["company_registrations"]>
@@ -1302,6 +1345,7 @@ export interface company_registrationsFieldRefs {
   readonly head_office: Prisma.FieldRef<"company_registrations", 'String'>
   readonly registered_on: Prisma.FieldRef<"company_registrations", 'DateTime'>
   readonly capital_entry_id: Prisma.FieldRef<"company_registrations", 'String'>
+  readonly capital_reserved_at: Prisma.FieldRef<"company_registrations", 'DateTime'>
   readonly created_at: Prisma.FieldRef<"company_registrations", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"company_registrations", 'DateTime'>
 }
