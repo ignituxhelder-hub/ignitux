@@ -327,6 +327,76 @@ describe('api', () => {
       });
     });
 
+    /**
+     * L'immatriculation : la fiche vient du Kbis de la personne et l'écriture
+     * de capital entre dans sa comptabilité. Rejouer plus tard une fiche, une
+     * suppression ou une écriture comptable, à son insu, serait pire qu'un
+     * échec immédiat.
+     */
+    describe('les écritures d’immatriculation n’entrent jamais en file', () => {
+      function horsLigne() {
+        global.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+      }
+      const saisie = {
+        siren: '732829320',
+        legalName: 'Ma Société',
+        headOffice: '1 rue X, 75001 Paris',
+        registeredOn: '2026-10-01',
+      };
+
+      it.each([
+        ['enregistrerImmatriculation', () => api.enregistrerImmatriculation('token', 'p1', saisie)],
+        ['supprimerImmatriculation', () => api.supprimerImmatriculation('token', 'p1')],
+        ['enregistrerCapitalImmatriculation', () => api.enregistrerCapitalImmatriculation('token', 'p1')],
+      ])('%s échoue tout de suite, sans rien mettre en file', async (_nom, appel) => {
+        const storage = fakeStorage();
+        setOfflineStorage(storage);
+        horsLigne();
+
+        const erreur = await appel().catch((e: unknown) => e);
+        expect(erreur).toBeInstanceOf(ApiError);
+        expect(erreur).toMatchObject({ status: 0 });
+        expect(readOfflineState().pending).toHaveLength(0);
+        expect(storage.entries.size).toBe(0);
+      });
+
+      it('hors ligne, la lecture de la fiche lève OfflineReadError (jamais un succès)', async () => {
+        const storage = fakeStorage();
+        setOfflineStorage(storage);
+        mockFetchOnce(200, { registration: null, suggestion: null });
+        await api.getImmatriculation('token', 'p1');
+
+        horsLigne();
+        const erreur = await api.getImmatriculation('token', 'p1').catch((e: unknown) => e);
+        expect(erreur).toBeInstanceOf(OfflineReadError);
+      });
+
+      it('envoie la saisie en PUT avec le jeton, champs facultatifs à null', async () => {
+        mockFetchOnce(200, { registration: null, suggestion: null });
+        await api.enregistrerImmatriculation('token', 'p1', { ...saisie, siret: null, vatNumber: null });
+
+        const [url, options] = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
+        expect(new URL(String(url)).pathname).toBe('/projects/p1/immatriculation');
+        expect(options.method).toBe('PUT');
+        expect(options.headers.Authorization).toBe('Bearer token');
+        expect(JSON.parse(options.body)).toEqual({ ...saisie, siret: null, vatNumber: null });
+      });
+
+      it('garde chaque message de validation du serveur, un par un', async () => {
+        mockFetchOnce(400, { message: ['Le SIREN doit compter 9 chiffres.', 'La clé TVA ne correspond pas.'] });
+
+        const erreur = await api.enregistrerImmatriculation('token', 'p1', saisie).catch((e: unknown) => e);
+
+        expect(erreur).toBeInstanceOf(ApiError);
+        expect((erreur as ApiError).status).toBe(400);
+        expect((erreur as ApiError).messages).toEqual([
+          'Le SIREN doit compter 9 chiffres.',
+          'La clé TVA ne correspond pas.',
+        ]);
+        expect((erreur as ApiError).message).toBe('Le SIREN doit compter 9 chiffres. La clé TVA ne correspond pas.');
+      });
+    });
+
     it('continue de mettre en cache une lecture ordinaire', async () => {
       // Sinon le test précédent passerait pour une mauvaise raison : il
       // suffirait que le cache soit cassé partout.
