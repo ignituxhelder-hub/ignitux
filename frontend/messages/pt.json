@@ -1,0 +1,41 @@
+{
+  "langue": { "label": "Idioma" },
+  "igini": { "descripteur": "a inteligência do Ignitux" },
+  "accueil": {
+    "seConnecter": "Entrar",
+    "creerCompte": "Criar uma conta",
+    "eyebrow": "Descobrir · Construir · Transmitir",
+    "titre": "Transformar uma ideia em realidade",
+    "iginiMention": "acompanha-te para analisar, construir, financiar, desenvolver e transmitir o teu projeto — a partir de um só lugar. A verdade acima de tudo.",
+    "commencer": "Começar gratuitamente",
+    "dejaCompte": "Já tenho uma conta",
+    "methode": "O método em 5 etapas",
+    "etapes": {
+      "analyser": { "nom": "Analisar", "description": "Resumo, pontuação de viabilidade, pontos fortes, riscos, próximos passos." },
+      "construire": { "nom": "Construir", "description": "Plano de construção: marcos, prazo estimado, recursos-chave." },
+      "financer": { "nom": "Financiar", "description": "Plano de financiamento: orçamento estimado, fontes, rubricas de despesa." },
+      "developper": { "nom": "Desenvolver", "description": "Plano de crescimento: alavancas, indicadores-chave, riscos de escalar." },
+      "transmettre": { "nom": "Transmitir", "description": "Plano de transmissão: opções de transferência, documentação, lista de verificação." }
+    },
+    "gardeEnTete": "O que o IGINI tem em mente",
+    "moteurs": {
+      "memoire": { "nom": "Memória", "description": "O que o IGINI retém das tuas decisões, preferências e aprendizagens." },
+      "connaissance": { "nom": "Conhecimento", "description": "Um grafo de conceitos para ligar entre si as ideias do teu projeto." },
+      "workflow": { "nom": "Workflow", "description": "As sugestões do IGINI tornam-se tarefas acompanháveis — nunca executadas por ti." },
+      "score": { "nom": "Pontuação", "description": "Um painel honesto do teu progresso, sem números inventados." }
+    },
+    "communaute": "Comunidade",
+    "communauteTexte": "Torna um projeto público quando estiveres pronto e recebe incentivo de outros promotores de projetos — nada mais por enquanto, sem mensagens privadas nem classificações.",
+    "pret": "Pronto para dar vida à tua ideia?"
+  },
+  "connexion": {
+    "titre": "Entrar",
+    "email": "Email",
+    "motDePasse": "Palavra-passe",
+    "envoi": "A entrar…",
+    "impossible": "Não foi possível entrar.",
+    "oublie": "Esqueceste a palavra-passe?",
+    "pasDeCompte": "Ainda não tens conta?",
+    "inscrire": "Registar-se"
+  }
+}

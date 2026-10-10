@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import type { CSSProperties, ReactNode } from 'react';
 
 /**
@@ -5,10 +6,10 @@ import type { CSSProperties, ReactNode } from 'react';
  * pour ne pas dupliquer/désynchroniser le nom de marque et son style.
  */
 export function IginiMention({ children, style }: { children: ReactNode; style?: CSSProperties }) {
+  const t = useTranslations('igini');
   return (
     <p className="muted" style={style}>
-      <strong style={{ color: 'var(--accent)' }}>Igini</strong>, l&apos;intelligence
-      d&apos;Ignitux, {children}
+      <strong style={{ color: 'var(--accent)' }}>Igini</strong>, {t('descripteur')}, {children}
     </p>
   );
 }

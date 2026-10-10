@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { IBM_Plex_Mono, IBM_Plex_Sans, Sora } from 'next/font/google';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { OfflineBanner } from '@/components/offline-banner';
 import { ServiceWorker } from '@/components/service-worker';
@@ -48,13 +50,15 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const locale = await getLocale();
   return (
-    <html lang="fr" className={`${sora.variable} ${plexSans.variable} ${plexMono.variable}`}>
+    <html lang={locale}className={`${sora.variable} ${plexSans.variable} ${plexMono.variable}`}>
       <body>
         {/* N'affiche rien : il pose le service worker qui rend l'ouverture
             possible sans réseau, et sait aussi le retirer. Article 16. */}
         <ServiceWorker />
+        <NextIntlClientProvider>
         <AuthProvider>
           {/* Monté au niveau racine : l'état hors ligne concerne toute
               l'application, pas une page en particulier, et le bandeau ne
@@ -68,6 +72,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               ce qui fait d'Ignitux un système plutôt qu'une suite de pages. */}
           <Systeme>{children}</Systeme>
         </AuthProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

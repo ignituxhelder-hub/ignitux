@@ -147,7 +147,10 @@ describe('accessibilité du balisage', () => {
       // Sans `lang`, un lecteur d'écran lit du français avec une voix
       // anglaise : quasi incompréhensible.
       const layout = readFileSync(join(APP, 'layout.tsx'), 'utf8');
-      expect(layout).toMatch(/<html[^>]*lang="fr"/);
+      // La langue suit celle choisie par la personne (cookie), pas une
+      // valeur fixe : elle vient de `getLocale()`.
+      expect(layout).toMatch(/<html[^>]*lang=\{locale\}/);
+      expect(layout).toContain('await getLocale()');
     });
 
     it('la marque décorative est masquée aux lecteurs d\'écran', () => {
