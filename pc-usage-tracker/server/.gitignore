@@ -1,0 +1,11 @@
+/node_modules
+/dist
+/coverage
+*.tsbuildinfo
+
+.env
+.env.*
+!.env.example
+
+# Base SQLite locale et ses fichiers WAL — jamais versionnée.
+/data
