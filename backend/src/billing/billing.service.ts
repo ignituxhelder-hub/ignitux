@@ -5,6 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConstitutionService } from '../constitution/constitution.service.js';
+import { capitalConnuCents } from '../immatriculation/capital.js';
+import { mentionsEmetteur } from '../immatriculation/mentions-emetteur.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BILLING_DISCLAIMER, BILLING_ENFORCED_RULES } from './billing-legal.js';
 import {
@@ -122,6 +124,9 @@ export class BillingService {
     }
     if (input.contactId) {
       await this.assertOwnsContact(ownerId, input.contactId);
+    }
+    if (input.projectId) {
+      await this.assertOwnsProject(ownerId, input.projectId);
     }
 
     const year = new Date().getFullYear();
@@ -282,13 +287,64 @@ export class BillingService {
       );
     }
 
-    return this.prisma.billing_documents.update({
-      where: { id: documentId },
-      data: {
-        status,
-        // La date d'émission est posée une seule fois, au passage à « emis ».
-        ...(status === 'emis' && !document.issued_at ? { issued_at: new Date() } : {}),
-      },
+    // La date d'émission et les mentions de l'émetteur sont posées une seule
+    // fois, au passage à « emis ». Un document déjà émis n'est jamais
+    // réécrit, même si la fiche d'immatriculation change ensuite.
+    const emission = status === 'emis' && !document.issued_at;
+    if (!emission) {
+      return this.prisma.billing_documents.update({ where: { id: documentId }, data: { status } });
+    }
+
+    // Gardée sur `issued_at: null` : deux émissions simultanées ont lu le
+    // même brouillon, une seule pose la date et les mentions. L'autre est
+    // refusée plutôt que de réécrire un document déjà émis.
+    const issuerDetails = await this.issuerDetailsAtEmission(ownerId, document.project_id ?? null);
+    const { count } = await this.prisma.billing_documents.updateMany({
+      where: { id: documentId, owner_id: ownerId, issued_at: null },
+      data: { status, issued_at: new Date(), issuer_details: issuerDetails },
+    });
+    if (count === 0) {
+      throw new ConflictException(
+        'Ce document vient d’être émis par une autre demande : il n’a pas été réécrit. Recharge-le.',
+      );
+    }
+    return this.findForOwner(ownerId, documentId);
+  }
+
+  /**
+   * Identité légale de l'émetteur, figée à l'émission — même logique que
+   * `client_details`. null sans projet ou sans fiche d'immatriculation :
+   * le comportement d'avant reste inchangé. La fiche est filtrée sur le
+   * propriétaire du document : rattacher un document au projet de quelqu'un
+   * d'autre n'en ferait pas recopier l'identité.
+   */
+  private async issuerDetailsAtEmission(ownerId: string, projectId: string | null): Promise<string | null> {
+    if (!projectId) return null;
+    const registration = await this.prisma.company_registrations.findFirst({
+      where: { project_id: projectId, owner_id: ownerId },
+    });
+    if (!registration) return null;
+
+    const [project, bylaws] = await Promise.all([
+      this.prisma.projects.findFirst({
+        where: { id: projectId, owner_id: ownerId },
+        select: { confirmed_legal_form: true },
+      }),
+      this.prisma.company_bylaws.findFirst({
+        where: { project_id: projectId, owner_id: ownerId },
+        select: { status: true, legal_form: true, capital_cents: true },
+      }),
+    ]);
+    const legalForm = project?.confirmed_legal_form ?? null;
+
+    return mentionsEmetteur({
+      legalName: registration.legal_name,
+      legalForm,
+      capitalCents: capitalConnuCents(legalForm, bylaws),
+      headOffice: registration.head_office,
+      siren: registration.siren,
+      siret: registration.siret,
+      vatNumber: registration.vat_number,
     });
   }
 
@@ -416,6 +472,21 @@ export class BillingService {
     });
     if (!contact) {
       throw new NotFoundException('Contact introuvable.');
+    }
+  }
+
+  /**
+   * Un document ne se rattache qu'à un projet de l'appelant : sinon il
+   * afficherait (et figerait à l'émission) l'identité d'une entreprise qui
+   * n'est pas la sienne. Même réponse qu'un projet inexistant.
+   */
+  private async assertOwnsProject(ownerId: string, projectId: string) {
+    const project = await this.prisma.projects.findFirst({
+      where: { id: projectId, owner_id: ownerId },
+      select: { id: true },
+    });
+    if (!project) {
+      throw new NotFoundException('Projet introuvable.');
     }
   }
 

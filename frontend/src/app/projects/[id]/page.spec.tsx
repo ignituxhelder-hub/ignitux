@@ -110,6 +110,12 @@ const ENGINE_ROUTES = {
       filing: { status: 'preparation', checkedItems: [], depositedAt: null, filingReference: null },
     },
   },
+  // L'immatriculation est montée sous le dossier de création (propriétaire).
+  'GET /projects/p1/immatriculation': { status: 200, body: { registration: null, suggestion: null } },
+  'GET /projects/p1/immatriculation/capital': {
+    status: 200,
+    body: { proposition: null, dejaEnregistree: false, raison: 'Saisis d’abord la fiche d’immatriculation.' },
+  },
   'GET /projects/p1/automation/runs': { status: 200, body: [] },
   'GET /projects/p1/workflows': { status: 200, body: [] },
   'GET /workflows/templates': { status: 200, body: [] },
@@ -217,6 +223,106 @@ describe('ProjectDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Forme juridique' }));
     expect(await screen.findByRole('heading', { name: 'Dossier de création' })).toBeInTheDocument();
     expect(await screen.findByText(/confirme d'abord la forme juridique \(section statuts/i)).toBeInTheDocument();
+  });
+
+  it('montre l’immatriculation au propriétaire, sous le dossier de création', async () => {
+    mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    expect(screen.queryByRole('heading', { name: 'Immatriculation' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Forme juridique' }));
+    expect(await screen.findByLabelText('SIREN (9 chiffres, obligatoire)')).toBeInTheDocument();
+    const titres = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
+    expect(titres.indexOf('Immatriculation')).toBeGreaterThan(titres.indexOf('Dossier de création'));
+  });
+
+  it('enregistrer la fiche recharge le dossier de création (bandeau « Immatriculée »)', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      ...ENGINE_ROUTES,
+      'PUT /projects/p1/immatriculation': {
+        status: 200,
+        body: {
+          registration: {
+            id: 'r1',
+            projectId: 'p1',
+            siren: '732829320',
+            siret: null,
+            vatNumber: null,
+            legalName: 'École motocross',
+            headOffice: '1 rue X',
+            registeredOn: '2026-10-01',
+            capitalEntryId: null,
+            createdAt: '2026-10-10T00:00:00.000Z',
+            updatedAt: '2026-10-10T00:00:00.000Z',
+          },
+          suggestion: null,
+        },
+      },
+    });
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    fireEvent.click(screen.getByRole('button', { name: 'Forme juridique' }));
+    await screen.findByLabelText('SIREN (9 chiffres, obligatoire)');
+    const lecturesDossier = () =>
+      (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.filter(
+        ([url, options]) =>
+          new URL(String(url)).pathname === '/projects/p1/dossier-creation' && (options?.method ?? 'GET') === 'GET',
+      ).length;
+    await waitFor(() => expect(lecturesDossier()).toBe(1));
+
+    // La date est obligatoire : l'interface ne l'envoie jamais vide.
+    fireEvent.change(screen.getByLabelText('SIREN (9 chiffres, obligatoire)'), { target: { value: '732829320' } });
+    fireEvent.change(screen.getByLabelText('Dénomination (obligatoire)'), { target: { value: 'École motocross' } });
+    fireEvent.change(screen.getByLabelText('Adresse du siège (obligatoire)'), { target: { value: '1 rue X' } });
+    fireEvent.change(screen.getByLabelText('Date d’immatriculation (obligatoire)'), { target: { value: '2026-10-01' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Enregistrer la fiche' }));
+
+    await waitFor(() => expect(lecturesDossier()).toBe(2));
+  });
+
+  it('confirmer la forme juridique recharge l’immatriculation (fiche et écriture de capital)', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      'PATCH /projects/p1/forme-juridique': { status: 200, body: { ...PROJECT, confirmed_legal_form: 'micro-entreprise' } },
+      ...ENGINE_ROUTES,
+    });
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    fireEvent.click(screen.getByRole('button', { name: 'Forme juridique' }));
+    await screen.findByLabelText('SIREN (9 chiffres, obligatoire)');
+    const lectures = (chemin: string) =>
+      (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.filter(
+        ([url, options]) => new URL(String(url)).pathname === chemin && (options?.method ?? 'GET') === 'GET',
+      ).length;
+    await waitFor(() => expect(lectures('/projects/p1/immatriculation/capital')).toBe(1));
+    expect(lectures('/projects/p1/immatriculation')).toBe(1);
+
+    fireEvent.change(screen.getByLabelText('Forme juridique', { selector: 'select' }), {
+      target: { value: 'micro-entreprise' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /confirmer cette forme/i }));
+
+    await waitFor(() => expect(lectures('/projects/p1/immatriculation/capital')).toBe(2));
+    expect(lectures('/projects/p1/immatriculation')).toBe(2);
   });
 
   describe('grille d’icônes des étapes', () => {
@@ -741,6 +847,13 @@ describe('ProjectDetailPage', () => {
     expect(
       (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.some(([url]) =>
         String(url).includes('/dossier-creation'),
+      ),
+    ).toBe(false);
+    // L'immatriculation non plus, et aucune requête n'est faite.
+    expect(screen.queryByRole('heading', { name: 'Immatriculation' })).not.toBeInTheDocument();
+    expect(
+      (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.some(([url]) =>
+        String(url).includes('/immatriculation'),
       ),
     ).toBe(false);
 

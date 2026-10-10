@@ -14,6 +14,11 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public readonly status: number,
+    /**
+     * Les messages un par un quand le serveur en renvoie une liste (erreurs
+     * de validation) : `message` les réunit, `messages` permet de les lister.
+     */
+    public readonly messages: string[] = [message],
   ) {
     super(message);
     this.name = 'ApiError';
@@ -123,7 +128,11 @@ async function request<T>(
         : Array.isArray(body?.message)
           ? body.message.join(' ')
           : 'Une erreur est survenue.';
-    throw new ApiError(message, res.status);
+    const messages =
+      Array.isArray(body?.message) && body.message.every((m: unknown) => typeof m === 'string') && body.message.length > 0
+        ? (body.message as string[])
+        : [message];
+    throw new ApiError(message, res.status, messages);
   }
 
   return body as T;
@@ -302,6 +311,11 @@ const ECRITURES_JAMAIS_EN_FILE = [
   // elle-même. Les rejouer plus tard, à son insu, pourrait affirmer un dépôt
   // qu'elle a entre-temps annulé (ou l'inverse).
   /^\/projects\/[^/?#]+\/dossier-creation(?:\/(?:depose|rouvrir))?(?:[?#].*)?$/,
+  // L'immatriculation : la fiche (SIREN, siège…) vient du Kbis de la personne,
+  // et l'écriture de capital entre dans sa comptabilité. Rejouer plus tard une
+  // fiche remplacée entre-temps, une suppression ou une écriture comptable,
+  // à son insu, serait pire qu'un échec immédiat.
+  /^\/projects\/[^/?#]+\/immatriculation(?:\/capital)?(?:[?#].*)?$/,
 ];
 
 function handleOffline<T>(path: string, options: RequestInit): Promise<T> {
@@ -520,6 +534,79 @@ export interface DossierCreation {
     depositedAt: string | null;
     filingReference: string | null;
   };
+  /** Vrai quand une fiche d'immatriculation existe. Absent d'un serveur plus ancien. */
+  immatriculee?: boolean;
+  registration?: { siren: string; registeredOn: string } | null;
+}
+
+/** Fiche d'immatriculation — en camelCase, telle que le serveur l'envoie. */
+export interface Registration {
+  id: string;
+  projectId: string;
+  siren: string;
+  siret: string | null;
+  vatNumber: string | null;
+  legalName: string;
+  headOffice: string;
+  /** `AAAA-MM-JJ`. */
+  registeredOn: string;
+  capitalEntryId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EtatImmatriculation {
+  registration: Registration | null;
+  /** Tiré des statuts retenus : à confirmer par la personne, jamais enregistré tel quel. */
+  suggestion: { legalName: string; headOffice: string } | null;
+}
+
+export interface SaisieImmatriculation {
+  siren: string;
+  siret?: string | null;
+  vatNumber?: string | null;
+  legalName: string;
+  headOffice: string;
+  /** `AAAA-MM-JJ`. */
+  registeredOn: string;
+}
+
+export interface LigneEcritureCapital {
+  compte: string;
+  libelleCompte: string;
+  natureCompte: string;
+  debitCents: number;
+  creditCents: number;
+}
+
+export interface EtatCapitalImmatriculation {
+  proposition: {
+    montantCents: number;
+    libelle: string;
+    date: string;
+    lignes: LigneEcritureCapital[];
+  } | null;
+  /** Vrai seulement si l'écriture existe dans le journal (une réservation pendante ne compte pas). */
+  dejaEnregistree: boolean;
+  /** L'écriture telle qu'elle est DANS le journal, quand elle est enregistrée — jamais recalculée. */
+  enregistree?: {
+    entryId: string;
+    date: string;
+    libelle: string;
+    montantCents: number;
+    lignes: LigneEcritureCapital[];
+  } | null;
+  /** Une autre demande est en train d'enregistrer l'écriture. */
+  enregistrementEnCours?: boolean;
+  /** Pourquoi il n'y a pas de proposition (null quand il y en a une). */
+  raison: string | null;
+}
+
+/** Ce que la personne a vu et confirmé : le serveur refuse (409) si la proposition a changé. */
+export interface ConfirmationCapital {
+  montantCents: number;
+  /** `AAAA-MM-JJ`. */
+  date: string;
 }
 
 export interface GenerateBylawsInput {
@@ -1297,6 +1384,8 @@ export interface BillingDocument {
   status: BillingStatus;
   client_name: string;
   client_details: string | null;
+  /** Identité légale de l'émetteur, figée à l'émission ; null sans fiche d'immatriculation. */
+  issuer_details?: string | null;
   notes: string | null;
   issued_at: string | null;
   due_at: string | null;
@@ -2199,6 +2288,37 @@ export const api = {
     }
     return res.blob();
   },
+
+  getImmatriculation: (token: string, projectId: string) =>
+    request<EtatImmatriculation>(`/projects/${projectId}/immatriculation`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  enregistrerImmatriculation: (token: string, projectId: string, saisie: SaisieImmatriculation) =>
+    request<EtatImmatriculation>(`/projects/${projectId}/immatriculation`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(saisie),
+    }),
+
+  supprimerImmatriculation: (token: string, projectId: string) =>
+    request<EtatImmatriculation>(`/projects/${projectId}/immatriculation`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getCapitalImmatriculation: (token: string, projectId: string) =>
+    request<EtatCapitalImmatriculation>(`/projects/${projectId}/immatriculation/capital`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  /** Seulement sur un clic confirmé : écrit dans la comptabilité de la personne. */
+  enregistrerCapitalImmatriculation: (token: string, projectId: string, confirmation: ConfirmationCapital) =>
+    request<EtatCapitalImmatriculation & { entryId: string }>(`/projects/${projectId}/immatriculation/capital`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(confirmation),
+    }),
 
   createProject: (token: string, title: string, description: string) =>
     request<Project>('/projects', {

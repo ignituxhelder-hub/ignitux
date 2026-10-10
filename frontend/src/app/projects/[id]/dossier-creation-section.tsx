@@ -235,6 +235,20 @@ export function DossierCreationSection({
       <h2>Dossier de création</h2>
       {avis}
       {error && <p className="error">{error}</p>}
+      {dossier.immatriculee && dossier.registration ? (
+        <p>
+          <span className="pill pill--fire">
+            <span aria-hidden="true">✓</span> Immatriculée le {jourParis(dossier.registration.registeredOn)} — SIREN{' '}
+            {dossier.registration.siren}
+          </span>{' '}
+          <a href="#section-immatriculation">Voir la fiche d’immatriculation</a>
+        </p>
+      ) : (
+        <p className="muted">
+          Pas encore immatriculée. Saisis ton SIREN dans la section{' '}
+          <a href="#section-immatriculation">Immatriculation</a> quand tu l&apos;as reçu.
+        </p>
+      )}
       <p className="muted">Forme juridique : {dossier.forme}.</p>
 
       <h3>Pièces du dossier</h3>

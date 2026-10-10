@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConstitutionService } from '../constitution/constitution.service.js';
 import { BILLING_DISCLAIMER } from './billing-legal.js';
@@ -11,10 +11,13 @@ describe('BillingService', () => {
   let service: BillingService;
   let module: TestingModule;
   let prisma: {
-    billing_documents: { create: Mock; findFirst: Mock; findMany: Mock; update: Mock; delete: Mock };
+    billing_documents: { create: Mock; findFirst: Mock; findMany: Mock; update: Mock; updateMany: Mock; delete: Mock };
     billing_payments: { create: Mock };
     constitution_violations: { createMany: Mock };
     crm_contacts: { findFirst: Mock };
+    company_registrations: { findFirst: Mock };
+    projects: { findFirst: Mock };
+    company_bylaws: { findFirst: Mock };
   };
 
   const LINE = { label: 'Prestation', quantityMilli: 1000, unitPriceCents: 10000 };
@@ -26,11 +29,15 @@ describe('BillingService', () => {
         findFirst: vi.fn(),
         findMany: vi.fn().mockResolvedValue([]),
         update: vi.fn().mockResolvedValue({ id: 'd1' }),
+        updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         delete: vi.fn(),
       },
       billing_payments: { create: vi.fn().mockResolvedValue({ id: 'p1' }) },
       crm_contacts: { findFirst: vi.fn() },
       constitution_violations: { createMany: vi.fn() },
+      company_registrations: { findFirst: vi.fn().mockResolvedValue(null) },
+      projects: { findFirst: vi.fn().mockResolvedValue(null) },
+      company_bylaws: { findFirst: vi.fn().mockResolvedValue(null) },
     };
 
     module = await Test.createTestingModule({
@@ -294,7 +301,33 @@ describe('BillingService', () => {
 
       await service.changeStatus('u1', 'd1', 'emis');
 
-      expect(prisma.billing_documents.update.mock.calls[0][0].data.issued_at).toBeInstanceOf(Date);
+      const emission = prisma.billing_documents.updateMany.mock.calls[0][0];
+      expect(emission.where).toEqual({ id: 'd1', owner_id: 'u1', issued_at: null });
+      expect(emission.data.status).toBe('emis');
+      expect(emission.data.issued_at).toBeInstanceOf(Date);
+      expect(prisma.billing_documents.update).not.toHaveBeenCalled();
+    });
+
+    it('deux émissions simultanées : la seconde perd (409) au lieu de réécrire date et mentions', async () => {
+      // Les deux demandes ont lu le brouillon ; la première a déjà posé
+      // issued_at quand la seconde écrit, donc l'écriture gardée ne trouve rien.
+      prisma.billing_documents.findFirst.mockResolvedValue({
+        id: 'd1',
+        owner_id: 'u1',
+        status: 'brouillon',
+        issued_at: null,
+      });
+      prisma.billing_documents.updateMany.mockResolvedValueOnce({ count: 1 }).mockResolvedValueOnce({ count: 0 });
+
+      const resultats = await Promise.allSettled([
+        service.changeStatus('u1', 'd1', 'emis'),
+        service.changeStatus('u1', 'd1', 'emis'),
+      ]);
+
+      expect(resultats.map((r) => r.status).sort()).toEqual(['fulfilled', 'rejected']);
+      const refus = resultats.find((r) => r.status === 'rejected') as PromiseRejectedResult;
+      expect(refus.reason).toBeInstanceOf(ConflictException);
+      expect(prisma.billing_documents.update).not.toHaveBeenCalled();
     });
 
     it("ne réécrit pas une date d'émission déjà posée", async () => {
@@ -308,6 +341,87 @@ describe('BillingService', () => {
       await service.changeStatus('u1', 'd1', 'paye');
 
       expect(prisma.billing_documents.update.mock.calls[0][0].data.issued_at).toBeUndefined();
+    });
+
+    describe('mentions de l’émetteur (issuer_details)', () => {
+      const fiche = {
+        legal_name: 'Ma Société',
+        head_office: '1 rue de la Paix, 75002 Paris',
+        siren: '443061841',
+        siret: '44306184100013',
+        vat_number: 'FR64443061841',
+      };
+      const brouillonDuProjet = { id: 'd1', owner_id: 'u1', project_id: 'proj-1', status: 'brouillon', issued_at: null };
+
+      it('fige l’identité de l’émetteur à l’émission quand le projet a une fiche', async () => {
+        prisma.billing_documents.findFirst.mockResolvedValue(brouillonDuProjet);
+        prisma.company_registrations.findFirst.mockResolvedValue(fiche);
+        prisma.projects.findFirst.mockResolvedValue({ confirmed_legal_form: 'SASU' });
+        prisma.company_bylaws.findFirst.mockResolvedValue({ status: 'retenue', legal_form: 'SASU', capital_cents: 100000 });
+
+        await service.changeStatus('u1', 'd1', 'emis');
+
+        expect(prisma.company_registrations.findFirst).toHaveBeenCalledWith(
+          expect.objectContaining({ where: { project_id: 'proj-1', owner_id: 'u1' } }),
+        );
+        expect(prisma.billing_documents.updateMany.mock.calls[0][0].data.issuer_details).toBe(
+          [
+            'Ma Société',
+            'SASU au capital de 1 000,00 €',
+            'Siège : 1 rue de la Paix, 75002 Paris',
+            'SIREN : 443 061 841',
+            'SIRET : 443 061 841 00013',
+            'TVA intracommunautaire : FR64443061841',
+          ].join('\n'),
+        );
+      });
+
+      it('n’écrit pas de capital quand les statuts ne sont pas retenus', async () => {
+        prisma.billing_documents.findFirst.mockResolvedValue(brouillonDuProjet);
+        prisma.company_registrations.findFirst.mockResolvedValue({ ...fiche, siret: null, vat_number: null });
+        prisma.projects.findFirst.mockResolvedValue({ confirmed_legal_form: 'SASU' });
+        prisma.company_bylaws.findFirst.mockResolvedValue({ status: 'brouillon', legal_form: 'SASU', capital_cents: 100000 });
+
+        await service.changeStatus('u1', 'd1', 'emis');
+
+        expect(prisma.billing_documents.updateMany.mock.calls[0][0].data.issuer_details).toBe(
+          ['Ma Société', 'SASU', 'Siège : 1 rue de la Paix, 75002 Paris', 'SIREN : 443 061 841'].join('\n'),
+        );
+      });
+
+      it('null quand le projet n’a pas de fiche', async () => {
+        prisma.billing_documents.findFirst.mockResolvedValue(brouillonDuProjet);
+
+        await service.changeStatus('u1', 'd1', 'emis');
+
+        const data = prisma.billing_documents.updateMany.mock.calls[0][0].data;
+        expect(data.issued_at).toBeInstanceOf(Date);
+        expect(data.issuer_details).toBeNull();
+      });
+
+      it('null, sans rien lire, quand le document n’a pas de projet', async () => {
+        prisma.billing_documents.findFirst.mockResolvedValue({ ...brouillonDuProjet, project_id: null });
+
+        await service.changeStatus('u1', 'd1', 'emis');
+
+        expect(prisma.company_registrations.findFirst).not.toHaveBeenCalled();
+        expect(prisma.billing_documents.updateMany.mock.calls[0][0].data.issuer_details).toBeNull();
+      });
+
+      it('ne touche jamais aux mentions d’un document déjà émis', async () => {
+        prisma.billing_documents.findFirst.mockResolvedValue({
+          ...brouillonDuProjet,
+          status: 'emis',
+          issued_at: new Date('2026-01-01'),
+          issuer_details: null,
+        });
+        prisma.company_registrations.findFirst.mockResolvedValue(fiche);
+
+        await service.changeStatus('u1', 'd1', 'paye');
+
+        expect(prisma.company_registrations.findFirst).not.toHaveBeenCalled();
+        expect(prisma.billing_documents.update.mock.calls[0][0].data).not.toHaveProperty('issuer_details');
+      });
     });
 
     it('refuse un retour en arrière vers brouillon', async () => {
@@ -388,6 +502,49 @@ describe('BillingService', () => {
       prisma.billing_documents.findFirst.mockResolvedValue(null);
 
       await expect(service.getDocument('u2', 'd1')).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it("refuse de rattacher le projet d'un autre utilisateur (404, rien créé)", async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.createDocument('u1', {
+          type: 'facture',
+          clientName: 'X',
+          projectId: 'proj-autre',
+          lines: [LINE],
+        }),
+      ).rejects.toThrow(new NotFoundException('Projet introuvable.'));
+      expect(prisma.projects.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: 'proj-autre', owner_id: 'u1' } }),
+      );
+      expect(prisma.billing_documents.create).not.toHaveBeenCalled();
+    });
+
+    it('rattache un projet dont l’appelant est propriétaire', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'proj-1' });
+      prisma.billing_documents.findFirst.mockResolvedValue(null);
+
+      await service.createDocument('u1', { type: 'facture', clientName: 'X', projectId: 'proj-1', lines: [LINE] });
+
+      expect(prisma.billing_documents.create.mock.calls[0][0].data.project_id).toBe('proj-1');
+    });
+
+    it('sans projet : aucune vérification de projet', async () => {
+      prisma.billing_documents.findFirst.mockResolvedValue(null);
+
+      await service.createDocument('u1', { type: 'facture', clientName: 'X', lines: [LINE] });
+
+      expect(prisma.projects.findFirst).not.toHaveBeenCalled();
+      expect(prisma.billing_documents.create.mock.calls[0][0].data.project_id).toBeNull();
+    });
+
+    it('la modification d’un brouillon ne change jamais son projet', async () => {
+      prisma.billing_documents.findFirst.mockResolvedValue({ id: 'd1', owner_id: 'u1', status: 'brouillon' });
+
+      await service.updateDraft('u1', 'd1', { clientName: 'Y', projectId: 'proj-autre' });
+
+      expect(prisma.billing_documents.update.mock.calls[0][0].data).not.toHaveProperty('project_id');
     });
 
     it("refuse de rattacher le contact d'un autre utilisateur", async () => {

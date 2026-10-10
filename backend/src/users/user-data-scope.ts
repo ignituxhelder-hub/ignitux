@@ -92,6 +92,9 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   // la personne tient elle-même (pièces cochées, date et référence du dépôt).
   // Un contenu de travail du projet, pas un contenu généré par IGINI.
   creation_filings: exported('projets_et_contenus'),
+  // La fiche d'immatriculation : SIREN, siège, dénomination… saisis par la
+  // personne depuis son Kbis. Même nature que le dossier de création.
+  company_registrations: exported('projets_et_contenus'),
   // Suivi de flotte : même nature que stocks/agenda, la dépense d'entretien
   // n'en fait pas un enregistrement financier au sens des CGU.
   fleet_vehicles: exported('projets_et_contenus'),

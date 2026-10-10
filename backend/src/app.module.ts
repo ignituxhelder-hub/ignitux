@@ -42,6 +42,7 @@ import { PubliciteModule } from './publicite/publicite.module.js';
 import { StatutsModule } from './statuts/statuts.module.js';
 import { DossierCreationModule } from './dossier-creation/dossier-creation.module.js';
 import { BoutiqueEnLigneModule } from './boutique-en-ligne/boutique-en-ligne.module.js';
+import { ImmatriculationModule } from './immatriculation/immatriculation.module.js';
 
 @Module({
   imports: [
@@ -87,6 +88,7 @@ import { BoutiqueEnLigneModule } from './boutique-en-ligne/boutique-en-ligne.mod
     PubliciteModule,
     StatutsModule,
     DossierCreationModule,
+    ImmatriculationModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: LimiteurQuiSExplique }],

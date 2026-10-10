@@ -473,7 +473,8 @@ export const ModelName = {
   ad_campaign_entries: 'ad_campaign_entries',
   identity_verifications: 'identity_verifications',
   mandates: 'mandates',
-  creation_filings: 'creation_filings'
+  creation_filings: 'creation_filings',
+  company_registrations: 'company_registrations'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -489,7 +490,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "company_bylaws" | "bylaw_associates" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "chat_messages" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "project_compliance_ai_runs" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "participation_agreements" | "participation_milestones" | "dividend_right_entries" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "shopify_connections" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries" | "identity_verifications" | "mandates" | "creation_filings"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "company_bylaws" | "bylaw_associates" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "chat_messages" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "project_compliance_ai_runs" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "participation_agreements" | "participation_milestones" | "dividend_right_entries" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "shopify_connections" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries" | "identity_verifications" | "mandates" | "creation_filings" | "company_registrations"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -6191,6 +6192,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    company_registrations: {
+      payload: Prisma.$company_registrationsPayload<ExtArgs>
+      fields: Prisma.company_registrationsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.company_registrationsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_registrationsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.company_registrationsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_registrationsPayload>
+        }
+        findFirst: {
+          args: Prisma.company_registrationsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_registrationsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.company_registrationsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_registrationsPayload>
+        }
+        findMany: {
+          args: Prisma.company_registrationsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_registrationsPayload>[]
+        }
+        create: {
+          args: Prisma.company_registrationsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_registrationsPayload>
+        }
+        createMany: {
+          args: Prisma.company_registrationsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.company_registrationsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_registrationsPayload>[]
+        }
+        delete: {
+          args: Prisma.company_registrationsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_registrationsPayload>
+        }
+        update: {
+          args: Prisma.company_registrationsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_registrationsPayload>
+        }
+        deleteMany: {
+          args: Prisma.company_registrationsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.company_registrationsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.company_registrationsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_registrationsPayload>[]
+        }
+        upsert: {
+          args: Prisma.company_registrationsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$company_registrationsPayload>
+        }
+        aggregate: {
+          args: Prisma.Company_registrationsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCompany_registrations>
+        }
+        groupBy: {
+          args: Prisma.company_registrationsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Company_registrationsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.company_registrationsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Company_registrationsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -6723,6 +6798,7 @@ export const Billing_documentsScalarFieldEnum = {
   status: 'status',
   client_name: 'client_name',
   client_details: 'client_details',
+  issuer_details: 'issuer_details',
   currency: 'currency',
   notes: 'notes',
   corrects_id: 'corrects_id',
@@ -7339,6 +7415,25 @@ export const Creation_filingsScalarFieldEnum = {
 export type Creation_filingsScalarFieldEnum = (typeof Creation_filingsScalarFieldEnum)[keyof typeof Creation_filingsScalarFieldEnum]
 
 
+export const Company_registrationsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  project_id: 'project_id',
+  siren: 'siren',
+  siret: 'siret',
+  vat_number: 'vat_number',
+  legal_name: 'legal_name',
+  head_office: 'head_office',
+  registered_on: 'registered_on',
+  capital_entry_id: 'capital_entry_id',
+  capital_reserved_at: 'capital_reserved_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Company_registrationsScalarFieldEnum = (typeof Company_registrationsScalarFieldEnum)[keyof typeof Company_registrationsScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -7687,6 +7782,7 @@ export type GlobalOmitConfig = {
   identity_verifications?: Prisma.identity_verificationsOmit
   mandates?: Prisma.mandatesOmit
   creation_filings?: Prisma.creation_filingsOmit
+  company_registrations?: Prisma.company_registrationsOmit
 }
 
 /* Types for Logging */
