@@ -53,6 +53,10 @@ ce qui changerait la réponse.
 | Pistes de financement | types adaptés (prêt bancaire, prêt d'honneur, Bpifrance, subventions, apport, investisseurs), à titre d'information, sans recommandation personnalisée | oui |
 | Prochaines étapes | 3 à 5 actions concrètes, ordonnées | oui |
 
+Les bornes (3 à 6 risques, 3 à 5 étapes) sont demandées à IGINI. Au-delà, le rapport est tronqué ;
+en deçà, il est accepté tel quel : un projet presque vide peut honnêtement n'avoir que deux risques
+identifiables, et compléter la liste serait inventer.
+
 ### 3.3 Règle d'honnêteté
 
 - Le rapport ne s'appuie **que** sur les données du projet en base, et nomme d'où vient chaque
