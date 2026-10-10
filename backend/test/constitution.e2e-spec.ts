@@ -249,6 +249,10 @@ describe('Constitution et données personnelles (e2e)', () => {
       // et le droit d'accès porte sur elles aussi. Les omettre rendrait
       // l'export incomplet sans que personne ne puisse s'en apercevoir.
       expect(Object.keys(response.body.donnees.compte).sort()).toEqual([
+        // L'offre souscrite, les pièces d'identité soumises et les mandats donnés à
+        // Ignitux sont rattachés au compte : ils partent avec lui (voir
+        // user-data.service.ts).
+        'abonnement',
         // Le bureau (applications ajoutées ou retirées) est une préférence que la
         // personne a choisie : il part avec l'export, comme ses rôles.
         'bureau',
@@ -256,8 +260,10 @@ describe('Constitution et données personnelles (e2e)', () => {
         'email',
         'email_verifie_le',
         'id',
+        'mandats_donnes_a_ignitux',
         'profil',
         'roles_tenus',
+        'verifications_d_identite',
       ]);
       expect(JSON.stringify(response.body)).not.toContain('$2b$');
       expect(response.body.non_inclus.length).toBeGreaterThan(0);

@@ -36,6 +36,15 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
  */
 const nextConfig = {
   distDir: process.env.NEXT_DIST_DIR ?? '.next',
+  // Métadonnées toujours dans le <head>, pour tous les navigateurs.
+  //
+  // next-intl lit la langue dans les cookies : toutes les pages sont devenues
+  // dynamiques, et Next diffuse alors les métadonnées APRÈS le </head>, sauf
+  // pour les robots qu'il connaît. Safari sur iPhone ne lit les balises Apple
+  // (mode application, nom sous l'icône, écrans de démarrage) que dans le
+  // <head> : installée, l'application s'ouvrait avec la barre Safari et sans
+  // son nom. scripts/installable.mjs le vérifie en CI.
+  htmlLimitedBots: /.*/,
 };
 
 export default withNextIntl(nextConfig);
