@@ -39,6 +39,7 @@ import { ParticipationSection } from './participation-section';
 import { CollaboratorsSection } from './collaborators-section';
 import { StatutsSection } from './statuts-section';
 import { DossierCreationSection } from './dossier-creation-section';
+import { ImmatriculationSection } from './immatriculation-section';
 import { ComplianceSection } from './compliance-section';
 import { KnowledgeSection, MemorySection, ScoreHistorySection, ScoreSection, TasksSection } from './engine-sections';
 import { MandatSection } from './mandat-section';
@@ -171,6 +172,9 @@ export default function ProjectDetailPage() {
   // Incrémenté quand les statuts sont générés, régénérés ou retenus : le
   // dossier de création (pièce « statuts ») se recharge alors.
   const [versionStatuts, setVersionStatuts] = useState(0);
+  // Incrémenté quand la fiche d'immatriculation est enregistrée ou supprimée :
+  // le bandeau « Immatriculée » du dossier de création en dépend.
+  const [versionImmatriculation, setVersionImmatriculation] = useState(0);
   const [parcours, setParcours] = useState<JourneyView | null>(null);
   const [vueAvancee, setVueAvancee] = useState(false);
   // Laquelle des six étapes (voir lib/etapes-projet.ts) affiche son contenu en
@@ -647,7 +651,18 @@ export default function ProjectDetailPage() {
               token={token}
               projectId={id}
               confirmedLegalForm={project?.confirmed_legal_form ?? null}
-              refreshSignal={versionStatuts}
+              // Deux compteurs qui ne font que croître : leur somme change à
+              // chaque changement des statuts comme de l'immatriculation.
+              refreshSignal={versionStatuts + versionImmatriculation}
+            />
+          )}
+          {/* L'immatriculation suit le dépôt du dossier ; réservée au propriétaire
+              côté serveur (un collaborateur reçoit un 404), donc ici aussi. */}
+          {isOwner && (
+            <ImmatriculationSection
+              token={token}
+              projectId={id}
+              onChanged={() => setVersionImmatriculation((v) => v + 1)}
             />
           )}
         </>
