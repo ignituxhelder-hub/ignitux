@@ -240,6 +240,32 @@ describe('DossierCreationSection', () => {
     expect(screen.queryByRole('button', { name: /télécharger/i })).not.toBeInTheDocument();
   });
 
+  it('immatriculée : bandeau avec la date (jour de Paris) et le SIREN, lien vers la fiche', async () => {
+    mockApiRoutes({
+      [`GET ${ROUTE}`]: {
+        status: 200,
+        body: dossier({ immatriculee: true, registration: { siren: '732829320', registeredOn: '2026-10-01' } }),
+      },
+    });
+    rendre();
+
+    expect(await screen.findByText(/Immatriculée le 01\/10\/2026 — SIREN 732829320/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Voir la fiche d’immatriculation' })).toHaveAttribute(
+      'href',
+      '#section-immatriculation',
+    );
+    expect(screen.queryByText(/quand tu l'as reçu/)).not.toBeInTheDocument();
+  });
+
+  it('pas encore immatriculée : invitation à saisir le SIREN une fois reçu', async () => {
+    mockApiRoutes({ [`GET ${ROUTE}`]: { status: 200, body: dossier({ immatriculee: false, registration: null }) } });
+    rendre();
+
+    expect(await screen.findByText(/Saisis ton SIREN dans la section/)).toBeInTheDocument();
+    expect(screen.getByText(/quand tu l'as reçu/)).toBeInTheDocument();
+    expect(screen.queryByText(/Immatriculée le/)).not.toBeInTheDocument();
+  });
+
   it('recharge le dossier quand la forme confirmée change', async () => {
     mockApiRoutes({ [`GET ${ROUTE}`]: { status: 200, body: dossier() } });
     const { rerender } = rendre(null);
