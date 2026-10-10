@@ -199,10 +199,11 @@ export default function RevueEvaluationsPage() {
 
   const champ = (cle: keyof Formulaire, libelle: string, lignes = 3, aide?: string): ReactNode =>
     form && (
-      <label style={{ display: 'block', marginBottom: '0.75rem' }}>
+      <label htmlFor={`revue-${cle}`} style={{ display: 'block', marginBottom: '0.75rem' }}>
         <strong>{libelle}</strong>
         {aide && <span className="muted"> — {aide}</span>}
         <textarea
+          id={`revue-${cle}`}
           rows={lignes}
           value={form[cle]}
           onChange={(e) => setForm({ ...form, [cle]: e.target.value })}
@@ -253,9 +254,10 @@ export default function RevueEvaluationsPage() {
             {detail.projetTitre} <span className="muted">· {detail.entrepreneurEmail}</span>
           </h2>
 
-          <label style={{ display: 'block', marginBottom: '0.75rem' }}>
+          <label htmlFor="revue-verdict" style={{ display: 'block', marginBottom: '0.75rem' }}>
             <strong>Verdict</strong>
             <select
+              id="revue-verdict"
               value={form.verdict}
               onChange={(e) => setForm({ ...form, verdict: e.target.value as VerdictEvaluation })}
               style={{ display: 'block' }}
@@ -288,9 +290,10 @@ export default function RevueEvaluationsPage() {
           </button>
 
           <hr />
-          <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+          <label htmlFor="revue-consigne" style={{ display: 'block', marginBottom: '0.5rem' }}>
             <strong>Consigne pour IGINI</strong>
             <textarea
+              id="revue-consigne"
               rows={2}
               value={consigne}
               onChange={(e) => setConsigne(e.target.value)}
@@ -306,9 +309,10 @@ export default function RevueEvaluationsPage() {
           </button>
 
           <hr />
-          <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+          <label htmlFor="revue-motif" style={{ display: 'block', marginBottom: '0.5rem' }}>
             <strong>Motif du refus</strong> <span className="muted">— l’entrepreneur le lira</span>
             <textarea
+              id="revue-motif"
               rows={2}
               value={motif}
               onChange={(e) => setMotif(e.target.value)}
