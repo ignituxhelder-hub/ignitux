@@ -36,6 +36,7 @@ import { AutomationSection } from './automation-section';
 import { WorkflowSection } from './workflow-section';
 import { BuybackSection, FinancingSection } from './financing-section';
 import { ParticipationSection } from './participation-section';
+import { EvaluationSection } from './evaluation-section';
 import { CollaboratorsSection } from './collaborators-section';
 import { StatutsSection } from './statuts-section';
 import { DossierCreationSection } from './dossier-creation-section';
@@ -706,6 +707,10 @@ export default function ProjectDetailPage() {
           readOnly={!isOwner}
           iginiStatus={iginiStatus}
         />
+      )}
+      {/* Le jugement (« est-ce finançable ? »), séparé du plan ci-dessus qui dit comment financer. */}
+      {montrer('financement') && etapeOuverte === 'financement' && (
+        <EvaluationSection token={token} projectId={id} readOnly={!isOwner} />
       )}
 
       {montrer('developpement') && etapeOuverte === 'developpement' && (

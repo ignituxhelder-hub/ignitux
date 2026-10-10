@@ -996,6 +996,44 @@ export interface CatalogueOffres {
   offres: Offre[];
 }
 
+// ── L EVALUATION DE FINANCEMENT ────────────────────────────────────────────
+
+export type VerdictEvaluation = 'financable' | 'financable_apres_corrections' | 'pas_financable_en_l_etat';
+
+export type StatutEvaluation = 'en_preparation' | 'echec' | 'en_revue' | 'a_refaire' | 'validee' | 'refusee';
+
+export interface RapportEvaluation {
+  verdict: VerdictEvaluation;
+  resume: string;
+  montantRecherche: { montantEuros: number | null; source: string };
+  usageDesFonds: string;
+  audit: { connu: string[]; manques: string[] };
+  faisabilite: { marche: string; modeleEconomique: string; capacite: string };
+  dossier: { piece: string; etat: 'prete' | 'manquante' }[];
+  risques: { risque: string; gravite: 'faible' | 'moyenne' | 'forte'; reduction: string }[];
+  pistes: { type: string; pourquoi: string }[];
+  prochainesEtapes: string[];
+}
+
+/** Ce que l entrepreneur voit : verdict, rapport et note restent null tant que ce n est pas validé. */
+export interface EvaluationVue {
+  id: string;
+  status: StatutEvaluation;
+  createdAt: string;
+  reviewedAt: string | null;
+  verdict: VerdictEvaluation | null;
+  rapport: RapportEvaluation | null;
+  noteIgnitux: string | null;
+  motifRefus: string | null;
+  motifEchec: string | null;
+}
+
+export const VERDICT_EVALUATION_LABEL: Record<VerdictEvaluation, string> = {
+  financable: 'Finançable en l’état',
+  financable_apres_corrections: 'Finançable après corrections',
+  pas_financable_en_l_etat: 'Pas finançable en l’état',
+};
+
 // ── LA COMPTABILITE ────────────────────────────────────────────────────────
 
 export const NATURES_DE_COMPTE_COMPTABLE = [
@@ -2289,6 +2327,30 @@ export const api = {
     });
     if (!res.ok) {
       throw new ApiError('Impossible de télécharger le récapitulatif.', res.status);
+    }
+    return res.blob();
+  },
+
+  demanderEvaluation: (token: string, projectId: string) =>
+    request<EvaluationVue>(`/projects/${projectId}/evaluations-financement`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getEvaluations: (token: string, projectId: string) =>
+    request<EvaluationVue[]>(
+      `/projects/${projectId}/evaluations-financement`,
+      { headers: { Authorization: `Bearer ${token}` } },
+      { skipOfflineCache: true },
+    ),
+
+  /** Même principe que le PDF des statuts : protégé par le jeton, récupéré en blob. */
+  telechargerEvaluationPdf: async (token: string, projectId: string, evaluationId: string): Promise<Blob> => {
+    const res = await fetch(`${API_URL}/projects/${projectId}/evaluations-financement/${evaluationId}/pdf`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      throw new ApiError('Impossible de télécharger le dossier de financement.', res.status);
     }
     return res.blob();
   },
