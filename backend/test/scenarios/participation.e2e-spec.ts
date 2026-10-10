@@ -93,7 +93,7 @@ describe('SCÉNARIO — participation IGNITUX', () => {
         .expect(403);
     });
 
-    it('IGNITUX crée l’accord : 51/49, 5 % et l’offre construction, par défaut', async () => {
+    it('IGNITUX crée l’accord : 51/49, 5 % et l’offre entrepreneur, par défaut', async () => {
       const { body } = await api(app)
         .post(`/projects/${projectId}/participation/agreement`)
         .set(...auth(ignitux))
@@ -104,7 +104,7 @@ describe('SCÉNARIO — participation IGNITUX', () => {
         initial_founder_bps: 5100,
         initial_ignitux_bps: 4900,
         dividend_right_bps: 500,
-        ecosystem_offre: 'construction',
+        ecosystem_offre: 'entrepreneur',
         status: 'actif',
       });
       await expect(partsActuelles()).resolves.toEqual({ porteur: 5100, ignitux: 4900 });
@@ -282,10 +282,10 @@ describe('SCÉNARIO — participation IGNITUX', () => {
   describe('4. l’accès à l’écosystème — indépendant du capital', () => {
     it('à 0 % du capital, l’entrepreneur garde l’offre de son accord', async () => {
       await expect(partsActuelles()).resolves.toEqual({ porteur: 10000, ignitux: 0 });
-      await expect(offres.offreDe(porteuse.userId)).resolves.toBe('construction');
+      await expect(offres.offreDe(porteuse.userId)).resolves.toBe('entrepreneur');
 
       const { body } = await lireParticipation();
-      expect(body.ecosystem).toMatchObject({ offre: 'construction', active: true });
+      expect(body.ecosystem).toMatchObject({ offre: 'entrepreneur', active: true });
     });
   });
 

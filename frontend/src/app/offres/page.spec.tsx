@@ -38,7 +38,7 @@ const CATALOGUE = (extra: Record<string, unknown> = {}) => ({
   souscriptionPossible: false,
   offres: [
     OFFRE('decouverte', 'Découverte', 0, { actuelle: true }),
-    OFFRE('entrepreneur', 'Entrepreneur', 990),
+    OFFRE('entrepreneur', 'Entrepreneur', 2000),
   ],
   evaluationFinancement: {
     prixCentimes: 9900,
@@ -75,7 +75,7 @@ describe('OffresPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Découverte' })).toBeInTheDocument();
     expect(screen.getByText('Gratuit')).toBeInTheDocument();
-    expect(screen.getByText((t) => t.includes('9,90') && t.includes('mois'))).toBeInTheDocument();
+    expect(screen.getByText((t) => t.includes('20,00') && t.includes('mois'))).toBeInTheDocument();
     expect(screen.getByText('1 projet')).toBeInTheDocument();
   });
 

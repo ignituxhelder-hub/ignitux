@@ -876,7 +876,7 @@ export interface ConstitutionViolation {
  */
 // ── LES OFFRES ─────────────────────────────────────────────────────────────
 
-export type OffreId = 'decouverte' | 'entrepreneur' | 'construction';
+export type OffreId = 'decouverte' | 'entrepreneur';
 
 export interface OffreCapacites {
   projets: number | null;

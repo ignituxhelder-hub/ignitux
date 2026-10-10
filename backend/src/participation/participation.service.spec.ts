@@ -102,7 +102,7 @@ describe('ParticipationService', () => {
       project_collaborators: new FakeTable(),
       equity_holders: new FakeTable(() => ({ is_founder: false }), 'holder'),
       equity_events: new FakeTable(() => ({}), 'event'),
-      participation_agreements: new FakeTable(() => ({ status: 'actif', ecosystem_offre: 'construction' }), 'agr'),
+      participation_agreements: new FakeTable(() => ({ status: 'actif', ecosystem_offre: 'entrepreneur' }), 'agr'),
       participation_milestones: new FakeTable(
         () => ({ status: 'prevu', conditions: [], equity_event_ids: [], validated_at: null }),
         'ms',
@@ -160,14 +160,14 @@ describe('ParticipationService', () => {
       expect(db.equity_events.rows).toHaveLength(2);
     });
 
-    it('copie les valeurs par défaut DANS l’accord : droit à 5 %, offre construction', async () => {
+    it('copie les valeurs par défaut DANS l’accord : droit à 5 %, offre entrepreneur', async () => {
       const agreement = await createAgreement();
 
       expect(agreement).toMatchObject({
         initial_founder_bps: 5100,
         initial_ignitux_bps: 4900,
         dividend_right_bps: 500,
-        ecosystem_offre: 'construction',
+        ecosystem_offre: 'entrepreneur',
         status: 'actif',
       });
     });
@@ -177,14 +177,14 @@ describe('ParticipationService', () => {
         founderBasisPoints: 6000,
         ignituxBasisPoints: 4000,
         dividendRightBasisPoints: 300,
-        ecosystemOffre: 'entrepreneur',
+        ecosystemOffre: 'decouverte',
       });
 
       expect(agreement).toMatchObject({
         initial_founder_bps: 6000,
         initial_ignitux_bps: 4000,
         dividend_right_bps: 300,
-        ecosystem_offre: 'entrepreneur',
+        ecosystem_offre: 'decouverte',
       });
       await expect(currentShares()).resolves.toEqual({ founder: 6000, ignitux: 4000 });
     });
@@ -543,7 +543,7 @@ describe('ParticipationService', () => {
         entries: [],
         totalDueCents: 0,
       });
-      expect(view.ecosystem).toMatchObject({ offre: 'construction', active: true });
+      expect(view.ecosystem).toMatchObject({ offre: 'entrepreneur', active: true });
     });
 
     it('après 100/0 : capital à 0 %, droit actif, accès à l’écosystème conservé', async () => {
@@ -556,7 +556,7 @@ describe('ParticipationService', () => {
       expect(view.phase).toBe('transmise');
       expect(view.capital!.holders.find((h) => !h.isFounder)!.shareBasisPoints).toBe(0);
       expect(view.dividendRight).toMatchObject({ active: true, totalDueCents: 50_000, totalSettledCents: 0 });
-      expect(view.ecosystem).toMatchObject({ offre: 'construction', active: true });
+      expect(view.ecosystem).toMatchObject({ offre: 'entrepreneur', active: true });
     });
 
     it('expose l’historique complet des changements de capital', async () => {
@@ -595,7 +595,7 @@ describe('ParticipationService', () => {
       expect(1_000_000 - entry.due_cents).toBe(950_000);
 
       const view = await service.getParticipation(OWNER.id, 'p1');
-      expect(view.ecosystem).toMatchObject({ offre: 'construction', active: true });
+      expect(view.ecosystem).toMatchObject({ offre: 'entrepreneur', active: true });
       // 2 événements de départ + 3 paliers × 2 : toute l'histoire est là.
       expect(view.history).toHaveLength(8);
     });

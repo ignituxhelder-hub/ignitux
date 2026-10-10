@@ -3,6 +3,7 @@ import {
   estOffre,
   EVALUATION_FINANCEMENT,
   GENERATEURS,
+  normaliserOffre,
   offre,
   OFFRE_PAR_DEFAUT,
   offreSuivante,
@@ -42,10 +43,8 @@ describe('catalogue des offres', () => {
     it('réserve les quatre générateurs suivants aux offres payantes', () => {
       expect(offre('decouverte').capacites.generateurs).toEqual(['analyser']);
 
-      for (const id of ['entrepreneur', 'construction'] as const) {
-        expect(offre(id).capacites.generateurs).toEqual([...GENERATEURS]);
-        expect(offre(id).capacites.generateurs).toHaveLength(6);
-      }
+      expect(offre('entrepreneur').capacites.generateurs).toEqual([...GENERATEURS]);
+      expect(offre('entrepreneur').capacites.generateurs).toHaveLength(6);
     });
 
     it('n’annonce jamais « executer » parmi les générateurs d’une offre', () => {
@@ -62,10 +61,17 @@ describe('catalogue des offres', () => {
       }
     });
 
-    it('réserve les outils de gestion à l’offre Construction', () => {
+    it('met tout dans l’unique offre payante : outils de gestion, investisseurs, collaborateurs', () => {
       expect(offre('decouverte').capacites.outilsDeGestion).toBe(false);
-      expect(offre('entrepreneur').capacites.outilsDeGestion).toBe(false);
-      expect(offre('construction').capacites.outilsDeGestion).toBe(true);
+      expect(offre('entrepreneur').capacites.outilsDeGestion).toBe(true);
+      expect(offre('entrepreneur').capacites.investisseurs).toBe(true);
+      expect(offre('entrepreneur').capacites.collaborateurs).toBeNull();
+    });
+
+    it('n’a qu’une offre payante, à 20 € par mois, et garde Découverte gratuite', () => {
+      expect(CATALOGUE.map((o) => o.id)).toEqual(['decouverte', 'entrepreneur']);
+      expect(offre('decouverte').prixCentimes).toBe(0);
+      expect(offre('entrepreneur').prixCentimes).toBe(2000);
     });
   });
 
@@ -135,8 +141,7 @@ describe('catalogue des offres', () => {
 
     it('propose l’offre au-dessus, et rien au-delà de la dernière', () => {
       expect(offreSuivante('decouverte')?.id).toBe('entrepreneur');
-      expect(offreSuivante('entrepreneur')?.id).toBe('construction');
-      expect(offreSuivante('construction')).toBeNull();
+      expect(offreSuivante('entrepreneur')).toBeNull();
     });
   });
 
@@ -168,6 +173,16 @@ describe('catalogue des offres', () => {
     it('se reconnaît', () => {
       expect(estOffre('entrepreneur')).toBe(true);
       expect(estOffre('premium')).toBe(false);
+    });
+
+    // L'offre Construction a été fusionnée dans Entrepreneur : des lignes en
+    // base portent encore l'ancien nom, et elles ne doivent pas retomber sur
+    // le gratuit.
+    it('reconnaît l’ancienne offre « construction » comme Entrepreneur', () => {
+      expect(estOffre('construction')).toBe(false);
+      expect(normaliserOffre('construction')).toBe('entrepreneur');
+      expect(normaliserOffre('entrepreneur')).toBe('entrepreneur');
+      expect(normaliserOffre('premium')).toBeNull();
     });
   });
 
@@ -207,7 +222,7 @@ describe('catalogue des offres', () => {
     });
 
     it('prend la valeur du catalogue par défaut', () => {
-      expect(prixCentimes('entrepreneur')).toBe(990);
+      expect(prixCentimes('entrepreneur')).toBe(2000);
     });
 
     it('accepte une surcharge, par exemple un prix de bêta', () => {
@@ -226,9 +241,9 @@ describe('catalogue des offres', () => {
     // Une faute de frappe ne doit pas rendre une offre gratuite par
     // accident, ni empêcher la page des offres de s afficher.
     it('ignore une valeur illisible ou négative au lieu de casser le prix', () => {
-      for (const mauvais of ['neuf euros', '9,90', '-100', '', '9.5']) {
+      for (const mauvais of ['vingt euros', '20,00', '-100', '', '9.5']) {
         process.env[CLE] = mauvais;
-        expect(prixCentimes('entrepreneur'), mauvais).toBe(990);
+        expect(prixCentimes('entrepreneur'), mauvais).toBe(2000);
       }
     });
   });

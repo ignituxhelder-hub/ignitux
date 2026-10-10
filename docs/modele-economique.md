@@ -80,6 +80,24 @@ enfermer derrière un péage ferait payer pour de l'électricité qu'on ne conso
 priverait quelqu'un sans budget d'un produit qui marche très bien sans IA, ce qui est
 exactement la promesse du parcours.
 
+> **Mise à jour du 10 octobre 2026 : il n'y a plus que deux offres.** Entrepreneur (9,90 €) et
+> Construction (59 €) ont été fusionnées en une seule offre, **Entrepreneur à 20 €/mois**, qui
+> contient tout. Découverte reste gratuite. Les lignes en base qui portent encore
+> `construction` sont lues comme `entrepreneur` (`normaliserOffre`) et migrées par
+> `20261010120000_offre_unique_entrepreneur`. Le tableau historique est conservé plus bas.
+
+| | Découverte | Entrepreneur |
+|---|---|---|
+| Prix par défaut | gratuit | **20,00 €/mois** |
+| Projets | 1 | sans limite |
+| Générateurs | Analyser | tous |
+| Générations/mois | 3 | 35 |
+| Comptabilité, facturation, banque | — | oui |
+| Financement, investisseurs | — | oui |
+| Collaborateurs | — | sans limite |
+
+*Avant le 10 octobre 2026, trois offres :*
+
 | | Découverte | Entrepreneur | Construction |
 |---|---|---|---|
 | Prix par défaut | gratuit | 9,90 € | 59,00 € |

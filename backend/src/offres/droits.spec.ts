@@ -96,37 +96,34 @@ describe('droits ouverts par une offre', () => {
 
     it('laisse passer tant que le quota n’est pas atteint', () => {
       expect(
-        peut('entrepreneur', { kind: 'generer', generateur: 'construire', appelsCeMois: 29 })
+        peut('entrepreneur', { kind: 'generer', generateur: 'construire', appelsCeMois: 34 })
           .autorise,
       ).toBe(true);
       expect(
-        peut('entrepreneur', { kind: 'generer', generateur: 'construire', appelsCeMois: 30 })
+        peut('entrepreneur', { kind: 'generer', generateur: 'construire', appelsCeMois: 35 })
           .autorise,
       ).toBe(false);
     });
   });
 
   describe('les outils de gestion', () => {
-    it('sont fermés en dessous de Construction, et nomment Construction', () => {
-      for (const id of ['decouverte', 'entrepreneur'] as const) {
-        const verdict = peut(id, { kind: 'outil_de_gestion', outil: 'comptabilite' });
-        expect(verdict.autorise, id).toBe(false);
-        expect(verdict.offreQuiOuvre, id).toBe('construction');
-      }
+    it('sont fermés en Découverte, et nomment Entrepreneur', () => {
+      const verdict = peut('decouverte', { kind: 'outil_de_gestion', outil: 'comptabilite' });
+      expect(verdict.autorise).toBe(false);
+      expect(verdict.offreQuiOuvre).toBe('entrepreneur');
     });
 
-    it('sont ouverts en Construction', () => {
-      expect(peut('construction', { kind: 'outil_de_gestion', outil: 'banque' }).autorise).toBe(
+    it('sont ouverts en Entrepreneur', () => {
+      expect(peut('entrepreneur', { kind: 'outil_de_gestion', outil: 'banque' }).autorise).toBe(
         true,
       );
     });
   });
 
   describe('le financement et les collaborateurs', () => {
-    it('ferme le financement sous Construction', () => {
-      expect(peut('entrepreneur', { kind: 'ouvrir_financement' }).offreQuiOuvre).toBe(
-        'construction',
-      );
+    it('ferme le financement en Découverte, et ouvre Entrepreneur', () => {
+      expect(peut('decouverte', { kind: 'ouvrir_financement' }).offreQuiOuvre).toBe('entrepreneur');
+      expect(peut('entrepreneur', { kind: 'ouvrir_financement' }).autorise).toBe(true);
     });
 
     it('dit clairement qu’aucun collaborateur n’est possible, sans parler de plafond atteint', () => {
@@ -140,9 +137,9 @@ describe('droits ouverts par une offre', () => {
       expect(verdict.raison).not.toMatch(/déjà là/);
     });
 
-    it('n’impose aucun plafond en Construction', () => {
+    it('n’impose aucun plafond en Entrepreneur', () => {
       expect(
-        peut('construction', { kind: 'inviter_collaborateur', collaborateursActuels: 12 })
+        peut('entrepreneur', { kind: 'inviter_collaborateur', collaborateursActuels: 12 })
           .autorise,
       ).toBe(true);
     });
@@ -153,9 +150,9 @@ describe('droits ouverts par une offre', () => {
       ['decouverte', { kind: 'creer_projet', projetsActuels: 1 }],
       ['decouverte', { kind: 'generer', generateur: 'financer', appelsCeMois: 0 }],
       ['decouverte', { kind: 'generer', generateur: 'analyser', appelsCeMois: 99 }],
-      ['entrepreneur', { kind: 'outil_de_gestion', outil: 'facturation' }],
-      ['entrepreneur', { kind: 'ouvrir_financement' }],
-      ['entrepreneur', { kind: 'inviter_collaborateur', collaborateursActuels: 0 }],
+      ['decouverte', { kind: 'outil_de_gestion', outil: 'facturation' }],
+      ['decouverte', { kind: 'ouvrir_financement' }],
+      ['decouverte', { kind: 'inviter_collaborateur', collaborateursActuels: 0 }],
     ];
 
     // Un refus sans phrase est une impasse : la personne voit un bouton
@@ -199,17 +196,15 @@ describe('droits ouverts par une offre', () => {
 });
 
 describe('outil de gestion — boutique en ligne', () => {
-  it('refuse en Découverte et en Entrepreneur, nomme Construction', () => {
-    for (const id of ['decouverte', 'entrepreneur'] as const) {
-      const verdict = peut(id, { kind: 'outil_de_gestion', outil: 'boutique_en_ligne' });
-      expect(verdict.autorise, id).toBe(false);
-      expect(verdict.offreQuiOuvre, id).toBe('construction');
-    }
+  it('refuse en Découverte, nomme Entrepreneur', () => {
+    const verdict = peut('decouverte', { kind: 'outil_de_gestion', outil: 'boutique_en_ligne' });
+    expect(verdict.autorise).toBe(false);
+    expect(verdict.offreQuiOuvre).toBe('entrepreneur');
   });
 
-  it('autorise en Construction', () => {
+  it('autorise en Entrepreneur', () => {
     expect(
-      peut('construction', { kind: 'outil_de_gestion', outil: 'boutique_en_ligne' }).autorise,
+      peut('entrepreneur', { kind: 'outil_de_gestion', outil: 'boutique_en_ligne' }).autorise,
     ).toBe(true);
   });
 });
