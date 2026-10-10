@@ -50,6 +50,9 @@ Aujourd'hui `billing_documents` n'a aucune identité d'émetteur. Ajouter
 si le projet du document a une fiche d'immatriculation au moment de l'émission, on y écrit :
 dénomination, forme juridique (`projects.confirmed_legal_form`), capital (depuis les statuts
 retenus, en euros, seulement s'il est connu), siège, SIREN (+ SIRET si présent), TVA si présente.
+Micro-entreprise et EI : la forme s'écrit « Entrepreneur individuel (EI) », sans ligne de capital.
+L'émission est gardée (`updateMany` sur `issued_at` nul, 409 pour la demande concurrente), et un
+document ne peut être rattaché qu'à un projet de l'appelant (404 « Projet introuvable. »).
 Sans fiche ou sans projet : `null`, comportement actuel inchangé. Les documents déjà émis ne
 changent jamais (pas de rétro-remplissage). Le brouillon n'a pas de snapshot (rempli à
 l'émission). Exposé par l'API existante des documents et affiché dans l'interface de
@@ -80,6 +83,17 @@ et `POST .../immatriculation/capital` qui enregistre l'écriture : **Débit** co
 - Idempotence : une seule écriture par fiche ; `capital_entry_id` est posé dans la même
   transaction logique ; un second POST → 409. Garde par `updateMany` conditionnel sur
   `capital_entry_id: null` + vérification du compte avant d'écrire.
+- (Revue finale) Le POST prend `{ montantCents, date }` — ce que la personne a vu — et
+  répond 409 « La proposition a changé depuis son affichage — recharge-la avant
+  d'enregistrer. » si la proposition recalculée diffère. `dejaEnregistree` n'est vrai que si
+  le journal de ce propriétaire contient une écriture sous `capital_entry_id` ; le GET rend
+  alors cette écriture réelle (`enregistree: { entryId, date, libelle, montantCents, lignes }`,
+  `proposition: null`), même si la forme a changé depuis. Une réservation sans écriture
+  (`capital_reserved_at`) de moins de 2 minutes → 409 « Un enregistrement est en cours,
+  réessaie dans un instant. » (`enregistrementEnCours: true` au GET) ; au-delà elle est
+  reprenable (POST, DELETE) par une écriture gardée sur l'ancienne valeur — sauf si une
+  écriture `SIREN …` existe déjà au journal (lien jamais posé) : 409, jamais de doublon.
+- Comptes 512/101 existants d'une autre nature que celle du plan (actif / capitaux) → 400.
 - Confirmation explicite côté interface (« Enregistrer cette écriture dans ma comptabilité »),
   avec le montant et les comptes affichés ; jamais d'enregistrement en arrière-plan.
 - Si l'enregistrement du ledger réussit mais que la pose de `capital_entry_id` échoue, le
