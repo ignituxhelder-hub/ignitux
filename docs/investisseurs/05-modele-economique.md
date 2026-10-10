@@ -9,7 +9,25 @@ Le principe, vérifié dans le code et cohérent partout où il est documenté :
 faire tourner reste gratuit ; ce qui coûte de l'argent réel à chaque clic (un appel à un générateur
 IGINI) est payant **[Code, Bible]**. Ce n'est pas « basique contre avancé ».
 
-## Les trois offres — chiffres vérifiés dans le code
+## Les offres — chiffres vérifiés dans le code
+
+> **Mise à jour du 10/10/2026.** Il n'y a plus que deux offres : Découverte (gratuite) et
+> Entrepreneur à **20,00 €/mois**, qui reprend tout ce que Construction contenait. L'évaluation de
+> financement ne se vend plus à part (99,00 €) : elle est **comprise dans Entrepreneur**, et son
+> parcours n'est pas encore construit (affichée « bientôt disponible »). **[Code]**
+
+| | Découverte | Entrepreneur |
+|---|---|---|
+| Prix | Gratuit | 20,00 €/mois |
+| Projets | 1 | Sans limite |
+| Générateurs IGINI | Analyser seul | Tous |
+| Générations IA/mois | 3 | 35 |
+| Comptabilité, facturation, banque | — | Oui |
+| Financement, investisseurs | — | Oui |
+| Collaborateurs | — | Sans limite |
+| Évaluation de financement | — | Incluse (bientôt disponible) |
+
+*Avant le 10/10/2026 :*
 
 | | Découverte | Entrepreneur | Construction |
 |---|---|---|---|
@@ -37,6 +55,10 @@ en moyenne** **[Bible, Pricing]**. Un pipeline complet (les 5 générateurs, une
 **0,3530 €** **[Pricing]**.
 
 ## ⚠️ Incohérence identifiée par cet audit — à trancher par le fondateur
+
+> **Tranchée le 10/10/2026.** L'offre payante unique vaut 20,00 €/mois : le plafond IA de 2,00 €
+> correspond désormais exactement aux 10 % annoncés. La suite de cette section décrit la situation
+> d'avant, conservée pour l'historique.
 
 `PRICING.md` construit tout son raisonnement de plafond de coût IA (« 10 % du prix de vente ») sur
 un **prix de vente de référence de 20,00 €/mois** — cité explicitement dans ses tableaux. **Aucune

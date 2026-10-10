@@ -34,7 +34,7 @@
  * autre problème, et les mélanger rendrait les deux illisibles.
  */
 
-/** Les abonnements : le gratuit, et une offre payante qui contient tout. Le financement n'en est pas un — voir plus bas. */
+/** Les abonnements : le gratuit, et une offre payante qui contient tout. L'évaluation de financement est comprise dans la payante. */
 export const OFFRES = ['decouverte', 'entrepreneur'] as const;
 export type OffreId = (typeof OFFRES)[number];
 
@@ -80,6 +80,15 @@ export interface Capacites {
   investisseurs: boolean;
   /** Collaborateurs invités par projet. `null` = sans limite, 0 = aucun. */
   collaborateurs: number | null;
+  /**
+   * L'évaluation de financement — audit, faisabilité, dossier, risque.
+   *
+   * Elle se vendait à part, 99 €, jusqu'au 10 octobre 2026. Elle est désormais
+   * comprise dans l'offre payante, sans supplément. Le parcours lui-même
+   * n'est pas encore construit : l'interface le dit (« bientôt disponible »)
+   * plutôt que de vendre ce qu'elle ne sait pas encore faire.
+   */
+  evaluationFinancement: boolean;
 }
 
 /**
@@ -141,6 +150,7 @@ export const CATALOGUE: readonly Offre[] = [
       outilsDeGestion: false,
       investisseurs: false,
       collaborateurs: 0,
+      evaluationFinancement: false,
     },
   },
   {
@@ -179,6 +189,7 @@ export const CATALOGUE: readonly Offre[] = [
       outilsDeGestion: true,
       investisseurs: true,
       collaborateurs: null,
+      evaluationFinancement: true,
     },
   },
 ];
@@ -226,30 +237,6 @@ export function offreSuivante(id: OffreId): Offre | null {
   if (index === -1) return CATALOGUE[1] ?? null;
   return CATALOGUE[index + 1] ?? null;
 }
-
-/**
- * LE FINANCEMENT IGNITUX N'EST PAS UN ABONNEMENT.
- *
- * C'est le prix d'une évaluation, payé une fois. Il ne l'est pas par
- * commodité comptable : le confondre avec un abonnement laisserait croire
- * qu'on achète un financement. On achète un examen — audit, faisabilité,
- * préparation du dossier, évaluation du risque — et la décision reste
- * indépendante de celui qui l'a payé.
- *
- * Cette phrase doit rester lisible partout où le montant s'affiche. Un test
- * la vérifie, parce que c'est la seule chose qui distingue une évaluation
- * payante d'une promesse vendue.
- */
-export const EVALUATION_FINANCEMENT = {
-  prixCentimes: 9900,
-  label: 'Évaluation de financement',
-  resume:
-    'Un audit complet, une étude de faisabilité, la préparation du dossier et une ' +
-    'évaluation du risque.',
-  avertissement:
-    "Ce montant paie l'évaluation, pas un financement. Elle peut conclure que le projet " +
-    "n'est pas finançable en l'état, et c'est un résultat, pas un échec du service.",
-} as const;
 
 /**
  * Le numéro d'article de la constitution qui justifie la ligne de partage.

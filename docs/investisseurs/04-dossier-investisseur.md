@@ -146,6 +146,12 @@ comptabilité/facturation/banque/investisseurs/collaborateurs illimités. Évalu
 99,00 €, explicitement non présentée comme un abonnement (avertissement obligatoire testé). **Ces
 chiffres confirment exactement la Bible.**
 
+> **Mise à jour du 10/10/2026.** Il n'y a plus que deux offres : Découverte (gratuite) et
+> Entrepreneur à **20,00 €/mois**, qui reprend tout ce que Construction contenait. L'évaluation de
+> financement ne se vend plus à part (99,00 €) : elle est **comprise dans Entrepreneur**, et son
+> parcours n'est pas encore construit (affichée « bientôt disponible »). **[Code]**
+
+
 **Aucun encaissement réel n'existe** : `docs/en-attente-paiement.md` (26/09/2026, non commité)
 confirme qu'aucun fournisseur de paiement n'est branché et qu'aucun webhook n'existe pour le champ
 `provider_ref` de la table `subscriptions` — classé **F**.

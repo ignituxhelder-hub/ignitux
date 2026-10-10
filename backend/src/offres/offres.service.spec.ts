@@ -295,13 +295,15 @@ describe('OffresService', () => {
       expect(vue.offres.filter((o) => o.actuelle)).toHaveLength(1);
     });
 
-    // Le montant du financement ne doit jamais s'afficher sans la phrase
-    // qui dit ce qu'il achète — et ce qu'il n'achète pas.
-    it('accompagne le prix de l’évaluation de son avertissement', async () => {
+    // L'évaluation de financement ne se vend plus à part : elle est une
+    // capacité de l'offre payante, pas un second prix sur la page.
+    it('ne propose plus l’évaluation de financement comme un achat séparé', async () => {
       const vue = await service.catalogue('u1');
 
-      expect(vue.evaluationFinancement.prixCentimes).toBeGreaterThan(0);
-      expect(vue.evaluationFinancement.avertissement).toMatch(/pas un financement/);
+      expect(vue).not.toHaveProperty('evaluationFinancement');
+      expect(vue.offres.find((o) => o.id === 'entrepreneur')?.capacites.evaluationFinancement).toBe(
+        true,
+      );
     });
   });
 });

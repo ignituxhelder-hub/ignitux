@@ -126,9 +126,11 @@ plafond : relever l'un sans l'autre fait échouer la suite.
 la banque, les investisseurs et les collaborateurs. Les trois lignes du tableau qui la
 distinguent sont toujours là.
 
-**L'évaluation de financement (99 €) n'est pas un abonnement,** et le code refuse de la ranger
-comme tel. Un test vérifie que son montant ne s'affiche jamais sans la phrase qui dit ce qu'il
-n'achète pas. C'est la seule chose qui distingue une évaluation payante d'une promesse vendue.
+**L'évaluation de financement est comprise dans Entrepreneur depuis le 10 octobre 2026.** Elle se
+vendait à part, 99 €, avec une phrase obligatoire disant que ce montant n'achetait pas un
+financement. Il n'y a plus de montant, donc plus de phrase ; l'idée reste : l'évaluation peut
+conclure qu'un projet n'est pas finançable. Le parcours n'est pas encore construit, et la page des
+offres l'écrit (« bientôt disponible ») plutôt que de vendre ce que le produit ne sait pas faire.
 
 **Les prix sont réglables sans redéployer** (`OFFRE_<ID>_PRIX_CENTIMES`). Tu parlais d'un
 paramètre en base ; l'environnement fait le même travail sans migration ni cache, et la base
@@ -217,7 +219,7 @@ Estimations en journées de travail concentré, pour ce qui reste du modèle éc
 | Facture d'abonnement émise par Ignitux (numérotation, PDF, TVA) | 2 à 3 | Identité légale complète |
 | Historique des scores et évolution dans le temps (priorité 18) | 1 à 1,5 | Supabase rouvert |
 | IGINI connaît la personne (priorité 15) | 1,5 à 2 | Rien |
-| Parcours d'évaluation de financement (99 €) | 2 à 3 | Encaissement |
+| Parcours d'évaluation de financement (compris dans Entrepreneur) | 2 à 3 | — |
 
 La TVA n'est pas dans ces chiffres : le régime dépend de ton immatriculation, et ce n'est pas une
 décision de code.

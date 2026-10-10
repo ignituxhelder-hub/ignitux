@@ -974,6 +974,8 @@ export interface OffreCapacites {
   outilsDeGestion: boolean;
   investisseurs: boolean;
   collaborateurs: number | null;
+  /** Comprise dans l offre payante depuis le 10/10/2026 ; parcours pas encore construit. */
+  evaluationFinancement: boolean;
 }
 
 export interface Offre {
@@ -992,13 +994,6 @@ export interface CatalogueOffres {
   /** false quand rien n encaisse : aucun bouton ne doit promettre. */
   souscriptionPossible: boolean;
   offres: Offre[];
-  evaluationFinancement: {
-    prixCentimes: number;
-    label: string;
-    resume: string;
-    /** Ne doit jamais s afficher sans le montant, ni le montant sans elle. */
-    avertissement: string;
-  };
 }
 
 // ── LA COMPTABILITE ────────────────────────────────────────────────────────

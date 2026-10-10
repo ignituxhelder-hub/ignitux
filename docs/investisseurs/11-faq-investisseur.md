@@ -47,8 +47,8 @@ Voir question 4 et `07-technologie.md`. **Manque** : positionnement concurrentie
 
 ## 6. Qui paie ?
 
-**Courte** : le porteur de projet, via un abonnement mensuel (9,90 € ou 59,00 €) ou une évaluation
-ponctuelle (99,00 €).
+**Courte** : le porteur de projet, via un abonnement mensuel unique à 20,00 €, qui comprend
+l'évaluation de financement (vendue 99,00 € à part avant le 10/10/2026).
 **Preuve** : `backend/src/offres/offres-catalogue.ts` **[Code]**.
 **Manque** : aucun payeur réel à ce jour.
 

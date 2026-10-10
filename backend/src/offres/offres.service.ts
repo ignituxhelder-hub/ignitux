@@ -4,7 +4,6 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { peut, type Action, type Verdict } from './droits.js';
 import {
   CATALOGUE,
-  EVALUATION_FINANCEMENT,
   normaliserOffre,
   offre,
   OFFRE_PAR_DEFAUT,
@@ -214,7 +213,6 @@ export class OffresService {
         ...offre(o.id),
         actuelle: o.id === actuelle,
       })),
-      evaluationFinancement: EVALUATION_FINANCEMENT,
     };
   }
 }

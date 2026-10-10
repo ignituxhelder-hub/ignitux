@@ -44,8 +44,8 @@ Ce n'est pas une promesse marketing : c'est vérifiable dans le code.
 
 ## Modèle économique
 
-Trois offres : Découverte (gratuite), Entrepreneur (9,90 €/mois), Construction (59,00 €/mois), plus
-une évaluation de financement ponctuelle à 99,00 € **[Code, vérifié]**. Le coût réel de l'IA par
+Deux offres depuis le 10/10/2026 : Découverte (gratuite) et Entrepreneur (20,00 €/mois), qui contient
+tout, y compris l'évaluation de financement (vendue 99,00 € à part auparavant) **[Code, vérifié]**. Le coût réel de l'IA par
 utilisation est mesuré (environ 0,05 à 0,35 € selon la profondeur) et reste largement sous les prix
 pratiqués **[Pricing]** — voir `05-modele-economique.md` pour un point d'attention identifié par cet
 audit sur la formulation du plafond de coût IA.

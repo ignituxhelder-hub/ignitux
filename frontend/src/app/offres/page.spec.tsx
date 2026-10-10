@@ -28,6 +28,7 @@ const OFFRE = (
     outilsDeGestion: false,
     investisseurs: false,
     collaborateurs: 0,
+    evaluationFinancement: prixCentimes > 0,
     ...(extra.capacites as object),
   },
   ...extra,
@@ -40,12 +41,6 @@ const CATALOGUE = (extra: Record<string, unknown> = {}) => ({
     OFFRE('decouverte', 'Découverte', 0, { actuelle: true }),
     OFFRE('entrepreneur', 'Entrepreneur', 2000),
   ],
-  evaluationFinancement: {
-    prixCentimes: 9900,
-    label: 'Évaluation de financement',
-    resume: 'Un audit complet et une étude de faisabilité.',
-    avertissement: "Ce montant paie l'évaluation, pas un financement.",
-  },
   ...extra,
 });
 
@@ -126,15 +121,21 @@ describe('OffresPage', () => {
     expect(within(carte as HTMLElement).getByText('Analyser')).toBeInTheDocument();
   });
 
-  // La seule chose qui distingue une évaluation payante d'une promesse
-  // vendue est cette phrase.
-  it('n’affiche jamais le prix du financement sans dire ce qu’il n’achète pas', async () => {
+  // L'évaluation de financement est comprise dans l'offre payante, et le
+  // parcours n'existe pas encore : la page le dit, sans second prix.
+  it('montre l’évaluation de financement incluse dans Entrepreneur, sans prix à part', async () => {
     mockApiRoutes({ 'GET /offres': { status: 200, body: CATALOGUE() } });
 
     afficher();
 
-    expect(await screen.findByText(/99,00/)).toBeInTheDocument();
-    expect(screen.getByText(/pas un financement/)).toBeInTheDocument();
+    const titre = await screen.findByRole('heading', { name: 'Entrepreneur' });
+    const carte = titre.closest('.card') as HTMLElement;
+    expect(within(carte).getByText(/Évaluation de financement incluse/)).toBeInTheDocument();
+    expect(within(carte).getByText(/bientôt disponible/)).toBeInTheDocument();
+
+    const decouverte = screen.getByRole('heading', { name: 'Découverte' }).closest('.card');
+    expect(within(decouverte as HTMLElement).queryByText(/Évaluation de financement/)).toBeNull();
+    expect(screen.queryByText(/99,00/)).toBeNull();
   });
 
   it('affiche une erreur lisible si les offres ne chargent pas', async () => {

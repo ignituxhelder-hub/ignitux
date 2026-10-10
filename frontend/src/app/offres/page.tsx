@@ -110,24 +110,6 @@ export default function OffresPage() {
         </div>
       )}
 
-      {catalogue && (
-        <div className="card" style={{ marginTop: '1.5rem' }}>
-          <div className="top-bar" style={{ gap: '1rem', alignItems: 'baseline' }}>
-            <h2 style={{ margin: 0 }}>{catalogue.evaluationFinancement.label}</h2>
-            <strong style={{ whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
-              {euros(catalogue.evaluationFinancement.prixCentimes)}
-            </strong>
-          </div>
-          <p className="muted" style={{ marginBottom: 0 }}>
-            {catalogue.evaluationFinancement.resume}
-          </p>
-          {/* Jamais le montant sans cette phrase. C'est la seule chose qui
-              distingue une évaluation payante d'une promesse vendue. */}
-          <p style={{ marginBottom: 0, marginTop: '0.75rem' }}>
-            <strong>{catalogue.evaluationFinancement.avertissement}</strong>
-          </p>
-        </div>
-      )}
     </main>
   );
 }
@@ -189,6 +171,11 @@ function CarteOffre({
         {capacites.outilsDeGestion && <Ligne texte="Comptabilité, facturation, banque" />}
         {capacites.investisseurs && <Ligne texte="Financement et investisseurs" />}
         {capacites.collaborateurs === null && <Ligne texte="Collaborateurs sans limite" />}
+        {/* Comprise dans l'offre, mais le parcours n'existe pas encore : le
+            dire, plutôt que de vendre ce que le produit ne sait pas faire. */}
+        {capacites.evaluationFinancement && (
+          <Ligne texte="Évaluation de financement incluse : audit, faisabilité, dossier, risque (bientôt disponible)" />
+        )}
       </ul>
 
       {offre.argument && (

@@ -1,7 +1,6 @@
 import {
   CATALOGUE,
   estOffre,
-  EVALUATION_FINANCEMENT,
   GENERATEURS,
   normaliserOffre,
   offre,
@@ -187,23 +186,15 @@ describe('catalogue des offres', () => {
   });
 
   describe('l’évaluation de financement', () => {
-    // La seule chose qui distingue une évaluation payante d'une promesse
-    // vendue est cette phrase. Elle doit rester lisible partout où le
-    // montant s'affiche.
-    it('dit que le paiement n’achète pas un financement', () => {
-      expect(EVALUATION_FINANCEMENT.avertissement).toMatch(/pas un financement/);
+    // Elle se vendait 99 € à part. Elle est comprise dans l'offre payante
+    // depuis le 10 octobre 2026, et ne doit plus revenir comme un achat séparé.
+    it('est comprise dans l’offre payante, pas dans la gratuite', () => {
+      expect(offre('decouverte').capacites.evaluationFinancement).toBe(false);
+      expect(offre('entrepreneur').capacites.evaluationFinancement).toBe(true);
     });
 
-    it('assume qu’un refus est un résultat, pas un échec du service', () => {
-      expect(EVALUATION_FINANCEMENT.avertissement).toMatch(/pas un échec/);
-    });
-
-    // Un abonnement laisserait croire qu'on paie pour rester finançable.
     it('n’est pas une offre du catalogue', () => {
       expect(OFFRES as readonly string[]).not.toContain('financement');
-      expect(CATALOGUE.some((o) => o.prixCentimes === EVALUATION_FINANCEMENT.prixCentimes)).toBe(
-        false,
-      );
     });
   });
 
