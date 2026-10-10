@@ -3,7 +3,39 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { investorsDeletionOperations } from '../investors/investors-deletion.js';
 import { ledgerDeletionOperations } from '../ledger/ledger-deletion.js';
+import { typeImage } from '../identite/identite.service.js';
 import { exclusions } from './user-data-scope.js';
+
+/**
+ * Une vérification d'identité telle qu'elle sort dans l'export : les colonnes
+ * binaires `document_front` / `document_back` sont remplacées par
+ * `document_recto_base64` / `document_verso_base64` (le contenu de l'image
+ * encodé en base64 standard) et `document_recto_type` / `document_verso_type`
+ * (le type MIME déduit des octets, comme pour l'affichage : `image/jpeg` ou
+ * `image/png`). Pas de verso : les deux champs verso valent `null`.
+ *
+ * Pourquoi ne pas garder les colonnes telles quelles : `JSON.stringify` d'un
+ * Buffer donne `{"type":"Buffer","data":[137,80,…]}`, illisible et trois à
+ * quatre fois plus lourd que le base64. Les autres champs passent inchangés.
+ */
+function avecImagesEnBase64<
+  T extends { document_front?: Uint8Array | null; document_back?: Uint8Array | null },
+>(verification: T) {
+  const { document_front: recto, document_back: verso, ...reste } = verification;
+  // `document_front` est obligatoire en base ; on reste tolérant quand même :
+  // une face absente donne null plutôt que de faire échouer tout l'export.
+  const encoder = (octets: Uint8Array | null | undefined) =>
+    octets ? { base64: Buffer.from(octets).toString('base64'), type: typeImage(octets) } : null;
+  const faceRecto = encoder(recto);
+  const faceVerso = encoder(verso);
+  return {
+    ...reste,
+    document_recto_base64: faceRecto?.base64 ?? null,
+    document_recto_type: faceRecto?.type ?? null,
+    document_verso_base64: faceVerso?.base64 ?? null,
+    document_verso_type: faceVerso?.type ?? null,
+  };
+}
 
 /**
  * DROIT D'ACCÈS ET DROIT À L'EFFACEMENT.
@@ -217,16 +249,18 @@ export class UserDataService {
       // Compte : l'offre souscrite, les vérifications d'identité et les
       // mandats donnés à Ignitux — déclarés exportés dans user-data-scope.
       this.prisma.subscriptions.findUnique({ where: { user_id: userId } }),
-      // Sans les images de la pièce d'identité : des octets bruts dans un
-      // fichier JSON destiné à circuler par email feraient voyager une copie
-      // du document lui-même, que la personne détient déjà puisqu'elle l'a
-      // envoyé. Tout ce qu'Ignitux en a tiré, en revanche, sort — c'est cela
-      // qu'elle a le droit de vérifier.
+      // Avec les images de la pièce d'identité (décision du 2026-10-10) : la
+      // personne reçoit tout ce qu'Ignitux détient sur elle. Les octets sont
+      // convertis en base64 plus bas (voir `avecImagesEnBase64`). Seul
+      // `reviewed_by` reste dehors : l'identifiant du membre de l'équipe qui
+      // a relu le dossier n'est pas une donnée de la personne.
       this.prisma.identity_verifications.findMany({
         where: { owner_id: userId },
         select: {
           id: true,
           document_type: true,
+          document_front: true,
+          document_back: true,
           extracted_first_name: true,
           extracted_last_name: true,
           extracted_birth_date: true,
@@ -289,7 +323,9 @@ export class UserDataService {
         'catégories que celles annoncées par les Conditions Générales (§2.2).',
       avertissement:
         'Ce fichier contient des données personnelles, y compris celles de tiers que tu as ' +
-        'saisies toi-même (contacts, clients, détenteurs de parts). En le téléchargeant tu en ' +
+        'saisies toi-même (contacts, clients, détenteurs de parts), et les images de ta pièce ' +
+        'd’identité (encodées en base64, champs document_recto_base64 / document_verso_base64). ' +
+        'En le téléchargeant tu en ' +
         'deviens le gardien : conserve-le comme tu conserverais ces informations elles-mêmes, ' +
         "et ne le transmets pas plus largement qu'elles.",
       donnees: {
@@ -303,7 +339,7 @@ export class UserDataService {
           profil: monProfil,
           bureau,
           abonnement,
-          verifications_d_identite: verificationsDIdentite,
+          verifications_d_identite: verificationsDIdentite.map(avecImagesEnBase64),
           mandats_donnes_a_ignitux: mandats,
         },
         projets_et_contenus: {

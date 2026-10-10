@@ -102,6 +102,18 @@ describe('AccountPage', () => {
       expect(screen.getByText('tiers')).toBeInTheDocument();
     });
 
+    it("prévient que le fichier contient les images de la pièce d'identité", async () => {
+      mockApiRoutes({});
+
+      render(
+        <AuthProvider>
+          <AccountPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByText(/images de ta pièce d’identité/)).toBeInTheDocument();
+    });
+
     it('télécharge un fichier nommé et daté', async () => {
       const createObjectURL = vi.fn().mockReturnValue('blob:fake');
       const revokeObjectURL = vi.fn();

@@ -294,18 +294,60 @@ describe('UserDataService', () => {
       });
     });
 
-    it("exporte les vérifications d'identité sans les images de la pièce", async () => {
-      // Ce qu'Ignitux a tiré de la pièce sort ; les octets du recto et du
-      // verso, non — ils feraient circuler une copie du document par email.
-      await service.exportUserData('u1');
+    it("exporte les vérifications d'identité avec les images de la pièce, en base64, sans l'agent qui a relu", async () => {
+      // Décision du 2026-10-10 : la personne reçoit tout ce qu'Ignitux
+      // détient sur elle, images de la pièce comprises. L'identifiant du
+      // membre de l'équipe qui a relu le dossier, lui, ne la concerne pas.
+      const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x01]);
+      const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x02]);
+      prisma.identity_verifications.findMany.mockResolvedValue([
+        {
+          id: 'iv1',
+          document_type: 'carte_identite',
+          document_front: png,
+          document_back: jpeg,
+          extracted_last_name: 'Dupont',
+          status: 'validee',
+        },
+        { id: 'iv2', document_type: 'passeport', document_front: jpeg, document_back: null, status: 'en_attente' },
+      ]);
+
+      const exported = await service.exportUserData('u1');
 
       const [args] = prisma.identity_verifications.findMany.mock.calls[0] as [
         { where: unknown; select: Record<string, boolean> },
       ];
       expect(args.where).toEqual({ owner_id: 'u1' });
-      expect(args.select).not.toHaveProperty('document_front');
-      expect(args.select).not.toHaveProperty('document_back');
+      expect(args.select.document_front).toBe(true);
+      expect(args.select.document_back).toBe(true);
       expect(args.select.extracted_last_name).toBe(true);
+      expect(args.select).not.toHaveProperty('reviewed_by');
+
+      const [premiere, seconde] = exported.donnees.compte.verifications_d_identite as Record<string, unknown>[];
+      expect(premiere).toEqual({
+        id: 'iv1',
+        document_type: 'carte_identite',
+        extracted_last_name: 'Dupont',
+        status: 'validee',
+        document_recto_base64: png.toString('base64'),
+        document_recto_type: 'image/png',
+        document_verso_base64: jpeg.toString('base64'),
+        document_verso_type: 'image/jpeg',
+      });
+      expect(seconde).toMatchObject({
+        document_recto_base64: jpeg.toString('base64'),
+        document_recto_type: 'image/jpeg',
+        document_verso_base64: null,
+        document_verso_type: null,
+      });
+      // Les octets bruts ne sortent jamais tels quels : JSON.stringify d'un
+      // Buffer donnerait un tableau de nombres illisible.
+      expect(premiere).not.toHaveProperty('document_front');
+      expect(premiere).not.toHaveProperty('document_back');
+      expect(exported.avertissement).toMatch(/images de ta pièce d’identité/);
+      const json = JSON.stringify(exported);
+      expect(json).toContain(png.toString('base64'));
+      expect(json).not.toContain('"type":"Buffer"');
     });
 
     it('ne lit stocks, flotte, caisse, immobilier et publicité que chez la personne', async () => {

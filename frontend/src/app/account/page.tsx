@@ -186,7 +186,8 @@ function ExportSection({ token }: { token: string }) {
       <p className="notice">
         <span>
           Ce fichier contiendra les coordonnées des <strong>tiers</strong> que tu as saisis
-          (contacts, clients). Une fois téléchargé, c&apos;est toi qui en réponds.
+          (contacts, clients), ainsi que les images de ta pièce d’identité si tu l&apos;as fait
+          vérifier — il peut donc être lourd. Une fois téléchargé, c&apos;est toi qui en réponds.
         </span>
       </p>
       <button className="secondary" type="button" onClick={handleExport} disabled={isBusy}>
