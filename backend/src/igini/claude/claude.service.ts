@@ -51,6 +51,32 @@ export interface WebSearchOptions {
 }
 
 /**
+ * Une page réellement ouverte par l'outil de lecture — même principe que
+ * `WebSearchSource` : reconstruite à partir des blocs `web_fetch_tool_result`
+ * renvoyés par l'API, jamais d'une URL que le modèle dirait avoir lue.
+ */
+export interface PageLue {
+  url: string;
+  titre: string | null;
+  /** Horodatage ISO de la lecture, tel que l'API le donne. */
+  luLe: string | null;
+}
+
+/**
+ * Cadrage de la lecture de pages pour un appel donné.
+ *
+ * `allowedDomains` n'est pas une option de confort : c'est ce qui empêche le
+ * modèle d'aller lire autre chose que la source officielle qu'on lui confie.
+ * Pas de frais par lecture côté Anthropic, seulement les tokens de la page —
+ * d'où `maxContentTokens`, qui borne ce que coûte une page trop longue.
+ */
+export interface WebFetchOptions {
+  allowedDomains: string[];
+  maxUses: number;
+  maxContentTokens: number;
+}
+
+/**
  * Modèle utilisé par l'orchestrateur du chat (tours de conversation), pas
  * par les générateurs — délibérément plus rapide/économique, puisqu'un
  * tour de conversation ordinaire en enchaîne plusieurs par message envoyé,
@@ -102,6 +128,11 @@ export interface StructuredOutputRequest<T> {
    * les deux signatures ci-dessous.
    */
   webSearch?: WebSearchOptions;
+  /**
+   * Absent par défaut, comme `webSearch`. Fourni, l'appel peut ouvrir les
+   * pages des domaines autorisés et renvoie `pagesLues` en plus.
+   */
+  webFetch?: WebFetchOptions;
 }
 
 /**
@@ -149,14 +180,17 @@ export class ClaudeService {
   }
 
   async generateStructuredOutput<T>(
-    request: StructuredOutputRequest<T> & { webSearch?: undefined },
+    request: StructuredOutputRequest<T> & { webSearch?: undefined; webFetch?: undefined },
   ): Promise<T>;
   async generateStructuredOutput<T>(
-    request: StructuredOutputRequest<T> & { webSearch: WebSearchOptions },
+    request: StructuredOutputRequest<T> & { webSearch: WebSearchOptions; webFetch?: undefined },
   ): Promise<T & { sources: WebSearchSource[] }>;
   async generateStructuredOutput<T>(
+    request: StructuredOutputRequest<T> & { webSearch?: undefined; webFetch: WebFetchOptions },
+  ): Promise<T & { pagesLues: PageLue[] }>;
+  async generateStructuredOutput<T>(
     request: StructuredOutputRequest<T>,
-  ): Promise<T | (T & { sources: WebSearchSource[] })> {
+  ): Promise<T | (T & { sources: WebSearchSource[] }) | (T & { pagesLues: PageLue[] })> {
     // Le verrou est ici, et pas dans chaque générateur : les six passent
     // par ce point unique, donc aucun d'eux ne peut être oublié le jour où
     // un septième arrive.
@@ -200,7 +234,17 @@ export class ClaudeService {
               max_uses: request.webSearch.maxUses,
             },
           ]
-        : undefined;
+        : request.webFetch
+          ? [
+              {
+                type: 'web_fetch_20260209',
+                name: 'web_fetch',
+                allowed_domains: request.webFetch.allowedDomains,
+                max_uses: request.webFetch.maxUses,
+                max_content_tokens: request.webFetch.maxContentTokens,
+              },
+            ]
+          : undefined;
 
       const baseParams = {
         model: CLAUDE_MODEL,
@@ -219,11 +263,11 @@ export class ClaudeService {
       // seulement une promesse de reprise — la seule façon documentée de
       // continuer est de renvoyer ce tour tel quel. On cumule l'usage de
       // chaque tour : chacun est déjà facturé, et ne retenir que le dernier
-      // sous-évaluerait le coût réel de l'appel. Hors recherche web, aucun
-      // outil serveur n'est déclaré et ce tour ne peut pas se produire — la
-      // boucle ne s'exécute donc jamais pour les quatre autres générateurs,
-      // et `usage` reste `response.usage` sans transformation.
-      if (request.webSearch) {
+      // sous-évaluerait le coût réel de l'appel. La lecture de pages suit la
+      // même règle. Sans recherche ni lecture, aucun outil serveur n'est
+      // déclaré et ce tour ne peut pas se produire — la boucle ne s'exécute
+      // donc pas, et `usage` reste `response.usage` sans transformation.
+      if (tools) {
         let resumptions = 0;
         while (response.stop_reason === 'pause_turn' && resumptions < MAX_PAUSE_RESUMPTIONS) {
           messages = [...messages, { role: 'assistant', content: response.content }];
@@ -266,11 +310,13 @@ export class ClaudeService {
         throw new Error('parsed_output manquant dans la réponse Claude.');
       }
 
-      if (!request.webSearch) {
-        return response.parsed_output;
+      if (request.webSearch) {
+        return { ...response.parsed_output, sources: extractWebSearchSources(response.content) };
       }
-
-      return { ...response.parsed_output, sources: extractWebSearchSources(response.content) };
+      if (request.webFetch) {
+        return { ...response.parsed_output, pagesLues: extractPagesLues(messages, response.content) };
+      }
+      return response.parsed_output;
     } catch (error) {
       this.logger.error(request.logContext, error as Error);
       throw new InternalServerErrorException(this.toSafeMessage(error, request.userErrorMessage));
@@ -458,4 +504,32 @@ function extractWebSearchSources(content: Anthropic.ContentBlock[]): WebSearchSo
     }
   }
   return sources;
+}
+
+/**
+ * Les pages réellement ouvertes — voir `PageLue`. Lues dans tous les tours
+ * de l'appel (une lecture peut avoir eu lieu avant un `pause_turn`). Une
+ * lecture en erreur n'en fait pas partie : une page refusée ou injoignable
+ * n'a pas été lue, et la présenter comme telle serait exactement le mensonge
+ * que cette liste existe pour empêcher.
+ */
+function extractPagesLues(
+  messages: Anthropic.MessageParam[],
+  dernierTour: Anthropic.ContentBlock[],
+): PageLue[] {
+  const blocs: unknown[] = [];
+  for (const message of messages) {
+    if (message.role === 'assistant' && Array.isArray(message.content)) blocs.push(...message.content);
+  }
+  blocs.push(...(dernierTour ?? []));
+  const vues = new Set<string>();
+  const pages: PageLue[] = [];
+  for (const bloc of blocs as Anthropic.ContentBlock[]) {
+    if (bloc.type !== 'web_fetch_tool_result' || bloc.content.type !== 'web_fetch_result') continue;
+    const { url, retrieved_at, content } = bloc.content;
+    if (vues.has(url)) continue;
+    vues.add(url);
+    pages.push({ url, titre: content?.title ?? null, luLe: retrieved_at ?? null });
+  }
+  return pages;
 }

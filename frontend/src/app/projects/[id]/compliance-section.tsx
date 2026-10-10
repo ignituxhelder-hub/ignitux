@@ -348,7 +348,7 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
             )
           )}
           <p className="muted" style={{ margin: '0.25rem 0 0', fontSize: '0.8rem' }}>
-            IGINI prépare, il ne dépose rien à ta place.
+            IGINI lit la fiche officielle et prépare le document, il ne dépose rien à ta place.
           </p>
         </div>
       )}

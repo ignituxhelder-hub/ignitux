@@ -516,6 +516,88 @@ describe('ClaudeService', () => {
     });
   });
 
+  describe('lecture de pages', () => {
+    const LECTURE = { allowedDomains: ['www.service-public.fr'], maxUses: 2, maxContentTokens: 20000 };
+    /** Un bloc `web_fetch_tool_result` réussi, tel que l'API le renvoie. */
+    const pageLue = (url: string) => ({
+      type: 'web_fetch_tool_result',
+      tool_use_id: 'srvtoolu_f',
+      content: {
+        type: 'web_fetch_result',
+        url,
+        retrieved_at: '2026-10-10T08:00:00Z',
+        content: { type: 'document', title: `Titre de ${url}`, source: { type: 'text', data: '…' } },
+      },
+    });
+    const lire = () =>
+      service.generateStructuredOutput({
+        schema,
+        system: 'system',
+        userContent: 'user',
+        logContext: 'contexte',
+        userErrorMessage: 'échec',
+        usage: ATTRIBUTION,
+        webFetch: LECTURE,
+      });
+
+    it('déclare web_fetch_20260209 limité aux domaines et au nombre de lectures demandés', async () => {
+      parseMock.mockResolvedValue({ parsed_output: { answer: 'ok' }, usage: UTILISATION, content: [], stop_reason: 'end_turn' });
+
+      await lire();
+
+      expect(parseMock.mock.calls[0][0].tools).toEqual([
+        {
+          type: 'web_fetch_20260209',
+          name: 'web_fetch',
+          allowed_domains: ['www.service-public.fr'],
+          max_uses: 2,
+          max_content_tokens: 20000,
+        },
+      ]);
+    });
+
+    it("ne retient que les lectures réussies, dédupliquées, y compris celles d'un tour mis en pause", async () => {
+      parseMock
+        .mockResolvedValueOnce({
+          parsed_output: null,
+          usage: UTILISATION,
+          stop_reason: 'pause_turn',
+          content: [pageLue('https://www.service-public.fr/a')],
+        })
+        .mockResolvedValueOnce({
+          parsed_output: { answer: 'ok' },
+          usage: UTILISATION,
+          stop_reason: 'end_turn',
+          content: [
+            pageLue('https://www.service-public.fr/a'),
+            {
+              type: 'web_fetch_tool_result',
+              tool_use_id: 'srvtoolu_g',
+              content: { type: 'web_fetch_tool_result_error', error_code: 'url_not_accessible' },
+            },
+          ],
+        });
+
+      const result = await lire();
+
+      expect(result.pagesLues).toEqual([
+        {
+          url: 'https://www.service-public.fr/a',
+          titre: 'Titre de https://www.service-public.fr/a',
+          luLe: '2026-10-10T08:00:00Z',
+        },
+      ]);
+    });
+
+    it('rend une liste vide quand aucune page n’a été lue — jamais une page inventée', async () => {
+      parseMock.mockResolvedValue({ parsed_output: { answer: 'ok' }, usage: UTILISATION, content: [], stop_reason: 'end_turn' });
+
+      const result = await lire();
+
+      expect(result.pagesLues).toEqual([]);
+    });
+  });
+
   describe('recherche web', () => {
     /** Un bloc `web_search_tool_result` tel que l'API le renvoie. */
     const resultatRecherche = (urls: string[]) => ({
