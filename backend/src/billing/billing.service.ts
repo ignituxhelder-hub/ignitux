@@ -5,6 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConstitutionService } from '../constitution/constitution.service.js';
+import { capitalConnuCents } from '../immatriculation/capital.js';
+import { mentionsEmetteur } from '../immatriculation/mentions-emetteur.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BILLING_DISCLAIMER, BILLING_ENFORCED_RULES } from './billing-legal.js';
 import {
@@ -282,13 +284,58 @@ export class BillingService {
       );
     }
 
+    // La date d'émission et les mentions de l'émetteur sont posées une seule
+    // fois, au passage à « emis ». Un document déjà émis n'est jamais
+    // réécrit, même si la fiche d'immatriculation change ensuite.
+    const emission = status === 'emis' && !document.issued_at;
     return this.prisma.billing_documents.update({
       where: { id: documentId },
       data: {
         status,
-        // La date d'émission est posée une seule fois, au passage à « emis ».
-        ...(status === 'emis' && !document.issued_at ? { issued_at: new Date() } : {}),
+        ...(emission
+          ? {
+              issued_at: new Date(),
+              issuer_details: await this.issuerDetailsAtEmission(ownerId, document.project_id ?? null),
+            }
+          : {}),
       },
+    });
+  }
+
+  /**
+   * Identité légale de l'émetteur, figée à l'émission — même logique que
+   * `client_details`. null sans projet ou sans fiche d'immatriculation :
+   * le comportement d'avant reste inchangé. La fiche est filtrée sur le
+   * propriétaire du document : rattacher un document au projet de quelqu'un
+   * d'autre n'en ferait pas recopier l'identité.
+   */
+  private async issuerDetailsAtEmission(ownerId: string, projectId: string | null): Promise<string | null> {
+    if (!projectId) return null;
+    const registration = await this.prisma.company_registrations.findFirst({
+      where: { project_id: projectId, owner_id: ownerId },
+    });
+    if (!registration) return null;
+
+    const [project, bylaws] = await Promise.all([
+      this.prisma.projects.findFirst({
+        where: { id: projectId, owner_id: ownerId },
+        select: { confirmed_legal_form: true },
+      }),
+      this.prisma.company_bylaws.findFirst({
+        where: { project_id: projectId, owner_id: ownerId },
+        select: { status: true, legal_form: true, capital_cents: true },
+      }),
+    ]);
+    const legalForm = project?.confirmed_legal_form ?? null;
+
+    return mentionsEmetteur({
+      legalName: registration.legal_name,
+      legalForm,
+      capitalCents: capitalConnuCents(legalForm, bylaws),
+      headOffice: registration.head_office,
+      siren: registration.siren,
+      siret: registration.siret,
+      vatNumber: registration.vat_number,
     });
   }
 
