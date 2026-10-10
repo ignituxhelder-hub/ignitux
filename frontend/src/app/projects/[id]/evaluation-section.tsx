@@ -42,26 +42,32 @@ export function EvaluationSection({ token, projectId, readOnly = false }: Evalua
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
 
+  /** Relit les évaluations ; c'est aussi ce que fait le sondage. */
   const charger = useCallback(async () => {
     if (!token) return;
     try {
-      const [liste, offres] = await Promise.all([
-        api.getEvaluations(token, projectId),
-        api.getOffres(token),
-      ]);
+      const liste = await api.getEvaluations(token, projectId);
       setEvaluations(Array.isArray(liste) ? liste : []);
-      // Garde défensive : une réponse inattendue ne doit pas faire planter la fiche projet.
-      const actuelle = Array.isArray(offres?.offres) ? offres.offres.find((o) => o.actuelle) : undefined;
-      setIncluse(Boolean(actuelle?.capacites?.evaluationFinancement));
+      // Une lecture réussie efface l'erreur d'une lecture précédente.
+      setError(null);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de charger l’évaluation de financement.');
     }
   }, [token, projectId]);
 
   useEffect(() => {
-    if (readOnly) return;
+    if (readOnly || !token) return;
     void charger();
-  }, [charger, readOnly]);
+    // L'offre ne change pas pendant qu'on regarde : lue une fois, pas à chaque sondage.
+    api
+      .getOffres(token)
+      .then((offres) => {
+        // Garde défensive : une réponse inattendue ne doit pas faire planter la fiche projet.
+        const actuelle = Array.isArray(offres?.offres) ? offres.offres.find((o) => o.actuelle) : undefined;
+        setIncluse(Boolean(actuelle?.capacites?.evaluationFinancement));
+      })
+      .catch(() => setIncluse(false));
+  }, [charger, readOnly, token]);
 
   const enPreparation = evaluations?.[0]?.status === 'en_preparation';
   useEffect(() => {
@@ -251,14 +257,30 @@ function Rapport({ evaluation, rapport }: { evaluation: EvaluationVue; rapport: 
 
       <h3>Résumé</h3>
       <p>{rapport.resume}</p>
+      <p>
+        <strong>Montant recherché.</strong>{' '}
+        {rapport.montantRecherche.montantEuros === null
+          ? 'Non renseigné.'
+          : `${new Intl.NumberFormat('fr-FR').format(rapport.montantRecherche.montantEuros)} € (source : ${rapport.montantRecherche.source})`}
+      </p>
+      <p>
+        <strong>Usage des fonds.</strong> {rapport.usageDesFonds}
+      </p>
+
+      <h3>Ce qu’Ignitux sait de ton projet</h3>
+      <ul>
+        {rapport.audit.connu.map((c, i) => (
+          <li key={i}>{c}</li>
+        ))}
+      </ul>
 
       <h3>Ce qui manque</h3>
       {rapport.audit.manques.length === 0 ? (
         <p className="muted">Rien de manquant relevé.</p>
       ) : (
         <ul>
-          {rapport.audit.manques.map((m) => (
-            <li key={m}>{m}</li>
+          {rapport.audit.manques.map((m, i) => (
+            <li key={i}>{m}</li>
           ))}
         </ul>
       )}
@@ -276,8 +298,8 @@ function Rapport({ evaluation, rapport }: { evaluation: EvaluationVue; rapport: 
 
       <h3>Dossier</h3>
       <ul>
-        {rapport.dossier.map((p) => (
-          <li key={p.piece}>
+        {rapport.dossier.map((p, i) => (
+          <li key={i}>
             {p.etat === 'prete' ? '✅' : '❌'} {p.piece}
           </li>
         ))}
@@ -285,8 +307,8 @@ function Rapport({ evaluation, rapport }: { evaluation: EvaluationVue; rapport: 
 
       <h3>Risques</h3>
       <ul>
-        {rapport.risques.map((r) => (
-          <li key={r.risque}>
+        {rapport.risques.map((r, i) => (
+          <li key={i}>
             <strong>{r.risque}</strong> ({GRAVITE[r.gravite]}) — {r.reduction}
           </li>
         ))}
@@ -295,8 +317,8 @@ function Rapport({ evaluation, rapport }: { evaluation: EvaluationVue; rapport: 
       <h3>Pistes de financement</h3>
       <p className="muted">À titre d’information, sans recommandation personnalisée.</p>
       <ul>
-        {rapport.pistes.map((p) => (
-          <li key={p.type}>
+        {rapport.pistes.map((p, i) => (
+          <li key={i}>
             <strong>{p.type}</strong> — {p.pourquoi}
           </li>
         ))}
@@ -304,8 +326,8 @@ function Rapport({ evaluation, rapport }: { evaluation: EvaluationVue; rapport: 
 
       <h3>Prochaines étapes</h3>
       <ol>
-        {rapport.prochainesEtapes.map((e) => (
-          <li key={e}>{e}</li>
+        {rapport.prochainesEtapes.map((e, i) => (
+          <li key={i}>{e}</li>
         ))}
       </ol>
     </div>

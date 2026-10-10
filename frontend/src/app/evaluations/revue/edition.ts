@@ -2,7 +2,8 @@ import type { RapportEvaluation } from '@/lib/api';
 
 /**
  * Les sections en liste du rapport, éditées en texte : une ligne par élément,
- * les champs séparés par « | ». Plus lisible pour un humain qu'un formulaire
+ * les champs séparés par « | » (un « | » de trop est refusé, jamais ignoré).
+ * Plus lisible pour un humain qu'un formulaire
  * par élément, et sans JSON à manipuler.
  */
 export type SectionListe = 'risques' | 'dossier' | 'pistes' | 'prochainesEtapes' | 'manques' | 'connu';
@@ -48,8 +49,9 @@ export function texteEnListe(section: SectionListe, texte: string): Resultat<unk
     case 'risques': {
       const valeur = [];
       for (const [i, l] of ls.entries()) {
-        const [risque, gravite, reduction] = champs(l);
-        if (!risque || !reduction || !(GRAVITES as readonly string[]).includes(gravite)) {
+        const morceaux = champs(l);
+        const [risque, gravite, reduction] = morceaux;
+        if (morceaux.length !== 3 || !risque || !reduction || !(GRAVITES as readonly string[]).includes(gravite)) {
           return { erreur: `Risques, ligne ${i + 1} : écris « risque | faible, moyenne ou forte | comment le réduire ».` };
         }
         valeur.push({ risque, gravite, reduction });
@@ -59,9 +61,10 @@ export function texteEnListe(section: SectionListe, texte: string): Resultat<unk
     case 'dossier': {
       const valeur = [];
       for (const [i, l] of ls.entries()) {
-        const [piece, etat] = champs(l);
+        const morceaux = champs(l);
+        const [piece, etat] = morceaux;
         const normalise = ETATS[(etat ?? '').toLowerCase()];
-        if (!piece || !normalise) {
+        if (morceaux.length !== 2 || !piece || !normalise) {
           return { erreur: `Dossier, ligne ${i + 1} : écris « pièce | prête ou manquante ».` };
         }
         valeur.push({ piece, etat: normalise });
@@ -71,8 +74,9 @@ export function texteEnListe(section: SectionListe, texte: string): Resultat<unk
     case 'pistes': {
       const valeur = [];
       for (const [i, l] of ls.entries()) {
-        const [type, pourquoi] = champs(l);
-        if (!type || !pourquoi) {
+        const morceaux = champs(l);
+        const [type, pourquoi] = morceaux;
+        if (morceaux.length !== 2 || !type || !pourquoi) {
           return { erreur: `Pistes, ligne ${i + 1} : écris « type de financement | pourquoi ».` };
         }
         valeur.push({ type, pourquoi });

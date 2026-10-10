@@ -34,6 +34,13 @@ describe('édition d’une section en texte, une ligne par élément', () => {
     });
   });
 
+  it('refuse une ligne avec trop de champs au lieu d’en jeter une partie', () => {
+    expect(texteEnListe('risques', 'Loyer | moyenne | Négocier | vite')).toEqual({
+      erreur: expect.stringContaining('ligne 1'),
+    });
+    expect(texteEnListe('pistes', 'Prêt | matériel | et stock')).toEqual({ erreur: expect.stringContaining('ligne 1') });
+  });
+
   it('fait l’aller-retour sans perte', () => {
     const risques = [{ risque: 'Loyer', gravite: 'faible' as const, reduction: 'Négocier' }];
     expect(texteEnListe('risques', listeEnTexte('risques', risques))).toEqual({ valeur: risques });

@@ -69,33 +69,68 @@ function formulaireDepuis(r: RapportEvaluation, note: string | null): Formulaire
   };
 }
 
-/** Le rapport tel que le formulaire le décrit, ou la première erreur de saisie. */
-function rapportDepuis(f: Formulaire): { rapport: RapportEvaluation } | { erreur: string } {
-  const listes: Partial<Record<SectionListe, unknown[]>> = {};
-  for (const section of ['connu', 'manques', 'dossier', 'risques', 'pistes', 'prochainesEtapes'] as const) {
-    const lu = texteEnListe(section, f[section]);
-    if ('erreur' in lu) return lu;
-    listes[section] = lu.valeur;
+/** Les champs du formulaire qui composent chaque section du rapport. */
+const CHAMPS_DE_SECTION: Record<SectionEvaluation, (keyof Formulaire)[]> = {
+  verdict: ['verdict'],
+  resume: ['resume'],
+  montantRecherche: ['montant', 'montantSource'],
+  usageDesFonds: ['usageDesFonds'],
+  audit: ['connu', 'manques'],
+  faisabilite: ['marche', 'modeleEconomique', 'capacite'],
+  dossier: ['dossier'],
+  risques: ['risques'],
+  pistes: ['pistes'],
+  prochainesEtapes: ['prochainesEtapes'],
+};
+
+function liste(section: SectionListe, texte: string): unknown[] {
+  const lu = texteEnListe(section, texte);
+  if ('erreur' in lu) throw new Error(lu.erreur);
+  return lu.valeur;
+}
+
+/** La valeur d'une section telle que le formulaire la décrit ; lève sur une saisie invalide. */
+function valeurSection(section: SectionEvaluation, f: Formulaire): unknown {
+  switch (section) {
+    case 'montantRecherche': {
+      const texte = f.montant.replace(/\s/g, '').replace(',', '.');
+      const montant = texte === '' ? null : Number(texte);
+      if (montant !== null && !Number.isFinite(montant)) {
+        throw new Error('Le montant recherché doit être un nombre, ou vide.');
+      }
+      return { montantEuros: montant, source: f.montantSource };
+    }
+    case 'audit':
+      return { connu: liste('connu', f.connu), manques: liste('manques', f.manques) };
+    case 'faisabilite':
+      return { marche: f.marche, modeleEconomique: f.modeleEconomique, capacite: f.capacite };
+    case 'dossier':
+    case 'risques':
+    case 'pistes':
+    case 'prochainesEtapes':
+      return liste(section, f[section]);
+    default:
+      return f[section];
   }
-  const montantTexte = f.montant.replace(/\s/g, '').replace(',', '.');
-  const montant = montantTexte === '' ? null : Number(montantTexte);
-  if (montant !== null && !Number.isFinite(montant)) {
-    return { erreur: 'Le montant recherché doit être un nombre, ou vide.' };
+}
+
+/**
+ * Les sections que l'administrateur a réellement modifiées : on compare le
+ * TEXTE saisi au texte de départ, pas la valeur relue. Une section non
+ * touchée n'est ni relue, ni renvoyée, ni tracée comme une correction
+ * humaine — même si le texte d'IGINI contient un « | » ou un retour à la ligne.
+ */
+function changementsDepuis(
+  f: Formulaire,
+  depart: Formulaire,
+): { section: SectionEvaluation; valeur: unknown }[] | { erreur: string } {
+  try {
+    return ORDRE.filter((section) => CHAMPS_DE_SECTION[section].some((cle) => f[cle] !== depart[cle])).map(
+      (section) => ({ section, valeur: valeurSection(section, f) }),
+    );
+  } catch (erreur) {
+    return { erreur: erreur instanceof Error ? erreur.message : 'Saisie invalide.' };
   }
-  return {
-    rapport: {
-      verdict: f.verdict,
-      resume: f.resume,
-      montantRecherche: { montantEuros: montant, source: f.montantSource },
-      usageDesFonds: f.usageDesFonds,
-      audit: { connu: listes.connu as string[], manques: listes.manques as string[] },
-      faisabilite: { marche: f.marche, modeleEconomique: f.modeleEconomique, capacite: f.capacite },
-      dossier: listes.dossier as RapportEvaluation['dossier'],
-      risques: listes.risques as RapportEvaluation['risques'],
-      pistes: listes.pistes as RapportEvaluation['pistes'],
-      prochainesEtapes: listes.prochainesEtapes as string[],
-    },
-  };
 }
 
 function date(iso: string): string {
@@ -176,14 +211,11 @@ export default function RevueEvaluationsPage() {
 
   async function validerEtEnvoyer() {
     if (!token || !detail || !form || !detail.rapport) return;
-    const lu = rapportDepuis(form);
-    if ('erreur' in lu) {
-      setError(lu.erreur);
+    const changements = changementsDepuis(form, formulaireDepuis(detail.rapport, detail.noteIgnitux));
+    if ('erreur' in changements) {
+      setError(changements.erreur);
       return;
     }
-    const changements = ORDRE.filter(
-      (section) => JSON.stringify(lu.rapport[section]) !== JSON.stringify(detail.rapport?.[section]),
-    ).map((section) => ({ section, valeur: lu.rapport[section] }));
     const note = form.note.trim() || null;
     const noteChangee = note !== (detail.noteIgnitux ?? null);
 

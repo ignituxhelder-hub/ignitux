@@ -118,6 +118,23 @@ describe('RevueEvaluationsPage', () => {
     expect(appels('PATCH', '/evaluations-financement/revue/e1')).toHaveLength(0);
   });
 
+  // Le texte d’IGINI peut contenir « | » ou des retours à la ligne : une
+  // section que personne n’a touchée ne doit être ni relue, ni renvoyée, ni
+  // tracée comme une correction humaine.
+  it('ne renvoie pas une section non touchée, même si son texte contient « | »', async () => {
+    const avecBarre = { ...RAPPORT, risques: [{ risque: 'Loyer', gravite: 'moyenne', reduction: 'Négocier | vite' }] };
+    routes({ 'GET /evaluations-financement/revue/e1': { status: 200, body: { ...DETAIL, rapport: avecBarre } } });
+    afficher();
+    await ouvrir();
+
+    fireEvent.change(screen.getByLabelText('Résumé'), { target: { value: 'Résumé corrigé.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Valider et envoyer' }));
+
+    await waitFor(() => expect(appels('POST', '/evaluations-financement/revue/e1/valider')).toHaveLength(1));
+    const corps = JSON.parse(String(appels('PATCH', '/evaluations-financement/revue/e1')[0][1]?.body));
+    expect(corps.changements).toEqual([{ section: 'resume', valeur: 'Résumé corrigé.' }]);
+  });
+
   it('signale une ligne de risque mal écrite au lieu d’envoyer', async () => {
     routes();
     afficher();

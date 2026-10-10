@@ -110,6 +110,41 @@ describe('EvaluationSection', () => {
     expect(screen.getByRole('button', { name: 'Demander une nouvelle évaluation' })).toBeInTheDocument();
   });
 
+  it('affiche le montant recherché, l’usage des fonds et ce qui est connu', async () => {
+    routes([vue({ status: 'validee', verdict: 'financable', rapport, reviewedAt: '2026-10-11T10:00:00Z' })]);
+    render(<EvaluationSection token={TOKEN} projectId="p1" />);
+
+    expect(await screen.findByText(/40\s000\s€ \(source : plan de financement\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Four et travaux./)).toBeInTheDocument();
+    expect(screen.getByText('analyse')).toBeInTheDocument();
+  });
+
+  it('efface une erreur de lecture dès qu’une lecture suivante réussit, sans recharger les offres', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    mockApiRoutes({
+      [URL_LISTE]: { status: 200, body: [vue({ status: 'en_preparation' })] },
+      'GET /offres': offres(true),
+    });
+    render(<EvaluationSection token={TOKEN} projectId="p1" />);
+    await screen.findByText(/En préparation/);
+
+    mockApiRoutes({ [URL_LISTE]: { status: 500, body: { message: 'Panne passagère.' } }, 'GET /offres': offres(true) });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5000);
+    });
+    expect(await screen.findByText('Panne passagère.')).toBeInTheDocument();
+
+    mockApiRoutes({ [URL_LISTE]: { status: 200, body: [vue({ status: 'en_revue' })] }, 'GET /offres': offres(true) });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5000);
+    });
+    await waitFor(() => expect(screen.queryByText('Panne passagère.')).not.toBeInTheDocument());
+    const lecturesOffres = vi
+      .mocked(global.fetch)
+      .mock.calls.filter(([url]) => new URL(String(url)).pathname === '/offres');
+    expect(lecturesOffres).toHaveLength(0);
+  });
+
   it('affiche le motif d’un refus et permet de redemander', async () => {
     routes([vue({ status: 'refusee', motifRefus: 'Projet trop flou.' })]);
     render(<EvaluationSection token={TOKEN} projectId="p1" />);

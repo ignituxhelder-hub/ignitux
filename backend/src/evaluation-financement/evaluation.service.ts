@@ -176,9 +176,10 @@ export class EvaluationService {
       });
     } catch (erreur) {
       this.logger.error(`Évaluation ${evaluationId} en échec : ${String(erreur)}`);
-      // Seul un refus lisible (quota, offre…) est montré à l'entrepreneur ;
-      // une erreur technique brute reste dans les journaux.
-      const motif = erreur instanceof HttpException ? erreur.message : null;
+      // Seul un refus lisible (4xx : quota, offre…) est montré à l'entrepreneur.
+      // Une erreur serveur porte notre message générique, déjà affiché par
+      // l'interface ; une erreur technique brute reste dans les journaux.
+      const motif = erreur instanceof HttpException && erreur.getStatus() < 500 ? erreur.message : null;
       await this.ecrireSiEnPreparation(evaluationId, { status: 'echec', failure_reason: motif }).catch(
         (e: unknown) => this.logger.error(`Impossible d'écrire l'échec de ${evaluationId} : ${String(e)}`),
       );

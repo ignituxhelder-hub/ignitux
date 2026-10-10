@@ -334,6 +334,30 @@ describe('api', () => {
      * suppression ou une écriture comptable, à son insu, serait pire qu'un
      * échec immédiat.
      */
+    /**
+     * L’évaluation de financement : une demande lance une génération payante,
+     * et une validation envoie le rapport à l’entrepreneur. Ni l’une ni l’autre
+     * ne doit partir plus tard, au retour du réseau, sans personne devant l’écran.
+     */
+    describe('les écritures d’évaluation de financement n’entrent jamais en file', () => {
+      it.each([
+        ['demanderEvaluation', () => api.demanderEvaluation('token', 'p1')],
+        ['modifierEvaluation', () => api.modifierEvaluation('token', 'e1', [{ section: 'resume', valeur: 'x' }])],
+        ['validerEvaluation', () => api.validerEvaluation('token', 'e1')],
+        ['refaireEvaluation', () => api.refaireEvaluation('token', 'e1', 'reprends')],
+        ['refuserEvaluation', () => api.refuserEvaluation('token', 'e1', 'flou')],
+      ])('%s échoue tout de suite, sans rien mettre en file', async (_nom, appel) => {
+        const storage = fakeStorage();
+        setOfflineStorage(storage);
+        global.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+
+        const erreur = await appel().catch((e: unknown) => e);
+        expect(erreur).toBeInstanceOf(ApiError);
+        expect(erreur).toMatchObject({ status: 0 });
+        expect(readOfflineState().pending).toHaveLength(0);
+      });
+    });
+
     describe('les écritures d’immatriculation n’entrent jamais en file', () => {
       function horsLigne() {
         global.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));

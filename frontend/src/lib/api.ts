@@ -318,6 +318,11 @@ const ECRITURES_JAMAIS_EN_FILE = [
   // fiche remplacée entre-temps, une suppression ou une écriture comptable,
   // à son insu, serait pire qu'un échec immédiat.
   /^\/projects\/[^/?#]+\/immatriculation(?:\/capital)?(?:[?#].*)?$/,
+  // L'évaluation de financement : une demande lance une génération payante,
+  // et une validation envoie le rapport à l'entrepreneur. Rejouées plus tard,
+  // sans personne devant l'écran, elles feraient pire qu'un échec immédiat.
+  /^\/projects\/[^/?#]+\/evaluations-financement(?:[?#].*)?$/,
+  /^\/evaluations-financement\/revue\//,
 ];
 
 function handleOffline<T>(path: string, options: RequestInit): Promise<T> {

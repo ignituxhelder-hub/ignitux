@@ -1,6 +1,7 @@
 import {
   ConflictException,
   ForbiddenException,
+  InternalServerErrorException,
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
@@ -142,6 +143,18 @@ describe('EvaluationService — demande et génération', () => {
     const [ecriture] = ecritures(prisma);
     expect(ecriture.where).toEqual({ id: 'e1', status: 'en_preparation' });
     expect(ecriture.data).toEqual({ status: 'echec', failure_reason: null });
+  });
+
+  it('ne répète pas le message générique d’une erreur serveur (500) comme motif', async () => {
+    const { service, prisma, claude } = monter();
+    claude.generateStructuredOutput.mockRejectedValue(
+      new InternalServerErrorException("L'évaluation n'a pas pu être préparée. Tu peux réessayer."),
+    );
+
+    await service.demander('u1', 'p1');
+    await finirArrierePlan();
+
+    expect(ecritures(prisma)[0].data.failure_reason).toBeNull();
   });
 
   it('garde le message d’un refus lisible (quota épuisé) comme motif d’échec', async () => {
