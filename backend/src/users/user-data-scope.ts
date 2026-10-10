@@ -13,8 +13,10 @@
  * une table sans la classer fait échouer les tests. C'est le seul dispositif
  * qui empêche l'export de se périmer en silence à la prochaine migration.
  *
- * Les groupes suivent l'ordre et le découpage des CGU §2.2, pour qu'une
- * personne puisse tenir le document d'une main et son export de l'autre.
+ * Les huit groupes sont nommés dans le texte de présentation du fichier
+ * exporté (user-data.service.ts) : leur liste et leur ordre ne changent pas
+ * sans que ce texte change aussi. (Ils ne renvoient à aucun paragraphe
+ * numéroté des CGU publiées, qui n'en ont pas.)
  */
 
 export const EXPORT_GROUPS = [
@@ -136,8 +138,8 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   billing_payments: exported('facturation'),
 
   // Comptabilité et banque. Rattachées au groupe « facturation » parce que
-  // les groupes suivent le découpage des CGU §2.2 et qu'en inventer un
-  // nouveau ferait diverger l'export du document qu'il est censé refléter.
+  // les huit groupes sont annoncés tels quels dans la présentation du
+  // fichier exporté, et qu'en inventer un nouveau la ferait mentir.
   // Les clés du fichier exporté, elles, disent précisément ce que c'est.
   //
   // Seules les lignes de la personne sortent : ces tables contiennent aussi

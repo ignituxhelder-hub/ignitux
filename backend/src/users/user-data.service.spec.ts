@@ -166,7 +166,18 @@ describe('UserDataService', () => {
       expect(JSON.stringify(exported)).not.toContain('SECRET-A-NE-JAMAIS-DIFFUSER');
     });
 
-    it('expose les huit catégories annoncées par les CGU', async () => {
+    it('se présente sans renvoyer à un paragraphe de document qui n’existe pas', async () => {
+      // L'ancien texte citait « Conditions Générales (§2.2) » : les CGU
+      // publiées n'ont pas de §2.2. Le fichier nomme ses catégories et
+      // renvoie à la politique de confidentialité, sans numéro de section.
+      const exported = await service.exportUserData('u1');
+
+      expect(exported.a_propos_de_ce_fichier).not.toMatch(/§|2\.2|Conditions G[ée]n[ée]rales/);
+      expect(exported.a_propos_de_ce_fichier).toContain('politique de confidentialité');
+      expect(exported.a_propos_de_ce_fichier).toContain('huit catégories');
+    });
+
+    it('expose les huit catégories de l’export', async () => {
       const exported = await service.exportUserData('u1');
 
       expect(Object.keys(exported.donnees)).toEqual([

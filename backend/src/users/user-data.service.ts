@@ -319,8 +319,10 @@ export class UserDataService {
     return {
       genere_le: new Date().toISOString(),
       a_propos_de_ce_fichier:
-        "Cet export contient les données qu'Ignitux détient à ton sujet, dans les mêmes " +
-        'catégories que celles annoncées par les Conditions Générales (§2.2).',
+        "Cet export contient les données qu'Ignitux détient à ton sujet, rangées en huit " +
+        'catégories : compte, projets et contenus, contenus générés par IGINI, relations ' +
+        'professionnelles, facturation, financement, communauté et marketplace, journaux ' +
+        "techniques. La politique de confidentialité explique à quoi servent ces données.",
       avertissement:
         'Ce fichier contient des données personnelles, y compris celles de tiers que tu as ' +
         'saisies toi-même (contacts, clients, détenteurs de parts), et les images de ta pièce ' +
