@@ -304,6 +304,8 @@ const JAMAIS_EN_FILE_MOTIFS = [
  * restent servies par le cache comme les autres.
  */
 const ECRITURES_JAMAIS_EN_FILE = [
+  // Toutes les écritures de statuts, sous-routes comprises (retenir,
+  // regenerer, deverrouiller…).
   /^\/projects\/[^/?#]+\/statuts(?:\/[^?#]*)?(?:[?#].*)?$/,
   /^\/projects\/[^/?#]+\/forme-juridique(?:[?#].*)?$/,
   // Le dossier de création : cocher une pièce, marquer comme déposé ou
@@ -2234,6 +2236,13 @@ export const api = {
 
   retenirStatuts: (token: string, projectId: string) =>
     request<CompanyBylaws>(`/projects/${projectId}/statuts/retenir`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  /** Retenue -> brouillon, accepté par le serveur seulement si la forme confirmée a changé depuis. */
+  deverrouillerStatuts: (token: string, projectId: string) =>
+    request<CompanyBylaws>(`/projects/${projectId}/statuts/deverrouiller`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
     }),

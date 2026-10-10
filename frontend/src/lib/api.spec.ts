@@ -255,6 +255,7 @@ describe('api', () => {
 
       it.each([
         ['retenirStatuts', () => api.retenirStatuts('token', 'p1')],
+        ['deverrouillerStatuts', () => api.deverrouillerStatuts('token', 'p1')],
         ['genererStatuts', () => api.genererStatuts('token', 'p1', dto)],
         ['regenererStatuts', () => api.regenererStatuts('token', 'p1', dto)],
         ['modifierStatuts', () => api.modifierStatuts('token', 'p1', 'texte')],

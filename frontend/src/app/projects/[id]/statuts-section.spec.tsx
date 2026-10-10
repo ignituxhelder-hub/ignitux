@@ -630,7 +630,7 @@ describe('StatutsSection', () => {
       rendre();
       fireEvent.click(await screen.findByRole('button', { name: /retenir cette version/i }));
 
-      expect(confirmer).toHaveBeenCalledWith(expect.stringMatching(/définitivement/));
+      expect(confirmer).toHaveBeenCalledWith(expect.stringMatching(/verrouille/));
       expect(appelsAvecMethode('POST')).toHaveLength(0);
       expect(screen.getByRole('button', { name: /retenir cette version/i })).toBeEnabled();
     });
@@ -680,8 +680,92 @@ describe('StatutsSection', () => {
         },
       });
       rendre('SARL');
-      expect(await screen.findByText(/verrouillée et ne peut plus être régénérée/i)).toBeInTheDocument();
+      expect(await screen.findByText(/est verrouillée/i)).toBeInTheDocument();
       expect(screen.queryByText(/régénère si tu veux/i)).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Régénérer' })).not.toBeInTheDocument();
+    });
+
+    describe('déverrouiller des statuts retenus quand la forme a changé', () => {
+      const retenus = () => ({ ...brouillon(), status: 'retenue', finalized_at: '2026-10-03T10:00:00.000Z' });
+
+      function rendreAvec(forme: string, onChanged = vi.fn()) {
+        render(
+          <StatutsSection
+            token={TOKEN}
+            projectId={PROJECT_ID}
+            confirmedLegalForm={forme}
+            onFormConfirmed={vi.fn()}
+            onChanged={onChanged}
+          />,
+        );
+        return onChanged;
+      }
+
+      it('explique et propose de déverrouiller quand la forme confirmée diffère', async () => {
+        mockApiRoutes({ 'GET /projects/p1/statuts': { status: 200, body: retenus() } });
+        rendreAvec('SARL');
+        expect(
+          await screen.findByRole('button', { name: 'Déverrouiller pour réécrire mes statuts' }),
+        ).toBeInTheDocument();
+        expect(screen.getByText(/« SASU »/)).toBeInTheDocument();
+        expect(screen.getByText(/déverrouiller pour les réécrire pour SARL/i)).toBeInTheDocument();
+      });
+
+      it('ne propose pas de déverrouiller quand la forme correspond toujours', async () => {
+        mockApiRoutes({ 'GET /projects/p1/statuts': { status: 200, body: retenus() } });
+        rendreAvec('SASU');
+        await screen.findByText(/Version retenue le/);
+        expect(screen.queryByRole('button', { name: /déverrouiller/i })).not.toBeInTheDocument();
+      });
+
+      it("ne déverrouille rien si la confirmation est refusée", async () => {
+        mockApiRoutes({ 'GET /projects/p1/statuts': { status: 200, body: retenus() } });
+        const confirmer = vi.spyOn(window, 'confirm').mockReturnValue(false);
+        const onChanged = rendreAvec('SARL');
+        fireEvent.click(await screen.findByRole('button', { name: 'Déverrouiller pour réécrire mes statuts' }));
+
+        expect(confirmer).toHaveBeenCalledTimes(1);
+        expect(confirmer.mock.calls[0][0]).toMatch(/brouillon/);
+        expect(confirmer.mock.calls[0][0]).toMatch(/SARL/);
+        expect(confirmer.mock.calls[0][0]).toMatch(/retenir à nouveau/);
+        expect(appelsAvecMethode('POST')).toHaveLength(0);
+        expect(onChanged).not.toHaveBeenCalled();
+      });
+
+      it('après confirmation : POST deverrouiller, repasse en brouillon modifiable et prévient onChanged', async () => {
+        mockApiRoutes({
+          'GET /projects/p1/statuts': { status: 200, body: retenus() },
+          'POST /projects/p1/statuts/deverrouiller': { status: 201, body: brouillon() },
+        });
+        const onChanged = rendreAvec('SARL');
+        fireEvent.click(await screen.findByRole('button', { name: 'Déverrouiller pour réécrire mes statuts' }));
+
+        expect(await screen.findByRole('button', { name: 'Régénérer' })).toBeInTheDocument();
+        expect(screen.getByLabelText('Texte des statuts')).not.toHaveAttribute('readonly');
+        expect(screen.queryByRole('button', { name: /déverrouiller/i })).not.toBeInTheDocument();
+        const posts = appelsAvecMethode('POST');
+        expect(posts).toHaveLength(1);
+        expect(String(posts[0][0])).toMatch(/\/projects\/p1\/statuts\/deverrouiller$/);
+        expect(onChanged).toHaveBeenCalledTimes(1);
+      });
+
+      it("montre l'erreur de l'API et ne prévient pas onChanged", async () => {
+        mockApiRoutes({
+          'GET /projects/p1/statuts': { status: 200, body: retenus() },
+          'POST /projects/p1/statuts/deverrouiller': {
+            status: 409,
+            body: { message: 'Tes statuts correspondent à ta forme juridique : ils restent verrouillés.' },
+          },
+        });
+        const onChanged = rendreAvec('SARL');
+        fireEvent.click(await screen.findByRole('button', { name: 'Déverrouiller pour réécrire mes statuts' }));
+
+        expect(
+          await screen.findByText('Tes statuts correspondent à ta forme juridique : ils restent verrouillés.'),
+        ).toBeInTheDocument();
+        expect(onChanged).not.toHaveBeenCalled();
+        expect(screen.getByLabelText('Texte des statuts')).toHaveAttribute('readonly');
+      });
     });
 
     it('n’affiche jamais le formulaire de génération quand le chargement échoue, et permet de réessayer', async () => {

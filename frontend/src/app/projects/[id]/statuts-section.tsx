@@ -86,7 +86,7 @@ export function StatutsSection({
   confirmedLegalForm: string | null;
   onFormConfirmed: (form: string) => void;
   /**
-   * Appelé après une génération, une régénération ou une rétention réussie :
+   * Appelé après une génération, une régénération, une rétention ou un déverrouillage réussi :
    * d'autres sections (le dossier de création) dépendent de l'état des statuts.
    */
   onChanged?: () => void;
@@ -117,10 +117,11 @@ export function StatutsSection({
   const [isSaving, setIsSaving] = useState(false);
   const [isRetaining, setIsRetaining] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isUnlocking, setIsUnlocking] = useState(false);
 
   const aPersonneMorale = confirmedLegalForm ? FORMES_AVEC_PERSONNE_MORALE.has(confirmedLegalForm) : false;
   const isLoading = aPersonneMorale && projetCharge !== projectId;
-  const isBusy = isGenerating || isSaving || isRetaining || isDownloading;
+  const isBusy = isGenerating || isSaving || isRetaining || isDownloading || isUnlocking;
   const modifie = bylaws !== null && texte !== bylaws.content;
 
   /** Toute réponse du serveur remplace l'état local ; `associates` n'est jamais supposé présent. */
@@ -182,7 +183,8 @@ export function StatutsSection({
     if (bylaws?.status === 'retenue' && bylaws.legal_form !== formeChoisie) {
       const accord = window.confirm(
         `Tes statuts retenus sont écrits pour une ${bylaws.legal_form}. Si tu passes à ${formeChoisie}, ` +
-          'ils ne correspondront plus à ta forme et resteront verrouillés : tu ne pourras pas les modifier.\n\n' +
+          'ils ne correspondront plus à ta forme : il faudra les déverrouiller, les régénérer pour la ' +
+          'nouvelle forme puis les retenir à nouveau.\n\n' +
           'Changer quand même de forme juridique ?',
       );
       if (!accord) return;
@@ -255,9 +257,11 @@ export function StatutsSection({
   };
 
   const retenir = async () => {
-    // Irréversible : on le dit, et on attend un accord explicite.
+    // Verrouillant : on le dit, et on attend un accord explicite. Seul un
+    // changement de forme juridique permet ensuite de déverrouiller.
     const accord = window.confirm(
-      'Retenir cette version la verrouille définitivement : tu ne pourras plus ni la modifier ni la régénérer.\n\n' +
+      'Retenir cette version la verrouille : tu ne pourras plus ni la modifier ni la régénérer ' +
+        '(sauf si tu changes ensuite de forme juridique).\n\n' +
         "Retenir n'est pas une validation juridique : fais relire le texte par un professionnel " +
         '(avocat, expert-comptable) avant tout dépôt. Continuer ?',
     );
@@ -271,6 +275,30 @@ export function StatutsSection({
       setError(err instanceof ApiError ? err.message : 'Impossible de retenir cette version.');
     } finally {
       setIsRetaining(false);
+    }
+  };
+
+  /**
+   * Seule sortie d'une version retenue : la forme confirmée a changé depuis.
+   * Le serveur revérifie la condition (409 sinon).
+   */
+  const deverrouiller = async () => {
+    if (!bylaws || !confirmedLegalForm) return;
+    const accord = window.confirm(
+      `Tes statuts retenus sont écrits pour une ${bylaws.legal_form}, ta forme est maintenant ${confirmedLegalForm}.\n\n` +
+        'Les déverrouiller les remet en brouillon : tu pourras les régénérer pour ' +
+        `${confirmedLegalForm}, puis il faudra les retenir à nouveau avant le dépôt. Continuer ?`,
+    );
+    if (!accord) return;
+    setError(null);
+    setIsUnlocking(true);
+    try {
+      recevoir(await api.deverrouillerStatuts(token, projectId));
+      onChanged?.();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Impossible de déverrouiller les statuts.');
+    } finally {
+      setIsUnlocking(false);
     }
   };
 
@@ -463,9 +491,16 @@ export function StatutsSection({
               Ce texte a été généré pour « {bylaws.legal_form} », mais la forme confirmée sur ce
               projet est maintenant « {confirmedLegalForm} ».{' '}
               {bylaws.status === 'retenue'
-                ? 'Cette version est retenue : elle est verrouillée et ne peut plus être régénérée.'
+                ? 'Cette version retenue est verrouillée, mais elle doit correspondre à ta forme pour le dépôt : ' +
+                  `tu peux déverrouiller pour les réécrire pour ${confirmedLegalForm}. Tes statuts repasseront en ` +
+                  'brouillon, tu les régénéreras, puis tu les retiendras à nouveau.'
                 : "Le contenu n'a pas suivi ce changement automatiquement — régénère si tu veux qu'il corresponde à la forme actuelle."}
             </p>
+          )}
+          {bylaws.status === 'retenue' && bylaws.legal_form !== confirmedLegalForm && (
+            <button className="primary" type="button" onClick={deverrouiller} disabled={isBusy}>
+              {isUnlocking ? 'Déverrouillage…' : 'Déverrouiller pour réécrire mes statuts'}
+            </button>
           )}
           <label htmlFor="statuts-texte">Texte des statuts</label>
           <textarea
