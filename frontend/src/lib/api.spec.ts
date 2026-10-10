@@ -347,7 +347,7 @@ describe('api', () => {
       it.each([
         ['enregistrerImmatriculation', () => api.enregistrerImmatriculation('token', 'p1', saisie)],
         ['supprimerImmatriculation', () => api.supprimerImmatriculation('token', 'p1')],
-        ['enregistrerCapitalImmatriculation', () => api.enregistrerCapitalImmatriculation('token', 'p1')],
+        ['enregistrerCapitalImmatriculation', () => api.enregistrerCapitalImmatriculation('token', 'p1', { montantCents: 100000, date: '2026-10-01' })],
       ])('%s échoue tout de suite, sans rien mettre en file', async (_nom, appel) => {
         const storage = fakeStorage();
         setOfflineStorage(storage);
@@ -380,6 +380,17 @@ describe('api', () => {
         expect(options.method).toBe('PUT');
         expect(options.headers.Authorization).toBe('Bearer token');
         expect(JSON.parse(options.body)).toEqual({ ...saisie, siret: null, vatNumber: null });
+      });
+
+      it('envoie en POST le montant et la date affichés, rien d’autre', async () => {
+        mockFetchOnce(201, { entryId: 'e1', proposition: null, dejaEnregistree: true, raison: null });
+        await api.enregistrerCapitalImmatriculation('token', 'p1', { montantCents: 100000, date: '2026-10-01' });
+
+        const [url, options] = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
+        expect(new URL(String(url)).pathname).toBe('/projects/p1/immatriculation/capital');
+        expect(options.method).toBe('POST');
+        expect(options.headers.Authorization).toBe('Bearer token');
+        expect(JSON.parse(options.body)).toEqual({ montantCents: 100000, date: '2026-10-01' });
       });
 
       it('garde chaque message de validation du serveur, un par un', async () => {

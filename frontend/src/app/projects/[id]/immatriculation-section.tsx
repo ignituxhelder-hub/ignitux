@@ -1,12 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import {
   api,
   ApiError,
   OfflineReadError,
   type EtatCapitalImmatriculation,
   type EtatImmatriculation,
+  type LigneEcritureCapital,
   type Registration,
 } from '@/lib/api';
 import { euros } from '@/lib/montants';
@@ -40,7 +41,56 @@ interface Saisie {
   registeredOn: string;
 }
 
+type Champ = keyof Saisie;
+
 const SAISIE_VIDE: Saisie = { siren: '', siret: '', vatNumber: '', legalName: '', headOffice: '', registeredOn: '' };
+
+/** L'identifiant de chaque champ (id/htmlFor), et de son message d'erreur. */
+const ID_CHAMP: Record<Champ, string> = {
+  siren: 'immatriculation-siren',
+  siret: 'immatriculation-siret',
+  vatNumber: 'immatriculation-tva',
+  legalName: 'immatriculation-denomination',
+  headOffice: 'immatriculation-siege',
+  registeredOn: 'immatriculation-date',
+};
+
+const ORDRE_CHAMPS: Champ[] = ['siren', 'siret', 'vatNumber', 'legalName', 'headOffice', 'registeredOn'];
+
+/** Les champs obligatoires, vérifiés avant tout envoi (jamais de date vide envoyée). */
+const OBLIGATOIRES: Array<[Champ, string]> = [
+  ['siren', 'Le SIREN est obligatoire.'],
+  ['legalName', 'La dénomination est obligatoire.'],
+  ['headOffice', 'L’adresse du siège est obligatoire.'],
+  ['registeredOn', 'La date d’immatriculation est obligatoire.'],
+];
+
+/**
+ * Le champ qu'un message du serveur désigne, quand il en désigne un. L'ordre
+ * compte : un message sur la TVA ou le SIRET parle aussi du SIREN.
+ */
+function champDuMessage(message: string): Champ | null {
+  if (/\bTVA\b/.test(message)) return 'vatNumber';
+  if (/\bSIRET\b/.test(message)) return 'siret';
+  if (/\bSIREN\b/.test(message)) return 'siren';
+  if (/dénomination/i.test(message)) return 'legalName';
+  if (/siège/i.test(message)) return 'headOffice';
+  if (/date d[’']immatriculation/i.test(message)) return 'registeredOn';
+  return null;
+}
+
+type ErreursChamps = Partial<Record<Champ, string[]>>;
+
+function repartir(messages: string[]): { champs: ErreursChamps; autres: string[] } {
+  const champs: ErreursChamps = {};
+  const autres: string[] = [];
+  for (const message of messages) {
+    const champ = champDuMessage(message);
+    if (champ) champs[champ] = [...(champs[champ] ?? []), message];
+    else autres.push(message);
+  }
+  return { champs, autres };
+}
 
 /** La saisie de départ : la fiche existante, sinon la suggestion (à confirmer), sinon rien. */
 function saisieDepuis(etat: EtatImmatriculation): Saisie {
@@ -67,6 +117,34 @@ function messagesErreur(err: unknown, repli: string): string[] {
   return [repli];
 }
 
+function TableEcriture({ lignes }: { lignes: LigneEcritureCapital[] }) {
+  return (
+    <div style={{ overflowX: 'auto' }}>
+      <table>
+        <caption className="muted">Lignes de l’écriture</caption>
+        <thead>
+          <tr>
+            <th scope="col">Compte</th>
+            <th scope="col">Libellé</th>
+            <th scope="col">Débit</th>
+            <th scope="col">Crédit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {lignes.map((ligne) => (
+            <tr key={ligne.compte}>
+              <td>{ligne.compte}</td>
+              <td>{ligne.libelleCompte}</td>
+              <td>{ligne.debitCents > 0 ? euros(ligne.debitCents) : '—'}</td>
+              <td>{ligne.creditCents > 0 ? euros(ligne.creditCents) : '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 /**
  * IMMATRICULATION — rattacher le projet à l'entreprise créée.
  *
@@ -74,62 +152,73 @@ function messagesErreur(err: unknown, repli: string): string[] {
  * Ignitux ne vérifie rien auprès de l'État, il contrôle seulement la forme
  * des numéros. Pas d'interface optimiste : on n'affiche que ce que le
  * serveur a enregistré. L'écriture de capital n'est jamais faite sans un
- * clic confirmé.
+ * clic confirmé, et le serveur refuse si ce qui a été montré a changé.
+ *
+ * La fiche et l'écriture de capital se chargent séparément : un échec du
+ * second ne cache jamais la fiche.
  */
 export function ImmatriculationSection({
   token,
   projectId,
+  confirmedLegalForm = null,
+  refreshSignal = 0,
   onChanged,
 }: {
   token: string;
   projectId: string;
+  /** Sert à recharger quand la forme change : la proposition de capital en dépend. */
+  confirmedLegalForm?: string | null;
+  /** Incrémenté quand les statuts changent : la suggestion et le capital en dépendent. */
+  refreshSignal?: number;
   /** Prévenu quand la fiche est créée, remplacée ou supprimée (le dossier de création en dépend). */
   onChanged?: () => void;
 }) {
-  const cleChargement = projectId;
+  const cleChargement = `${projectId}|${confirmedLegalForm ?? ''}|${refreshSignal}`;
   const [etat, setEtat] = useState<EtatImmatriculation | null>(null);
-  const [capital, setCapital] = useState<EtatCapitalImmatriculation | null>(null);
-  const [capitalErreur, setCapitalErreur] = useState<string | null>(null);
   const [cleChargee, setCleChargee] = useState<string | null>(null);
   const [chargementEchoue, setChargementEchoue] = useState(false);
+  const [capital, setCapital] = useState<EtatCapitalImmatriculation | null>(null);
+  const [capitalCleChargee, setCapitalCleChargee] = useState<string | null>(null);
+  const [capitalErreur, setCapitalErreur] = useState<string | null>(null);
   const [erreurs, setErreurs] = useState<string[]>([]);
+  const [erreursChamps, setErreursChamps] = useState<ErreursChamps>({});
   const [succes, setSucces] = useState<string | null>(null);
   const [saisie, setSaisie] = useState<Saisie>(SAISIE_VIDE);
   const [modification, setModification] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const isLoading = cleChargee !== cleChargement;
+  const capitalEnChargement = capitalCleChargee !== cleChargement && !capitalErreur;
 
   // Même garde que le dossier de création : une réponse plus ancienne qui
   // arrive après la plus récente est ignorée.
   const dernierChargement = useRef(0);
   const dernierCapital = useRef(0);
+  // Une saisie commencée n'est pas écrasée par un rechargement venu d'une
+  // autre section (statuts, forme) sur le même projet.
+  const saisieTouchee = useRef<string | null>(null);
 
   const charger = useCallback(async () => {
     const numero = ++dernierChargement.current;
-    // Un chargement complet rend caduque toute relecture du capital en cours.
-    ++dernierCapital.current;
     const courant = () => numero === dernierChargement.current;
     setCleChargee(null);
     setChargementEchoue(false);
     try {
-      const [recu, recuCapital] = await Promise.all([
-        api.getImmatriculation(token, projectId),
-        api.getCapitalImmatriculation(token, projectId),
-      ]);
+      const recu = await api.getImmatriculation(token, projectId);
       if (!courant()) return;
-      if (!estEtat(recu) || !estEtatCapital(recuCapital)) throw new ApiError(REPONSE_ILLISIBLE, 0);
+      if (!estEtat(recu)) throw new ApiError(REPONSE_ILLISIBLE, 0);
       setEtat(recu);
-      setCapital(recuCapital);
-      setCapitalErreur(null);
-      setSaisie(saisieDepuis(recu));
-      setModification(false);
+      if (saisieTouchee.current !== projectId) {
+        saisieTouchee.current = null;
+        setSaisie(saisieDepuis(recu));
+        setModification(false);
+        setErreursChamps({});
+      }
       setErreurs([]);
     } catch (err) {
       if (!courant()) return;
       // Hors ligne : une fiche en cache pourrait être périmée — on ne l'affiche pas.
       setEtat(null);
-      setCapital(null);
       setChargementEchoue(true);
       setErreurs([
         err instanceof OfflineReadError
@@ -143,37 +232,64 @@ export function ImmatriculationSection({
     }
   }, [token, projectId, cleChargement]);
 
-  useEffect(() => {
-    void charger();
-  }, [charger]);
-
-  /** Relit l'écriture de capital proposée après un changement de la fiche. */
-  const rechargerCapital = useCallback(async () => {
+  /** Lit l'état de l'écriture de capital — indépendamment de la fiche. */
+  const chargerCapital = useCallback(async () => {
     const numero = ++dernierCapital.current;
     const courant = () => numero === dernierCapital.current;
+    setCapitalErreur(null);
     try {
       const recu = await api.getCapitalImmatriculation(token, projectId);
       if (!courant()) return;
       if (!estEtatCapital(recu)) throw new ApiError(REPONSE_ILLISIBLE, 0);
       setCapital(recu);
-      setCapitalErreur(null);
     } catch (err) {
       if (!courant()) return;
       setCapital(null);
       setCapitalErreur(
-        err instanceof ApiError && !(err instanceof OfflineReadError)
-          ? err.message
-          : 'Impossible de charger l’écriture de capital proposée.',
+        err instanceof OfflineReadError
+          ? 'Pas de réseau : l’écriture de capital ne s’affiche pas hors ligne.'
+          : err instanceof ApiError
+            ? err.message
+            : 'Impossible de charger l’écriture de capital.',
       );
+    } finally {
+      if (courant()) setCapitalCleChargee(cleChargement);
     }
-  }, [token, projectId]);
+  }, [token, projectId, cleChargement]);
 
-  const changer = (champ: keyof Saisie) => (e: { target: { value: string } }) =>
+  useEffect(() => {
+    void charger();
+    void chargerCapital();
+  }, [charger, chargerCapital]);
+
+  const changer = (champ: Champ) => (e: { target: { value: string } }) => {
+    saisieTouchee.current = projectId;
     setSaisie((s) => ({ ...s, [champ]: e.target.value }));
+  };
 
-  const enregistrer = async () => {
+  /** Pose les erreurs : à côté du champ qu'elles désignent, sinon dans la liste générale. */
+  const montrerErreurs = (messages: string[]) => {
+    const { champs, autres } = repartir(messages);
+    setErreursChamps(champs);
+    setErreurs(autres);
+    const premier = ORDRE_CHAMPS.find((champ) => champs[champ]);
+    if (premier) document.getElementById(ID_CHAMP[premier])?.focus();
+  };
+
+  const effacerMessages = () => {
     setErreurs([]);
+    setErreursChamps({});
     setSucces(null);
+  };
+
+  const enregistrer = async (e?: FormEvent) => {
+    e?.preventDefault();
+    effacerMessages();
+    const manquants = OBLIGATOIRES.filter(([champ]) => !saisie[champ].trim()).map(([, message]) => message);
+    if (manquants.length > 0) {
+      montrerErreurs(manquants);
+      return;
+    }
     setIsSaving(true);
     try {
       const facultatif = (v: string) => (v.trim() ? v.trim() : null);
@@ -186,14 +302,15 @@ export function ImmatriculationSection({
         registeredOn: saisie.registeredOn,
       });
       if (!estEtat(recu)) throw new ApiError(REPONSE_ILLISIBLE, 0);
+      saisieTouchee.current = null;
       setEtat(recu);
       setSaisie(saisieDepuis(recu));
       setModification(false);
       setSucces('Fiche enregistrée.');
       onChanged?.();
-      void rechargerCapital();
+      void chargerCapital();
     } catch (err) {
-      setErreurs(messagesErreur(err, 'Impossible d’enregistrer la fiche.'));
+      montrerErreurs(messagesErreur(err, 'Impossible d’enregistrer la fiche.'));
     } finally {
       setIsSaving(false);
     }
@@ -205,18 +322,18 @@ export function ImmatriculationSection({
         'Les devis et factures déjà émis ne changent pas.',
     );
     if (!accord) return;
-    setErreurs([]);
-    setSucces(null);
+    effacerMessages();
     setIsSaving(true);
     try {
       const recu = await api.supprimerImmatriculation(token, projectId);
       if (!estEtat(recu)) throw new ApiError(REPONSE_ILLISIBLE, 0);
+      saisieTouchee.current = null;
       setEtat(recu);
       setSaisie(saisieDepuis(recu));
       setModification(false);
       setSucces('Fiche supprimée.');
       onChanged?.();
-      void rechargerCapital();
+      void chargerCapital();
     } catch (err) {
       setErreurs(messagesErreur(err, 'Impossible de supprimer la fiche.'));
     } finally {
@@ -239,15 +356,19 @@ export function ImmatriculationSection({
         ' ? Elle ne sera enregistrée qu’une fois.',
     );
     if (!accord) return;
-    setErreurs([]);
-    setSucces(null);
+    effacerMessages();
     setIsSaving(true);
     try {
-      const recu = await api.enregistrerCapitalImmatriculation(token, projectId);
+      // Ce que la personne a vu : le serveur refuse si la proposition a changé.
+      const recu = await api.enregistrerCapitalImmatriculation(token, projectId, {
+        montantCents: proposition.montantCents,
+        date: proposition.date,
+      });
       if (!estEtatCapital(recu)) throw new ApiError(REPONSE_ILLISIBLE, 0);
       ++dernierCapital.current;
       setCapital(recu);
       setCapitalErreur(null);
+      setCapitalCleChargee(cleChargement);
       // La fiche porte désormais l'écriture : elle ne peut plus être supprimée.
       setEtat((e) =>
         e?.registration ? { ...e, registration: { ...e.registration, capitalEntryId: recu.entryId } } : e,
@@ -255,8 +376,8 @@ export function ImmatriculationSection({
       setSucces('Écriture de capital enregistrée dans ta comptabilité.');
     } catch (err) {
       setErreurs(messagesErreur(err, 'Impossible d’enregistrer l’écriture de capital.'));
-      // L'état réel du serveur, pas celui qu'on suppose (réservation, doublon…).
-      void rechargerCapital();
+      // L'état réel du serveur, pas celui qu'on suppose (proposition changée, doublon…).
+      void chargerCapital();
     } finally {
       setIsSaving(false);
     }
@@ -269,17 +390,21 @@ export function ImmatriculationSection({
     </p>
   );
 
+  const champsEnErreur = ORDRE_CHAMPS.some((champ) => erreursChamps[champ]);
   const blocErreurs =
-    erreurs.length === 0 ? null : erreurs.length === 1 ? (
-      <p className="error" role="alert">
-        {erreurs[0]}
-      </p>
-    ) : (
-      <ul className="error" role="alert">
-        {erreurs.map((m) => (
-          <li key={m}>{m}</li>
-        ))}
-      </ul>
+    erreurs.length === 0 && !champsEnErreur ? null : (
+      <div className="error" role="alert">
+        {champsEnErreur && <p>La fiche n’a pas été enregistrée : vérifie les champs signalés.</p>}
+        {erreurs.length === 1 ? (
+          <p>{erreurs[0]}</p>
+        ) : erreurs.length > 1 ? (
+          <ul>
+            {erreurs.map((m) => (
+              <li key={m}>{m}</li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
     );
 
   if (isLoading) {
@@ -296,7 +421,14 @@ export function ImmatriculationSection({
       <div className="card" id="section-immatriculation">
         <h2>Immatriculation</h2>
         {blocErreurs}
-        <button className="secondary" type="button" onClick={() => void charger()}>
+        <button
+          className="secondary"
+          type="button"
+          onClick={() => {
+            void charger();
+            void chargerCapital();
+          }}
+        >
           Réessayer
         </button>
       </div>
@@ -308,6 +440,29 @@ export function ImmatriculationSection({
   const montrerFormulaire = !fiche || modification;
   const proposeLegalName = !!suggestion && saisie.legalName === suggestion.legalName && suggestion.legalName !== '';
   const proposeHeadOffice = !!suggestion && saisie.headOffice === suggestion.headOffice && suggestion.headOffice !== '';
+  // Ce que le journal dit, pas l'identifiant posé sur la fiche (qui peut
+  // n'être qu'une réservation) ; repli sur la fiche si le capital n'a pas pu
+  // être lu — par prudence, sans proposer de suppression.
+  const capitalEnregistre = capital ? capital.dejaEnregistree : !!fiche?.capitalEntryId;
+
+  /** Attributs d'accessibilité d'un champ : aide éventuelle, et son erreur. */
+  const attributsChamp = (champ: Champ, aide?: string) => {
+    const enErreur = !!erreursChamps[champ];
+    const decrit = [aide, enErreur ? `${ID_CHAMP[champ]}-erreur` : undefined].filter(Boolean).join(' ');
+    return {
+      id: ID_CHAMP[champ],
+      'aria-invalid': enErreur ? (true as const) : undefined,
+      'aria-describedby': decrit || undefined,
+    };
+  };
+  const erreurChamp = (champ: Champ) =>
+    erreursChamps[champ] ? (
+      <p className="error" id={`${ID_CHAMP[champ]}-erreur`}>
+        {erreursChamps[champ]!.join(' ')}
+      </p>
+    ) : null;
+
+  const enregistree = capital?.enregistree ?? null;
 
   return (
     <div className="card" id="section-immatriculation">
@@ -350,8 +505,7 @@ export function ImmatriculationSection({
             className="secondary"
             type="button"
             onClick={() => {
-              setSucces(null);
-              setErreurs([]);
+              effacerMessages();
               setSaisie(saisieDepuis(etat));
               setModification(true);
             }}
@@ -359,7 +513,7 @@ export function ImmatriculationSection({
           >
             Modifier la fiche
           </button>{' '}
-          {fiche.capitalEntryId ? (
+          {capitalEnregistre ? (
             <p className="muted">
               Une écriture de capital a été enregistrée à partir de cette fiche : elle ne peut plus être supprimée,
               mais tu peux toujours la corriger.
@@ -373,7 +527,7 @@ export function ImmatriculationSection({
       )}
 
       {montrerFormulaire && (
-        <>
+        <form onSubmit={(e) => void enregistrer(e)} noValidate aria-label="Fiche d’immatriculation">
           {!fiche && (
             <p className="muted">
               Saisis ici le SIREN et les mentions de ton Kbis (ou de l’avis de situation INSEE) une fois ta société
@@ -386,38 +540,42 @@ export function ImmatriculationSection({
               avant d’enregistrer.
             </p>
           )}
-          <label htmlFor="immatriculation-siren">SIREN (9 chiffres, obligatoire)</label>
+          <label htmlFor={ID_CHAMP.siren}>SIREN (9 chiffres, obligatoire)</label>
           <input
-            id="immatriculation-siren"
+            {...attributsChamp('siren')}
             inputMode="numeric"
             autoComplete="off"
+            required
             aria-required="true"
             value={saisie.siren}
             maxLength={20}
             onChange={changer('siren')}
           />
-          <label htmlFor="immatriculation-siret">SIRET du siège (14 chiffres, facultatif)</label>
+          {erreurChamp('siren')}
+          <label htmlFor={ID_CHAMP.siret}>SIRET du siège (14 chiffres, facultatif)</label>
           <input
-            id="immatriculation-siret"
+            {...attributsChamp('siret')}
             inputMode="numeric"
             autoComplete="off"
             value={saisie.siret}
             maxLength={30}
             onChange={changer('siret')}
           />
-          <label htmlFor="immatriculation-tva">Numéro de TVA intracommunautaire (facultatif)</label>
+          {erreurChamp('siret')}
+          <label htmlFor={ID_CHAMP.vatNumber}>Numéro de TVA intracommunautaire (facultatif)</label>
           <input
-            id="immatriculation-tva"
+            {...attributsChamp('vatNumber')}
             autoComplete="off"
             value={saisie.vatNumber}
             maxLength={30}
             onChange={changer('vatNumber')}
           />
-          <label htmlFor="immatriculation-denomination">Dénomination (obligatoire)</label>
+          {erreurChamp('vatNumber')}
+          <label htmlFor={ID_CHAMP.legalName}>Dénomination (obligatoire)</label>
           <input
-            id="immatriculation-denomination"
+            {...attributsChamp('legalName', proposeLegalName ? 'immatriculation-denomination-aide' : undefined)}
+            required
             aria-required="true"
-            aria-describedby={proposeLegalName ? 'immatriculation-denomination-aide' : undefined}
             value={saisie.legalName}
             maxLength={200}
             onChange={changer('legalName')}
@@ -427,11 +585,12 @@ export function ImmatriculationSection({
               Proposé depuis le titre du projet — à confirmer.
             </p>
           )}
-          <label htmlFor="immatriculation-siege">Adresse du siège (obligatoire)</label>
+          {erreurChamp('legalName')}
+          <label htmlFor={ID_CHAMP.headOffice}>Adresse du siège (obligatoire)</label>
           <input
-            id="immatriculation-siege"
+            {...attributsChamp('headOffice', proposeHeadOffice ? 'immatriculation-siege-aide' : undefined)}
+            required
             aria-required="true"
-            aria-describedby={proposeHeadOffice ? 'immatriculation-siege-aide' : undefined}
             value={saisie.headOffice}
             maxLength={300}
             onChange={changer('headOffice')}
@@ -441,15 +600,18 @@ export function ImmatriculationSection({
               Proposé depuis tes statuts retenus — à confirmer.
             </p>
           )}
-          <label htmlFor="immatriculation-date">Date d’immatriculation (obligatoire)</label>
+          {erreurChamp('headOffice')}
+          <label htmlFor={ID_CHAMP.registeredOn}>Date d’immatriculation (obligatoire)</label>
           <input
-            id="immatriculation-date"
+            {...attributsChamp('registeredOn')}
             type="date"
+            required
             aria-required="true"
             value={saisie.registeredOn}
             onChange={changer('registeredOn')}
           />
-          <button className="primary" type="button" onClick={() => void enregistrer()} disabled={isSaving}>
+          {erreurChamp('registeredOn')}
+          <button className="primary" type="submit" disabled={isSaving}>
             {isSaving ? 'Enregistrement…' : 'Enregistrer la fiche'}
           </button>
           {fiche && (
@@ -459,7 +621,8 @@ export function ImmatriculationSection({
                 className="secondary"
                 type="button"
                 onClick={() => {
-                  setErreurs([]);
+                  effacerMessages();
+                  saisieTouchee.current = null;
                   setSaisie(saisieDepuis(etat));
                   setModification(false);
                 }}
@@ -469,78 +632,67 @@ export function ImmatriculationSection({
               </button>
             </>
           )}
-        </>
+        </form>
       )}
 
       <h3>Écriture de capital</h3>
       {capitalErreur ? (
         <>
-          <p className="error">{capitalErreur}</p>
-          <button className="secondary" type="button" onClick={() => void rechargerCapital()}>
+          <p className="error" role="alert">
+            {capitalErreur}
+          </p>
+          <button className="secondary" type="button" onClick={() => void chargerCapital()}>
             Réessayer
           </button>
         </>
-      ) : capital ? (
+      ) : capitalEnChargement || !capital ? (
+        <p className="loading">Chargement de l’écriture de capital…</p>
+      ) : capital.dejaEnregistree ? (
         <>
-          {capital.dejaEnregistree && (
-            <p>
-              <span className="pill pill--fire">
-                <span aria-hidden="true">✓</span> Déjà enregistrée
-              </span>{' '}
-              L’écriture de capital est déjà dans ta comptabilité.
-            </p>
-          )}
-          {capital.proposition ? (
+          <p>
+            <span className="pill pill--fire">
+              <span aria-hidden="true">✓</span> Déjà enregistrée
+            </span>{' '}
+            L’écriture de capital est déjà dans ta comptabilité.
+          </p>
+          {enregistree && (
             <>
               <p>
-                {capital.dejaEnregistree ? 'Écriture enregistrée' : 'Écriture proposée'} :{' '}
-                {capital.proposition.libelle}, le {jourSaisi(capital.proposition.date)}, pour{' '}
-                {euros(capital.proposition.montantCents)}.
+                Écriture enregistrée : {enregistree.libelle}, le {jourSaisi(enregistree.date)}, pour{' '}
+                {euros(enregistree.montantCents)}.
               </p>
-              <div style={{ overflowX: 'auto' }}>
-                <table>
-                  <caption className="muted">Lignes de l’écriture</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Compte</th>
-                      <th scope="col">Libellé</th>
-                      <th scope="col">Débit</th>
-                      <th scope="col">Crédit</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {capital.proposition.lignes.map((ligne) => (
-                      <tr key={ligne.compte}>
-                        <td>{ligne.compte}</td>
-                        <td>{ligne.libelleCompte}</td>
-                        <td>{ligne.debitCents > 0 ? euros(ligne.debitCents) : '—'}</td>
-                        <td>{ligne.creditCents > 0 ? euros(ligne.creditCents) : '—'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {!capital.dejaEnregistree && (
-                <>
-                  <p className="muted">
-                    Rien n’est écrit dans ta comptabilité sans ce clic, et une seule fois.
-                  </p>
-                  <button
-                    className="primary"
-                    type="button"
-                    onClick={() => void enregistrerCapital()}
-                    disabled={isSaving}
-                  >
-                    Enregistrer cette écriture dans ma comptabilité
-                  </button>
-                </>
-              )}
+              <TableEcriture lignes={enregistree.lignes} />
             </>
-          ) : (
-            capital.raison && <p className="muted">{capital.raison}</p>
           )}
         </>
-      ) : null}
+      ) : capital.proposition ? (
+        <>
+          <p>
+            Écriture proposée : {capital.proposition.libelle}, le {jourSaisi(capital.proposition.date)}, pour{' '}
+            {euros(capital.proposition.montantCents)}.
+          </p>
+          <TableEcriture lignes={capital.proposition.lignes} />
+          {capital.enregistrementEnCours ? (
+            <p className="notice" role="status">
+              Un enregistrement est en cours, réessaie dans un instant.
+            </p>
+          ) : (
+            <>
+              <p className="muted">Rien n’est écrit dans ta comptabilité sans ce clic, et une seule fois.</p>
+              <button
+                className="primary"
+                type="button"
+                onClick={() => void enregistrerCapital()}
+                disabled={isSaving}
+              >
+                Enregistrer cette écriture dans ma comptabilité
+              </button>
+            </>
+          )}
+        </>
+      ) : (
+        capital.raison && <p className="muted">{capital.raison}</p>
+      )}
     </div>
   );
 }

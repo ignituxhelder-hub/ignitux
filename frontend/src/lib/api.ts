@@ -586,9 +586,27 @@ export interface EtatCapitalImmatriculation {
     date: string;
     lignes: LigneEcritureCapital[];
   } | null;
+  /** Vrai seulement si l'écriture existe dans le journal (une réservation pendante ne compte pas). */
   dejaEnregistree: boolean;
+  /** L'écriture telle qu'elle est DANS le journal, quand elle est enregistrée — jamais recalculée. */
+  enregistree?: {
+    entryId: string;
+    date: string;
+    libelle: string;
+    montantCents: number;
+    lignes: LigneEcritureCapital[];
+  } | null;
+  /** Une autre demande est en train d'enregistrer l'écriture. */
+  enregistrementEnCours?: boolean;
   /** Pourquoi il n'y a pas de proposition (null quand il y en a une). */
   raison: string | null;
+}
+
+/** Ce que la personne a vu et confirmé : le serveur refuse (409) si la proposition a changé. */
+export interface ConfirmationCapital {
+  montantCents: number;
+  /** `AAAA-MM-JJ`. */
+  date: string;
 }
 
 export interface GenerateBylawsInput {
@@ -2295,10 +2313,11 @@ export const api = {
     }),
 
   /** Seulement sur un clic confirmé : écrit dans la comptabilité de la personne. */
-  enregistrerCapitalImmatriculation: (token: string, projectId: string) =>
+  enregistrerCapitalImmatriculation: (token: string, projectId: string, confirmation: ConfirmationCapital) =>
     request<EtatCapitalImmatriculation & { entryId: string }>(`/projects/${projectId}/immatriculation/capital`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(confirmation),
     }),
 
   createProject: (token: string, title: string, description: string) =>

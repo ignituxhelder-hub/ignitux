@@ -662,6 +662,10 @@ export default function ProjectDetailPage() {
             <ImmatriculationSection
               token={token}
               projectId={id}
+              // La suggestion (statuts retenus) et l'écriture de capital
+              // dépendent des statuts et de la forme : rechargées quand ils changent.
+              confirmedLegalForm={project?.confirmed_legal_form ?? null}
+              refreshSignal={versionStatuts}
               onChanged={() => setVersionImmatriculation((v) => v + 1)}
             />
           )}

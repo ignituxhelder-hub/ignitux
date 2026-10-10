@@ -283,9 +283,46 @@ describe('ProjectDetailPage', () => {
       ).length;
     await waitFor(() => expect(lecturesDossier()).toBe(1));
 
+    // La date est obligatoire : l'interface ne l'envoie jamais vide.
+    fireEvent.change(screen.getByLabelText('SIREN (9 chiffres, obligatoire)'), { target: { value: '732829320' } });
+    fireEvent.change(screen.getByLabelText('Dénomination (obligatoire)'), { target: { value: 'École motocross' } });
+    fireEvent.change(screen.getByLabelText('Adresse du siège (obligatoire)'), { target: { value: '1 rue X' } });
+    fireEvent.change(screen.getByLabelText('Date d’immatriculation (obligatoire)'), { target: { value: '2026-10-01' } });
     fireEvent.click(screen.getByRole('button', { name: 'Enregistrer la fiche' }));
 
     await waitFor(() => expect(lecturesDossier()).toBe(2));
+  });
+
+  it('confirmer la forme juridique recharge l’immatriculation (fiche et écriture de capital)', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      'PATCH /projects/p1/forme-juridique': { status: 200, body: { ...PROJECT, confirmed_legal_form: 'micro-entreprise' } },
+      ...ENGINE_ROUTES,
+    });
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    fireEvent.click(screen.getByRole('button', { name: 'Forme juridique' }));
+    await screen.findByLabelText('SIREN (9 chiffres, obligatoire)');
+    const lectures = (chemin: string) =>
+      (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.filter(
+        ([url, options]) => new URL(String(url)).pathname === chemin && (options?.method ?? 'GET') === 'GET',
+      ).length;
+    await waitFor(() => expect(lectures('/projects/p1/immatriculation/capital')).toBe(1));
+    expect(lectures('/projects/p1/immatriculation')).toBe(1);
+
+    fireEvent.change(screen.getByLabelText('Forme juridique', { selector: 'select' }), {
+      target: { value: 'micro-entreprise' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /confirmer cette forme/i }));
+
+    await waitFor(() => expect(lectures('/projects/p1/immatriculation/capital')).toBe(2));
+    expect(lectures('/projects/p1/immatriculation')).toBe(2);
   });
 
   describe('grille d’icônes des étapes', () => {
