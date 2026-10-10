@@ -418,6 +418,17 @@ export default function LanceurPage() {
 
       {!dossierOuvert && <h1 className="ecran-accueil__titre">Ton bureau</h1>}
 
+      {/* L'entrée des files de revue. Le serveur revérifie le rôle sur chaque
+          route : ce lien n'ouvre rien qu'il ne protège déjà. */}
+      {!dossierOuvert && roles?.roles?.includes('administrateur') && (
+        <p className="notice" style={{ marginBottom: '1rem' }}>
+          <span>
+            <Link href="/administration">Administration</Link> — les évaluations de financement et
+            les pièces d&apos;identité à revoir.
+          </span>
+        </p>
+      )}
+
       {!dossierOuvert && sansRole && (
         <p className="notice" style={{ marginBottom: '1rem' }}>
           <span>

@@ -122,7 +122,7 @@ describe('OffresPage', () => {
   });
 
   // L'évaluation de financement est comprise dans l'offre payante, et le
-  // parcours n'existe pas encore : la page le dit, sans second prix.
+  // parcours existe depuis le 11/10/2026 : plus de « bientôt disponible ».
   it('montre l’évaluation de financement incluse dans Entrepreneur, sans prix à part', async () => {
     mockApiRoutes({ 'GET /offres': { status: 200, body: CATALOGUE() } });
 
@@ -131,7 +131,7 @@ describe('OffresPage', () => {
     const titre = await screen.findByRole('heading', { name: 'Entrepreneur' });
     const carte = titre.closest('.card') as HTMLElement;
     expect(within(carte).getByText(/Évaluation de financement incluse/)).toBeInTheDocument();
-    expect(within(carte).getByText(/bientôt disponible/)).toBeInTheDocument();
+    expect(within(carte).queryByText(/bientôt disponible/)).toBeNull();
 
     const decouverte = screen.getByRole('heading', { name: 'Découverte' }).closest('.card');
     expect(within(decouverte as HTMLElement).queryByText(/Évaluation de financement/)).toBeNull();

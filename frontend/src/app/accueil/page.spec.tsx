@@ -241,6 +241,27 @@ describe('LanceurPage', () => {
         );
       });
     });
+    it('montre la tuile Administration au seul administrateur', async () => {
+      mockApiRoutes(
+        routes({
+          'GET /roles/moi': {
+            status: 200,
+            body: { roles: ['entrepreneur', 'administrateur'], activeRole: 'entrepreneur', suggestions: [], catalogue: [] },
+          },
+        }),
+      );
+      afficher();
+      expect(await screen.findByRole('link', { name: /Administration/ })).toHaveAttribute('href', '/administration');
+    });
+
+    it('ne montre pas la tuile Administration aux autres comptes', async () => {
+      mockApiRoutes(routes());
+      afficher();
+      await screen.findByText('Ton bureau');
+      await screen.findAllByRole('link');
+      expect(screen.queryByRole('link', { name: /Administration/ })).not.toBeInTheDocument();
+    });
+
     it('invite à choisir ses rôles quand le compte n’en a aucun', async () => {
       mockApiRoutes(
         routes({

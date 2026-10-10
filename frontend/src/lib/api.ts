@@ -1028,6 +1028,38 @@ export interface EvaluationVue {
   motifEchec: string | null;
 }
 
+/** Une ligne de la file de revue (administrateur). */
+export interface EvaluationEnRevue {
+  id: string;
+  projetTitre: string;
+  entrepreneurEmail: string;
+  verdict: VerdictEvaluation | null;
+  createdAt: string;
+}
+
+export type SectionEvaluation = keyof RapportEvaluation;
+
+export interface TraceEvaluation {
+  id: string;
+  editor_id: string | null;
+  section: string;
+  before: unknown;
+  after: unknown;
+  created_at: string;
+}
+
+/** Une évaluation ouverte dans l écran de revue (administrateur). */
+export interface EvaluationDetailRevue {
+  id: string;
+  status: StatutEvaluation;
+  projetTitre: string;
+  entrepreneurEmail: string;
+  createdAt: string;
+  rapport: RapportEvaluation | null;
+  noteIgnitux: string | null;
+  traces: TraceEvaluation[];
+}
+
 export const VERDICT_EVALUATION_LABEL: Record<VerdictEvaluation, string> = {
   financable: 'Finançable en l’état',
   financable_apres_corrections: 'Finançable après corrections',
@@ -2354,6 +2386,52 @@ export const api = {
     }
     return res.blob();
   },
+
+  getEvaluationsEnRevue: (token: string) =>
+    request<EvaluationEnRevue[]>(
+      '/evaluations-financement/revue',
+      { headers: { Authorization: `Bearer ${token}` } },
+      { skipOfflineCache: true },
+    ),
+
+  getEvaluationRevue: (token: string, id: string) =>
+    request<EvaluationDetailRevue>(
+      `/evaluations-financement/revue/${id}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+      { skipOfflineCache: true },
+    ),
+
+  modifierEvaluation: (
+    token: string,
+    id: string,
+    changements: { section: SectionEvaluation; valeur: unknown }[],
+    noteIgnitux?: string | null,
+  ) =>
+    request<EvaluationDetailRevue>(`/evaluations-financement/revue/${id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ changements, noteIgnitux }),
+    }),
+
+  validerEvaluation: (token: string, id: string) =>
+    request<void>(`/evaluations-financement/revue/${id}/valider`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  refaireEvaluation: (token: string, id: string, consigne: string) =>
+    request<void>(`/evaluations-financement/revue/${id}/refaire`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ consigne }),
+    }),
+
+  refuserEvaluation: (token: string, id: string, motif: string) =>
+    request<void>(`/evaluations-financement/revue/${id}/refuser`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ motif }),
+    }),
 
   getImmatriculation: (token: string, projectId: string) =>
     request<EtatImmatriculation>(`/projects/${projectId}/immatriculation`, {

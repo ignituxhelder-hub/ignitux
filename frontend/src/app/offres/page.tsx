@@ -171,10 +171,9 @@ function CarteOffre({
         {capacites.outilsDeGestion && <Ligne texte="Comptabilité, facturation, banque" />}
         {capacites.investisseurs && <Ligne texte="Financement et investisseurs" />}
         {capacites.collaborateurs === null && <Ligne texte="Collaborateurs sans limite" />}
-        {/* Comprise dans l'offre, mais le parcours n'existe pas encore : le
-            dire, plutôt que de vendre ce que le produit ne sait pas faire. */}
+        {/* Comprise dans l'offre : IGINI rédige, Ignitux relit, voir la fiche projet. */}
         {capacites.evaluationFinancement && (
-          <Ligne texte="Évaluation de financement incluse : audit, faisabilité, dossier, risque (bientôt disponible)" />
+          <Ligne texte="Évaluation de financement incluse : audit, faisabilité, dossier, risque" />
         )}
       </ul>
 
