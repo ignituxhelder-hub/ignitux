@@ -1158,6 +1158,24 @@ describe('ProjectsService', () => {
     });
   });
 
+  describe('contexteEvaluation', () => {
+    it('refuse le projet d’un autre', async () => {
+      prisma.projects.findFirst.mockResolvedValue(null);
+      await expect(service.contexteEvaluation('u1', 'p1')).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('rassemble titre, description et ce qu’IGINI sait déjà (analyse, plans)', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' });
+      prisma.analyses.findFirst.mockResolvedValue({ feasibility_score: 7, summary: 'Marché porteur' });
+
+      const r = await service.contexteEvaluation('u1', 'p1');
+
+      expect(r.titre).toBe('Idée');
+      expect(r.description).toBe('Desc');
+      expect(r.contexte).toContain('Marché porteur');
+    });
+  });
+
   describe('createFinancingPlanForOwner', () => {
     it("lève une NotFoundException si le projet n'appartient pas à l'utilisateur", async () => {
       prisma.projects.findFirst.mockResolvedValue(null);

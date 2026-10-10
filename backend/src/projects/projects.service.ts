@@ -559,6 +559,28 @@ export class ProjectsService {
     });
   }
 
+  /**
+   * Tout ce qu’IGINI sait du projet, pour l’évaluation de financement : le
+   * même contexte que les générateurs, plus les plans des étapes déjà faites.
+   * Propriétaire seulement (404 sinon).
+   */
+  async contexteEvaluation(
+    ownerId: string,
+    projectId: string,
+  ): Promise<{ titre: string; description: string | null; contexte: string | undefined }> {
+    const project = await this.findOneForOwner(ownerId, projectId);
+    const parts = await Promise.all([
+      this.personContext(ownerId),
+      this.memoryContext(ownerId, projectId),
+      this.latestAnalysisContext(projectId),
+      this.latestBuildPlanContext(projectId),
+      this.latestFinancingPlanContext(projectId),
+      this.latestDevelopmentPlanContext(projectId),
+      this.participationContext(projectId),
+    ]);
+    return { titre: project.title, description: project.description, contexte: this.joinContext(...parts) };
+  }
+
   async createFinancingPlanForOwner(ownerId: string, id: string) {
     const project = await this.findOneForOwner(ownerId, id);
     const [personne, memory, analysis, buildPlan, participation] = await Promise.all([
