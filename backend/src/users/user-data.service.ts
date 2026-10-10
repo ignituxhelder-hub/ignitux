@@ -137,6 +137,7 @@ export class UserDataService {
       biensImmobiliers,
       campagnesPublicitaires,
       dossiersDeCreation,
+      fichesDImmatriculation,
     ] = await Promise.all([
       this.prisma.tasks.findMany({ where: byProject }),
       this.prisma.memories.findMany({ where: { user_id: userId } }),
@@ -277,6 +278,8 @@ export class UserDataService {
       // Le dossier de création : pièces cochées, date et référence du
       // dépôt que la personne a notées elle-même.
       this.prisma.creation_filings.findMany({ where: { owner_id: userId } }),
+      // Les fiches d'immatriculation, saisies par la personne elle-même.
+      this.prisma.company_registrations.findMany({ where: { owner_id: userId } }),
     ]);
 
     return {
@@ -320,6 +323,7 @@ export class UserDataService {
           agenda,
           flotte,
           dossiers_de_creation: dossiersDeCreation,
+          fiches_d_immatriculation: fichesDImmatriculation,
         },
         contenus_generes_par_igini: {
           analyses,

@@ -127,7 +127,8 @@ export const ModelName = {
   ad_campaign_entries: 'ad_campaign_entries',
   identity_verifications: 'identity_verifications',
   mandates: 'mandates',
-  creation_filings: 'creation_filings'
+  creation_filings: 'creation_filings',
+  company_registrations: 'company_registrations'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -639,6 +640,7 @@ export const Billing_documentsScalarFieldEnum = {
   status: 'status',
   client_name: 'client_name',
   client_details: 'client_details',
+  issuer_details: 'issuer_details',
   currency: 'currency',
   notes: 'notes',
   corrects_id: 'corrects_id',
@@ -1253,6 +1255,24 @@ export const Creation_filingsScalarFieldEnum = {
 } as const
 
 export type Creation_filingsScalarFieldEnum = (typeof Creation_filingsScalarFieldEnum)[keyof typeof Creation_filingsScalarFieldEnum]
+
+
+export const Company_registrationsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  project_id: 'project_id',
+  siren: 'siren',
+  siret: 'siret',
+  vat_number: 'vat_number',
+  legal_name: 'legal_name',
+  head_office: 'head_office',
+  registered_on: 'registered_on',
+  capital_entry_id: 'capital_entry_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Company_registrationsScalarFieldEnum = (typeof Company_registrationsScalarFieldEnum)[keyof typeof Company_registrationsScalarFieldEnum]
 
 
 export const SortOrder = {

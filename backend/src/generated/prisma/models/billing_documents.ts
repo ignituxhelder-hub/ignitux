@@ -61,6 +61,7 @@ export type Billing_documentsMinAggregateOutputType = {
   status: string | null
   client_name: string | null
   client_details: string | null
+  issuer_details: string | null
   currency: string | null
   notes: string | null
   corrects_id: string | null
@@ -82,6 +83,7 @@ export type Billing_documentsMaxAggregateOutputType = {
   status: string | null
   client_name: string | null
   client_details: string | null
+  issuer_details: string | null
   currency: string | null
   notes: string | null
   corrects_id: string | null
@@ -103,6 +105,7 @@ export type Billing_documentsCountAggregateOutputType = {
   status: number
   client_name: number
   client_details: number
+  issuer_details: number
   currency: number
   notes: number
   corrects_id: number
@@ -136,6 +139,7 @@ export type Billing_documentsMinAggregateInputType = {
   status?: true
   client_name?: true
   client_details?: true
+  issuer_details?: true
   currency?: true
   notes?: true
   corrects_id?: true
@@ -157,6 +161,7 @@ export type Billing_documentsMaxAggregateInputType = {
   status?: true
   client_name?: true
   client_details?: true
+  issuer_details?: true
   currency?: true
   notes?: true
   corrects_id?: true
@@ -178,6 +183,7 @@ export type Billing_documentsCountAggregateInputType = {
   status?: true
   client_name?: true
   client_details?: true
+  issuer_details?: true
   currency?: true
   notes?: true
   corrects_id?: true
@@ -286,6 +292,7 @@ export type Billing_documentsGroupByOutputType = {
   status: string
   client_name: string
   client_details: string | null
+  issuer_details: string | null
   currency: string
   notes: string | null
   corrects_id: string | null
@@ -330,6 +337,7 @@ export type billing_documentsWhereInput = {
   status?: Prisma.StringFilter<"billing_documents"> | string
   client_name?: Prisma.StringFilter<"billing_documents"> | string
   client_details?: Prisma.StringNullableFilter<"billing_documents"> | string | null
+  issuer_details?: Prisma.StringNullableFilter<"billing_documents"> | string | null
   currency?: Prisma.StringFilter<"billing_documents"> | string
   notes?: Prisma.StringNullableFilter<"billing_documents"> | string | null
   corrects_id?: Prisma.UuidNullableFilter<"billing_documents"> | string | null
@@ -358,6 +366,7 @@ export type billing_documentsOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   client_name?: Prisma.SortOrder
   client_details?: Prisma.SortOrderInput | Prisma.SortOrder
+  issuer_details?: Prisma.SortOrderInput | Prisma.SortOrder
   currency?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   corrects_id?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -390,6 +399,7 @@ export type billing_documentsWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.StringFilter<"billing_documents"> | string
   client_name?: Prisma.StringFilter<"billing_documents"> | string
   client_details?: Prisma.StringNullableFilter<"billing_documents"> | string | null
+  issuer_details?: Prisma.StringNullableFilter<"billing_documents"> | string | null
   currency?: Prisma.StringFilter<"billing_documents"> | string
   notes?: Prisma.StringNullableFilter<"billing_documents"> | string | null
   corrects_id?: Prisma.UuidNullableFilter<"billing_documents"> | string | null
@@ -418,6 +428,7 @@ export type billing_documentsOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   client_name?: Prisma.SortOrder
   client_details?: Prisma.SortOrderInput | Prisma.SortOrder
+  issuer_details?: Prisma.SortOrderInput | Prisma.SortOrder
   currency?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   corrects_id?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -447,6 +458,7 @@ export type billing_documentsScalarWhereWithAggregatesInput = {
   status?: Prisma.StringWithAggregatesFilter<"billing_documents"> | string
   client_name?: Prisma.StringWithAggregatesFilter<"billing_documents"> | string
   client_details?: Prisma.StringNullableWithAggregatesFilter<"billing_documents"> | string | null
+  issuer_details?: Prisma.StringNullableWithAggregatesFilter<"billing_documents"> | string | null
   currency?: Prisma.StringWithAggregatesFilter<"billing_documents"> | string
   notes?: Prisma.StringNullableWithAggregatesFilter<"billing_documents"> | string | null
   corrects_id?: Prisma.UuidNullableWithAggregatesFilter<"billing_documents"> | string | null
@@ -465,6 +477,7 @@ export type billing_documentsCreateInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   issued_at?: Date | string | null
@@ -492,6 +505,7 @@ export type billing_documentsUncheckedCreateInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   corrects_id?: string | null
@@ -513,6 +527,7 @@ export type billing_documentsUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -540,6 +555,7 @@ export type billing_documentsUncheckedUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   corrects_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -564,6 +580,7 @@ export type billing_documentsCreateManyInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   corrects_id?: string | null
@@ -582,6 +599,7 @@ export type billing_documentsUpdateManyMutationInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -602,6 +620,7 @@ export type billing_documentsUncheckedUpdateManyInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   corrects_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -645,6 +664,7 @@ export type billing_documentsCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   client_name?: Prisma.SortOrder
   client_details?: Prisma.SortOrder
+  issuer_details?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   corrects_id?: Prisma.SortOrder
@@ -671,6 +691,7 @@ export type billing_documentsMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   client_name?: Prisma.SortOrder
   client_details?: Prisma.SortOrder
+  issuer_details?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   corrects_id?: Prisma.SortOrder
@@ -692,6 +713,7 @@ export type billing_documentsMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   client_name?: Prisma.SortOrder
   client_details?: Prisma.SortOrder
+  issuer_details?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   corrects_id?: Prisma.SortOrder
@@ -932,6 +954,7 @@ export type billing_documentsCreateWithoutOwnerInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   issued_at?: Date | string | null
@@ -957,6 +980,7 @@ export type billing_documentsUncheckedCreateWithoutOwnerInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   corrects_id?: string | null
@@ -1010,6 +1034,7 @@ export type billing_documentsScalarWhereInput = {
   status?: Prisma.StringFilter<"billing_documents"> | string
   client_name?: Prisma.StringFilter<"billing_documents"> | string
   client_details?: Prisma.StringNullableFilter<"billing_documents"> | string | null
+  issuer_details?: Prisma.StringNullableFilter<"billing_documents"> | string | null
   currency?: Prisma.StringFilter<"billing_documents"> | string
   notes?: Prisma.StringNullableFilter<"billing_documents"> | string | null
   corrects_id?: Prisma.UuidNullableFilter<"billing_documents"> | string | null
@@ -1028,6 +1053,7 @@ export type billing_documentsCreateWithoutProjectInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   issued_at?: Date | string | null
@@ -1053,6 +1079,7 @@ export type billing_documentsUncheckedCreateWithoutProjectInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   corrects_id?: string | null
@@ -1100,6 +1127,7 @@ export type billing_documentsCreateWithoutCorrected_byInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   issued_at?: Date | string | null
@@ -1126,6 +1154,7 @@ export type billing_documentsUncheckedCreateWithoutCorrected_byInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   corrects_id?: string | null
@@ -1151,6 +1180,7 @@ export type billing_documentsCreateWithoutCorrectsInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   issued_at?: Date | string | null
@@ -1177,6 +1207,7 @@ export type billing_documentsUncheckedCreateWithoutCorrectsInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   issued_at?: Date | string | null
@@ -1218,6 +1249,7 @@ export type billing_documentsUpdateWithoutCorrected_byInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1244,6 +1276,7 @@ export type billing_documentsUncheckedUpdateWithoutCorrected_byInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   corrects_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1280,6 +1313,7 @@ export type billing_documentsCreateWithoutLinesInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   issued_at?: Date | string | null
@@ -1306,6 +1340,7 @@ export type billing_documentsUncheckedCreateWithoutLinesInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   corrects_id?: string | null
@@ -1342,6 +1377,7 @@ export type billing_documentsUpdateWithoutLinesInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1368,6 +1404,7 @@ export type billing_documentsUncheckedUpdateWithoutLinesInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   corrects_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1388,6 +1425,7 @@ export type billing_documentsCreateWithoutPaymentsInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   issued_at?: Date | string | null
@@ -1414,6 +1452,7 @@ export type billing_documentsUncheckedCreateWithoutPaymentsInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   corrects_id?: string | null
@@ -1450,6 +1489,7 @@ export type billing_documentsUpdateWithoutPaymentsInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1476,6 +1516,7 @@ export type billing_documentsUncheckedUpdateWithoutPaymentsInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   corrects_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1496,6 +1537,7 @@ export type billing_documentsCreateWithoutContactInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   issued_at?: Date | string | null
@@ -1521,6 +1563,7 @@ export type billing_documentsUncheckedCreateWithoutContactInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   corrects_id?: string | null
@@ -1570,6 +1613,7 @@ export type billing_documentsCreateManyOwnerInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   corrects_id?: string | null
@@ -1588,6 +1632,7 @@ export type billing_documentsUpdateWithoutOwnerInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1613,6 +1658,7 @@ export type billing_documentsUncheckedUpdateWithoutOwnerInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   corrects_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1636,6 +1682,7 @@ export type billing_documentsUncheckedUpdateManyWithoutOwnerInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   corrects_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1656,6 +1703,7 @@ export type billing_documentsCreateManyProjectInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   corrects_id?: string | null
@@ -1674,6 +1722,7 @@ export type billing_documentsUpdateWithoutProjectInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1699,6 +1748,7 @@ export type billing_documentsUncheckedUpdateWithoutProjectInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   corrects_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1722,6 +1772,7 @@ export type billing_documentsUncheckedUpdateManyWithoutProjectInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   corrects_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1743,6 +1794,7 @@ export type billing_documentsCreateManyCorrectsInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   issued_at?: Date | string | null
@@ -1760,6 +1812,7 @@ export type billing_documentsUpdateWithoutCorrectsInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1786,6 +1839,7 @@ export type billing_documentsUncheckedUpdateWithoutCorrectsInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1809,6 +1863,7 @@ export type billing_documentsUncheckedUpdateManyWithoutCorrectsInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1828,6 +1883,7 @@ export type billing_documentsCreateManyContactInput = {
   status?: string
   client_name: string
   client_details?: string | null
+  issuer_details?: string | null
   currency?: string
   notes?: string | null
   corrects_id?: string | null
@@ -1846,6 +1902,7 @@ export type billing_documentsUpdateWithoutContactInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1871,6 +1928,7 @@ export type billing_documentsUncheckedUpdateWithoutContactInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   corrects_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1894,6 +1952,7 @@ export type billing_documentsUncheckedUpdateManyWithoutContactInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   client_name?: Prisma.StringFieldUpdateOperationsInput | string
   client_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuer_details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   corrects_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1964,6 +2023,7 @@ export type billing_documentsSelect<ExtArgs extends runtime.Types.Extensions.Int
   status?: boolean
   client_name?: boolean
   client_details?: boolean
+  issuer_details?: boolean
   currency?: boolean
   notes?: boolean
   corrects_id?: boolean
@@ -1993,6 +2053,7 @@ export type billing_documentsSelectCreateManyAndReturn<ExtArgs extends runtime.T
   status?: boolean
   client_name?: boolean
   client_details?: boolean
+  issuer_details?: boolean
   currency?: boolean
   notes?: boolean
   corrects_id?: boolean
@@ -2018,6 +2079,7 @@ export type billing_documentsSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   status?: boolean
   client_name?: boolean
   client_details?: boolean
+  issuer_details?: boolean
   currency?: boolean
   notes?: boolean
   corrects_id?: boolean
@@ -2043,6 +2105,7 @@ export type billing_documentsSelectScalar = {
   status?: boolean
   client_name?: boolean
   client_details?: boolean
+  issuer_details?: boolean
   currency?: boolean
   notes?: boolean
   corrects_id?: boolean
@@ -2052,7 +2115,7 @@ export type billing_documentsSelectScalar = {
   updated_at?: boolean
 }
 
-export type billing_documentsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_id" | "contact_id" | "project_id" | "type" | "year" | "sequence" | "number" | "status" | "client_name" | "client_details" | "currency" | "notes" | "corrects_id" | "issued_at" | "due_at" | "created_at" | "updated_at", ExtArgs["result"]["billing_documents"]>
+export type billing_documentsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_id" | "contact_id" | "project_id" | "type" | "year" | "sequence" | "number" | "status" | "client_name" | "client_details" | "issuer_details" | "currency" | "notes" | "corrects_id" | "issued_at" | "due_at" | "created_at" | "updated_at", ExtArgs["result"]["billing_documents"]>
 export type billing_documentsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   contact?: boolean | Prisma.billing_documents$contactArgs<ExtArgs>
@@ -2107,6 +2170,13 @@ export type $billing_documentsPayload<ExtArgs extends runtime.Types.Extensions.I
      */
     client_name: string
     client_details: string | null
+    /**
+     * Identité légale de l'émetteur (dénomination, forme, capital, siège,
+     * SIREN/SIRET, TVA) figée À L'ÉMISSION depuis la fiche d'immatriculation
+     * du projet. null pour un brouillon, un document sans projet ou un projet
+     * sans fiche. Jamais réécrite ensuite, jamais rétro-remplie.
+     */
+    issuer_details: string | null
     currency: string
     notes: string | null
     /**
@@ -2558,6 +2628,7 @@ export interface billing_documentsFieldRefs {
   readonly status: Prisma.FieldRef<"billing_documents", 'String'>
   readonly client_name: Prisma.FieldRef<"billing_documents", 'String'>
   readonly client_details: Prisma.FieldRef<"billing_documents", 'String'>
+  readonly issuer_details: Prisma.FieldRef<"billing_documents", 'String'>
   readonly currency: Prisma.FieldRef<"billing_documents", 'String'>
   readonly notes: Prisma.FieldRef<"billing_documents", 'String'>
   readonly corrects_id: Prisma.FieldRef<"billing_documents", 'String'>

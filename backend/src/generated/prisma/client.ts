@@ -688,3 +688,10 @@ export type mandates = Prisma.mandatesModel
  * pièces qu'elle seule peut fournir et note elle-même le dépôt.
  */
 export type creation_filings = Prisma.creation_filingsModel
+/**
+ * Model company_registrations
+ * Fiche d'immatriculation : l'identité légale de l'entreprise créée, saisie
+ * par la personne après son dépôt (Kbis, avis de situation). Ignitux ne la
+ * vérifie pas auprès de l'État. Une ligne par projet.
+ */
+export type company_registrations = Prisma.company_registrationsModel
