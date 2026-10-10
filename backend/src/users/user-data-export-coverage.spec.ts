@@ -129,6 +129,12 @@ describe("export RGPD — couverture réelle du périmètre déclaré", () => {
     // disparaît volontairement, on vérifie donc le compte par son id.
     present.add('users');
     expect(exported.donnees.compte.id).toBe('users-1');
+    // Les évaluations de financement aussi : seul le contenu validé sort
+    // (voir evaluationPourExport), on vérifie donc la ligne par son id.
+    present.add('financing_evaluations');
+    expect(exported.donnees.contenus_generes_par_igini.evaluations_de_financement[0].id).toBe(
+      'financing_evaluations-1',
+    );
 
     const missing = exportedTables().filter((table) => !present.has(table));
 
@@ -140,7 +146,8 @@ describe("export RGPD — couverture réelle du périmètre déclaré", () => {
     const misplaced: string[] = [];
 
     for (const table of exportedTables()) {
-      if (table === 'users') continue;
+      // Recomposées champ par champ, sans marque : vérifiées par leur id ci-dessus.
+      if (table === 'users' || table === 'financing_evaluations') continue;
       const treatment = USER_DATA_SCOPE[table] as { group: keyof typeof exported.donnees };
       if (!tablesFoundIn(exported.donnees[treatment.group]).has(table)) {
         misplaced.push(`${table} → ${treatment.group}`);

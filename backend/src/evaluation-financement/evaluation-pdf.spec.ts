@@ -56,6 +56,12 @@ describe('genererDossierPdf', () => {
     expect(texte).toContain(hex('Plan de financement'));
   });
 
+  it('reprend les prochaines étapes', async () => {
+    const texte = octetsTexte(await genererDossierPdf(entree()));
+    expect(texte).toContain(hex('Prochaines étapes'));
+    expect(texte).toContain(hex('Établir un prévisionnel'));
+  });
+
   it('ne contient jamais la section Audit', async () => {
     const texte = octetsTexte(
       await genererDossierPdf(entree({ audit: { connu: ['CONNU-SECRET'], manques: ['MANQUE-SECRET'] } })),

@@ -122,10 +122,15 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   bylaw_associates: exported('contenus_generes_par_igini'),
   build_plans: exported('contenus_generes_par_igini'),
   financing_plans: exported('contenus_generes_par_igini'),
-  // L'évaluation de financement et les corrections de l'administrateur sur
-  // ce rapport : un contenu généré pour le projet de la personne.
+  // L'évaluation de financement : exportée, mais son contenu seulement une
+  // fois validé — l'export ne doit pas contourner la revue (« rien n'atteint
+  // l'entrepreneur sans validation »). Décision du 11/10/2026, à confirmer par
+  // un juriste au titre du droit d'accès, comme les pièces d'identité.
   financing_evaluations: exported('contenus_generes_par_igini'),
-  financing_evaluation_edits: exported('contenus_generes_par_igini'),
+  // Les corrections et consignes internes de l'administrateur sur ce rapport.
+  financing_evaluation_edits: excluded(
+    'Traces internes de la revue par un administrateur Ignitux : elles décrivent son travail sur le rapport, pas une donnée fournie par la personne.',
+  ),
   development_plans: exported('contenus_generes_par_igini'),
   transmission_plans: exported('contenus_generes_par_igini'),
   // Le fil de conversation avec Igini : contrairement aux cinq lignes

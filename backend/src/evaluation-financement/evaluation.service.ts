@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  HttpException,
   Injectable,
   Logger,
   NotFoundException,
@@ -166,22 +167,40 @@ export class EvaluationService {
       });
       const rapport = normaliserRapport(brut);
 
-      await this.prisma.financing_evaluations.update({
-        where: { id: evaluationId },
-        data: {
-          status: 'en_revue',
-          verdict: rapport.verdict,
-          report: rapport,
-          ai_draft: rapport,
-          failure_reason: null,
-        },
+      await this.ecrireSiEnPreparation(evaluationId, {
+        status: 'en_revue',
+        verdict: rapport.verdict,
+        report: rapport,
+        ai_draft: rapport,
+        failure_reason: null,
       });
     } catch (erreur) {
-      const message = erreur instanceof Error && erreur.message ? erreur.message : ECHEC_PAR_DEFAUT;
-      this.logger.error(`Évaluation ${evaluationId} en échec : ${message}`);
-      await this.prisma.financing_evaluations
-        .update({ where: { id: evaluationId }, data: { status: 'echec', failure_reason: message } })
-        .catch((e: unknown) => this.logger.error(`Impossible d'écrire l'échec de ${evaluationId} : ${String(e)}`));
+      this.logger.error(`Évaluation ${evaluationId} en échec : ${String(erreur)}`);
+      // Seul un refus lisible (quota, offre…) est montré à l'entrepreneur ;
+      // une erreur technique brute reste dans les journaux.
+      const motif = erreur instanceof HttpException ? erreur.message : null;
+      await this.ecrireSiEnPreparation(evaluationId, { status: 'echec', failure_reason: motif }).catch(
+        (e: unknown) => this.logger.error(`Impossible d'écrire l'échec de ${evaluationId} : ${String(e)}`),
+      );
+    }
+  }
+
+  /**
+   * N'écrit que sur une évaluation encore en préparation. Un appel lent peut
+   * survivre à la fenêtre de 10 minutes : entre-temps la ligne a pu être
+   * rangée en échec et une nouvelle demandée. Sa réponse tardive ne doit
+   * alors rien ressusciter — elle est journalisée et oubliée.
+   */
+  private async ecrireSiEnPreparation(
+    evaluationId: string,
+    data: Prisma.financing_evaluationsUpdateManyMutationInput,
+  ): Promise<void> {
+    const { count } = await this.prisma.financing_evaluations.updateMany({
+      where: { id: evaluationId, status: 'en_preparation' },
+      data,
+    });
+    if (count === 0) {
+      this.logger.warn(`Évaluation ${evaluationId} : résultat ignoré, elle n'est plus en préparation.`);
     }
   }
 
@@ -251,7 +270,10 @@ export class EvaluationService {
       rapport: validee ? (l.report as unknown as EvaluationReport | null) : null,
       noteIgnitux: validee ? l.admin_note : null,
       motifRefus: status === 'refusee' ? l.refusal_reason : null,
-      motifEchec: status === 'echec' ? (l.failure_reason ?? PREPARATION_INTERROMPUE) : null,
+      motifEchec:
+        status === 'echec'
+          ? (l.failure_reason ?? (l.status === 'en_preparation' ? PREPARATION_INTERROMPUE : null))
+          : null,
     };
   }
 }

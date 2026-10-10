@@ -42,7 +42,7 @@ function monter() {
       findUnique: vi.fn().mockResolvedValue(ligne()),
       create: vi.fn().mockResolvedValue(ligne()),
       update: vi.fn().mockImplementation(({ data }) => Promise.resolve(ligne(data))),
-      updateMany: vi.fn().mockResolvedValue({ count: 0 }),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
     },
     $transaction: vi.fn(),
   };
@@ -70,6 +70,13 @@ function monter() {
   return { service, prisma, claude, offres, projects };
 }
 
+/** Les écritures de la génération : conditionnées à « encore en préparation ». */
+function ecritures(prisma: ReturnType<typeof monter>['prisma']) {
+  return prisma.financing_evaluations.updateMany.mock.calls
+    .map(([arg]) => arg)
+    .filter((arg) => arg.where?.id === 'e1');
+}
+
 /** Laisse la génération lancée en arrière-plan se terminer. */
 const finirArrierePlan = () => new Promise((r) => setTimeout(r, 0));
 
@@ -93,7 +100,7 @@ describe('EvaluationService — demande et génération', () => {
     expect(prisma.financing_evaluations.create).toHaveBeenCalledWith({
       data: { project_id: 'p1', requested_by: 'u1', status: 'en_preparation' },
     });
-    expect(prisma.financing_evaluations.update).not.toHaveBeenCalled();
+    expect(ecritures(prisma)).toHaveLength(0);
   });
 
   it('passe en revue avec ai_draft = report quand IGINI répond', async () => {
@@ -105,7 +112,9 @@ describe('EvaluationService — demande et génération', () => {
     expect(claude.generateStructuredOutput).toHaveBeenCalledWith(
       expect.objectContaining({ usage: { userId: 'u1', projectId: 'p1', generator: 'evaluer' } }),
     );
-    const data = prisma.financing_evaluations.update.mock.calls.at(-1)?.[0].data;
+    const [ecriture] = ecritures(prisma);
+    expect(ecriture.where).toEqual({ id: 'e1', status: 'en_preparation' });
+    const data = ecriture.data;
     expect(data.status).toBe('en_revue');
     expect(data.verdict).toBe('financable_apres_corrections');
     expect(data.report).toEqual(data.ai_draft);
@@ -123,16 +132,40 @@ describe('EvaluationService — demande et génération', () => {
     expect(contenu).toMatch(/aucune anomalie/i);
   });
 
-  it('passe en échec avec failure_reason quand IGINI échoue', async () => {
+  it('passe en échec sans montrer une erreur technique brute', async () => {
     const { service, prisma, claude } = monter();
-    claude.generateStructuredOutput.mockRejectedValue(new Error('réponse invalide'));
+    claude.generateStructuredOutput.mockRejectedValue(new Error('connect ECONNREFUSED 10.0.0.1:5432'));
 
     await service.demander('u1', 'p1');
     await finirArrierePlan();
 
-    const data = prisma.financing_evaluations.update.mock.calls.at(-1)?.[0].data;
-    expect(data.status).toBe('echec');
-    expect(data.failure_reason).toBeTruthy();
+    const [ecriture] = ecritures(prisma);
+    expect(ecriture.where).toEqual({ id: 'e1', status: 'en_preparation' });
+    expect(ecriture.data).toEqual({ status: 'echec', failure_reason: null });
+  });
+
+  it('garde le message d’un refus lisible (quota épuisé) comme motif d’échec', async () => {
+    const { service, prisma, claude } = monter();
+    claude.generateStructuredOutput.mockRejectedValue(
+      new ForbiddenException('Tu as utilisé tes 35 générations ce mois-ci. Le compteur repart le 1er.'),
+    );
+
+    await service.demander('u1', 'p1');
+    await finirArrierePlan();
+
+    expect(ecritures(prisma)[0].data.failure_reason).toMatch(/compteur repart le 1er/);
+  });
+
+  it('n’écrase pas une évaluation qui n’est plus en préparation (génération tardive)', async () => {
+    const { service, prisma } = monter();
+    prisma.financing_evaluations.updateMany.mockResolvedValue({ count: 0 });
+
+    await service.demander('u1', 'p1');
+    await finirArrierePlan();
+
+    // Une seule tentative conditionnelle, puis rien : ni passage en revue, ni échec écrit par-dessus.
+    expect(ecritures(prisma)).toHaveLength(1);
+    expect(prisma.financing_evaluations.update).not.toHaveBeenCalled();
   });
 
   it('refuse en 409 une seconde demande tant qu’une évaluation est active', async () => {

@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import type { financing_evaluations } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { investorsDeletionOperations } from '../investors/investors-deletion.js';
 import { ledgerDeletionOperations } from '../ledger/ledger-deletion.js';
@@ -57,6 +58,27 @@ function avecImagesEnBase64<
  *      y compris ce que la personne pourrait avoir l'obligation légale de
  *      conserver.
  */
+/**
+ * Une évaluation de financement telle que l'export la montre : son existence
+ * et son état toujours, son contenu seulement une fois validé. Jamais la
+ * version d'IGINI ni la consigne interne de l'administrateur — l'export ne
+ * doit pas contourner la revue (voir user-data-scope.ts).
+ */
+function evaluationPourExport(e: financing_evaluations) {
+  const validee = e.status === 'validee';
+  return {
+    id: e.id,
+    project_id: e.project_id,
+    status: e.status,
+    created_at: e.created_at,
+    reviewed_at: validee ? e.reviewed_at : null,
+    verdict: validee ? e.verdict : null,
+    rapport: validee ? e.report : null,
+    note_ignitux: validee ? e.admin_note : null,
+    motif_refus: e.status === 'refusee' ? e.refusal_reason : null,
+  };
+}
+
 @Injectable()
 export class UserDataService {
   constructor(private readonly prisma: PrismaService) {}
@@ -192,7 +214,7 @@ export class UserDataService {
       this.prisma.company_bylaws.findMany({ where: byProject, include: { associates: true } }),
       this.prisma.build_plans.findMany({ where: byProject }),
       this.prisma.financing_plans.findMany({ where: byProject }),
-      this.prisma.financing_evaluations.findMany({ where: byProject, include: { edits: true } }),
+      this.prisma.financing_evaluations.findMany({ where: byProject }),
       this.prisma.development_plans.findMany({ where: byProject }),
       this.prisma.transmission_plans.findMany({ where: byProject }),
       this.prisma.crm_companies.findMany({ where: { owner_id: userId } }),
@@ -371,7 +393,7 @@ export class UserDataService {
           statuts,
           plans_de_construction: buildPlans,
           plans_de_financement: financingPlans,
-          evaluations_de_financement: evaluationsDeFinancement,
+          evaluations_de_financement: evaluationsDeFinancement.map(evaluationPourExport),
           plans_de_developpement: developmentPlans,
           plans_de_transmission: transmissionPlans,
           // Le fil de conversation avec l'orchestrateur, non rattaché à un

@@ -247,6 +247,37 @@ describe('UserDataService', () => {
       ]);
     });
 
+    // « Rien n’atteint l’entrepreneur sans validation » : l’export ne doit pas
+    // contourner la revue. Il dit qu’une évaluation existe et où elle en est ;
+    // le contenu n’apparaît qu’une fois validé, et jamais la version d’IGINI
+    // ni les consignes et corrections internes de l’administrateur.
+    it('n’exporte le contenu d’une évaluation de financement qu’une fois validée', async () => {
+      prisma.projects.findMany.mockResolvedValue([{ id: 'p1' }]);
+      const commun = { project_id: 'p1', created_at: new Date('2026-10-11'), admin_note: 'note' };
+      prisma.financing_evaluations.findMany.mockResolvedValue([
+        { ...commun, id: 'e1', status: 'en_revue', verdict: 'financable', report: { resume: 'brouillon' }, ai_draft: { resume: 'brouillon' }, redo_instruction: 'consigne interne', refusal_reason: null, reviewed_at: null },
+        { ...commun, id: 'e2', status: 'validee', verdict: 'financable', report: { resume: 'validé' }, ai_draft: { resume: 'brouillon' }, redo_instruction: null, refusal_reason: null, reviewed_at: new Date('2026-10-12') },
+      ]);
+
+      const exported = await service.exportUserData('u1');
+      const [enRevue, validee] = exported.donnees.contenus_generes_par_igini.evaluations_de_financement;
+
+      expect(enRevue).toEqual({
+        id: 'e1',
+        project_id: 'p1',
+        status: 'en_revue',
+        created_at: new Date('2026-10-11'),
+        reviewed_at: null,
+        verdict: null,
+        rapport: null,
+        note_ignitux: null,
+        motif_refus: null,
+      });
+      expect(validee).toMatchObject({ verdict: 'financable', rapport: { resume: 'validé' }, note_ignitux: 'note' });
+      expect(JSON.stringify(exported)).not.toContain('consigne interne');
+      expect(JSON.stringify(exported)).not.toContain('brouillon');
+    });
+
     it('inclut les statuts générés, avec leurs associés, pour les projets de la personne', async () => {
       prisma.projects.findMany.mockResolvedValue([{ id: 'p1' }]);
       prisma.company_bylaws.findMany.mockResolvedValue([

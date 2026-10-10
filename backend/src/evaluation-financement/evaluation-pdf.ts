@@ -107,6 +107,10 @@ export function genererDossierPdf(entree: EntreeDossierPdf): Promise<Buffer> {
       doc.text(`[${p.etat === 'prete' ? 'Prête' : 'À fournir'}] ${p.piece}`);
     }
 
+    // 7. Prochaines étapes
+    titre('Prochaines étapes');
+    rapport.prochainesEtapes.forEach((etape, i) => doc.text(`${i + 1}. ${etape}`));
+
     // Pied de page sur chaque page, sous la marge basse sans déclencher de saut.
     const { start, count } = doc.bufferedPageRange();
     for (let i = start; i < start + count; i++) {
