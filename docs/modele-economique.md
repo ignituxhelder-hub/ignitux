@@ -129,8 +129,9 @@ distinguent sont toujours là.
 **L'évaluation de financement est comprise dans Entrepreneur depuis le 10 octobre 2026.** Elle se
 vendait à part, 99 €, avec une phrase obligatoire disant que ce montant n'achetait pas un
 financement. Il n'y a plus de montant, donc plus de phrase ; l'idée reste : l'évaluation peut
-conclure qu'un projet n'est pas finançable. Le parcours n'est pas encore construit, et la page des
-offres l'écrit (« bientôt disponible ») plutôt que de vendre ce que le produit ne sait pas faire.
+conclure qu'un projet n'est pas finançable. Le parcours existe depuis le 11 octobre 2026 : IGINI
+rédige le rapport, un administrateur d'Ignitux le relit et le valide, puis l'entrepreneur le lit et
+télécharge un dossier PDF (spec : `docs/superpowers/specs/2026-10-11-evaluation-financement-design.md`).
 
 **Les prix sont réglables sans redéployer** (`OFFRE_<ID>_PRIX_CENTIMES`). Tu parlais d'un
 paramètre en base ; l'environnement fait le même travail sans migration ni cache, et la base

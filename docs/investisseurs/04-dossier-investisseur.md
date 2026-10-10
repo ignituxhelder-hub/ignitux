@@ -149,7 +149,8 @@ chiffres confirment exactement la Bible.**
 > **Mise à jour du 10/10/2026.** Il n'y a plus que deux offres : Découverte (gratuite) et
 > Entrepreneur à **20,00 €/mois**, qui reprend tout ce que Construction contenait. L'évaluation de
 > financement ne se vend plus à part (99,00 €) : elle est **comprise dans Entrepreneur**, et son
-> parcours n'est pas encore construit (affichée « bientôt disponible »). **[Code]**
+> parcours existe depuis le 11/10/2026 : rapport rédigé par IGINI, relu et validé par un
+> administrateur, puis dossier PDF pour l'entrepreneur. **[Code]**
 
 
 **Aucun encaissement réel n'existe** : `docs/en-attente-paiement.md` (26/09/2026, non commité)
