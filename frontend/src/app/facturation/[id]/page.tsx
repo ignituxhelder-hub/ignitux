@@ -130,6 +130,16 @@ export default function BillingDocumentPage() {
           </h1>
 
           <div className="card">
+            {/* L'identité légale de l'émetteur, figée à l'émission (fiche
+                d'immatriculation du projet). Absente : rien, comme avant. */}
+            {doc.issuer_details && (
+              <div style={{ marginBottom: '1rem' }}>
+                <p className="muted" style={{ margin: 0, fontSize: '0.8rem' }}>
+                  Émetteur
+                </p>
+                <p style={{ margin: '0.25rem 0 0', whiteSpace: 'pre-line' }}>{doc.issuer_details}</p>
+              </div>
+            )}
             <div className="top-bar" style={{ marginBottom: '1rem' }}>
               <div>
                 <p className="muted" style={{ margin: 0, fontSize: '0.8rem' }}>
