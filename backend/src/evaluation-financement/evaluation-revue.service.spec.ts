@@ -1,4 +1,5 @@
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import { Prisma } from '../generated/prisma/client.js';
 import { EvaluationRevueService } from './evaluation-revue.service.js';
 import { rapport } from './evaluation.fixture.js';
 
@@ -95,7 +96,7 @@ describe('EvaluationRevueService', () => {
     expect(prisma.financing_evaluations.updateMany.mock.calls[0][0].data.admin_note).toBe('Dossier sérieux.');
     expect(prisma.financing_evaluation_edits.createMany.mock.calls[0][0].data[0]).toMatchObject({
       section: 'note',
-      before: null,
+      before: Prisma.DbNull,
       after: 'Dossier sérieux.',
     });
   });
@@ -145,7 +146,7 @@ describe('EvaluationRevueService', () => {
           evaluation_id: 'e1',
           editor_id: 'admin',
           section: 'consigne',
-          before: null,
+          before: Prisma.DbNull,
           after: 'Reprends le marché avec les chiffres du secteur.',
         },
       ],

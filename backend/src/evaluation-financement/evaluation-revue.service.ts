@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import type { Prisma } from '../generated/prisma/client.js';
+import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   EvaluationReportSchema,
@@ -16,6 +16,11 @@ export interface ChangementSection {
 
 const PAS_EN_REVUE =
   'Cette évaluation n’est plus en revue : elle a déjà été traitée, peut-être depuis un autre onglet.';
+
+/** Une valeur pour une colonne JSON : Prisma exige `DbNull`, pas `null`, pour écrire NULL. */
+function json(valeur: unknown): Prisma.InputJsonValue | typeof Prisma.DbNull {
+  return valeur === null || valeur === undefined ? Prisma.DbNull : (valeur as Prisma.InputJsonValue);
+}
 
 function texteObligatoire(valeur: string | undefined, message: string): string {
   const propre = (valeur ?? '').trim();
@@ -104,8 +109,8 @@ export class EvaluationRevueService {
         evaluation_id: id,
         editor_id: adminId,
         section,
-        before: avant[section] as Prisma.InputJsonValue,
-        after: verifie.data[section] as Prisma.InputJsonValue,
+        before: json(avant[section]),
+        after: json(verifie.data[section]),
       }));
       if (noteIgnitux !== undefined) {
         const note = noteIgnitux?.trim() || null;
@@ -114,8 +119,8 @@ export class EvaluationRevueService {
           evaluation_id: id,
           editor_id: adminId,
           section: 'note',
-          before: (l.admin_note ?? null) as Prisma.InputJsonValue,
-          after: note as Prisma.InputJsonValue,
+          before: json(l.admin_note),
+          after: json(note),
         });
       }
 
@@ -135,7 +140,7 @@ export class EvaluationRevueService {
     await this.transition(id, { status: 'en_preparation', redo_instruction: propre });
     // Qui a demandé une nouvelle version, et pourquoi : tracé comme une correction.
     await this.prisma.financing_evaluation_edits.createMany({
-      data: [{ evaluation_id: id, editor_id: adminId, section: 'consigne', before: null, after: propre }],
+      data: [{ evaluation_id: id, editor_id: adminId, section: 'consigne', before: Prisma.DbNull, after: propre }],
     });
     // Sans `await` : la nouvelle version se prépare en arrière-plan, comme la première.
     void this.evaluations.generer(id, propre);
