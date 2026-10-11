@@ -1883,3 +1883,102 @@ th {
   font-size: 0.8rem;
   color: var(--text-muted);
 }
+
+/* ── Le guide pas à pas d'un projet (« Ton parcours ») ───────────────────── */
+
+.guide-parcours__liste {
+  list-style: none;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.guide-etape {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  padding: 0.45rem 0.6rem;
+  border-radius: var(--radius-sm);
+}
+
+.guide-etape__signe {
+  flex: none;
+  width: 1.4rem;
+  text-align: center;
+}
+
+.guide-etape__texte {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.guide-etape--fait .guide-etape__label {
+  color: var(--text-muted);
+}
+
+.guide-etape--a-venir {
+  color: var(--text-faint);
+}
+
+.guide-etape--en-cours {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+}
+
+.guide-etape--en-cours .guide-etape__label {
+  font-weight: 700;
+}
+
+.guide-etape__detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  align-items: flex-start;
+}
+
+.guide-etape__aller {
+  width: auto;
+}
+
+/* Sur ordinateur, tout le chemin tient : rien à replier. */
+.guide-parcours__tout {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  .guide-parcours:not(.guide-parcours--tout) .guide-etape--repliee {
+    display: none;
+  }
+
+  .guide-parcours__tout {
+    display: inline-flex;
+    width: auto;
+  }
+}
+
+/* Ce que « Y aller » désigne : une pulsation, le temps de le repérer. */
+.guide-cible {
+  animation: guide-pulse 1s ease-in-out 3;
+  outline: 2px solid var(--flame);
+  outline-offset: 3px;
+}
+
+@keyframes guide-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(255 90 31 / 0%);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgb(255 90 31 / 35%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide-cible {
+    animation: none;
+  }
+}

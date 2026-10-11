@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import type { JourneyRepere } from '@/lib/api';
-import { TableauDeBord } from './parcours';
+import type { JourneyEtapeGuide, JourneyRepere, JourneyView } from '@/lib/api';
+import { GuideParcours, TableauDeBord } from './parcours';
 
 /**
  * LA TUILE QUI CONSTATE UN VIDE DOIT OFFRIR DE LE COMBLER.
@@ -75,5 +75,81 @@ describe('le tableau de bord d’un projet', () => {
     );
 
     expect(screen.queryByRole('button', { name: 'Ajouter une tâche' })).toBeNull();
+  });
+});
+
+describe('le guide « Ton parcours »', () => {
+  const GUIDE: JourneyEtapeGuide[] = [
+    { id: 'decrire', label: 'Décrire ton idée', etat: 'fait' },
+    { id: 'analyser', label: 'Analyser ton idée', etat: 'en-cours' },
+    { id: 'construire', label: 'Établir ton plan', etat: 'a-venir' },
+    { id: 'premieres-taches', label: 'Poser tes premières tâches', etat: 'a-venir' },
+    { id: 'avancer-taches', label: 'Avancer tes tâches', etat: 'a-venir' },
+    { id: 'developper', label: 'Préparer le développement', etat: 'a-venir' },
+    { id: 'transmettre', label: 'Penser la transmission', etat: 'a-venir' },
+  ];
+  function parcours(partiel: Partial<JourneyView> = {}): JourneyView {
+    return {
+      phase: 'decouvrir',
+      phaseLabel: 'Découvrir',
+      reperes: [],
+      nextStep: {
+        id: 'analyser',
+        titre: 'Analyser ton idée',
+        pourquoi: "C'est le point de départ.",
+        section: 'analyse',
+      },
+      guide: GUIDE,
+      visible: [],
+      locked: [],
+      ...partiel,
+    } as JourneyView;
+  }
+
+  it('montre chaque étape avec son état, et celle du moment en avant', () => {
+    render(<GuideParcours parcours={parcours()} onAller={() => {}} />);
+    expect(screen.getByRole('heading', { name: 'Ton parcours' })).toBeInTheDocument();
+    const etapes = screen.getAllByRole('listitem');
+    expect(etapes).toHaveLength(7);
+    expect(etapes[0]).toHaveAccessibleName('Décrire ton idée, faite');
+    expect(etapes[1]).toHaveAttribute('aria-current', 'step');
+    expect(etapes[1]).toHaveAccessibleName('Analyser ton idée, en cours');
+    expect(etapes[2]).toHaveAccessibleName('Établir ton plan, à venir');
+    expect(screen.getByText("C'est le point de départ.")).toBeInTheDocument();
+  });
+
+  it('« Y aller » demande l’étape en cours', () => {
+    const onAller = vi.fn();
+    render(<GuideParcours parcours={parcours()} onAller={onAller} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Y aller' }));
+    expect(onAller).toHaveBeenCalledWith('analyser');
+  });
+
+  it('dit qu’on a fait le tour, sans bouton, quand rien ne reste', () => {
+    render(
+      <GuideParcours
+        parcours={parcours({ nextStep: null, guide: GUIDE.map((e) => ({ ...e, etat: 'fait' })) })}
+        onAller={() => {}}
+      />,
+    );
+    expect(screen.getByRole('heading', { name: 'Tu as fait le tour' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Y aller' })).not.toBeInTheDocument();
+  });
+
+  it('dit ce qui bloque quand l’IA est éteinte', () => {
+    render(<GuideParcours parcours={parcours()} iaDisponible={false} onAller={() => {}} />);
+    expect(screen.getByText(/générateurs sont éteints/)).toBeInTheDocument();
+  });
+
+  it('replie le reste du chemin derrière « Voir tout »', () => {
+    const { container } = render(<GuideParcours parcours={parcours()} onAller={() => {}} />);
+    const voirTout = screen.getByRole('button', { name: 'Voir tout' });
+    expect(voirTout).toHaveAttribute('aria-expanded', 'false');
+    // Sur téléphone, le CSS masque les étapes faites et celles au-delà des
+    // deux prochaines : ici Décrire, et les trois dernières.
+    expect(container.querySelectorAll('.guide-etape--repliee')).toHaveLength(4);
+    fireEvent.click(voirTout);
+    expect(screen.getByRole('button', { name: 'Replier' })).toHaveAttribute('aria-expanded', 'true');
+    expect(container.querySelector('.guide-parcours--tout')).not.toBeNull();
   });
 });

@@ -1,6 +1,7 @@
 'use client';
 
-import type { JourneyPhase, JourneyRepere, JourneyView } from '@/lib/api';
+import { useId, useState } from 'react';
+import type { JourneyEtatEtape, JourneyPhase, JourneyRepere, JourneyView } from '@/lib/api';
 
 const PHASES: Array<{ id: JourneyPhase; label: string }> = [
   { id: 'decouvrir', label: 'Découvrir' },
@@ -258,6 +259,116 @@ export function ProchaineEtape({
         </button>
       )}
     </div>
+  );
+}
+
+const ETAT_DIT: Record<JourneyEtatEtape, string> = {
+  fait: 'faite',
+  'en-cours': 'en cours',
+  'a-venir': 'à venir',
+};
+
+const ETAT_SIGNE: Record<JourneyEtatEtape, string> = {
+  fait: '✅',
+  'en-cours': '▶',
+  'a-venir': '○',
+};
+
+/**
+ * TON PARCOURS — le guide pas à pas de l'écran projet.
+ *
+ * Remplace la seule « prochaine étape » pour le porteur : une personne qui
+ * découvre Ignitux a besoin de voir le chemin entier pour savoir où elle en
+ * est, et d'un bouton qui l'emmène à l'endroit exact où agir. Le chemin et
+ * les états viennent du serveur ; ce composant ne décide de rien.
+ *
+ * Sur téléphone, le CSS replie les étapes faites et celles au-delà des deux
+ * prochaines (`guide-etape--repliee`) ; « Voir tout » les rouvre.
+ */
+export function GuideParcours({
+  parcours,
+  iaDisponible = true,
+  onAller,
+}: {
+  parcours: JourneyView;
+  iaDisponible?: boolean;
+  onAller: (etapeId: string) => void;
+}) {
+  const titreId = useId();
+  const [tout, setTout] = useState(false);
+  const etape = parcours.nextStep;
+  const indexEnCours = parcours.guide.findIndex((e) => e.etat === 'en-cours');
+  const repliee = (index: number, etat: JourneyEtatEtape) =>
+    etat === 'fait' || (indexEnCours >= 0 && index > indexEnCours + 2);
+  const aReplier = parcours.guide.some((e, index) => repliee(index, e.etat));
+  const bloqueeParLIa = !!etape && !iaDisponible && ETAPES_QUI_EXIGENT_L_IA.has(etape.id);
+
+  return (
+    <section
+      className={`card guide-parcours${tout ? ' guide-parcours--tout' : ''}`}
+      data-visite="guide"
+      aria-labelledby={titreId}
+      style={{ marginBottom: '1.5rem' }}
+    >
+      <h2 id={titreId} style={{ marginTop: 0 }}>
+        {etape ? 'Ton parcours' : 'Tu as fait le tour'}
+      </h2>
+
+      <ol className="guide-parcours__liste">
+        {parcours.guide.map((e, index) => (
+          <li
+            key={e.id}
+            className={`guide-etape guide-etape--${e.etat}${repliee(index, e.etat) ? ' guide-etape--repliee' : ''}`}
+            aria-current={e.etat === 'en-cours' ? 'step' : undefined}
+            aria-label={`${e.label}, ${ETAT_DIT[e.etat]}`}
+          >
+            <span className="guide-etape__signe" aria-hidden="true">
+              {ETAT_SIGNE[e.etat]}
+            </span>
+            <span className="guide-etape__texte">
+              <span className="guide-etape__label">
+                {index + 1}. {e.label}
+              </span>
+              {e.etat === 'en-cours' && etape && (
+                <span className="guide-etape__detail">
+                  <span className="guide-etape__pourquoi">{etape.pourquoi}</span>
+                  {bloqueeParLIa && (
+                    <span className="notice">
+                      <span>
+                        IGINI ne peut pas s&apos;en charger maintenant : ses générateurs sont
+                        éteints. Cela ne bloque pas ton projet — tu peux avancer à la main : note
+                        dans la Mémoire ce que tu sais déjà, ou pose tes premières tâches.
+                      </span>
+                    </span>
+                  )}
+                  <button className="primary guide-etape__aller" type="button" onClick={() => onAller(e.id)}>
+                    Y aller
+                  </button>
+                </span>
+              )}
+            </span>
+          </li>
+        ))}
+      </ol>
+
+      {!etape && (
+        <p className="muted" style={{ marginBottom: 0 }}>
+          Les étapes du parcours sont franchies. La direction t&apos;appartient maintenant : ouvre
+          la vue avancée si tu cherches un outil précis.
+        </p>
+      )}
+
+      {aReplier && (
+        <button
+          type="button"
+          className="secondary guide-parcours__tout"
+          aria-expanded={tout}
+          onClick={() => setTout((v) => !v)}
+        >
+          {tout ? 'Replier' : 'Voir tout'}
+        </button>
+      )}
+    </section>
   );
 }
 
