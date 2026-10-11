@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { assertOwnsProject } from '../prisma/assert-owns-project.js';
+import { exigerCapacite } from '../equipe/acces-projet.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { TEXTE_MANDAT } from './mandate-text.js';
 import { MANDATS_SUSPENDUS, MESSAGE_MANDATS_SUSPENDUS } from './mandats-suspension.js';
@@ -16,8 +16,9 @@ export class MandatsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async creerMandat(ownerId: string, projectId: string, purpose: string) {
+    // Le rôle d'abord : un membre apprend que ce n'est pas à lui, quelle que soit la suspension.
+    await exigerCapacite(this.prisma, ownerId, projectId, 'actes_juridiques');
     refuserSiSuspendus();
-    await assertOwnsProject(this.prisma, ownerId, projectId);
 
     const verification = await this.prisma.identity_verifications.findFirst({
       where: { owner_id: ownerId, status: 'validee' },

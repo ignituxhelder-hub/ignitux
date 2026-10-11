@@ -1,3 +1,4 @@
+import { exigerCapacite } from '../equipe/acces-projet.js';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { genererPdfDossier } from './dossier-pdf.js';
@@ -41,12 +42,15 @@ const DEPOT_VIDE: EtatDepot = { status: 'preparation', checkedItems: [], deposit
 export class DossierCreationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async obtenir(ownerId: string, projectId: string): Promise<DossierCreation> {
+  async obtenir(demandeurId: string, projectId: string): Promise<DossierCreation> {
+    // Un membre lit les documents du propriétaire, à qui ils appartiennent.
+    const { ownerId } = await exigerCapacite(this.prisma, demandeurId, projectId, 'voir_documents_juridiques');
     const { dossier } = await this.charger(ownerId, projectId);
     return dossier;
   }
 
   async cocher(ownerId: string, projectId: string, checkedItems: string[]): Promise<DossierCreation> {
+    await exigerCapacite(this.prisma, ownerId, projectId, 'actes_juridiques');
     const project = await this.projetDuProprietaire(ownerId, projectId);
 
     // Le DTO a déjà refusé les ids inconnus et les doublons ; ici on refuse
@@ -89,6 +93,7 @@ export class DossierCreationService {
   }
 
   async marquerDepose(ownerId: string, projectId: string, filingReference?: string): Promise<DossierCreation> {
+    await exigerCapacite(this.prisma, ownerId, projectId, 'actes_juridiques');
     await this.projetDuProprietaire(ownerId, projectId);
     await this.assurerLigne(ownerId, projectId);
 
@@ -109,6 +114,7 @@ export class DossierCreationService {
   }
 
   async rouvrir(ownerId: string, projectId: string): Promise<DossierCreation> {
+    await exigerCapacite(this.prisma, ownerId, projectId, 'actes_juridiques');
     await this.projetDuProprietaire(ownerId, projectId);
     const { count } = await this.prisma.creation_filings.updateMany({
       where: { project_id: projectId, owner_id: ownerId, status: 'depose' },
@@ -120,7 +126,9 @@ export class DossierCreationService {
     return this.obtenir(ownerId, projectId);
   }
 
-  async recapitulatifPdf(ownerId: string, projectId: string): Promise<Buffer> {
+  async recapitulatifPdf(demandeurId: string, projectId: string): Promise<Buffer> {
+    // Un membre lit les documents du propriétaire, à qui ils appartiennent.
+    const { ownerId } = await exigerCapacite(this.prisma, demandeurId, projectId, 'voir_documents_juridiques');
     const { project, bylaws, dossier } = await this.charger(ownerId, projectId);
     // Une micro-entreprise ou une EI n'a pas de statuts : des statuts restés
     // d'une forme précédente ne doivent jamais apparaître dans son récapitulatif.

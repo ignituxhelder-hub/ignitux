@@ -20,7 +20,8 @@ describe('StatutsService — génération', () => {
 
   beforeEach(async () => {
     prisma = {
-      projects: { findFirst: vi.fn() },
+      // Par défaut, un projet de user-1 : les contrôles de l'équipe le relisent.
+      projects: { findFirst: vi.fn().mockResolvedValue({ id: 'p1', owner_id: 'user-1', confirmed_legal_form: 'SASU' }) },
       company_bylaws: {
         create: vi.fn(),
         findUnique: vi.fn(),

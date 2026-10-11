@@ -20,7 +20,12 @@ describe('ImmatriculationService', () => {
     findEntryByReference: ReturnType<typeof vi.fn>;
   };
 
-  const projet = (confirmed_legal_form: string | null = 'SASU') => ({ id: 'p1', title: 'Ma Société', confirmed_legal_form });
+  const projet = (confirmed_legal_form: string | null = 'SASU') => ({
+    id: 'p1',
+    owner_id: 'user-1',
+    title: 'Ma Société',
+    confirmed_legal_form,
+  });
   const ligneFiche = (extra: Record<string, unknown> = {}) => ({
     id: 'r1',
     project_id: 'p1',
@@ -113,7 +118,8 @@ describe('ImmatriculationService', () => {
       prisma.projects.findFirst.mockResolvedValue(null);
       await expect(appel(service)).rejects.toThrow(new NotFoundException('Projet introuvable.'));
       expect(prisma.projects.findFirst).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { id: 'p1', owner_id: 'autre' } }),
+        // La requête d'accès de l'équipe : propriétaire OU membre du projet.
+        expect.objectContaining({ where: expect.objectContaining({ id: 'p1' }) }),
       );
       expect(prisma.company_registrations.findFirst).not.toHaveBeenCalled();
       expect(prisma.company_registrations.upsert).not.toHaveBeenCalled();

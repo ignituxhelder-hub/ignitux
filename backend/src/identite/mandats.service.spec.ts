@@ -34,7 +34,7 @@ describe('MandatsService', () => {
   });
 
   it('refuse de créer un mandat sans vérification d’identité validée', async () => {
-    prisma.projects.findFirst.mockResolvedValue({ id: 'p1' });
+    prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'user-1' });
     prisma.identity_verifications.findFirst.mockResolvedValue(null);
 
     await expect(service.creerMandat('user-1', 'p1', 'depot_creation_entreprise')).rejects.toThrow(
@@ -43,7 +43,7 @@ describe('MandatsService', () => {
   });
 
   it('crée un mandat quand une vérification validée existe', async () => {
-    prisma.projects.findFirst.mockResolvedValue({ id: 'p1' });
+    prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'user-1' });
     prisma.identity_verifications.findFirst.mockResolvedValue({ id: 'v1', status: 'validee' });
     prisma.mandates.create.mockResolvedValue({ id: 'm1' });
 
@@ -105,7 +105,7 @@ describe('MandatsService', () => {
 
     beforeEach(() => {
       interrupteur.suspendus = true;
-      prisma.projects.findFirst.mockResolvedValue({ id: 'p1' });
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'user-1' });
       prisma.identity_verifications.findFirst.mockResolvedValue({ id: 'v1', status: 'validee' });
       prisma.mandates.findFirst.mockResolvedValue({
         id: 'm1',

@@ -23,7 +23,12 @@ describe('DossierCreationService', () => {
   let service: DossierCreationService;
   let prisma: any;
 
-  const projet = (confirmed_legal_form: string | null = 'SASU') => ({ id: 'p1', title: 'Mon projet', confirmed_legal_form });
+  const projet = (confirmed_legal_form: string | null = 'SASU') => ({
+    id: 'p1',
+    owner_id: 'user-1',
+    title: 'Mon projet',
+    confirmed_legal_form,
+  });
 
   beforeEach(async () => {
     prisma = {

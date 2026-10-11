@@ -1,3 +1,4 @@
+import { exigerCapacite } from '../equipe/acces-projet.js';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConstitutionService } from '../constitution/constitution.service.js';
 import { CLAUDE_MODEL, ClaudeService } from '../igini/claude/claude.service.js';
@@ -29,6 +30,7 @@ export class StatutsService {
   ) {}
 
   async genererPourProjet(ownerId: string, projectId: string, dto: GenerateBylawsDto) {
+    await exigerCapacite(this.prisma, ownerId, projectId, 'actes_juridiques');
     const project = await this.prisma.projects.findFirst({
       where: { id: projectId, owner_id: ownerId },
     });
@@ -158,6 +160,7 @@ export class StatutsService {
   }
 
   async modifierTexte(ownerId: string, projectId: string, content: string) {
+    await exigerCapacite(this.prisma, ownerId, projectId, 'actes_juridiques');
     const bylaws = await this.findForOwner(ownerId, projectId);
     if (bylaws.status === 'retenue') {
       throw new ConflictException('Cette version est retenue : elle ne peut plus être modifiée.');
@@ -178,6 +181,7 @@ export class StatutsService {
   }
 
   async regenererPourProjet(ownerId: string, projectId: string, dto: GenerateBylawsDto) {
+    await exigerCapacite(this.prisma, ownerId, projectId, 'actes_juridiques');
     const bylaws = await this.findForOwner(ownerId, projectId);
     if (bylaws.status === 'retenue') {
       throw new ConflictException('Cette version est retenue : elle ne peut plus être régénérée.');
@@ -188,6 +192,7 @@ export class StatutsService {
   }
 
   async retenirPourProjet(ownerId: string, projectId: string) {
+    await exigerCapacite(this.prisma, ownerId, projectId, 'actes_juridiques');
     const bylaws = await this.findForOwner(ownerId, projectId);
     if (bylaws.status === 'retenue') {
       throw new ConflictException('Cette version est déjà retenue.');
@@ -219,6 +224,7 @@ export class StatutsService {
    * d'autre (registre, immatriculation).
    */
   async deverrouillerPourProjet(ownerId: string, projectId: string) {
+    await exigerCapacite(this.prisma, ownerId, projectId, 'actes_juridiques');
     const project = await this.prisma.projects.findFirst({
       where: { id: projectId, owner_id: ownerId },
     });
@@ -255,7 +261,9 @@ export class StatutsService {
   }
 
   /** Rend null (pas d'exception) quand rien n'existe encore : « pas de statuts » est un état normal. */
-  obtenirPourProjet(ownerId: string, projectId: string) {
+  async obtenirPourProjet(demandeurId: string, projectId: string) {
+    // Un membre lit les documents du propriétaire, à qui ils appartiennent.
+    const { ownerId } = await exigerCapacite(this.prisma, demandeurId, projectId, 'voir_documents_juridiques');
     return this.prisma.company_bylaws.findFirst({
       where: { project_id: projectId, owner_id: ownerId },
       include: { associates: true },

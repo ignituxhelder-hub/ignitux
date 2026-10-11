@@ -1,3 +1,4 @@
+import { exigerCapacite } from '../equipe/acces-projet.js';
 import { randomUUID } from 'node:crypto';
 import {
   BadRequestException,
@@ -167,7 +168,9 @@ export class ImmatriculationService {
     private readonly ledger: LedgerService,
   ) {}
 
-  async obtenir(ownerId: string, projectId: string): Promise<EtatImmatriculation> {
+  async obtenir(demandeurId: string, projectId: string): Promise<EtatImmatriculation> {
+    // Un membre lit les documents du propriétaire, à qui ils appartiennent.
+    const { ownerId } = await exigerCapacite(this.prisma, demandeurId, projectId, 'voir_documents_juridiques');
     const project = await this.projetDuProprietaire(ownerId, projectId);
     const [fiche, statuts] = await Promise.all([
       this.ficheDuProjet(ownerId, projectId),
@@ -189,6 +192,7 @@ export class ImmatriculationService {
 
   /** Crée ou remplace la fiche. Ne touche à aucun document déjà émis. */
   async enregistrer(ownerId: string, projectId: string, saisie: SaisieFiche): Promise<EtatImmatriculation> {
+    await exigerCapacite(this.prisma, ownerId, projectId, 'actes_juridiques');
     await this.projetDuProprietaire(ownerId, projectId);
 
     const resultat = normaliserFiche(saisie);
@@ -242,6 +246,7 @@ export class ImmatriculationService {
   }
 
   async supprimer(ownerId: string, projectId: string): Promise<EtatImmatriculation> {
+    await exigerCapacite(this.prisma, ownerId, projectId, 'actes_juridiques');
     await this.projetDuProprietaire(ownerId, projectId);
     const fiche = await this.ficheDuProjet(ownerId, projectId);
     if (!fiche) {
@@ -273,7 +278,9 @@ export class ImmatriculationService {
     return this.obtenir(ownerId, projectId);
   }
 
-  async obtenirCapital(ownerId: string, projectId: string): Promise<EtatCapital> {
+  async obtenirCapital(demandeurId: string, projectId: string): Promise<EtatCapital> {
+    // Un membre lit les documents du propriétaire, à qui ils appartiennent.
+    const { ownerId } = await exigerCapacite(this.prisma, demandeurId, projectId, 'voir_documents_juridiques');
     const project = await this.projetDuProprietaire(ownerId, projectId);
     const [fiche, statuts] = await Promise.all([
       this.ficheDuProjet(ownerId, projectId),
@@ -315,6 +322,7 @@ export class ImmatriculationService {
     projectId: string,
     confirmation: ConfirmationCapital,
   ): Promise<EtatCapital & { entryId: string }> {
+    await exigerCapacite(this.prisma, ownerId, projectId, 'actes_juridiques');
     const project = await this.projetDuProprietaire(ownerId, projectId);
     const [fiche, statuts] = await Promise.all([
       this.ficheDuProjet(ownerId, projectId),
