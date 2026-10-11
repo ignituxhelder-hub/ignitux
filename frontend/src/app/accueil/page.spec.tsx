@@ -133,71 +133,108 @@ describe('LanceurPage', () => {
     });
 
     describe('le dossier Entreprise', () => {
+      const AVEC_PLUS = {
+        ...LANCEUR,
+        applications: [
+          ...LANCEUR.applications,
+          { id: 'crm', nom: 'Relations', resume: 'Tes contacts.', categorie: 'vendre', route: '/crm', horsOffre: false },
+        ],
+        reglages: [
+          ...LANCEUR.reglages,
+          { id: 'offres', nom: 'Mon offre', resume: 'Ton abonnement.', categorie: 'reglages', route: '/offres', horsOffre: false },
+        ],
+      };
+
+      it('range les applications en un dossier par catégorie, sans dossier vide', async () => {
+        mockApiRoutes(routes({ 'GET /me/applications': { status: 200, body: AVEC_PLUS } }));
+        afficher();
+        fireEvent.click(await screen.findByRole('button', { name: 'Ouvrir Entreprise' }));
+
+        const dossiers = screen
+          .getAllByRole('button')
+          .map((b) => b.getAttribute('aria-label') ?? '')
+          .filter((nom) => nom.startsWith('Ouvrir '));
+        // Vendre (Relations, Caisse), Gérer (Agenda), Réglages (Mon offre).
+        // Ni Investir ni Réseau : aucune application de ces catégories ici.
+        expect(dossiers).toEqual(['Ouvrir Vendre', 'Ouvrir Gérer', 'Ouvrir Réglages']);
+        // Les applications restent dans leur dossier tant qu'on ne l'ouvre pas.
+        expect(screen.queryByRole('link', { name: 'Relations' })).not.toBeInTheDocument();
+      });
+
       // Une application prévue n'a pas d'écran : son icône ne doit pas être
       // un lien qui ouvrirait une page vide. Elle dit seulement ce qui arrive.
-      it('regroupe le reste des applications et les prévues, celle du secteur en premier', async () => {
-        mockApiRoutes(routes());
+      it('ouvre un dossier sur ses applications et ses prévues, et revient en arrière', async () => {
+        mockApiRoutes(routes({ 'GET /me/applications': { status: 200, body: AVEC_PLUS } }));
         afficher();
         await screen.findByRole('link', { name: 'Mes projets' });
-
-        // Rien de tout ça sur le bureau avant d'ouvrir le dossier.
         expect(screen.queryByRole('button', { name: 'Caisse, bientôt' })).not.toBeInTheDocument();
 
         fireEvent.click(screen.getByRole('button', { name: 'Ouvrir Entreprise' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Ouvrir Vendre' }));
 
-        const caisse = await screen.findByRole('button', { name: 'Caisse, bientôt' });
+        expect(screen.getByRole('heading', { name: 'Vendre' })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: 'Relations' })).toHaveAttribute('href', '/crm');
+        const caisse = screen.getByRole('button', { name: 'Caisse, bientôt' });
         expect(screen.queryByRole('link', { name: /caisse/i })).not.toBeInTheDocument();
-        const prevues = screen
-          .getAllByRole('button')
-          .filter((b) => /, bientôt$/.test(b.getAttribute('aria-label') ?? ''));
-        expect(prevues.map((b) => b.getAttribute('aria-label'))).toEqual([
-          'Caisse, bientôt',
-          'Agenda, bientôt',
-        ]);
+        // Agenda est dans Gérer, pas ici ; Mon offre dans Réglages.
+        expect(screen.queryByRole('button', { name: 'Agenda, bientôt' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: 'Mon offre' })).not.toBeInTheDocument();
 
         fireEvent.click(caisse);
         const detail = screen.getByRole('status');
         expect(detail).toHaveTextContent('Pour ton secteur');
         expect(detail).toHaveTextContent('certifié');
 
-        // On referme : le dossier se vide de l'écran, Mes projets revient.
-        fireEvent.click(screen.getByRole('button', { name: '← Bureau' }));
-        expect(await screen.findByRole('link', { name: 'Mes projets' })).toBeInTheDocument();
-        expect(screen.queryByRole('button', { name: 'Caisse, bientôt' })).not.toBeInTheDocument();
-      });
-
-      it('cache les autres applications et réglages secondaires tant que le dossier est fermé', async () => {
-        const AVEC_PLUS = {
-          ...LANCEUR,
-          applications: [
-            ...LANCEUR.applications,
-            { id: 'crm', nom: 'Relations', resume: 'Tes contacts.', categorie: 'vendre', route: '/crm', horsOffre: false },
-          ],
-          reglages: [
-            ...LANCEUR.reglages,
-            { id: 'offres', nom: 'Mon offre', resume: 'Ton abonnement.', categorie: 'reglages', route: '/offres', horsOffre: false },
-          ],
-        };
-        mockApiRoutes(routes({ 'GET /me/applications': { status: 200, body: AVEC_PLUS } }));
-        afficher();
-        await screen.findByRole('link', { name: 'Mes projets' });
-
+        // Un cran en arrière : Entreprise et ses dossiers.
+        fireEvent.click(screen.getByRole('button', { name: '← Entreprise' }));
+        expect(screen.getByRole('button', { name: 'Ouvrir Gérer' })).toBeInTheDocument();
         expect(screen.queryByRole('link', { name: 'Relations' })).not.toBeInTheDocument();
-        expect(screen.queryByRole('link', { name: 'Mon offre' })).not.toBeInTheDocument();
 
-        fireEvent.click(screen.getByRole('button', { name: 'Ouvrir Entreprise' }));
-
-        expect(await screen.findByRole('link', { name: 'Relations' })).toHaveAttribute('href', '/crm');
+        fireEvent.click(screen.getByRole('button', { name: 'Ouvrir Réglages' }));
         expect(screen.getByRole('link', { name: 'Mon offre' })).toHaveAttribute('href', '/offres');
 
+        // Encore un cran, puis le bureau : Mes projets revient.
+        fireEvent.click(screen.getByRole('button', { name: '← Entreprise' }));
         fireEvent.click(screen.getByRole('button', { name: '← Bureau' }));
-        expect(screen.queryByRole('link', { name: 'Relations' })).not.toBeInTheDocument();
+        expect(await screen.findByRole('link', { name: 'Mes projets' })).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Ouvrir Vendre' })).not.toBeInTheDocument();
+      });
+
+      it('range la prévue du secteur avant les autres dans son dossier', async () => {
+        const DEUX_PREVUES = {
+          ...LANCEUR,
+          prevues: [
+            { ...LANCEUR.prevues[1], id: 'publicite', nom: 'Publicité', pourToi: false, cadre: null },
+            LANCEUR.prevues[1],
+          ],
+        };
+        mockApiRoutes(routes({ 'GET /me/applications': { status: 200, body: DEUX_PREVUES } }));
+        afficher();
+        fireEvent.click(await screen.findByRole('button', { name: 'Ouvrir Entreprise' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Ouvrir Vendre' }));
+
+        const prevues = screen
+          .getAllByRole('button')
+          .filter((b) => /, bientôt$/.test(b.getAttribute('aria-label') ?? ''));
+        expect(prevues.map((b) => b.getAttribute('aria-label'))).toEqual([
+          'Caisse, bientôt',
+          'Publicité, bientôt',
+        ]);
+      });
+
+      it('retire une application depuis l’intérieur d’un dossier', async () => {
+        mockApiRoutes(routes({ 'GET /me/applications': { status: 200, body: AVEC_PLUS } }));
+        afficher();
+        fireEvent.click(await screen.findByRole('button', { name: /organiser mon bureau/i }));
+        fireEvent.click(screen.getByRole('button', { name: 'Ouvrir Entreprise' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Ouvrir Vendre' }));
+        expect(screen.getByRole('button', { name: 'Retirer Relations du bureau' })).toBeEnabled();
       });
     });
 
     describe('les pages qu’on fait glisser', () => {
-      // Mes projets reste seul sur le bureau ; les 20 autres tombent dans le
-      // dossier Entreprise, où la pagination se joue.
+      // Mes projets reste seul sur le bureau ; les 20 autres (catégorie
+      // « créer ») tombent dans le dossier Créer, où la pagination se joue.
       const PLEIN = {
         ...LANCEUR,
         applications: [
@@ -222,6 +259,7 @@ describe('LanceurPage', () => {
         mockApiRoutes(routes({ 'GET /me/applications': { status: 200, body: PLEIN } }));
         afficher();
         fireEvent.click(await screen.findByRole('button', { name: 'Ouvrir Entreprise' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Ouvrir Créer' }));
         await screen.findByRole('link', { name: 'Appli 0' });
         // 16 icônes par page sur téléphone : la 17e ouvre la page 2.
         const page1 = screen.getByRole('list', { name: 'Page 1 sur 2' });
