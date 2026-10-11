@@ -4,6 +4,7 @@ import { AuthModule } from '../auth/auth.module.js';
 import { ComplianceModule } from '../compliance/compliance.module.js';
 import { FinanceAuditModule } from '../finance-audit/finance-audit.module.js';
 import { ClaudeModule } from '../igini/claude/claude.module.js';
+import { MailModule } from '../mail/mail.module.js';
 import { OffresModule } from '../offres/offres.module.js';
 import { ProjectsModule } from '../projects/projects.module.js';
 import { RoleGuard } from '../roles/role.guard.js';
@@ -25,6 +26,7 @@ import { EvaluationService } from './evaluation.service.js';
     ProjectsModule,
     FinanceAuditModule,
     ComplianceModule,
+    MailModule,
   ],
   controllers: [EvaluationController, EvaluationRevueController],
   providers: [EvaluationService, EvaluationRevueService, RoleGuard],

@@ -7,11 +7,13 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ComplianceService } from '../compliance/compliance.service.js';
+import { getEnv } from '../config/env.js';
 import { FinanceAuditService } from '../finance-audit/finance-audit.service.js';
 import type { financing_evaluations } from '../generated/prisma/client.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { ClaudeService } from '../igini/claude/claude.service.js';
 import { readGeneratorsAvailability } from '../igini/claude/generators-availability.js';
+import { MailService } from '../mail/mail.service.js';
 import { OffresService } from '../offres/offres.service.js';
 import { assertOwnsProject } from '../prisma/assert-owns-project.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -77,6 +79,7 @@ export class EvaluationService {
     private readonly projects: ProjectsService,
     private readonly financeAudit: FinanceAuditService,
     private readonly compliance: ComplianceService,
+    private readonly mail: MailService,
   ) {}
 
   async demander(userId: string, projectId: string): Promise<EvaluationVue> {
@@ -167,13 +170,14 @@ export class EvaluationService {
       });
       const rapport = normaliserRapport(brut);
 
-      await this.ecrireSiEnPreparation(evaluationId, {
+      const enRevue = await this.ecrireSiEnPreparation(evaluationId, {
         status: 'en_revue',
         verdict: rapport.verdict,
         report: rapport,
         ai_draft: rapport,
         failure_reason: null,
       });
+      if (enRevue) await this.prevenirAdministrateurs(projet.titre);
     } catch (erreur) {
       this.logger.error(`Évaluation ${evaluationId} en échec : ${String(erreur)}`);
       // Seul un refus lisible (4xx : quota, offre…) est montré à l'entrepreneur.
@@ -195,13 +199,47 @@ export class EvaluationService {
   private async ecrireSiEnPreparation(
     evaluationId: string,
     data: Prisma.financing_evaluationsUpdateManyMutationInput,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const { count } = await this.prisma.financing_evaluations.updateMany({
       where: { id: evaluationId, status: 'en_preparation' },
       data,
     });
     if (count === 0) {
       this.logger.warn(`Évaluation ${evaluationId} : résultat ignoré, elle n'est plus en préparation.`);
+    }
+    return count > 0;
+  }
+
+  /**
+   * Un email à chaque administrateur : une évaluation attend sa revue. Sans
+   * lui, il faudrait aller vérifier la file soi-même.
+   *
+   * Ne lève jamais : un email qui ne part pas ne doit pas remettre en échec
+   * une évaluation déjà en revue. Le contenu du rapport n'est pas dans
+   * l'email, seulement le nom du projet et le lien vers la file.
+   */
+  private async prevenirAdministrateurs(titreProjet: string): Promise<void> {
+    try {
+      const admins = await this.prisma.user_roles.findMany({
+        where: { role: 'administrateur' },
+        select: { user: { select: { email: true } } },
+      });
+      const lien = `${getEnv().FRONTEND_URL}/evaluations/revue`;
+      for (const { user } of admins) {
+        await this.mail.send({
+          to: user.email,
+          subject: `Évaluation de financement à revoir : ${titreProjet}`,
+          text:
+            `IGINI a préparé l'évaluation de financement du projet « ${titreProjet} ».
+
+` +
+            `Elle attend ta revue avant d'être envoyée à l'entrepreneur :
+${lien}
+`,
+        });
+      }
+    } catch (erreur) {
+      this.logger.error(`Impossible de prévenir les administrateurs : ${String(erreur)}`);
     }
   }
 

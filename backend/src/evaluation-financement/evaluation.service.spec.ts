@@ -7,6 +7,9 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client.js';
 import { EvaluationService } from './evaluation.service.js';
+
+// Seule l'adresse du site sert ici (le lien de l'email aux administrateurs).
+vi.mock('../config/env.js', () => ({ getEnv: () => ({ FRONTEND_URL: 'https://ignitux.test' }) }));
 import { rapport } from './evaluation.fixture.js';
 
 const PROJET = { id: 'p1', owner_id: 'u1', title: 'Ma boulangerie', description: 'Levain' };
@@ -45,6 +48,12 @@ function monter() {
       update: vi.fn().mockImplementation(({ data }) => Promise.resolve(ligne(data))),
       updateMany: vi.fn().mockResolvedValue({ count: 1 }),
     },
+    user_roles: {
+      findMany: vi.fn().mockResolvedValue([
+        { user: { email: 'admin1@exemple.fr' } },
+        { user: { email: 'admin2@exemple.fr' } },
+      ]),
+    },
     $transaction: vi.fn(),
   };
   prisma.$transaction.mockImplementation((fn: (tx: typeof prisma) => unknown) => fn(prisma));
@@ -59,6 +68,7 @@ function monter() {
   const compliance = {
     listForProject: vi.fn().mockResolvedValue({ requirements: [{ completed: true }, { completed: false }] }),
   };
+  const mail = { send: vi.fn().mockResolvedValue('sent') };
   const service = new EvaluationService(
     prisma as never,
     claude as never,
@@ -66,9 +76,10 @@ function monter() {
     projects as never,
     financeAudit as never,
     compliance as never,
+    mail as never,
   );
   service.maintenant = () => MAINTENANT;
-  return { service, prisma, claude, offres, projects };
+  return { service, prisma, claude, offres, projects, mail };
 }
 
 /** Les écritures de la génération : conditionnées à « encore en préparation ». */
@@ -235,6 +246,57 @@ describe('EvaluationService — demande et génération', () => {
 
     await expect(service.demander('u2', 'p1')).rejects.toBeInstanceOf(NotFoundException);
     await expect(service.lister('u2', 'p1')).rejects.toBeInstanceOf(NotFoundException);
+  });
+});
+
+describe('EvaluationService — prévenir les administrateurs', () => {
+  const flagInitial = process.env.IGINI_AI_ENABLED;
+  beforeEach(() => {
+    process.env.IGINI_AI_ENABLED = 'true';
+  });
+  afterAll(() => {
+    if (flagInitial === undefined) delete process.env.IGINI_AI_ENABLED;
+    else process.env.IGINI_AI_ENABLED = flagInitial;
+  });
+
+  it('envoie un email à chaque administrateur quand une évaluation passe en revue', async () => {
+    const { service, prisma, mail } = monter();
+
+    await service.demander('u1', 'p1');
+    await finirArrierePlan();
+
+    expect(prisma.user_roles.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { role: 'administrateur' } }),
+    );
+    expect(mail.send).toHaveBeenCalledTimes(2);
+    const [{ to, subject, text }] = mail.send.mock.calls[0];
+    expect(to).toBe('admin1@exemple.fr');
+    expect(subject).toContain('Ma boulangerie');
+    expect(text).toContain('/evaluations/revue');
+  });
+
+  it('ne prévient personne quand la génération échoue ou arrive trop tard', async () => {
+    const tardive = monter();
+    tardive.prisma.financing_evaluations.updateMany.mockResolvedValue({ count: 0 });
+    await tardive.service.demander('u1', 'p1');
+    await finirArrierePlan();
+    expect(tardive.mail.send).not.toHaveBeenCalled();
+
+    const echec = monter();
+    echec.claude.generateStructuredOutput.mockRejectedValue(new Error('panne'));
+    await echec.service.demander('u1', 'p1');
+    await finirArrierePlan();
+    expect(echec.mail.send).not.toHaveBeenCalled();
+  });
+
+  it('un email qui ne part pas ne remet pas l’évaluation en échec', async () => {
+    const { service, prisma, mail } = monter();
+    mail.send.mockRejectedValue(new Error('SMTP injoignable'));
+
+    await service.demander('u1', 'p1');
+    await finirArrierePlan();
+
+    expect(ecritures(prisma).map((e) => e.data.status)).toEqual(['en_revue']);
   });
 });
 
