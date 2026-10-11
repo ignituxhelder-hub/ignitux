@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { lireLimiteGlobale } from './observability/limite-globale.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { LimiteurQuiSExplique } from './observability/limiteur.guard.js';
@@ -47,10 +48,10 @@ import { ImmatriculationModule } from './immatriculation/immatriculation.module.
 
 @Module({
   imports: [
-    // Limite globale par défaut : 20 requêtes / minute / IP.
-    // Les endpoints sensibles (login, signup) ont une limite plus stricte
-    // posée directement sur leur route via @Throttle().
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 20 }]),
+    // Limite globale par minute et par IP (voir limite-globale.ts), réglable par
+    // LIMITE_REQUETES_PAR_MINUTE. Les endpoints sensibles (login, signup) ont une
+    // limite plus stricte posée directement sur leur route via @Throttle().
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: lireLimiteGlobale(process.env.LIMITE_REQUETES_PAR_MINUTE) }]),
     PrismaModule,
     OffresModule,
     UsersModule,
