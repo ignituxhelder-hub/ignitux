@@ -111,6 +111,17 @@ describe('MailService', () => {
       );
     });
 
+    // Sans limite, nodemailer attend jusqu'à 2 minutes la connexion et 10
+    // minutes une réponse : un fournisseur muet bloquait alors /ready et la
+    // demande « mot de passe oublié ». Constaté en production le 11/10/2026.
+    it('borne l’attente de connexion et de réponse à quelques secondes', async () => {
+      await serviceAvec(SMTP);
+
+      expect(createTransport).toHaveBeenCalledWith(
+        expect.objectContaining({ connectionTimeout: 10_000, greetingTimeout: 10_000, socketTimeout: 20_000 }),
+      );
+    });
+
     // Se tromper de mode TLS donne une connexion qui pend jusqu'au délai
     // d'attente, pas une erreur claire. On le déduit du port.
     it.each([

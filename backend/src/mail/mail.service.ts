@@ -67,6 +67,12 @@ export class MailService implements OnModuleInit {
       // erreur claire — d'où la déduction plutôt qu'un réglage de plus.
       secure: port === 465,
       auth: { user: env.SMTP_USER, pass: env.SMTP_PASSWORD },
+      // Sans ces bornes, nodemailer attend jusqu'à 2 minutes la connexion et
+      // 10 minutes une réponse : un fournisseur muet bloquait /ready et la
+      // demande « mot de passe oublié » (constaté le 11/10/2026).
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 20_000,
     });
     this.logger.log(`Transport email SMTP vers ${env.SMTP_HOST}:${port}.`);
   }
