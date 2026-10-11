@@ -45,6 +45,21 @@ const nextConfig = {
   // <head> : installée, l'application s'ouvrait avec la barre Safari et sans
   // son nom. scripts/installable.mjs le vérifie en CI.
   htmlLimitedBots: /.*/,
+  // L'adresse publique est ignitux.com. L'ancienne adresse Vercel sert encore
+  // le même site, mais la connexion y échoue (le serveur n'autorise qu'une
+  // origine) : on y renvoie donc chaque page vers la même page sur
+  // ignitux.com. Seul l'hôte exact est visé, pas les aperçus
+  // `ignitux-xxxx.vercel.app` des branches.
+  async redirects() {
+    return [
+      {
+        source: '/:chemin*',
+        has: [{ type: 'host', value: 'ignitux.vercel.app' }],
+        destination: 'https://ignitux.com/:chemin*',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);
