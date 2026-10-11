@@ -256,6 +256,10 @@ describe('Constitution et données personnelles (e2e)', () => {
         // Le bureau (applications ajoutées ou retirées) est une préférence que la
         // personne a choisie : il part avec l'export, comme ses rôles.
         'bureau',
+        // L'acceptation des CGU (date et version) est une déclaration de la
+        // personne : elle part avec son compte.
+        'cgu_acceptees_le',
+        'cgu_version_acceptee',
         'compte_cree_le',
         'email',
         'email_verifie_le',
