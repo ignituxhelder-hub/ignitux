@@ -230,11 +230,11 @@ describe('SCÉNARIO — ce qu’un collaborateur peut, et ce qu’il ne peut pas
         .set(...auth(collaborateur))
         .send(corps);
 
-      // 404 partout : la propriété est vérifiée avant tout le reste, et le
-      // produit ne confirme même pas que le projet existe. Un 503 ici
-      // voudrait dire que l'interrupteur IA passe AVANT le contrôle d'accès
-      // — le collaborateur apprendrait alors que le projet existe.
-      expect(reponse.status).toBe(404);
+      // 403 partout : il est observateur (le rôle des collaborateurs d'avant
+      // les rôles), il connaît donc le projet, et le refus le dit en clair.
+      // Le droit est vérifié avant tout le reste : un 503 ici voudrait dire
+      // que l'interrupteur IA passe AVANT le contrôle d'accès.
+      expect(reponse.status).toBe(403);
     });
 
     it('il ne peut pas cocher une démarche de conformité', async () => {
@@ -242,7 +242,7 @@ describe('SCÉNARIO — ce qu’un collaborateur peut, et ce qu’il ne peut pas
         .post(`/projects/${projectId}/compliance/${requirementId}/check`)
         .set(...auth(collaborateur))
         .send({})
-        .expect(404);
+        .expect(403);
     });
 
     it('il ne peut pas ouvrir le projet au financement', async () => {
@@ -250,7 +250,7 @@ describe('SCÉNARIO — ce qu’un collaborateur peut, et ce qu’il ne peut pas
         .post('/projets-finances')
         .set(...auth(collaborateur))
         .send({ projectId, openedOn: '2026-01-10' })
-        .expect(404);
+        .expect(403);
     });
   });
 
