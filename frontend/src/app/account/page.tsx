@@ -125,7 +125,8 @@ export default function AccountPage() {
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Cookies et stockage local</h2>
         <p className="muted" style={{ marginTop: 0, marginBottom: 0 }}>
-          Ignitux ne pose aucun cookie et ne fait tourner aucun script de suivi. La connexion
+          Ignitux ne fait tourner aucun script de suivi et ne pose qu&apos;un seul cookie, si tu
+          changes de langue depuis la page d&apos;accueil, pour la retenir. La connexion
           (ton jeton de session) est mémorisée uniquement dans le stockage local de ton
           navigateur, sur cet appareil : elle disparaît si tu l&apos;effaces et n&apos;est jamais
           partagée avec un tiers.
