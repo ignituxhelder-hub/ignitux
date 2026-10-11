@@ -29,7 +29,9 @@ de propriétaire inconnu — l'identifier avant tout `migrate resolve`/`reset`.
 
 **Reste à faire sans payer :**
 - Rattacher le projet à l'entreprise immatriculée, avec compta et banque (sous-projet 4).
-- Décider si des statuts retenus peuvent être déverrouillés quand la forme change.
+- ~~Décider si des statuts retenus peuvent être déverrouillés quand la forme change.~~ Décidé le
+  10/10/2026 et construit (`StatutsService.deverrouillerPourProjet`) : seulement si la forme
+  confirmée est une société et diffère de celle des statuts ; retour en brouillon.
 - Décider si les photos de pièce d'identité entrent dans l'export RGPD (avis juridique).
 - Lancer une première fois `npm run test:charge` contre le serveur local.
 - Équipe : toujours reportée (permissions « chacun voit ce qu'il doit voir »).
@@ -149,7 +151,19 @@ Ce qui manquait vraiment est maintenant en place :
 Reste, hors code : la décision de Helder de publier ou non un jour une page
 de confidentialité publique à partir du `.docx` existant.
 
-### 13. Tests de charge
+### 13. Tests de charge — première mesure faite (11/10/2026)
+
+**Mesuré sur le PC de développement** (`npm run test:charge`, serveur local sur la base de
+développement, limiteur levé pour la mesure) : environ **250 requêtes/s**, **0 erreur** jusqu'à
+100 connexions simultanées ; seule la latence monte (p50 de 40 ms à 10 connexions, 380 ms à
+100). Render gratuit est bien moins puissant : la capacité réelle en production est plus
+basse et n'est pas mesurable avec cet outil (il refuse de viser un serveur distant).
+
+**Trouvé en mesurant :** la limite globale était de **20 requêtes/minute/IP** pour tout le
+site — trop bas pour un usage normal. Relevée à **120** (`LIMITE_REQUETES_PAR_MINUTE`,
+voir `limite-globale.ts`) ; les limites strictes de connexion et d'inscription restent.
+
+*Texte d'origine :*
 
 La capacité réelle n'est pas mesurée. Le plafond connu est le budget IA
 (≈ 360 analyses gratuites/mois à 50 €/mois). Ce n'est pas urgent pour une
