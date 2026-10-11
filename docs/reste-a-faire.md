@@ -29,7 +29,9 @@ de propriétaire inconnu — l'identifier avant tout `migrate resolve`/`reset`.
 
 **Reste à faire sans payer :**
 - Rattacher le projet à l'entreprise immatriculée, avec compta et banque (sous-projet 4).
-- Décider si des statuts retenus peuvent être déverrouillés quand la forme change.
+- ~~Décider si des statuts retenus peuvent être déverrouillés quand la forme change.~~ Décidé le
+  10/10/2026 et construit (`StatutsService.deverrouillerPourProjet`) : seulement si la forme
+  confirmée est une société et diffère de celle des statuts ; retour en brouillon.
 - Décider si les photos de pièce d'identité entrent dans l'export RGPD (avis juridique).
 - Lancer une première fois `npm run test:charge` contre le serveur local.
 - Équipe : toujours reportée (permissions « chacun voit ce qu'il doit voir »).
