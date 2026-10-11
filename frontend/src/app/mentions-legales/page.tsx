@@ -15,6 +15,11 @@ export const metadata = {
  * backend (Vercel pour le frontend était déjà la décision de Helder, voir
  * docs/deploiement-v1.md) — voir docs/superpowers/plans/2026-09-30-v1-test-prive.md,
  * Tâche 4.
+ *
+ * Mise à jour du 2026-10-11 : contact@ignitux.com remplace l'ancienne
+ * adresse ; la base de données (Supabase) rejoint l'hébergement. Son adresse
+ * postale n'est écrite nulle part dans le dépôt : elle est omise plutôt
+ * qu'inventée.
  */
 export default function MentionsLegalesPage() {
   return (
@@ -34,19 +39,23 @@ export default function MentionsLegalesPage() {
           <br />
           28 avenue de la Route Blanche, 74950 Scionzier, France
           <br />
-          Contact : ignitux@outlook.com
+          Contact : contact@ignitux.com
         </p>
       </div>
 
       <div className="card" style={{ marginTop: '1.5rem' }}>
         <h2 style={{ marginTop: 0 }}>Hébergement</h2>
         <p>
-          Backend : Render Services, Inc., 525 Brannan Street Ste 300, San Francisco, CA
+          Site (ignitux.com) : Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789,
+          États-Unis — vercel.com
+        </p>
+        <p>
+          Serveur : Render Services, Inc., 525 Brannan Street Ste 300, San Francisco, CA
           94107, États-Unis — render.com
         </p>
         <p style={{ marginBottom: 0 }}>
-          Frontend : Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis —
-          vercel.com
+          Base de données : Supabase, Inc. — supabase.com (base située dans l&apos;Union
+          européenne, en Irlande)
         </p>
       </div>
 
