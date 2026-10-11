@@ -6730,6 +6730,7 @@ export const Project_collaboratorsScalarFieldEnum = {
   id: 'id',
   project_id: 'project_id',
   user_id: 'user_id',
+  role: 'role',
   created_at: 'created_at'
 } as const
 

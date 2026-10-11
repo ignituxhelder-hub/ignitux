@@ -28,6 +28,7 @@ export type Project_collaboratorsMinAggregateOutputType = {
   id: string | null
   project_id: string | null
   user_id: string | null
+  role: string | null
   created_at: Date | null
 }
 
@@ -35,6 +36,7 @@ export type Project_collaboratorsMaxAggregateOutputType = {
   id: string | null
   project_id: string | null
   user_id: string | null
+  role: string | null
   created_at: Date | null
 }
 
@@ -42,6 +44,7 @@ export type Project_collaboratorsCountAggregateOutputType = {
   id: number
   project_id: number
   user_id: number
+  role: number
   created_at: number
   _all: number
 }
@@ -51,6 +54,7 @@ export type Project_collaboratorsMinAggregateInputType = {
   id?: true
   project_id?: true
   user_id?: true
+  role?: true
   created_at?: true
 }
 
@@ -58,6 +62,7 @@ export type Project_collaboratorsMaxAggregateInputType = {
   id?: true
   project_id?: true
   user_id?: true
+  role?: true
   created_at?: true
 }
 
@@ -65,6 +70,7 @@ export type Project_collaboratorsCountAggregateInputType = {
   id?: true
   project_id?: true
   user_id?: true
+  role?: true
   created_at?: true
   _all?: true
 }
@@ -145,6 +151,7 @@ export type Project_collaboratorsGroupByOutputType = {
   id: string
   project_id: string
   user_id: string
+  role: string
   created_at: Date | null
   _count: Project_collaboratorsCountAggregateOutputType | null
   _min: Project_collaboratorsMinAggregateOutputType | null
@@ -173,6 +180,7 @@ export type project_collaboratorsWhereInput = {
   id?: Prisma.UuidFilter<"project_collaborators"> | string
   project_id?: Prisma.UuidFilter<"project_collaborators"> | string
   user_id?: Prisma.UuidFilter<"project_collaborators"> | string
+  role?: Prisma.StringFilter<"project_collaborators"> | string
   created_at?: Prisma.DateTimeNullableFilter<"project_collaborators"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
   user?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
@@ -182,6 +190,7 @@ export type project_collaboratorsOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   project_id?: Prisma.SortOrder
   user_id?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   project?: Prisma.projectsOrderByWithRelationInput
   user?: Prisma.usersOrderByWithRelationInput
@@ -195,6 +204,7 @@ export type project_collaboratorsWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.project_collaboratorsWhereInput | Prisma.project_collaboratorsWhereInput[]
   project_id?: Prisma.UuidFilter<"project_collaborators"> | string
   user_id?: Prisma.UuidFilter<"project_collaborators"> | string
+  role?: Prisma.StringFilter<"project_collaborators"> | string
   created_at?: Prisma.DateTimeNullableFilter<"project_collaborators"> | Date | string | null
   project?: Prisma.XOR<Prisma.ProjectsScalarRelationFilter, Prisma.projectsWhereInput>
   user?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
@@ -204,6 +214,7 @@ export type project_collaboratorsOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   project_id?: Prisma.SortOrder
   user_id?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.project_collaboratorsCountOrderByAggregateInput
   _max?: Prisma.project_collaboratorsMaxOrderByAggregateInput
@@ -217,11 +228,13 @@ export type project_collaboratorsScalarWhereWithAggregatesInput = {
   id?: Prisma.UuidWithAggregatesFilter<"project_collaborators"> | string
   project_id?: Prisma.UuidWithAggregatesFilter<"project_collaborators"> | string
   user_id?: Prisma.UuidWithAggregatesFilter<"project_collaborators"> | string
+  role?: Prisma.StringWithAggregatesFilter<"project_collaborators"> | string
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"project_collaborators"> | Date | string | null
 }
 
 export type project_collaboratorsCreateInput = {
   id?: string
+  role?: string
   created_at?: Date | string | null
   project: Prisma.projectsCreateNestedOneWithoutCollaboratorsInput
   user: Prisma.usersCreateNestedOneWithoutCollaborationsInput
@@ -231,11 +244,13 @@ export type project_collaboratorsUncheckedCreateInput = {
   id?: string
   project_id: string
   user_id: string
+  role?: string
   created_at?: Date | string | null
 }
 
 export type project_collaboratorsUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   project?: Prisma.projectsUpdateOneRequiredWithoutCollaboratorsNestedInput
   user?: Prisma.usersUpdateOneRequiredWithoutCollaborationsNestedInput
@@ -245,6 +260,7 @@ export type project_collaboratorsUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   project_id?: Prisma.StringFieldUpdateOperationsInput | string
   user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -252,11 +268,13 @@ export type project_collaboratorsCreateManyInput = {
   id?: string
   project_id: string
   user_id: string
+  role?: string
   created_at?: Date | string | null
 }
 
 export type project_collaboratorsUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -264,6 +282,7 @@ export type project_collaboratorsUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   project_id?: Prisma.StringFieldUpdateOperationsInput | string
   user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -286,6 +305,7 @@ export type project_collaboratorsCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   project_id?: Prisma.SortOrder
   user_id?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -293,6 +313,7 @@ export type project_collaboratorsMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   project_id?: Prisma.SortOrder
   user_id?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -300,6 +321,7 @@ export type project_collaboratorsMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   project_id?: Prisma.SortOrder
   user_id?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -389,6 +411,7 @@ export type project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput = 
 
 export type project_collaboratorsCreateWithoutUserInput = {
   id?: string
+  role?: string
   created_at?: Date | string | null
   project: Prisma.projectsCreateNestedOneWithoutCollaboratorsInput
 }
@@ -396,6 +419,7 @@ export type project_collaboratorsCreateWithoutUserInput = {
 export type project_collaboratorsUncheckedCreateWithoutUserInput = {
   id?: string
   project_id: string
+  role?: string
   created_at?: Date | string | null
 }
 
@@ -432,11 +456,13 @@ export type project_collaboratorsScalarWhereInput = {
   id?: Prisma.UuidFilter<"project_collaborators"> | string
   project_id?: Prisma.UuidFilter<"project_collaborators"> | string
   user_id?: Prisma.UuidFilter<"project_collaborators"> | string
+  role?: Prisma.StringFilter<"project_collaborators"> | string
   created_at?: Prisma.DateTimeNullableFilter<"project_collaborators"> | Date | string | null
 }
 
 export type project_collaboratorsCreateWithoutProjectInput = {
   id?: string
+  role?: string
   created_at?: Date | string | null
   user: Prisma.usersCreateNestedOneWithoutCollaborationsInput
 }
@@ -444,6 +470,7 @@ export type project_collaboratorsCreateWithoutProjectInput = {
 export type project_collaboratorsUncheckedCreateWithoutProjectInput = {
   id?: string
   user_id: string
+  role?: string
   created_at?: Date | string | null
 }
 
@@ -476,11 +503,13 @@ export type project_collaboratorsUpdateManyWithWhereWithoutProjectInput = {
 export type project_collaboratorsCreateManyUserInput = {
   id?: string
   project_id: string
+  role?: string
   created_at?: Date | string | null
 }
 
 export type project_collaboratorsUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   project?: Prisma.projectsUpdateOneRequiredWithoutCollaboratorsNestedInput
 }
@@ -488,23 +517,27 @@ export type project_collaboratorsUpdateWithoutUserInput = {
 export type project_collaboratorsUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   project_id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type project_collaboratorsUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   project_id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type project_collaboratorsCreateManyProjectInput = {
   id?: string
   user_id: string
+  role?: string
   created_at?: Date | string | null
 }
 
 export type project_collaboratorsUpdateWithoutProjectInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.usersUpdateOneRequiredWithoutCollaborationsNestedInput
 }
@@ -512,12 +545,14 @@ export type project_collaboratorsUpdateWithoutProjectInput = {
 export type project_collaboratorsUncheckedUpdateWithoutProjectInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type project_collaboratorsUncheckedUpdateManyWithoutProjectInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -527,6 +562,7 @@ export type project_collaboratorsSelect<ExtArgs extends runtime.Types.Extensions
   id?: boolean
   project_id?: boolean
   user_id?: boolean
+  role?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
   user?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -536,6 +572,7 @@ export type project_collaboratorsSelectCreateManyAndReturn<ExtArgs extends runti
   id?: boolean
   project_id?: boolean
   user_id?: boolean
+  role?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
   user?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -545,6 +582,7 @@ export type project_collaboratorsSelectUpdateManyAndReturn<ExtArgs extends runti
   id?: boolean
   project_id?: boolean
   user_id?: boolean
+  role?: boolean
   created_at?: boolean
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
   user?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -554,10 +592,11 @@ export type project_collaboratorsSelectScalar = {
   id?: boolean
   project_id?: boolean
   user_id?: boolean
+  role?: boolean
   created_at?: boolean
 }
 
-export type project_collaboratorsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "user_id" | "created_at", ExtArgs["result"]["project_collaborators"]>
+export type project_collaboratorsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "project_id" | "user_id" | "role" | "created_at", ExtArgs["result"]["project_collaborators"]>
 export type project_collaboratorsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.projectsDefaultArgs<ExtArgs>
   user?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -581,6 +620,11 @@ export type $project_collaboratorsPayload<ExtArgs extends runtime.Types.Extensio
     id: string
     project_id: string
     user_id: string
+    /**
+     * associe | salarie | comptable | observateur (voir src/equipe/droits-equipe.ts).
+     * Les collaborateurs d'avant les rôles sont des observateurs : tout voir, rien modifier.
+     */
+    role: string
     created_at: Date | null
   }, ExtArgs["result"]["project_collaborators"]>
   composites: {}
@@ -1010,6 +1054,7 @@ export interface project_collaboratorsFieldRefs {
   readonly id: Prisma.FieldRef<"project_collaborators", 'String'>
   readonly project_id: Prisma.FieldRef<"project_collaborators", 'String'>
   readonly user_id: Prisma.FieldRef<"project_collaborators", 'String'>
+  readonly role: Prisma.FieldRef<"project_collaborators", 'String'>
   readonly created_at: Prisma.FieldRef<"project_collaborators", 'DateTime'>
 }
     
