@@ -365,6 +365,57 @@ export function nextStep(f: ProjectFacts): NextStep | null {
   return null;
 }
 
+export type EtatEtape = 'fait' | 'en-cours' | 'a-venir';
+
+export interface EtapeGuide {
+  id: string;
+  label: string;
+  etat: EtatEtape;
+}
+
+/**
+ * Le chemin entier, pour le guide pas à pas de l'écran projet.
+ *
+ * `nextStep` dit une seule chose à faire ; une personne qui découvre le
+ * produit a aussi besoin de voir où elle en est sur l'ensemble. Mêmes ids
+ * que `nextStep`, dans le même ordre : l'étape en cours est toujours celle
+ * qu'il désigne. Les deux étapes conditionnelles n'apparaissent que si
+ * elles s'appliquent — afficher « reprendre ton idée » à quelqu'un dont
+ * l'analyse est bonne serait un faux reproche.
+ */
+export function guideSteps(f: ProjectFacts): EtapeGuide[] {
+  const enCours = nextStep(f)?.id ?? null;
+  const etapes: Array<{ id: string; label: string; presente: boolean; faite: boolean }> = [
+    { id: 'decrire', label: 'Décrire ton idée', presente: true, faite: f.hasDescription },
+    { id: 'analyser', label: 'Analyser ton idée', presente: true, faite: f.analyses > 0 },
+    { id: 'ameliorer', label: 'Reprendre ton idée', presente: enCours === 'ameliorer', faite: false },
+    { id: 'construire', label: 'Établir ton plan', presente: true, faite: f.buildPlans > 0 },
+    { id: 'premieres-taches', label: 'Poser tes premières tâches', presente: true, faite: f.tasks > 0 },
+    {
+      id: 'conformite',
+      label: 'Regarder tes démarches',
+      presente: f.complianceChecks > 0,
+      faite: f.completedComplianceChecks > 0,
+    },
+    {
+      id: 'avancer-taches',
+      label: 'Avancer tes tâches',
+      presente: true,
+      faite: f.tasks > 0 && f.openTasks === 0,
+    },
+    { id: 'developper', label: 'Préparer le développement', presente: true, faite: f.developmentPlans > 0 },
+    { id: 'transmettre', label: 'Penser la transmission', presente: true, faite: f.transmissionPlans > 0 },
+  ];
+
+  return etapes
+    .filter((e) => e.presente)
+    .map(({ id, label, faite }) => ({
+      id,
+      label,
+      etat: id === enCours ? 'en-cours' : faite ? 'fait' : 'a-venir',
+    }));
+}
+
 /**
  * Un repère du tableau de bord : un chiffre, et ce qu'il vaut.
  *
@@ -442,6 +493,8 @@ export interface JourneyView {
   phase: Phase;
   phaseLabel: string;
   nextStep: NextStep | null;
+  /** Toutes les étapes du chemin et leur état, pour le guide pas à pas. */
+  guide: EtapeGuide[];
   /** Les chiffres du haut de page. */
   reperes: Repere[];
   /** Les sections à afficher, dans l'ordre du parcours. */
@@ -465,6 +518,7 @@ export function journeyView(f: ProjectFacts): JourneyView {
     phase,
     phaseLabel: PHASE_LABELS[phase],
     nextStep: nextStep(f),
+    guide: guideSteps(f),
     reperes: reperes(f),
     visible,
     locked,
