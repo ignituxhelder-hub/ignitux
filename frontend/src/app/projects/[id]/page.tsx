@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
+  useCallback,
   useEffect,
   useState,
   type Dispatch,
@@ -12,8 +13,21 @@ import {
 } from 'react';
 import { Icone } from '@/components/icones';
 import { IginiMention } from '@/components/igini-mention';
-import { ProchaineEtape, Progression, SectionsFermees, TableauDeBord } from '@/components/parcours';
+import {
+  GuideParcours,
+  ProchaineEtape,
+  Progression,
+  SectionsFermees,
+  TableauDeBord,
+} from '@/components/parcours';
+import {
+  marquerVisiteVue,
+  VisiteGuidee,
+  visiteDejaVue,
+  type ArretVisite,
+} from '@/components/visite-guidee';
 import { ETAPES_PROJET, OUTILS_PROJET } from '@/lib/etapes-projet';
+import { destinationDe } from '@/lib/guide-projet';
 import { AnalyseEnCours, AnalyseResultat } from './analyse-resultat';
 import { FormeJuridiqueResultat } from './forme-juridique-resultat';
 import { ChampsADemander } from '@/components/champs-profil';
@@ -44,6 +58,41 @@ import { ImmatriculationSection } from './immatriculation-section';
 import { ComplianceSection } from './compliance-section';
 import { KnowledgeSection, MemorySection, ScoreHistorySection, ScoreSection, TasksSection } from './engine-sections';
 import { MandatSection } from './mandat-section';
+
+/**
+ * Les arrêts de la visite guidée, à la première ouverture d'un projet. Cinq
+ * au plus : on montre où regarder, on n'explique pas tout le produit.
+ */
+const ARRETS_VISITE: readonly ArretVisite[] = [
+  {
+    cible: 'reperes',
+    titre: 'L’état de ton projet',
+    texte: 'Ici, l’état de ton projet en un coup d’œil.',
+  },
+  {
+    cible: 'progression',
+    titre: 'Les trois phases',
+    texte:
+      'Ton projet passe par trois phases : découvrir, construire, transmettre. La tienne est mise en avant.',
+  },
+  {
+    cible: 'guide',
+    titre: 'Ton parcours',
+    texte:
+      'Chaque fois que tu reviens, regarde ici : Ignitux te dit quoi faire ensuite. Touche « Y aller » et il t’y emmène.',
+  },
+  {
+    cible: 'etapes',
+    titre: 'Les étapes',
+    texte: 'Le travail fait avec IGINI est rangé ici, une étape par icône.',
+  },
+  {
+    cible: 'vue-avancee',
+    titre: 'Vue avancée',
+    texte:
+      'Les outils plus poussés (tâches, score, conformité…) sont ici, quand tu en auras besoin.',
+  },
+];
 
 /**
  * Demande au serveur si les 5 générateurs IGINI sont disponibles.
@@ -207,6 +256,48 @@ export default function ProjectDetailPage() {
     cible.scrollIntoView({ behavior: sansAnimation ? 'auto' : 'smooth', block: 'start' });
     setAllerAuxTaches(false);
   }, [allerAuxTaches, vueAvancee]);
+
+  /**
+   * « Y ALLER » — même mécanique en deux temps que les tâches ci-dessus :
+   * l'élément à désigner n'existe qu'une fois son étape ouverte. On retient
+   * le sélecteur, et on le cherche après le rendu. Trouvé, il pulse trois
+   * secondes ; absent (générateurs éteints : pas de bouton), on mène à la
+   * section sans rien faire pulser dans le vide.
+   */
+  const [cibleGuide, setCibleGuide] = useState<{ selecteur: string | null; section: string } | null>(
+    null,
+  );
+  useEffect(() => {
+    if (!cibleGuide) return;
+    const sansAnimation =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const element = cibleGuide.selecteur
+      ? document.querySelector<HTMLElement>(cibleGuide.selecteur)
+      : null;
+    const repli = document.getElementById(`section-${cibleGuide.section}`);
+    setCibleGuide(null);
+    if (!element) {
+      repli?.scrollIntoView?.({ behavior: sansAnimation ? 'auto' : 'smooth', block: 'start' });
+      return;
+    }
+    element.scrollIntoView?.({ behavior: sansAnimation ? 'auto' : 'smooth', block: 'center' });
+    if (element.id === 'description') element.focus();
+    element.classList.add('guide-cible');
+    window.setTimeout(() => element.classList.remove('guide-cible'), 3000);
+  }, [cibleGuide, etapeOuverte, vueAvancee]);
+
+  // La visite se propose d'elle-même une seule fois, au porteur, une fois
+  // le parcours chargé (sans lui, la moitié des arrêts manqueraient).
+  const [visiteOuverte, setVisiteOuverte] = useState(false);
+  const porteur = !!project && !!user && project.owner_id === user.id;
+  useEffect(() => {
+    if (porteur && parcours && !visiteDejaVue()) setVisiteOuverte(true);
+  }, [porteur, parcours]);
+  const fermerVisite = useCallback(() => {
+    marquerVisiteVue();
+    setVisiteOuverte(false);
+  }, []);
 
   const iginiStatus = useIginiStatus();
 
@@ -413,6 +504,15 @@ export default function ProjectDetailPage() {
     return montrer(outil.section);
   };
 
+  /** « Y aller » du guide : ouvrir l'étape, puis désigner où agir. */
+  const allerA = (etapeId: string) => {
+    const destination = destinationDe(etapeId);
+    if (!destination) return;
+    if (destination.avancee || !montrer(destination.ouvre)) setVueAvancee(true);
+    setEtapeOuverte(destination.ouvre);
+    setCibleGuide({ selecteur: destination.cible, section: destination.ouvre });
+  };
+
   return (
     <main className="page page--wide">
       <div className="top-bar">
@@ -435,9 +535,21 @@ export default function ProjectDetailPage() {
           {/* Le mode par défaut reste simple. La vue avancée est un choix,
               jamais l'état initial : quelqu'un qui arrive ne devrait pas
               avoir à comprendre Ignitux avant de s'en servir. */}
+          {isOwner && (
+            <button
+              className="secondary"
+              type="button"
+              style={{ width: 'auto' }}
+              aria-label="Revoir la visite"
+              onClick={() => setVisiteOuverte(true)}
+            >
+              ? Visite
+            </button>
+          )}
           <button
             className="secondary"
             type="button"
+            data-visite="vue-avancee"
             aria-pressed={vueAvancee}
             onClick={() => setVueAvancee((v) => !v)}
           >
@@ -460,38 +572,54 @@ export default function ProjectDetailPage() {
           {/* Les chiffres d'abord : « où en est ce projet ? » se lisait
               jusqu'ici en faisant défiler jusqu'au score, tout en bas. */}
           {parcours && (
-            <TableauDeBord
-              reperes={parcours.reperes}
-              /* Deux conditions, et chacune a coûté quelque chose.
+            <div data-visite="reperes">
+              <TableauDeBord
+                reperes={parcours.reperes}
+                /* Deux conditions, et chacune a coûté quelque chose.
 
-                 Réservé au porteur : quelqu'un qui consulte le projet d'un
-                 autre n'a pas de tâche à y ajouter, et lui proposer serait
-                 promettre une porte qui se refermera.
+                   Réservé au porteur : quelqu'un qui consulte le projet d'un
+                   autre n'a pas de tâche à y ajouter, et lui proposer serait
+                   promettre une porte qui se refermera.
 
-                 Et seulement tant que la section des tâches n'est pas déjà à
-                 l'écran. Sans cette seconde condition, la page portait deux
-                 contrôles nommés « Ajouter… » dont un seul agissait — le
-                 raccourci de la tuile restait affiché au-dessus du formulaire
-                 qu'il venait d'ouvrir. Un raccourci vers un endroit où l'on se
-                 trouve déjà n'est plus un raccourci. */
-              surTacheVide={
-                isOwner && !montrer('taches')
-                  ? () => {
-                      setVueAvancee(true);
-                      setEtapeOuverte('taches');
-                      setAllerAuxTaches(true);
-                    }
-                  : undefined
-              }
+                   Et seulement tant que la section des tâches n'est pas déjà à
+                   l'écran. Sans cette seconde condition, la page portait deux
+                   contrôles nommés « Ajouter… » dont un seul agissait — le
+                   raccourci de la tuile restait affiché au-dessus du formulaire
+                   qu'il venait d'ouvrir. Un raccourci vers un endroit où l'on se
+                   trouve déjà n'est plus un raccourci. */
+                surTacheVide={
+                  isOwner && !montrer('taches')
+                    ? () => {
+                        setVueAvancee(true);
+                        setEtapeOuverte('taches');
+                        setAllerAuxTaches(true);
+                      }
+                    : undefined
+                }
+              />
+            </div>
+          )}
+          {parcours && (
+            <div data-visite="progression">
+              <Progression phase={parcours.phase} />
+            </div>
+          )}
+          {/* Le guide pas à pas pour le porteur. Sans `guide` (serveur pas
+              encore à jour pendant un déploiement), l'ancienne carte reste. */}
+          {parcours && isOwner && Array.isArray(parcours.guide) && (
+            <GuideParcours
+              parcours={parcours}
+              iaDisponible={iginiStatus?.generatorsEnabled ?? true}
+              onAller={allerA}
             />
           )}
-          {parcours && <Progression phase={parcours.phase} />}
-          {parcours && isOwner && (
+          {parcours && isOwner && !Array.isArray(parcours.guide) && (
             <ProchaineEtape
               parcours={parcours}
               iaDisponible={iginiStatus?.generatorsEnabled ?? true}
             />
           )}
+          {isOwner && <VisiteGuidee arrets={ARRETS_VISITE} ouverte={visiteOuverte} onFermer={fermerVisite} />}
 
           {/* Demandé ici parce que c'est ici que ça sert, pas à
               l'inscription où la personne n'avait encore rien vu. */}
@@ -535,7 +663,7 @@ export default function ProjectDetailPage() {
           complet visible en même temps. On choisit laquelle ouvrir ; les
           autres restent fermées jusqu'au prochain clic. */}
       {ETAPES_PROJET.some((etape) => montrer(etape.section)) && (
-        <div className="card" style={{ marginTop: '1.5rem' }}>
+        <div className="card" style={{ marginTop: '1.5rem' }} data-visite="etapes">
           <h2 style={{ marginTop: 0 }}>Les étapes</h2>
           <ul
             className="etapes-grille"
@@ -565,6 +693,7 @@ export default function ProjectDetailPage() {
 
       {montrer('analyse') && etapeOuverte === 'analyse' && (
         <GenerationSection
+          guideCible="analyse"
           title="Analyse"
           buttonLabel="Analyser ce projet"
           buttonBusyLabel="Analyse en cours…"
@@ -676,6 +805,7 @@ export default function ProjectDetailPage() {
       {montrer('construction') && etapeOuverte === 'construction' && (
         <GenerationSection
           anchorId="section-construction"
+          guideCible="construction"
           title="Plan de construction"
           buttonLabel="Générer un plan"
           buttonBusyLabel="Génération…"
@@ -715,6 +845,7 @@ export default function ProjectDetailPage() {
 
       {montrer('developpement') && etapeOuverte === 'developpement' && (
         <GenerationSection
+          guideCible="developpement"
           title="Développement"
           buttonLabel="Générer un plan de développement"
           buttonBusyLabel="Génération…"
@@ -731,6 +862,7 @@ export default function ProjectDetailPage() {
 
       {montrer('transmission') && etapeOuverte === 'transmission' && (
         <GenerationSection
+          guideCible="transmission"
           title="Transmission"
           buttonLabel="Générer un plan de transmission"
           buttonBusyLabel="Génération…"
@@ -861,7 +993,9 @@ export default function ProjectDetailPage() {
       {/* MANDAT — une autorisation que le porteur donne, pas un résultat de générateur IGINI. Propriétaire seulement (assertOwnsProject côté serveur). */}
       {isOwner && <MandatSection token={token} projectId={id} />}
       {montrer('conformite') && etapeOuverte === 'conformite' && (
-        <ComplianceSection token={token} projectId={id} readOnly={!isOwner} />
+        <div data-guide-cible="conformite">
+          <ComplianceSection token={token} projectId={id} readOnly={!isOwner} />
+        </div>
       )}
       {montrer('automatisation') && etapeOuverte === 'automatisation' && (
         <AutomationSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
@@ -890,6 +1024,8 @@ export default function ProjectDetailPage() {
 interface GenerationSectionProps<T> {
   /** Pose un identifiant sur la section, pour qu'on puisse y mener. */
   anchorId?: string;
+  /** Marque le bouton de génération pour que « Y aller » le fasse pulser. */
+  guideCible?: string;
   /** Ce qui s'affiche pendant la génération, à la place du vide. */
   busyContent?: ReactNode;
   title: string;
@@ -912,6 +1048,7 @@ interface GenerationSectionProps<T> {
 
 function GenerationSection<T>({
   anchorId,
+  guideCible,
   busyContent,
   title,
   buttonLabel,
@@ -935,7 +1072,13 @@ function GenerationSection<T>({
       <div className="top-bar" style={{ marginBottom: items.length ? '1rem' : 0 }}>
         <h2 style={{ margin: 0 }}>{title}</h2>
         {!readOnly && !generatorsOff && (
-          <button className="secondary" type="button" onClick={onGenerate} disabled={isBusy}>
+          <button
+            className="secondary"
+            type="button"
+            onClick={onGenerate}
+            disabled={isBusy}
+            data-guide-cible={guideCible}
+          >
             {isBusy ? buttonBusyLabel : buttonLabel}
           </button>
         )}

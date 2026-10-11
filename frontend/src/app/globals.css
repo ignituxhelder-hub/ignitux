@@ -2085,3 +2085,8 @@ th {
     animation: none;
   }
 }
+
+.guide-etape__titre {
+  margin: 0;
+  font-size: 1.05rem;
+}

@@ -331,13 +331,15 @@ export function GuideParcours({
               </span>
               {e.etat === 'en-cours' && etape && (
                 <span className="guide-etape__detail">
+                  <h3 className="guide-etape__titre">{etape.titre}</h3>
                   <span className="guide-etape__pourquoi">{etape.pourquoi}</span>
                   {bloqueeParLIa && (
                     <span className="notice">
                       <span>
                         IGINI ne peut pas s&apos;en charger maintenant : ses générateurs sont
-                        éteints. Cela ne bloque pas ton projet — tu peux avancer à la main : note
-                        dans la Mémoire ce que tu sais déjà, ou pose tes premières tâches.
+                        éteints. Cela ne bloque pas ton projet — l&apos;IA accélère, elle ne décide
+                        pas. Tu peux avancer à la main : note dans la Mémoire ce que tu sais déjà,
+                        ou pose tes premières tâches. Le parcours suivra.
                       </span>
                     </span>
                   )}
@@ -353,8 +355,9 @@ export function GuideParcours({
 
       {!etape && (
         <p className="muted" style={{ marginBottom: 0 }}>
-          Les étapes du parcours sont franchies. La direction t&apos;appartient maintenant : ouvre
-          la vue avancée si tu cherches un outil précis.
+          Les étapes du parcours sont franchies. Ignitux n&apos;a pas de suite à te proposer — et
+          n&apos;en inventera pas. La direction t&apos;appartient maintenant : ouvre la vue avancée
+          si tu cherches un outil précis.
         </p>
       )}
 
