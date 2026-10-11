@@ -95,7 +95,14 @@ export class UserDataService {
   async exportUserData(userId: string) {
     const row = await this.prisma.users.findUniqueOrThrow({
       where: { id: userId },
-      select: { id: true, email: true, email_verified_at: true, created_at: true },
+      select: {
+        id: true,
+        email: true,
+        email_verified_at: true,
+        created_at: true,
+        cgu_accepted_at: true,
+        cgu_version: true,
+      },
     });
 
     // Deux protections plutôt qu'une sur le champ le plus dangereux du
@@ -109,6 +116,10 @@ export class UserDataService {
       email: row.email,
       email_verifie_le: row.email_verified_at,
       compte_cree_le: row.created_at,
+      // null pour un compte créé avant que l'acceptation soit enregistrée :
+      // l'export dit ce qui est en base, il n'invente pas d'acceptation.
+      cgu_acceptees_le: row.cgu_accepted_at ?? null,
+      cgu_version_acceptee: row.cgu_version ?? null,
     };
 
     const projectIds = await this.ownedProjectIds(userId);

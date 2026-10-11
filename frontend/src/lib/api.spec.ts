@@ -26,7 +26,7 @@ describe('api', () => {
   it('lève une ApiError avec le message renvoyé par le backend', async () => {
     mockFetchOnce(400, { message: 'Email invalide.' });
 
-    await expect(api.signup('a@b.com', 'x', 'captcha')).rejects.toMatchObject({
+    await expect(api.signup('a@b.com', 'x', 'captcha', true)).rejects.toMatchObject({
       message: 'Email invalide.',
       status: 400,
     });
@@ -35,7 +35,7 @@ describe('api', () => {
   it('joint les messages quand le backend en renvoie plusieurs', async () => {
     mockFetchOnce(400, { message: ['Erreur 1', 'Erreur 2'] });
 
-    await expect(api.signup('a@b.com', 'x', 'captcha')).rejects.toMatchObject({
+    await expect(api.signup('a@b.com', 'x', 'captcha', true)).rejects.toMatchObject({
       message: 'Erreur 1 Erreur 2',
     });
   });
@@ -43,7 +43,7 @@ describe('api', () => {
   it('renvoie un message par défaut si le backend ne fournit rien d\'exploitable', async () => {
     mockFetchOnce(500, null);
 
-    await expect(api.signup('a@b.com', 'x', 'captcha')).rejects.toMatchObject({
+    await expect(api.signup('a@b.com', 'x', 'captcha', true)).rejects.toMatchObject({
       message: 'Une erreur est survenue.',
       status: 500,
     });
@@ -199,7 +199,7 @@ describe('api', () => {
         setOfflineStorage(storage);
         horsLigne();
 
-        await expect(api.signup('victime@exemple.fr', 'MotDePasseSecret', 'captcha')).rejects.toBeInstanceOf(
+        await expect(api.signup('victime@exemple.fr', 'MotDePasseSecret', 'captcha', true)).rejects.toBeInstanceOf(
           ApiError,
         );
 

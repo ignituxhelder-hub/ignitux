@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import type { Server } from 'node:http';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
+import { CGU_VERSION_EN_VIGUEUR } from '../src/users/cgu.js';
 import { TurnstileVerificationService } from '../src/users/turnstile-verification.service.js';
 
 /**
@@ -77,7 +78,13 @@ export async function createAccount(app: INestApplication<Server>): Promise<Test
   // d'être qu'une chaîne non vide.
   const signup = await api(app)
     .post('/users/signup')
-    .send({ email, password, captchaToken: 'jeton-e2e' })
+    .send({
+      email,
+      password,
+      captchaToken: 'jeton-e2e',
+      acceptCgu: true,
+      cguVersion: CGU_VERSION_EN_VIGUEUR,
+    })
     .expect(201);
   const login = await api(app).post('/auth/login').send({ email, password }).expect(200);
 

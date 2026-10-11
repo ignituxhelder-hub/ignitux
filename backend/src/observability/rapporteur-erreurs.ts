@@ -137,7 +137,7 @@ export function signalerErreur(rapport: RapportErreur): void {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     // Le même contenu, déjà expurgé ; seule la mise en forme change pour Discord.
-    body: JSON.stringify(estDiscord(url) ? { content: messageDiscord(charge) } : charge),
+    body: JSON.stringify(estDiscord(url) ? { content: messageDiscord(charge), allowed_mentions: { parse: [] } } : charge),
     signal: AbortSignal.timeout(5_000),
   }).catch((erreur: unknown) => {
     // Une seule ligne, sans pile : un collecteur injoignable ne doit pas

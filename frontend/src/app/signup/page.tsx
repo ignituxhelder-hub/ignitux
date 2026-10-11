@@ -36,7 +36,7 @@ export default function SignupPage() {
     setError(null);
     setIsSubmitting(true);
     try {
-      await signup(email, password, captchaToken);
+      await signup(email, password, captchaToken, acceptedCgu);
       router.replace('/roles');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de créer le compte.');

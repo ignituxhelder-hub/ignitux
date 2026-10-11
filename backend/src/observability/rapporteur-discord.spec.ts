@@ -34,7 +34,9 @@ describe('rapporteur d’erreurs — salon Discord', () => {
   it('envoie un message { content } lisible à un webhook Discord', () => {
     const corps = envoyer('https://discord.com/api/webhooks/123/jeton');
 
-    expect(Object.keys(corps)).toEqual(['content']);
+    expect(Object.keys(corps)).toEqual(['content', 'allowed_mentions']);
+    // Un « @everyone » cité dans une erreur ne doit notifier personne.
+    expect(corps.allowed_mentions).toEqual({ parse: [] });
     expect(corps.content).toContain('abc123');
     expect(corps.content).toContain('POST /auth/reset-password');
   });

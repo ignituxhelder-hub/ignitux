@@ -90,7 +90,9 @@ sur tout le graphe » pour revenir à la vue complète).
 
 Choisir un service (Sentry, Highlight, Axiom, webhook maison) et poser
 `ERREURS_WEBHOOK_URL` dans les variables de production. Sans lui, les
-`Logger.error` restent dans le vide.
+`Logger.error` restent dans le vide. Option gratuite prise en charge
+directement : un webhook Discord — marche à suivre dans
+`docs/deployer.md`, « Recevoir les erreurs dans Discord ».
 
 ### 8. Sonde externe sur `/health`
 

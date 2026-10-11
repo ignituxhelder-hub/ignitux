@@ -29,6 +29,8 @@ export type UsersMinAggregateOutputType = {
   email: string | null
   password_hash: string | null
   email_verified_at: Date | null
+  cgu_accepted_at: Date | null
+  cgu_version: string | null
   created_at: Date | null
   active_role: string | null
 }
@@ -38,6 +40,8 @@ export type UsersMaxAggregateOutputType = {
   email: string | null
   password_hash: string | null
   email_verified_at: Date | null
+  cgu_accepted_at: Date | null
+  cgu_version: string | null
   created_at: Date | null
   active_role: string | null
 }
@@ -47,6 +51,8 @@ export type UsersCountAggregateOutputType = {
   email: number
   password_hash: number
   email_verified_at: number
+  cgu_accepted_at: number
+  cgu_version: number
   created_at: number
   active_role: number
   _all: number
@@ -58,6 +64,8 @@ export type UsersMinAggregateInputType = {
   email?: true
   password_hash?: true
   email_verified_at?: true
+  cgu_accepted_at?: true
+  cgu_version?: true
   created_at?: true
   active_role?: true
 }
@@ -67,6 +75,8 @@ export type UsersMaxAggregateInputType = {
   email?: true
   password_hash?: true
   email_verified_at?: true
+  cgu_accepted_at?: true
+  cgu_version?: true
   created_at?: true
   active_role?: true
 }
@@ -76,6 +86,8 @@ export type UsersCountAggregateInputType = {
   email?: true
   password_hash?: true
   email_verified_at?: true
+  cgu_accepted_at?: true
+  cgu_version?: true
   created_at?: true
   active_role?: true
   _all?: true
@@ -158,6 +170,8 @@ export type UsersGroupByOutputType = {
   email: string
   password_hash: string
   email_verified_at: Date | null
+  cgu_accepted_at: Date | null
+  cgu_version: string | null
   created_at: Date | null
   active_role: string | null
   _count: UsersCountAggregateOutputType | null
@@ -188,6 +202,8 @@ export type usersWhereInput = {
   email?: Prisma.StringFilter<"users"> | string
   password_hash?: Prisma.StringFilter<"users"> | string
   email_verified_at?: Prisma.DateTimeNullableFilter<"users"> | Date | string | null
+  cgu_accepted_at?: Prisma.DateTimeNullableFilter<"users"> | Date | string | null
+  cgu_version?: Prisma.StringNullableFilter<"users"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"users"> | Date | string | null
   active_role?: Prisma.StringNullableFilter<"users"> | string | null
   projects?: Prisma.ProjectsListRelationFilter
@@ -227,6 +243,8 @@ export type usersOrderByWithRelationInput = {
   email?: Prisma.SortOrder
   password_hash?: Prisma.SortOrder
   email_verified_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  cgu_accepted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  cgu_version?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   active_role?: Prisma.SortOrderInput | Prisma.SortOrder
   projects?: Prisma.projectsOrderByRelationAggregateInput
@@ -269,6 +287,8 @@ export type usersWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.usersWhereInput | Prisma.usersWhereInput[]
   password_hash?: Prisma.StringFilter<"users"> | string
   email_verified_at?: Prisma.DateTimeNullableFilter<"users"> | Date | string | null
+  cgu_accepted_at?: Prisma.DateTimeNullableFilter<"users"> | Date | string | null
+  cgu_version?: Prisma.StringNullableFilter<"users"> | string | null
   created_at?: Prisma.DateTimeNullableFilter<"users"> | Date | string | null
   active_role?: Prisma.StringNullableFilter<"users"> | string | null
   projects?: Prisma.ProjectsListRelationFilter
@@ -308,6 +328,8 @@ export type usersOrderByWithAggregationInput = {
   email?: Prisma.SortOrder
   password_hash?: Prisma.SortOrder
   email_verified_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  cgu_accepted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  cgu_version?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   active_role?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.usersCountOrderByAggregateInput
@@ -323,6 +345,8 @@ export type usersScalarWhereWithAggregatesInput = {
   email?: Prisma.StringWithAggregatesFilter<"users"> | string
   password_hash?: Prisma.StringWithAggregatesFilter<"users"> | string
   email_verified_at?: Prisma.DateTimeNullableWithAggregatesFilter<"users"> | Date | string | null
+  cgu_accepted_at?: Prisma.DateTimeNullableWithAggregatesFilter<"users"> | Date | string | null
+  cgu_version?: Prisma.StringNullableWithAggregatesFilter<"users"> | string | null
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"users"> | Date | string | null
   active_role?: Prisma.StringNullableWithAggregatesFilter<"users"> | string | null
 }
@@ -332,6 +356,8 @@ export type usersCreateInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -371,6 +397,8 @@ export type usersUncheckedCreateInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -410,6 +438,8 @@ export type usersUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -449,6 +479,8 @@ export type usersUncheckedUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -488,6 +520,8 @@ export type usersCreateManyInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
 }
@@ -497,6 +531,8 @@ export type usersUpdateManyMutationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -506,6 +542,8 @@ export type usersUncheckedUpdateManyInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -515,6 +553,8 @@ export type usersCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   password_hash?: Prisma.SortOrder
   email_verified_at?: Prisma.SortOrder
+  cgu_accepted_at?: Prisma.SortOrder
+  cgu_version?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   active_role?: Prisma.SortOrder
 }
@@ -524,6 +564,8 @@ export type usersMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   password_hash?: Prisma.SortOrder
   email_verified_at?: Prisma.SortOrder
+  cgu_accepted_at?: Prisma.SortOrder
+  cgu_version?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   active_role?: Prisma.SortOrder
 }
@@ -533,6 +575,8 @@ export type usersMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   password_hash?: Prisma.SortOrder
   email_verified_at?: Prisma.SortOrder
+  cgu_accepted_at?: Prisma.SortOrder
+  cgu_version?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   active_role?: Prisma.SortOrder
 }
@@ -988,6 +1032,8 @@ export type usersCreateWithoutAuth_tokensInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -1026,6 +1072,8 @@ export type usersUncheckedCreateWithoutAuth_tokensInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -1080,6 +1128,8 @@ export type usersUpdateWithoutAuth_tokensInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -1118,6 +1168,8 @@ export type usersUncheckedUpdateWithoutAuth_tokensInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1156,6 +1208,8 @@ export type usersCreateWithoutProjectsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
@@ -1194,6 +1248,8 @@ export type usersUncheckedCreateWithoutProjectsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
@@ -1248,6 +1304,8 @@ export type usersUpdateWithoutProjectsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
@@ -1286,6 +1344,8 @@ export type usersUncheckedUpdateWithoutProjectsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
@@ -1324,6 +1384,8 @@ export type usersCreateWithoutCompany_bylawsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -1362,6 +1424,8 @@ export type usersUncheckedCreateWithoutCompany_bylawsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -1416,6 +1480,8 @@ export type usersUpdateWithoutCompany_bylawsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -1454,6 +1520,8 @@ export type usersUncheckedUpdateWithoutCompany_bylawsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1492,6 +1560,8 @@ export type usersCreateWithoutMemoriesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -1530,6 +1600,8 @@ export type usersUncheckedCreateWithoutMemoriesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -1584,6 +1656,8 @@ export type usersUpdateWithoutMemoriesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -1622,6 +1696,8 @@ export type usersUncheckedUpdateWithoutMemoriesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1660,6 +1736,8 @@ export type usersCreateWithoutChat_messagesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -1698,6 +1776,8 @@ export type usersUncheckedCreateWithoutChat_messagesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -1752,6 +1832,8 @@ export type usersUpdateWithoutChat_messagesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -1790,6 +1872,8 @@ export type usersUncheckedUpdateWithoutChat_messagesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1828,6 +1912,8 @@ export type usersCreateWithoutConceptsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -1866,6 +1952,8 @@ export type usersUncheckedCreateWithoutConceptsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -1920,6 +2008,8 @@ export type usersUpdateWithoutConceptsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -1958,6 +2048,8 @@ export type usersUncheckedUpdateWithoutConceptsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1996,6 +2088,8 @@ export type usersCreateWithoutCommunity_commentsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -2034,6 +2128,8 @@ export type usersUncheckedCreateWithoutCommunity_commentsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -2088,6 +2184,8 @@ export type usersUpdateWithoutCommunity_commentsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -2126,6 +2224,8 @@ export type usersUncheckedUpdateWithoutCommunity_commentsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2164,6 +2264,8 @@ export type usersCreateWithoutCollaborationsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -2202,6 +2304,8 @@ export type usersUncheckedCreateWithoutCollaborationsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -2256,6 +2360,8 @@ export type usersUpdateWithoutCollaborationsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -2294,6 +2400,8 @@ export type usersUncheckedUpdateWithoutCollaborationsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2332,6 +2440,8 @@ export type usersCreateWithoutMarketplace_profileInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -2370,6 +2480,8 @@ export type usersUncheckedCreateWithoutMarketplace_profileInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -2424,6 +2536,8 @@ export type usersUpdateWithoutMarketplace_profileInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -2462,6 +2576,8 @@ export type usersUncheckedUpdateWithoutMarketplace_profileInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2500,6 +2616,8 @@ export type usersCreateWithoutMarketplace_contacts_sentInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -2538,6 +2656,8 @@ export type usersUncheckedCreateWithoutMarketplace_contacts_sentInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -2592,6 +2712,8 @@ export type usersUpdateWithoutMarketplace_contacts_sentInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -2630,6 +2752,8 @@ export type usersUncheckedUpdateWithoutMarketplace_contacts_sentInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2668,6 +2792,8 @@ export type usersCreateWithoutBilling_documentsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -2706,6 +2832,8 @@ export type usersUncheckedCreateWithoutBilling_documentsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -2760,6 +2888,8 @@ export type usersUpdateWithoutBilling_documentsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -2798,6 +2928,8 @@ export type usersUncheckedUpdateWithoutBilling_documentsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2836,6 +2968,8 @@ export type usersCreateWithoutCrm_companiesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -2874,6 +3008,8 @@ export type usersUncheckedCreateWithoutCrm_companiesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -2928,6 +3064,8 @@ export type usersUpdateWithoutCrm_companiesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -2966,6 +3104,8 @@ export type usersUncheckedUpdateWithoutCrm_companiesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -3004,6 +3144,8 @@ export type usersCreateWithoutCrm_contactsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -3042,6 +3184,8 @@ export type usersUncheckedCreateWithoutCrm_contactsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -3096,6 +3240,8 @@ export type usersUpdateWithoutCrm_contactsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -3134,6 +3280,8 @@ export type usersUncheckedUpdateWithoutCrm_contactsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -3172,6 +3320,8 @@ export type usersCreateWithoutStock_itemsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -3210,6 +3360,8 @@ export type usersUncheckedCreateWithoutStock_itemsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -3264,6 +3416,8 @@ export type usersUpdateWithoutStock_itemsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -3302,6 +3456,8 @@ export type usersUncheckedUpdateWithoutStock_itemsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -3340,6 +3496,8 @@ export type usersCreateWithoutAgenda_eventsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -3378,6 +3536,8 @@ export type usersUncheckedCreateWithoutAgenda_eventsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -3432,6 +3592,8 @@ export type usersUpdateWithoutAgenda_eventsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -3470,6 +3632,8 @@ export type usersUncheckedUpdateWithoutAgenda_eventsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -3508,6 +3672,8 @@ export type usersCreateWithoutCash_register_entriesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -3546,6 +3712,8 @@ export type usersUncheckedCreateWithoutCash_register_entriesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -3600,6 +3768,8 @@ export type usersUpdateWithoutCash_register_entriesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -3638,6 +3808,8 @@ export type usersUncheckedUpdateWithoutCash_register_entriesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -3676,6 +3848,8 @@ export type usersCreateWithoutRolesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -3714,6 +3888,8 @@ export type usersUncheckedCreateWithoutRolesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -3768,6 +3944,8 @@ export type usersUpdateWithoutRolesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -3806,6 +3984,8 @@ export type usersUncheckedUpdateWithoutRolesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -3844,6 +4024,8 @@ export type usersCreateWithoutApplicationsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -3882,6 +4064,8 @@ export type usersUncheckedCreateWithoutApplicationsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -3936,6 +4120,8 @@ export type usersUpdateWithoutApplicationsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -3974,6 +4160,8 @@ export type usersUncheckedUpdateWithoutApplicationsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -4012,6 +4200,8 @@ export type usersCreateWithoutProfileInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -4050,6 +4240,8 @@ export type usersUncheckedCreateWithoutProfileInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -4104,6 +4296,8 @@ export type usersUpdateWithoutProfileInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -4142,6 +4336,8 @@ export type usersUncheckedUpdateWithoutProfileInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -4180,6 +4376,8 @@ export type usersCreateWithoutSubscriptionInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -4218,6 +4416,8 @@ export type usersUncheckedCreateWithoutSubscriptionInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -4272,6 +4472,8 @@ export type usersUpdateWithoutSubscriptionInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -4310,6 +4512,8 @@ export type usersUncheckedUpdateWithoutSubscriptionInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -4348,6 +4552,8 @@ export type usersCreateWithoutReal_estate_propertiesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -4386,6 +4592,8 @@ export type usersUncheckedCreateWithoutReal_estate_propertiesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -4440,6 +4648,8 @@ export type usersUpdateWithoutReal_estate_propertiesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -4478,6 +4688,8 @@ export type usersUncheckedUpdateWithoutReal_estate_propertiesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -4516,6 +4728,8 @@ export type usersCreateWithoutFleet_vehiclesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -4554,6 +4768,8 @@ export type usersUncheckedCreateWithoutFleet_vehiclesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -4608,6 +4824,8 @@ export type usersUpdateWithoutFleet_vehiclesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -4646,6 +4864,8 @@ export type usersUncheckedUpdateWithoutFleet_vehiclesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -4684,6 +4904,8 @@ export type usersCreateWithoutAd_campaignsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -4722,6 +4944,8 @@ export type usersUncheckedCreateWithoutAd_campaignsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -4776,6 +5000,8 @@ export type usersUpdateWithoutAd_campaignsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -4814,6 +5040,8 @@ export type usersUncheckedUpdateWithoutAd_campaignsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -4852,6 +5080,8 @@ export type usersCreateWithoutIdentity_verificationsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -4890,6 +5120,8 @@ export type usersUncheckedCreateWithoutIdentity_verificationsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -4944,6 +5176,8 @@ export type usersUpdateWithoutIdentity_verificationsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -4982,6 +5216,8 @@ export type usersUncheckedUpdateWithoutIdentity_verificationsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -5020,6 +5256,8 @@ export type usersCreateWithoutMandatesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -5058,6 +5296,8 @@ export type usersUncheckedCreateWithoutMandatesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -5112,6 +5352,8 @@ export type usersUpdateWithoutMandatesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -5150,6 +5392,8 @@ export type usersUncheckedUpdateWithoutMandatesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -5188,6 +5432,8 @@ export type usersCreateWithoutCreation_filingsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -5226,6 +5472,8 @@ export type usersUncheckedCreateWithoutCreation_filingsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -5280,6 +5528,8 @@ export type usersUpdateWithoutCreation_filingsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -5318,6 +5568,8 @@ export type usersUncheckedUpdateWithoutCreation_filingsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -5356,6 +5608,8 @@ export type usersCreateWithoutCompany_registrationsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -5394,6 +5648,8 @@ export type usersUncheckedCreateWithoutCompany_registrationsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -5448,6 +5704,8 @@ export type usersUpdateWithoutCompany_registrationsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -5486,6 +5744,8 @@ export type usersUncheckedUpdateWithoutCompany_registrationsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -5524,6 +5784,8 @@ export type usersCreateWithoutEvaluations_demandeesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -5562,6 +5824,8 @@ export type usersUncheckedCreateWithoutEvaluations_demandeesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -5605,6 +5869,8 @@ export type usersCreateWithoutEvaluations_revuesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -5643,6 +5909,8 @@ export type usersUncheckedCreateWithoutEvaluations_revuesInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -5697,6 +5965,8 @@ export type usersUpdateWithoutEvaluations_demandeesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -5735,6 +6005,8 @@ export type usersUncheckedUpdateWithoutEvaluations_demandeesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -5784,6 +6056,8 @@ export type usersUpdateWithoutEvaluations_revuesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -5822,6 +6096,8 @@ export type usersUncheckedUpdateWithoutEvaluations_revuesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -5860,6 +6136,8 @@ export type usersCreateWithoutEvaluation_editsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
@@ -5898,6 +6176,8 @@ export type usersUncheckedCreateWithoutEvaluation_editsInput = {
   email: string
   password_hash: string
   email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
   created_at?: Date | string | null
   active_role?: string | null
   projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
@@ -5952,6 +6232,8 @@ export type usersUpdateWithoutEvaluation_editsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
@@ -5990,6 +6272,8 @@ export type usersUncheckedUpdateWithoutEvaluation_editsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password_hash?: Prisma.StringFieldUpdateOperationsInput | string
   email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -6293,6 +6577,8 @@ export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   email?: boolean
   password_hash?: boolean
   email_verified_at?: boolean
+  cgu_accepted_at?: boolean
+  cgu_version?: boolean
   created_at?: boolean
   active_role?: boolean
   projects?: boolean | Prisma.users$projectsArgs<ExtArgs>
@@ -6333,6 +6619,8 @@ export type usersSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   email?: boolean
   password_hash?: boolean
   email_verified_at?: boolean
+  cgu_accepted_at?: boolean
+  cgu_version?: boolean
   created_at?: boolean
   active_role?: boolean
 }, ExtArgs["result"]["users"]>
@@ -6342,6 +6630,8 @@ export type usersSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   email?: boolean
   password_hash?: boolean
   email_verified_at?: boolean
+  cgu_accepted_at?: boolean
+  cgu_version?: boolean
   created_at?: boolean
   active_role?: boolean
 }, ExtArgs["result"]["users"]>
@@ -6351,11 +6641,13 @@ export type usersSelectScalar = {
   email?: boolean
   password_hash?: boolean
   email_verified_at?: boolean
+  cgu_accepted_at?: boolean
+  cgu_version?: boolean
   created_at?: boolean
   active_role?: boolean
 }
 
-export type usersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "password_hash" | "email_verified_at" | "created_at" | "active_role", ExtArgs["result"]["users"]>
+export type usersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "password_hash" | "email_verified_at" | "cgu_accepted_at" | "cgu_version" | "created_at" | "active_role", ExtArgs["result"]["users"]>
 export type usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   projects?: boolean | Prisma.users$projectsArgs<ExtArgs>
   memories?: boolean | Prisma.users$memoriesArgs<ExtArgs>
@@ -6431,6 +6723,8 @@ export type $usersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     email: string
     password_hash: string
     email_verified_at: Date | null
+    cgu_accepted_at: Date | null
+    cgu_version: string | null
     created_at: Date | null
     /**
      * Le rôle sous lequel la personne travaille en ce moment. Rangé ici et
@@ -6895,6 +7189,8 @@ export interface usersFieldRefs {
   readonly email: Prisma.FieldRef<"users", 'String'>
   readonly password_hash: Prisma.FieldRef<"users", 'String'>
   readonly email_verified_at: Prisma.FieldRef<"users", 'DateTime'>
+  readonly cgu_accepted_at: Prisma.FieldRef<"users", 'DateTime'>
+  readonly cgu_version: Prisma.FieldRef<"users", 'String'>
   readonly created_at: Prisma.FieldRef<"users", 'DateTime'>
   readonly active_role: Prisma.FieldRef<"users", 'String'>
 }

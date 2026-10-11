@@ -208,7 +208,7 @@ titre('Compte');
 await verifier('Inscription', async () => {
   const { statut } = await appelPatient('/users/signup', {
     method: 'POST',
-    body: JSON.stringify({ email: EMAIL, password: MDP, captchaToken: 'jeton-script' }),
+    body: JSON.stringify({ email: EMAIL, password: MDP, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-01' }),
   });
   if (statut !== 201 && statut !== 200) return false;
   return `HTTP ${statut}`;
@@ -1113,7 +1113,7 @@ const appelInv = async (chemin, options = {}) => {
 await verifier('Un investisseur se déclare, et son portefeuille part de zéro', async () => {
   await appelInv('/users/signup', {
     method: 'POST',
-    body: JSON.stringify({ email: EMAIL_INV, password: MDP, captchaToken: 'jeton-script' }),
+    body: JSON.stringify({ email: EMAIL_INV, password: MDP, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-01' }),
   });
   const connexion = await appelInv('/auth/login', {
     method: 'POST',
@@ -1219,7 +1219,7 @@ const appelInvite = async (chemin, options = {}) => {
 await verifier('Un second compte, et un projet à partager', async () => {
   await appelInvite('/users/signup', {
     method: 'POST',
-    body: JSON.stringify({ email: EMAIL_INVITE, password: MDP, captchaToken: 'jeton-script' }),
+    body: JSON.stringify({ email: EMAIL_INVITE, password: MDP, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-01' }),
   });
   const { corps } = await appelInvite('/auth/login', {
     method: 'POST',
@@ -1531,7 +1531,7 @@ const appelRgpdUneFois = async (chemin, options = {}) => {
 await verifier('Un compte à part, avec de quoi exporter', async () => {
   await appelRgpd('/users/signup', {
     method: 'POST',
-    body: JSON.stringify({ email: EMAIL_RGPD, password: MDP, captchaToken: 'jeton-script' }),
+    body: JSON.stringify({ email: EMAIL_RGPD, password: MDP, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-01' }),
   });
   const { corps } = await appelRgpd('/auth/login', {
     method: 'POST',

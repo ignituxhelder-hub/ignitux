@@ -8,7 +8,7 @@ interface AuthState {
   user: User | null;
   isReady: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, captchaToken: string) => Promise<void>;
+  signup: (email: string, password: string, captchaToken: string, acceptCgu: true) => Promise<void>;
   logout: () => void;
 }
 
@@ -53,8 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persist(accessToken, loggedInUser);
   }
 
-  async function signup(email: string, password: string, captchaToken: string) {
-    await api.signup(email, password, captchaToken);
+  async function signup(email: string, password: string, captchaToken: string, acceptCgu: true) {
+    await api.signup(email, password, captchaToken, acceptCgu);
     await login(email, password);
   }
 

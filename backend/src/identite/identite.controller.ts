@@ -34,6 +34,7 @@ import {
 import { IdentiteService } from './identite.service.js';
 import { MandatsService } from './mandats.service.js';
 import { TEXTE_MANDAT } from './mandate-text.js';
+import { MANDATS_SUSPENDUS } from './mandats-suspension.js';
 
 const TAILLE_MAX_OCTETS = 8 * 1024 * 1024;
 const TYPES_MIME_ACCEPTES = new Set(['image/jpeg', 'image/png']);
@@ -137,10 +138,15 @@ export class IdentiteController {
     return this.identiteService.revoirVerification(admin.id, id, dto.decision, dto.motif);
   }
 
-  /** Le texte que la personne lit avant de signer — celui que signerMandat figera. */
+  /**
+   * Le texte que la personne lit avant de signer — celui que signerMandat
+   * figera —, et si la signature est suspendue (mandats-suspension.ts) :
+   * c'est le serveur qui le dit à l'interface, pour qu'elle n'ait pas sa
+   * propre copie de l'interrupteur.
+   */
   @Get('mandats/texte')
   texteMandat() {
-    return { texte: TEXTE_MANDAT };
+    return { texte: TEXTE_MANDAT, signatureSuspendue: MANDATS_SUSPENDUS };
   }
 
   @Post('mandats')

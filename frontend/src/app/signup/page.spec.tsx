@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
+import { CGU_VERSION } from '@/lib/cgu';
 import { createRouterMock, mockFetchSequence } from '@/test-utils/mocks';
 import { TURNSTILE_CALLBACK_NAME } from '@/lib/turnstile';
 import SignupPage from './page';
@@ -80,6 +81,8 @@ describe('SignupPage', () => {
             email: 'a@b.com',
             password: 'motdepasse',
             captchaToken: 'jeton-cloudflare-123',
+            acceptCgu: true,
+            cguVersion: CGU_VERSION,
           }),
         }),
       ),

@@ -1,3 +1,4 @@
+import { CGU_VERSION } from './cgu';
 import { cacheResponse, readCached, type IterableStorage } from './offline-cache';
 import {
   dismissRejected,
@@ -2169,10 +2170,15 @@ export const api = {
   /** Sans jeton : l'état d'une fonctionnalité n'est pas une donnée personnelle. */
   getIginiStatus: () => request<IginiStatus>('/igini/status'),
 
-  signup: (email: string, password: string, captchaToken: string) =>
+  /**
+   * `acceptCgu` est typé `true` : l'appelant doit avoir réellement recueilli
+   * la case des conditions d'utilisation. La version envoyée est celle que la
+   * page affiche ; le serveur enregistre les deux.
+   */
+  signup: (email: string, password: string, captchaToken: string, acceptCgu: true) =>
     request<User>('/users/signup', {
       method: 'POST',
-      body: JSON.stringify({ email, password, captchaToken }),
+      body: JSON.stringify({ email, password, captchaToken, acceptCgu, cguVersion: CGU_VERSION }),
     }),
 
   login: (email: string, password: string) =>
@@ -3920,8 +3926,13 @@ export const api = {
     return res.blob();
   },
 
+  /**
+   * `signatureSuspendue` : le serveur refuse pour l'instant de créer ou de
+   * signer un mandat (backend/src/identite/mandats-suspension.ts). C'est lui
+   * qui le dit ; l'interface n'a pas sa propre copie de l'interrupteur.
+   */
   getTexteMandat(token: string) {
-    return request<{ texte: string }>(
+    return request<{ texte: string; signatureSuspendue: boolean }>(
       '/identite/mandats/texte',
       { headers: { Authorization: `Bearer ${token}` } },
       // Un texte engageant ne doit jamais être relu depuis une copie locale

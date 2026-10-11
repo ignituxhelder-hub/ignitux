@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmailVerificationService } from '../auth-tokens/email-verification.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { CGU_VERSION_EN_VIGUEUR } from './cgu.js';
 import { TurnstileVerificationService } from './turnstile-verification.service.js';
 import { UserDataService } from './user-data.service.js';
 import { UsersController } from './users.controller.js';
@@ -61,9 +62,11 @@ describe('UsersController', () => {
       email: 'a@b.com',
       password: 'motdepasse',
       captchaToken: 'jeton-valide',
+      acceptCgu: true,
+      cguVersion: CGU_VERSION_EN_VIGUEUR,
     });
 
-    expect(usersService.signup).toHaveBeenCalledWith('a@b.com', 'motdepasse');
+    expect(usersService.signup).toHaveBeenCalledWith('a@b.com', 'motdepasse', CGU_VERSION_EN_VIGUEUR);
     expect(result).toEqual({ id: 'uuid-1', email: 'a@b.com' });
   });
 
@@ -74,6 +77,8 @@ describe('UsersController', () => {
       email: 'a@b.com',
       password: 'motdepasse',
       captchaToken: 'jeton-valide',
+      acceptCgu: true,
+      cguVersion: CGU_VERSION_EN_VIGUEUR,
     });
 
     expect(emailVerificationService.sendVerification).toHaveBeenCalledWith('uuid-1', 'a@b.com');
@@ -87,6 +92,8 @@ describe('UsersController', () => {
         email: 'a@b.com',
         password: 'motdepasse',
         captchaToken: 'jeton-du-widget',
+        acceptCgu: true,
+        cguVersion: CGU_VERSION_EN_VIGUEUR,
       });
 
       expect(turnstileVerificationService.verify).toHaveBeenCalledWith('jeton-du-widget');
@@ -100,6 +107,8 @@ describe('UsersController', () => {
           email: 'a@b.com',
           password: 'motdepasse',
           captchaToken: 'jeton-invalide',
+          acceptCgu: true,
+          cguVersion: CGU_VERSION_EN_VIGUEUR,
         }),
       ).rejects.toThrow('Vérification anti-robot invalide');
       expect(usersService.signup).not.toHaveBeenCalled();

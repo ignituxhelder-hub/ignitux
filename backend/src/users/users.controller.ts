@@ -43,7 +43,7 @@ export class UsersController {
       throw new BadRequestException('Vérification anti-robot invalide. Réessaie.');
     }
 
-    const user = await this.usersService.signup(dto.email, dto.password);
+    const user = await this.usersService.signup(dto.email, dto.password, dto.cguVersion);
     // Ne bloque jamais l'inscription si l'envoi echoue (aucun vrai
     // fournisseur d'email n'est configure pour l'instant, voir MailService) —
     // le compte doit rester utilisable meme sans verification immediate.

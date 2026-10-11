@@ -183,11 +183,40 @@ Pas « bientôt » : **le jour même**.
 
 1. **Un collecteur d'erreurs.** Les `Logger.error` existent, chacun avec sa
    référence. Sans collecteur, personne ne les lit, et le premier bogue se
-   découvrira par un message d'utilisateur.
+   découvrira par un message d'utilisateur. Le plus simple, et gratuit :
+   **un salon Discord** (voir ci-dessous).
 2. **Une sonde externe sur `/health`**, qui t'écrit quand ça ne répond plus.
 3. **La sauvegarde planifiée** : `backend/scripts/sauvegarde.mjs` en tâche
    quotidienne, puis `verifier-sauvegarde.mjs` sur le résultat. Une sauvegarde
    qu'on doit penser à faire n'existe pas le jour où on en a besoin.
+
+### Recevoir les erreurs dans Discord *(10 minutes, gratuit)*
+
+Le serveur reconnaît une adresse de webhook Discord
+(`https://discord.com/api/webhooks/…`) et y envoie un message court :
+« Erreur Ignitux — réf … — MÉTHODE /chemin — moment », le message expurgé et
+le début de la pile. Rien d'autre : ni corps de requête, ni en-têtes, ni
+chaîne de requête, ni identifiant d'utilisateur. La référence est celle que
+la personne voit à l'écran ; elle retrouve la ligne complète dans les
+journaux Render.
+
+1. Dans Discord, créer un serveur (le « + » de la colonne de gauche →
+   « Créer le mien ») et un salon textuel, par exemple `#erreurs-prod`.
+   Un serveur à toi seul suffit.
+2. Sur le salon : **Paramètres du salon** (la roue dentée) → **Intégrations**
+   → **Webhooks** → **Nouveau webhook**. Lui donner un nom (« Ignitux »).
+3. **Copier l'URL du webhook.** Elle contient un jeton : quiconque l'a peut
+   écrire dans le salon. Ne la mets ni dans le dépôt ni dans un message.
+4. Dans Render → `ignitux-api` → **Environment** : ajouter
+   `ERREURS_WEBHOOK_URL` = l'URL copiée, puis enregistrer (Render redéploie).
+5. Vérifier : `https://api.ignitux.fr/ready` doit indiquer le rapporteur
+   comme actif. La première vraie erreur 5xx arrivera dans le salon.
+
+Si l'URL fuite : Paramètres du salon → Intégrations → Webhooks → supprimer
+ce webhook, en créer un autre, remplacer la variable dans Render.
+
+Une adresse qui n'est pas un webhook Discord reçoit, elle, la charge JSON
+générique (champs nommés dans `backend/src/observability/rapporteur-erreurs.ts`).
 
 ---
 

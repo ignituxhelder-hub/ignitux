@@ -154,6 +154,8 @@ describe('UserDataService', () => {
       expect(Object.keys(exported.donnees.compte).sort()).toEqual([
         'abonnement',
         'bureau',
+        'cgu_acceptees_le',
+        'cgu_version_acceptee',
         'compte_cree_le',
         'email',
         'email_verifie_le',
@@ -164,6 +166,39 @@ describe('UserDataService', () => {
         'verifications_d_identite',
       ]);
       expect(JSON.stringify(exported)).not.toContain('SECRET-A-NE-JAMAIS-DIFFUSER');
+    });
+
+    it("restitue l'acceptation des CGU telle qu'enregistrée — null pour un compte d'avant", async () => {
+      prisma.users.findUniqueOrThrow.mockResolvedValue({
+        id: 'u1',
+        email: 'a@b.com',
+        email_verified_at: null,
+        created_at: new Date('2026-01-01'),
+        cgu_accepted_at: new Date('2026-10-11T08:00:00.000Z'),
+        cgu_version: '2026-10-01',
+      });
+
+      const exported = await service.exportUserData('u1');
+
+      expect(exported.donnees.compte.cgu_acceptees_le).toEqual(new Date('2026-10-11T08:00:00.000Z'));
+      expect(exported.donnees.compte.cgu_version_acceptee).toBe('2026-10-01');
+      expect(prisma.users.findUniqueOrThrow.mock.calls[0][0].select).toMatchObject({
+        cgu_accepted_at: true,
+        cgu_version: true,
+      });
+
+      // Un compte créé avant l'enregistrement : rien n'est inventé.
+      prisma.users.findUniqueOrThrow.mockResolvedValue({
+        id: 'u1',
+        email: 'a@b.com',
+        email_verified_at: null,
+        created_at: new Date('2026-01-01'),
+        cgu_accepted_at: null,
+        cgu_version: null,
+      });
+      const ancien = await service.exportUserData('u1');
+      expect(ancien.donnees.compte.cgu_acceptees_le).toBeNull();
+      expect(ancien.donnees.compte.cgu_version_acceptee).toBeNull();
     });
 
     it('se présente sans renvoyer à un paragraphe de document qui n’existe pas', async () => {

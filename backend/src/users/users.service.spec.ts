@@ -46,7 +46,7 @@ describe('UsersService', () => {
         created_at: new Date(),
       });
 
-      const result = await service.signup('a@b.com', 'motdepasse');
+      const result = await service.signup('a@b.com', 'motdepasse', '2026-10-01');
 
       expect(result).toEqual({ id: 'uuid-1', email: 'a@b.com' });
       expect(result).not.toHaveProperty('password_hash');
@@ -56,17 +56,32 @@ describe('UsersService', () => {
       prisma.users.findUnique.mockResolvedValue(null);
       prisma.users.create.mockResolvedValue({ id: 'uuid-1', email: 'a@b.com' });
 
-      await service.signup('a@b.com', 'motdepasse');
+      await service.signup('a@b.com', 'motdepasse', '2026-10-01');
 
       const { data } = prisma.users.create.mock.calls[0][0];
       expect(data.password_hash).not.toBe('motdepasse');
       await expect(bcrypt.compare('motdepasse', data.password_hash)).resolves.toBe(true);
     });
 
+    it("enregistre l'acceptation des CGU — moment et version — dans la même création", async () => {
+      prisma.users.findUnique.mockResolvedValue(null);
+      prisma.users.create.mockResolvedValue({ id: 'uuid-1', email: 'a@b.com' });
+      const avant = Date.now();
+
+      await service.signup('a@b.com', 'motdepasse', '2026-10-01');
+
+      expect(prisma.users.create).toHaveBeenCalledTimes(1);
+      const { data } = prisma.users.create.mock.calls[0][0];
+      expect(data.cgu_version).toBe('2026-10-01');
+      expect(data.cgu_accepted_at).toBeInstanceOf(Date);
+      expect((data.cgu_accepted_at as Date).getTime()).toBeGreaterThanOrEqual(avant);
+      expect(prisma.users.update).not.toHaveBeenCalled();
+    });
+
     it('rejette un email déjà utilisé', async () => {
       prisma.users.findUnique.mockResolvedValue({ id: 'uuid-1', email: 'a@b.com' });
 
-      await expect(service.signup('a@b.com', 'motdepasse')).rejects.toBeInstanceOf(
+      await expect(service.signup('a@b.com', 'motdepasse', '2026-10-01')).rejects.toBeInstanceOf(
         ConflictException,
       );
       expect(prisma.users.create).not.toHaveBeenCalled();
