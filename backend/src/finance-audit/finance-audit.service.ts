@@ -1,7 +1,7 @@
+import { exigerCapacite } from '../equipe/acces-projet.js';
 import { Injectable } from '@nestjs/common';
 import { InvestorsService } from '../investors/investors.service.js';
 import { LedgerService } from '../ledger/ledger.service.js';
-import { assertHasProjectAccess } from '../prisma/assert-has-project-access.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 /**
@@ -135,7 +135,7 @@ export class FinanceAuditService {
 
   /** La cohérence financière d’UN projet, rendue à qui a le droit de le lire. */
   async projectAudit(userId: string, projectId: string): Promise<FinanceAudit> {
-    await assertHasProjectAccess(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'voir_financement');
 
     const [capTable, dividendes] = await Promise.all([
       this.capTableFindings(projectId),

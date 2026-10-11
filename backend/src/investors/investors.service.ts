@@ -1,3 +1,4 @@
+import { exigerCapacite } from '../equipe/acces-projet.js';
 import {
   BadRequestException,
   ForbiddenException,
@@ -6,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { ConstitutionService } from '../constitution/constitution.service.js';
-import { assertOwnsProject } from '../prisma/assert-owns-project.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   allocatePro,
@@ -168,7 +168,7 @@ export class InvestorsService {
   // ── Le projet financé ───────────────────────────────────────────────────
 
   async openFinancing(ownerId: string, input: OpenFinancingInput) {
-    await assertOwnsProject(this.prisma, ownerId, input.projectId);
+    await exigerCapacite(this.prisma, ownerId, input.projectId, 'modifier_financement');
 
     const projet = await this.prisma.projects.findUniqueOrThrow({
       where: { id: input.projectId },
@@ -680,7 +680,7 @@ export class InvestorsService {
     // fier à `entrepreneur_user_id` recopié ici : une colonne dénormalisée
     // est une vérité de plus à maintenir, et celle-ci ne doit jamais servir
     // de garde.
-    await assertOwnsProject(this.prisma, ownerId, financed.project_id);
+    await exigerCapacite(this.prisma, ownerId, financed.project_id, 'modifier_financement');
     return { ...financed, project_id: financed.project_id };
   }
 }

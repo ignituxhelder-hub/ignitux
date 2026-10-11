@@ -1,7 +1,6 @@
+import { exigerCapacite } from '../equipe/acces-projet.js';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConstitutionService } from '../constitution/constitution.service.js';
-import { assertHasProjectAccess } from '../prisma/assert-has-project-access.js';
-import { assertOwnsProject } from '../prisma/assert-owns-project.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   BUYBACK_SCOPE_NOTICE,
@@ -57,7 +56,7 @@ export class FinancingService {
     occurredAt: Date,
     note?: string,
   ) {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'modifier_financement');
     if (amountCents <= 0) {
       throw new BadRequestException('Un financement doit porter un montant strictement positif.');
     }
@@ -68,7 +67,7 @@ export class FinancingService {
   }
 
   async listRounds(userId: string, projectId: string) {
-    await assertHasProjectAccess(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'voir_financement');
 
     const rounds = await this.prisma.financing_rounds.findMany({
       where: { project_id: projectId },
@@ -88,7 +87,7 @@ export class FinancingService {
     if (!round) {
       throw new NotFoundException('Financement introuvable.');
     }
-    await assertOwnsProject(this.prisma, userId, round.project_id);
+    await exigerCapacite(this.prisma, userId, round.project_id, 'modifier_financement');
 
     await this.prisma.financing_rounds.delete({ where: { id: roundId } });
   }
@@ -96,7 +95,7 @@ export class FinancingService {
   // ------------------------------------------------------------- détenteurs
 
   async addHolder(userId: string, projectId: string, name: string, isFounder: boolean) {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'modifier_financement');
 
     return this.prisma.equity_holders.create({
       data: { project_id: projectId, name, is_founder: isFounder },
@@ -163,7 +162,7 @@ export class FinancingService {
    * collaborateurs.
    */
   async getCapTable(userId: string, projectId: string) {
-    await assertHasProjectAccess(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'voir_financement');
 
     const [holders, events] = await Promise.all([
       this.prisma.equity_holders.findMany({
@@ -196,7 +195,7 @@ export class FinancingService {
   }
 
   async listEquityEvents(userId: string, projectId: string) {
-    await assertHasProjectAccess(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'voir_financement');
 
     return this.prisma.equity_events.findMany({
       where: { project_id: projectId },
@@ -231,7 +230,7 @@ export class FinancingService {
   }
 
   async listDividends(userId: string, projectId: string) {
-    await assertHasProjectAccess(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'voir_financement');
 
     const dividends = await this.prisma.dividend_distributions.findMany({
       where: { project_id: projectId },
@@ -311,7 +310,7 @@ export class FinancingService {
     if (!holder) {
       throw new NotFoundException('Détenteur introuvable.');
     }
-    await assertOwnsProject(this.prisma, userId, holder.project_id);
+    await exigerCapacite(this.prisma, userId, holder.project_id, 'modifier_financement');
     return holder;
   }
 
@@ -326,7 +325,7 @@ export class FinancingService {
    * de ce qu'un collaborateur a besoin de comprendre.
    */
   async getBuybackProgress(userId: string, projectId: string) {
-    await assertHasProjectAccess(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'voir_financement');
 
     const objectives = await this.prisma.buyback_objectives.findMany({
       where: { project_id: projectId },
@@ -360,7 +359,7 @@ export class FinancingService {
     kind: BuybackCondition,
     definition: string,
   ) {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'modifier_financement');
 
     return this.prisma.buyback_objectives.upsert({
       where: { project_id_kind: { project_id: projectId, kind } },
@@ -382,7 +381,7 @@ export class FinancingService {
     reachedAt: string | null | undefined,
     evidence: string | undefined,
   ) {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'modifier_financement');
 
     const objective = await this.prisma.buyback_objectives.findUnique({
       where: { project_id_kind: { project_id: projectId, kind } },

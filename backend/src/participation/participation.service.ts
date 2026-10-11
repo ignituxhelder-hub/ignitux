@@ -1,3 +1,4 @@
+import { exigerCapacite } from '../equipe/acces-projet.js';
 import {
   BadRequestException,
   ConflictException,
@@ -8,8 +9,6 @@ import {
 import { ConstitutionService } from '../constitution/constitution.service.js';
 import { buildCapTable } from '../financing/financing-model.js';
 import { normaliserOffre, offre } from '../offres/offres-catalogue.js';
-import { assertHasProjectAccess } from '../prisma/assert-has-project-access.js';
-import { assertOwnsProject } from '../prisma/assert-owns-project.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { estOperateurIgnitux } from './operateurs.js';
 import {
@@ -307,7 +306,7 @@ export class ParticipationService {
    */
   async acknowledgeMilestone(userId: string, milestoneId: string) {
     const { milestone, agreement } = await this.requireMilestone(milestoneId);
-    await assertOwnsProject(this.prisma, userId, agreement.project_id);
+    await exigerCapacite(this.prisma, userId, agreement.project_id, 'modifier_financement');
 
     return this.prisma.participation_milestones.update({
       where: { id: milestone.id },
@@ -397,7 +396,7 @@ export class ParticipationService {
    * nul ne produit aucune ligne.
    */
   async recordDistributedDividend(userId: string, projectId: string, input: RecordDividendInput) {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'modifier_financement');
     const agreement = await this.requireAgreement(projectId);
 
     if (!Number.isInteger(input.distributedCents) || input.distributedCents <= 0) {
@@ -444,7 +443,7 @@ export class ParticipationService {
   // ---------------------------------------------------------------- lecture
 
   async getParticipation(userId: string, projectId: string) {
-    await assertHasProjectAccess(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'voir_financement');
 
     const agreement = await this.prisma.participation_agreements.findFirst({
       where: { project_id: projectId },

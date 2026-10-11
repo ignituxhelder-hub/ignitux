@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConstitutionService } from '../constitution/constitution.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -333,7 +333,8 @@ describe('FinancingService', () => {
       await expect(service.getBuybackProgress('u2', 'p1')).resolves.toBeDefined();
       await expect(
         service.setBuybackObjective('u2', 'p1', 'stabilite', 'Tentative.'),
-      ).rejects.toBeInstanceOf(NotFoundException);
+      // Il connaît le projet (observateur) : un refus lisible, plus un « introuvable ».
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });
 });

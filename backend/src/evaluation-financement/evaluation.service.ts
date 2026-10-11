@@ -1,3 +1,4 @@
+import { exigerCapacite } from '../equipe/acces-projet.js';
 import {
   ConflictException,
   HttpException,
@@ -15,7 +16,6 @@ import { ClaudeService } from '../igini/claude/claude.service.js';
 import { readGeneratorsAvailability } from '../igini/claude/generators-availability.js';
 import { MailService } from '../mail/mail.service.js';
 import { OffresService } from '../offres/offres.service.js';
-import { assertOwnsProject } from '../prisma/assert-owns-project.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ProjectsService } from '../projects/projects.service.js';
 import {
@@ -85,7 +85,7 @@ export class EvaluationService {
   ) {}
 
   async demander(userId: string, projectId: string): Promise<EvaluationVue> {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'demander_evaluation');
     await this.offres.exiger(userId, { kind: 'evaluer_financement' });
 
     const disponibilite = readGeneratorsAvailability(process.env.IGINI_AI_ENABLED);
@@ -288,7 +288,7 @@ ${lien}
   }
 
   async lister(userId: string, projectId: string): Promise<EvaluationVue[]> {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'voir_evaluation');
     const lignes = await this.prisma.financing_evaluations.findMany({
       where: { project_id: projectId },
       orderBy: { created_at: 'desc' },
@@ -297,7 +297,7 @@ ${lien}
   }
 
   async pdf(userId: string, projectId: string, evaluationId: string): Promise<{ fichier: Buffer; nom: string }> {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'voir_evaluation');
     const evaluation = await this.prisma.financing_evaluations.findFirst({
       where: { id: evaluationId, project_id: projectId },
     });
