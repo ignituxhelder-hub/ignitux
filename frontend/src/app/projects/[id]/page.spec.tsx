@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
 import { createRouterMock, mockApiRoutes, signInAs } from '@/test-utils/mocks';
+import { CLE_VISITE_PROJET } from '@/components/visite-guidee';
 import ProjectDetailPage from './page';
 
 const router = createRouterMock();
@@ -59,6 +60,15 @@ function parcours(overrides = {}) {
       pourquoi: 'Un plan qui ne descend pas en tâches reste une intention.',
       section: 'taches',
     },
+    guide: [
+      { id: 'decrire', label: 'Décrire ton idée', etat: 'fait' },
+      { id: 'analyser', label: 'Analyser ton idée', etat: 'fait' },
+      { id: 'construire', label: 'Établir ton plan', etat: 'fait' },
+      { id: 'premieres-taches', label: 'Poser tes premières tâches', etat: 'en-cours' },
+      { id: 'avancer-taches', label: 'Avancer tes tâches', etat: 'a-venir' },
+      { id: 'developper', label: 'Préparer le développement', etat: 'a-venir' },
+      { id: 'transmettre', label: 'Penser la transmission', etat: 'a-venir' },
+    ],
     reperes: [
       { cle: 'etincelle', label: 'Étincelle', valeur: '80/100', precision: 'Dernière analyse.' },
       { cle: 'taches', label: 'Tâches', valeur: '3/5', precision: '2 en cours.' },
@@ -149,6 +159,8 @@ const ENGINE_ROUTES = {
 describe('ProjectDetailPage', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    // La visite guidée a ses propres tests plus bas : ici, déjà vue.
+    window.localStorage.setItem(CLE_VISITE_PROJET, 'vue');
     router.replace.mockClear();
     signInAs('tok123', { id: 'u1', email: 'a@b.com' });
   });
@@ -992,11 +1004,30 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      expect(await screen.findByText('PROCHAINE ÉTAPE')).toBeInTheDocument();
+      expect(await screen.findByRole('heading', { name: 'Ton parcours' })).toBeInTheDocument();
+      expect(screen.queryByText('PROCHAINE ÉTAPE')).not.toBeInTheDocument();
       expect(
         screen.getByRole('heading', { name: 'Transformer le plan en premières tâches' }),
       ).toBeInTheDocument();
       expect(screen.getByText(/reste une intention/)).toBeInTheDocument();
+    });
+
+    // Vercel peut publier l'écran avant que le serveur ne connaisse le guide :
+    // la page ne doit pas tomber pendant ces quelques minutes.
+    it('garde l’ancienne carte quand le serveur n’envoie pas encore le guide', async () => {
+      mockApiRoutes({
+        ...{ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES },
+        'GET /projects/p1/parcours': { status: 200, body: parcours({ guide: undefined }) },
+      });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByText('PROCHAINE ÉTAPE')).toBeInTheDocument();
+      expect(screen.queryByRole('heading', { name: 'Ton parcours' })).not.toBeInTheDocument();
     });
 
     it('affiche la progression Découvrir → Construire → Transmettre', async () => {
@@ -1155,6 +1186,8 @@ describe('ProjectDetailPage', () => {
 describe('ProjectDetailPage — conduite quand les générateurs sont éteints', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    // La visite guidée a ses propres tests plus bas : ici, déjà vue.
+    window.localStorage.setItem(CLE_VISITE_PROJET, 'vue');
     router.replace.mockClear();
     signInAs('tok123', { id: 'u1', email: 'a@b.com' });
   });
@@ -1238,5 +1271,151 @@ describe('ProjectDetailPage — conduite quand les générateurs sont éteints',
     // Le parcours par défaut conseille « premieres-taches », qui se fait à la main.
     await screen.findByRole('heading', { name: 'Transformer le plan en premières tâches' });
     expect(screen.queryByText(/avancer à la main/)).toBeNull();
+  });
+});
+
+describe('ProjectDetailPage — guide pas à pas et visite guidée', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    window.localStorage.setItem(CLE_VISITE_PROJET, 'vue');
+    router.replace.mockClear();
+    signInAs('tok123', { id: 'u1', email: 'a@b.com' });
+    Element.prototype.scrollIntoView = vi.fn();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const PARCOURS_ANALYSER = {
+    'GET /projects/p1/parcours': {
+      status: 200,
+      body: parcours({
+        phase: 'decouvrir',
+        phaseLabel: 'Découvrir',
+        nextStep: {
+          id: 'analyser',
+          titre: 'Analyser ton idée',
+          pourquoi: 'IGINI lit ton projet.',
+          section: 'analyse',
+        },
+        guide: [
+          { id: 'decrire', label: 'Décrire ton idée', etat: 'fait' },
+          { id: 'analyser', label: 'Analyser ton idée', etat: 'en-cours' },
+          { id: 'construire', label: 'Établir ton plan', etat: 'a-venir' },
+        ],
+        visible: [{ section: 'analyse', label: 'Analyse', phase: 'decouvrir' }],
+        locked: [],
+      }),
+    },
+  };
+
+  function afficher() {
+    return render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+  }
+
+  it('« Y aller » ouvre l’analyse et fait pulser son bouton', async () => {
+    mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES, ...PARCOURS_ANALYSER });
+    afficher();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Y aller' }));
+
+    const bouton = await screen.findByRole('button', { name: 'Analyser ce projet' });
+    await waitFor(() => expect(bouton).toHaveClass('guide-cible'));
+  });
+
+  it('« Y aller » passe en vue avancée pour les tâches', async () => {
+    mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
+    afficher();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Y aller' }));
+
+    expect(await screen.findByRole('button', { name: 'Revenir au parcours' })).toBeInTheDocument();
+    await waitFor(() => expect(document.getElementById('taches')).not.toBeNull());
+  });
+
+  it('IA éteinte : « Y aller » ouvre la section sans rien faire pulser', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      ...ENGINE_ROUTES,
+      ...PARCOURS_ANALYSER,
+      'GET /igini/status': {
+        status: 200,
+        body: { generatorsEnabled: false, unavailableReason: 'Générateurs éteints.' },
+      },
+    });
+    afficher();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Y aller' }));
+
+    expect(await screen.findByRole('heading', { name: 'Analyse' })).toBeInTheDocument();
+    expect(document.querySelector('.guide-cible')).toBeNull();
+    // Sans bouton à désigner, on mène quand même à la section.
+    const section = document.getElementById('section-analyse');
+    expect(section).not.toBeNull();
+    expect(vi.mocked(Element.prototype.scrollIntoView).mock.contexts).toContain(section);
+  });
+
+  it('« Y aller » sur « Décrire » ouvre le formulaire sans passer en vue avancée', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      ...ENGINE_ROUTES,
+      'GET /projects/p1/parcours': {
+        status: 200,
+        body: parcours({
+          phase: 'decouvrir',
+          phaseLabel: 'Découvrir',
+          nextStep: { id: 'decrire', titre: 'Décris ton idée', pourquoi: 'Quelques phrases.', section: 'analyse' },
+          guide: [{ id: 'decrire', label: 'Décrire ton idée', etat: 'en-cours' }],
+          visible: [{ section: 'analyse', label: 'Analyse', phase: 'decouvrir' }],
+          locked: [],
+        }),
+      },
+    });
+    afficher();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Y aller' }));
+
+    await waitFor(() => expect(document.getElementById('description')).not.toBeNull());
+    expect(screen.getByRole('button', { name: 'Vue avancée' })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('lance la visite à la première ouverture, une seule fois', async () => {
+    window.localStorage.removeItem(CLE_VISITE_PROJET);
+    mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
+    const { unmount } = afficher();
+
+    const visite = await screen.findByRole('dialog', { name: 'L’état de ton projet' });
+    expect(visite).toHaveTextContent('1/5');
+    fireEvent.click(screen.getByRole('button', { name: 'Passer la visite' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(window.localStorage.getItem(CLE_VISITE_PROJET)).not.toBeNull();
+
+    unmount();
+    afficher();
+    await screen.findByRole('heading', { name: 'Ton parcours' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Revoir la visite' }));
+    expect(await screen.findByRole('dialog', { name: 'L’état de ton projet' })).toBeInTheDocument();
+  });
+
+  it('ni guide ni visite pour un collaborateur', async () => {
+    window.localStorage.removeItem(CLE_VISITE_PROJET);
+    mockApiRoutes({
+      ...ENGINE_ROUTES,
+      'GET /projects/p1': { status: 200, body: { ...PROJECT, owner_id: 'u2' } },
+    });
+    afficher();
+
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    await screen.findByRole('list', { name: 'Progression du projet' });
+    expect(screen.queryByRole('heading', { name: 'Ton parcours' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Revoir la visite' })).not.toBeInTheDocument();
   });
 });

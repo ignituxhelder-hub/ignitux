@@ -9,6 +9,7 @@ import { InvitationInstallation } from '@/components/invitation-installation';
 import {
   api,
   ApiError,
+  type ApplicationCategorie,
   type ApplicationPrevue,
   type ApplicationVue,
   type ChoixBureau,
@@ -36,17 +37,35 @@ import { enPages, fermerTache, ICONES_PAR_PAGE } from '@/lib/systeme';
  * deviendrait utile.
  */
 
+/** Le dossier ouvert : aucun (le bureau), Entreprise, ou l'un de ses sous-dossiers. */
+type DossierOuvert = null | 'entreprise' | ApplicationCategorie;
+type IdDossier = Exclude<DossierOuvert, null>;
+
 type Icone =
   | { sorte: 'app'; app: ApplicationVue; retirable: boolean }
   | { sorte: 'prevue'; app: ApplicationPrevue }
-  | { sorte: 'dossier'; apercu: readonly ApplicationVue[] }
+  | { sorte: 'dossier'; id: IdDossier; nom: string; apercu: readonly ApplicationVue[] }
   | { sorte: 'organiser' };
 
 function cleIcone(icone: Icone): string {
   if (icone.sorte === 'organiser') return 'organiser';
-  if (icone.sorte === 'dossier') return 'dossier';
+  if (icone.sorte === 'dossier') return `dossier:${icone.id}`;
   return `${icone.sorte}:${icone.app.id}`;
 }
+
+/**
+ * Les sous-dossiers d'Entreprise, dans l'ordre où ils s'affichent : un par
+ * catégorie du catalogue serveur. Vingt icônes à plat ne se lisent pas ;
+ * cinq dossiers qui disent « vendre », « gérer »… si.
+ */
+const DOSSIERS_CATEGORIE: readonly { id: ApplicationCategorie; nom: string }[] = [
+  { id: 'creer', nom: 'Créer' },
+  { id: 'vendre', nom: 'Vendre' },
+  { id: 'gerer', nom: 'Gérer' },
+  { id: 'investir', nom: 'Investir' },
+  { id: 'reseau', nom: 'Réseau' },
+  { id: 'reglages', nom: 'Réglages' },
+];
 
 /** 4 × 4 sur téléphone, 6 × 3 sur grand écran — la même règle que la grille CSS. */
 function useIconesParPage(): number {
@@ -97,7 +116,7 @@ function IconeBureau({
   rangement: boolean;
   occupe: boolean;
   onRetirer: (app: ApplicationVue) => void;
-  onOuvrirDossier: () => void;
+  onOuvrirDossier: (id: IdDossier) => void;
   onOrganiser: () => void;
   onDetail: (app: ApplicationPrevue) => void;
 }) {
@@ -112,20 +131,21 @@ function IconeBureau({
     );
   }
 
-  // Un dossier, comme sur un téléphone : il regroupe le reste des
-  // applications sans les faire disparaître, et s'ouvre en plein écran.
+  // Un dossier, comme sur un téléphone : il regroupe des applications sans
+  // les faire disparaître, et s'ouvre en plein écran. Il reste un dossier en
+  // rangement : c'est en l'ouvrant qu'on atteint ce qu'on veut retirer.
   if (icone.sorte === 'dossier') {
     return (
       <button
         type="button"
         className="icone icone--dossier"
-        onClick={onOuvrirDossier}
-        aria-label="Ouvrir Entreprise"
+        onClick={() => onOuvrirDossier(icone.id)}
+        aria-label={`Ouvrir ${icone.nom}`}
       >
         <span className="icone__glyphe icone__glyphe--dossier" aria-hidden="true">
           <ApercuDossier apercu={icone.apercu} />
         </span>
-        <span className="icone__nom">Entreprise</span>
+        <span className="icone__nom">{icone.nom}</span>
       </button>
     );
   }
@@ -203,7 +223,7 @@ function GrillePages({
   occupe: boolean;
   libellePages: string;
   onRetirer: (app: ApplicationVue) => void;
-  onOuvrirDossier: () => void;
+  onOuvrirDossier: (id: IdDossier) => void;
   onOrganiser: () => void;
   onDetail: (app: ApplicationPrevue) => void;
 }) {
@@ -302,7 +322,7 @@ export default function LanceurPage() {
   const [rangement, setRangement] = useState(false);
   const [occupe, setOccupe] = useState<string | null>(null);
   const [erreurRangement, setErreurRangement] = useState<string | null>(null);
-  const [dossierOuvert, setDossierOuvert] = useState(false);
+  const [dossierOuvert, setDossierOuvert] = useState<DossierOuvert>(null);
   const [detail, setDetail] = useState<ApplicationPrevue | null>(null);
 
   async function choisir(app: ApplicationVue, choix: ChoixBureau) {
@@ -366,19 +386,42 @@ export default function LanceurPage() {
   const icones: Icone[] = lanceur
     ? [
         ...appsPrincipales.map((app) => ({ sorte: 'app' as const, app, retirable: true })),
-        { sorte: 'dossier' as const, apercu: [...appsDossier, ...reglagesDossier, ...prevuesTriees] },
+        {
+          sorte: 'dossier' as const,
+          id: 'entreprise' as const,
+          nom: 'Entreprise',
+          apercu: [...appsDossier, ...reglagesDossier, ...prevuesTriees],
+        },
         ...reglagesPrincipaux.map((app) => ({ sorte: 'app' as const, app, retirable: false })),
         ...(rangement ? [] : [{ sorte: 'organiser' as const }]),
       ]
     : [];
 
-  const iconesDossier: Icone[] = lanceur
+  const iconesEntreprise: Icone[] = lanceur
     ? [
         ...appsDossier.map((app) => ({ sorte: 'app' as const, app, retirable: true })),
         ...reglagesDossier.map((app) => ({ sorte: 'app' as const, app, retirable: false })),
         ...prevuesTriees.map((app) => ({ sorte: 'prevue' as const, app })),
       ]
     : [];
+
+  // Entreprise ne montre que ses sous-dossiers, un par catégorie ; un dossier
+  // sans rien dedans ne s'affiche pas.
+  const deCategorie = (categorie: ApplicationCategorie): Icone[] =>
+    iconesEntreprise.filter(
+      (icone) =>
+        (icone.sorte === 'app' || icone.sorte === 'prevue') && icone.app.categorie === categorie,
+    );
+  const sousDossiers: Icone[] = DOSSIERS_CATEGORIE.flatMap(({ id, nom }) => {
+    const apercu = deCategorie(id).flatMap((icone) =>
+      icone.sorte === 'app' || icone.sorte === 'prevue' ? [icone.app] : [],
+    );
+    return apercu.length > 0 ? [{ sorte: 'dossier' as const, id, nom, apercu }] : [];
+  });
+
+  const sousDossierOuvert = DOSSIERS_CATEGORIE.find((d) => d.id === dossierOuvert) ?? null;
+  const iconesDossier = sousDossierOuvert ? deCategorie(sousDossierOuvert.id) : sousDossiers;
+  const nomDossier = sousDossierOuvert?.nom ?? 'Entreprise';
 
   if (!isReady || !token) return null;
 
@@ -475,25 +518,34 @@ export default function LanceurPage() {
                   type="button"
                   className="secondary"
                   style={{ width: 'auto' }}
-                  onClick={() => setDossierOuvert(false)}
+                  onClick={() => {
+                    setDetail(null);
+                    setDossierOuvert(sousDossierOuvert ? 'entreprise' : null);
+                  }}
                 >
-                  ← Bureau
+                  {sousDossierOuvert ? '← Entreprise' : '← Bureau'}
                 </button>
-                <h2 className="ecran-accueil__titre">Entreprise</h2>
+                <h2 className="ecran-accueil__titre">{nomDossier}</h2>
               </div>
 
               {rangement && banniereRangement}
               {erreurRangement && <p className="error">{erreurRangement}</p>}
 
-              <section aria-label="Applications du dossier Entreprise" aria-roledescription="dossier">
+              <section aria-label={`Applications du dossier ${nomDossier}`} aria-roledescription="dossier">
                 <GrillePages
+                  // Une grille neuve par dossier : on n'arrive pas en page 2
+                  // d'un dossier parce qu'on était en page 2 du précédent.
+                  key={dossierOuvert}
                   icones={iconesDossier}
                   parPage={parPage}
                   rangement={rangement}
                   occupe={occupe !== null}
                   libellePages="Pages du dossier"
                   onRetirer={(app) => void choisir(app, 'retiree')}
-                  onOuvrirDossier={() => {}}
+                  onOuvrirDossier={(id) => {
+                    setDetail(null);
+                    setDossierOuvert(id);
+                  }}
                   onOrganiser={() => {
                     setDetail(null);
                     setRangement(true);
@@ -539,7 +591,7 @@ export default function LanceurPage() {
                   occupe={occupe !== null}
                   libellePages="Pages du bureau"
                   onRetirer={(app) => void choisir(app, 'retiree')}
-                  onOuvrirDossier={() => setDossierOuvert(true)}
+                  onOuvrirDossier={() => setDossierOuvert('entreprise')}
                   onOrganiser={() => {
                     setDetail(null);
                     setRangement(true);

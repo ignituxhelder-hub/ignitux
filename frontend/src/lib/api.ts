@@ -2085,6 +2085,14 @@ export interface JourneyRepere {
   precision: string;
 }
 
+export type JourneyEtatEtape = 'fait' | 'en-cours' | 'a-venir';
+
+export interface JourneyEtapeGuide {
+  id: string;
+  label: string;
+  etat: JourneyEtatEtape;
+}
+
 export interface JourneyView {
   phase: JourneyPhase;
   phaseLabel: string;
@@ -2092,6 +2100,8 @@ export interface JourneyView {
   reperes: JourneyRepere[];
   /** null = rien ne se déduit. Le produit le dit au lieu d'inventer. */
   nextStep: JourneyStep | null;
+  /** Toutes les étapes du chemin et leur état, pour le guide pas à pas. */
+  guide: JourneyEtapeGuide[];
   visible: Array<{ section: JourneySection; label: string; phase: JourneyPhase }>;
   locked: Array<{
     section: JourneySection;
