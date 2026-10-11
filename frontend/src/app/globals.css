@@ -1982,3 +1982,106 @@ th {
     animation: none;
   }
 }
+
+/* ── La visite guidée ─────────────────────────────────────────────────────── */
+
+.visite__voile {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+/* Le trou lumineux : tout ce qui l'entoure est assombri par son ombre. */
+.visite__trou {
+  position: fixed;
+  z-index: 1001;
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 9999px rgb(0 0 0 / 65%);
+  outline: 2px solid var(--flame);
+  pointer-events: none;
+  transition:
+    top 250ms ease,
+    left 250ms ease,
+    width 250ms ease,
+    height 250ms ease;
+}
+
+.visite__bulle {
+  position: fixed;
+  z-index: 1002;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(26rem, calc(100vw - 32px));
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-lg);
+  animation: visite-apparition 200ms ease-out;
+}
+
+.visite__bulle:focus {
+  outline: none;
+}
+
+.visite__compteur {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--texte-etiquette);
+}
+
+.visite__titre {
+  margin: 0.25rem 0 0.4rem;
+  font-size: 1.1rem;
+}
+
+.visite__texte {
+  margin: 0 0 1rem;
+}
+
+.visite__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.visite__navigation {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.visite__navigation button {
+  width: auto;
+}
+
+.visite__passer {
+  background: none;
+  border: none;
+  padding: 0.4rem 0;
+  color: var(--text-muted);
+  text-decoration: underline;
+  width: auto;
+}
+
+@keyframes visite-apparition {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .visite__trou {
+    transition: none;
+  }
+
+  .visite__bulle {
+    animation: none;
+  }
+}
