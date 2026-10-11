@@ -114,8 +114,8 @@ describe('IdentiteController', () => {
     expect(entetes).toEqual(expect.arrayContaining([{ name: 'Cache-Control', value: 'no-store' }]));
   });
 
-  it('expose le texte du mandat en vigueur', () => {
-    expect(controller.texteMandat()).toEqual({ texte: TEXTE_MANDAT });
+  it('expose le texte du mandat en vigueur, et dit que la signature est suspendue', () => {
+    expect(controller.texteMandat()).toEqual({ texte: TEXTE_MANDAT, signatureSuspendue: true });
   });
 
   it('crée un mandat pour le projet donné', async () => {
@@ -214,7 +214,7 @@ describe('IdentiteController (HTTP)', () => {
   it('sert le texte du mandat', async () => {
     const res = await request(app.getHttpServer()).get('/identite/mandats/texte');
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ texte: TEXTE_MANDAT });
+    expect(res.body).toEqual({ texte: TEXTE_MANDAT, signatureSuspendue: true });
   });
 
   it('refuse une signature sans accepte: true', async () => {

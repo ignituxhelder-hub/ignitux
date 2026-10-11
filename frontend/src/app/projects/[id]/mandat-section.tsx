@@ -13,6 +13,10 @@ import { api, ApiError, type Mandate } from '@/lib/api';
  * du mandat — celui-là même que le serveur enregistrera —, coche une case
  * de consentement, puis retape son nom complet. Le bouton « Signer » reste
  * désactivé tant que les deux ne sont pas faits.
+ *
+ * Tant que le serveur répond `signatureSuspendue: true` (en attendant
+ * l'avis d'un avocat), une note neutre remplace tout le parcours de
+ * signature. Un mandat déjà signé reste visible et révocable.
  */
 export function MandatSection({ token, projectId }: { token: string; projectId: string }) {
   const [identiteValidee, setIdentiteValidee] = useState(false);
@@ -21,6 +25,7 @@ export function MandatSection({ token, projectId }: { token: string; projectId: 
   /** Un mandat antérieur a été révoqué : on le dit en une ligne, sans bloquer une nouvelle signature. */
   const [revocationAnterieure, setRevocationAnterieure] = useState(false);
   const [texteMandat, setTexteMandat] = useState<string | null>(null);
+  const [signatureSuspendue, setSignatureSuspendue] = useState(false);
   const [nomComplet, setNomComplet] = useState('');
   const [accepte, setAccepte] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +35,7 @@ export function MandatSection({ token, projectId }: { token: string; projectId: 
   const charger = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [verifications, mandats, { texte }] = await Promise.all([
+      const [verifications, mandats, { texte, signatureSuspendue: suspendue }] = await Promise.all([
         api.getMesVerifications(token),
         api.getMesMandats(token),
         api.getTexteMandat(token),
@@ -44,6 +49,7 @@ export function MandatSection({ token, projectId }: { token: string; projectId: 
       setMandat(duProjet.find((m) => m.status !== 'revoquee') ?? null);
       setRevocationAnterieure(duProjet.some((m) => m.status === 'revoquee'));
       setTexteMandat(texte);
+      setSignatureSuspendue(suspendue === true);
       setError(null);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de charger le mandat.');
@@ -60,7 +66,7 @@ export function MandatSection({ token, projectId }: { token: string; projectId: 
   // champ qui distingue « signé » de « pas encore signé » est `signed_at`,
   // pas `status` (qui ne distingue qu'actif de révoqué — voir Task 6).
   const mandatSigne = mandat !== null && mandat.signed_at !== null;
-  const peutSigner = identiteValidee && !mandatSigne && texteMandat !== null;
+  const peutSigner = !signatureSuspendue && identiteValidee && !mandatSigne && texteMandat !== null;
 
   /**
    * Crée le mandat si besoin, puis le signe.
@@ -116,7 +122,14 @@ export function MandatSection({ token, projectId }: { token: string; projectId: 
       <h2>Mandat</h2>
       {error && <p className="error">{error}</p>}
 
-      {!identiteValidee && (
+      {signatureSuspendue && !mandatSigne && (
+        <p className="muted">
+          La signature de mandats est suspendue en attendant un avis juridique. Rien n’est
+          déposé à ta place.
+        </p>
+      )}
+
+      {!signatureSuspendue && !identiteValidee && (
         <p className="muted">
           Il faut d&apos;abord{' '}
           <Link href="/identite">vérifier ton identité</Link> avant de pouvoir signer un mandat
@@ -124,7 +137,7 @@ export function MandatSection({ token, projectId }: { token: string; projectId: 
         </p>
       )}
 
-      {revocationAnterieure && !mandatSigne && (
+      {!signatureSuspendue && revocationAnterieure && !mandatSigne && (
         <p className="muted">Un mandat précédent pour ce projet a été révoqué.</p>
       )}
 

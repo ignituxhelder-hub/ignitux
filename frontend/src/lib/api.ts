@@ -3926,8 +3926,13 @@ export const api = {
     return res.blob();
   },
 
+  /**
+   * `signatureSuspendue` : le serveur refuse pour l'instant de créer ou de
+   * signer un mandat (backend/src/identite/mandats-suspension.ts). C'est lui
+   * qui le dit ; l'interface n'a pas sa propre copie de l'interrupteur.
+   */
   getTexteMandat(token: string) {
-    return request<{ texte: string }>(
+    return request<{ texte: string; signatureSuspendue: boolean }>(
       '/identite/mandats/texte',
       { headers: { Authorization: `Bearer ${token}` } },
       // Un texte engageant ne doit jamais être relu depuis une copie locale

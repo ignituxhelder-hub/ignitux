@@ -2,12 +2,21 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { assertOwnsProject } from '../prisma/assert-owns-project.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { TEXTE_MANDAT } from './mandate-text.js';
+import { MANDATS_SUSPENDUS, MESSAGE_MANDATS_SUSPENDUS } from './mandats-suspension.js';
+
+/** Voir mandats-suspension.ts : avant toute lecture ou écriture. */
+function refuserSiSuspendus() {
+  if (MANDATS_SUSPENDUS) {
+    throw new ConflictException(MESSAGE_MANDATS_SUSPENDUS);
+  }
+}
 
 @Injectable()
 export class MandatsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async creerMandat(ownerId: string, projectId: string, purpose: string) {
+    refuserSiSuspendus();
     await assertOwnsProject(this.prisma, ownerId, projectId);
 
     const verification = await this.prisma.identity_verifications.findFirst({
@@ -42,6 +51,7 @@ export class MandatsService {
   }
 
   async signerMandat(ownerId: string, mandateId: string, nomComplet: string, ip: string) {
+    refuserSiSuspendus();
     const mandat = await this.findMandatForOwner(ownerId, mandateId);
     if (mandat.signed_at) {
       throw new ConflictException('Ce mandat est déjà signé.');

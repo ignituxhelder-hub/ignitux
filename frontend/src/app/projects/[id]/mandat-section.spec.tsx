@@ -31,7 +31,7 @@ function mandat(overrides: Partial<Mandate> = {}): Mandate {
 describe('MandatSection', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(api.getTexteMandat).mockResolvedValue({ texte: TEXTE });
+    vi.mocked(api.getTexteMandat).mockResolvedValue({ texte: TEXTE, signatureSuspendue: false });
   });
 
   it('invite à vérifier son identité quand aucune vérification n’est validée', async () => {
@@ -161,6 +161,49 @@ describe('MandatSection', () => {
 
       expect(await screen.findByRole('button', { name: /^signer$/i })).toBeInTheDocument();
       expect(screen.getByText(/mandat précédent.*révoqué/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('quand le serveur dit que la signature est suspendue', () => {
+    beforeEach(() => {
+      vi.mocked(api.getTexteMandat).mockResolvedValue({ texte: TEXTE, signatureSuspendue: true });
+    });
+
+    it('affiche une note neutre à la place du formulaire de signature', async () => {
+      vi.mocked(api.getMesVerifications).mockResolvedValue([VERIFICATION_VALIDEE]);
+      vi.mocked(api.getMesMandats).mockResolvedValue([]);
+      render(<MandatSection token="tok" projectId="p1" />);
+
+      expect(await screen.findByText(/suspendue en attendant un avis juridique/i)).toBeInTheDocument();
+      expect(screen.getByText(/rien n’est déposé à ta place/i)).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /^signer$/i })).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Nom complet')).not.toBeInTheDocument();
+      expect(screen.queryByText(TEXTE)).not.toBeInTheDocument();
+      expect(api.creerMandat).not.toHaveBeenCalled();
+    });
+
+    it("n'invite pas à vérifier son identité pour signer un mandat qu'on ne peut pas signer", async () => {
+      vi.mocked(api.getMesVerifications).mockResolvedValue([]);
+      vi.mocked(api.getMesMandats).mockResolvedValue([]);
+      render(<MandatSection token="tok" projectId="p1" />);
+
+      expect(await screen.findByText(/suspendue en attendant un avis juridique/i)).toBeInTheDocument();
+      expect(screen.queryByText(/avant de pouvoir signer un mandat/i)).not.toBeInTheDocument();
+    });
+
+    it('laisse voir et révoquer un mandat déjà signé', async () => {
+      vi.mocked(api.getMesVerifications).mockResolvedValue([VERIFICATION_VALIDEE]);
+      vi.mocked(api.getMesMandats).mockResolvedValue([mandat()]);
+      vi.mocked(api.revoquerMandat).mockResolvedValue(mandat({ status: 'revoquee' }));
+      render(<MandatSection token="tok" projectId="p1" />);
+
+      expect(await screen.findByText(/signé par jean dupont/i)).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: /révoquer/i }));
+      await waitFor(() => expect(api.revoquerMandat).toHaveBeenCalledWith('tok', 'm1'));
+
+      // Après la révocation, pas de formulaire qui rouvre : la note reste.
+      expect(await screen.findByText(/suspendue en attendant un avis juridique/i)).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /^signer$/i })).not.toBeInTheDocument();
     });
   });
 });

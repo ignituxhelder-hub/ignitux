@@ -1,7 +1,20 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { MandatsService } from './mandats.service.js';
+
+// L'interrupteur est un module : on le remplace par un état que chaque test
+// règle, pour vérifier les deux positions sans toucher à la vraie valeur.
+const interrupteur = vi.hoisted(() => ({ suspendus: false }));
+vi.mock('./mandats-suspension.js', async (importOriginal) => {
+  const original = await importOriginal<typeof import('./mandats-suspension.js')>();
+  return {
+    ...original,
+    get MANDATS_SUSPENDUS() {
+      return interrupteur.suspendus;
+    },
+  };
+});
 
 describe('MandatsService', () => {
   let service: MandatsService;
@@ -17,6 +30,7 @@ describe('MandatsService', () => {
       providers: [MandatsService, { provide: PrismaService, useValue: prisma }],
     }).compile();
     service = moduleRef.get(MandatsService);
+    interrupteur.suspendus = false;
   });
 
   it('refuse de créer un mandat sans vérification d’identité validée', async () => {
@@ -83,5 +97,50 @@ describe('MandatsService', () => {
   it('refuse de révoquer le mandat d’un autre compte', async () => {
     prisma.mandates.findFirst.mockResolvedValue(null);
     await expect(service.revoquerMandat('user-1', 'm1')).rejects.toThrow(NotFoundException);
+  });
+
+  describe('signature suspendue en attendant un avis juridique', () => {
+    const MESSAGE =
+      'La signature de mandats est suspendue en attendant un avis juridique. Rien n’est déposé à ta place.';
+
+    beforeEach(() => {
+      interrupteur.suspendus = true;
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1' });
+      prisma.identity_verifications.findFirst.mockResolvedValue({ id: 'v1', status: 'validee' });
+      prisma.mandates.findFirst.mockResolvedValue({
+        id: 'm1',
+        owner_id: 'user-1',
+        signed_at: null,
+        status: 'active',
+      });
+    });
+
+    it('refuse de créer un mandat (409), sans rien écrire', async () => {
+      const appel = service.creerMandat('user-1', 'p1', 'depot_creation_entreprise');
+      await expect(appel).rejects.toThrow(ConflictException);
+      await expect(appel).rejects.toThrow(MESSAGE);
+      expect(prisma.mandates.create).not.toHaveBeenCalled();
+    });
+
+    it('refuse de signer un mandat déjà créé (409), sans rien écrire', async () => {
+      const appel = service.signerMandat('user-1', 'm1', 'Jean Dupont', '203.0.113.4');
+      await expect(appel).rejects.toThrow(ConflictException);
+      await expect(appel).rejects.toThrow(MESSAGE);
+      expect(prisma.mandates.update).not.toHaveBeenCalled();
+    });
+
+    it('laisse lire les mandats existants', async () => {
+      prisma.mandates.findMany.mockResolvedValue([{ id: 'm1' }]);
+      await expect(service.listerMesMandats('user-1')).resolves.toEqual([{ id: 'm1' }]);
+    });
+
+    it('laisse révoquer un mandat existant', async () => {
+      prisma.mandates.update.mockResolvedValue({ id: 'm1', status: 'revoquee' });
+      await service.revoquerMandat('user-1', 'm1');
+      expect(prisma.mandates.update).toHaveBeenCalledWith({
+        where: { id: 'm1' },
+        data: expect.objectContaining({ status: 'revoquee' }),
+      });
+    });
   });
 });
