@@ -1,4 +1,5 @@
 import { CGU_VERSION } from './cgu';
+import type { MonAcces, RoleEquipe } from './equipe';
 import { cacheResponse, readCached, type IterableStorage } from './offline-cache';
 import {
   dismissRejected,
@@ -629,6 +630,8 @@ export interface Collaborator {
   project_id: string;
   user_id: string;
   created_at: string;
+  /** Son rôle sur le projet (voir lib/equipe.ts). */
+  role: RoleEquipe;
   user: { id: string; email: string };
 }
 
@@ -2745,11 +2748,24 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     }),
 
-  addCollaborator: (token: string, id: string, email: string) =>
+  addCollaborator: (token: string, id: string, email: string, role: RoleEquipe = 'observateur') =>
     request<Collaborator>(`/projects/${id}/collaborators`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, role }),
+    }),
+
+  changerRoleCollaborateur: (token: string, id: string, collaboratorUserId: string, role: RoleEquipe) =>
+    request<void>(`/projects/${id}/collaborators/${collaboratorUserId}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ role }),
+    }),
+
+  /** Le rôle et les capacités de la personne connectée sur ce projet. */
+  getMonAcces: (token: string, id: string) =>
+    request<MonAcces>(`/projects/${id}/mon-acces`, {
+      headers: { Authorization: `Bearer ${token}` },
     }),
 
   removeCollaborator: async (token: string, id: string, collaboratorUserId: string) => {

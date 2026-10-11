@@ -184,11 +184,22 @@ describe('EvaluationSection', () => {
     await waitFor(() => expect(screen.getByText(/En cours de revue par Ignitux/)).toBeInTheDocument());
   });
 
-  it('n’affiche aucun bouton en lecture seule (collaborateur)', async () => {
+  it('en lecture seule (associé, comptable), ne propose pas de demander une évaluation', async () => {
     routes([]);
     render(<EvaluationSection token={TOKEN} projectId="p1" readOnly />);
 
-    expect(await screen.findByText(/réservée au porteur du projet/)).toBeInTheDocument();
+    expect(await screen.findByText(/Aucune évaluation validée pour l’instant/)).toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  it('en lecture seule, montre le rapport validé et son PDF, sans « nouvelle évaluation »', async () => {
+    routes([
+      vue({ status: 'validee', verdict: 'financable', rapport, reviewedAt: '2026-10-11T10:00:00Z' }),
+    ]);
+    render(<EvaluationSection token={TOKEN} projectId="p1" readOnly />);
+
+    expect(await screen.findByText('Finançable après corrections')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Télécharger le dossier (PDF)' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Demander/ })).not.toBeInTheDocument();
   });
 });

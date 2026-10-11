@@ -798,6 +798,34 @@ describe('ProjectDetailPage', () => {
     expect(await screen.findByText('Ce projet est visible dans la communauté.')).toBeInTheDocument();
   });
 
+  it('montre au comptable le plan de financement, pas l’analyse ni les tâches, et dit son rôle', async () => {
+    signInAs('tok456', { id: 'u2', email: 'compta@b.com' });
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      'GET /projects/p1/mon-acces': {
+        status: 200,
+        body: {
+          role: 'comptable',
+          capacites: ['voir_plan_financement', 'voir_evaluation', 'voir_financement', 'voir_documents_juridiques'],
+        },
+      },
+      ...ENGINE_ROUTES,
+    });
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByRole('heading', { name: 'École motocross' })).toBeInTheDocument();
+    expect(await screen.findByText(/(Comptable)/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Vue avancée' }));
+    expect(await screen.findByRole('button', { name: 'Plan de financement' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Analyser' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Tâches' })).not.toBeInTheDocument();
+  });
+
   it('affiche une vue lecture seule pour un collaborateur (pas le propriétaire)', async () => {
     signInAs('tok456', { id: 'u2', email: 'collaborateur@b.com' });
     mockApiRoutes({
@@ -836,7 +864,8 @@ describe('ProjectDetailPage', () => {
     expect(screen.queryByRole('button', { name: /analyser ce projet/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /supprimer le projet/i })).not.toBeInTheDocument();
     // La gestion des collaborateurs reste réservée au propriétaire.
-    expect(screen.queryByText('Collaborateurs')).not.toBeInTheDocument();
+    // Tout membre voit l'équipe ; seul le propriétaire la gère (pas de bouton Inviter).
+    expect(screen.queryByRole('button', { name: /inviter/i })).not.toBeInTheDocument();
     // Les statuts se créent côté propriétaire : un collaborateur ne voit pas la section.
     // L'étape est bien ouverte (sa recommandation s'affiche), mais sans Statuts : seul le propriétaire les voit.
     fireEvent.click(screen.getByRole('button', { name: 'Forme juridique' }));

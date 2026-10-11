@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mockApiRoutes } from '@/test-utils/mocks';
 import { CollaboratorsSection } from './collaborators-section';
@@ -109,5 +109,65 @@ describe('CollaboratorsSection', () => {
     fireEvent.click(screen.getByRole('button', { name: /inviter/i }));
 
     expect(await screen.findByText('Aucun compte ne correspond à cet email.')).toBeInTheDocument();
+  });
+
+  const MEMBRE = {
+    id: 'pc1',
+    project_id: 'p1',
+    user_id: 'u2',
+    created_at: '2026-01-01T00:00:00.000Z',
+    role: 'salarie',
+    user: { id: 'u2', email: 'b@b.com' },
+  };
+
+  function appels(methode: string, chemin: string) {
+    return vi
+      .mocked(global.fetch)
+      .mock.calls.filter(([url, o]) => new URL(String(url)).pathname === chemin && (o?.method ?? 'GET') === methode);
+  }
+
+  it('invite avec le rôle choisi et explique ce que ce rôle permet', async () => {
+    mockApiRoutes({
+      'GET /projects/p1/collaborators': { status: 200, body: [] },
+      'POST /projects/p1/collaborators': { status: 201, body: MEMBRE },
+    });
+    render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText("Aucun collaborateur pour l'instant.");
+    fireEvent.change(screen.getByLabelText('Rôle de la personne invitée'), { target: { value: 'salarie' } });
+    expect(screen.getByText(/travaille sur les tâches/)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Email du collaborateur à ajouter'), { target: { value: 'b@b.com' } });
+    fireEvent.click(screen.getByRole('button', { name: /inviter/i }));
+
+    await screen.findByText('b@b.com');
+    expect(JSON.parse(String(appels('POST', '/projects/p1/collaborators')[0][1]?.body))).toEqual({
+      email: 'b@b.com',
+      role: 'salarie',
+    });
+  });
+
+  it('change le rôle d’un membre', async () => {
+    mockApiRoutes({
+      'GET /projects/p1/collaborators': { status: 200, body: [MEMBRE] },
+      'PATCH /projects/p1/collaborators/u2': { status: 204, body: null },
+    });
+    render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    fireEvent.change(await screen.findByLabelText('Rôle de b@b.com'), { target: { value: 'comptable' } });
+
+    await waitFor(() => expect(appels('PATCH', '/projects/p1/collaborators/u2')).toHaveLength(1));
+    expect(JSON.parse(String(appels('PATCH', '/projects/p1/collaborators/u2')[0][1]?.body))).toEqual({
+      role: 'comptable',
+    });
+  });
+
+  it('montre l’équipe et les rôles à un membre, sans aucune action', async () => {
+    mockApiRoutes({ 'GET /projects/p1/collaborators': { status: 200, body: [MEMBRE] } });
+    render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} peutGerer={false} />);
+
+    expect(await screen.findByText('b@b.com')).toBeInTheDocument();
+    expect(screen.getByText('Salarié')).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
   });
 });

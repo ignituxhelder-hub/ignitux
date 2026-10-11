@@ -38,6 +38,7 @@ import { BuybackSection, FinancingSection } from './financing-section';
 import { ParticipationSection } from './participation-section';
 import { EvaluationSection } from './evaluation-section';
 import { CollaboratorsSection } from './collaborators-section';
+import { lectureDeSection, ROLE_EQUIPE_LABEL, type Capacite, type MonAcces } from '@/lib/equipe';
 import { StatutsSection } from './statuts-section';
 import { DossierCreationSection } from './dossier-creation-section';
 import { ImmatriculationSection } from './immatriculation-section';
@@ -157,6 +158,8 @@ export default function ProjectDetailPage() {
   const router = useRouter();
 
   const [project, setProject] = useState<Project | null>(null);
+  // Le rôle de la personne sur ce projet et ce qu'il permet (voir lib/equipe.ts).
+  const [acces, setAcces] = useState<MonAcces | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -199,6 +202,24 @@ export default function ProjectDetailPage() {
    * une fois qu'elle est montée.
    */
   const [allerAuxTaches, setAllerAuxTaches] = useState(false);
+  useEffect(() => {
+    if (!token) return;
+    let annule = false;
+    api
+      .getMonAcces(token, id)
+      .then((a) => {
+        // Garde défensive : une réponse inattendue retombe sur l'affichage par défaut.
+        if (!annule) setAcces(a && Array.isArray(a.capacites) ? a : null);
+      })
+      // Sans réponse : l'affichage d'avant les rôles (voir peut()), le serveur tranche.
+      .catch(() => {
+        if (!annule) setAcces(null);
+      });
+    return () => {
+      annule = true;
+    };
+  }, [token, id]);
+
   useEffect(() => {
     if (!allerAuxTaches) return;
     const cible = document.getElementById('taches');
@@ -391,6 +412,14 @@ export default function ProjectDetailPage() {
   const isOwner = project ? project.owner_id === user?.id : false;
 
   /**
+   * Ce que le rôle de la personne permet sur ce projet (lu sur le serveur).
+   * Tant que ce n'est pas chargé : tout pour le propriétaire, la lecture pour
+   * les autres — l'affichage d'avant les rôles. Le serveur revérifie tout.
+   */
+  const peut = (capacite: Capacite): boolean =>
+    acces ? acces.capacites.includes(capacite) : isOwner || capacite.startsWith('voir_');
+
+  /**
    * Une section s'affiche si le parcours l'a ouverte, ou si la vue avancée
    * est demandée. Tant que le parcours n'est pas chargé, on s'en tient à
    * l'essentiel : mieux vaut un écran qui se remplit qu'un écran qui montre
@@ -399,6 +428,8 @@ export default function ProjectDetailPage() {
    */
   const montrer = (section: string): boolean => {
     if (!project) return false;
+    const lecture = lectureDeSection(section);
+    if (lecture && !peut(lecture)) return false;
     if (vueAvancee) return true;
     if (!parcours) return section === 'analyse';
     return parcours.visible.some((s) => s.section === section);
@@ -408,8 +439,8 @@ export default function ProjectDetailPage() {
   const outilVisible = (outil: { id: string; section: string }): boolean => {
     // Le formulaire d'édition n'est pas une section du parcours : il est
     // toujours là pour le propriétaire, jamais pour un collaborateur.
-    if (outil.id === 'infos') return !!project && isOwner;
-    if (outil.id === 'collaborateurs') return isOwner && montrer(outil.section);
+    if (outil.id === 'infos') return !!project && peut('modifier_projet');
+    if (outil.id === 'collaborateurs') return montrer(outil.section);
     return montrer(outil.section);
   };
 
@@ -431,7 +462,7 @@ export default function ProjectDetailPage() {
         {/* L'argent a son propre écran : la fiche projet faisait déjà sept
             mille pixels, et le financement s'y perdait tout en bas. */}
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <Link href={`/projects/${id}/finances`}>Financement et investisseurs</Link>
+          {peut('voir_financement') && <Link href={`/projects/${id}/finances`}>Financement et investisseurs</Link>}
           {/* Le mode par défaut reste simple. La vue avancée est un choix,
               jamais l'état initial : quelqu'un qui arrive ne devrait pas
               avoir à comprendre Ignitux avant de s'en servir. */}
@@ -475,7 +506,7 @@ export default function ProjectDetailPage() {
                  qu'il venait d'ouvrir. Un raccourci vers un endroit où l'on se
                  trouve déjà n'est plus un raccourci. */
               surTacheVide={
-                isOwner && !montrer('taches')
+                peut('modifier_taches') && !montrer('taches')
                   ? () => {
                       setVueAvancee(true);
                       setEtapeOuverte('taches');
@@ -486,7 +517,7 @@ export default function ProjectDetailPage() {
             />
           )}
           {parcours && <Progression phase={parcours.phase} />}
-          {parcours && isOwner && (
+          {parcours && peut('modifier_projet') && (
             <ProchaineEtape
               parcours={parcours}
               iaDisponible={iginiStatus?.generatorsEnabled ?? true}
@@ -523,8 +554,10 @@ export default function ProjectDetailPage() {
                 <p style={{ marginTop: 0, marginBottom: 0 }}>{project.description}</p>
               )}
               <p className="muted" style={{ marginTop: '0.75rem', marginBottom: 0 }}>
-                Projet partagé avec toi — tu peux consulter son historique, mais seul le
-                propriétaire peut le modifier ou générer de nouveaux plans.
+                Projet partagé avec toi
+                {acces && acces.role !== 'proprietaire' ? ` (${ROLE_EQUIPE_LABEL[acces.role]})` : ''} — tu
+                vois et fais ce que ton rôle permet ; le propriétaire garde les actes juridiques et
+                l&apos;équipe.
               </p>
             </div>
           )}
@@ -612,7 +645,7 @@ export default function ProjectDetailPage() {
              quelque chose a cassé. On dit ce qui est en cours, sans feindre
              une progression que le modèle ne fournit pas. */
           busyContent={<AnalyseEnCours />}
-          readOnly={!isOwner}
+          readOnly={!peut('lancer_ia')}
           iginiStatus={iginiStatus}
         />
       )}
@@ -629,7 +662,7 @@ export default function ProjectDetailPage() {
             error={legalForm.error}
             onGenerate={legalForm.generate}
             renderItem={(item) => <FormeJuridiqueResultat recommandation={item} key={item.id} />}
-            readOnly={!isOwner}
+            readOnly={!peut('lancer_ia')}
             iginiStatus={iginiStatus}
           />
           {/* Les statuts suivent la forme juridique : même étape. Leur création est
@@ -685,7 +718,7 @@ export default function ProjectDetailPage() {
           error={plan.error}
           onGenerate={plan.generate}
           renderItem={(item) => <BuildPlanCard plan={item} key={item.id} />}
-          readOnly={!isOwner}
+          readOnly={!peut('lancer_ia')}
           iginiStatus={iginiStatus}
         />
       )}
@@ -704,13 +737,13 @@ export default function ProjectDetailPage() {
           error={financing.error}
           onGenerate={financing.generate}
           renderItem={(item) => <FinancingPlanCard plan={item} key={item.id} />}
-          readOnly={!isOwner}
+          readOnly={!peut('lancer_ia')}
           iginiStatus={iginiStatus}
         />
       )}
       {/* Le jugement (« est-ce finançable ? »), séparé du plan ci-dessus qui dit comment financer. */}
       {montrer('financement') && etapeOuverte === 'financement' && (
-        <EvaluationSection token={token} projectId={id} readOnly={!isOwner} />
+        <EvaluationSection token={token} projectId={id} readOnly={!peut('demander_evaluation')} />
       )}
 
       {montrer('developpement') && etapeOuverte === 'developpement' && (
@@ -724,7 +757,7 @@ export default function ProjectDetailPage() {
           error={development.error}
           onGenerate={development.generate}
           renderItem={(item) => <DevelopmentPlanCard plan={item} key={item.id} />}
-          readOnly={!isOwner}
+          readOnly={!peut('lancer_ia')}
           iginiStatus={iginiStatus}
         />
       )}
@@ -740,7 +773,7 @@ export default function ProjectDetailPage() {
           error={transmission.error}
           onGenerate={transmission.generate}
           renderItem={(item) => <TransmissionPlanCard plan={item} key={item.id} />}
-          readOnly={!isOwner}
+          readOnly={!peut('lancer_ia')}
           iginiStatus={iginiStatus}
         />
       )}
@@ -836,7 +869,7 @@ export default function ProjectDetailPage() {
           <TasksSection
             token={token}
             projectId={id}
-            readOnly={!isOwner}
+            readOnly={!peut('modifier_taches')}
             refreshSignal={refreshSignal}
             /* Même signal que les générateurs : une tâche cochée à la main
                doit rafraîchir le score et le parcours exactement comme une
@@ -847,13 +880,13 @@ export default function ProjectDetailPage() {
         </div>
       )}
       {montrer('memoire') && etapeOuverte === 'memoire' && (
-        <MemorySection token={token} projectId={id} readOnly={!isOwner} />
+        <MemorySection token={token} projectId={id} readOnly={!peut('modifier_conformite_memoire')} />
       )}
       {montrer('connaissances') && etapeOuverte === 'connaissances' && (
         <KnowledgeSection
           token={token}
           projectId={id}
-          readOnly={!isOwner}
+          readOnly={!peut('modifier_conformite_memoire')}
           refreshSignal={refreshSignal}
           onChanged={onGenerated}
         />
@@ -861,25 +894,25 @@ export default function ProjectDetailPage() {
       {/* MANDAT — une autorisation que le porteur donne, pas un résultat de générateur IGINI. Propriétaire seulement (assertOwnsProject côté serveur). */}
       {isOwner && <MandatSection token={token} projectId={id} />}
       {montrer('conformite') && etapeOuverte === 'conformite' && (
-        <ComplianceSection token={token} projectId={id} readOnly={!isOwner} />
+        <ComplianceSection token={token} projectId={id} readOnly={!peut('modifier_conformite_memoire')} />
       )}
       {montrer('automatisation') && etapeOuverte === 'automatisation' && (
-        <AutomationSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
+        <AutomationSection token={token} projectId={id} readOnly={!peut('lancer_ia')} refreshSignal={refreshSignal} />
       )}
       {montrer('processus') && etapeOuverte === 'processus' && (
-        <WorkflowSection token={token} projectId={id} readOnly={!isOwner} refreshSignal={refreshSignal} />
+        <WorkflowSection token={token} projectId={id} readOnly={!peut('modifier_taches')} refreshSignal={refreshSignal} />
       )}
-      {montrer('financement') && etapeOuverte === 'financement-recu' && (
-        <FinancingSection token={token} projectId={id} readOnly={!isOwner} />
-      )}
-      {montrer('capital') && etapeOuverte === 'capital' && (
-        <ParticipationSection token={token} projectId={id} readOnly={!isOwner} />
+      {montrer('financement') && peut('voir_financement') && etapeOuverte === 'financement-recu' && (
+        <FinancingSection token={token} projectId={id} readOnly={!peut('modifier_financement')} />
       )}
       {montrer('capital') && etapeOuverte === 'capital' && (
-        <BuybackSection token={token} projectId={id} readOnly={!isOwner} />
+        <ParticipationSection token={token} projectId={id} readOnly={!peut('modifier_financement')} />
       )}
-      {montrer('collaborateurs') && isOwner && etapeOuverte === 'collaborateurs' && (
-        <CollaboratorsSection token={token} projectId={id} />
+      {montrer('capital') && etapeOuverte === 'capital' && (
+        <BuybackSection token={token} projectId={id} readOnly={!peut('modifier_financement')} />
+      )}
+      {montrer('collaborateurs') && etapeOuverte === 'collaborateurs' && (
+        <CollaboratorsSection token={token} projectId={id} peutGerer={peut('gerer_equipe')} />
       )}
 
       {vueAvancee && parcours && <SectionsFermees parcours={parcours} />}

@@ -56,8 +56,10 @@ export function EvaluationSection({ token, projectId, readOnly = false }: Evalua
   }, [token, projectId]);
 
   useEffect(() => {
-    if (readOnly || !token) return;
+    if (!token) return;
     void charger();
+    // Un membre ne demande pas : l'offre du propriétaire ne le concerne pas.
+    if (readOnly) return;
     // L'offre ne change pas pendant qu'on regarde : lue une fois, pas à chaque sondage.
     api
       .getOffres(token)
@@ -116,7 +118,7 @@ export function EvaluationSection({ token, projectId, readOnly = false }: Evalua
       </p>
 
       {readOnly ? (
-        <p className="muted">L’évaluation de financement est réservée au porteur du projet.</p>
+        <LectureSeule evaluations={evaluations} onTelecharger={telecharger} />
       ) : (
         <Contenu
           evaluations={evaluations}
@@ -129,6 +131,42 @@ export function EvaluationSection({ token, projectId, readOnly = false }: Evalua
 
       {error && <p className="error">{error}</p>}
     </section>
+  );
+}
+
+/** Ce qu'un membre (associé, comptable, observateur) voit : les évaluations validées. */
+function LectureSeule({
+  evaluations,
+  onTelecharger,
+}: {
+  evaluations: EvaluationVue[] | null;
+  onTelecharger: (id: string) => void;
+}) {
+  if (evaluations === null) return <p className="loading">Chargement…</p>;
+  const validees = evaluations.filter((e) => e.status === 'validee' && e.rapport);
+  const [derniere, ...anciennes] = validees;
+  if (!derniere?.rapport) {
+    return <p className="muted">Aucune évaluation validée pour l’instant. Le propriétaire la demande.</p>;
+  }
+  return (
+    <>
+      <Rapport evaluation={derniere} rapport={derniere.rapport} />
+      <button className="primary" type="button" onClick={() => onTelecharger(derniere.id)} style={{ marginTop: '1rem' }}>
+        Télécharger le dossier (PDF)
+      </button>
+      {anciennes.length > 0 && (
+        <details style={{ marginTop: '1rem' }}>
+          <summary>Évaluations validées précédentes ({anciennes.length})</summary>
+          <ul>
+            {anciennes.map((a) => (
+              <li key={a.id}>
+                {date(a.createdAt)} — {a.verdict ? VERDICT_EVALUATION_LABEL[a.verdict] : ''}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </>
   );
 }
 
