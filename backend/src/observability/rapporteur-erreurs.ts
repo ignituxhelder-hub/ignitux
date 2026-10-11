@@ -31,6 +31,9 @@
  * Ne partent jamais : le corps de la requête, les en-têtes, les témoins, les
  * valeurs de la chaîne de requête, les variables d'environnement.
  *
+ * Quand l'adresse est un webhook Discord, les mêmes champs partent sous forme
+ * d'un texte court — sans l'identifiant de l'utilisateur (voir plus bas).
+ *
  * ── Ce qu'il ne fait pas ─────────────────────────────────────────────────
  *
  * Il ne relance pas, ne met pas en file et n'attend pas. Un rapporteur qui
@@ -113,7 +116,7 @@ export function signalerErreur(rapport: RapportErreur): void {
   void fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(charge),
+    body: JSON.stringify(estWebhookDiscord(url) ? chargeDiscord(charge) : charge),
     signal: AbortSignal.timeout(5_000),
   }).catch((erreur: unknown) => {
     // Une seule ligne, sans pile : un collecteur injoignable ne doit pas
@@ -124,4 +127,67 @@ export function signalerErreur(rapport: RapportErreur): void {
       }`,
     );
   });
+}
+
+/**
+ * ── Discord ──────────────────────────────────────────────────────────────
+ *
+ * Un webhook Discord (gratuit) refuse la charge générique : il veut
+ * `{ content }`, 2 000 caractères au plus. On lui envoie un texte court, bâti
+ * uniquement à partir des champs déjà expurgés ci-dessus — et sans
+ * l'identifiant de l'utilisateur, inutile pour être prévenu : la référence
+ * suffit à retrouver la ligne complète dans le journal du serveur.
+ */
+const LIMITE_DISCORD = 2_000;
+const LIGNES_DE_PILE = 8;
+
+export function estWebhookDiscord(adresse: string): boolean {
+  try {
+    const url = new URL(adresse);
+    return (
+      (url.hostname === 'discord.com' || url.hostname === 'discordapp.com') &&
+      url.pathname.startsWith('/api/webhooks/')
+    );
+  } catch {
+    return false;
+  }
+}
+
+function couper(texte: string, longueur: number): string {
+  return texte.length <= longueur ? texte : `${texte.slice(0, Math.max(0, longueur - 1))}…`;
+}
+
+function chargeDiscord(charge: {
+  reference: string;
+  methode: string;
+  chemin: string;
+  message: string;
+  pile: string | null;
+  moment: string;
+}) {
+  const tete = couper(
+    `Erreur Ignitux — réf ${charge.reference} — ${charge.methode} ${charge.chemin} — ${charge.moment}\n${charge.message}`,
+    LIMITE_DISCORD,
+  );
+
+  let content = tete;
+  if (charge.pile !== null) {
+    const ouverture = '\n```\n';
+    const fermeture = '\n```';
+    const place = LIMITE_DISCORD - tete.length - ouverture.length - fermeture.length;
+    // En dessous, le bloc ne montrerait rien d'utile : on s'en passe.
+    if (place >= 40) {
+      const debut = charge.pile
+        .split('\n')
+        .slice(0, LIGNES_DE_PILE)
+        .join('\n')
+        // Trois accents graves dans la pile refermeraient le bloc avant l'heure.
+        .replace(/```/g, "'''");
+      content = `${tete}${ouverture}${couper(debut, place)}${fermeture}`;
+    }
+  }
+
+  // Aucune mention : un « @everyone » cité dans un message d'erreur ne doit
+  // notifier personne.
+  return { content, allowed_mentions: { parse: [] as string[] } };
 }
