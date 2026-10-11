@@ -170,7 +170,9 @@ export function VisiteGuidee({
 
   return (
     <div className="visite" role="presentation">
-      <div className="visite__voile" onClick={onFermer} aria-hidden="true" />
+      {/* Le voile bloque les clics sur la page sans en recevoir lui-même :
+          on sort par « Passer la visite » ou Échap, qui se disent. */}
+      <div className="visite__voile" aria-hidden="true" />
       {cadre && (
         <div
           className="visite__trou"
