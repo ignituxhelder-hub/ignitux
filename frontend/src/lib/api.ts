@@ -1,3 +1,4 @@
+import { CGU_VERSION } from './cgu';
 import { cacheResponse, readCached, type IterableStorage } from './offline-cache';
 import {
   dismissRejected,
@@ -2169,10 +2170,15 @@ export const api = {
   /** Sans jeton : l'état d'une fonctionnalité n'est pas une donnée personnelle. */
   getIginiStatus: () => request<IginiStatus>('/igini/status'),
 
-  signup: (email: string, password: string, captchaToken: string) =>
+  /**
+   * `acceptCgu` est typé `true` : l'appelant doit avoir réellement recueilli
+   * la case des conditions d'utilisation. La version envoyée est celle que la
+   * page affiche ; le serveur enregistre les deux.
+   */
+  signup: (email: string, password: string, captchaToken: string, acceptCgu: true) =>
     request<User>('/users/signup', {
       method: 'POST',
-      body: JSON.stringify({ email, password, captchaToken }),
+      body: JSON.stringify({ email, password, captchaToken, acceptCgu, cguVersion: CGU_VERSION }),
     }),
 
   login: (email: string, password: string) =>

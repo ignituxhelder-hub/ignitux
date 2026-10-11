@@ -12,7 +12,12 @@ export class UsersService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async signup(email: string, password: string) {
+  /**
+   * `cguVersion` a déjà été comparée à la version en vigueur par SignupDto ;
+   * elle est enregistrée avec le moment de l'acceptation, dans la création
+   * même — un compte ne peut pas exister sans la trace de ce qu'il a accepté.
+   */
+  async signup(email: string, password: string, cguVersion: string) {
     const existingUser = await this.prisma.users.findUnique({ where: { email } });
     if (existingUser) {
       throw new ConflictException('Un compte existe déjà avec cet email.');
@@ -24,6 +29,8 @@ export class UsersService {
       data: {
         email,
         password_hash: passwordHash,
+        cgu_accepted_at: new Date(),
+        cgu_version: cguVersion,
       },
     });
 

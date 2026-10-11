@@ -1,5 +1,6 @@
 import type { INestApplication } from '@nestjs/common';
 import type { Server } from 'node:http';
+import { CGU_VERSION_EN_VIGUEUR } from '../src/users/cgu.js';
 import { api, auth, createAccount, deleteAccount, startApp, type TestAccount } from './e2e-app.js';
 
 /**
@@ -29,7 +30,13 @@ describe('parcours complet (e2e)', () => {
     it('refuse une inscription en double', async () => {
       await api(app)
         .post('/users/signup')
-        .send({ email: account.email, password: account.password, captchaToken: 'jeton-e2e' })
+        .send({
+          email: account.email,
+          password: account.password,
+          captchaToken: 'jeton-e2e',
+          acceptCgu: true,
+          cguVersion: CGU_VERSION_EN_VIGUEUR,
+        })
         .expect(409);
     });
 
@@ -44,8 +51,25 @@ describe('parcours complet (e2e)', () => {
           email: `court.${Date.now()}@e2e.test`,
           password: 'court',
           captchaToken: 'jeton-e2e',
+          acceptCgu: true,
+          cguVersion: CGU_VERSION_EN_VIGUEUR,
         })
         .expect(400);
+    });
+
+    it("refuse une inscription qui n'accepte pas la version en vigueur des CGU", async () => {
+      // Aucun compte n'est créé : la ValidationPipe refuse avant le service.
+      const reponse = await api(app)
+        .post('/users/signup')
+        .send({
+          email: `cgu.${Date.now()}@e2e.test`,
+          password: 'MotDePasse-CGU-1',
+          captchaToken: 'jeton-e2e',
+          acceptCgu: true,
+          cguVersion: '2000-01-01',
+        })
+        .expect(400);
+      expect(JSON.stringify(reponse.body)).toContain('recharge');
     });
 
     it('refuse un mot de passe faux à la connexion', async () => {

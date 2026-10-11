@@ -135,7 +135,7 @@ const MDP = 'MotDePasse123!';
 const inscription = await fetch(`${API}/users/signup`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email: EMAIL, password: MDP, captchaToken: 'jeton-script' }),
+  body: JSON.stringify({ email: EMAIL, password: MDP, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-01' }),
 });
 if (inscription.status >= 400) {
   console.error(`Inscription impossible (HTTP ${inscription.status}) — le serveur répond-il ?`);

@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import { Equals, IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import { CGU_VERSION_EN_VIGUEUR } from '../cgu.js';
 
 export class SignupDto {
   @IsEmail({}, { message: "L'email n'est pas valide." })
@@ -17,4 +18,24 @@ export class SignupDto {
   @IsNotEmpty({ message: 'Vérification anti-robot manquante.' })
   @MaxLength(2048, { message: 'Jeton de vérification invalide.' })
   captchaToken: string;
+
+  /**
+   * La case « J'ai lu et j'accepte les conditions d'utilisation et la
+   * politique de confidentialité ». Exactement `true` : ni absent, ni
+   * `false`, ni la chaîne "true" (la ValidationPipe ne convertit rien).
+   */
+  @Equals(true, {
+    message: "Il faut accepter les conditions d'utilisation et la politique de confidentialité.",
+  })
+  acceptCgu: true;
+
+  /**
+   * La version que la page affichait. Elle doit être celle en vigueur : sinon
+   * la personne a accepté un texte qui n'est plus le bon.
+   */
+  @Equals(CGU_VERSION_EN_VIGUEUR, {
+    message:
+      "Les conditions d'utilisation ont changé depuis l'ouverture de cette page : recharge-la pour lire et accepter la version en vigueur.",
+  })
+  cguVersion: string;
 }

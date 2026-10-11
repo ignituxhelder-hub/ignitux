@@ -14,7 +14,14 @@ model users {
   password_hash             String
   // null tant que l'email n'a pas ete verifie via le lien envoye a l'inscription.
   email_verified_at         DateTime?                @db.Timestamptz(6)
-  created_at                DateTime?                @default(now()) @db.Timestamptz(6)
+  // Moment où la personne a accepté les conditions d'utilisation et la
+  // politique de confidentialité, à l'inscription — et la version acceptée
+  // (voir src/users/cgu.ts). null pour les comptes créés avant que
+  // l'acceptation soit enregistrée : on ne fabrique jamais une acceptation
+  // qu'on n'a pas recueillie.
+  cgu_accepted_at           DateTime?                @db.Timestamptz(6)
+  cgu_version               String?
+  created_at               DateTime?                @default(now()) @db.Timestamptz(6)
   projects                  projects[]
   memories                  memories[]
   chat_messages             chat_messages[]
