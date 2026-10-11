@@ -51,7 +51,7 @@ export async function accesProjet(
   });
   if (!projet) throw new NotFoundException('Projet introuvable.');
   if (projet.owner_id === userId) return { role: 'proprietaire', ownerId: projet.owner_id };
-  const brut = projet.collaborators[0]?.role ?? 'observateur';
+  const brut = projet.collaborators?.[0]?.role ?? 'observateur';
   // Un rôle inconnu en base n'ouvre jamais plus que la lecture.
   return { role: estRoleEquipe(brut) ? brut : 'observateur', ownerId: projet.owner_id };
 }

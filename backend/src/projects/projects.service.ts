@@ -23,6 +23,7 @@ import { FormerService, type LegalFormRecommendationResult } from '../igini/form
 import { OffresService } from '../offres/offres.service.js';
 import { contextePersonne } from '../profile/contexte-personne.js';
 import { chargerContexteParticipation } from '../participation/participation-context.js';
+import { exigerCapacite } from '../equipe/acces-projet.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
@@ -148,7 +149,7 @@ export class ProjectsService {
 
   async updateForOwner(ownerId: string, id: string, title?: string, description?: string) {
     // Vérifie que le projet appartient bien à l'utilisateur avant de le modifier.
-    await this.findOneForOwner(ownerId, id);
+    await exigerCapacite(this.prisma, ownerId, id, 'modifier_projet');
 
     return this.prisma.projects.update({
       where: { id },
@@ -157,7 +158,7 @@ export class ProjectsService {
   }
 
   async deleteForOwner(ownerId: string, id: string) {
-    await this.findOneForOwner(ownerId, id);
+    await exigerCapacite(this.prisma, ownerId, id, 'supprimer_projet');
     await this.prisma.projects.delete({ where: { id } });
   }
 
@@ -169,7 +170,7 @@ export class ProjectsService {
    * entière sans lui, simplement dans l'ordre par défaut.
    */
   async setSectorForOwner(ownerId: string, id: string, sector: string | null) {
-    await this.findOneForOwner(ownerId, id);
+    await exigerCapacite(this.prisma, ownerId, id, 'modifier_projet');
     return this.prisma.projects.update({ where: { id }, data: { sector } });
   }
 
@@ -179,7 +180,7 @@ export class ProjectsService {
    * ne doit jamais se construire sur une suggestion non confirmée.
    */
   async setConfirmedLegalFormForOwner(ownerId: string, id: string, legalForm: string | null) {
-    await this.findOneForOwner(ownerId, id);
+    await exigerCapacite(this.prisma, ownerId, id, 'modifier_projet');
     return this.prisma.projects.update({
       where: { id },
       data: { confirmed_legal_form: legalForm },
@@ -187,7 +188,7 @@ export class ProjectsService {
   }
 
   async setVisibilityForOwner(ownerId: string, id: string, isPublic: boolean) {
-    await this.findOneForOwner(ownerId, id);
+    await exigerCapacite(this.prisma, ownerId, id, 'modifier_projet');
     return this.prisma.projects.update({ where: { id }, data: { is_public: isPublic } });
   }
 
@@ -286,7 +287,9 @@ export class ProjectsService {
     return present.length > 0 ? present.join('\n') : undefined;
   }
 
-  async analyzeForOwner(ownerId: string, id: string) {
+  async analyzeForOwner(demandeurId: string, id: string) {
+    // Un associé peut lancer IGINI ; l'appel reste attribué au propriétaire (offre, quota, coût).
+    const { ownerId } = await exigerCapacite(this.prisma, demandeurId, id, 'lancer_ia');
     const project = await this.findOneForOwner(ownerId, id);
     const result = await this.analysisService.analyzeProject(
       project.title,
@@ -355,7 +358,7 @@ export class ProjectsService {
   }
 
   async listAnalysesForOwner(ownerId: string, id: string) {
-    await this.findOneForViewer(ownerId, id);
+    await exigerCapacite(this.prisma, ownerId, id, 'voir_projet');
     return this.prisma.analyses.findMany({
       where: { project_id: id },
       include: { sources: true },
@@ -455,7 +458,9 @@ export class ProjectsService {
     }
   }
 
-  async recommendLegalFormForOwner(ownerId: string, id: string) {
+  async recommendLegalFormForOwner(demandeurId: string, id: string) {
+    // Un associé peut lancer IGINI ; l'appel reste attribué au propriétaire (offre, quota, coût).
+    const { ownerId } = await exigerCapacite(this.prisma, demandeurId, id, 'lancer_ia');
     const project = await this.findOneForOwner(ownerId, id);
     const result = await this.formerService.recommendLegalForm(
       project.title,
@@ -467,7 +472,7 @@ export class ProjectsService {
   }
 
   async listLegalFormRecommendationsForOwner(ownerId: string, id: string) {
-    await this.findOneForViewer(ownerId, id);
+    await exigerCapacite(this.prisma, ownerId, id, 'voir_projet');
     return this.prisma.legal_form_recommendations.findMany({
       where: { project_id: id },
       include: { assumptions: true, alternatives: true, sources: true },
@@ -475,7 +480,9 @@ export class ProjectsService {
     });
   }
 
-  async createBuildPlanForOwner(ownerId: string, id: string) {
+  async createBuildPlanForOwner(demandeurId: string, id: string) {
+    // Un associé peut lancer IGINI ; l'appel reste attribué au propriétaire (offre, quota, coût).
+    const { ownerId } = await exigerCapacite(this.prisma, demandeurId, id, 'lancer_ia');
     const project = await this.findOneForOwner(ownerId, id);
     const [personne, memory, analysis, participation] = await Promise.all([
       this.personContext(ownerId),
@@ -512,7 +519,7 @@ export class ProjectsService {
   }
 
   async listBuildPlansForOwner(ownerId: string, id: string) {
-    await this.findOneForViewer(ownerId, id);
+    await exigerCapacite(this.prisma, ownerId, id, 'voir_projet');
     return this.prisma.build_plans.findMany({
       where: { project_id: id },
       orderBy: { created_at: 'desc' },
@@ -541,7 +548,9 @@ export class ProjectsService {
     return { titre: project.title, description: project.description, contexte: this.joinContext(...parts) };
   }
 
-  async createFinancingPlanForOwner(ownerId: string, id: string) {
+  async createFinancingPlanForOwner(demandeurId: string, id: string) {
+    // Un associé peut lancer IGINI ; l'appel reste attribué au propriétaire (offre, quota, coût).
+    const { ownerId } = await exigerCapacite(this.prisma, demandeurId, id, 'lancer_ia');
     const project = await this.findOneForOwner(ownerId, id);
     const [personne, memory, analysis, buildPlan, participation] = await Promise.all([
       this.personContext(ownerId),
@@ -582,14 +591,16 @@ export class ProjectsService {
   }
 
   async listFinancingPlansForOwner(ownerId: string, id: string) {
-    await this.findOneForViewer(ownerId, id);
+    await exigerCapacite(this.prisma, ownerId, id, 'voir_plan_financement');
     return this.prisma.financing_plans.findMany({
       where: { project_id: id },
       orderBy: { created_at: 'desc' },
     });
   }
 
-  async createDevelopmentPlanForOwner(ownerId: string, id: string) {
+  async createDevelopmentPlanForOwner(demandeurId: string, id: string) {
+    // Un associé peut lancer IGINI ; l'appel reste attribué au propriétaire (offre, quota, coût).
+    const { ownerId } = await exigerCapacite(this.prisma, demandeurId, id, 'lancer_ia');
     const project = await this.findOneForOwner(ownerId, id);
     const [personne, memory, analysis, buildPlan, financingPlan, participation] = await Promise.all([
       this.personContext(ownerId),
@@ -631,14 +642,16 @@ export class ProjectsService {
   }
 
   async listDevelopmentPlansForOwner(ownerId: string, id: string) {
-    await this.findOneForViewer(ownerId, id);
+    await exigerCapacite(this.prisma, ownerId, id, 'voir_projet');
     return this.prisma.development_plans.findMany({
       where: { project_id: id },
       orderBy: { created_at: 'desc' },
     });
   }
 
-  async createTransmissionPlanForOwner(ownerId: string, id: string) {
+  async createTransmissionPlanForOwner(demandeurId: string, id: string) {
+    // Un associé peut lancer IGINI ; l'appel reste attribué au propriétaire (offre, quota, coût).
+    const { ownerId } = await exigerCapacite(this.prisma, demandeurId, id, 'lancer_ia');
     const project = await this.findOneForOwner(ownerId, id);
     const [personne, memory, analysis, buildPlan, financingPlan, developmentPlan, participation] =
       await Promise.all([
@@ -690,7 +703,7 @@ export class ProjectsService {
   }
 
   async listTransmissionPlansForOwner(ownerId: string, id: string) {
-    await this.findOneForViewer(ownerId, id);
+    await exigerCapacite(this.prisma, ownerId, id, 'voir_projet');
     return this.prisma.transmission_plans.findMany({
       where: { project_id: id },
       orderBy: { created_at: 'desc' },
@@ -701,14 +714,14 @@ export class ProjectsService {
   // exécute exactement la même logique que celle appelée automatiquement
   // après chaque génération (voir AutomationService).
   async runAutomationForOwner(ownerId: string, id: string) {
-    await this.findOneForOwner(ownerId, id);
+    await exigerCapacite(this.prisma, ownerId, id, 'lancer_ia');
     return this.automationService.run(id);
   }
 
   // Lecture seule : accessible au propriétaire et aux collaborateurs, comme
   // les autres moteurs transverses.
   async listAutomationRunsForViewer(userId: string, id: string) {
-    await this.findOneForViewer(userId, id);
+    await exigerCapacite(this.prisma, userId, id, 'voir_projet');
     return this.automationService.listRuns(id);
   }
 }

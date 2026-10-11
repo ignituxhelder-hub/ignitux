@@ -370,12 +370,15 @@ describe('ProjectsService', () => {
       prisma.projects.findFirst.mockResolvedValue(project);
 
       await expect(service.findOneForViewer('u2', 'p1')).resolves.toEqual(project);
-      expect(prisma.projects.findFirst).toHaveBeenCalledWith({
+      expect(prisma.projects.findFirst).toHaveBeenCalledWith(
+        // Le rôle est lu en même temps (select) : seul le critère d'accès compte ici.
+        expect.objectContaining({
         where: {
           id: 'p1',
           OR: [{ owner_id: 'u2' }, { collaborators: { some: { user_id: 'u2' } } }],
         },
-      });
+        }),
+      );
     });
   });
 
@@ -784,12 +787,15 @@ describe('ProjectsService', () => {
       await expect(service.listAnalysesForOwner('u2-collaborateur', 'p1')).resolves.toEqual([
         { id: 'a1' },
       ]);
-      expect(prisma.projects.findFirst).toHaveBeenCalledWith({
+      expect(prisma.projects.findFirst).toHaveBeenCalledWith(
+        // Le rôle est lu en même temps (select) : seul le critère d'accès compte ici.
+        expect.objectContaining({
         where: {
           id: 'p1',
           OR: [{ owner_id: 'u2-collaborateur' }, { collaborators: { some: { user_id: 'u2-collaborateur' } } }],
         },
-      });
+        }),
+      );
     });
   });
 
@@ -895,6 +901,66 @@ describe('ProjectsService', () => {
         include: { assumptions: true, alternatives: true, sources: true },
         orderBy: { created_at: 'desc' },
       });
+    });
+  });
+
+  describe('droits de l’équipe sur le projet', () => {
+    const projetAvec = (role: string) => ({
+      id: 'p1',
+      owner_id: 'proprio',
+      title: 'Idée',
+      description: 'Desc',
+      collaborators: [{ role }],
+    });
+
+    it('un salarié voit les plans mais ne modifie pas le projet', async () => {
+      prisma.projects.findFirst.mockResolvedValue(projetAvec('salarie'));
+      prisma.build_plans.findMany.mockResolvedValue([]);
+
+      await expect(service.listBuildPlansForOwner('u2', 'p1')).resolves.toEqual([]);
+      await expect(service.updateForOwner('u2', 'p1', 'Nouveau titre')).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+      await expect(service.setSectorForOwner('u2', 'p1', 'commerce')).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+    });
+
+    it('un comptable voit le plan de financement, pas les autres plans', async () => {
+      prisma.projects.findFirst.mockResolvedValue(projetAvec('comptable'));
+      prisma.financing_plans.findMany.mockResolvedValue([]);
+
+      await expect(service.listFinancingPlansForOwner('u2', 'p1')).resolves.toEqual([]);
+      await expect(service.listBuildPlansForOwner('u2', 'p1')).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('un associé lance un générateur : l’appel est attribué au propriétaire', async () => {
+      prisma.projects.findFirst.mockResolvedValue(projetAvec('associe'));
+      planningService.createBuildPlan.mockResolvedValue({
+        summary: 'R',
+        estimated_timeline: 'x',
+        milestones: [],
+        key_resources: [],
+      });
+      prisma.build_plans.create.mockResolvedValue({ id: 'bp1' });
+
+      await service.createBuildPlanForOwner('u2', 'p1');
+
+      expect(planningService.createBuildPlan).toHaveBeenCalledWith(
+        'Idée',
+        'Desc',
+        { userId: 'proprio', projectId: 'p1' },
+        undefined,
+      );
+    });
+
+    it('un associé ne supprime pas le projet ; un observateur ne lance pas IGINI', async () => {
+      prisma.projects.findFirst.mockResolvedValue(projetAvec('associe'));
+      await expect(service.deleteForOwner('u2', 'p1')).rejects.toBeInstanceOf(ForbiddenException);
+
+      prisma.projects.findFirst.mockResolvedValue(projetAvec('observateur'));
+      await expect(service.analyzeForOwner('u2', 'p1')).rejects.toBeInstanceOf(ForbiddenException);
+      expect(analysisService.analyzeProject).not.toHaveBeenCalled();
     });
   });
 
