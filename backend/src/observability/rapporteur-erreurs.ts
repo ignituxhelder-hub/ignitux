@@ -85,6 +85,29 @@ function destination(): string | null {
   }
 }
 
+/** Discord n'accepte qu'un `{ content }` : son webhook refuserait le format maison. */
+function estDiscord(url: string): boolean {
+  const { hostname, pathname } = new URL(url);
+  return /(^|\.)discord(app)?\.com$/.test(hostname) && pathname.startsWith('/api/webhooks/');
+}
+
+/** Limite de Discord pour un message. */
+const LONGUEUR_MAX_DISCORD = 2000;
+
+/** Le rapport, déjà expurgé, mis en forme pour un salon Discord. */
+function messageDiscord(r: RapportErreur & { produit: string }): string {
+  const entete = [
+    `🚨 **Erreur Ignitux** — référence \`${r.reference}\``,
+    `\`${r.methode} ${r.chemin}\``,
+    `Utilisateur : ${r.utilisateurId ?? 'non connecté'} · ${r.moment}`,
+    r.message.slice(0, 400),
+  ].join('\n');
+  if (!r.pile) return entete.slice(0, LONGUEUR_MAX_DISCORD);
+  // Ce qui reste de place va à la pile, dans un bloc de code.
+  const place = LONGUEUR_MAX_DISCORD - entete.length - '\n```\n\n```'.length;
+  return place > 0 ? `${entete}\n\`\`\`\n${r.pile.slice(0, place)}\n\`\`\`` : entete.slice(0, LONGUEUR_MAX_DISCORD);
+}
+
 /** Le collecteur est-il configuré ? Sert à l'endpoint de santé. */
 export function rapporteurActif(): boolean {
   return destination() !== null;
@@ -113,7 +136,8 @@ export function signalerErreur(rapport: RapportErreur): void {
   void fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(charge),
+    // Le même contenu, déjà expurgé ; seule la mise en forme change pour Discord.
+    body: JSON.stringify(estDiscord(url) ? { content: messageDiscord(charge) } : charge),
     signal: AbortSignal.timeout(5_000),
   }).catch((erreur: unknown) => {
     // Une seule ligne, sans pile : un collecteur injoignable ne doit pas
