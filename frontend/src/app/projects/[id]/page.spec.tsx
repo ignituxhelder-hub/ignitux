@@ -1325,6 +1325,34 @@ describe('ProjectDetailPage — guide pas à pas et visite guidée', () => {
 
     expect(await screen.findByRole('heading', { name: 'Analyse' })).toBeInTheDocument();
     expect(document.querySelector('.guide-cible')).toBeNull();
+    // Sans bouton à désigner, on mène quand même à la section.
+    const section = document.getElementById('section-analyse');
+    expect(section).not.toBeNull();
+    expect(vi.mocked(Element.prototype.scrollIntoView).mock.contexts).toContain(section);
+  });
+
+  it('« Y aller » sur « Décrire » ouvre le formulaire sans passer en vue avancée', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      ...ENGINE_ROUTES,
+      'GET /projects/p1/parcours': {
+        status: 200,
+        body: parcours({
+          phase: 'decouvrir',
+          phaseLabel: 'Découvrir',
+          nextStep: { id: 'decrire', titre: 'Décris ton idée', pourquoi: 'Quelques phrases.', section: 'analyse' },
+          guide: [{ id: 'decrire', label: 'Décrire ton idée', etat: 'en-cours' }],
+          visible: [{ section: 'analyse', label: 'Analyse', phase: 'decouvrir' }],
+          locked: [],
+        }),
+      },
+    });
+    afficher();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Y aller' }));
+
+    await waitFor(() => expect(document.getElementById('description')).not.toBeNull());
+    expect(screen.getByRole('button', { name: 'Vue avancée' })).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('lance la visite à la première ouverture, une seule fois', async () => {

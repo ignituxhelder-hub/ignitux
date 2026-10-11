@@ -508,7 +508,11 @@ export default function ProjectDetailPage() {
   const allerA = (etapeId: string) => {
     const destination = destinationDe(etapeId);
     if (!destination) return;
-    if (destination.avancee || !montrer(destination.ouvre)) setVueAvancee(true);
+    // « infos » n'est pas une section du parcours : le formulaire est
+    // toujours là pour le porteur, la vue simple suffit.
+    const visibleEnVueSimple =
+      destination.ouvre === 'infos' ? outilVisible({ id: 'infos', section: 'infos' }) : montrer(destination.ouvre);
+    if (destination.avancee || !visibleEnVueSimple) setVueAvancee(true);
     setEtapeOuverte(destination.ouvre);
     setCibleGuide({ selecteur: destination.cible, section: destination.ouvre });
   };
@@ -1068,7 +1072,13 @@ function GenerationSection<T>({
   const generatorsOff = iginiStatus !== null && !iginiStatus.generatorsEnabled;
 
   return (
-    <div className="card" id={anchorId} style={{ marginTop: '1.5rem' }}>
+    <div
+      className="card"
+      // Sans ancre explicite, « Y aller » mène quand même à la section quand
+      // son bouton manque (générateurs éteints).
+      id={anchorId ?? (guideCible ? `section-${guideCible}` : undefined)}
+      style={{ marginTop: '1.5rem' }}
+    >
       <div className="top-bar" style={{ marginBottom: items.length ? '1rem' : 0 }}>
         <h2 style={{ margin: 0 }}>{title}</h2>
         {!readOnly && !generatorsOff && (

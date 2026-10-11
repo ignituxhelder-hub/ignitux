@@ -159,14 +159,18 @@ export function VisiteGuidee({
     }
   }
 
-  // La bulle sous la zone, ou au-dessus si elle sortirait de l'écran.
+  // La bulle sous la zone, sinon au-dessus, sinon épinglée en bas de
+  // l'écran : sur téléphone une zone peut être plus haute que l'écran, et
+  // une bulle sortie de l'écran emporterait le seul bouton de sortie.
   const hauteurEcran = typeof window === 'undefined' ? 0 : window.innerHeight;
-  const enDessous = !cadre || cadre.top + cadre.height + 220 < hauteurEcran;
-  const positionBulle = cadre
-    ? enDessous
+  const hauteurBulle = bulle.current?.offsetHeight || 220;
+  const positionBulle = !cadre
+    ? { top: 16 }
+    : cadre.top + cadre.height + 12 + hauteurBulle <= hauteurEcran - 16
       ? { top: cadre.top + cadre.height + 12 }
-      : { bottom: hauteurEcran - cadre.top + 12 }
-    : { top: 16 };
+      : cadre.top - 12 - hauteurBulle >= 16
+        ? { bottom: hauteurEcran - cadre.top + 12 }
+        : { bottom: 16 };
 
   return (
     <div className="visite" role="presentation">

@@ -2090,3 +2090,16 @@ th {
   margin: 0;
   font-size: 1.05rem;
 }
+
+/* « ✅ N étapes faites » : ne se lit que là où ces étapes sont repliées. */
+.guide-parcours__resume {
+  display: none;
+  margin: 0 0 0.35rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 639px) {
+  .guide-parcours__resume {
+    display: block;
+  }
+}

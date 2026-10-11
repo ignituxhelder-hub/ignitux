@@ -298,9 +298,12 @@ export function GuideParcours({
   const [tout, setTout] = useState(false);
   const etape = parcours.nextStep;
   const indexEnCours = parcours.guide.findIndex((e) => e.etat === 'en-cours');
+  // Rien d'en cours (tout est fait) : on ne replie rien, les ✅ sont la
+  // réponse à « où en suis-je ? ».
   const repliee = (index: number, etat: JourneyEtatEtape) =>
-    etat === 'fait' || (indexEnCours >= 0 && index > indexEnCours + 2);
+    indexEnCours >= 0 && (etat === 'fait' || index > indexEnCours + 2);
   const aReplier = parcours.guide.some((e, index) => repliee(index, e.etat));
+  const faitesRepliees = parcours.guide.filter((e, index) => e.etat === 'fait' && repliee(index, e.etat)).length;
   const bloqueeParLIa = !!etape && !iaDisponible && ETAPES_QUI_EXIGENT_L_IA.has(etape.id);
 
   return (
@@ -313,6 +316,12 @@ export function GuideParcours({
       <h2 id={titreId} style={{ marginTop: 0 }}>
         {etape ? 'Ton parcours' : 'Tu as fait le tour'}
       </h2>
+
+      {faitesRepliees > 0 && !tout && (
+        <p className="guide-parcours__resume">
+          ✅ {faitesRepliees} {faitesRepliees > 1 ? 'étapes faites' : 'étape faite'}
+        </p>
+      )}
 
       <ol className="guide-parcours__liste">
         {parcours.guide.map((e, index) => (

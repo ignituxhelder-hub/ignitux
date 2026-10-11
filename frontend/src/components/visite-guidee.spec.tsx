@@ -75,6 +75,27 @@ describe('la visite guidée', () => {
     expect(screen.getByRole('dialog', { name: 'Arrêt B' })).toBeInTheDocument();
   });
 
+  // Sur un téléphone, une zone plus haute que l'écran ne laisse de place ni
+  // dessous ni dessus : la bulle s'épingle en bas plutôt que de sortir de
+  // l'écran avec le seul bouton de sortie.
+  it('garde la bulle à l’écran quand la zone est plus haute que lui', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      top: -100,
+      left: 0,
+      width: 300,
+      height: 1200,
+      bottom: 1100,
+      right: 300,
+      x: 0,
+      y: -100,
+      toJSON: () => ({}),
+    });
+    render(<Page ouverte onFermer={() => {}} />);
+    const bulle = screen.getByRole('dialog');
+    expect(bulle.style.bottom).toBe('16px');
+    expect(bulle.style.top).toBe('');
+  });
+
   it('met le focus dans la bulle', () => {
     render(<Page ouverte onFermer={() => {}} />);
     expect(screen.getByRole('dialog').contains(document.activeElement)).toBe(true);

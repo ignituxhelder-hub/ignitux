@@ -136,6 +136,22 @@ describe('le guide « Ton parcours »', () => {
     expect(screen.queryByRole('button', { name: 'Y aller' })).not.toBeInTheDocument();
   });
 
+  it('ne replie rien quand tout est fait, pour montrer les ✅', () => {
+    const { container } = render(
+      <GuideParcours
+        parcours={parcours({ nextStep: null, guide: GUIDE.map((e) => ({ ...e, etat: 'fait' })) })}
+        onAller={() => {}}
+      />,
+    );
+    expect(container.querySelectorAll('.guide-etape--repliee')).toHaveLength(0);
+    expect(screen.queryByRole('button', { name: 'Voir tout' })).not.toBeInTheDocument();
+  });
+
+  it('résume les étapes faites repliées sur téléphone', () => {
+    render(<GuideParcours parcours={parcours()} onAller={() => {}} />);
+    expect(screen.getByText('✅ 1 étape faite')).toHaveClass('guide-parcours__resume');
+  });
+
   it('dit ce qui bloque quand l’IA est éteinte', () => {
     render(<GuideParcours parcours={parcours()} iaDisponible={false} onAller={() => {}} />);
     expect(screen.getByText(/générateurs sont éteints/)).toBeInTheDocument();
