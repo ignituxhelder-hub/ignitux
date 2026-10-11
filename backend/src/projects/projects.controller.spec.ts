@@ -15,9 +15,6 @@ describe('ProjectsController', () => {
     deleteForOwner: ReturnType<typeof vi.fn>;
     setVisibilityForOwner: ReturnType<typeof vi.fn>;
     setConfirmedLegalFormForOwner: ReturnType<typeof vi.fn>;
-    listCollaborators: ReturnType<typeof vi.fn>;
-    addCollaborator: ReturnType<typeof vi.fn>;
-    removeCollaborator: ReturnType<typeof vi.fn>;
     analyzeForOwner: ReturnType<typeof vi.fn>;
     listAnalysesForOwner: ReturnType<typeof vi.fn>;
     recommendLegalFormForOwner: ReturnType<typeof vi.fn>;
@@ -44,10 +41,7 @@ describe('ProjectsController', () => {
       updateForOwner: vi.fn(),
       deleteForOwner: vi.fn(),
       setVisibilityForOwner: vi.fn(),
-      setConfirmedLegalFormForOwner: vi.fn(),
-      listCollaborators: vi.fn(),
-      addCollaborator: vi.fn(),
-      removeCollaborator: vi.fn(),
+      setConfirmedLegalFormForOwner: vi.fn(),
       analyzeForOwner: vi.fn(),
       listAnalysesForOwner: vi.fn(),
       recommendLegalFormForOwner: vi.fn(),
@@ -148,32 +142,6 @@ describe('ProjectsController', () => {
     await controller.updateLegalForm(currentUser, 'p1', { legalForm: null });
 
     expect(projectsService.setConfirmedLegalFormForOwner).toHaveBeenCalledWith('u1', 'p1', null);
-  });
-
-  it('listCollaborators délègue au service avec l\'utilisateur courant', async () => {
-    projectsService.listCollaborators.mockResolvedValue([{ id: 'pc1' }]);
-
-    const result = await controller.listCollaborators(currentUser, 'p1');
-
-    expect(projectsService.listCollaborators).toHaveBeenCalledWith('u1', 'p1');
-    expect(result).toEqual([{ id: 'pc1' }]);
-  });
-
-  it('addCollaborator délègue au service avec le propriétaire courant', async () => {
-    projectsService.addCollaborator.mockResolvedValue({ id: 'pc1' });
-
-    const result = await controller.addCollaborator(currentUser, 'p1', { email: 'b@b.com' });
-
-    expect(projectsService.addCollaborator).toHaveBeenCalledWith('u1', 'p1', 'b@b.com');
-    expect(result).toEqual({ id: 'pc1' });
-  });
-
-  it('removeCollaborator délègue au service avec le propriétaire courant', async () => {
-    projectsService.removeCollaborator.mockResolvedValue(undefined);
-
-    await controller.removeCollaborator(currentUser, 'p1', 'u2');
-
-    expect(projectsService.removeCollaborator).toHaveBeenCalledWith('u1', 'p1', 'u2');
   });
 
   it('analyze délègue au service avec le propriétaire courant', async () => {

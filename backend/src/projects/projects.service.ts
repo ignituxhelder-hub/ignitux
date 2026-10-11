@@ -191,46 +191,6 @@ export class ProjectsService {
     return this.prisma.projects.update({ where: { id }, data: { is_public: isPublic } });
   }
 
-  async listCollaborators(userId: string, id: string) {
-    await this.findOneForViewer(userId, id);
-    return this.prisma.project_collaborators.findMany({
-      where: { project_id: id },
-      include: { user: { select: { id: true, email: true } } },
-      orderBy: { created_at: 'asc' },
-    });
-  }
-
-  async addCollaborator(ownerId: string, id: string, email: string) {
-    const project = await this.findOneForOwner(ownerId, id);
-
-    const user = await this.prisma.users.findUnique({ where: { email } });
-    if (!user) {
-      throw new NotFoundException('Aucun compte ne correspond à cet email.');
-    }
-    if (user.id === project.owner_id) {
-      throw new BadRequestException('Le propriétaire du projet ne peut pas être ajouté comme collaborateur.');
-    }
-
-    const existing = await this.prisma.project_collaborators.findFirst({
-      where: { project_id: id, user_id: user.id },
-    });
-    if (existing) {
-      throw new BadRequestException('Cette personne collabore déjà sur ce projet.');
-    }
-
-    return this.prisma.project_collaborators.create({
-      data: { project_id: id, user_id: user.id },
-      include: { user: { select: { id: true, email: true } } },
-    });
-  }
-
-  async removeCollaborator(ownerId: string, id: string, collaboratorUserId: string) {
-    await this.findOneForOwner(ownerId, id);
-    await this.prisma.project_collaborators.deleteMany({
-      where: { project_id: id, user_id: collaboratorUserId },
-    });
-  }
-
   // Mémoire commune (voir backend/src/igini/README.md) : chaque génération ne
   // doit voir QUE ce que les étapes qui la précèdent logiquement ont déjà
   // établi — jamais ce qui vient après. Chaque étape a donc sa propre

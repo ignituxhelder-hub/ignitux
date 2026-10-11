@@ -106,7 +106,8 @@ describe('SCÉNARIO — ce qu’un collaborateur peut, et ce qu’il ne peut pas
         .post(`/projects/${projectId}/collaborators`)
         .set(...auth(collaborateur))
         .send({ email: porteuse.email })
-        .expect(404);
+        // Il connaît le projet : un refus lisible (403) plutôt qu'un « introuvable ».
+        .expect(403);
     });
   });
 

@@ -18,7 +18,6 @@ import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { RefuserEcritureDepassee } from '../hors-ligne/ecriture-depassee.decorator.js';
 import { EcritureDepasseeGuard } from '../hors-ligne/ecriture-depassee.guard.js';
-import { AddCollaboratorDto } from './dto/add-collaborator.dto.js';
 import { CreateProjectDto } from './dto/create-project.dto.js';
 import { UpdateLegalFormDto } from './dto/update-legal-form.dto.js';
 import { UpdateProjectDto } from './dto/update-project.dto.js';
@@ -94,31 +93,6 @@ export class ProjectsController {
     @Body() dto: UpdateVisibilityDto,
   ) {
     return this.projectsService.setVisibilityForOwner(user.id, id, dto.isPublic);
-  }
-
-  @Get(':id/collaborators')
-  listCollaborators(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
-    return this.projectsService.listCollaborators(user.id, id);
-  }
-
-  @Post(':id/collaborators')
-  @HttpCode(HttpStatus.CREATED)
-  addCollaborator(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: AddCollaboratorDto,
-  ) {
-    return this.projectsService.addCollaborator(user.id, id, dto.email);
-  }
-
-  @Delete(':id/collaborators/:userId')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async removeCollaborator(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id', ParseUUIDPipe) id: string,
-    @Param('userId', ParseUUIDPipe) collaboratorUserId: string,
-  ) {
-    await this.projectsService.removeCollaborator(user.id, id, collaboratorUserId);
   }
 
   @Post(':id/analyze')

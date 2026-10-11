@@ -25,6 +25,7 @@ import { KnowledgeModule } from './igini/knowledge/knowledge.module.js';
 import { ChatModule } from './igini/chat/chat.module.js';
 import { MemoryModule } from './igini/memory/memory.module.js';
 import { ScoringModule } from './igini/scoring/scoring.module.js';
+import { EquipeModule } from './equipe/equipe.module.js';
 import { EvaluationModule } from './evaluation-financement/evaluation.module.js';
 import { ExecutionModule } from './igini/execution/execution.module.js';
 import { WorkflowModule } from './igini/workflow/workflow.module.js';
@@ -62,6 +63,7 @@ import { ImmatriculationModule } from './immatriculation/immatriculation.module.
     WorkflowModule,
     ExecutionModule,
     EvaluationModule,
+    EquipeModule,
     ScoringModule,
     CommunityModule,
     ComplianceModule,
