@@ -38,21 +38,22 @@ de propriétaire inconnu — l'identifier avant tout `migrate resolve`/`reset`.
 
 ## BLOQUANTS — sans ça, on n'ouvre pas
 
-### 1. Hébergement et domaine *(attend Helder)*
+### 1. ~~Hébergement et domaine~~ — fait (10-11/10/2026)
 
-Zéro ligne de code à écrire. Deux décisions :
-- Choisir entre Railway (~15 $/mois) et Scalingo (~14,40 €/mois).
-- Acheter le domaine (`ignitux.fr` ou `ignitux.com`).
+Le site est en ligne : interface sur Vercel (`ignitux.vercel.app`), serveur sur
+Render (offre gratuite), base `ignitux_prod` sur Supabase. Domaine **ignitux.com**
+acheté chez OVH le 11/10/2026 (pas encore relié au site : il sert aux emails).
+Rappel : appliquer les migrations sur `ignitux_prod` **avant** de pousser sur
+`main` (voir `deploiement-v1.md`).
 
-Une fois le domaine en place, `verifier-production.mjs` passe de 1 bloquant
-à 0 bloquant, et on peut déployer.
+### 2. ~~Envoi d'emails~~ — fait (11/10/2026)
 
-Voir [`hebergement.md`](hebergement.md) et [`deployer.md`](deployer.md).
-
-### 2. Mot de passe SMTP *(attend Helder)*
-
-`SMTP_PASSWORD` manque dans `.env.production`. Sans lui, `MAIL_TRANSPORT`
-reste `log` et les mails (inscription, réinitialisation) ne partent pas.
+Brevo, en SMTP, **port 2525** (le 587 expire depuis Render), expéditeur
+`contact@ignitux.com`, domaine authentifié. Réglages dans les variables
+d'environnement de Render. **La clé SMTP expire le 11/10/2027, ou après 90
+jours sans aucun envoi** : en générer une nouvelle et remplacer
+`SMTP_PASSWORD` dans Render. Le blocage d'IP inconnues de Brevo est
+désactivé pour les clés SMTP (les adresses de Render changent).
 
 ---
 
@@ -86,13 +87,12 @@ sur tout le graphe » pour revenir à la vue complète).
 
 ## À FAIRE LE JOUR DU DÉPLOIEMENT
 
-### 7. Collecteur d'erreurs externe
+### 7. ~~Collecteur d'erreurs externe~~ — fait (11/10/2026)
 
-Choisir un service (Sentry, Highlight, Axiom, webhook maison) et poser
-`ERREURS_WEBHOOK_URL` dans les variables de production. Sans lui, les
-`Logger.error` restent dans le vide. Option gratuite prise en charge
-directement : un webhook Discord — marche à suivre dans
-`docs/deployer.md`, « Recevoir les erreurs dans Discord ».
+Un salon Discord privé (serveur « ignitux ») reçoit chaque erreur 5xx :
+`ERREURS_WEBHOOK_URL` est le webhook de ce salon, et le rapporteur met le
+rapport (déjà expurgé) au format Discord (marche à suivre dans
+`docs/deployer.md`, « Recevoir les erreurs dans Discord »).
 
 ### 8. Sonde externe sur `/health`
 
