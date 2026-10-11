@@ -1,6 +1,5 @@
+import { exigerCapacite } from '../../equipe/acces-projet.js';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { assertHasProjectAccess } from '../../prisma/assert-has-project-access.js';
-import { assertOwnsProject } from '../../prisma/assert-owns-project.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { AutomationService } from '../automation/automation.service.js';
 import {
@@ -36,7 +35,7 @@ export class KnowledgeService {
     projectId?: string,
   ) {
     if (projectId) {
-      await assertOwnsProject(this.prisma, userId, projectId);
+      await exigerCapacite(this.prisma, userId, projectId, 'modifier_conformite_memoire');
     }
 
     const concept = await this.prisma.concepts.create({
@@ -64,7 +63,7 @@ export class KnowledgeService {
    */
   async listConcepts(userId: string, projectId?: string) {
     if (projectId) {
-      await assertHasProjectAccess(this.prisma, userId, projectId);
+      await exigerCapacite(this.prisma, userId, projectId, 'voir_conformite_memoire');
     }
 
     return this.prisma.concepts.findMany({
@@ -94,7 +93,7 @@ export class KnowledgeService {
    */
   async searchConcepts(userId: string, filters: ConceptSearchFilters = {}) {
     if (filters.projectId) {
-      await assertHasProjectAccess(this.prisma, userId, filters.projectId);
+      await exigerCapacite(this.prisma, userId, filters.projectId, 'voir_conformite_memoire');
     }
 
     const terms = (filters.query ?? '')

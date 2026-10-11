@@ -1,7 +1,6 @@
+import { exigerCapacite } from '../../equipe/acces-projet.js';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConstitutionService } from '../../constitution/constitution.service.js';
-import { assertHasProjectAccess } from '../../prisma/assert-has-project-access.js';
-import { assertOwnsProject } from '../../prisma/assert-owns-project.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { MEMORY_CATEGORIES, type MemoryCategory } from './memory-category.js';
 
@@ -68,7 +67,7 @@ export class MemoryService {
     tags: string[] = [],
   ) {
     if (projectId) {
-      await assertOwnsProject(this.prisma, userId, projectId);
+      await exigerCapacite(this.prisma, userId, projectId, 'modifier_conformite_memoire');
     }
 
     // Article 12 (Mémoire Responsable) : un souvenir sans auteur est un
@@ -104,7 +103,7 @@ export class MemoryService {
    */
   async search(userId: string, filters: MemorySearchFilters = {}) {
     if (filters.projectId) {
-      await assertHasProjectAccess(this.prisma, userId, filters.projectId);
+      await exigerCapacite(this.prisma, userId, filters.projectId, 'voir_conformite_memoire');
     }
 
     const terms = this.splitTerms(filters.query);
@@ -134,7 +133,7 @@ export class MemoryService {
    * vaut pour tous ses projets, pas seulement pour celui où elle a été dite.
    */
   async recall(userId: string, projectId: string, limit = DEFAULT_RECALL_LIMIT) {
-    await assertHasProjectAccess(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'voir_conformite_memoire');
 
     const memories = await this.prisma.memories.findMany({
       where: {
@@ -184,7 +183,7 @@ export class MemoryService {
 
     // Le projet cible doit aussi appartenir à l'utilisateur, sinon on
     // pourrait rattacher un souvenir au projet de quelqu'un d'autre.
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'modifier_conformite_memoire');
 
     return this.prisma.memories.update({
       where: { id: memoryId },

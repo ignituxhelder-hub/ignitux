@@ -1,6 +1,6 @@
+import { exigerCapacite } from '../../equipe/acces-projet.js';
 import { Injectable } from '@nestjs/common';
 import { ConstitutionService } from '../../constitution/constitution.service.js';
-import { assertHasProjectAccess } from '../../prisma/assert-has-project-access.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 
 export interface ScoreCard {
@@ -46,7 +46,7 @@ export class ScoringService {
 
   // Lecture seule par nature : un collaborateur peut consulter le score.
   async getScoreCard(userId: string, projectId: string): Promise<ScoreCard> {
-    await assertHasProjectAccess(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'voir_projet');
 
     const [analysis, buildPlan, financingPlan, developmentPlan, transmissionPlan, tasks] =
       await Promise.all([
@@ -163,7 +163,7 @@ export class ScoringService {
    * courbe lissée raconterait une histoire que personne n'a vécue.
    */
   async historique(userId: string, projectId: string, jours = 90): Promise<ScoreSnapshot[]> {
-    await assertHasProjectAccess(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'voir_projet');
 
     const depuis = new Date();
     depuis.setUTCHours(0, 0, 0, 0);

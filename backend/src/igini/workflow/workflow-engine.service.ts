@@ -1,7 +1,6 @@
+import { exigerCapacite } from '../../equipe/acces-projet.js';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConstitutionService } from '../../constitution/constitution.service.js';
-import { assertHasProjectAccess } from '../../prisma/assert-has-project-access.js';
-import { assertOwnsProject } from '../../prisma/assert-owns-project.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import {
   evaluateCondition,
@@ -65,7 +64,7 @@ export class WorkflowEngineService {
   }
 
   async createFromTemplate(userId: string, projectId: string, slug: string) {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'modifier_taches');
 
     const template = findTemplate(slug);
     if (!template) {
@@ -100,7 +99,7 @@ export class WorkflowEngineService {
     description: string | undefined,
     steps: WorkflowStepInput[],
   ) {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'modifier_taches');
 
     if (steps.length === 0) {
       throw new BadRequestException('Un processus doit comporter au moins une étape.');
@@ -133,7 +132,7 @@ export class WorkflowEngineService {
 
   // Lecture seule : un collaborateur peut consulter les processus du projet.
   async listWorkflows(userId: string, projectId: string) {
-    await assertHasProjectAccess(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'voir_taches');
 
     return this.prisma.workflow_definitions.findMany({
       where: { project_id: projectId },
@@ -181,7 +180,7 @@ export class WorkflowEngineService {
     if (!run) {
       throw new NotFoundException('Exécution introuvable.');
     }
-    await assertOwnsProject(this.prisma, userId, run.project_id);
+    await exigerCapacite(this.prisma, userId, run.project_id, 'modifier_taches');
 
     const [steps, snapshot] = await Promise.all([
       this.prisma.workflow_steps.findMany({
@@ -279,7 +278,7 @@ export class WorkflowEngineService {
     if (!run) {
       throw new NotFoundException('Exécution introuvable.');
     }
-    await assertOwnsProject(this.prisma, userId, run.project_id);
+    await exigerCapacite(this.prisma, userId, run.project_id, 'modifier_taches');
 
     if (run.current_position !== position) {
       throw new BadRequestException(
@@ -296,7 +295,7 @@ export class WorkflowEngineService {
     if (!run) {
       throw new NotFoundException('Exécution introuvable.');
     }
-    await assertHasProjectAccess(this.prisma, userId, run.project_id);
+    await exigerCapacite(this.prisma, userId, run.project_id, 'voir_taches');
 
     return this.prisma.workflow_events.findMany({
       where: { run_id: runId },
@@ -401,7 +400,7 @@ export class WorkflowEngineService {
     if (!workflow) {
       throw new NotFoundException('Processus introuvable.');
     }
-    await assertOwnsProject(this.prisma, userId, workflow.project_id);
+    await exigerCapacite(this.prisma, userId, workflow.project_id, 'modifier_taches');
     return workflow;
   }
 

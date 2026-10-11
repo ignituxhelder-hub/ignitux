@@ -1,6 +1,5 @@
+import { exigerCapacite } from '../equipe/acces-projet.js';
 import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
-import { assertHasProjectAccess } from '../prisma/assert-has-project-access.js';
-import { assertOwnsProject } from '../prisma/assert-owns-project.js';
 import { ConstitutionService } from '../constitution/constitution.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { COMPLIANCE_REQUIREMENTS_FR } from './compliance-requirements.js';
@@ -136,7 +135,7 @@ export class ComplianceService implements OnModuleInit {
   }
 
   // Lecture seule : accessible au propriétaire et aux collaborateurs, comme
-  // les 4 moteurs transverses (voir assertHasProjectAccess).
+  // les 4 moteurs transverses (voir exigerCapacite).
   /**
    * Les démarches du projet, pour le pays qui le concerne.
    *
@@ -149,7 +148,7 @@ export class ComplianceService implements OnModuleInit {
    * l'interface doit le présenter comme tel.
    */
   async listForProject(userId: string, projectId: string, country?: string) {
-    await assertHasProjectAccess(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'voir_conformite_memoire');
 
     const declare = country ?? (await this.paysDeclare(userId));
     const pays = declare ?? 'FR';
@@ -228,7 +227,7 @@ export class ComplianceService implements OnModuleInit {
   // Écriture réservée au propriétaire, comme partout ailleurs dans les
   // moteurs transverses.
   async markChecked(userId: string, projectId: string, requirementId: string) {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'modifier_conformite_memoire');
 
     const requirement = await this.prisma.compliance_requirements.findUnique({ where: { id: requirementId } });
     if (!requirement) {
@@ -243,7 +242,7 @@ export class ComplianceService implements OnModuleInit {
   }
 
   async unmarkChecked(userId: string, projectId: string, requirementId: string) {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'modifier_conformite_memoire');
     await this.prisma.project_compliance_checks.deleteMany({
       where: { project_id: projectId, requirement_id: requirementId },
     });

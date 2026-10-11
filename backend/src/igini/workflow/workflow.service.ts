@@ -1,6 +1,5 @@
+import { exigerCapacite } from '../../equipe/acces-projet.js';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { assertHasProjectAccess } from '../../prisma/assert-has-project-access.js';
-import { assertOwnsProject } from '../../prisma/assert-owns-project.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { AutomationService } from '../automation/automation.service.js';
 import type { TaskAssignee, TaskStatus } from './task-status.js';
@@ -29,7 +28,7 @@ export class WorkflowService {
     assignee: TaskAssignee = 'human',
     source = 'manual',
   ) {
-    await assertOwnsProject(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'modifier_taches');
 
     const tache = await this.prisma.tasks.create({
       data: { project_id: projectId, title, description, assignee, source },
@@ -46,7 +45,7 @@ export class WorkflowService {
   // Lecture seule : un collaborateur peut consulter les tâches, pas en créer
   // ni changer leur statut (voir createTask/updateStatus, restés owner-only).
   async listTasks(userId: string, projectId: string) {
-    await assertHasProjectAccess(this.prisma, userId, projectId);
+    await exigerCapacite(this.prisma, userId, projectId, 'voir_taches');
 
     return this.prisma.tasks.findMany({
       where: { project_id: projectId },
@@ -59,7 +58,7 @@ export class WorkflowService {
     if (!task) {
       throw new NotFoundException('Tâche introuvable.');
     }
-    await assertOwnsProject(this.prisma, userId, task.project_id);
+    await exigerCapacite(this.prisma, userId, task.project_id, 'modifier_taches');
 
     const misAJour = await this.prisma.tasks.update({
       where: { id: taskId },

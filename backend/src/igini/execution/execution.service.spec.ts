@@ -56,7 +56,7 @@ const RUN = {
 describe('ExecutionService', () => {
   let service: ExecutionService;
   let prisma: {
-    projects: { findFirst: ReturnType<typeof vi.fn> };
+    projects: { findFirst: ReturnType<typeof vi.fn>; findUnique: ReturnType<typeof vi.fn> };
     tasks: { findFirst: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> };
     compliance_requirements: { findUnique: ReturnType<typeof vi.fn> };
     project_compliance_ai_runs: {
@@ -70,7 +70,10 @@ describe('ExecutionService', () => {
 
   beforeEach(async () => {
     prisma = {
-      projects: { findFirst: vi.fn().mockResolvedValue({ ...PROJET }) },
+      projects: {
+        findFirst: vi.fn().mockResolvedValue({ ...PROJET }),
+        findUnique: vi.fn().mockResolvedValue({ ...PROJET }),
+      },
       tasks: {
         findFirst: vi.fn().mockResolvedValue({ ...TACHE }),
         update: vi.fn().mockImplementation(({ data }) => Promise.resolve({ ...TACHE, ...data })),
