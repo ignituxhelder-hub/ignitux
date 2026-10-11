@@ -39,6 +39,50 @@ function monter() {
   return { service, prisma, evaluations };
 }
 
+describe('EvaluationRevueService — finitions', () => {
+  it('faire refaire : écrit le changement d’état et la trace dans la même transaction', async () => {
+    const { service, prisma } = monter();
+
+    await service.faireRefaire('admin', 'e1', 'Reprends le marché.');
+
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+  });
+
+  it('refuse une correction faite sur une version périmée (deux onglets)', async () => {
+    const { service, prisma } = monter();
+    prisma.financing_evaluations.findUnique.mockResolvedValue(enRevue({ updated_at: T(9) }));
+
+    await expect(
+      service.modifier('admin', 'e1', [{ section: 'resume', valeur: 'x' }], undefined, T(8).toISOString()),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(prisma.financing_evaluations.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('verrouille l’écriture sur la version lue', async () => {
+    const { service, prisma } = monter();
+
+    await service.modifier('admin', 'e1', [{ section: 'resume', valeur: 'x' }], undefined, T(8).toISOString());
+
+    expect(prisma.financing_evaluations.updateMany.mock.calls[0][0].where).toEqual({
+      id: 'e1',
+      status: 'en_revue',
+      updated_at: T(8),
+    });
+  });
+
+  it('donne la version et l’alerte d’une nouvelle version ratée dans le détail', async () => {
+    const { service, prisma } = monter();
+    prisma.financing_evaluations.findUnique.mockResolvedValue(
+      enRevue({ failure_reason: 'La nouvelle version n’a pas pu être préparée.' }),
+    );
+
+    const d = await service.detail('e1');
+
+    expect(d.version).toBe(T(8).toISOString());
+    expect(d.alerte).toBe('La nouvelle version n’a pas pu être préparée.');
+  });
+});
+
 describe('EvaluationRevueService', () => {
   it('liste seulement les évaluations en revue, la plus ancienne d’abord', async () => {
     const { service, prisma } = monter();
@@ -137,7 +181,12 @@ describe('EvaluationRevueService', () => {
 
     expect(prisma.financing_evaluations.updateMany).toHaveBeenCalledWith({
       where: { id: 'e1', status: 'en_revue' },
-      data: { status: 'en_preparation', redo_instruction: 'Reprends le marché avec les chiffres du secteur.' },
+      // failure_reason remis à zéro : l'alerte d'une version ratée précédente ne vaut plus.
+      data: {
+        status: 'en_preparation',
+        redo_instruction: 'Reprends le marché avec les chiffres du secteur.',
+        failure_reason: null,
+      },
     });
     expect(evaluations.generer).toHaveBeenCalledWith('e1', 'Reprends le marché avec les chiffres du secteur.');
     expect(prisma.financing_evaluation_edits.createMany).toHaveBeenCalledWith({

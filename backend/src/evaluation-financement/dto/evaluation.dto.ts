@@ -3,6 +3,7 @@ import {
   Allow,
   IsArray,
   IsIn,
+  IsISO8601,
   IsOptional,
   IsString,
   MaxLength,
@@ -30,6 +31,11 @@ export class ModifierEvaluationDto {
   @IsString()
   @MaxLength(2000)
   noteIgnitux?: string | null;
+
+  /** La version lue (`version` du détail) : une correction sur une version périmée est refusée. */
+  @IsOptional()
+  @IsISO8601()
+  version?: string;
 }
 
 export class RefaireEvaluationDto {

@@ -68,13 +68,23 @@ describe('EvaluationRevueController (administrateur)', () => {
     const { admin, revue } = monter();
     await admin.file();
     await admin.detail('e1');
-    await admin.modifier(USER, 'e1', { changements: [{ section: 'resume', valeur: 'x' }], noteIgnitux: 'n' });
+    await admin.modifier(USER, 'e1', {
+      changements: [{ section: 'resume', valeur: 'x' }],
+      noteIgnitux: 'n',
+      version: '2026-10-11T08:00:00.000Z',
+    });
     await admin.valider(USER, 'e1');
     await admin.refaire(USER, 'e1', { consigne: 'reprends' });
     await admin.refuser(USER, 'e1', { motif: 'flou' });
 
     expect(revue.detail).toHaveBeenCalledWith('e1');
-    expect(revue.modifier).toHaveBeenCalledWith('u1', 'e1', [{ section: 'resume', valeur: 'x' }], 'n');
+    expect(revue.modifier).toHaveBeenCalledWith(
+      'u1',
+      'e1',
+      [{ section: 'resume', valeur: 'x' }],
+      'n',
+      '2026-10-11T08:00:00.000Z',
+    );
     expect(revue.valider).toHaveBeenCalledWith('u1', 'e1');
     expect(revue.faireRefaire).toHaveBeenCalledWith('u1', 'e1', 'reprends');
     expect(revue.refuser).toHaveBeenCalledWith('u1', 'e1', 'flou');

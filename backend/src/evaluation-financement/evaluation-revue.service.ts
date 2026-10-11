@@ -14,6 +14,9 @@ export interface ChangementSection {
   valeur: unknown;
 }
 
+const MODIFIEE_ENTRE_TEMPS =
+  'Cette évaluation a été modifiée entre-temps (dans un autre onglet ?). Recharge-la avant de corriger.';
+
 const PAS_EN_REVUE =
   'Cette évaluation n’est plus en revue : elle a déjà été traitée, peut-être depuis un autre onglet.';
 
@@ -79,14 +82,28 @@ export class EvaluationRevueService {
       rapport: l.report as unknown as EvaluationReport | null,
       noteIgnitux: l.admin_note,
       traces: l.edits,
+      /** À renvoyer avec une correction : refusée si quelqu'un a modifié l'évaluation entre-temps. */
+      version: (l.updated_at ?? l.created_at).toISOString(),
+      /** Une nouvelle version demandée qui n'a pas pu être préparée ; le rapport affiché est le précédent. */
+      alerte: l.status === 'en_revue' ? l.failure_reason : null,
     };
   }
 
-  async modifier(adminId: string, id: string, changements: ChangementSection[], noteIgnitux?: string | null) {
+  async modifier(
+    adminId: string,
+    id: string,
+    changements: ChangementSection[],
+    noteIgnitux?: string | null,
+    version?: string,
+  ) {
     await this.prisma.$transaction(async (tx) => {
       const l = await tx.financing_evaluations.findUnique({ where: { id } });
       if (!l) throw new NotFoundException('Évaluation introuvable.');
       if (l.status !== 'en_revue' || !l.report) throw new ConflictException(PAS_EN_REVUE);
+      // Deux onglets : une correction faite sur une version périmée écraserait
+      // celle de l'autre onglet. On la refuse plutôt.
+      const lue = (l.updated_at ?? l.created_at).toISOString();
+      if (version !== undefined && version !== lue) throw new ConflictException(MODIFIEE_ENTRE_TEMPS);
 
       const avant = l.report as unknown as EvaluationReport;
       const candidat: Record<string, unknown> = { ...avant };
@@ -124,7 +141,10 @@ export class EvaluationRevueService {
         });
       }
 
-      const { count } = await tx.financing_evaluations.updateMany({ where: { id, status: 'en_revue' }, data });
+      const { count } = await tx.financing_evaluations.updateMany({
+        where: { id, status: 'en_revue', ...(version !== undefined ? { updated_at: new Date(version) } : {}) },
+        data,
+      });
       if (count === 0) throw new ConflictException(PAS_EN_REVUE);
       if (traces.length > 0) await tx.financing_evaluation_edits.createMany({ data: traces });
     });
@@ -137,10 +157,13 @@ export class EvaluationRevueService {
 
   async faireRefaire(adminId: string, id: string, consigne: string) {
     const propre = texteObligatoire(consigne, 'Écris la consigne à donner à IGINI pour la nouvelle version.');
-    await this.transition(id, { status: 'en_preparation', redo_instruction: propre });
-    // Qui a demandé une nouvelle version, et pourquoi : tracé comme une correction.
-    await this.prisma.financing_evaluation_edits.createMany({
-      data: [{ evaluation_id: id, editor_id: adminId, section: 'consigne', before: Prisma.DbNull, after: propre }],
+    // Le changement d'état et sa trace ensemble : sans trace, pas de nouvelle version.
+    await this.prisma.$transaction(async (tx) => {
+      await this.transition(id, { status: 'en_preparation', redo_instruction: propre, failure_reason: null }, tx);
+      // Qui a demandé une nouvelle version, et pourquoi : tracé comme une correction.
+      await tx.financing_evaluation_edits.createMany({
+        data: [{ evaluation_id: id, editor_id: adminId, section: 'consigne', before: Prisma.DbNull, after: propre }],
+      });
     });
     // Sans `await` : la nouvelle version se prépare en arrière-plan, comme la première.
     void this.evaluations.generer(id, propre);
@@ -156,8 +179,12 @@ export class EvaluationRevueService {
     });
   }
 
-  private async transition(id: string, data: Prisma.financing_evaluationsUncheckedUpdateManyInput) {
-    const { count } = await this.prisma.financing_evaluations.updateMany({
+  private async transition(
+    id: string,
+    data: Prisma.financing_evaluationsUncheckedUpdateManyInput,
+    client: Pick<PrismaService, 'financing_evaluations'> = this.prisma,
+  ) {
+    const { count } = await client.financing_evaluations.updateMany({
       where: { id, status: 'en_revue' },
       data,
     });

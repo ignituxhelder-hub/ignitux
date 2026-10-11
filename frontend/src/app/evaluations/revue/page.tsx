@@ -221,7 +221,7 @@ export default function RevueEvaluationsPage() {
 
     await agir(async () => {
       if (changements.length > 0 || noteChangee) {
-        await api.modifierEvaluation(token, detail.id, changements, noteChangee ? note : undefined);
+        await api.modifierEvaluation(token, detail.id, changements, noteChangee ? note : undefined, detail.version);
       }
       await api.validerEvaluation(token, detail.id);
     });
@@ -285,6 +285,7 @@ export default function RevueEvaluationsPage() {
           <h2>
             {detail.projetTitre} <span className="muted">· {detail.entrepreneurEmail}</span>
           </h2>
+          {detail.alerte && <p className="error">{detail.alerte}</p>}
 
           <label htmlFor="revue-verdict" style={{ display: 'block', marginBottom: '0.75rem' }}>
             <strong>Verdict</strong>

@@ -1064,6 +1064,10 @@ export interface EvaluationDetailRevue {
   rapport: RapportEvaluation | null;
   noteIgnitux: string | null;
   traces: TraceEvaluation[];
+  /** À renvoyer avec une correction : le serveur refuse une version périmée (deux onglets). */
+  version: string;
+  /** Une nouvelle version demandée qui n a pas pu être préparée ; le rapport affiché est le précédent. */
+  alerte: string | null;
 }
 
 export const VERDICT_EVALUATION_LABEL: Record<VerdictEvaluation, string> = {
@@ -2417,11 +2421,12 @@ export const api = {
     id: string,
     changements: { section: SectionEvaluation; valeur: unknown }[],
     noteIgnitux?: string | null,
+    version?: string,
   ) =>
     request<EvaluationDetailRevue>(`/evaluations-financement/revue/${id}`, {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ changements, noteIgnitux }),
+      body: JSON.stringify({ changements, noteIgnitux, version }),
     }),
 
   validerEvaluation: (token: string, id: string) =>

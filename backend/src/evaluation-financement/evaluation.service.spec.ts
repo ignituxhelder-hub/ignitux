@@ -142,6 +142,8 @@ describe('EvaluationService — demande et génération', () => {
     expect(contenu).toContain('Analyse : marché porteur');
     expect(contenu).toContain('1 démarche(s) de conformité sur 2');
     expect(contenu).toMatch(/aucune anomalie/i);
+    // Sans données financières, « aucune anomalie » ne doit pas sonner comme un bon point.
+    expect(contenu).toMatch(/ne dit rien/);
   });
 
   it('passe en échec sans montrer une erreur technique brute', async () => {
@@ -198,6 +200,18 @@ describe('EvaluationService — demande et génération', () => {
 
     await expect(service.demander('u1', 'p1')).rejects.toBeInstanceOf(ConflictException);
     expect(prisma.financing_evaluations.create).not.toHaveBeenCalled();
+  });
+
+  it('réessaie une fois un conflit de sérialisation passager avant de répondre 409', async () => {
+    const { service, prisma } = monter();
+    const conflit = new Prisma.PrismaClientKnownRequestError('conflit', { code: 'P2034', clientVersion: '7' });
+    const normal = prisma.$transaction.getMockImplementation();
+    prisma.$transaction.mockRejectedValueOnce(conflit).mockImplementation(normal!);
+
+    const vue = await service.demander('u1', 'p1');
+
+    expect(vue.status).toBe('en_preparation');
+    expect(prisma.$transaction).toHaveBeenCalledTimes(2);
   });
 
   it('traduit un conflit de sérialisation (double clic) en 409', async () => {
@@ -297,6 +311,20 @@ describe('EvaluationService — prévenir les administrateurs', () => {
     await finirArrierePlan();
 
     expect(ecritures(prisma).map((e) => e.data.status)).toEqual(['en_revue']);
+  });
+});
+
+describe('EvaluationService — nouvelle version demandée par l’administrateur', () => {
+  it('une nouvelle version qui échoue laisse l’évaluation en revue, avec une alerte pour l’administrateur', async () => {
+    const { service, prisma, claude } = monter();
+    claude.generateStructuredOutput.mockRejectedValue(new Error('panne'));
+
+    await service.generer('e1', 'Reprends le marché.');
+
+    expect(ecritures(prisma)[0].data).toEqual({
+      status: 'en_revue',
+      failure_reason: 'La nouvelle version n’a pas pu être préparée. Le rapport précédent est toujours là.',
+    });
   });
 });
 

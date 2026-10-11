@@ -44,6 +44,8 @@ export interface EvaluationVue {
 }
 
 const ECHEC_PAR_DEFAUT = "L'évaluation n'a pas pu être préparée. Tu peux réessayer.";
+const NOUVELLE_VERSION_RATEE =
+  'La nouvelle version n’a pas pu être préparée. Le rapport précédent est toujours là.';
 const PREPARATION_INTERROMPUE = 'La préparation a été interrompue avant la fin.';
 
 function slug(texte: string): string {
@@ -102,7 +104,11 @@ export class EvaluationService {
    * la lecture des actives et la création se font dans une transaction
    * sérialisable, et un conflit de sérialisation devient un 409.
    */
-  private async creerSiAucuneActive(userId: string, projectId: string): Promise<financing_evaluations> {
+  private async creerSiAucuneActive(
+    userId: string,
+    projectId: string,
+    tentative = 1,
+  ): Promise<financing_evaluations> {
     const maintenant = this.maintenant();
     try {
       return await this.prisma.$transaction(
@@ -134,6 +140,9 @@ export class EvaluationService {
       );
     } catch (erreur) {
       if ((erreur as { code?: unknown }).code === 'P2034') {
+        // Postgres peut signaler un conflit entre deux demandes sur des projets
+        // différents : une seconde tentative lève le doute avant de répondre 409.
+        if (tentative === 1) return this.creerSiAucuneActive(userId, projectId, 2);
         throw new ConflictException('Une évaluation vient d’être demandée pour ce projet.');
       }
       throw erreur;
@@ -184,7 +193,13 @@ export class EvaluationService {
       // Une erreur serveur porte notre message générique, déjà affiché par
       // l'interface ; une erreur technique brute reste dans les journaux.
       const motif = erreur instanceof HttpException && erreur.getStatus() < 500 ? erreur.message : null;
-      await this.ecrireSiEnPreparation(evaluationId, { status: 'echec', failure_reason: motif }).catch(
+      // Une nouvelle version demandée par l'administrateur qui échoue ne doit pas
+      // se montrer à l'entrepreneur comme un échec : l'évaluation reste en revue,
+      // avec son rapport précédent, et l'administrateur voit l'alerte.
+      const data = consigne
+        ? { status: 'en_revue', failure_reason: NOUVELLE_VERSION_RATEE }
+        : { status: 'echec', failure_reason: motif };
+      await this.ecrireSiEnPreparation(evaluationId, data).catch(
         (e: unknown) => this.logger.error(`Impossible d'écrire l'échec de ${evaluationId} : ${String(e)}`),
       );
     }
@@ -247,7 +262,15 @@ ${lien}
     try {
       const audit = await this.financeAudit.projectAudit(userId, projectId);
       const defauts = audit.findings.filter((f) => f.count > 0);
-      if (defauts.length === 0) return 'Contrôle de cohérence financière : aucune anomalie relevée.';
+      if (defauts.length === 0) {
+        // Dit sans ambiguïté : sur un projet sans données financières, l'absence
+        // d'anomalie n'est pas un bon point, et IGINI ne doit pas la lire ainsi.
+        return (
+          'Contrôle de cohérence financière : aucune anomalie relevée. Il ne porte que sur les ' +
+          'données financières saisies dans Ignitux (capital, dividendes) : il ne dit rien d’un ' +
+          'projet qui n’en a pas encore.'
+        );
+      }
       return `Contrôle de cohérence financière :\n${defauts.map((f) => `- ${f.label} (${f.count})`).join('\n')}`;
     } catch {
       return undefined;

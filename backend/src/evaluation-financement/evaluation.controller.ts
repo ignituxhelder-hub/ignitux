@@ -82,7 +82,7 @@ export class EvaluationRevueController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ModifierEvaluationDto,
   ) {
-    return this.revue.modifier(admin.id, id, dto.changements, dto.noteIgnitux);
+    return this.revue.modifier(admin.id, id, dto.changements, dto.noteIgnitux, dto.version);
   }
 
   @Post(':id/valider')

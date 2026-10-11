@@ -37,6 +37,8 @@ const DETAIL = {
   rapport: RAPPORT,
   noteIgnitux: null,
   traces: [],
+  version: '2026-10-11T08:00:00.000Z',
+  alerte: null,
 };
 
 function routes(extra: Record<string, { status: number; body: unknown }> = {}) {
@@ -105,6 +107,8 @@ describe('RevueEvaluationsPage', () => {
       { section: 'resume', valeur: 'Résumé corrigé.' },
     ]);
     expect(corps.noteIgnitux).toBe('Bon dossier.');
+    // La version lue part avec la correction : le serveur refuse une version périmée.
+    expect(corps.version).toBe('2026-10-11T08:00:00.000Z');
   });
 
   it('valide sans PATCH quand rien n’a été modifié', async () => {
@@ -161,6 +165,19 @@ describe('RevueEvaluationsPage', () => {
     expect(JSON.parse(String(appels('POST', '/evaluations-financement/revue/e1/refaire')[0][1]?.body))).toEqual({
       consigne: 'Reprends le marché.',
     });
+  });
+
+  it('affiche l’alerte d’une nouvelle version qui n’a pas pu être préparée', async () => {
+    routes({
+      'GET /evaluations-financement/revue/e1': {
+        status: 200,
+        body: { ...DETAIL, alerte: 'La nouvelle version n’a pas pu être préparée. Le rapport précédent est toujours là.' },
+      },
+    });
+    afficher();
+    await ouvrir();
+
+    expect(screen.getByText(/La nouvelle version n’a pas pu être préparée/)).toBeInTheDocument();
   });
 
   it('dit que l’écran est réservé aux administrateurs sur un 403', async () => {
