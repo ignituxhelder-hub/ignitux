@@ -153,6 +153,7 @@ describe('ProjectFinancesPage', () => {
         <ProjectFinancesPage />
       </AuthProvider>,
     );
+    fireEvent.click(await screen.findByRole('button', { name: 'Investisseurs' }));
 
     const section = (await screen.findByRole('heading', { name: 'Investisseurs' }))
       .parentElement!;
@@ -168,6 +169,7 @@ describe('ProjectFinancesPage', () => {
         <ProjectFinancesPage />
       </AuthProvider>,
     );
+    fireEvent.click(await screen.findByRole('button', { name: 'Capital' }));
 
     expect(await screen.findByText(/^88\s?%$/)).toBeInTheDocument();
     expect(screen.getByText(/^12\s?%$/)).toBeInTheDocument();
@@ -190,6 +192,7 @@ describe('ProjectFinancesPage', () => {
         <ProjectFinancesPage />
       </AuthProvider>,
     );
+    fireEvent.click(await screen.findByRole('button', { name: 'Capital' }));
 
     expect(await screen.findByText(/totalise 90\s?% au lieu de 100/)).toBeInTheDocument();
   });
@@ -331,6 +334,7 @@ describe('ProjectFinancesPage', () => {
           <ProjectFinancesPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Historique' }));
 
       fireEvent.click(await screen.findByRole('button', { name: /Corriger le mouvement du/ }));
       fireEvent.change(screen.getByLabelText('Correction à ajouter (€, signé)'), {
@@ -374,6 +378,7 @@ describe('ProjectFinancesPage', () => {
           <ProjectFinancesPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Historique' }));
 
       fireEvent.click(await screen.findByRole('button', { name: /Corriger le mouvement du/ }));
       fireEvent.change(screen.getByLabelText('Correction à ajouter (€, signé)'), {
@@ -440,6 +445,7 @@ describe('ProjectFinancesPage', () => {
           <ProjectFinancesPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Historique' }));
 
       await screen.findByText(/rectifie une écriture antérieure/);
       expect(

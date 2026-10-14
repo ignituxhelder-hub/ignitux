@@ -1,34 +1,35 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { Brand } from "@/components/ignitux-mark";
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { Brand } from '@/components/ignitux-mark';
+import { IconesPanneaux } from '@/components/icones-panneaux';
 import {
   api,
   ApiError,
   type CapTable,
   type DividendDistribution,
   type ProjectFinancingRegister,
-} from "@/lib/api";
-import { useAuth } from "@/lib/auth";
-import { centimesDepuisEuros, euros, jour, pourcentage } from "@/lib/montants";
-import { AuditFinancier } from "./audit-financier";
+} from '@/lib/api';
+import { useAuth } from '@/lib/auth';
+import { centimesDepuisEuros, euros, jour, pourcentage } from '@/lib/montants';
+import { AuditFinancier } from './audit-financier';
 
 const STATUTS: Record<string, string> = {
-  ouvert: "Ouvert au financement",
-  finance: "Financé",
-  en_remboursement: "En remboursement",
-  solde: "Soldé",
-  arrete: "Arrêté",
+  ouvert: 'Ouvert au financement',
+  finance: 'Financé',
+  en_remboursement: 'En remboursement',
+  solde: 'Soldé',
+  arrete: 'Arrêté',
 };
 
 const MOUVEMENTS: Record<string, string> = {
-  investissement: "Apport",
-  remboursement_capital: "Remboursement de capital",
-  dividende: "Dividende",
-  gain: "Gain",
-  correction: "Correction",
+  investissement: 'Apport',
+  remboursement_capital: 'Remboursement de capital',
+  dividende: 'Dividende',
+  gain: 'Gain',
+  correction: 'Correction',
 };
 
 /**
@@ -48,12 +49,10 @@ export default function ProjectFinancesPage() {
   const params = useParams<{ id: string }>();
   const projectId = params.id;
 
-  const [registre, setRegistre] = useState<ProjectFinancingRegister | null>(
-    null,
-  );
+  const [registre, setRegistre] = useState<ProjectFinancingRegister | null>(null);
   const [capTable, setCapTable] = useState<CapTable | null>(null);
   const [dividendes, setDividendes] = useState<DividendDistribution[]>([]);
-  const [titre, setTitre] = useState("");
+  const [titre, setTitre] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -77,7 +76,7 @@ export default function ProjectFinancesPage() {
       const acces = await api.getMonAcces(token, projectId).catch(() => null);
       setPeutModifier(
         acces && Array.isArray(acces.capacites)
-          ? acces.capacites.includes("modifier_financement")
+          ? acces.capacites.includes('modifier_financement')
           : projet.owner_id === user?.id,
       );
       setRegistre(financement);
@@ -85,11 +84,7 @@ export default function ProjectFinancesPage() {
       setDividendes(versements.dividends);
       setError(null);
     } catch (err) {
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : "Impossible de charger le financement.",
-      );
+      setError(err instanceof ApiError ? err.message : 'Impossible de charger le financement.');
     } finally {
       setIsLoading(false);
     }
@@ -98,7 +93,7 @@ export default function ProjectFinancesPage() {
   useEffect(() => {
     if (!isReady) return;
     if (!token) {
-      router.replace("/login");
+      router.replace('/login');
       return;
     }
     void charger();
@@ -117,7 +112,7 @@ export default function ProjectFinancesPage() {
         </Link>
       </div>
 
-      <h1>Financement — {titre || "projet"}</h1>
+      <h1>Financement — {titre || 'projet'}</h1>
 
       {error && <p className="error">{error}</p>}
       {message && (
@@ -128,14 +123,12 @@ export default function ProjectFinancesPage() {
       {isLoading && <p className="loading">Chargement…</p>}
 
       {!isLoading && !finance && !peutModifier && (
-        <p className="muted">
-          Le projet n&apos;est pas encore ouvert au financement.
-        </p>
+        <p className="muted">Le projet n&apos;est pas encore ouvert au financement.</p>
       )}
       {!isLoading && !finance && peutModifier && (
         <OuvrirLeFinancement
           onOuvert={async () => {
-            setMessage("Le projet est ouvert au financement.");
+            setMessage('Le projet est ouvert au financement.');
             await charger();
           }}
           onErreur={setError}
@@ -147,105 +140,131 @@ export default function ProjectFinancesPage() {
       {finance && registre && (
         <>
           <div className="card">
-            <div className="top-bar" style={{ marginBottom: "0.75rem" }}>
+            <div className="top-bar" style={{ marginBottom: '0.75rem' }}>
               <h2 style={{ margin: 0 }}>Financements reçus</h2>
-              <span className="muted">
-                {STATUTS[finance.status] ?? finance.status}
-              </span>
+              <span className="muted">{STATUTS[finance.status] ?? finance.status}</span>
             </div>
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-                gap: "1rem",
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                gap: '1rem',
               }}
             >
               <Chiffre libelle="Levé" valeur={euros(registre.raisedCents)} />
               <Chiffre
                 libelle="Objectif"
-                valeur={
-                  finance.target_cents === null
-                    ? "—"
-                    : euros(finance.target_cents)
-                }
+                valeur={finance.target_cents === null ? '—' : euros(finance.target_cents)}
               />
-              <Chiffre
-                libelle="Remboursé"
-                valeur={euros(registre.totals.repaidCents)}
-              />
-              <Chiffre
-                libelle="Dividendes versés"
-                valeur={euros(registre.totals.dividendsCents)}
-              />
+              <Chiffre libelle="Remboursé" valeur={euros(registre.totals.repaidCents)} />
+              <Chiffre libelle="Dividendes versés" valeur={euros(registre.totals.dividendsCents)} />
             </div>
             {finance.target_cents === null && (
-              <p
-                className="muted"
-                style={{ marginBottom: 0, marginTop: "1rem" }}
-              >
-                Aucun objectif de levée n&apos;a été annoncé. Ignitux n&apos;en
-                invente pas : sans cible déclarée, il n&apos;y a pas de
-                pourcentage d&apos;avancement à afficher.
+              <p className="muted" style={{ marginBottom: 0, marginTop: '1rem' }}>
+                Aucun objectif de levée n&apos;a été annoncé. Ignitux n&apos;en invente pas :
+                sans cible déclarée, il n&apos;y a pas de pourcentage d&apos;avancement à
+                afficher.
               </p>
             )}
-            <p
-              className="muted"
-              style={{ marginBottom: 0, marginTop: "0.75rem" }}
-            >
+            <p className="muted" style={{ marginBottom: 0, marginTop: '0.75rem' }}>
               Ouvert le {jour(finance.opened_on)}.
             </p>
           </div>
 
-          <Investisseurs registre={registre} />
-
-          <Capital capTable={capTable} />
-
-          {peutModifier && (
-            <div className="card" style={{ marginTop: "1.5rem" }}>
-              <h2 style={{ marginTop: 0 }}>Enregistrer un mouvement</h2>
-              <p className="muted" style={{ marginTop: 0 }}>
-                Ce qui est enregistré ici est un fait, pas une prévision : la
-                date est celle du virement, pas celle de la saisie. Rien ne
-                s&apos;annule — une erreur se corrige par une écriture de
-                correction, qui référence celle qu&apos;elle rectifie.
-              </p>
-              <FormulaireApport
-                financedProjectId={finance.id}
-                token={token}
-                onFait={async (m) => {
-                  setMessage(m);
-                  await charger();
-                }}
-                onErreur={setError}
-              />
-              <FormulaireVersement
-                financedProjectId={finance.id}
-                token={token}
-                onFait={async (m) => {
-                  setMessage(m);
-                  await charger();
-                }}
-                onErreur={setError}
-              />
-            </div>
-          )}
-
-          <Historique
-            lectureSeule={!peutModifier}
-            registre={registre}
-            token={token}
-            onFait={async (m) => {
-              setMessage(m);
-              await charger();
-            }}
-            onErreur={setError}
+          <IconesPanneaux
+            titre="Le financement du projet"
+            // Un membre qui lit sans écrire ouvre sur les investisseurs.
+            ouvertParDefaut={peutModifier ? 'mouvement' : 'investisseurs'}
+            panneaux={[
+              // Enregistrer un mouvement : le propriétaire seul.
+              ...(peutModifier
+                ? [
+                    {
+                      id: 'mouvement',
+                nom: 'Enregistrer',
+                glyphe: 'financement',
+                categorie: 'investir',
+                contenu: (
+                  <div className="card" style={{ marginTop: '1.5rem' }}>
+                    <h2 style={{ marginTop: 0 }}>Enregistrer un mouvement</h2>
+                    <p className="muted" style={{ marginTop: 0 }}>
+                      Ce qui est enregistré ici est un fait, pas une prévision : la date est celle du
+                      virement, pas celle de la saisie. Rien ne s&apos;annule — une erreur se corrige
+                      par une écriture de correction, qui référence celle qu&apos;elle rectifie.
+                    </p>
+                    <FormulaireApport
+                      financedProjectId={finance.id}
+                      token={token}
+                      onFait={async (m) => {
+                        setMessage(m);
+                        await charger();
+                      }}
+                      onErreur={setError}
+                    />
+                    <FormulaireVersement
+                      financedProjectId={finance.id}
+                      token={token}
+                      onFait={async (m) => {
+                        setMessage(m);
+                        await charger();
+                      }}
+                      onErreur={setError}
+                    />
+                  </div>
+                ),
+                    },
+                  ]
+                : []),
+              {
+                id: 'investisseurs',
+                nom: 'Investisseurs',
+                glyphe: 'collaborateurs',
+                categorie: 'reseau',
+                contenu: <Investisseurs registre={registre} />,
+              },
+              {
+                id: 'capital',
+                nom: 'Capital',
+                glyphe: 'capital',
+                categorie: 'gerer',
+                contenu: <Capital capTable={capTable} />,
+              },
+              {
+                id: 'historique',
+                nom: 'Historique',
+                glyphe: 'taches',
+                categorie: 'vendre',
+                contenu: (
+                  <Historique
+                    lectureSeule={!peutModifier}
+                    registre={registre}
+                    token={token}
+                    onFait={async (m) => {
+                      setMessage(m);
+                      await charger();
+                    }}
+                    onErreur={setError}
+                  />
+                ),
+              },
+              {
+                id: 'dividendes',
+                nom: 'Dividendes',
+                glyphe: 'financement-recu',
+                categorie: 'investir',
+                contenu: <Dividendes dividendes={dividendes} />,
+              },
+              {
+                id: 'controles',
+                nom: 'Contrôles',
+                glyphe: 'conformite',
+                categorie: 'reglages',
+                // En dernier, volontairement : on lit d'abord ce que le projet a
+                // reçu et versé, puis on vérifie que tout cela tient ensemble.
+                contenu: <AuditFinancier token={token} projectId={projectId} />,
+              },
+            ]}
           />
-
-          <Dividendes dividendes={dividendes} />
-
-          {/* En dernier, volontairement : on lit d'abord ce que le projet a
-              reçu et versé, puis on vérifie que tout cela tient ensemble. */}
-          <AuditFinancier token={token} projectId={projectId} />
         </>
       )}
     </main>
@@ -266,17 +285,16 @@ function OuvrirLeFinancement({
   onErreur: (m: string) => void;
 }) {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [objectif, setObjectif] = useState("");
+  const [objectif, setObjectif] = useState('');
   const [enCours, setEnCours] = useState(false);
 
   async function soumettre(e: FormEvent) {
     e.preventDefault();
     setEnCours(true);
     try {
-      const cible =
-        objectif.trim() === "" ? undefined : centimesDepuisEuros(objectif);
+      const cible = objectif.trim() === '' ? undefined : centimesDepuisEuros(objectif);
       if (cible !== undefined && (cible === null || cible <= 0)) {
-        onErreur("Objectif de levée illisible.");
+        onErreur('Objectif de levée illisible.');
         return;
       }
       await api.openProjectFinancing(token, {
@@ -294,24 +312,14 @@ function OuvrirLeFinancement({
 
   return (
     <div className="card">
-      <h2 style={{ marginTop: 0 }}>
-        Ce projet n&apos;est pas ouvert au financement
-      </h2>
+      <h2 style={{ marginTop: 0 }}>Ce projet n&apos;est pas ouvert au financement</h2>
       <p className="muted">
-        L&apos;ouvrir crée un registre distinct du projet : il survivra au
-        projet s&apos;il disparaît, pour que l&apos;argent que d&apos;autres y
-        ont mis reste traçable. Tous les projets n&apos;ont pas à l&apos;être —
-        seulement ceux qui cherchent de l&apos;argent.
+        L&apos;ouvrir crée un registre distinct du projet : il survivra au projet s&apos;il
+        disparaît, pour que l&apos;argent que d&apos;autres y ont mis reste traçable. Tous les
+        projets n&apos;ont pas à l&apos;être — seulement ceux qui cherchent de l&apos;argent.
       </p>
-      <form
-        onSubmit={soumettre}
-        style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}
-      >
-        <label
-          className="field"
-          style={{ marginBottom: 0 }}
-          htmlFor="ouverture-date"
-        >
+      <form onSubmit={soumettre} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <label className="field" style={{ marginBottom: 0 }} htmlFor="ouverture-date">
           <span>Date d&apos;ouverture</span>
           <input
             id="ouverture-date"
@@ -321,11 +329,7 @@ function OuvrirLeFinancement({
             required
           />
         </label>
-        <label
-          className="field"
-          style={{ marginBottom: 0 }}
-          htmlFor="ouverture-objectif"
-        >
+        <label className="field" style={{ marginBottom: 0 }} htmlFor="ouverture-objectif">
           <span>Objectif de levée (€, facultatif)</span>
           <input
             id="ouverture-objectif"
@@ -334,13 +338,8 @@ function OuvrirLeFinancement({
             placeholder="laisser vide si aucun"
           />
         </label>
-        <button
-          className="primary"
-          type="submit"
-          disabled={enCours}
-          style={{ alignSelf: "end" }}
-        >
-          {enCours ? "Ouverture…" : "Ouvrir au financement"}
+        <button className="primary" type="submit" disabled={enCours} style={{ alignSelf: 'end' }}>
+          {enCours ? 'Ouverture…' : 'Ouvrir au financement'}
         </button>
       </form>
     </div>
@@ -358,43 +357,35 @@ function Investisseurs({ registre }: { registre: ProjectFinancingRegister }) {
   >();
   for (const p of registre.participations) {
     const existant = parInvestisseur.get(p.investor_id);
-    const nom = p.investor?.display_name ?? "Investisseur";
+    const nom = p.investor?.display_name ?? 'Investisseur';
     const parts = p.share_basis_points_granted;
     parInvestisseur.set(p.investor_id, {
       nom,
       apports: (existant?.apports ?? 0) + 1,
       investi: (existant?.investi ?? 0) + p.invested_cents,
-      parts:
-        parts === null
-          ? (existant?.parts ?? null)
-          : (existant?.parts ?? 0) + parts,
+      parts: parts === null ? (existant?.parts ?? null) : (existant?.parts ?? 0) + parts,
     });
   }
-  const lignes = [...parInvestisseur.values()].sort(
-    (a, b) => b.investi - a.investi,
-  );
+  const lignes = [...parInvestisseur.values()].sort((a, b) => b.investi - a.investi);
 
   return (
-    <div className="card" style={{ marginTop: "1.5rem" }}>
+    <div className="card" style={{ marginTop: '1.5rem' }}>
       <h2 style={{ marginTop: 0 }}>Investisseurs</h2>
       {lignes.length === 0 ? (
         <p className="muted" style={{ marginBottom: 0 }}>
           Aucun apport enregistré.
         </p>
       ) : (
-        <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {lignes.map((ligne) => (
             <li
               key={ligne.nom}
               className="project-item"
-              style={{ cursor: "default", marginBottom: "0.5rem" }}
+              style={{ cursor: 'default', marginBottom: '0.5rem' }}
             >
-              <div className="top-bar" style={{ marginBottom: "0.25rem" }}>
+              <div className="top-bar" style={{ marginBottom: '0.25rem' }}>
                 <strong>{ligne.nom}</strong>
-                <span
-                  className="muted"
-                  style={{ fontVariantNumeric: "tabular-nums" }}
-                >
+                <span className="muted" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {euros(ligne.investi)}
                 </span>
               </div>
@@ -408,11 +399,9 @@ function Investisseurs({ registre }: { registre: ProjectFinancingRegister }) {
           ))}
         </ul>
       )}
-      <p className="muted" style={{ marginBottom: 0, marginTop: "0.75rem" }}>
-        Les parts indiquées ici sont celles{" "}
-        <strong>accordées au moment de l&apos;apport</strong>. La répartition
-        d&apos;aujourd&apos;hui se lit ci-dessous : c&apos;est elle qui fait
-        foi.
+      <p className="muted" style={{ marginBottom: 0, marginTop: '0.75rem' }}>
+        Les parts indiquées ici sont celles <strong>accordées au moment de l&apos;apport</strong>.
+        La répartition d&apos;aujourd&apos;hui se lit ci-dessous : c&apos;est elle qui fait foi.
       </p>
     </div>
   );
@@ -423,7 +412,7 @@ function Investisseurs({ registre }: { registre: ProjectFinancingRegister }) {
 function Capital({ capTable }: { capTable: CapTable | null }) {
   if (!capTable) return null;
   return (
-    <div className="card" style={{ marginTop: "1.5rem" }}>
+    <div className="card" style={{ marginTop: '1.5rem' }}>
       <h2 style={{ marginTop: 0 }}>Répartition du capital</h2>
       <p className="muted" style={{ marginTop: 0 }}>
         {capTable.notice}
@@ -433,22 +422,20 @@ function Capital({ capTable }: { capTable: CapTable | null }) {
           Aucun détenteur enregistré.
         </p>
       ) : (
-        <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {capTable.holders.map((detenteur) => (
             <li
               key={detenteur.holderId}
               className="top-bar"
-              style={{ marginBottom: "0.4rem", cursor: "default" }}
+              style={{ marginBottom: '0.4rem', cursor: 'default' }}
             >
               <span>
                 {detenteur.name}
-                {detenteur.isFounder && (
-                  <span className="muted"> · fondateur</span>
-                )}
+                {detenteur.isFounder && <span className="muted"> · fondateur</span>}
               </span>
-              <span style={{ fontVariantNumeric: "tabular-nums" }}>
+              <span style={{ fontVariantNumeric: 'tabular-nums' }}>
                 {detenteur.shareBasisPoints === null
-                  ? "—"
+                  ? '—'
                   : pourcentage(detenteur.shareBasisPoints)}
               </span>
             </li>
@@ -457,9 +444,9 @@ function Capital({ capTable }: { capTable: CapTable | null }) {
       )}
       {capTable.discrepancyBasisPoints !== 0 && (
         <p className="error" style={{ marginBottom: 0 }}>
-          La répartition totalise {pourcentage(capTable.totalBasisPoints)} au
-          lieu de 100 %. Ignitux ne redistribue pas l&apos;écart automatiquement
-          : ce serait décider à la place des personnes qui détiennent ces parts.
+          La répartition totalise {pourcentage(capTable.totalBasisPoints)} au lieu de 100 %.
+          Ignitux ne redistribue pas l&apos;écart automatiquement : ce serait décider à la
+          place des personnes qui détiennent ces parts.
         </p>
       )}
     </div>
@@ -483,28 +470,28 @@ function Historique({
 }) {
   const mouvements = [...registre.movements].reverse();
   const [correctionId, setCorrectionId] = useState<string | null>(null);
-  const [montant, setMontant] = useState("");
+  const [montant, setMontant] = useState('');
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [motif, setMotif] = useState("");
+  const [motif, setMotif] = useState('');
   const [enCours, setEnCours] = useState(false);
 
   function ouvrirCorrection() {
-    setMontant("");
+    setMontant('');
     setDate(new Date().toISOString().slice(0, 10));
-    setMotif("");
+    setMotif('');
   }
 
   async function soumettreCorrection(movementId: string, e: FormEvent) {
     e.preventDefault();
     if (!motif.trim()) {
-      onErreur("Une correction doit dire pourquoi.");
+      onErreur('Une correction doit dire pourquoi.');
       return;
     }
     setEnCours(true);
     try {
       const cents = centimesDepuisEuros(montant);
       if (cents === null || cents === 0) {
-        onErreur("Montant de la correction illisible ou nul.");
+        onErreur('Montant de la correction illisible ou nul.');
         return;
       }
       await api.correctInvestorMovement(token, movementId, {
@@ -513,57 +500,42 @@ function Historique({
         note: motif.trim(),
       });
       setCorrectionId(null);
-      await onFait("Correction enregistrée.");
+      await onFait('Correction enregistrée.');
     } catch (err) {
-      onErreur(
-        err instanceof ApiError
-          ? err.message
-          : "La correction n'a pas pu être enregistrée.",
-      );
+      onErreur(err instanceof ApiError ? err.message : "La correction n'a pas pu être enregistrée.");
     } finally {
       setEnCours(false);
     }
   }
 
   return (
-    <div className="card" style={{ marginTop: "1.5rem" }}>
+    <div className="card" style={{ marginTop: '1.5rem' }}>
       <h2 style={{ marginTop: 0 }}>Historique</h2>
       {mouvements.length === 0 ? (
         <p className="muted" style={{ marginBottom: 0 }}>
           Aucun mouvement enregistré.
         </p>
       ) : (
-        <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {mouvements.map((m) => (
-            <li key={m.id} style={{ marginBottom: "0.4rem" }}>
+            <li key={m.id} style={{ marginBottom: '0.4rem' }}>
               <div
                 className="top-bar"
-                style={{ cursor: "default", alignItems: "baseline" }}
+                style={{ cursor: 'default', alignItems: 'baseline' }}
               >
                 <span>
-                  <span className="muted">{jour(m.occurred_on)}</span>{" "}
+                  <span className="muted">{jour(m.occurred_on)}</span>{' '}
                   {MOUVEMENTS[m.kind] ?? m.kind}
-                  {m.reference && (
-                    <span className="muted"> · {m.reference}</span>
-                  )}
+                  {m.reference && <span className="muted"> · {m.reference}</span>}
                   {m.corrects_movement_id && (
-                    <span className="muted">
-                      {" "}
-                      · rectifie une écriture antérieure
-                    </span>
+                    <span className="muted"> · rectifie une écriture antérieure</span>
                   )}
                 </span>
-                <span
-                  style={{
-                    display: "inline-flex",
-                    gap: "0.5rem",
-                    alignItems: "baseline",
-                  }}
-                >
-                  <span style={{ fontVariantNumeric: "tabular-nums" }}>
+                <span style={{ display: 'inline-flex', gap: '0.5rem', alignItems: 'baseline' }}>
+                  <span style={{ fontVariantNumeric: 'tabular-nums' }}>
                     {euros(m.amount_cents)}
                   </span>
-                  {m.kind !== "correction" && !lectureSeule && (
+                  {m.kind !== 'correction' && !lectureSeule && (
                     <button
                       className="secondary"
                       type="button"
@@ -586,12 +558,7 @@ function Historique({
               {correctionId === m.id && (
                 <form
                   onSubmit={(e) => void soumettreCorrection(m.id, e)}
-                  style={{
-                    display: "flex",
-                    gap: "0.5rem",
-                    flexWrap: "wrap",
-                    marginTop: "0.5rem",
-                  }}
+                  style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}
                 >
                   <label
                     className="field"
@@ -623,7 +590,7 @@ function Historique({
                   </label>
                   <label
                     className="field"
-                    style={{ marginBottom: 0, flexBasis: "100%" }}
+                    style={{ marginBottom: 0, flexBasis: '100%' }}
                     htmlFor={`correction-motif-${m.id}`}
                   >
                     <span>Motif</span>
@@ -635,12 +602,8 @@ function Historique({
                       required
                     />
                   </label>
-                  <button
-                    className="secondary"
-                    type="submit"
-                    disabled={enCours}
-                  >
-                    {enCours ? "Enregistrement…" : "Enregistrer la correction"}
+                  <button className="secondary" type="submit" disabled={enCours}>
+                    {enCours ? 'Enregistrement…' : 'Enregistrer la correction'}
                   </button>
                   <button
                     className="secondary"
@@ -655,11 +618,11 @@ function Historique({
           ))}
         </ul>
       )}
-      <p className="muted" style={{ marginBottom: 0, marginTop: "0.75rem" }}>
-        Un montant négatif est de l&apos;argent qui entre dans le projet :
-        c&apos;est l&apos;investisseur qui verse. Rien n&apos;est jamais
-        supprimé de cette liste — une erreur se corrige par une écriture de
-        correction, qui référence celle qu&apos;elle rectifie.
+      <p className="muted" style={{ marginBottom: 0, marginTop: '0.75rem' }}>
+        Un montant négatif est de l&apos;argent qui entre dans le projet : c&apos;est
+        l&apos;investisseur qui verse. Rien n&apos;est jamais supprimé de cette liste — une
+        erreur se corrige par une écriture de correction, qui référence celle qu&apos;elle
+        rectifie.
       </p>
     </div>
   );
@@ -669,29 +632,26 @@ function Historique({
 
 function Dividendes({ dividendes }: { dividendes: DividendDistribution[] }) {
   return (
-    <div className="card" style={{ marginTop: "1.5rem" }}>
+    <div className="card" style={{ marginTop: '1.5rem' }}>
       <h2 style={{ marginTop: 0 }}>Dividendes versés</h2>
       {dividendes.length === 0 ? (
         <p className="muted" style={{ marginBottom: 0 }}>
-          Aucun dividende versé. Ignitux n&apos;affiche pas de dividende
-          prévisionnel : un dividende se constate après coup, le prédire
-          reviendrait à promettre un revenu.
+          Aucun dividende versé. Ignitux n&apos;affiche pas de dividende prévisionnel : un
+          dividende se constate après coup, le prédire reviendrait à promettre un revenu.
         </p>
       ) : (
-        <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {dividendes.map((d) => (
             <li
               key={d.id}
               className="top-bar"
-              style={{ marginBottom: "0.4rem", cursor: "default" }}
+              style={{ marginBottom: '0.4rem', cursor: 'default' }}
             >
               <span>
-                <span className="muted">{jour(d.occurred_at)}</span>{" "}
-                {d.holder?.name ?? "Détenteur"}
+                <span className="muted">{jour(d.occurred_at)}</span>{' '}
+                {d.holder?.name ?? 'Détenteur'}
               </span>
-              <span style={{ fontVariantNumeric: "tabular-nums" }}>
-                {euros(d.amount_cents)}
-              </span>
+              <span style={{ fontVariantNumeric: 'tabular-nums' }}>{euros(d.amount_cents)}</span>
             </li>
           ))}
         </ul>
@@ -713,10 +673,10 @@ function FormulaireApport({
   onFait: (message: string) => Promise<void>;
   onErreur: (m: string) => void;
 }) {
-  const [investorId, setInvestorId] = useState("");
-  const [montant, setMontant] = useState("");
+  const [investorId, setInvestorId] = useState('');
+  const [montant, setMontant] = useState('');
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [parts, setParts] = useState("");
+  const [parts, setParts] = useState('');
   const [enCours, setEnCours] = useState(false);
 
   async function soumettre(e: FormEvent) {
@@ -725,35 +685,25 @@ function FormulaireApport({
     try {
       const cents = centimesDepuisEuros(montant);
       if (cents === null || cents <= 0) {
-        onErreur("Montant de l’apport illisible.");
+        onErreur('Montant de l’apport illisible.');
         return;
       }
-      const pourcent =
-        parts.trim() === "" ? undefined : Number(parts.replace(",", "."));
-      if (
-        pourcent !== undefined &&
-        (!Number.isFinite(pourcent) || pourcent < 0 || pourcent > 100)
-      ) {
-        onErreur("La part accordée va de 0 à 100 %.");
+      const pourcent = parts.trim() === '' ? undefined : Number(parts.replace(',', '.'));
+      if (pourcent !== undefined && (!Number.isFinite(pourcent) || pourcent < 0 || pourcent > 100)) {
+        onErreur('La part accordée va de 0 à 100 %.');
         return;
       }
       await api.recordParticipation(token, financedProjectId, {
         investorId: investorId.trim(),
         investedCents: cents,
         occurredOn: date,
-        ...(pourcent === undefined
-          ? {}
-          : { shareBasisPointsGranted: Math.round(pourcent * 100) }),
+        ...(pourcent === undefined ? {} : { shareBasisPointsGranted: Math.round(pourcent * 100) }),
       });
-      setMontant("");
-      setParts("");
-      await onFait("Apport enregistré.");
+      setMontant('');
+      setParts('');
+      await onFait('Apport enregistré.');
     } catch (err) {
-      onErreur(
-        err instanceof ApiError
-          ? err.message
-          : "L'apport n'a pas pu être enregistré.",
-      );
+      onErreur(err instanceof ApiError ? err.message : "L'apport n'a pas pu être enregistré.");
     } finally {
       setEnCours(false);
     }
@@ -763,19 +713,14 @@ function FormulaireApport({
     <form
       onSubmit={soumettre}
       aria-labelledby="titre-apport"
-      style={{
-        display: "flex",
-        gap: "0.5rem",
-        flexWrap: "wrap",
-        marginTop: "1.5rem",
-      }}
+      style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '1.5rem' }}
     >
-      <h3 id="titre-apport" style={{ flexBasis: "100%", margin: 0 }}>
+      <h3 id="titre-apport" style={{ flexBasis: '100%', margin: 0 }}>
         Un apport reçu
       </h3>
       <label
         className="field"
-        style={{ marginBottom: 0, flexBasis: "100%" }}
+        style={{ marginBottom: 0, flexBasis: '100%' }}
         htmlFor="apport-investisseur"
       >
         <span>Identifiant de l&apos;investisseur</span>
@@ -790,20 +735,12 @@ function FormulaireApport({
             n’importe qui vérifier si une adresse appartient à un
             investisseur. L’identifiant se transmet parce que son porteur
             a décidé de le transmettre. */}
-        <span
-          className="muted"
-          style={{ textTransform: "none", letterSpacing: 0 }}
-        >
-          L&apos;investisseur le trouve dans son espace, sous « Mon identifiant
-          ». Ignitux ne propose pas de recherche par email : elle permettrait de
-          savoir qui investit.
+        <span className="muted" style={{ textTransform: 'none', letterSpacing: 0 }}>
+          L&apos;investisseur le trouve dans son espace, sous « Mon identifiant ». Ignitux
+          ne propose pas de recherche par email : elle permettrait de savoir qui investit.
         </span>
       </label>
-      <label
-        className="field"
-        style={{ marginBottom: 0 }}
-        htmlFor="apport-montant"
-      >
+      <label className="field" style={{ marginBottom: 0 }} htmlFor="apport-montant">
         <span>Montant apporté (€)</span>
         <input
           id="apport-montant"
@@ -812,11 +749,7 @@ function FormulaireApport({
           required
         />
       </label>
-      <label
-        className="field"
-        style={{ marginBottom: 0 }}
-        htmlFor="apport-date"
-      >
+      <label className="field" style={{ marginBottom: 0 }} htmlFor="apport-date">
         <span>Date de l&apos;apport</span>
         <input
           id="apport-date"
@@ -826,11 +759,7 @@ function FormulaireApport({
           required
         />
       </label>
-      <label
-        className="field"
-        style={{ marginBottom: 0 }}
-        htmlFor="apport-parts"
-      >
+      <label className="field" style={{ marginBottom: 0 }} htmlFor="apport-parts">
         <span>Part accordée (%, facultatif)</span>
         <input
           id="apport-parts"
@@ -839,13 +768,8 @@ function FormulaireApport({
           placeholder="ex. 12"
         />
       </label>
-      <button
-        className="secondary"
-        type="submit"
-        disabled={enCours}
-        style={{ alignSelf: "end" }}
-      >
-        {enCours ? "Enregistrement…" : "Enregistrer un apport"}
+      <button className="secondary" type="submit" disabled={enCours} style={{ alignSelf: 'end' }}>
+        {enCours ? 'Enregistrement…' : 'Enregistrer un apport'}
       </button>
     </form>
   );
@@ -862,12 +786,10 @@ function FormulaireVersement({
   onFait: (message: string) => Promise<void>;
   onErreur: (m: string) => void;
 }) {
-  const [nature, setNature] = useState<"remboursement" | "dividende">(
-    "remboursement",
-  );
-  const [montant, setMontant] = useState("");
+  const [nature, setNature] = useState<'remboursement' | 'dividende'>('remboursement');
+  const [montant, setMontant] = useState('');
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [reference, setReference] = useState("");
+  const [reference, setReference] = useState('');
   const [enCours, setEnCours] = useState(false);
 
   async function soumettre(e: FormEvent) {
@@ -876,32 +798,24 @@ function FormulaireVersement({
     try {
       const cents = centimesDepuisEuros(montant);
       if (cents === null || cents <= 0) {
-        onErreur("Montant du versement illisible.");
+        onErreur('Montant du versement illisible.');
         return;
       }
       const commun = {
         amountCents: cents,
         occurredOn: date,
-        ...(reference.trim() === "" ? {} : { reference: reference.trim() }),
+        ...(reference.trim() === '' ? {} : { reference: reference.trim() }),
       };
-      if (nature === "remboursement") {
+      if (nature === 'remboursement') {
         await api.recordRepayment(token, financedProjectId, commun);
       } else {
         await api.recordInvestorDividend(token, financedProjectId, commun);
       }
-      setMontant("");
-      setReference("");
-      await onFait(
-        nature === "remboursement"
-          ? "Remboursement enregistré."
-          : "Dividende réparti.",
-      );
+      setMontant('');
+      setReference('');
+      await onFait(nature === 'remboursement' ? 'Remboursement enregistré.' : 'Dividende réparti.');
     } catch (err) {
-      onErreur(
-        err instanceof ApiError
-          ? err.message
-          : "Le versement n'a pas pu être enregistré.",
-      );
+      onErreur(err instanceof ApiError ? err.message : "Le versement n'a pas pu être enregistré.");
     } finally {
       setEnCours(false);
     }
@@ -912,39 +826,29 @@ function FormulaireVersement({
       onSubmit={soumettre}
       aria-labelledby="titre-versement"
       style={{
-        display: "flex",
-        gap: "0.5rem",
-        flexWrap: "wrap",
-        marginTop: "2rem",
-        paddingTop: "1.5rem",
-        borderTop: "1px solid var(--border)",
+        display: 'flex',
+        gap: '0.5rem',
+        flexWrap: 'wrap',
+        marginTop: '2rem',
+        paddingTop: '1.5rem',
+        borderTop: '1px solid var(--border)',
       }}
     >
-      <h3 id="titre-versement" style={{ flexBasis: "100%", margin: 0 }}>
+      <h3 id="titre-versement" style={{ flexBasis: '100%', margin: 0 }}>
         Un versement aux investisseurs
       </h3>
-      <label
-        className="field"
-        style={{ marginBottom: 0 }}
-        htmlFor="versement-nature"
-      >
+      <label className="field" style={{ marginBottom: 0 }} htmlFor="versement-nature">
         <span>Nature</span>
         <select
           id="versement-nature"
           value={nature}
-          onChange={(e) =>
-            setNature(e.target.value as "remboursement" | "dividende")
-          }
+          onChange={(e) => setNature(e.target.value as 'remboursement' | 'dividende')}
         >
           <option value="remboursement">Remboursement de capital</option>
           <option value="dividende">Dividende</option>
         </select>
       </label>
-      <label
-        className="field"
-        style={{ marginBottom: 0 }}
-        htmlFor="versement-montant"
-      >
+      <label className="field" style={{ marginBottom: 0 }} htmlFor="versement-montant">
         <span>Montant total à répartir (€)</span>
         <input
           id="versement-montant"
@@ -953,11 +857,7 @@ function FormulaireVersement({
           required
         />
       </label>
-      <label
-        className="field"
-        style={{ marginBottom: 0 }}
-        htmlFor="versement-date"
-      >
+      <label className="field" style={{ marginBottom: 0 }} htmlFor="versement-date">
         <span>Date du versement</span>
         <input
           id="versement-date"
@@ -967,11 +867,7 @@ function FormulaireVersement({
           required
         />
       </label>
-      <label
-        className="field"
-        style={{ marginBottom: 0 }}
-        htmlFor="versement-reference"
-      >
+      <label className="field" style={{ marginBottom: 0 }} htmlFor="versement-reference">
         <span>Référence (facultatif)</span>
         <input
           id="versement-reference"
@@ -980,13 +876,8 @@ function FormulaireVersement({
           placeholder="n° de virement"
         />
       </label>
-      <button
-        className="secondary"
-        type="submit"
-        disabled={enCours}
-        style={{ alignSelf: "end" }}
-      >
-        {enCours ? "Enregistrement…" : "Enregistrer le versement"}
+      <button className="secondary" type="submit" disabled={enCours} style={{ alignSelf: 'end' }}>
+        {enCours ? 'Enregistrement…' : 'Enregistrer le versement'}
       </button>
     </form>
   );
@@ -995,16 +886,10 @@ function FormulaireVersement({
 function Chiffre({ libelle, valeur }: { libelle: string; valeur: string }) {
   return (
     <div>
-      <p className="muted" style={{ margin: 0, fontSize: "0.8rem" }}>
+      <p className="muted" style={{ margin: 0, fontSize: '0.8rem' }}>
         {libelle}
       </p>
-      <p
-        style={{
-          margin: "0.25rem 0 0",
-          fontSize: "1.3rem",
-          fontVariantNumeric: "tabular-nums",
-        }}
-      >
+      <p style={{ margin: '0.25rem 0 0', fontSize: '1.3rem', fontVariantNumeric: 'tabular-nums' }}>
         {valeur}
       </p>
     </div>
