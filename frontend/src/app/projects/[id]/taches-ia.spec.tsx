@@ -20,6 +20,7 @@ function tache(id: string, extra: Record<string, unknown> = {}) {
     ai_result: null,
     ai_refusal_reason: null,
     ai_run_at: null,
+    note: null,
     created_at: '2026-01-01T00:00:00.000Z',
     updated_at: '2026-01-01T00:00:00.000Z',
     ...extra,
@@ -69,6 +70,8 @@ describe('TasksSection — IGINI fait les tâches', () => {
     expect(screen.getByText('2 éléments sélectionnés, ~2 appels IA')).toBeInTheDocument();
     const bouton = screen.getByRole('button', { name: /Démarrer IGINI/ });
     expect(bouton).not.toBeDisabled();
+    // Orange (style « primary »), pas le gris d'un bouton sans classe.
+    expect(bouton).toHaveClass('primary');
     fireEvent.click(bouton);
 
     expect(await screen.findByText('Texte deux')).toBeInTheDocument();
@@ -163,6 +166,34 @@ describe('TasksSection — IGINI fait les tâches', () => {
 
     expect(await screen.findByText('Réussi')).toBeInTheDocument();
     expect(appels.filter((a) => a.endsWith('/run'))).toEqual(['POST /projects/p1/tasks/t1/run']);
+  }, TIMEOUT);
+
+  it('une tâche en échec accepte une note, enregistrée sans relancer IGINI', async () => {
+    const { appels, bodies } = mockFetch({
+      'GET /projects/p1/tasks': { status: 200, body: [tache('t1', { ai_status: 'echec' })] },
+      'PATCH /tasks/t1/note': { status: 200, body: tache('t1', { ai_status: 'echec', note: 'À faire par téléphone' }) },
+    });
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    const champ = await screen.findByLabelText('Note sur Tâche t1');
+    expect(screen.queryByRole('button', { name: 'Enregistrer la note' })).not.toBeInTheDocument();
+    fireEvent.change(champ, { target: { value: 'À faire par téléphone' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Enregistrer la note' }));
+
+    await waitFor(() => expect(appels).toContain('PATCH /tasks/t1/note'));
+    expect(bodies['PATCH /tasks/t1/note']).toEqual({ note: 'À faire par téléphone' });
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Enregistrer la note' })).not.toBeInTheDocument());
+    expect(appels.filter((a) => a.endsWith('/run'))).toEqual([]);
+  }, TIMEOUT);
+
+  it('en lecture seule, la note est affichée mais ne se modifie pas', async () => {
+    mockFetch({
+      'GET /projects/p1/tasks': { status: 200, body: [tache('t1', { ai_status: 'echec', note: 'Voir avec le comptable' })] },
+    });
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} readOnly />);
+
+    expect(await screen.findByText('Note : Voir avec le comptable')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Note sur Tâche t1')).not.toBeInTheDocument();
   }, TIMEOUT);
 
   it('en lecture seule : ni case, ni bouton de lancement, ni validation', async () => {

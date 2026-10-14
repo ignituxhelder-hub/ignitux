@@ -457,6 +457,9 @@ model tasks {
   // de la nouvelle tentative.
   ai_refusal_reason String?
   ai_run_at         DateTime? @db.Timestamptz(6)
+  // Note libre de la personne, surtout pour une tâche qu'IGINI n'arrive pas à
+  // faire : ce qui bloque, ce qu'elle a essayé. Ajout additif, nullable.
+  note              String?
   created_at  DateTime? @default(now()) @db.Timestamptz(6)
   updated_at  DateTime? @updatedAt @db.Timestamptz(6)
 

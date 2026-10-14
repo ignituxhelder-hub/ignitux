@@ -907,6 +907,8 @@ export interface Task {
   ai_result: string | null;
   ai_refusal_reason: string | null;
   ai_run_at: string | null;
+  // Note libre de la personne, surtout sur une tâche qu'IGINI n'a pas pu faire.
+  note: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -2746,6 +2748,13 @@ export const api = {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify({ status }),
+    }),
+
+  updateTaskNote: (token: string, taskId: string, note: string) =>
+    request<Task>(`/tasks/${taskId}/note`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ note }),
     }),
 
   runTask: (token: string, projectId: string, taskId: string) =>
