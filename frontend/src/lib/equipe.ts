@@ -43,10 +43,13 @@ export const ROLE_EQUIPE_LABEL: Record<Role, string> = {
 
 /** Ce que chaque rôle permet, en une phrase, au moment de choisir. */
 export const ROLE_EQUIPE_DESCRIPTION: Record<RoleEquipe, string> = {
-  associe: 'Voit et modifie le projet, lance IGINI. Le financement et les actes juridiques restent à toi.',
+  associe:
+    'Voit et modifie le projet, lance IGINI, et travaille dans ta facturation, ta comptabilité, ta banque et ' +
+    'ta caisse. Le financement et les actes juridiques restent à toi.',
   salarie: 'Voit le projet et travaille sur les tâches. Ne voit pas l’argent.',
   comptable:
-    'Voit le financement, l’évaluation et les documents juridiques. Ne voit pas le reste du travail.',
+    'Travaille dans ta facturation, ta comptabilité, ta banque et ta caisse ; voit le financement, ' +
+    'l’évaluation et les documents juridiques. Ne voit pas le reste du travail.',
   observateur: 'Voit tout, ne modifie rien.',
 };
 

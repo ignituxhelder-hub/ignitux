@@ -6,7 +6,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Icone } from '@/components/icones';
 import { ChatIgini } from './chat-igini';
 import { useAuth } from '@/lib/auth';
-import { domaineDeLApplication, libelleRole } from '@/lib/domaines';
+import { domaineDeLApplication, libelleRoles } from '@/lib/domaines';
 import { useEspace } from '@/lib/espace';
 import { nomDansPhrase } from '@/lib/espace-courant';
 import {
@@ -91,13 +91,10 @@ export function Systeme({ children }: { children: ReactNode }) {
 
   if (!connecte || (!app && !surBureau)) return <>{children}</>;
 
-  // Dans l'espace d'un autre, une application que le rôle n'ouvre pas ne
-  // s'affiche pas : ses requêtes partiraient sans en-tête et montreraient
-  // MES données sous le bandeau de l'autre. L'équipe fait exception :
-  // sa page explique elle-même que seul le propriétaire la gère.
-  const domaineApp = app ? domaineDeLApplication(app.id) : null;
-  const horsRole =
-    !!courant && !!app && app.id !== 'equipe' && !courant.domaines.includes(domaineApp ?? 'personnel');
+  // Dans l'espace d'un autre, seules les applications d'argent s'affichent :
+  // les requêtes des autres partiraient sans en-tête et montreraient MES
+  // données sous le bandeau de l'autre.
+  const horsArgent = !!courant && !!app && domaineDeLApplication(app.id) !== 'argent';
   const plusieursEspaces = !!espaces && espaces.length > 1;
 
   function fermerApplication(id: string) {
@@ -136,7 +133,7 @@ export function Systeme({ children }: { children: ReactNode }) {
         <section className="barre-espace" aria-label="Espace de travail">
           {courant && (
             <p className="barre-espace__bandeau" role="status">
-              Tu travailles dans {nomDansPhrase(courant.nom)} — rôle : {libelleRole(courant.role)}
+              Tu travailles dans {nomDansPhrase(courant.nom)} (facturation, comptabilité, banque, caisse) — rôle : {libelleRoles(courant.roles)}
             </p>
           )}
           {message && (
@@ -155,7 +152,7 @@ export function Systeme({ children }: { children: ReactNode }) {
                 value={courant?.ownerId ?? user?.id ?? ''}
                 onChange={(e) => {
                   const cible = espaces.find((espace) => espace.ownerId === e.target.value) ?? null;
-                  choisir(cible && cible.role !== 'proprietaire' ? cible : null);
+                  choisir(cible && cible.ownerId !== user?.id ? cible : null);
                   // Les données affichées sont celles de l'ancien espace : on
                   // repart du bureau, qui se recalcule pour le nouveau.
                   router.push(BUREAU);
@@ -163,9 +160,9 @@ export function Systeme({ children }: { children: ReactNode }) {
               >
                 {espaces.map((espace) => (
                   <option key={espace.ownerId} value={espace.ownerId}>
-                    {espace.role === 'proprietaire'
+                    {espace.ownerId === user?.id
                       ? 'Mon espace'
-                      : `${espace.nom} (${libelleRole(espace.role)})`}
+                      : `${espace.nom} (${libelleRoles(espace.roles)})`}
                   </option>
                 ))}
               </select>
@@ -174,13 +171,11 @@ export function Systeme({ children }: { children: ReactNode }) {
         </section>
       )}
 
-      {horsRole && app && courant ? (
+      {horsArgent && app && courant ? (
         <main className="page">
           <div className="card">
             <p style={{ marginTop: 0 }}>
-              {domaineApp === 'personnel'
-                ? `${app.nom} est personnelle : elle n’est pas partagée dans ${nomDansPhrase(courant.nom)}.`
-                : `Ton rôle de ${libelleRole(courant.role)} ne donne pas accès à ${app.nom} dans ${nomDansPhrase(courant.nom)}.`}
+              {`${app.nom} n’est pas partagée dans ${nomDansPhrase(courant.nom)} : seules la facturation, la comptabilité, la banque et la caisse le sont.`}
             </p>
             <button
               type="button"

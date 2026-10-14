@@ -1884,6 +1884,54 @@ th {
   color: var(--text-muted);
 }
 
+/* ── Équipe : l'espace où l'on travaille ─────────────────────────────── */
+
+.barre-espace {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  max-width: 960px;
+  margin: 0.75rem auto 0;
+  padding: 0 1rem;
+}
+
+.barre-espace__bandeau {
+  flex: 1 1 16rem;
+  margin: 0;
+  padding: 0.55rem 0.8rem;
+  background: var(--warn-soft);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--warn);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+}
+
+.barre-espace__message {
+  flex: 1 1 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.barre-espace__message button {
+  width: auto;
+  flex: none;
+}
+
+.barre-espace__choix {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.barre-espace__choix select {
+  width: auto;
+  max-width: 100%;
+}
+
 /* ── Le guide pas à pas d'un projet (« Ton parcours ») ───────────────────── */
 
 .guide-parcours__liste {

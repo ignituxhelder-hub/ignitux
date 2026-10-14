@@ -386,8 +386,9 @@ export default function LanceurPage() {
     ? [...lanceur.prevues].sort((a, b) => Number(b.pourToi) - Number(a.pourToi))
     : [];
 
-  // Dans l'espace d'un autre : seulement les applications que mon rôle y
-  // ouvre, à plat. Ni dossier, ni suggestions, ni rangement — mon bureau
+  // Dans l'espace d'un autre : seulement ses applications d'argent
+  // (facturation, comptabilité, banque, caisse), à plat. Ni dossier, ni
+  // suggestions, ni rangement — mon bureau
   // à moi ne se range pas depuis chez quelqu'un d'autre.
   const appsEspace: ApplicationVue[] = [];
   if (lanceur && courant) {
@@ -400,7 +401,7 @@ export default function LanceurPage() {
     ]) {
       if (vues.has(app.id) || !app.route) continue;
       vues.add(app.id);
-      if (courant.domaines.includes(domaineDeLApplication(app.id))) appsEspace.push(app);
+      if (domaineDeLApplication(app.id) === 'argent') appsEspace.push(app);
     }
   }
 
