@@ -233,7 +233,7 @@ describe('CollaboratorsSection', () => {
     });
   });
 
-  describe('« Accès à mon argent » (propriétaire) — automatique ou activé', () => {
+  describe('« Accès à mon argent » (propriétaire) — activé à l’invitation ou par moi', () => {
     const TITRE = 'Accès à mon argent (facturation, compta, banque, caisse)';
     const BOB = '66666666-6666-4666-8666-666666666666';
     const CHLOE = '77777777-7777-4777-8777-777777777777';
@@ -255,14 +255,18 @@ describe('CollaboratorsSection', () => {
     ];
 
     type Reponse = { status: number; body: unknown };
-    /** Un faux serveur : GET de la liste, et PUT dont on garde le corps. */
-    function serveur(liste: unknown[], put: (memberId: string, corps: unknown) => Reponse | Promise<Reponse>) {
+    /** Un faux serveur : GET de la liste (fixe, ou relue à chaque appel), et PUT dont on garde le corps. */
+    function serveur(
+      liste: unknown[] | (() => unknown[]),
+      put: (memberId: string, corps: unknown) => Reponse | Promise<Reponse>,
+    ) {
+      const lire = typeof liste === 'function' ? liste : () => liste;
       const envois: { memberId: string; corps: unknown }[] = [];
       global.fetch = vi.fn().mockImplementation(async (url: string, options?: RequestInit) => {
         const chemin = new URL(url).pathname;
         const methode = options?.method ?? 'GET';
         let reponse: Reponse = { status: 200, body: [] };
-        if (methode === 'GET' && chemin === '/espaces/acces-argent') reponse = { status: 200, body: liste };
+        if (methode === 'GET' && chemin === '/espaces/acces-argent') reponse = { status: 200, body: lire() };
         const cible = /^\/espaces\/acces-argent\/([^/]+)$/.exec(chemin);
         if (methode === 'PUT' && cible) {
           const corps = JSON.parse(String(options?.body));
@@ -298,13 +302,26 @@ describe('CollaboratorsSection', () => {
       expect(within(bloc).getByLabelText('Eve (Comptable)')).not.toBeChecked();
 
       // La raison est rattachée à la case (lue par les lecteurs d'écran).
-      expect(caseBob).toHaveAccessibleDescription('À activer — invité avant le changement');
-      expect(within(bloc).getByLabelText('Chloé (Associé)')).toHaveAccessibleDescription(
-        'Automatique (invité à partir du 15/10/2026)',
-      );
+      expect(caseBob).toHaveAccessibleDescription('À activer');
+      expect(within(bloc).getByLabelText('Chloé (Associé)')).toHaveAccessibleDescription('Activé à l’invitation');
       expect(within(bloc).getByLabelText('Dan (Comptable et associé)')).toHaveAccessibleDescription('Activé par toi');
       expect(within(bloc).getByLabelText('Eve (Comptable)')).toHaveAccessibleDescription('Coupé par toi');
       expect(lecturesAcces()).toHaveLength(1);
+    });
+
+    it('aucun texte du bloc ne cite de date ni « invité avant » : l’accès vient du geste, pas d’une date', async () => {
+      serveur(EQUIPE, () => ({ status: 200, body: EQUIPE }));
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      const bloc = await screen.findByRole('region', { name: TITRE });
+      await within(bloc).findByLabelText('Bob (Comptable)');
+      expect(bloc.textContent).not.toMatch(/\d{1,2}\/\d{1,2}\/\d{4}/);
+      expect(bloc.textContent).not.toMatch(/invité avant|à partir du/);
+      expect(bloc).toHaveTextContent(
+        "Quand tu invites quelqu'un comme comptable ou associé, ou que tu lui donnes l'un de ces rôles, " +
+          'son accès est activé automatiquement.',
+      );
+      expect(bloc).toHaveTextContent("Une personne « À activer » n'y a accès que si tu l'actives.");
     });
 
     it('activer demande confirmation, envoie le choix, puis affiche la réponse du serveur (rien avant)', async () => {
@@ -372,7 +389,29 @@ describe('CollaboratorsSection', () => {
         await screen.findByText('Cette personne n’est ni comptable ni associée sur un de tes projets.'),
       ).toBeInTheDocument();
       expect(screen.getByLabelText('Bob (Comptable)')).not.toBeChecked();
-      expect(screen.getByLabelText('Bob (Comptable)')).not.toBeDisabled();
+      // La liste est relue après l'échec ; les cases reviennent ensuite.
+      await waitFor(() => expect(screen.getByLabelText('Bob (Comptable)')).not.toBeDisabled());
+      expect(screen.getByLabelText('Bob (Comptable)')).not.toBeChecked();
+    });
+
+    it('après un échec d’enregistrement, la liste est relue : elle redevient celle du serveur', async () => {
+      // Bob a été retiré de l'équipe ailleurs : le choix échoue, et la liste
+      // relue ne le montre plus. Le message d'échec reste affiché.
+      let lectures = 0;
+      serveur(
+        () => (lectures++ === 0 ? EQUIPE : EQUIPE.slice(1)),
+        () => ({ status: 404, body: { message: 'Cette personne n’est ni comptable ni associée sur un de tes projets.' } }),
+      );
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      fireEvent.click(await screen.findByLabelText('Bob (Comptable)'));
+
+      await waitFor(() => expect(screen.queryByLabelText('Bob (Comptable)')).not.toBeInTheDocument());
+      expect(lecturesAcces()).toHaveLength(2);
+      expect(screen.getByText('Cette personne n’est ni comptable ni associée sur un de tes projets.')).toBeInTheDocument();
+      expect(screen.getByLabelText('Chloé (Associé)')).toBeChecked();
+      expect(screen.getByLabelText('Chloé (Associé)')).not.toBeDisabled();
     });
 
     it('sans comptable ni associé : un message, aucune case', async () => {
@@ -404,6 +443,130 @@ describe('CollaboratorsSection', () => {
       fireEvent.change(await screen.findByLabelText('Rôle de b@b.com'), { target: { value: 'comptable' } });
 
       await waitFor(() => expect(lecturesAcces()).toHaveLength(2));
+    });
+
+    describe('lectures et choix qui se croisent', () => {
+      type EnAttente = { methode: string; corps: unknown; repondre: (r: Reponse) => void };
+      /**
+       * Un faux serveur dont le test libère chaque réponse de l'accès à
+       * l'argent quand il veut, dans l'ordre qu'il veut. L'équipe du projet
+       * (b@b.com, salarié) et ses changements de rôle répondent tout de suite.
+       */
+      function serveurPilote() {
+        const attente: EnAttente[] = [];
+        global.fetch = vi.fn().mockImplementation((url: string, options?: RequestInit) => {
+          const chemin = new URL(url).pathname;
+          const methode = options?.method ?? 'GET';
+          if (chemin.startsWith('/espaces/acces-argent')) {
+            return new Promise((resolve) => {
+              attente.push({
+                methode,
+                corps: options?.body ? JSON.parse(String(options.body)) : undefined,
+                repondre: ({ status, body }) =>
+                  resolve({ ok: status >= 200 && status < 300, status, json: () => Promise.resolve(body) }),
+              });
+            });
+          }
+          const body = methode === 'GET' && chemin === '/projects/p1/collaborators' ? [MEMBRE] : null;
+          return Promise.resolve({ ok: true, status: methode === 'PATCH' ? 204 : 200, json: () => Promise.resolve(body) });
+        }) as unknown as typeof fetch;
+        /** La plus ancienne requête encore en attente pour cette méthode (attendue si besoin). */
+        const prochaine = async (methode: string) => {
+          let trouvee: EnAttente | undefined;
+          await waitFor(() => {
+            trouvee = attente.find((r) => r.methode === methode);
+            expect(trouvee).toBeDefined();
+          });
+          attente.splice(attente.indexOf(trouvee!), 1);
+          return trouvee!;
+        };
+        return { attente, prochaine };
+      }
+
+      const CASES = ['Bob (Comptable)', 'Chloé (Associé)', 'Dan (Comptable et associé)', 'Eve (Comptable)'];
+      const CHLOE_COUPEE = [EQUIPE[0], membre(CHLOE, 'Chloé', false, 'coupe_par_toi', ['associe']), ...EQUIPE.slice(2)];
+
+      it('les cases sont désactivées pendant une lecture : rien ne part avant sa réponse', async () => {
+        const { attente, prochaine } = serveurPilote();
+        const confirmer = vi.spyOn(window, 'confirm').mockReturnValue(true);
+        render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+
+        // Première lecture : tant qu'elle n'a pas répondu, aucune case.
+        const premiere = await prochaine('GET');
+        expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+        premiere.repondre({ status: 200, body: EQUIPE });
+        await waitFor(() => expect(screen.getByLabelText('Bob (Comptable)')).not.toBeDisabled());
+
+        // Un changement de rôle dans l'équipe relance la lecture : toutes les cases l'attendent.
+        fireEvent.change(screen.getByLabelText('Rôle de b@b.com'), { target: { value: 'comptable' } });
+        const relue = await prochaine('GET');
+        await waitFor(() => {
+          for (const nom of CASES) expect(screen.getByLabelText(nom)).toBeDisabled();
+        });
+        fireEvent.click(screen.getByLabelText('Bob (Comptable)'));
+        fireEvent.click(screen.getByLabelText('Chloé (Associé)'));
+        expect(confirmer).not.toHaveBeenCalled();
+        expect(attente.filter((r) => r.methode === 'PUT')).toEqual([]);
+
+        relue.repondre({ status: 200, body: EQUIPE });
+        await waitFor(() => {
+          for (const nom of CASES) expect(screen.getByLabelText(nom)).not.toBeDisabled();
+        });
+        expect(screen.getByLabelText('Bob (Comptable)')).not.toBeChecked();
+        expect(screen.getByLabelText('Chloé (Associé)')).toBeChecked();
+      });
+
+      it('une lecture plus ancienne n’écrase jamais un état plus récent (numéro de requête)', async () => {
+        const { attente, prochaine } = serveurPilote();
+        render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+        (await prochaine('GET')).repondre({ status: 200, body: EQUIPE });
+
+        // Je coupe Chloé : le choix part…
+        fireEvent.click(await screen.findByLabelText('Chloé (Associé)'));
+        const choix = await prochaine('PUT');
+        expect(choix.corps).toEqual({ acces: false });
+        // … et pendant son envoi, un changement de rôle dans l'équipe relance une lecture.
+        fireEvent.change(screen.getByLabelText('Rôle de b@b.com'), { target: { value: 'comptable' } });
+        const lanceePendantLeChoix = await prochaine('GET');
+
+        // Le choix répond (Chloé coupée) ; la lecture, servie avant que le
+        // serveur n'enregistre le choix, répond ensuite l'état d'avant.
+        choix.repondre({ status: 200, body: CHLOE_COUPEE });
+        const apresLeChoix = await prochaine('GET');
+        lanceePendantLeChoix.repondre({ status: 200, body: EQUIPE });
+
+        // La réponse périmée n'est jamais l'état final : la liste relue après le choix l'emporte.
+        apresLeChoix.repondre({ status: 200, body: CHLOE_COUPEE });
+        await waitFor(() => expect(screen.getByLabelText('Chloé (Associé)')).not.toBeChecked());
+        expect(screen.getByLabelText('Chloé (Associé)')).toHaveAccessibleDescription('Coupé par toi');
+        await waitFor(() => expect(screen.getByLabelText('Chloé (Associé)')).not.toBeDisabled());
+        expect(attente).toEqual([]);
+        expect(lecturesAcces()).toHaveLength(3);
+      });
+
+      it('une lecture dépassée qui répond en dernier n’efface pas le choix affiché', async () => {
+        const { attente, prochaine } = serveurPilote();
+        render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+        (await prochaine('GET')).repondre({ status: 200, body: EQUIPE });
+
+        fireEvent.click(await screen.findByLabelText('Chloé (Associé)'));
+        const choix = await prochaine('PUT');
+        fireEvent.change(screen.getByLabelText('Rôle de b@b.com'), { target: { value: 'comptable' } });
+        const lanceePendantLeChoix = await prochaine('GET');
+
+        choix.repondre({ status: 200, body: CHLOE_COUPEE });
+        const apresLeChoix = await prochaine('GET');
+        apresLeChoix.repondre({ status: 200, body: CHLOE_COUPEE });
+        await waitFor(() => expect(screen.getByLabelText('Chloé (Associé)')).not.toBeChecked());
+
+        // La lecture lancée pendant le choix, plus ancienne, arrive enfin avec l'état d'avant : ignorée.
+        lanceePendantLeChoix.repondre({ status: 200, body: EQUIPE });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        expect(screen.getByLabelText('Chloé (Associé)')).not.toBeChecked();
+        expect(screen.getByLabelText('Chloé (Associé)')).toHaveAccessibleDescription('Coupé par toi');
+        expect(screen.getByLabelText('Chloé (Associé)')).not.toBeDisabled();
+        expect(attente).toEqual([]);
+      });
     });
 
     it('un membre ne voit pas le bloc et ne le charge pas', async () => {

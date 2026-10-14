@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import {
   api,
   ApiError,
@@ -196,9 +196,9 @@ const TITRE_ACCES = 'Accès à mon argent (facturation, compta, banque, caisse)'
 /** La raison de chaque accès, en clair (voir backend/src/equipe/acces-argent.ts). */
 const RAISON_ACCES: Record<RaisonAccesArgent, string> = {
   active_par_toi: 'Activé par toi',
-  automatique: 'Automatique (invité à partir du 15/10/2026)',
+  automatique: 'Activé à l’invitation',
   coupe_par_toi: 'Coupé par toi',
-  a_activer: 'À activer — invité avant le changement',
+  a_activer: 'À activer',
 };
 
 /**
@@ -210,46 +210,68 @@ const RAISON_ACCES: Record<RaisonAccesArgent, string> = {
  * répondu (la liste relue après chaque choix). Activer demande une
  * confirmation ; couper, jamais (c'est le sens prudent). Le choix vaut pour
  * tout mon argent, quel que soit le projet où la personne travaille.
+ *
+ * Lectures et choix peuvent se croiser (un changement de rôle dans l'équipe
+ * relance une lecture, peut-être pendant l'envoi d'un choix). Chaque requête
+ * prend donc un numéro, et seule la réponse de la DERNIÈRE lancée s'affiche :
+ * une lecture plus ancienne n'écrase jamais un état plus récent. Les cases
+ * sont désactivées pendant une lecture. Un choix dépassé par une lecture
+ * lancée pendant son envoi n'est pas affiché : la liste est relue après lui
+ * (cette lecture-là a pu partir avant que le serveur n'enregistre le choix).
+ * Après un échec d'enregistrement, la liste est relue aussi.
  */
 function AccesAMonArgent({ token, version }: { token: string | null; version: number }) {
   const [membres, setMembres] = useState<MembreAccesArgent[] | null>(null);
-  const [erreur, setErreur] = useState<string | null>(null);
+  const [erreurLecture, setErreurLecture] = useState<string | null>(null);
+  const [erreurChoix, setErreurChoix] = useState<string | null>(null);
   const [enCours, setEnCours] = useState<string | null>(null);
+  const [lectureEnCours, setLectureEnCours] = useState(false);
+  // Relit la liste sans que l'équipe ait changé (choix dépassé ou en échec).
+  const [relecture, setRelecture] = useState(0);
+  // Le numéro de la dernière requête lancée, lecture ou choix.
+  const derniere = useRef(0);
 
   useEffect(() => {
     if (!token) return;
-    let annule = false;
+    const numero = ++derniere.current;
+    setLectureEnCours(true);
     api
       .accesArgent(token)
       .then((data) => {
-        if (annule) return;
+        if (numero !== derniere.current) return;
         setMembres(data);
-        setErreur(null);
+        setErreurLecture(null);
       })
       .catch((err: unknown) => {
-        if (!annule) {
-          setErreur(err instanceof ApiError ? err.message : 'Impossible de lire l’accès de ton équipe à ton argent.');
-        }
+        if (numero !== derniere.current) return;
+        setErreurLecture(
+          err instanceof ApiError ? err.message : 'Impossible de lire l’accès de ton équipe à ton argent.',
+        );
+      })
+      .finally(() => {
+        if (numero === derniere.current) setLectureEnCours(false);
       });
-    return () => {
-      annule = true;
-    };
-  }, [token, version]);
+  }, [token, version, relecture]);
 
   async function choisir(membre: MembreAccesArgent, acces: boolean) {
-    if (!token || enCours !== null) return;
+    if (!token || enCours !== null || lectureEnCours) return;
     if (
       acces &&
       !window.confirm(`${membre.nom} pourra voir et modifier ta facturation, ta compta, ta banque et ta caisse.`)
     ) {
       return;
     }
-    setErreur(null);
+    setErreurChoix(null);
     setEnCours(membre.memberId);
+    const numero = ++derniere.current;
     try {
-      setMembres(await api.choisirAccesArgent(token, membre.memberId, acces));
+      const liste = await api.choisirAccesArgent(token, membre.memberId, acces);
+      if (numero === derniere.current) setMembres(liste);
+      else setRelecture((n) => n + 1);
     } catch (err) {
-      setErreur(err instanceof ApiError ? err.message : 'Impossible d’enregistrer ce choix.');
+      setErreurChoix(err instanceof ApiError ? err.message : 'Impossible d’enregistrer ce choix.');
+      // L'état affiché n'est peut-être plus celui du serveur : on le relit.
+      setRelecture((n) => n + 1);
     } finally {
       setEnCours(null);
     }
@@ -262,12 +284,13 @@ function AccesAMonArgent({ token, version }: { token: string | null; version: nu
       </h3>
       <p className="muted" style={{ marginTop: 0 }}>
         Tes comptables et associés peuvent voir et modifier ta facturation, ta compta, ta banque et ta caisse.
-        Ceux que tu as ajoutés à partir du 15/10/2026 y ont accès automatiquement ; ceux ajoutés avant n&apos;y
-        ont accès que si tu l&apos;actives. Tu peux couper l&apos;accès de chacun à tout moment. Le choix vaut
-        pour tous tes projets.
+        Quand tu invites quelqu&apos;un comme comptable ou associé, ou que tu lui donnes l&apos;un de ces rôles,
+        son accès est activé automatiquement. Une personne « À activer » n&apos;y a accès que si tu
+        l&apos;actives. Tu peux couper l&apos;accès de chacun à tout moment. Le choix vaut pour tous tes projets.
       </p>
-      {erreur && <p className="error">{erreur}</p>}
-      {membres === null && !erreur && <p className="loading">Chargement…</p>}
+      {erreurChoix && <p className="error">{erreurChoix}</p>}
+      {erreurLecture && <p className="error">{erreurLecture}</p>}
+      {membres === null && !erreurLecture && <p className="loading">Chargement…</p>}
       {membres !== null && membres.length === 0 && (
         <p className="muted">Aucun comptable ni associé : personne d’autre que toi n’a accès à ton argent.</p>
       )}
@@ -281,7 +304,7 @@ function AccesAMonArgent({ token, version }: { token: string | null; version: nu
                   type="checkbox"
                   id={id}
                   checked={membre.acces}
-                  disabled={enCours !== null}
+                  disabled={enCours !== null || lectureEnCours}
                   aria-describedby={`${id}-raison`}
                   onChange={() => void choisir(membre, !membre.acces)}
                 />
