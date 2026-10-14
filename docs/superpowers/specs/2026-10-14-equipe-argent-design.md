@@ -8,49 +8,73 @@ propriétaire, qui sont rangés par personne (`owner_id`) et non par projet.
 
 Une personne a accès à l'**espace argent** d'un propriétaire X si elle est, sur **au moins un
 projet dont X est propriétaire**, collaboratrice avec le rôle `comptable` ou `associe`
-(`project_collaborators.role`) **et** que cet accès est en vigueur (voir « Accès automatique ou
-activé » ci-dessous). Accès en **lecture et écriture** pour les deux rôles. Les autres
+(`project_collaborators.role`) **et** que X y a consenti (voir « Accès consenti au geste du
+propriétaire » ci-dessous). Accès en **lecture et écriture** pour les deux rôles. Les autres
 rôles (`salarie`, `observateur`) n'y ont pas accès. Retirée de tous les projets de X (ou passée à un
 autre rôle partout), la personne perd l'accès **à la requête suivante** (relu à chaque requête,
 sans cache), même si X le lui avait activé.
 
-### Accès automatique ou activé — décision du 2026-10-14 (Helder : « un peu des deux »)
+### Accès consenti au geste du propriétaire — décision du 2026-10-14, après revue
 
-Les personnes invitées avant ce lot l'ont été sous les anciens textes, qui ne parlaient pas d'accès
-à l'argent du propriétaire. On ne leur ouvre donc pas cet accès sans un geste du propriétaire. Les
-personnes invitées après le changement l'ont automatiquement, et le propriétaire peut le couper.
+Le principe validé par Helder le 2026-10-14 (« un peu des deux ») ne change pas : une personne
+invitée comme comptable ou associée **sous les nouveaux textes** a l'accès automatiquement, et le
+propriétaire peut le couper ; une personne invitée **sous les anciens textes**, qui ne parlaient
+pas d'accès à l'argent du propriétaire, ne l'a pas sans un geste du propriétaire.
+
+Ce qui change après la revue du même jour : la première version reposait sur une **date limite**
+(le 15/10/2026 à 00:00, comparée à `project_collaborators.created_at`). **Elle est supprimée.** La
+revue a montré qu'avec une mise en ligne après cette date, les personnes invitées entre-temps par
+l'ancien code, donc sous les anciens textes, auraient eu l'accès automatiquement. Le consentement
+n'est plus déduit d'une date : il est **enregistré au moment du geste** du propriétaire, par le
+nouveau code.
 
 Soit C, collaborateur `comptable` ou `associe` sur au moins un projet de X. C a accès à l'argent de
 X si et seulement si :
 
-- **(a)** X le lui a **activé** : ligne `space_members` (owner_id = X, member_id = C) avec
-  `role = 'argent'` ; **ou**
-- **(b)** X ne le lui a **pas coupé** (pas de ligne `space_members` (X, C) avec `role = 'refuse'`)
-  **et** C a été ajouté comme comptable ou associé sur un projet de X **à partir de**
-  `ACCES_ARGENT_AUTOMATIQUE_DEPUIS` = `2026-10-15T00:00:00+02:00` (constante,
-  `backend/src/equipe/acces-argent.ts`).
+- C est **encore** comptable ou associé sur au moins un projet de X ; **et**
+- la ligne `space_members` (owner_id = X, member_id = C) a le rôle :
+  - `'argent'` : X le lui a **activé** explicitement (`PUT`, ci-dessous) ; **ou**
+  - `'argent_auto'` : accès accordé **par le nouveau code** au moment où X l'a invité comme
+    comptable ou associé, ou lui a donné l'un de ces rôles (ci-dessous).
 
-Et dans tous les cas, C doit **être encore** comptable ou associé sur au moins un projet de X.
+`'refuse'` (X l'a **coupé**) → pas d'accès. **Aucune ligne** → pas d'accès (« À activer »).
+
+Consentement pris au geste (`backend/src/equipe/equipe.service.ts`, `inviter` et `changerRole`) :
+
+- Quand X **ajoute** un collaborateur avec le rôle `comptable` ou `associe`
+  (`POST /projects/:id/collaborators`), ou **change** le rôle d'un collaborateur en `comptable` ou
+  `associe` (`PATCH /projects/:id/collaborators/:userId`, y compris de l'un à l'autre), le code crée
+  la ligne (X, C) avec `'argent_auto'` **seulement si aucune ligne n'existe** (`createMany` avec
+  `skipDuplicates`, soit `INSERT … ON CONFLICT DO NOTHING` : atomique, sans course). Un choix
+  explicite `'argent'` ou `'refuse'` n'est **jamais écrasé** : un accès coupé reste coupé quand la
+  personne est repassée comptable ou associée, ou retirée puis réinvitée. Les rôles `salarie` et
+  `observateur` n'écrivent rien.
+- Ces deux actions n'ont pas de transaction : la ligne est écrite **juste après** l'ajout ou le
+  changement de rôle (et avant l'e-mail d'invitation). Si cette écriture échoue, l'invitation ou le
+  changement de rôle **réussit quand même** (erreur seulement journalisée) : la personne reste
+  « À activer », côté prudent, et X peut l'activer.
+- **Retirer** un collaborateur ne supprime **pas** la ligne : l'accès dépend déjà du rôle actuel
+  (retiré de tous les projets de X, ou passé salarié / observateur partout, C perd l'accès à la
+  requête suivante). S'il redevient comptable ou associé, la ligne enregistrée s'applique de
+  nouveau (`'argent'` ou `'argent_auto'` : accès ; `'refuse'` : pas d'accès).
+- Les comptables et associés ajoutés **avant** ce lot n'ont aucune ligne : « À activer » tant que X
+  ne les active pas. Aucune date n'intervient plus : `project_collaborators.created_at` ne compte
+  pas pour l'accès.
 
 Précisions :
 
-- La date qui compte est `project_collaborators.created_at` d'une ligne (projet de X, C) **dont le
-  rôle actuel** est `comptable` ou `associe`. Il n'existe aucune date de changement de rôle : un
-  ancien collaborateur (ligne créée avant la date) **promu** comptable ou associé après la date
-  garde sa date de création, donc il lui faut une activation explicite — c'est le côté prudent. À
-  l'inverse, une ligne créée après la date (même comme observateur, puis promue) compte comme une
-  invitation sous les nouveaux textes. Une ligne sans date (`created_at` nul) compte comme ancienne.
-- `space_members.role` ne prend que deux valeurs dans ce lot : `'argent'` (activé par le
-  propriétaire) et `'refuse'` (coupé par le propriétaire). Toute autre valeur (reste éventuel de la
-  version abandonnée) vaut « aucun choix ». Une ligne par couple (X, C), quel que soit le nombre de
-  projets partagés : le choix vaut pour tout l'argent de X. `created_at` y porte la date du choix
-  **en vigueur** (remise à jour à chaque changement : la table n'a pas de colonne de mise à jour).
-- Une ligne `space_members` n'ouvre rien seule : retiré de tous les projets de X (ou passé
-  salarié / observateur partout), C perd l'accès ; s'il redevient comptable ou associé plus tard,
-  le choix enregistré s'applique de nouveau (activé : accès ; coupé : pas d'accès).
-- Raisons affichées au propriétaire : `active_par_toi` (« Activé par toi »), `automatique`
-  (« Automatique (invité à partir du 15/10/2026) »), `coupe_par_toi` (« Coupé par toi »),
-  `a_activer` (« À activer — invité avant le changement »).
+- `space_members.role` prend trois valeurs dans ce lot : `'argent'` (activé par le propriétaire),
+  `'argent_auto'` (accordé à l'invitation ou au passage comptable / associé) et `'refuse'` (coupé
+  par le propriétaire). Toute autre valeur (reste éventuel de la version abandonnée) vaut « aucune
+  ligne » : « À activer ». Comme la ligne existe déjà, une invitation ne la remplace pas ; seul un
+  choix explicite de X (`PUT`) la remplace.
+- Une ligne par couple (X, C), quel que soit le nombre de projets partagés : le choix vaut pour
+  tout l'argent de X. `created_at` y porte la date du choix **en vigueur** : celle de l'invitation
+  ou du changement de rôle pour `'argent_auto'`, remise à jour à chaque `PUT` (la table n'a pas de
+  colonne de mise à jour).
+- Raisons affichées au propriétaire : `active_par_toi` (`'argent'`, « Activé par toi »),
+  `automatique` (`'argent_auto'`, « Activé à l'invitation »), `coupe_par_toi` (`'refuse'`,
+  « Coupé par toi »), `a_activer` (aucune ligne, « À activer »).
 
 API du propriétaire (sur ses propres données uniquement, **sans** `@Espace` ni `@HorsEspace` :
 refusée en 403 avec l'espace d'un autre, comme `GET /espaces/activite`) :
@@ -58,17 +82,23 @@ refusée en 403 avec l'espace d'un autre, comme `GET /espaces/activite`) :
 - `GET /espaces/acces-argent` → ses collaborateurs comptables / associés, une entrée par personne
   (dédoublonnée sur ses projets) : `{ memberId, nom, email, roles, acces, raison }`. `nom` = nom
   affiché, sinon l'e-mail (le propriétaire voit déjà les e-mails de son équipe).
-- `PUT /espaces/acces-argent/:memberId` `{ acces: boolean }` → enregistre `'argent'` ou
-  `'refuse'` (upsert sur (X, C)) et renvoie la liste relue. 404 si la personne n'est pas comptable
-  ou associée sur un projet de X : un membre qui l'appelle pour l'espace d'un autre agit donc chez
-  lui et reçoit 404 (ou 403 avec l'en-tête `X-Espace`).
+- `PUT /espaces/acces-argent/:memberId` `{ acces: boolean }` → `{ acces: true }` enregistre
+  `'argent'`, `{ acces: false }` enregistre `'refuse'` (upsert sur (X, C), qui remplace aussi une
+  ligne `'argent_auto'`) et renvoie la liste relue. 404 si la personne n'est pas comptable ou
+  associée sur un projet de X : un membre qui l'appelle pour l'espace d'un autre agit donc chez lui
+  et reçoit 404 (ou 403 avec l'en-tête `X-Espace`).
 
 Interface : dans la section Équipe d'un projet (propriétaire seulement), bloc « Accès à mon argent
 (facturation, compta, banque, caisse) » : une case à cocher par personne, avec sa raison ;
 confirmation avant d'activer (« X pourra voir et modifier ta facturation, ta compta, ta banque et
-ta caisse. ») ; l'état affiché est toujours la réponse du serveur (pas d'affichage anticipé). Les
-textes des rôles et l'e-mail d'invitation disent que l'accès est automatique et que le
-propriétaire peut le couper.
+ta caisse. ») ; l'état affiché est toujours la réponse du serveur (pas d'affichage anticipé). Une
+lecture plus ancienne n'écrase jamais un état plus récent : chaque requête du bloc porte un numéro
+et seule la réponse de la dernière lancée s'affiche (un choix dépassé par une lecture lancée
+pendant son envoi provoque une nouvelle lecture) ; les cases sont désactivées pendant une lecture ;
+la liste est relue après un échec d'enregistrement. Aucun texte ne cite de date. Les textes des
+rôles (« accès automatique, que tu peux couper à tout moment ») et l'e-mail d'invitation (« accès
+automatique, que le propriétaire peut couper à tout moment ») disent que l'accès est automatique
+et que le propriétaire peut le couper.
 
 `GET /espaces` (côté membre) ne liste que les espaces où l'accès est **en vigueur**.
 
@@ -103,7 +133,8 @@ chat, etc.).
 `space_activity` existent déjà en production (créées le 2026-10-14 pour une version abandonnée).
 Elles **doivent rester déclarées dans `schema.prisma`** (sinon le prochain `db push` les
 supprimerait) : `space_activity` est utilisée (journal) ; `space_members` est **réutilisée** pour
-les choix d'accès à l'argent (décision ci-dessus), exportée dans le groupe `compte` ;
+les choix d'accès à l'argent (`'argent'`, `'argent_auto'`, `'refuse'` : décision ci-dessus ; le
+commentaire `///` du modèle le dit, sans changement de structure), exportée dans le groupe `compte` ;
 `space_invitations` reste **réservée, inutilisée**, classée « excluded » dans `user-data-scope.ts`
 avec ce motif, à retirer plus tard par une migration décidée explicitement.
 
@@ -113,8 +144,14 @@ Comptable sur un projet de X → accède aux 4 modules de X ; associé → idem 
 404 ; retiré → 404 immédiat ; aucun accès aux modules non-argent de X avec `X-Espace` (403 fermé par
 défaut) ; propriétaire chez lui inchangé ; journal écrit pour un POST d'un membre ; cache cloisonné.
 
-Accès automatique ou activé : ligne `'argent'` → accès ; comptable ajouté après la date → accès ;
-ajouté avant → 404 tant que le propriétaire ne l'a pas activé ; ligne `'refuse'` → 404 même
-après la date ; retiré des projets → 404 même avec une ligne `'argent'` ; `GET /espaces` du membre
-suit la règle ; les routes du propriétaire refusent un `X-Espace` étranger (403) ; un membre ne peut
-pas choisir pour l'espace d'un autre ; interface : case, confirmation, raisons.
+Accès consenti au geste : invité comme comptable ou associé → ligne `'argent_auto'` → accès ;
+salarié / observateur invité → aucune ligne ; observateur promu associé → ligne créée → accès ; un
+`'refuse'` explicite est gardé quand la personne est repromue ou réinvitée (jamais écrasé) ;
+l'échec de l'écriture de la ligne n'annule ni l'invitation ni le changement de rôle (journalisé) ;
+collaborateur d'avant (aucune ligne) → 404 tant que le propriétaire ne l'a pas activé ; ligne
+`'argent'` → accès ; ligne `'refuse'` → 404 ; retiré des projets → 404 même avec une ligne (qui
+n'est pas supprimée) ; `GET /espaces` du membre suit la règle ; les routes du propriétaire refusent
+un `X-Espace` étranger (403) ; un membre ne peut pas choisir pour l'espace d'un autre ; plus aucune
+référence à une date limite dans le code ; interface : case, confirmation, raisons sans date, une
+lecture plus ancienne n'écrase pas un état plus récent, cases désactivées pendant une lecture,
+liste relue après un échec d'enregistrement.
