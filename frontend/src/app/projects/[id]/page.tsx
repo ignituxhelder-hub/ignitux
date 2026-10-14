@@ -183,6 +183,9 @@ export default function ProjectDetailPage() {
   // d'icônes qui remplace l'empilement de texte.
   const [etapeOuverte, setEtapeOuverte] = useState<string | null>(null);
   const [aDemander, setADemander] = useState<ProfileField[]>([]);
+  // null tant qu'on ne sait pas : on n'affiche rien plutôt qu'un rappel
+  // qui disparaîtrait une seconde plus tard.
+  const [questionnaireTermine, setQuestionnaireTermine] = useState<boolean | null>(null);
   const onGenerated = () => setRefreshSignal((n) => n + 1);
 
   /**
@@ -384,6 +387,19 @@ export default function ProjectDetailPage() {
       .catch(() => setADemander([]));
   }, [token, refreshSignal]);
 
+  /**
+   * Le questionnaire est-il terminé ? Même règle que les questions de
+   * profil : un échec est silencieux, un rappel facultatif ne doit pas
+   * abîmer la page.
+   */
+  useEffect(() => {
+    if (!token) return;
+    api
+      .getQuestionnaire(token, id)
+      .then((q) => setQuestionnaireTermine(q.termine))
+      .catch(() => setQuestionnaireTermine(null));
+  }, [token, id]);
+
   if (!isReady || !token) {
     return null;
   }
@@ -495,6 +511,18 @@ export default function ProjectDetailPage() {
 
           {/* Demandé ici parce que c'est ici que ça sert, pas à
               l'inscription où la personne n'avait encore rien vu. */}
+          {isOwner && questionnaireTermine === false && (
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
+              <h2 style={{ marginTop: 0 }}>Aide IGINI à analyser juste</h2>
+              <p className="muted" style={{ marginTop: 0 }}>
+                Quelques questions à cliquer — ton parcours, ton projet, ton budget — pour
+                qu&apos;IGINI parte de ta situation réelle au lieu de la deviner.
+              </p>
+              <Link className="primary" href={`/projects/${id}/questionnaire`}>
+                Compléter les informations
+              </Link>
+            </div>
+          )}
           {isOwner && (
             <ChampsADemander
               token={token}

@@ -15,16 +15,32 @@ import { api, ApiError, type ProfileField, type ProfileValues } from '@/lib/api'
  * d'activité » ne motive personne ; « la section Conformité cesse de
  * supposer la France » donne une raison de répondre.
  */
+/**
+ * Ce qu'un champ doit dire pour être affiché. Le questionnaire de projet
+ * réutilise ce composant : ses questions n'ont pas de « ce que ça ouvre ».
+ */
+export type ChampAffichable = Pick<ProfileField, 'id' | 'question' | 'purpose' | 'kind' | 'options'> & {
+  unlocks?: string | null;
+};
+
 function Champ({
   champ,
   valeur,
   onChange,
+  boutons = false,
+  prefixe = 'profil',
 }: {
-  champ: ProfileField;
+  champ: ChampAffichable;
   valeur: string | string[] | null;
   onChange: (v: string | string[]) => void;
+  /**
+   * Un choix unique en boutons plutôt qu'en liste déroulante. Pour le
+   * parcours par étapes : on clique, on ne fait pas défiler.
+   */
+  boutons?: boolean;
+  prefixe?: string;
 }) {
-  const id = `profil-${champ.id}`;
+  const id = `${prefixe}-${champ.id}`;
 
   return (
     <div className="field" style={{ marginBottom: '1.5rem' }}>
@@ -47,7 +63,34 @@ function Champ({
         />
       )}
 
-      {champ.kind === 'choix' && (
+      {champ.kind === 'choix' && boutons && (
+        <div
+          id={id}
+          role="radiogroup"
+          aria-label={champ.question}
+          style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}
+        >
+          {(champ.options ?? []).map((o) => {
+            const choisi = valeur === o;
+            return (
+              <button
+                key={o}
+                type="button"
+                role="radio"
+                aria-checked={choisi}
+                className={choisi ? 'primary' : 'secondary'}
+                // Recliquer sur le choix actif le retire : sinon une réponse
+                // donnée par erreur ne pourrait plus jamais être effacée.
+                onClick={() => onChange(choisi ? '' : o)}
+              >
+                {o}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {champ.kind === 'choix' && !boutons && (
         <select
           id={id}
           value={typeof valeur === 'string' ? valeur : ''}

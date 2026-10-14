@@ -215,7 +215,7 @@ describe('ProjectsPage', () => {
 
     // Revenir à une liste après avoir créé serait un détour que personne ne
     // demande : c'est dans le projet que le parcours reprend la main.
-    it('emmène directement dans le projet créé', async () => {
+    it('emmène directement dans le questionnaire du projet créé', async () => {
       mockApiRoutes(
         routes({
           'GET /projects': { status: 200, body: [] },
@@ -236,9 +236,9 @@ describe('ProjectsPage', () => {
       fireEvent.change(screen.getByLabelText('Nom du projet'), {
         target: { value: 'Nouvelle idée' },
       });
-      fireEvent.click(screen.getByRole('button', { name: 'Commencer' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Suivant' }));
 
-      await waitFor(() => expect(router.push).toHaveBeenCalledWith('/projects/p9'));
+      await waitFor(() => expect(router.push).toHaveBeenCalledWith('/projects/p9/questionnaire'));
     });
   });
 });

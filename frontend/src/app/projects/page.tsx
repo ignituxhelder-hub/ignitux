@@ -121,10 +121,10 @@ function ProjectsPageInterieur() {
       setTitle('');
       setDescription('');
       setCreation(false);
-      // On emmène directement dans le projet : c'est là que le parcours
-      // reprend la main, et revenir à une liste après avoir créé serait un
-      // détour que personne ne demande.
-      router.push(`/projects/${cree.id}`);
+      // Tout de suite le questionnaire : c'est maintenant, l'idée en tête,
+      // que la personne sait répondre — et ce qu'elle dit là évite à IGINI
+      // de deviner. Il se quitte à tout moment pour le projet.
+      router.push(`/projects/${cree.id}/questionnaire`);
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : 'Impossible de créer le projet.');
     } finally {
@@ -190,7 +190,7 @@ function ProjectsPageInterieur() {
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <button className="primary" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Création…' : 'Commencer'}
+              {isSubmitting ? 'Création…' : 'Suivant'}
             </button>
             <button className="secondary" type="button" onClick={() => setCreation(false)}>
               Annuler

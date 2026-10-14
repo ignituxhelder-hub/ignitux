@@ -189,7 +189,10 @@ export const PROFILE_FIELDS: readonly ProfileField[] = [
       'qu’Ignitux te propose.',
     unlocks: 'Des recommandations qui partent de là où tu es, pas de zéro.',
     roles: ['entrepreneur'],
-    moment: 'premier-projet',
+    // Plus demandé sur la page projet : le questionnaire de projet pose le
+    // CV décrit (cv.service.ts), plus précis que ce texte libre. Le champ
+    // reste pour ceux qui l'ont rempli, et sur la page Profil.
+    moment: 'au-besoin',
     kind: 'texte-long',
     countsTowardCompletion: true,
   },

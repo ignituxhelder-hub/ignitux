@@ -4,7 +4,8 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Brand } from '@/components/ignitux-mark';
 import { Champ } from '@/components/champs-profil';
-import { api, ApiError, type ProfileValues, type ProfileView } from '@/lib/api';
+import { cvAEnvoyer, EditeurCv } from '@/components/editeur-cv';
+import { api, ApiError, type Cv, type ProfileValues, type ProfileView } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
 /**
@@ -32,13 +33,21 @@ export default function ProfilePage() {
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [cv, setCv] = useState<Cv | null>(null);
+  const [cvEnCours, setCvEnCours] = useState(false);
+  const [cvMessage, setCvMessage] = useState<string | null>(null);
 
   const charger = useCallback(async (jeton: string) => {
     setIsLoading(true);
     try {
-      const v = await api.getProfile(jeton);
+      const [v, monCv] = await Promise.all([
+        api.getProfile(jeton),
+        // Le CV est un complément : s'il ne se charge pas, le profil reste utile.
+        api.getCv(jeton).catch(() => null),
+      ]);
       setVue(v);
       setBrouillon(v.values);
+      setCv(monCv);
       setErreur(null);
     } catch (err) {
       setErreur(err instanceof ApiError ? err.message : 'Impossible de lire ton profil.');
@@ -73,6 +82,22 @@ export default function ProfilePage() {
       setErreur(err instanceof ApiError ? err.message : "L'enregistrement a échoué.");
     } finally {
       setEnCours(false);
+    }
+  }
+
+  async function enregistrerCv(e: FormEvent) {
+    e.preventDefault();
+    if (!token || !cv) return;
+    setCvEnCours(true);
+    setErreur(null);
+    setCvMessage(null);
+    try {
+      setCv(await api.saveCv(token, cvAEnvoyer(cv)));
+      setCvMessage('CV enregistré.');
+    } catch (err) {
+      setErreur(err instanceof ApiError ? err.message : "L'enregistrement du CV a échoué.");
+    } finally {
+      setCvEnCours(false);
     }
   }
 
@@ -143,6 +168,30 @@ export default function ProfilePage() {
               {enCours ? 'Enregistrement…' : 'Enregistrer'}
             </button>
           </form>
+
+          {cv && (
+            <form className="card" onSubmit={enregistrerCv} style={{ marginTop: '1.5rem' }}>
+              <h2 style={{ marginTop: 0 }}>Ton CV</h2>
+              <p className="muted" style={{ marginTop: 0 }}>
+                Décrit plutôt qu&apos;importé : tes postes avec leurs dates, en quelques mots.
+                IGINI s&apos;en sert dans toutes ses analyses.
+              </p>
+              <EditeurCv cv={cv} onChange={setCv} />
+              {cvMessage && (
+                <p className="notice">
+                  <span>{cvMessage}</span>
+                </p>
+              )}
+              <button
+                className="primary"
+                type="submit"
+                disabled={cvEnCours}
+                style={{ marginTop: '1rem' }}
+              >
+                {cvEnCours ? 'Enregistrement…' : 'Enregistrer mon CV'}
+              </button>
+            </form>
+          )}
 
           <p className="muted" style={{ marginTop: '1.5rem' }}>
             Ce que tu écris ici devient un souvenir personnel d&apos;IGINI, rattaché à toi et

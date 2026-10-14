@@ -2145,6 +2145,66 @@ export interface ProfileView {
   fields: ProfileField[];
 }
 
+// ── LE CV DÉCRIT ────────────────────────────────────────────────────────────
+
+export interface CvExperience {
+  poste: string;
+  entreprise: string | null;
+  /** AAAA-MM */
+  debut: string | null;
+  /** AAAA-MM ; null quand le poste est en cours. */
+  fin: string | null;
+  enCours: boolean;
+  description: string | null;
+}
+
+export interface CvFormation {
+  diplome: string;
+  etablissement: string | null;
+  annee: number | null;
+}
+
+export interface Cv {
+  experiences: CvExperience[];
+  formations: CvFormation[];
+}
+
+// ── LE QUESTIONNAIRE DU PROJET ──────────────────────────────────────────────
+
+export interface EtapeQuestionnaire {
+  id: string;
+  titre: string;
+  intro: string;
+}
+
+export interface QuestionProjet {
+  id: string;
+  etape: string;
+  label: string;
+  question: string;
+  purpose: string;
+  kind: 'choix' | 'liste' | 'texte';
+  options?: string[];
+  longueurMax?: number;
+  visibleSi?: { question: string; parmi: string[] };
+}
+
+export interface QuestionIgini {
+  id: string;
+  question: string;
+  pourquoi: string | null;
+  reponse: string | null;
+}
+
+export interface Questionnaire {
+  etapes: EtapeQuestionnaire[];
+  questions: QuestionProjet[];
+  reponses: Record<string, string | string[]>;
+  termine: boolean;
+  questionsIginiPreparees: boolean;
+  questionsIgini: QuestionIgini[];
+}
+
 export const api = {
   getBuybackProgress: (token: string, projectId: string) =>
     request<BuybackProgress>(`/projects/${projectId}/financing/buyback`, {
@@ -3873,6 +3933,51 @@ export const api = {
    * formulaire complet, il demande au serveur les deux ou trois questions
    * qui ont un sens à cet endroit du parcours.
    */
+  getCv: (token: string) =>
+    request<Cv>('/profil/cv', { headers: { Authorization: `Bearer ${token}` } }),
+
+  saveCv: (token: string, cv: Cv) =>
+    request<Cv>('/profil/cv', {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(cv),
+    }),
+
+  getQuestionnaire: (token: string, projectId: string) =>
+    request<Questionnaire>(`/projects/${projectId}/questionnaire`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  saveQuestionnaire: (
+    token: string,
+    projectId: string,
+    reponses: Record<string, string | string[] | null>,
+    termine = false,
+  ) =>
+    request<Questionnaire>(`/projects/${projectId}/questionnaire`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ reponses, ...(termine ? { termine: true } : {}) }),
+    }),
+
+  /** Une seule fois par projet ; un échec n'est pas bloquant. */
+  prepareIginiQuestions: (token: string, projectId: string) =>
+    request<Questionnaire>(`/projects/${projectId}/questionnaire/questions-igini`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  answerIginiQuestions: (
+    token: string,
+    projectId: string,
+    reponses: Array<{ id: string; reponse: string | null }>,
+  ) =>
+    request<Questionnaire>(`/projects/${projectId}/questionnaire/questions-igini`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ reponses }),
+    }),
+
   getProfileFieldsToAsk: (token: string, moment: ProfileMoment) =>
     request<ProfileField[]>(`/profil/a-demander/${moment}`, {
       headers: { Authorization: `Bearer ${token}` },
