@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
+import { IconesPanneaux } from '@/components/icones-panneaux';
 import {
   api,
   ApiError,
@@ -308,246 +309,267 @@ export default function BillingPage() {
 
       {error && <p className="error">{error}</p>}
 
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Nouveau document</h2>
-        <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <select
-            aria-label="Type de document"
-            value={type}
-            onChange={(e) => setType(e.target.value as BillingType)}
-          >
-            <option value="devis">Devis</option>
-            <option value="facture">Facture</option>
-          </select>
-          <input
-            aria-label="Nom du client"
-            placeholder="Client"
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
-          />
-          <input
-            aria-label="Désignation"
-            placeholder="Désignation de la prestation"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-          />
-          <input
-            aria-label="Montant hors taxes en euros"
-            placeholder="Montant HT (€)"
-            value={amountEuros}
-            onChange={(e) => setAmountEuros(e.target.value)}
-          />
-          <input
-            aria-label="Taux de TVA en pourcentage"
-            placeholder="TVA (%)"
-            value={vatPercent}
-            onChange={(e) => setVatPercent(e.target.value)}
-          />
-          <button className="secondary" type="submit" disabled={isSaving}>
-            {isSaving ? 'Création…' : 'Créer'}
-          </button>
-        </form>
-        <p className="muted" style={{ marginBottom: 0 }}>
-          Le taux de TVA est celui que tu saisis : Ignitux n&apos;en présume aucun, parce que les
-          taux dépendent de ton activité et changent avec la réglementation.
-        </p>
-      </div>
-
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <div className="top-bar">
-          <h2 style={{ marginTop: 0 }}>Documents</h2>
-          <button
-            className="secondary"
-            type="button"
-            onClick={() => void handleExportCsv()}
-            disabled={isExporting || documents.length === 0}
-          >
-            {isExporting ? 'Export…' : 'Exporter en CSV'}
-          </button>
-        </div>
-        <p className="muted" style={{ marginTop: 0 }}>
-          Ouvre un document pour le voir tel que ton client le recevra, et l&apos;imprimer ou
-          l&apos;enregistrer en PDF.
-        </p>
-        {isLoading && <p className="loading">Chargement…</p>}
-        {!isLoading && documents.length === 0 && (
-          <p className="muted">Aucun document pour l&apos;instant.</p>
-        )}
-        <ul aria-label="Liste des documents" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {documents.map((document) => (
-            <li
-              key={document.id}
-              className="project-item"
-              style={{ cursor: 'default', marginBottom: '0.5rem' }}
+      <IconesPanneaux
+        titre="Facturation"
+        ouvertParDefaut="documents"
+        panneaux={[
+          {
+            id: 'documents',
+            nom: 'Documents',
+            glyphe: 'facturation',
+            categorie: 'vendre',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <div className="top-bar">
+            <h2 style={{ marginTop: 0 }}>Documents</h2>
+            <button
+              className="secondary"
+              type="button"
+              onClick={() => void handleExportCsv()}
+              disabled={isExporting || documents.length === 0}
             >
-              <div className="top-bar" style={{ marginBottom: '0.25rem' }}>
-                <Link href={`/facturation/${document.id}`}>
-                  <strong>
-                    {document.number} — {TYPE_LABELS[document.type]}
-                  </strong>
-                </Link>
-                <span className="muted">{STATUS_LABELS[document.status]}</span>
-              </div>
-              <p style={{ margin: 0 }}>{document.client_name}</p>
-              {document.corrects_id && (
+              {isExporting ? 'Export…' : 'Exporter en CSV'}
+            </button>
+          </div>
+          <p className="muted" style={{ marginTop: 0 }}>
+            Ouvre un document pour le voir tel que ton client le recevra, et l&apos;imprimer ou
+            l&apos;enregistrer en PDF.
+          </p>
+          {isLoading && <p className="loading">Chargement…</p>}
+          {!isLoading && documents.length === 0 && (
+            <p className="muted">Aucun document pour l&apos;instant.</p>
+          )}
+          <ul aria-label="Liste des documents" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {documents.map((document) => (
+              <li
+                key={document.id}
+                className="project-item"
+                style={{ cursor: 'default', marginBottom: '0.5rem' }}
+              >
+                <div className="top-bar" style={{ marginBottom: '0.25rem' }}>
+                  <Link href={`/facturation/${document.id}`}>
+                    <strong>
+                      {document.number} — {TYPE_LABELS[document.type]}
+                    </strong>
+                  </Link>
+                  <span className="muted">{STATUS_LABELS[document.status]}</span>
+                </div>
+                <p style={{ margin: 0 }}>{document.client_name}</p>
+                {document.corrects_id && (
+                  <p className="muted" style={{ margin: '0.25rem 0 0' }}>
+                    À déduire de{' '}
+                    {documents.find((other) => other.id === document.corrects_id)?.number ??
+                      'un document supprimé'}
+                    .
+                  </p>
+                )}
                 <p className="muted" style={{ margin: '0.25rem 0 0' }}>
-                  À déduire de{' '}
-                  {documents.find((other) => other.id === document.corrects_id)?.number ??
-                    'un document supprimé'}
-                  .
+                  {formatCents(document.totals.subtotalCents)} HT · TVA{' '}
+                  {formatCents(document.totals.vatCents)} · Total{' '}
+                  {formatCents(document.totals.totalCents)}
+                  {document.status !== 'brouillon' &&
+                    ` · Reste dû ${formatCents(document.remainingCents)}`}
                 </p>
-              )}
-              <p className="muted" style={{ margin: '0.25rem 0 0' }}>
-                {formatCents(document.totals.subtotalCents)} HT · TVA{' '}
-                {formatCents(document.totals.vatCents)} · Total{' '}
-                {formatCents(document.totals.totalCents)}
-                {document.status !== 'brouillon' &&
-                  ` · Reste dû ${formatCents(document.remainingCents)}`}
-              </p>
 
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-                {document.status === 'brouillon' && (
-                  <>
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                  {document.status === 'brouillon' && (
+                    <>
+                      <button
+                        className="secondary"
+                        type="button"
+                        onClick={() => void handleStatus(document, 'emis')}
+                      >
+                        Émettre
+                      </button>
+                      <button
+                        className="secondary"
+                        type="button"
+                        onClick={() =>
+                          editingId === document.id ? setEditingId(null) : startEdit(document)
+                        }
+                      >
+                        Modifier
+                      </button>
+                      <button
+                        className="secondary"
+                        type="button"
+                        onClick={() => void handleDelete(document)}
+                      >
+                        Supprimer
+                      </button>
+                    </>
+                  )}
+                  {document.status === 'emis' && (
                     <button
                       className="secondary"
                       type="button"
-                      onClick={() => void handleStatus(document, 'emis')}
+                      onClick={() => void handlePay(document)}
                     >
-                      Émettre
-                    </button>
-                    <button
-                      className="secondary"
-                      type="button"
-                      onClick={() =>
-                        editingId === document.id ? setEditingId(null) : startEdit(document)
-                      }
-                    >
-                      Modifier
-                    </button>
-                    <button
-                      className="secondary"
-                      type="button"
-                      onClick={() => void handleDelete(document)}
-                    >
-                      Supprimer
-                    </button>
-                  </>
-                )}
-                {document.status === 'emis' && (
-                  <button
-                    className="secondary"
-                    type="button"
-                    onClick={() => void handlePay(document)}
-                  >
-                    Marquer réglé
-                  </button>
-                )}
-                {/* La règle « une facture émise ne se corrige que par un avoir »
-                    était énoncée en haut de page sans être offerte nulle part.
-                    Le geste existe maintenant là où la règle s'applique. */}
-                {document.type === 'facture' &&
-                  (document.status === 'emis' || document.status === 'paye') &&
-                  correctingId !== document.id && (
-                    <button
-                      className="secondary"
-                      type="button"
-                      onClick={() => startCorrection(document)}
-                    >
-                      Corriger par un avoir
+                      Marquer réglé
                     </button>
                   )}
-                {document.status !== 'brouillon' && (
-                  <span className="muted">
-                    Émis : ce document ne peut plus être modifié ni supprimé.
-                  </span>
-                )}
-              </div>
+                  {/* La règle « une facture émise ne se corrige que par un avoir »
+                      était énoncée en haut de page sans être offerte nulle part.
+                      Le geste existe maintenant là où la règle s'applique. */}
+                  {document.type === 'facture' &&
+                    (document.status === 'emis' || document.status === 'paye') &&
+                    correctingId !== document.id && (
+                      <button
+                        className="secondary"
+                        type="button"
+                        onClick={() => startCorrection(document)}
+                      >
+                        Corriger par un avoir
+                      </button>
+                    )}
+                  {document.status !== 'brouillon' && (
+                    <span className="muted">
+                      Émis : ce document ne peut plus être modifié ni supprimé.
+                    </span>
+                  )}
+                </div>
 
-              {editingId === document.id && (
-                <form
-                  onSubmit={(e) => void handleEdit(document, e)}
-                  style={{
-                    display: 'flex',
-                    gap: '0.5rem',
-                    flexWrap: 'wrap',
-                    marginTop: '0.75rem',
-                  }}
-                >
-                  <input
-                    aria-label="Modifier le nom du client"
-                    placeholder="Client"
-                    value={editClientName}
-                    onChange={(e) => setEditClientName(e.target.value)}
-                  />
-                  <input
-                    aria-label="Modifier la désignation"
-                    placeholder="Désignation de la prestation"
-                    value={editLabel}
-                    onChange={(e) => setEditLabel(e.target.value)}
-                  />
-                  <input
-                    aria-label="Modifier le montant hors taxes en euros"
-                    placeholder="Montant HT (€)"
-                    value={editAmountEuros}
-                    onChange={(e) => setEditAmountEuros(e.target.value)}
-                  />
-                  <input
-                    aria-label="Modifier le taux de TVA en pourcentage"
-                    placeholder="TVA (%)"
-                    value={editVatPercent}
-                    onChange={(e) => setEditVatPercent(e.target.value)}
-                  />
-                  <button className="secondary" type="submit" disabled={isEditSaving}>
-                    {isEditSaving ? 'Enregistrement…' : 'Enregistrer'}
-                  </button>
-                  <button className="secondary" type="button" onClick={() => setEditingId(null)}>
-                    Annuler
-                  </button>
-                </form>
-              )}
-
-              {correctingId === document.id && (
-                <form
-                  onSubmit={(e) => void handleCredit(document, e)}
-                  style={{
-                    display: 'flex',
-                    gap: '0.5rem',
-                    flexWrap: 'wrap',
-                    marginTop: '0.75rem',
-                  }}
-                >
-                  <input
-                    aria-label="Motif de l’avoir"
-                    placeholder="Motif de l’avoir"
-                    value={creditLabel}
-                    onChange={(e) => setCreditLabel(e.target.value)}
-                  />
-                  <input
-                    aria-label="Montant hors taxes à créditer en euros"
-                    placeholder="Montant HT à créditer (€)"
-                    value={creditEuros}
-                    onChange={(e) => setCreditEuros(e.target.value)}
-                  />
-                  <button className="secondary" type="submit" disabled={isSaving}>
-                    {isSaving ? 'Émission…' : 'Émettre l’avoir'}
-                  </button>
-                  <button
-                    className="secondary"
-                    type="button"
-                    onClick={() => setCorrectingId(null)}
+                {editingId === document.id && (
+                  <form
+                    onSubmit={(e) => void handleEdit(document, e)}
+                    style={{
+                      display: 'flex',
+                      gap: '0.5rem',
+                      flexWrap: 'wrap',
+                      marginTop: '0.75rem',
+                    }}
                   >
-                    Annuler
-                  </button>
-                  <p className="muted" style={{ margin: 0, flexBasis: '100%' }}>
-                    L’avoir reprend le taux de TVA de la facture corrigée. Il naît en brouillon :
-                    il faudra l’émettre à son tour, et il portera alors son propre numéro.
-                  </p>
-                </form>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+                    <input
+                      aria-label="Modifier le nom du client"
+                      placeholder="Client"
+                      value={editClientName}
+                      onChange={(e) => setEditClientName(e.target.value)}
+                    />
+                    <input
+                      aria-label="Modifier la désignation"
+                      placeholder="Désignation de la prestation"
+                      value={editLabel}
+                      onChange={(e) => setEditLabel(e.target.value)}
+                    />
+                    <input
+                      aria-label="Modifier le montant hors taxes en euros"
+                      placeholder="Montant HT (€)"
+                      value={editAmountEuros}
+                      onChange={(e) => setEditAmountEuros(e.target.value)}
+                    />
+                    <input
+                      aria-label="Modifier le taux de TVA en pourcentage"
+                      placeholder="TVA (%)"
+                      value={editVatPercent}
+                      onChange={(e) => setEditVatPercent(e.target.value)}
+                    />
+                    <button className="secondary" type="submit" disabled={isEditSaving}>
+                      {isEditSaving ? 'Enregistrement…' : 'Enregistrer'}
+                    </button>
+                    <button className="secondary" type="button" onClick={() => setEditingId(null)}>
+                      Annuler
+                    </button>
+                  </form>
+                )}
+
+                {correctingId === document.id && (
+                  <form
+                    onSubmit={(e) => void handleCredit(document, e)}
+                    style={{
+                      display: 'flex',
+                      gap: '0.5rem',
+                      flexWrap: 'wrap',
+                      marginTop: '0.75rem',
+                    }}
+                  >
+                    <input
+                      aria-label="Motif de l’avoir"
+                      placeholder="Motif de l’avoir"
+                      value={creditLabel}
+                      onChange={(e) => setCreditLabel(e.target.value)}
+                    />
+                    <input
+                      aria-label="Montant hors taxes à créditer en euros"
+                      placeholder="Montant HT à créditer (€)"
+                      value={creditEuros}
+                      onChange={(e) => setCreditEuros(e.target.value)}
+                    />
+                    <button className="secondary" type="submit" disabled={isSaving}>
+                      {isSaving ? 'Émission…' : 'Émettre l’avoir'}
+                    </button>
+                    <button
+                      className="secondary"
+                      type="button"
+                      onClick={() => setCorrectingId(null)}
+                    >
+                      Annuler
+                    </button>
+                    <p className="muted" style={{ margin: 0, flexBasis: '100%' }}>
+                      L’avoir reprend le taux de TVA de la facture corrigée. Il naît en brouillon :
+                      il faudra l’émettre à son tour, et il portera alors son propre numéro.
+                    </p>
+                  </form>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+            ),
+          },
+          {
+            id: 'nouveau',
+            nom: 'Nouveau',
+            glyphe: 'infos',
+            categorie: 'creer',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>Nouveau document</h2>
+          <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <select
+              aria-label="Type de document"
+              value={type}
+              onChange={(e) => setType(e.target.value as BillingType)}
+            >
+              <option value="devis">Devis</option>
+              <option value="facture">Facture</option>
+            </select>
+            <input
+              aria-label="Nom du client"
+              placeholder="Client"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+            />
+            <input
+              aria-label="Désignation"
+              placeholder="Désignation de la prestation"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+            />
+            <input
+              aria-label="Montant hors taxes en euros"
+              placeholder="Montant HT (€)"
+              value={amountEuros}
+              onChange={(e) => setAmountEuros(e.target.value)}
+            />
+            <input
+              aria-label="Taux de TVA en pourcentage"
+              placeholder="TVA (%)"
+              value={vatPercent}
+              onChange={(e) => setVatPercent(e.target.value)}
+            />
+            <button className="secondary" type="submit" disabled={isSaving}>
+              {isSaving ? 'Création…' : 'Créer'}
+            </button>
+          </form>
+          <p className="muted" style={{ marginBottom: 0 }}>
+            Le taux de TVA est celui que tu saisis : Ignitux n&apos;en présume aucun, parce que les
+            taux dépendent de ton activité et changent avec la réglementation.
+          </p>
+        </div>
+            ),
+          },
+        ]}
+      />
     </main>
   );
 }
