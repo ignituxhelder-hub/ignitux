@@ -32,8 +32,9 @@ import {
  * sur un ordinateur.
  *
  * Il ne s'affiche que pour une personne connectée, et seulement sur le
- * bureau ou dans une application. Connexion, inscription, pages d'erreur :
- * pas de barre — on n'est pas encore « dans » Ignitux.
+ * bureau ou dans une application. Connexion, inscription : pas de barre — on
+ * n'est pas encore « dans » Ignitux. Seule exception : la barre de l'espace
+ * (bandeau chez un autre, sélecteur) est sur TOUTE page connectée.
  *
  * Il ne garde aucune porte : les droits restent au serveur.
  */
@@ -89,13 +90,71 @@ export function Systeme({ children }: { children: ReactNode }) {
     if (message) router.push(BUREAU);
   }, [message, router]);
 
-  if (!connecte || (!app && !surBureau)) return <>{children}</>;
+  if (!connecte) return <>{children}</>;
+
+  const plusieursEspaces = !!espaces && espaces.length > 1;
+
+  // Le bandeau de l'espace d'un autre (et le sélecteur, dès qu'il y a le
+  // choix) est sur TOUTES les pages connectées, y compris celles qui ne sont
+  // pas une application (identité, administration, évaluations…) : on ne
+  // doit jamais oublier chez qui l'on est.
+  const barreEspace = (courant || message || plusieursEspaces) && (
+    <section className="barre-espace" aria-label="Espace de travail">
+      {courant && (
+        <p className="barre-espace__bandeau" role="status">
+          Tu travailles dans {nomDansPhrase(courant.nom)} (facturation, comptabilité, banque, caisse) — rôle : {libelleRoles(courant.roles)}
+        </p>
+      )}
+      {message && (
+        <p className="error barre-espace__message" role="alert">
+          <span>{message} Tu es revenu dans ton espace.</span>
+          <button type="button" className="secondary" onClick={effacerMessage}>
+            OK
+          </button>
+        </p>
+      )}
+      {plusieursEspaces && espaces && (
+        <div className="barre-espace__choix">
+          <label htmlFor="selecteur-espace">Espace</label>
+          <select
+            id="selecteur-espace"
+            value={courant?.ownerId ?? user?.id ?? ''}
+            onChange={(e) => {
+              const cible = espaces.find((espace) => espace.ownerId === e.target.value) ?? null;
+              choisir(cible && cible.ownerId !== user?.id ? cible : null);
+              // Les données affichées sont celles de l'ancien espace : on
+              // repart du bureau, qui se recalcule pour le nouveau.
+              router.push(BUREAU);
+            }}
+          >
+            {espaces.map((espace) => (
+              <option key={espace.ownerId} value={espace.ownerId}>
+                {espace.ownerId === user?.id
+                  ? 'Mon espace'
+                  : `${espace.nom} (${libelleRoles(espace.roles)})`}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+    </section>
+  );
+
+  // Page connectée hors bureau et hors application : ni barre d'application
+  // ni barre des tâches, mais l'espace reste dit.
+  if (!app && !surBureau) {
+    return (
+      <>
+        {barreEspace}
+        {children}
+      </>
+    );
+  }
 
   // Dans l'espace d'un autre, seules les applications d'argent s'affichent :
   // les requêtes des autres partiraient sans en-tête et montreraient MES
   // données sous le bandeau de l'autre.
   const horsArgent = !!courant && !!app && domaineDeLApplication(app.id) !== 'argent';
-  const plusieursEspaces = !!espaces && espaces.length > 1;
 
   function fermerApplication(id: string) {
     const suivantes = fermer(taches, id);
@@ -129,47 +188,7 @@ export function Systeme({ children }: { children: ReactNode }) {
         </header>
       )}
 
-      {(courant || message || plusieursEspaces) && (
-        <section className="barre-espace" aria-label="Espace de travail">
-          {courant && (
-            <p className="barre-espace__bandeau" role="status">
-              Tu travailles dans {nomDansPhrase(courant.nom)} (facturation, comptabilité, banque, caisse) — rôle : {libelleRoles(courant.roles)}
-            </p>
-          )}
-          {message && (
-            <p className="error barre-espace__message" role="alert">
-              <span>{message} Tu es revenu dans ton espace.</span>
-              <button type="button" className="secondary" onClick={effacerMessage}>
-                OK
-              </button>
-            </p>
-          )}
-          {plusieursEspaces && espaces && (
-            <div className="barre-espace__choix">
-              <label htmlFor="selecteur-espace">Espace</label>
-              <select
-                id="selecteur-espace"
-                value={courant?.ownerId ?? user?.id ?? ''}
-                onChange={(e) => {
-                  const cible = espaces.find((espace) => espace.ownerId === e.target.value) ?? null;
-                  choisir(cible && cible.ownerId !== user?.id ? cible : null);
-                  // Les données affichées sont celles de l'ancien espace : on
-                  // repart du bureau, qui se recalcule pour le nouveau.
-                  router.push(BUREAU);
-                }}
-              >
-                {espaces.map((espace) => (
-                  <option key={espace.ownerId} value={espace.ownerId}>
-                    {espace.ownerId === user?.id
-                      ? 'Mon espace'
-                      : `${espace.nom} (${libelleRoles(espace.roles)})`}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        </section>
-      )}
+      {barreEspace}
 
       {horsArgent && app && courant ? (
         <main className="page">

@@ -213,4 +213,45 @@ describe('Systeme — l’espace argent', () => {
     expect(getEspaceActif()).toBe(ALICE);
     expect(screen.getByText('contenu de la page')).toBeInTheDocument();
   });
+
+  describe('pages connectées qui ne sont pas une application (identité, administration, évaluations…)', () => {
+    it.each(['/identite', '/administration', '/evaluations/revue'])(
+      '%s chez Alice : le bandeau et le sélecteur restent visibles, au-dessus de la page',
+      async (route) => {
+        chezAlice();
+        chemin = route;
+        mockApiRoutes({ 'GET /espaces': { status: 200, body: MES_ESPACES } });
+        afficher();
+        expect(await screen.findByText(BANDEAU_ALICE)).toBeInTheDocument();
+        expect(screen.getByLabelText('Espace')).toBeInTheDocument();
+        expect(screen.getByText('contenu de la page')).toBeInTheDocument();
+      },
+    );
+
+    it('chez soi avec plusieurs espaces : le sélecteur y est aussi, sans bandeau', async () => {
+      chemin = '/identite';
+      mockApiRoutes({ 'GET /espaces': { status: 200, body: MES_ESPACES } });
+      afficher();
+      expect(await screen.findByLabelText('Espace')).toBeInTheDocument();
+      expect(screen.queryByText(/Tu travailles dans/)).not.toBeInTheDocument();
+      expect(screen.getByText('contenu de la page')).toBeInTheDocument();
+    });
+
+    it('l’accès perdu y est dit aussi', async () => {
+      chezAlice();
+      chemin = '/identite';
+      mockApiRoutes({ 'GET /espaces': { status: 200, body: [MES_ESPACES[0]] } });
+      afficher();
+      expect(await screen.findByRole('alert')).toHaveTextContent('Tu n’as plus accès à cet espace.');
+    });
+
+    it('déconnecté (connexion, inscription) : rien de tout cela', async () => {
+      window.localStorage.clear();
+      chemin = '/login';
+      mockApiRoutes({ 'GET /espaces': { status: 200, body: MES_ESPACES } });
+      afficher();
+      expect(await screen.findByText('contenu de la page')).toBeInTheDocument();
+      expect(screen.queryByLabelText('Espace')).not.toBeInTheDocument();
+    });
+  });
 });
