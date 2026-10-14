@@ -314,6 +314,37 @@ describe('le cache et la file sont cloisonnés par utilisateur', () => {
   });
 });
 
+describe('écritures hors ligne d’avant ce déploiement (sans auteur)', () => {
+  const ANCIENNE = JSON.stringify({
+    pending: [{ id: '1-1', path: '/projects/p1', method: 'PATCH', body: '{}', label: 'Projet', queuedAt: '2026-10-01T00:00:00.000Z' }],
+    rejected: [],
+    nextId: 2,
+  });
+
+  it('rattachées à la première personne connectée : montrées et rejouées pour elle', async () => {
+    const storage = fakeStorage();
+    storage.setItem('ignitux.offline', ANCIENNE);
+    setUtilisateurActif(null);
+    setOfflineStorage(storage);
+    setUtilisateurActif('u1');
+
+    expect(readOfflineState().pending).toEqual([expect.objectContaining({ path: '/projects/p1', utilisateur: 'u1' })]);
+    const envois = reseau(200, {});
+    expect(await replayOfflineQueue('jeton-de-u1')).toMatchObject({ sent: 1 });
+    expect(envois).toHaveLength(1);
+  });
+
+  it('aussi quand le stockage arrive après la session ; la personne suivante ne les voit pas', () => {
+    const storage = fakeStorage();
+    storage.setItem('ignitux.offline', ANCIENNE);
+    setOfflineStorage(storage);
+    expect(readOfflineState().pending).toHaveLength(1);
+
+    setUtilisateurActif('u2');
+    expect(readOfflineState().pending).toEqual([]);
+  });
+});
+
 describe('la file d’attente se souvient de l’espace', () => {
   it('une écriture faite dans l’espace A repart avec l’en-tête de A, même rentré chez soi', async () => {
     setOfflineStorage(fakeStorage());

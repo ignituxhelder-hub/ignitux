@@ -55,7 +55,8 @@ export interface QueuedMutation {
    * est partagé par tous ceux qui se connectent sur cet appareil : une
    * écriture n'est rejouée (et montrée) que pour SON auteur, jamais avec le
    * jeton de la personne connectée ensuite. Absent (écriture d'avant ce
-   * cloisonnement, ou faite déconnecté) : auteur inconnu, jamais rejouée.
+   * cloisonnement, ou faite déconnecté) : auteur inconnu, jamais rejouée —
+   * sauf une fois, à la migration `adopterEcrituresSansAuteur`.
    */
   utilisateur?: string;
 }
@@ -222,6 +223,49 @@ export function enqueue(
   });
 
   return stored ? queued : null;
+}
+
+const CLE_ADOPTION = 'ignitux.offline.adoption';
+
+/**
+ * MIGRATION UNIQUE — les écritures mises en file AVANT le cloisonnement par
+ * utilisateur n'ont pas d'auteur. Sans elle, elles ne seraient plus ni
+ * montrées ni rejouées : perdues en silence, ce que ce module promet de ne
+ * jamais faire. Elles sont donc rattachées à la PREMIÈRE personne qui se
+ * connecte sur ce navigateur après le déploiement — en pratique celle qui
+ * les a faites, l'appareil étant le plus souvent personnel — puis la
+ * migration est marquée faite : une personne connectée ensuite n'adopte
+ * plus rien.
+ *
+ * Sans file dans ce navigateur, rien n'est écrit (pas même la marque). Si le
+ * stockage refuse l'écriture, rien n'est annoncé et la migration sera
+ * retentée à la prochaine connexion. Rend le nombre d'écritures adoptées.
+ */
+export function adopterEcrituresSansAuteur(storage: KeyValueStorage, utilisateur: string): number {
+  try {
+    if (storage.getItem(CLE_ADOPTION) !== null || storage.getItem(STORAGE_KEY) === null) return 0;
+  } catch {
+    return 0;
+  }
+
+  const state = readState(storage);
+  const sansAuteur = (mutation: QueuedMutation) => mutation.utilisateur === undefined;
+  const adoptees = state.pending.filter(sansAuteur).length + state.rejected.filter(sansAuteur).length;
+  if (adoptees > 0) {
+    const ecrit = writeState(storage, {
+      ...state,
+      pending: state.pending.map((m) => (sansAuteur(m) ? { ...m, utilisateur } : m)),
+      rejected: state.rejected.map((m) => (sansAuteur(m) ? { ...m, utilisateur } : m)),
+    });
+    if (!ecrit) return 0;
+  }
+
+  try {
+    storage.setItem(CLE_ADOPTION, 'fait');
+  } catch {
+    // Sans marque, la migration repassera : elle ne trouvera plus rien à adopter.
+  }
+  return adoptees;
 }
 
 export function removePending(storage: KeyValueStorage, id: string): OfflineState {

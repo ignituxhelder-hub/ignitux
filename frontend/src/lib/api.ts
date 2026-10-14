@@ -3,6 +3,7 @@ import type { MonAcces, RoleEquipe } from './equipe';
 import { envoieEspace } from './domaines';
 import { cacheResponse, readCached, type IterableStorage } from './offline-cache';
 import {
+  adopterEcrituresSansAuteur,
   dismissRejected,
   enqueue,
   readState,
@@ -69,6 +70,18 @@ let utilisateurActif: string | null = null;
 
 export function setUtilisateurActif(userId: string | null) {
   utilisateurActif = userId;
+  adopterEcrituresAnciennes();
+}
+
+/**
+ * Les écritures hors ligne d'avant le cloisonnement (sans auteur) vont à la
+ * première personne connectée (voir `adopterEcrituresSansAuteur`). Appelé
+ * quand l'utilisateur OU le stockage est posé : l'ordre des deux au
+ * démarrage n'est pas garanti.
+ */
+function adopterEcrituresAnciennes() {
+  if (!utilisateurActif || !offlineStorage) return;
+  if (adopterEcrituresSansAuteur(offlineStorage, utilisateurActif) > 0) onOfflineChange?.();
 }
 
 export function getUtilisateurActif(): string | null {
@@ -336,6 +349,7 @@ let offlineStorage: IterableStorage | null = null;
 
 export function setOfflineStorage(storage: IterableStorage | null) {
   offlineStorage = storage;
+  adopterEcrituresAnciennes();
 }
 
 /**

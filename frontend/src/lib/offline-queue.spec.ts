@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  adopterEcrituresSansAuteur,
   dismissRejected,
   enqueue,
   readState,
@@ -402,6 +403,60 @@ describe("file d'attente hors ligne", () => {
       );
 
       expect(outcome).toEqual({ sent: 0, rejected: 0, remaining: 1 });
+    });
+  });
+
+  describe('écritures d’avant le cloisonnement (sans auteur) : adoptées une fois', () => {
+    function fileAncienne() {
+      return memoryStorage({
+        'ignitux.offline': JSON.stringify({
+          pending: [
+            { id: '1-1', path: '/ancienne', method: 'POST', body: null, label: 'Ancienne', queuedAt: 'x' },
+            { id: '1-2', path: '/de-u2', method: 'POST', body: null, label: 'U2', queuedAt: 'x', utilisateur: 'u2' },
+          ],
+          rejected: [
+            { id: '1-3', path: '/refusee', method: 'PATCH', body: null, label: 'R', queuedAt: 'x', status: 422, reason: 'Non.', rejectedAt: 'x' },
+          ],
+          nextId: 4,
+        }),
+      });
+    }
+
+    it('la première personne connectée reçoit les écritures sans auteur (en file et refusées), pas celles d’un autre', () => {
+      const storage = fileAncienne();
+      expect(adopterEcrituresSansAuteur(storage, 'u1')).toBe(2);
+      const etat = readState(storage);
+      expect(etat.pending.map((m) => [m.path, m.utilisateur])).toEqual([
+        ['/ancienne', 'u1'],
+        ['/de-u2', 'u2'],
+      ]);
+      expect(etat.rejected[0]).toMatchObject({ path: '/refusee', utilisateur: 'u1', reason: 'Non.' });
+      expect(etat.nextId).toBe(4);
+    });
+
+    it('une seule fois : la personne suivante n’adopte rien', () => {
+      const storage = fileAncienne();
+      adopterEcrituresSansAuteur(storage, 'u1');
+      const file = JSON.parse(storage.data['ignitux.offline']);
+      file.pending.push({ id: '1-9', path: '/orpheline', method: 'POST', body: null, label: 'O', queuedAt: 'x' });
+      storage.data['ignitux.offline'] = JSON.stringify(file);
+
+      expect(adopterEcrituresSansAuteur(storage, 'u3')).toBe(0);
+      expect(readState(storage).pending.find((m) => m.path === '/orpheline')?.utilisateur).toBeUndefined();
+    });
+
+    it('sans file dans ce navigateur, rien n’est écrit', () => {
+      const storage = memoryStorage();
+      expect(adopterEcrituresSansAuteur(storage, 'u1')).toBe(0);
+      expect(storage.data).toEqual({});
+    });
+
+    it('un stockage qui n’enregistre pas : rien d’annoncé, et la migration sera retentée', () => {
+      const initial = fileAncienne().data;
+      const perdant = silentlyLossyStorage(initial);
+      expect(adopterEcrituresSansAuteur(perdant, 'u1')).toBe(0);
+      const storage = memoryStorage(initial);
+      expect(adopterEcrituresSansAuteur(storage, 'u1')).toBe(2);
     });
   });
 });
