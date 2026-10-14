@@ -159,7 +159,23 @@ function fauxPrisma(collaborateurs: Collaborateur[], donnees: { lignes: Record<s
           }),
       ),
     },
-    space_activity: { create: vi.fn(async () => ({})), deleteMany: vi.fn(async () => ({ count: 0 })) },
+    space_activity: {
+      create: vi.fn(async () => ({})),
+      deleteMany: vi.fn(async () => ({ count: 0 })),
+      findMany: vi.fn(async ({ where }: { where: { owner_id: string } }) =>
+        where.owner_id === PROPRIO
+          ? [
+              {
+                created_at: new Date('2026-10-14T10:00:00Z'),
+                methode: 'POST',
+                chemin: '/caisse/journees',
+                statut: 201,
+                actor: { profile: { display_name: 'Bob' } },
+              },
+            ]
+          : [],
+      ),
+    },
     billing_documents: evaluee('billing_documents', () => donnees.lignes.billing_documents),
     ledger_accounts: evaluee('ledger_accounts', () => donnees.lignes.ledger_accounts),
     bank_accounts: evaluee('bank_accounts', () => donnees.lignes.bank_accounts),
@@ -181,7 +197,7 @@ function fauxPrisma(collaborateurs: Collaborateur[], donnees: { lignes: Record<s
     },
   });
   return prisma as unknown as PrismaServiceType & {
-    space_activity: { create: Fn; deleteMany: Fn };
+    space_activity: { create: Fn; deleteMany: Fn; findMany: Fn };
     project_collaborators: { findFirst: Fn; findMany: Fn };
   };
 }
@@ -239,6 +255,7 @@ describe('Espace argent sur les vrais contrôleurs — application entière, san
     donnees.lignes = lignesArgent();
     vi.restoreAllMocks();
     prisma.space_activity.create.mockClear();
+    prisma.space_activity.findMany.mockClear();
     prisma.project_collaborators.findFirst.mockClear();
   });
 
@@ -420,6 +437,34 @@ describe('Espace argent sur les vrais contrôleurs — application entière, san
       collaborateurs.push({ user_id: MOI, project_id: PROJET_ETRANGER, role: 'observateur' });
       const res = await en('get', '/espaces');
       expect(res.body).toEqual([{ ownerId: MOI, nom: 'Mon espace', roles: ['proprietaire'] }]);
+    });
+  });
+
+  describe('GET /espaces/activite — le journal de mon équipe, pour moi seul', () => {
+    it('le propriétaire lit l’activité de ses membres dans SON argent', async () => {
+      const res = await par(PROPRIO, 'get', '/espaces/activite');
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual([
+        { date: '2026-10-14T10:00:00.000Z', acteur: 'Bob', methode: 'POST', chemin: '/caisse/journees', statut: 201 },
+      ]);
+      expect(prisma.space_activity.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { owner_id: PROPRIO } }));
+    });
+
+    it('un membre ne lit que le sien (vide), jamais celui du propriétaire', async () => {
+      roleSurProjetDuProprio('associe');
+      const res = await en('get', '/espaces/activite');
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual([]);
+    });
+
+    it('avec l’espace d’un autre : 403, sans lire le journal (même pour un associé)', async () => {
+      roleSurProjetDuProprio('associe');
+      const res = await en('get', '/espaces/activite', PROPRIO);
+      expect(res.status).toBe(403);
+      expect(res.body.message).toBe(
+        'Cette action ne se fait que dans ton propre espace. Reviens sur « Mon espace » pour la faire.',
+      );
+      expect(prisma.space_activity.findMany).not.toHaveBeenCalled();
     });
   });
 });

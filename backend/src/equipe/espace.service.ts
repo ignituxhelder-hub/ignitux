@@ -24,6 +24,19 @@ export interface EspaceListe {
   roles: string[];
 }
 
+/** Une ligne du journal de mon équipe (`GET /espaces/activite`). */
+export interface ActiviteEquipe {
+  date: string | null;
+  /** Le nom affiché de l'acteur, sinon « un membre » — jamais son e-mail. */
+  acteur: string;
+  methode: string;
+  chemin: string;
+  statut: number;
+}
+
+/** Combien de lignes du journal le propriétaire voit, les plus récentes. */
+export const ACTIVITE_MAX = 200;
+
 /**
  * L'espace d'un AUTRE demandé par l'en-tête, ou `null` quand la requête vise
  * mon propre espace (en-tête absent, vide, ou égal à mon id).
@@ -135,5 +148,34 @@ export class EspaceService {
         roles: ROLES_ARGENT.filter((r) => roles.has(r)),
       })),
     ];
+  }
+
+  /**
+   * Ce que mes comptables et associés ont écrit dans MON argent : les
+   * ACTIVITE_MAX dernières lignes de `space_activity` dont je suis le
+   * propriétaire, les plus récentes d'abord. Lecture seule. L'acteur est
+   * désigné par son nom affiché, sinon « un membre » (compte supprimé
+   * compris) : le journal ne transmet pas d'e-mail.
+   */
+  async activiteDeMonEquipe(ownerId: string): Promise<ActiviteEquipe[]> {
+    const lignes = await this.prisma.space_activity.findMany({
+      where: { owner_id: ownerId },
+      orderBy: { created_at: 'desc' },
+      take: ACTIVITE_MAX,
+      select: {
+        created_at: true,
+        methode: true,
+        chemin: true,
+        statut: true,
+        actor: { select: { profile: { select: { display_name: true } } } },
+      },
+    });
+    return lignes.map((ligne) => ({
+      date: ligne.created_at ? ligne.created_at.toISOString() : null,
+      acteur: ligne.actor?.profile?.display_name?.trim() || 'un membre',
+      methode: ligne.methode,
+      chemin: ligne.chemin,
+      statut: ligne.statut,
+    }));
   }
 }

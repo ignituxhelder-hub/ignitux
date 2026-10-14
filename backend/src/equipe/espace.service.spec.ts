@@ -156,3 +156,36 @@ describe('EspaceService.mesEspaces', () => {
     await expect(service.mesEspaces(MOI)).resolves.toHaveLength(1);
   });
 });
+
+describe('EspaceService.activiteDeMonEquipe — le journal vu par le propriétaire', () => {
+  it('ses 200 dernières lignes, les plus récentes d’abord, avec le nom de l’acteur (jamais son e-mail)', async () => {
+    const quand = new Date('2026-10-14T10:00:00Z');
+    const findMany = vi.fn().mockResolvedValue([
+      { created_at: quand, methode: 'POST', chemin: '/caisse/journees', statut: 201, actor: { profile: { display_name: ' Bob ' } } },
+      { created_at: quand, methode: 'PATCH', chemin: '/billing/documents/d1', statut: 422, actor: { profile: { display_name: '  ' } } },
+      { created_at: quand, methode: 'DELETE', chemin: '/billing/documents/d2', statut: 204, actor: { profile: null } },
+      // Compte de l'acteur supprimé depuis : l'acteur est détaché.
+      { created_at: quand, methode: 'POST', chemin: '/banque/comptes', statut: 201, actor: null },
+    ]);
+    const service = new EspaceService({ space_activity: { findMany } } as never);
+
+    await expect(service.activiteDeMonEquipe(PROPRIO)).resolves.toEqual([
+      { date: quand.toISOString(), acteur: 'Bob', methode: 'POST', chemin: '/caisse/journees', statut: 201 },
+      { date: quand.toISOString(), acteur: 'un membre', methode: 'PATCH', chemin: '/billing/documents/d1', statut: 422 },
+      { date: quand.toISOString(), acteur: 'un membre', methode: 'DELETE', chemin: '/billing/documents/d2', statut: 204 },
+      { date: quand.toISOString(), acteur: 'un membre', methode: 'POST', chemin: '/banque/comptes', statut: 201 },
+    ]);
+    expect(findMany).toHaveBeenCalledWith({
+      where: { owner_id: PROPRIO },
+      orderBy: { created_at: 'desc' },
+      take: 200,
+      select: {
+        created_at: true,
+        methode: true,
+        chemin: true,
+        statut: true,
+        actor: { select: { profile: { select: { display_name: true } } } },
+      },
+    });
+  });
+});
