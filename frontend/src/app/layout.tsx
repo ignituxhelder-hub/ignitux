@@ -7,6 +7,7 @@ import { OfflineBanner } from '@/components/offline-banner';
 import { ServiceWorker } from '@/components/service-worker';
 import { Systeme } from '@/components/systeme';
 import { AuthProvider } from '@/lib/auth';
+import { EspaceProvider } from '@/lib/espace';
 import { imagesDemarrage } from '@/lib/ecrans-demarrage';
 import './globals.css';
 
@@ -60,6 +61,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <ServiceWorker />
         <NextIntlClientProvider>
         <AuthProvider>
+          {/* L'espace où l'on travaille (Équipe) : posé avant que les pages
+              chargent leurs données. */}
+          <EspaceProvider>
           {/* Monté au niveau racine : l'état hors ligne concerne toute
               l'application, pas une page en particulier, et le bandeau ne
               s'affiche que s'il a réellement quelque chose à dire. Le
@@ -71,6 +75,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           {/* Le bureau, la barre de l'application et la barre des tâches :
               ce qui fait d'Ignitux un système plutôt qu'une suite de pages. */}
           <Systeme>{children}</Systeme>
+          </EspaceProvider>
         </AuthProvider>
         </NextIntlClientProvider>
       </body>

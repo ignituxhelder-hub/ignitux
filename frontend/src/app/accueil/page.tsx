@@ -16,6 +16,8 @@ import {
   type Lanceur,
 } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { domaineDeLApplication } from '@/lib/domaines';
+import { useEspace } from '@/lib/espace';
 import { useRoles } from '@/lib/roles';
 import { enPages, fermerTache, ICONES_PAR_PAGE } from '@/lib/systeme';
 
@@ -316,6 +318,7 @@ export default function LanceurPage() {
   const router = useRouter();
   const { roles } = useRoles(token);
   const parPage = useIconesParPage();
+  const { courant } = useEspace();
 
   const [lanceur, setLanceur] = useState<Lanceur | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -383,7 +386,27 @@ export default function LanceurPage() {
     ? [...lanceur.prevues].sort((a, b) => Number(b.pourToi) - Number(a.pourToi))
     : [];
 
-  const icones: Icone[] = lanceur
+  // Dans l'espace d'un autre : seulement les applications que mon rôle y
+  // ouvre, à plat. Ni dossier, ni suggestions, ni rangement — mon bureau
+  // à moi ne se range pas depuis chez quelqu'un d'autre.
+  const appsEspace: ApplicationVue[] = [];
+  if (lanceur && courant) {
+    const vues = new Set<string>();
+    for (const app of [
+      ...lanceur.applications,
+      ...lanceur.suggestions,
+      ...lanceur.boutique,
+      ...lanceur.reglages,
+    ]) {
+      if (vues.has(app.id) || !app.route) continue;
+      vues.add(app.id);
+      if (courant.domaines.includes(domaineDeLApplication(app.id))) appsEspace.push(app);
+    }
+  }
+
+  const icones: Icone[] = courant
+    ? appsEspace.map((app) => ({ sorte: 'app' as const, app, retirable: false }))
+    : lanceur
     ? [
         ...appsPrincipales.map((app) => ({ sorte: 'app' as const, app, retirable: true })),
         {
@@ -459,11 +482,19 @@ export default function LanceurPage() {
         </button>
       </div>
 
-      {!dossierOuvert && <h1 className="ecran-accueil__titre">Ton bureau</h1>}
+      {!dossierOuvert && (
+        <h1 className="ecran-accueil__titre">{courant ? courant.nom : 'Ton bureau'}</h1>
+      )}
+
+      {courant && lanceur && appsEspace.length === 0 && (
+        <p className="notice" style={{ marginBottom: '1rem' }}>
+          <span>Ton rôle n&apos;ouvre aucune application dans cet espace pour l&apos;instant.</span>
+        </p>
+      )}
 
       {/* L'entrée des files de revue. Le serveur revérifie le rôle sur chaque
           route : ce lien n'ouvre rien qu'il ne protège déjà. */}
-      {!dossierOuvert && roles?.roles?.includes('administrateur') && (
+      {!dossierOuvert && !courant && roles?.roles?.includes('administrateur') && (
         <p className="notice" style={{ marginBottom: '1rem' }}>
           <span>
             <Link href="/administration">Administration</Link> — les évaluations de financement et
@@ -472,7 +503,7 @@ export default function LanceurPage() {
         </p>
       )}
 
-      {!dossierOuvert && sansRole && (
+      {!dossierOuvert && !courant && sansRole && (
         <p className="notice" style={{ marginBottom: '1rem' }}>
           <span>
             Tu n&apos;as pas encore dit qui tu es dans Ignitux : on te montre l&apos;espace
@@ -487,7 +518,7 @@ export default function LanceurPage() {
 
       {lanceur && (
         <>
-          {lanceur.suggestions.length > 0 && !rangement && !dossierOuvert && (
+          {lanceur.suggestions.length > 0 && !rangement && !dossierOuvert && !courant && (
             <section aria-labelledby="suggestions-titre" className="widget-igini">
               <h2 id="suggestions-titre" className="launcher-eyebrow">
                 <strong style={{ color: 'var(--accent)' }}>IGINI</strong> te propose

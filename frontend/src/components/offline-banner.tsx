@@ -27,7 +27,8 @@ const EMPTY: OfflineState = { pending: [], rejected: [], nextId: 1 };
  * est enregistré alors qu'il est perdu.
  */
 export function OfflineBanner() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const userId = user?.id ?? null;
   const [isOnline, setIsOnline] = useState(true);
   const [state, setState] = useState<OfflineState>(EMPTY);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -66,6 +67,12 @@ export function OfflineBanner() {
       window.removeEventListener('offline', goOffline);
     };
   }, []);
+
+  // La file est montrée par personne (voir readOfflineState) : relue quand
+  // la session est connue, ou change de compte sur cet appareil.
+  useEffect(() => {
+    setState(readOfflineState());
+  }, [userId]);
 
   // Le verrou de synchronisation est une ref et non un état : mis dans les
   // dépendances de l'effet, `isSyncing` le relançait aussitôt après son

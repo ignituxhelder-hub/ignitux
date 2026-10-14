@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { api } from './api';
+import { api, getUtilisateurActif } from './api';
 import { AuthProvider, useAuth } from './auth';
 
 function wrapper({ children }: { children: ReactNode }) {
@@ -29,6 +29,16 @@ describe('AuthProvider', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it('le module d’API sait qui est connecté (cloisonnement hors ligne), et l’oublie à la déconnexion', async () => {
+    window.localStorage.setItem('ignitux.auth', JSON.stringify({ token: 't', user: { id: 'u7', email: 'a@b.com' } }));
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.token).toBe('t'));
+    expect(getUtilisateurActif()).toBe('u7');
+
+    act(() => result.current.logout());
+    expect(getUtilisateurActif()).toBeNull();
   });
 
   it("commence déconnecté quand rien n'est en localStorage", async () => {

@@ -1,5 +1,6 @@
 import { CGU_VERSION } from './cgu';
 import type { MonAcces, RoleEquipe } from './equipe';
+import { envoieEspace } from './domaines';
 import { cacheResponse, readCached, type IterableStorage } from './offline-cache';
 import {
   dismissRejected,
@@ -11,6 +12,98 @@ import {
 } from './offline-queue';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
+
+// ── L'espace courant (Équipe, livraison 2 : l'argent) ──────────────────────
+//
+// `null` = « Mon espace ». Sinon, l'id du propriétaire dont on tient
+// l'argent (comptable ou associé d'un de ses projets) : les seules routes
+// des modules d'argent (facturation, comptabilité, banque, caisse — voir
+// `domaines.ts`) partent avec `X-Espace`. Toute autre route ne le porte
+// jamais : le serveur la refuserait (403), et elle concerne la personne
+// connectée. Posé par `EspaceProvider`.
+
+let espaceActif: string | null = null;
+
+export function setEspaceActif(ownerId: string | null) {
+  espaceActif = ownerId;
+}
+
+export function getEspaceActif(): string | null {
+  return espaceActif;
+}
+
+/** Le message renvoyé par le serveur quand l'espace n'existe pas (ou plus) pour moi : 404. */
+export const ESPACE_INTROUVABLE = 'Espace introuvable.';
+export const MESSAGE_ESPACE_PERDU = 'Tu n’as plus accès à cet espace.';
+
+type EspaceAVerifierHandler = (ownerId: string) => void;
+let onEspaceAVerifier: EspaceAVerifierHandler | null = null;
+
+/**
+ * Prévenu quand une réponse met en doute l'espace courant. Le module d'API
+ * ne change jamais d'espace tout seul : c'est `EspaceProvider` qui relit
+ * `GET /espaces` et décide — rentrer chez soi seulement si l'espace a
+ * réellement disparu de la liste.
+ */
+export function setEspaceAVerifierHandler(handler: EspaceAVerifierHandler | null) {
+  onEspaceAVerifier = handler;
+}
+
+/** L'espace que CETTE requête porte, figé au moment de l'envoyer. */
+function espacePour(path: string): string | null {
+  return espaceActif && envoieEspace(path) ? espaceActif : null;
+}
+
+function enteteEspace(espace: string | null): Record<string, string> {
+  return espace ? { 'X-Espace': espace } : {};
+}
+
+// ── L'utilisateur connecté (cloisonnement hors ligne) ──────────────────────
+//
+// Le cache et la file d'attente vivent dans le stockage du navigateur,
+// partagé par tous ceux qui se connectent sur cet appareil. Posé par
+// `AuthProvider` dès que la session est connue (et remis à null à la
+// déconnexion).
+
+let utilisateurActif: string | null = null;
+
+export function setUtilisateurActif(userId: string | null) {
+  utilisateurActif = userId;
+}
+
+export function getUtilisateurActif(): string | null {
+  return utilisateurActif;
+}
+
+/**
+ * La clé du cache hors ligne : le chemin, préfixé par l'utilisateur
+ * connecté, puis par l'espace quand la requête en portait un. Sans ce
+ * cloisonnement, les factures lues chez Alice s'afficheraient hors ligne
+ * chez soi — ou chez la personne qui se connecte ensuite sur le même
+ * appareil.
+ */
+function cleHorsLigne(path: string, espace: string | null, utilisateur: string | null): string {
+  const qui = `[u:${utilisateur ?? '-'}]`;
+  return espace ? `${qui}[espace:${espace}]${path}` : `${qui}${path}`;
+}
+
+/**
+ * Une réponse qui met en doute l'espace de CETTE requête : 404 « Espace
+ * introuvable. » — l'accès a peut-être disparu (retiré du projet, rôle
+ * changé). On ne change PAS d'espace ici : le 404 n'est cru qu'une fois
+ * confirmé par la relecture de `GET /espaces` (voir `EspaceProvider`). Un
+ * 403 ne fait jamais quitter l'espace : c'est un refus de l'action, pas de
+ * l'accès. Rend le message à montrer, ou `null` si la réponse ne concerne
+ * pas l'espace.
+ */
+function verifierEspace(status: number, message: string, espace: string | null): string | null {
+  if (!espace) return null;
+  if (status === 404 && message === ESPACE_INTROUVABLE) {
+    onEspaceAVerifier?.(espace);
+    return ESPACE_INTROUVABLE;
+  }
+  return null;
+}
 
 export class ApiError extends Error {
   constructor(
@@ -94,6 +187,9 @@ async function request<T>(
   options: RequestInit = {},
   meta: RequestMeta = {},
 ): Promise<T> {
+  const espace = espacePour(path);
+  // Figé à l'envoi, comme l'espace : la réponse se range chez CETTE personne.
+  const utilisateur = utilisateurActif;
   let res: Response;
   try {
     res = await fetch(`${API_URL}${path}`, {
@@ -101,17 +197,18 @@ async function request<T>(
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
+        ...enteteEspace(espace),
       },
     });
   } catch (error) {
     if (!isNetworkFailure(error)) throw error;
-    return handleOffline<T>(path, options);
+    return handleOffline<T>(path, options, espace, utilisateur);
   }
 
   const body = await res.json().catch(() => null);
 
   if (res.ok && (options.method ?? 'GET') === 'GET' && offlineStorage && !meta.skipOfflineCache) {
-    cacheResponse(offlineStorage, path, body);
+    cacheResponse(offlineStorage, cleHorsLigne(path, espace, utilisateur), body);
   }
 
   if (!res.ok) {
@@ -134,6 +231,8 @@ async function request<T>(
       Array.isArray(body?.message) && body.message.every((m: unknown) => typeof m === 'string') && body.message.length > 0
         ? (body.message as string[])
         : [message];
+    const messageEspace = verifierEspace(res.status, message, espace);
+    if (messageEspace) throw new ApiError(messageEspace, res.status);
     throw new ApiError(message, res.status, messages);
   }
 
@@ -145,13 +244,16 @@ async function request<T>(
  * appelle systématiquement `res.json()`.
  */
 async function requestCsv(path: string, token: string): Promise<string> {
+  const espace = espacePour(path);
   const res = await fetch(`${API_URL}${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}`, ...enteteEspace(espace) },
   });
   if (!res.ok) {
     const body = await res.json().catch(() => null);
     const message =
       body && typeof body.message === 'string' ? body.message : 'Une erreur est survenue.';
+    const messageEspace = verifierEspace(res.status, message, espace);
+    if (messageEspace) throw new ApiError(messageEspace, res.status);
     throw new ApiError(message, res.status);
   }
   return res.text();
@@ -213,7 +315,7 @@ export interface Mandate {
 async function requestMultipart<T>(path: string, token: string, form: FormData): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}`, ...enteteEspace(espacePour(path)) },
     body: form,
   });
   const body = await res.json().catch(() => null);
@@ -295,6 +397,10 @@ const JAMAIS_EN_FILE = [
 const JAMAIS_EN_FILE_MOTIFS = [
   /^\/projects\/[^/]+\/tasks\/[^/]+\/(run|validate|refuse)$/,
   /^\/projects\/[^/]+\/compliance\/[^/]+\/(run|validate|refuse)$/,
+  // La liste de mes espaces : c'est elle qui confirme un accès perdu, elle
+  // ne doit jamais être servie depuis un cache périmé.
+  // (`/espaces/entrepreneur` et `/espaces/investisseur` ne sont pas concernés.)
+  /^\/espaces$/,
 ];
 
 /**
@@ -327,7 +433,12 @@ const ECRITURES_JAMAIS_EN_FILE = [
   /^\/evaluations-financement\/revue\//,
 ];
 
-function handleOffline<T>(path: string, options: RequestInit): Promise<T> {
+function handleOffline<T>(
+  path: string,
+  options: RequestInit,
+  espace: string | null,
+  utilisateur: string | null,
+): Promise<T> {
   const method = (options.method ?? 'GET').toUpperCase();
 
   if (
@@ -350,7 +461,7 @@ function handleOffline<T>(path: string, options: RequestInit): Promise<T> {
   }
 
   if (method === 'GET') {
-    const cached = readCached<T>(offlineStorage, path);
+    const cached = readCached<T>(offlineStorage, cleHorsLigne(path, espace, utilisateur));
     if (!cached) {
       throw new ApiError("Pas de réseau, et cette donnée n'a jamais été chargée ici.", 0);
     }
@@ -366,6 +477,11 @@ function handleOffline<T>(path: string, options: RequestInit): Promise<T> {
     method,
     body: typeof options.body === 'string' ? options.body : null,
     label: describeMutation(method, path),
+    // L'écriture repartira dans l'espace où elle a été faite, même si la
+    // personne a changé d'espace entre-temps.
+    ...(espace ? { espace } : {}),
+    // Et elle ne repartira qu'avec la session de SON auteur.
+    ...(utilisateur ? { utilisateur } : {}),
   });
   if (!queued) {
     // Le stockage a refusé de conserver l'écriture (quota plein, navigation
@@ -438,7 +554,10 @@ function dejaEcriteDansCeRejeu(envoyees: string[], chemin: string): boolean {
  * s'annule.
  */
 export function replayOfflineQueue(token: string) {
-  if (!offlineStorage) {
+  // Sans utilisateur connu, on ne sait pas à qui appartient le jeton : rien
+  // ne part (une écriture n'est rejouée qu'avec la session de son auteur).
+  const auteur = utilisateurActif;
+  if (!offlineStorage || !auteur) {
     return Promise.resolve({ sent: 0, rejected: 0, remaining: 0 } as ReplayOutcome);
   }
 
@@ -453,6 +572,8 @@ export function replayOfflineQueue(token: string) {
     if (Number.isFinite(age) && age >= 0 && !dejaEcriteDansCeRejeu(envoyees, mutation.path)) {
       headers['X-Ignitux-Capture-Age'] = String(age);
     }
+    // L'espace où l'écriture a été faite, pas celui où l'on est maintenant.
+    if (mutation.espace && envoieEspace(mutation.path)) headers['X-Espace'] = mutation.espace;
 
     try {
       const res = await fetch(`${API_URL}${mutation.path}`, {
@@ -478,11 +599,21 @@ export function replayOfflineQueue(token: string) {
     } catch {
       return { ok: false as const, retryable: true, status: 0, reason: 'Réseau indisponible.' };
     }
-  });
+  },
+  undefined,
+  // Seulement les écritures de la personne connectée ; celles d'un autre
+  // compte (ou d'auteur inconnu) restent en file, intactes.
+  (mutation) => mutation.utilisateur === auteur,
+  );
 }
 
+/** La file vue par la personne connectée : ses seules écritures. */
 export function readOfflineState(): OfflineState {
-  return offlineStorage ? readState(offlineStorage) : { pending: [], rejected: [], nextId: 1 };
+  if (!offlineStorage) return { pending: [], rejected: [], nextId: 1 };
+  const etat = readState(offlineStorage);
+  const siennes = <M extends { utilisateur?: string }>(m: M) =>
+    utilisateurActif !== null && m.utilisateur === utilisateurActif;
+  return { ...etat, pending: etat.pending.filter(siennes), rejected: etat.rejected.filter(siennes) };
 }
 
 export function dismissRejectedMutation(id: string): OfflineState {
@@ -2156,6 +2287,18 @@ export interface ProfileView {
   values: ProfileValues;
   completion: ProfileCompletion;
   fields: ProfileField[];
+}
+
+// ── ÉQUIPE : L'ESPACE ARGENT ────────────────────────────────────────────────
+// Les espaces où je peux travailler l'argent (facturation, comptabilité,
+// banque, caisse). Forme : backend/src/equipe/espace.service.ts.
+
+/** Un espace où je peux travailler. Le premier est toujours « Mon espace ». */
+export interface EspaceListe {
+  ownerId: string;
+  nom: string;
+  /** `['proprietaire']` pour « Mon espace » ; sinon mes rôles chez ce propriétaire (comptable, associe). */
+  roles: string[];
 }
 
 // ── LE CV DÉCRIT ────────────────────────────────────────────────────────────
@@ -4118,4 +4261,10 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     });
   },
+
+  // ── Équipe : l'espace argent ──────────────────────────────────────────────
+
+  /** Jamais servi par le cache : c'est cette liste qui confirme un accès perdu. */
+  mesEspaces: (token: string) =>
+    request<EspaceListe[]>('/espaces', { headers: { Authorization: `Bearer ${token}` } }, { skipOfflineCache: true }),
 };

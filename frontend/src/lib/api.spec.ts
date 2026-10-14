@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   api,
   ApiError,
@@ -7,7 +7,13 @@ import {
   replayOfflineQueue,
   setOfflineStorage,
   setUnauthorizedHandler,
+  setUtilisateurActif,
 } from './api';
+
+// La file et le cache hors ligne sont cloisonnés par utilisateur : ces
+// tests agissent pour une personne connectée, « u1 ».
+beforeEach(() => setUtilisateurActif('u1'));
+afterEach(() => setUtilisateurActif(null));
 
 function mockFetchOnce(status: number, body: unknown) {
   global.fetch = vi.fn().mockResolvedValue({

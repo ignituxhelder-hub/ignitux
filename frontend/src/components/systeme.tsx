@@ -6,6 +6,9 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Icone } from '@/components/icones';
 import { ChatIgini } from './chat-igini';
 import { useAuth } from '@/lib/auth';
+import { domaineDeLApplication, libelleRole } from '@/lib/domaines';
+import { useEspace } from '@/lib/espace';
+import { nomDansPhrase } from '@/lib/espace-courant';
 import {
   applicationDe,
   applicationParId,
@@ -37,7 +40,8 @@ import {
 export function Systeme({ children }: { children: ReactNode }) {
   const chemin = usePathname() ?? '';
   const router = useRouter();
-  const { token, isReady } = useAuth();
+  const { token, isReady, user } = useAuth();
+  const { espaces, courant, message, choisir, effacerMessage } = useEspace();
   const [taches, setTaches] = useState<Tache[]>([]);
   const [chatOuvert, setChatOuvert] = useState(false);
 
@@ -80,7 +84,21 @@ export function Systeme({ children }: { children: ReactNode }) {
     }
   }, [isReady, token]);
 
+  // L'accès à l'espace a disparu : on rentre au bureau, chez soi.
+  useEffect(() => {
+    if (message) router.push(BUREAU);
+  }, [message, router]);
+
   if (!connecte || (!app && !surBureau)) return <>{children}</>;
+
+  // Dans l'espace d'un autre, une application que le rôle n'ouvre pas ne
+  // s'affiche pas : ses requêtes partiraient sans en-tête et montreraient
+  // MES données sous le bandeau de l'autre. L'équipe fait exception :
+  // sa page explique elle-même que seul le propriétaire la gère.
+  const domaineApp = app ? domaineDeLApplication(app.id) : null;
+  const horsRole =
+    !!courant && !!app && app.id !== 'equipe' && !courant.domaines.includes(domaineApp ?? 'personnel');
+  const plusieursEspaces = !!espaces && espaces.length > 1;
 
   function fermerApplication(id: string) {
     const suivantes = fermer(taches, id);
@@ -114,7 +132,71 @@ export function Systeme({ children }: { children: ReactNode }) {
         </header>
       )}
 
-      {children}
+      {(courant || message || plusieursEspaces) && (
+        <section className="barre-espace" aria-label="Espace de travail">
+          {courant && (
+            <p className="barre-espace__bandeau" role="status">
+              Tu travailles dans {nomDansPhrase(courant.nom)} — rôle : {libelleRole(courant.role)}
+            </p>
+          )}
+          {message && (
+            <p className="error barre-espace__message" role="alert">
+              <span>{message} Tu es revenu dans ton espace.</span>
+              <button type="button" className="secondary" onClick={effacerMessage}>
+                OK
+              </button>
+            </p>
+          )}
+          {plusieursEspaces && espaces && (
+            <div className="barre-espace__choix">
+              <label htmlFor="selecteur-espace">Espace</label>
+              <select
+                id="selecteur-espace"
+                value={courant?.ownerId ?? user?.id ?? ''}
+                onChange={(e) => {
+                  const cible = espaces.find((espace) => espace.ownerId === e.target.value) ?? null;
+                  choisir(cible && cible.role !== 'proprietaire' ? cible : null);
+                  // Les données affichées sont celles de l'ancien espace : on
+                  // repart du bureau, qui se recalcule pour le nouveau.
+                  router.push(BUREAU);
+                }}
+              >
+                {espaces.map((espace) => (
+                  <option key={espace.ownerId} value={espace.ownerId}>
+                    {espace.role === 'proprietaire'
+                      ? 'Mon espace'
+                      : `${espace.nom} (${libelleRole(espace.role)})`}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </section>
+      )}
+
+      {horsRole && app && courant ? (
+        <main className="page">
+          <div className="card">
+            <p style={{ marginTop: 0 }}>
+              {domaineApp === 'personnel'
+                ? `${app.nom} est personnelle : elle n’est pas partagée dans ${nomDansPhrase(courant.nom)}.`
+                : `Ton rôle de ${libelleRole(courant.role)} ne donne pas accès à ${app.nom} dans ${nomDansPhrase(courant.nom)}.`}
+            </p>
+            <button
+              type="button"
+              className="primary"
+              onClick={() => {
+                choisir(null);
+                router.push(BUREAU);
+              }}
+            >
+              Revenir à mon espace
+            </button>
+          </div>
+        </main>
+      ) : (
+        children
+      )}
 
       {/* Réserve la hauteur de la barre : sans lui, le bas de chaque page
           passait dessous. */}

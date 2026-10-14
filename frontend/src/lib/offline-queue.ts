@@ -44,6 +44,20 @@ export interface QueuedMutation {
   /** Ce que l'utilisateur a voulu faire, en français, pour l'affichage. */
   label: string;
   queuedAt: string;
+  /**
+   * L'espace (id du propriétaire) où l'écriture a été faite, quand ce
+   * n'était pas celui de la personne. Le rejeu la renvoie dans CET espace,
+   * même si la personne en a changé entre-temps. Absent = son propre espace.
+   */
+  espace?: string;
+  /**
+   * L'utilisateur connecté qui a fait l'écriture. Le stockage du navigateur
+   * est partagé par tous ceux qui se connectent sur cet appareil : une
+   * écriture n'est rejouée (et montrée) que pour SON auteur, jamais avec le
+   * jeton de la personne connectée ensuite. Absent (écriture d'avant ce
+   * cloisonnement, ou faite déconnecté) : auteur inconnu, jamais rejouée.
+   */
+  utilisateur?: string;
 }
 
 export interface RejectedMutation extends QueuedMutation {
@@ -101,7 +115,11 @@ function isReplayable(value: unknown): value is QueuedMutation {
     item.path.startsWith('/') &&
     typeof item.method === 'string' &&
     (METHODS as readonly string[]).includes(item.method) &&
-    (item.body === null || typeof item.body === 'string')
+    (item.body === null || typeof item.body === 'string') &&
+    // Un espace illisible renverrait l'écriture on ne sait où : écartée.
+    (item.espace === undefined || (typeof item.espace === 'string' && item.espace.length > 0)) &&
+    // Idem pour l'auteur : un auteur illisible ne doit jamais être rejoué.
+    (item.utilisateur === undefined || (typeof item.utilisateur === 'string' && item.utilisateur.length > 0))
   );
 }
 
@@ -273,15 +291,23 @@ export async function replay(
   storage: KeyValueStorage,
   send: ReplaySend,
   now: () => Date = () => new Date(),
+  /**
+   * Les écritures à rejouer — par défaut toutes. Le client n'y met que
+   * celles de la personne connectée : les autres restent en file, intactes,
+   * sans bloquer les siennes.
+   */
+  retenir: (mutation: QueuedMutation) => boolean = () => true,
 ): Promise<ReplayOutcome> {
   let sent = 0;
   let rejected = 0;
+  const encoreEnFile = (id: string) => readState(storage).pending.some((item) => item.id === id);
 
   // On relit la file à chaque tour : le rejeu peut durer, et une autre
   // action de l'utilisateur peut y ajouter une écriture entre-temps.
   for (;;) {
     const state = readState(storage);
-    const next = state.pending[0];
+    const miennes = state.pending.filter(retenir);
+    const next = miennes[0];
     if (!next) {
       return { sent, rejected, remaining: 0 };
     }
@@ -300,20 +326,20 @@ export async function replay(
       // l'écrire ou non. Se fier à son retour, c'est vérifier l'intention
       // plutôt que le fait — exactement l'erreur qu'on veut détecter ici.
       removePending(storage, next.id);
-      if (readState(storage).pending[0]?.id === next.id) {
-        return { sent, rejected, remaining: state.pending.length, storageStalled: true };
+      if (encoreEnFile(next.id)) {
+        return { sent, rejected, remaining: miennes.length, storageStalled: true };
       }
       continue;
     }
 
     if (result.retryable) {
-      return { sent, rejected, remaining: readState(storage).pending.length };
+      return { sent, rejected, remaining: readState(storage).pending.filter(retenir).length };
     }
 
     rejected += 1;
     reject(storage, next.id, result.status, result.reason, now);
-    if (readState(storage).pending[0]?.id === next.id) {
-      return { sent, rejected, remaining: state.pending.length, storageStalled: true };
+    if (encoreEnFile(next.id)) {
+      return { sent, rejected, remaining: miennes.length, storageStalled: true };
     }
   }
 }

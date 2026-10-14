@@ -22,6 +22,8 @@ const PENDING = {
   body: '{"title":"Relire"}',
   label: 'Création sur /projects/p1/tasks',
   queuedAt: '2026-09-19T10:00:00.000Z',
+  // L'auteur : la personne connectée dans ces tests (voir signInAs).
+  utilisateur: 'u1',
 };
 
 describe('OfflineBanner', () => {
@@ -63,6 +65,27 @@ it('prévient quand le stockage ne retient plus ce qui a été envoyé', async (
 
     expect(await screen.findByText(/stockage de ton navigateur est saturé/)).toBeInTheDocument();
     expect(screen.getByText(/repartir une seconde fois/)).toBeInTheDocument();
+  });
+
+  it('n’affiche ni ne rejoue les actions en attente d’un autre compte de cet appareil', async () => {
+    seedQueue([{ ...PENDING, utilisateur: 'u2', label: 'Action de quelqu’un d’autre' }]);
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({}),
+    }) as unknown as typeof fetch;
+
+    render(
+      <AuthProvider>
+        <OfflineBanner />
+      </AuthProvider>,
+    );
+
+    // Laisse le temps à la session de se charger et à un éventuel rejeu de partir.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(screen.queryByText('Action de quelqu’un d’autre')).not.toBeInTheDocument();
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(JSON.parse(window.localStorage.getItem('ignitux.offline') ?? '{}').pending).toHaveLength(1);
   });
 
   it("ne s'affiche pas quand tout va bien", () => {

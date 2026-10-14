@@ -1,7 +1,8 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { api, setUnauthorizedHandler, type User } from './api';
+import { api, setEspaceActif, setUnauthorizedHandler, setUtilisateurActif, type User } from './api';
+import { oublierEspaceChoisi } from './espace-courant';
 
 interface AuthState {
   token: string | null;
@@ -28,6 +29,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as { token: string; user: User };
+        // Avant le jeton : aucune requête ne part sans savoir pour qui
+        // ranger son cache hors ligne.
+        setUtilisateurActif(parsed.user?.id ?? null);
         setToken(parsed.token);
         setUser(parsed.user);
       }
@@ -39,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   function persist(nextToken: string, nextUser: User) {
+    setUtilisateurActif(nextUser.id);
     setToken(nextToken);
     setUser(nextUser);
     try {
@@ -65,6 +70,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.localStorage.removeItem(STORAGE_KEY);
     } catch {
       // Rien à faire si le stockage est inaccessible.
+    }
+    // L'espace choisi part avec la session : la personne suivante sur cet
+    // appareil commence chez elle, et aucune requête ne garde l'en-tête.
+    setEspaceActif(null);
+    setUtilisateurActif(null);
+    try {
+      oublierEspaceChoisi(window.localStorage);
+    } catch {
+      // Idem.
     }
   }
 

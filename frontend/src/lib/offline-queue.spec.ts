@@ -352,4 +352,56 @@ describe("file d'attente hors ligne", () => {
       expect(outcome.rejected).toBe(1);
     });
   });
+
+  describe('cloisonnement par utilisateur', () => {
+    it('garde l’auteur de l’écriture, et écarte un auteur illisible', () => {
+      const storage = memoryStorage();
+      const mise = queued(storage, { path: '/a', method: 'POST', body: null, label: 'A', utilisateur: 'u1' });
+      expect(readState(storage).pending[0]).toMatchObject({ id: mise.id, utilisateur: 'u1' });
+
+      storage.data['ignitux.offline'] = JSON.stringify({
+        pending: [{ id: '1-1', path: '/a', method: 'POST', body: null, label: 'A', utilisateur: 42 }],
+        rejected: [],
+        nextId: 2,
+      });
+      expect(readState(storage).pending).toEqual([]);
+    });
+
+    it('ne rejoue que les écritures retenues (celles de la personne connectée), et laisse les autres', async () => {
+      const storage = memoryStorage();
+      queued(storage, { path: '/de-u2', method: 'POST', body: null, label: 'U2', utilisateur: 'u2' });
+      queued(storage, { path: '/de-u1', method: 'POST', body: null, label: 'U1', utilisateur: 'u1' });
+      queued(storage, { path: '/sans-auteur', method: 'POST', body: null, label: 'X' });
+      const envoyees: string[] = [];
+
+      const outcome = await replay(
+        storage,
+        async (mutation) => {
+          envoyees.push(mutation.path);
+          return { ok: true };
+        },
+        CLOCK,
+        (mutation) => mutation.utilisateur === 'u1',
+      );
+
+      expect(envoyees).toEqual(['/de-u1']);
+      expect(outcome).toEqual({ sent: 1, rejected: 0, remaining: 0 });
+      expect(readState(storage).pending.map((m) => m.path)).toEqual(['/de-u2', '/sans-auteur']);
+    });
+
+    it('un échec temporaire ne compte que les écritures retenues comme restantes', async () => {
+      const storage = memoryStorage();
+      queued(storage, { path: '/de-u2', method: 'POST', body: null, label: 'U2', utilisateur: 'u2' });
+      queued(storage, { path: '/de-u1', method: 'POST', body: null, label: 'U1', utilisateur: 'u1' });
+
+      const outcome = await replay(
+        storage,
+        async () => ({ ok: false, retryable: true, status: 503, reason: 'Indisponible.' }),
+        CLOCK,
+        (mutation) => mutation.utilisateur === 'u1',
+      );
+
+      expect(outcome).toEqual({ sent: 0, rejected: 0, remaining: 1 });
+    });
+  });
 });
