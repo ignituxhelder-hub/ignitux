@@ -83,6 +83,7 @@ describe('CaissePage', () => {
     );
 
     await screen.findByText("Aucun relevé enregistré pour l'instant.");
+    fireEvent.click(screen.getByRole('button', { name: 'Nouveau relevé' }));
     routeMap['GET /caisse/journees'] = { status: 200, body: [ENTRY] };
 
     fireEvent.change(screen.getByLabelText('Total espèces en euros'), { target: { value: '50' } });
@@ -112,6 +113,7 @@ describe('CaissePage', () => {
     );
 
     await screen.findByText('01/10/2026');
+    fireEvent.click(screen.getByRole('button', { name: 'Nouveau relevé' }));
     (global.fetch as ReturnType<typeof vi.fn>).mockClear();
 
     fireEvent.change(screen.getByLabelText('Total espèces en euros'), {

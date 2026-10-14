@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState, type FormEvent } from 'react';
+import { IconesPanneaux } from '@/components/icones-panneaux';
 import {
   api,
   ApiError,
@@ -264,21 +265,46 @@ function BoutiqueEnLigne() {
             </p>
           )}
 
-          <h2>Produits</h2>
-          <ul>
-            {produits.map((produit) => (
-              <li key={produit.id}>{produit.title}</li>
-            ))}
-          </ul>
-
-          <h2>Commandes</h2>
-          <ul>
-            {commandes.map((commande) => (
-              <li key={commande.id}>
-                {commande.name} — {(commande.totalPriceCents / 100).toFixed(2)} {commande.currency}
-              </li>
-            ))}
-          </ul>
+          <IconesPanneaux
+            titre="Ma boutique"
+            ouvertParDefaut="produits"
+            panneaux={[
+              {
+                id: 'produits',
+                nom: 'Produits',
+                glyphe: 'boutique-en-ligne',
+                categorie: 'vendre',
+                contenu: (
+                  <div>
+                    <h2>Produits</h2>
+                    <ul>
+                      {produits.map((produit) => (
+                        <li key={produit.id}>{produit.title}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ),
+              },
+              {
+                id: 'commandes',
+                nom: 'Commandes',
+                glyphe: 'facturation',
+                categorie: 'gerer',
+                contenu: (
+                  <div>
+                    <h2>Commandes</h2>
+                    <ul>
+                      {commandes.map((commande) => (
+                        <li key={commande.id}>
+                          {commande.name} — {(commande.totalPriceCents / 100).toFixed(2)} {commande.currency}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ),
+              },
+            ]}
+          />
         </div>
       )}
     </div>

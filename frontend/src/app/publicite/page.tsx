@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
+import { IconesPanneaux } from '@/components/icones-panneaux';
 import { api, ApiError, type AdCampaign, type AdCampaignEntries } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { centimesDepuisEuros, euros, jour } from '@/lib/montants';
@@ -170,84 +171,105 @@ export default function PublicitePage() {
 
       {error && <p className="error">{error}</p>}
 
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Ajouter une campagne</h2>
-        <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <input
-            aria-label="Nom de la campagne"
-            placeholder="Nom de la campagne"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-          />
-          <input
-            aria-label="Canal"
-            placeholder="Canal (facultatif)"
-            value={channel}
-            onChange={(e) => setChannel(e.target.value)}
-          />
-          <button className="secondary" type="submit" disabled={isSaving}>
-            {isSaving ? 'Ajout…' : 'Ajouter'}
-          </button>
-        </form>
-      </div>
+      <IconesPanneaux
+        titre="Campagnes"
+        ouvertParDefaut="liste"
+        panneaux={[
+          {
+            id: 'liste',
+            nom: 'Campagnes',
+            glyphe: 'publicite',
+            categorie: 'vendre',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>Campagnes</h2>
 
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Campagnes</h2>
+          {isLoading && <p className="loading">Chargement…</p>}
+          {!isLoading && campaigns.length === 0 && (
+            <p className="muted">Aucune campagne enregistrée pour l&apos;instant.</p>
+          )}
 
-        {isLoading && <p className="loading">Chargement…</p>}
-        {!isLoading && campaigns.length === 0 && (
-          <p className="muted">Aucune campagne enregistrée pour l&apos;instant.</p>
-        )}
-
-        <ul aria-label="Liste des campagnes" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {campaigns.map((campaign) => (
-            <li key={campaign.id} className="project-item" style={{ marginBottom: '0.5rem' }}>
-              {editingId === campaign.id ? (
-                <form
-                  onSubmit={(e) => void handleUpdate(campaign.id, e)}
-                  style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
-                >
-                  <input
-                    aria-label={`Nom de ${campaign.label}`}
-                    value={editLabel}
-                    onChange={(e) => setEditLabel(e.target.value)}
-                  />
-                  <input
-                    aria-label={`Canal de ${campaign.label}`}
-                    placeholder="Canal (facultatif)"
-                    value={editChannel}
-                    onChange={(e) => setEditChannel(e.target.value)}
-                  />
-                  <button className="secondary" type="submit">
-                    Enregistrer
-                  </button>
-                  <button className="secondary" type="button" onClick={() => setEditingId(null)}>
-                    Annuler
-                  </button>
-                </form>
-              ) : (
-                <div className="top-bar">
-                  <span>
-                    <strong>{campaign.label}</strong>{' '}
-                    {campaign.channel && <span className="muted">{campaign.channel}</span>}
-                  </span>
-                  <span style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="secondary" type="button" onClick={() => void handleSelect(campaign)}>
-                      Historique
+          <ul aria-label="Liste des campagnes" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {campaigns.map((campaign) => (
+              <li key={campaign.id} className="project-item" style={{ marginBottom: '0.5rem' }}>
+                {editingId === campaign.id ? (
+                  <form
+                    onSubmit={(e) => void handleUpdate(campaign.id, e)}
+                    style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
+                  >
+                    <input
+                      aria-label={`Nom de ${campaign.label}`}
+                      value={editLabel}
+                      onChange={(e) => setEditLabel(e.target.value)}
+                    />
+                    <input
+                      aria-label={`Canal de ${campaign.label}`}
+                      placeholder="Canal (facultatif)"
+                      value={editChannel}
+                      onChange={(e) => setEditChannel(e.target.value)}
+                    />
+                    <button className="secondary" type="submit">
+                      Enregistrer
                     </button>
-                    <button className="secondary" type="button" onClick={() => startEdit(campaign)}>
-                      Modifier
+                    <button className="secondary" type="button" onClick={() => setEditingId(null)}>
+                      Annuler
                     </button>
-                    <button className="secondary" type="button" onClick={() => void handleDelete(campaign)}>
-                      Supprimer
-                    </button>
-                  </span>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+                  </form>
+                ) : (
+                  <div className="top-bar">
+                    <span>
+                      <strong>{campaign.label}</strong>{' '}
+                      {campaign.channel && <span className="muted">{campaign.channel}</span>}
+                    </span>
+                    <span style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button className="secondary" type="button" onClick={() => void handleSelect(campaign)}>
+                        Historique
+                      </button>
+                      <button className="secondary" type="button" onClick={() => startEdit(campaign)}>
+                        Modifier
+                      </button>
+                      <button className="secondary" type="button" onClick={() => void handleDelete(campaign)}>
+                        Supprimer
+                      </button>
+                    </span>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+            ),
+          },
+          {
+            id: 'ajouter',
+            nom: 'Nouvelle campagne',
+            glyphe: 'infos',
+            categorie: 'creer',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>Ajouter une campagne</h2>
+          <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <input
+              aria-label="Nom de la campagne"
+              placeholder="Nom de la campagne"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+            />
+            <input
+              aria-label="Canal"
+              placeholder="Canal (facultatif)"
+              value={channel}
+              onChange={(e) => setChannel(e.target.value)}
+            />
+            <button className="secondary" type="submit" disabled={isSaving}>
+              {isSaving ? 'Ajout…' : 'Ajouter'}
+            </button>
+          </form>
+        </div>
+            ),
+          },
+        ]}
+      />
 
       {selected && (
         <div className="card" style={{ marginTop: '1.5rem' }}>

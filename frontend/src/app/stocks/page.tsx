@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
+import { IconesPanneaux } from '@/components/icones-panneaux';
 import {
   api,
   ApiError,
@@ -178,118 +179,139 @@ export default function StocksPage() {
 
       {error && <p className="error">{error}</p>}
 
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Ajouter un article</h2>
-        <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <input
-            aria-label="Nom de l'article"
-            placeholder="Nom de l'article"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <select aria-label="Unité" value={unit} onChange={(e) => setUnit(e.target.value as StockUnit)}>
-            {STOCK_UNITS.map((value) => (
-              <option key={value} value={value}>
-                {UNIT_LABELS[value]}
-              </option>
-            ))}
-          </select>
-          <input
-            aria-label="Seuil d'alerte"
-            placeholder="Seuil d'alerte (facultatif)"
-            value={alertBelow}
-            onChange={(e) => setAlertBelow(e.target.value)}
-          />
-          <button className="secondary" type="submit" disabled={isSaving}>
-            {isSaving ? 'Ajout…' : 'Ajouter'}
-          </button>
-        </form>
-      </div>
+      <IconesPanneaux
+        titre="Articles"
+        ouvertParDefaut="liste"
+        panneaux={[
+          {
+            id: 'liste',
+            nom: 'Articles',
+            glyphe: 'stocks',
+            categorie: 'vendre',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>Articles</h2>
 
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Articles</h2>
+          {isLoading && <p className="loading">Chargement…</p>}
+          {!isLoading && items.length === 0 && (
+            <p className="muted">Aucun article en stock pour l&apos;instant.</p>
+          )}
 
-        {isLoading && <p className="loading">Chargement…</p>}
-        {!isLoading && items.length === 0 && (
-          <p className="muted">Aucun article en stock pour l&apos;instant.</p>
-        )}
-
-        <ul aria-label="Liste des articles" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {items.map((item) => {
-            const enAlerte = estSousLeSeuil(item);
-            return (
-              <li
-                key={item.id}
-                className="project-item"
-                style={{
-                  cursor: 'default',
-                  marginBottom: '0.5rem',
-                  ...(enAlerte ? { borderLeft: '2px solid var(--danger)' } : {}),
-                }}
-              >
-                {editingId === item.id ? (
-                  <form
-                    onSubmit={(e) => void handleUpdate(item.id, e)}
-                    style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
-                  >
-                    <input
-                      aria-label={`Nom de ${item.name}`}
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                    />
-                    <select
-                      aria-label={`Unité de ${item.name}`}
-                      value={editUnit}
-                      onChange={(e) => setEditUnit(e.target.value as StockUnit)}
+          <ul aria-label="Liste des articles" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {items.map((item) => {
+              const enAlerte = estSousLeSeuil(item);
+              return (
+                <li
+                  key={item.id}
+                  className="project-item"
+                  style={{
+                    cursor: 'default',
+                    marginBottom: '0.5rem',
+                    ...(enAlerte ? { borderLeft: '2px solid var(--danger)' } : {}),
+                  }}
+                >
+                  {editingId === item.id ? (
+                    <form
+                      onSubmit={(e) => void handleUpdate(item.id, e)}
+                      style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
                     >
-                      {STOCK_UNITS.map((value) => (
-                        <option key={value} value={value}>
-                          {UNIT_LABELS[value]}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      aria-label={`Seuil d'alerte de ${item.name}`}
-                      placeholder="Seuil d'alerte (facultatif)"
-                      value={editAlertBelow}
-                      onChange={(e) => setEditAlertBelow(e.target.value)}
-                    />
-                    <button className="secondary" type="submit">
-                      Enregistrer
-                    </button>
-                    <button className="secondary" type="button" onClick={() => setEditingId(null)}>
-                      Annuler
-                    </button>
-                  </form>
-                ) : (
-                  <div className="top-bar">
-                    <span>
-                      <strong>{item.name}</strong>{' '}
-                      <span className="muted">
-                        {item.quantity} {UNIT_LABELS[item.unit as StockUnit] ?? item.unit}
+                      <input
+                        aria-label={`Nom de ${item.name}`}
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                      />
+                      <select
+                        aria-label={`Unité de ${item.name}`}
+                        value={editUnit}
+                        onChange={(e) => setEditUnit(e.target.value as StockUnit)}
+                      >
+                        {STOCK_UNITS.map((value) => (
+                          <option key={value} value={value}>
+                            {UNIT_LABELS[value]}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        aria-label={`Seuil d'alerte de ${item.name}`}
+                        placeholder="Seuil d'alerte (facultatif)"
+                        value={editAlertBelow}
+                        onChange={(e) => setEditAlertBelow(e.target.value)}
+                      />
+                      <button className="secondary" type="submit">
+                        Enregistrer
+                      </button>
+                      <button className="secondary" type="button" onClick={() => setEditingId(null)}>
+                        Annuler
+                      </button>
+                    </form>
+                  ) : (
+                    <div className="top-bar">
+                      <span>
+                        <strong>{item.name}</strong>{' '}
+                        <span className="muted">
+                          {item.quantity} {UNIT_LABELS[item.unit as StockUnit] ?? item.unit}
+                        </span>
+                        {enAlerte && (
+                          <span style={{ color: 'var(--danger)' }}> — sous le seuil d&apos;alerte</span>
+                        )}
                       </span>
-                      {enAlerte && (
-                        <span style={{ color: 'var(--danger)' }}> — sous le seuil d&apos;alerte</span>
-                      )}
-                    </span>
-                    <span style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button className="secondary" type="button" onClick={() => void handleSelect(item)}>
-                        Historique
-                      </button>
-                      <button className="secondary" type="button" onClick={() => startEdit(item)}>
-                        Modifier
-                      </button>
-                      <button className="secondary" type="button" onClick={() => void handleDelete(item)}>
-                        Supprimer
-                      </button>
-                    </span>
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+                      <span style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button className="secondary" type="button" onClick={() => void handleSelect(item)}>
+                          Historique
+                        </button>
+                        <button className="secondary" type="button" onClick={() => startEdit(item)}>
+                          Modifier
+                        </button>
+                        <button className="secondary" type="button" onClick={() => void handleDelete(item)}>
+                          Supprimer
+                        </button>
+                      </span>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+            ),
+          },
+          {
+            id: 'ajouter',
+            nom: 'Nouvel article',
+            glyphe: 'infos',
+            categorie: 'creer',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>Ajouter un article</h2>
+          <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <input
+              aria-label="Nom de l'article"
+              placeholder="Nom de l'article"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <select aria-label="Unité" value={unit} onChange={(e) => setUnit(e.target.value as StockUnit)}>
+              {STOCK_UNITS.map((value) => (
+                <option key={value} value={value}>
+                  {UNIT_LABELS[value]}
+                </option>
+              ))}
+            </select>
+            <input
+              aria-label="Seuil d'alerte"
+              placeholder="Seuil d'alerte (facultatif)"
+              value={alertBelow}
+              onChange={(e) => setAlertBelow(e.target.value)}
+            />
+            <button className="secondary" type="submit" disabled={isSaving}>
+              {isSaving ? 'Ajout…' : 'Ajouter'}
+            </button>
+          </form>
+        </div>
+            ),
+          },
+        ]}
+      />
 
       {selected && (
         <div className="card" style={{ marginTop: '1.5rem' }}>

@@ -71,14 +71,14 @@ describe('ComplianceSection — IGINI prépare les démarches', () => {
     });
     render(<ComplianceSection token={TOKEN} projectId={PROJECT_ID} />);
 
-    const bouton = await screen.findByRole('button', { name: /Faire faire par IGINI/ });
+    await screen.findByText('Démarche r1');
     expect(screen.getByText('IGINI lit la fiche officielle et prépare le document, il ne dépose rien à ta place.')).toBeInTheDocument();
-    expect(bouton).toBeDisabled();
+    expect(screen.queryByRole('button', { name: /Démarrer IGINI/ })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByLabelText('Faire faire : Démarche r1'));
     fireEvent.click(screen.getByLabelText('Faire faire : Démarche r2'));
-    expect(screen.getByText('2 éléments, ~2 appels IA')).toBeInTheDocument();
-    fireEvent.click(bouton);
+    expect(screen.getByText('2 éléments sélectionnés, ~2 appels IA')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Démarrer IGINI/ }));
 
     expect(await screen.findByText('Texte r2')).toBeInTheDocument();
     expect(appels.filter((a) => a.endsWith('/run'))).toEqual([
@@ -171,7 +171,7 @@ describe('ComplianceSection — IGINI prépare les démarches', () => {
     render(<ComplianceSection token={TOKEN} projectId={PROJECT_ID} readOnly />);
 
     await screen.findByText('Démarche r1');
-    expect(screen.queryByRole('button', { name: /Faire faire par IGINI/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Démarrer IGINI/ })).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/Faire faire/)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: "J'ai fait / J'ai déposé" })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Refuser' })).not.toBeInTheDocument();
@@ -186,7 +186,7 @@ describe('ComplianceSection — IGINI prépare les démarches', () => {
 
     await screen.findByText('Démarche r1');
     for (const id of ['r1', 'r2', 'r3']) fireEvent.click(screen.getByLabelText(`Faire faire : Démarche ${id}`));
-    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Démarrer IGINI/ }));
 
     expect(await screen.findByText('Limite atteinte : 3 éléments non traités')).toBeInTheDocument();
     expect(appels.filter((a) => a.endsWith('/run'))).toHaveLength(1);
@@ -211,7 +211,7 @@ describe('ComplianceSection — IGINI prépare les démarches', () => {
 
     await screen.findByText('Démarche r1');
     for (const id of ["r1","r2","r3"]) fireEvent.click(screen.getByLabelText('Faire faire : Démarche ' + id));
-    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Démarrer IGINI/ }));
 
     expect(await screen.findByText('Connexion perdue : 3 éléments non traités')).toBeInTheDocument();
     expect(appels).toHaveLength(1);
@@ -228,7 +228,7 @@ describe('ComplianceSection — IGINI prépare les démarches', () => {
 
     await screen.findByText('Démarche r1');
     fireEvent.click(screen.getByLabelText('Faire faire : Démarche r1'));
-    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Démarrer IGINI/ }));
 
     expect(await screen.findByText("IGINI n'a pas pu préparer cette démarche")).toBeInTheDocument();
     expect(screen.getByText('Le modèle a répondu hors format.')).toBeInTheDocument();
@@ -256,7 +256,7 @@ describe('ComplianceSection — IGINI prépare les démarches', () => {
     await screen.findByText('Démarche r1');
     fireEvent.click(screen.getByLabelText('Faire faire : Démarche r1'));
     fireEvent.click(screen.getByLabelText('Faire faire : Démarche r2'));
-    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Démarrer IGINI/ }));
     await waitFor(() => expect(appels.filter((a) => a.endsWith('/run'))).toHaveLength(1));
 
     unmount();

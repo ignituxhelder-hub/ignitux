@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
+import { IconesPanneaux } from '@/components/icones-panneaux';
 import { api, ApiError, type CashRegisterEntry } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { centimesDepuisEuros, euros, jour } from '@/lib/montants';
@@ -102,76 +103,97 @@ export default function CaissePage() {
 
       {error && <p className="error">{error}</p>}
 
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Enregistrer le relevé du jour</h2>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <input
-            aria-label="Date du relevé"
-            type="date"
-            value={occurredOn}
-            onChange={(e) => setOccurredOn(e.target.value)}
-          />
-          <input
-            aria-label="Total espèces en euros"
-            placeholder="Espèces (€)"
-            value={cash}
-            onChange={(e) => setCash(e.target.value)}
-          />
-          <input
-            aria-label="Total carte en euros"
-            placeholder="Carte (€)"
-            value={card}
-            onChange={(e) => setCard(e.target.value)}
-          />
-          <input
-            aria-label="TVA collectée en euros"
-            placeholder="TVA collectée (€)"
-            value={vat}
-            onChange={(e) => setVat(e.target.value)}
-          />
-          <input
-            aria-label="Note"
-            placeholder="Note (facultatif)"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            style={{ flex: '1 1 200px' }}
-          />
-          <button className="secondary" type="submit" disabled={isSaving}>
-            {isSaving ? 'Enregistrement…' : 'Enregistrer'}
-          </button>
-        </form>
-      </div>
+      <IconesPanneaux
+        titre="Relevés"
+        ouvertParDefaut="liste"
+        panneaux={[
+          {
+            id: 'liste',
+            nom: 'Relevés',
+            glyphe: 'caisse',
+            categorie: 'vendre',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>Relevés déjà saisis</h2>
 
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Relevés déjà saisis</h2>
+          {isLoading && <p className="loading">Chargement…</p>}
+          {!isLoading && entries.length === 0 && (
+            <p className="muted">Aucun relevé enregistré pour l&apos;instant.</p>
+          )}
 
-        {isLoading && <p className="loading">Chargement…</p>}
-        {!isLoading && entries.length === 0 && (
-          <p className="muted">Aucun relevé enregistré pour l&apos;instant.</p>
-        )}
-
-        <ul aria-label="Relevés de caisse" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {entries.map((entry) => (
-            <li key={entry.id} className="project-item" style={{ marginBottom: '0.5rem' }}>
-              <div className="top-bar">
-                <span>
-                  <strong>{jour(entry.occurred_on)}</strong>{' '}
-                  <span className="muted">
-                    Espèces {euros(entry.cash_cents)} · Carte {euros(entry.card_cents)} · TVA{' '}
-                    {euros(entry.vat_cents)}
+          <ul aria-label="Relevés de caisse" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {entries.map((entry) => (
+              <li key={entry.id} className="project-item" style={{ marginBottom: '0.5rem' }}>
+                <div className="top-bar">
+                  <span>
+                    <strong>{jour(entry.occurred_on)}</strong>{' '}
+                    <span className="muted">
+                      Espèces {euros(entry.cash_cents)} · Carte {euros(entry.card_cents)} · TVA{' '}
+                      {euros(entry.vat_cents)}
+                    </span>
+                    {entry.note && <p style={{ margin: '0.25rem 0 0' }}>{entry.note}</p>}
                   </span>
-                  {entry.note && <p style={{ margin: '0.25rem 0 0' }}>{entry.note}</p>}
-                </span>
-                {entry.ledger_entry_id && (
-                  <Link href="/comptabilite" className="secondary">
-                    Voir l&apos;écriture
-                  </Link>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+                  {entry.ledger_entry_id && (
+                    <Link href="/comptabilite" className="secondary">
+                      Voir l&apos;écriture
+                    </Link>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+            ),
+          },
+          {
+            id: 'ajouter',
+            nom: 'Nouveau relevé',
+            glyphe: 'infos',
+            categorie: 'creer',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>Enregistrer le relevé du jour</h2>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <input
+              aria-label="Date du relevé"
+              type="date"
+              value={occurredOn}
+              onChange={(e) => setOccurredOn(e.target.value)}
+            />
+            <input
+              aria-label="Total espèces en euros"
+              placeholder="Espèces (€)"
+              value={cash}
+              onChange={(e) => setCash(e.target.value)}
+            />
+            <input
+              aria-label="Total carte en euros"
+              placeholder="Carte (€)"
+              value={card}
+              onChange={(e) => setCard(e.target.value)}
+            />
+            <input
+              aria-label="TVA collectée en euros"
+              placeholder="TVA collectée (€)"
+              value={vat}
+              onChange={(e) => setVat(e.target.value)}
+            />
+            <input
+              aria-label="Note"
+              placeholder="Note (facultatif)"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              style={{ flex: '1 1 200px' }}
+            />
+            <button className="secondary" type="submit" disabled={isSaving}>
+              {isSaving ? 'Enregistrement…' : 'Enregistrer'}
+            </button>
+          </form>
+        </div>
+            ),
+          },
+        ]}
+      />
     </main>
   );
 }
