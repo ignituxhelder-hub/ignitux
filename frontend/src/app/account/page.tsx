@@ -4,8 +4,26 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Brand } from '@/components/ignitux-mark';
+import { Icone } from '@/components/icones';
 import { api, ApiError, type DeletionPreview } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+
+/** Ce qui mène ailleurs. */
+const RACCOURCIS = [
+  { id: 'profil', nom: 'Mon profil', route: '/profil', glyphe: 'profil', categorie: 'creer' },
+  { id: 'ia', nom: 'Consommation IA', route: '/consommation-ia', glyphe: 'consommation-ia', categorie: 'investir' },
+  { id: 'roles', nom: 'Mes rôles', route: '/roles', glyphe: 'collaborateurs', categorie: 'reseau' },
+] as const;
+
+/** Ce qui s'ouvre ici, un seul à la fois : un écran court plutôt qu'une longue page de cartes. */
+const PANNEAUX = [
+  { id: 'motdepasse', nom: 'Mot de passe', glyphe: 'conformite', categorie: 'reglages' },
+  { id: 'donnees', nom: 'Mes données', glyphe: 'financement-recu', categorie: 'gerer' },
+  { id: 'cookies', nom: 'Cookies', glyphe: 'memoire', categorie: 'reglages' },
+  { id: 'suppression', nom: 'Supprimer mon compte', glyphe: 'supprimer', categorie: 'reglages' },
+] as const;
+
+type IdPanneau = (typeof PANNEAUX)[number]['id'];
 
 export default function AccountPage() {
   const { token, user, isReady, logout } = useAuth();
@@ -16,6 +34,7 @@ export default function AccountPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDone, setIsDone] = useState(false);
+  const [ouvert, setOuvert] = useState<IdPanneau | null>(null);
 
   useEffect(() => {
     if (isReady && !token) {
@@ -53,93 +72,97 @@ export default function AccountPage() {
       <h1>Mon compte</h1>
       <p className="muted">{user?.email}</p>
 
-      <div className="card">
-        <h2 style={{ marginTop: 0 }}>Mon profil</h2>
-        <p className="muted" style={{ marginTop: 0 }}>
-          Ce qu&apos;Ignitux sait de toi, pourquoi il le sait, et ce que chaque réponse
-          change. Rien n&apos;y est obligatoire.
-        </p>
-        <Link className="secondary" href="/profil" style={{ display: 'inline-block' }}>
-          Voir mon profil
-        </Link>
-      </div>
+      <ul className="accueil-page" aria-label="Mon compte">
+        {RACCOURCIS.map((r) => (
+          <li key={r.id}>
+            <Link href={r.route} className="icone">
+              <span className="icone__glyphe" data-categorie={r.categorie} aria-hidden="true">
+                <Icone id={r.glyphe} />
+              </span>
+              <span className="icone__nom">{r.nom}</span>
+            </Link>
+          </li>
+        ))}
+        {PANNEAUX.map((pa) => (
+          <li key={pa.id}>
+            <button
+              type="button"
+              className="icone"
+              aria-expanded={ouvert === pa.id}
+              onClick={() => setOuvert(ouvert === pa.id ? null : pa.id)}
+            >
+              <span className="icone__glyphe" data-categorie={pa.categorie} aria-hidden="true">
+                <Icone id={pa.glyphe} />
+              </span>
+              <span className="icone__nom">{pa.nom}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
 
-      <div className="card">
-        <h2 style={{ marginTop: 0 }}>Consommation IA</h2>
-        <p className="muted" style={{ marginTop: 0 }}>
-          Ce que les générateurs ont consommé ce mois-ci, ce qu&apos;il te reste, et le détail
-          appel par appel.
-        </p>
-        <Link className="secondary" href="/consommation-ia" style={{ display: 'inline-block' }}>
-          Voir ma consommation
-        </Link>
-      </div>
+      {ouvert === 'motdepasse' && (
+        <div className="card">
+          <h2 style={{ marginTop: 0 }}>Changer le mot de passe</h2>
+          {error && <p className="error">{error}</p>}
+          {isDone && <p style={{ color: 'var(--ok)' }}>Mot de passe changé.</p>}
+          <form onSubmit={handleSubmit}>
+            <div className="field">
+              <label htmlFor="currentPassword">Mot de passe actuel</label>
+              <input
+                id="currentPassword"
+                type="password"
+                required
+                autoComplete="current-password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="newPassword">Nouveau mot de passe</label>
+              <input
+                id="newPassword"
+                type="password"
+                required
+                minLength={8}
+                autoComplete="new-password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+            <button className="primary" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Enregistrement…' : 'Changer le mot de passe'}
+            </button>
+          </form>
+        </div>
 
-      <div className="card">
-        <h2 style={{ marginTop: 0 }}>Mes rôles</h2>
-        <p className="muted" style={{ marginTop: 0 }}>
-          Entrepreneur, investisseur, ou les deux. Un rôle décide de ce qui t&apos;est
-          montré — il ne détient aucune donnée, et en changer n&apos;en déplace aucune.
-        </p>
-        <Link className="secondary" href="/roles" style={{ display: 'inline-block' }}>
-          Gérer mes rôles
-        </Link>
-      </div>
+      )}
 
-      <div className="card">
-        <h2 style={{ marginTop: 0 }}>Changer le mot de passe</h2>
-        {error && <p className="error">{error}</p>}
-        {isDone && <p style={{ color: 'var(--ok)' }}>Mot de passe changé.</p>}
-        <form onSubmit={handleSubmit}>
-          <div className="field">
-            <label htmlFor="currentPassword">Mot de passe actuel</label>
-            <input
-              id="currentPassword"
-              type="password"
-              required
-              autoComplete="current-password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="newPassword">Nouveau mot de passe</label>
-            <input
-              id="newPassword"
-              type="password"
-              required
-              minLength={8}
-              autoComplete="new-password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-          </div>
-          <button className="primary" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Enregistrement…' : 'Changer le mot de passe'}
-          </button>
-        </form>
-      </div>
+      {ouvert === 'donnees' && <ExportSection token={token} />}
 
-      <ExportSection token={token} />
+      {ouvert === 'cookies' && (
+        <div className="card">
+          <h2 style={{ marginTop: 0 }}>Cookies et stockage local</h2>
+          <p className="muted" style={{ marginTop: 0, marginBottom: 0 }}>
+            Ignitux ne fait tourner aucun script de suivi et ne pose qu&apos;un seul cookie, si tu
+            changes de langue depuis la page d&apos;accueil, pour la retenir. La connexion
+            (ton jeton de session) est mémorisée uniquement dans le stockage local de ton
+            navigateur, sur cet appareil : elle disparaît si tu l&apos;effaces et n&apos;est jamais
+            partagée avec un tiers.
+          </p>
+        </div>
 
-      <div className="card">
-        <h2 style={{ marginTop: 0 }}>Cookies et stockage local</h2>
-        <p className="muted" style={{ marginTop: 0, marginBottom: 0 }}>
-          Ignitux ne fait tourner aucun script de suivi et ne pose qu&apos;un seul cookie, si tu
-          changes de langue depuis la page d&apos;accueil, pour la retenir. La connexion
-          (ton jeton de session) est mémorisée uniquement dans le stockage local de ton
-          navigateur, sur cet appareil : elle disparaît si tu l&apos;effaces et n&apos;est jamais
-          partagée avec un tiers.
-        </p>
-      </div>
+      )}
 
-      <DeleteAccountSection
-        token={token}
-        onDeleted={() => {
-          logout();
-          router.replace('/');
-        }}
-      />
+      {ouvert === 'suppression' && (
+        <DeleteAccountSection
+          token={token}
+          onDeleted={() => {
+            logout();
+            router.replace('/');
+          }}
+        />
+
+      )}
 
       <p className="muted" style={{ marginTop: '1.5rem', fontSize: '0.85rem' }}>
         <Link href="/confidentialite">Politique de confidentialité</Link> ·{' '}

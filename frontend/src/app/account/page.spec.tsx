@@ -35,6 +35,7 @@ describe('AccountPage', () => {
         <AccountPage />
       </AuthProvider>,
     );
+    fireEvent.click(await screen.findByRole('button', { name: 'Mot de passe' }));
 
     fireEvent.change(await screen.findByLabelText('Mot de passe actuel'), {
       target: { value: 'ancien' },
@@ -55,6 +56,7 @@ describe('AccountPage', () => {
         <AccountPage />
       </AuthProvider>,
     );
+    fireEvent.click(await screen.findByRole('button', { name: 'Mot de passe' }));
 
     fireEvent.change(await screen.findByLabelText('Mot de passe actuel'), {
       target: { value: 'mauvais' },
@@ -97,6 +99,7 @@ describe('AccountPage', () => {
           <AccountPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Mes données' }));
 
       expect(await screen.findByText(/coordonnées des/)).toBeInTheDocument();
       expect(screen.getByText('tiers')).toBeInTheDocument();
@@ -110,6 +113,7 @@ describe('AccountPage', () => {
           <AccountPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Mes données' }));
 
       expect(await screen.findByText(/images de ta pièce d’identité/)).toBeInTheDocument();
     });
@@ -129,6 +133,7 @@ describe('AccountPage', () => {
           <AccountPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Mes données' }));
 
       fireEvent.click(await screen.findByRole('button', { name: /télécharger mes données/i }));
 
@@ -148,6 +153,7 @@ describe('AccountPage', () => {
           <AccountPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Supprimer mon compte' }));
 
       expect(
         await screen.findByRole('button', { name: /voir ce qui sera supprimé/i }),
@@ -165,6 +171,7 @@ describe('AccountPage', () => {
           <AccountPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Supprimer mon compte' }));
 
       fireEvent.click(await screen.findByRole('button', { name: /voir ce qui sera supprimé/i }));
 
@@ -185,6 +192,7 @@ describe('AccountPage', () => {
           <AccountPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Supprimer mon compte' }));
 
       fireEvent.click(await screen.findByRole('button', { name: /voir ce qui sera supprimé/i }));
 
@@ -203,6 +211,7 @@ describe('AccountPage', () => {
           <AccountPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Supprimer mon compte' }));
 
       fireEvent.click(await screen.findByRole('button', { name: /voir ce qui sera supprimé/i }));
       fireEvent.change(await screen.findByLabelText(/confirme avec ton mot de passe/i), {
@@ -227,6 +236,7 @@ describe('AccountPage', () => {
           <AccountPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Supprimer mon compte' }));
 
       fireEvent.click(await screen.findByRole('button', { name: /voir ce qui sera supprimé/i }));
       fireEvent.change(await screen.findByLabelText(/confirme avec ton mot de passe/i), {

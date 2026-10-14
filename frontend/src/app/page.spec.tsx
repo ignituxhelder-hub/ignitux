@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
 import { createRouterMock, signInAs } from '@/test-utils/mocks';
@@ -31,7 +31,12 @@ describe('HomePage', () => {
     expect(screen.getByText('Transmettre')).toBeInTheDocument();
     expect(screen.getByText('Mémoire')).toBeInTheDocument();
     expect(screen.getByText('Score')).toBeInTheDocument();
+    // Le texte n'apparaît qu'au clic sur l'icône.
+    expect(screen.queryByText(/porteurs de projet/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Communauté' }));
     expect(screen.getByText(/porteurs de projet/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Communauté' }));
+    expect(screen.queryByText(/porteurs de projet/)).not.toBeInTheDocument();
   });
 
   it('redirige vers /projects si déjà connecté', async () => {

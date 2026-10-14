@@ -1,205 +1,72 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useEffect } from 'react';
 import { Brand } from '@/components/ignitux-mark';
-import { Champ } from '@/components/champs-profil';
-import { cvAEnvoyer, EditeurCv } from '@/components/editeur-cv';
-import { api, ApiError, type Cv, type ProfileValues, type ProfileView } from '@/lib/api';
+import { Icone } from '@/components/icones';
 import { useAuth } from '@/lib/auth';
 
 /**
- * LE PROFIL, EN ENTIER, POUR QUI VEUT LE VOIR.
+ * MON PROFIL, RANGÉ EN ICÔNES.
  *
- * Cette page existe pour deux raisons, et aucune n'est « il faut bien un
- * écran de profil » :
- *
- * 1. **Voir ce qu'Ignitux sait de soi.** Une personne doit pouvoir lire, en
- *    un endroit, tout ce que le produit a enregistré sur elle — et corriger.
- * 2. **Répondre d'avance si on en a envie.** Le parcours pose les questions
- *    au moment utile ; certains préfèrent tout remplir une fois. Les deux
- *    chemins mènent au même endroit.
- *
- * Ce qu'elle n'est pas : le passage obligé de l'inscription. Rien ici n'est
- * requis pour se servir du produit, et le pourcentage ne reproche rien.
+ * Même idée que le dossier Entreprise du bureau : plutôt qu'un long
+ * formulaire, des icônes qui disent où aller — ce qu'Ignitux sait de soi,
+ * l'identité, les rôles, l'offre, la consommation, le compte, le cadre légal.
+ * Le formulaire de réponses n'a pas disparu : il est derrière « Mes
+ * informations ».
  */
-export default function ProfilePage() {
+const ICONES_PROFIL: readonly {
+  id: string;
+  nom: string;
+  route: string;
+  glyphe: string;
+  categorie: string;
+}[] = [
+  { id: 'informations', nom: 'Mes informations', route: '/profil/informations', glyphe: 'profil', categorie: 'creer' },
+  { id: 'identite', nom: 'Mon identité', route: '/identite', glyphe: 'conformite', categorie: 'gerer' },
+  { id: 'roles', nom: 'Mes rôles', route: '/roles', glyphe: 'collaborateurs', categorie: 'reseau' },
+  { id: 'offre', nom: 'Mon offre', route: '/offres', glyphe: 'offres', categorie: 'vendre' },
+  { id: 'ia', nom: 'Consommation IA', route: '/consommation-ia', glyphe: 'consommation-ia', categorie: 'investir' },
+  { id: 'compte', nom: 'Mon compte', route: '/account', glyphe: 'compte', categorie: 'reglages' },
+  { id: 'confidentialite', nom: 'Confidentialité', route: '/confidentialite', glyphe: 'conformite', categorie: 'reglages' },
+  { id: 'cgu', nom: 'Conditions', route: '/cgu', glyphe: 'constitution', categorie: 'reglages' },
+];
+
+export default function ProfilPage() {
   const { token, isReady } = useAuth();
   const router = useRouter();
 
-  const [vue, setVue] = useState<ProfileView | null>(null);
-  const [brouillon, setBrouillon] = useState<ProfileValues>({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [enCours, setEnCours] = useState(false);
-  const [erreur, setErreur] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [cv, setCv] = useState<Cv | null>(null);
-  const [cvEnCours, setCvEnCours] = useState(false);
-  const [cvMessage, setCvMessage] = useState<string | null>(null);
-
-  const charger = useCallback(async (jeton: string) => {
-    setIsLoading(true);
-    try {
-      const [v, monCv] = await Promise.all([
-        api.getProfile(jeton),
-        // Le CV est un complément : s'il ne se charge pas, le profil reste utile.
-        api.getCv(jeton).catch(() => null),
-      ]);
-      setVue(v);
-      setBrouillon(v.values);
-      setCv(monCv);
-      setErreur(null);
-    } catch (err) {
-      setErreur(err instanceof ApiError ? err.message : 'Impossible de lire ton profil.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    if (!isReady) return;
-    if (!token) {
-      router.replace('/login');
-      return;
-    }
-    void charger(token);
-  }, [isReady, token, router, charger]);
+    if (isReady && !token) router.replace('/login');
+  }, [isReady, token, router]);
 
   if (!isReady || !token) return null;
 
-  async function enregistrer(e: FormEvent) {
-    e.preventDefault();
-    if (!token) return;
-    setEnCours(true);
-    setErreur(null);
-    setMessage(null);
-    try {
-      const v = await api.saveProfile(token, brouillon);
-      setVue(v);
-      setBrouillon(v.values);
-      setMessage('Enregistré.');
-    } catch (err) {
-      setErreur(err instanceof ApiError ? err.message : "L'enregistrement a échoué.");
-    } finally {
-      setEnCours(false);
-    }
-  }
-
-  async function enregistrerCv(e: FormEvent) {
-    e.preventDefault();
-    if (!token || !cv) return;
-    setCvEnCours(true);
-    setErreur(null);
-    setCvMessage(null);
-    try {
-      setCv(await api.saveCv(token, cvAEnvoyer(cv)));
-      setCvMessage('CV enregistré.');
-    } catch (err) {
-      setErreur(err instanceof ApiError ? err.message : "L'enregistrement du CV a échoué.");
-    } finally {
-      setCvEnCours(false);
-    }
-  }
-
   return (
-    <main className="page">
+    <main className="page ecran-accueil">
       <div className="top-bar">
         <Brand />
       </div>
+      <Link href="/accueil" className="secondary" style={{ display: 'inline-block', width: 'auto' }}>
+        ← Bureau
+      </Link>
+      <h1 className="ecran-accueil__titre" style={{ marginTop: '1rem' }}>
+        Mon profil
+      </h1>
 
-      <h1>Ce qu&apos;Ignitux sait de toi</h1>
-      <p className="muted">
-        Rien ici n&apos;est obligatoire. Chaque question dit à quoi elle sert, et tu peux
-        laisser vide ce dont tu ne vois pas l&apos;utilité — le produit fonctionne sans.
-      </p>
-
-      {erreur && <p className="error">{erreur}</p>}
-      {message && (
-        <p className="notice">
-          <span>{message}</span>
-        </p>
-      )}
-      {isLoading && <p className="loading">Chargement…</p>}
-
-      {vue && (
-        <>
-          <div className="card">
-            <div className="top-bar" style={{ marginBottom: '0.5rem' }}>
-              <h2 style={{ margin: 0 }}>Profil rempli</h2>
-              <strong style={{ fontSize: '1.4rem', fontVariantNumeric: 'tabular-nums' }}>
-                {vue.completion.percent} %
-              </strong>
-            </div>
-            <p className="muted" style={{ marginTop: 0 }}>
-              {vue.completion.filled} réponse(s) sur {vue.completion.total} qui comptent. Les
-              questions facultatives n&apos;entrent pas dans ce calcul : un pourcentage qui
-              baisse parce qu&apos;on n&apos;a pas rempli l&apos;accessoire pousse à tout
-              remplir, y compris ce dont personne n&apos;a besoin.
-            </p>
-
-            {vue.completion.missing.length > 0 && (
-              <>
-                <h3 style={{ marginBottom: '0.5rem' }}>Ce qui manque, et ce que ça ouvrirait</h3>
-                <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                  {vue.completion.missing.map((m) => (
-                    <li key={m.id} style={{ marginBottom: '0.6rem' }}>
-                      <strong>{m.label}</strong>
-                      <span className="muted" style={{ display: 'block', fontSize: '0.85rem' }}>
-                        {m.unlocks ?? 'Rien de précis pour l’instant — c’est du contexte pour IGINI.'}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </div>
-
-          <form className="card" onSubmit={enregistrer} style={{ marginTop: '1.5rem' }}>
-            <h2 style={{ marginTop: 0 }}>Tes réponses</h2>
-            {vue.fields.map((champ) => (
-              <Champ
-                key={champ.id}
-                champ={champ}
-                valeur={brouillon[champ.id] ?? (champ.kind === 'liste' ? [] : '')}
-                onChange={(v) => setBrouillon((p) => ({ ...p, [champ.id]: v }))}
-              />
-            ))}
-            <button className="primary" type="submit" disabled={enCours}>
-              {enCours ? 'Enregistrement…' : 'Enregistrer'}
-            </button>
-          </form>
-
-          {cv && (
-            <form className="card" onSubmit={enregistrerCv} style={{ marginTop: '1.5rem' }}>
-              <h2 style={{ marginTop: 0 }}>Ton CV</h2>
-              <p className="muted" style={{ marginTop: 0 }}>
-                Décrit plutôt qu&apos;importé : tes postes avec leurs dates, en quelques mots.
-                IGINI s&apos;en sert dans toutes ses analyses.
-              </p>
-              <EditeurCv cv={cv} onChange={setCv} />
-              {cvMessage && (
-                <p className="notice">
-                  <span>{cvMessage}</span>
-                </p>
-              )}
-              <button
-                className="primary"
-                type="submit"
-                disabled={cvEnCours}
-                style={{ marginTop: '1rem' }}
-              >
-                {cvEnCours ? 'Enregistrement…' : 'Enregistrer mon CV'}
-              </button>
-            </form>
-          )}
-
-          <p className="muted" style={{ marginTop: '1.5rem' }}>
-            Ce que tu écris ici devient un souvenir personnel d&apos;IGINI, rattaché à toi et
-            non à un projet : il te suivra d&apos;un projet à l&apos;autre. Tout figure dans
-            l&apos;export de tes données, et part avec ton compte si tu le supprimes.
-          </p>
-        </>
-      )}
+      <ul className="accueil-page" aria-label="Mon profil">
+        {ICONES_PROFIL.map((i) => (
+          <li key={i.id}>
+            <Link href={i.route} className="icone">
+              <span className="icone__glyphe" data-categorie={i.categorie} aria-hidden="true">
+                <Icone id={i.glyphe} />
+              </span>
+              <span className="icone__nom">{i.nom}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </main>
   );
 }

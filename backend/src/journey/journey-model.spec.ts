@@ -1,4 +1,5 @@
 import {
+  guideSteps,
   journeyView,
   nextStep,
   phaseOf,
@@ -340,5 +341,106 @@ describe('tableau de bord — les chiffres du haut de page', () => {
       'taches',
       'etapes',
     ]);
+  });
+});
+
+describe('le guide pas à pas', () => {
+  const ids = (f: ProjectFacts) => guideSteps(f).map((e) => e.id);
+  const etat = (f: ProjectFacts, id: string) => guideSteps(f).find((e) => e.id === id)?.etat;
+  const analyse = (overrides: Partial<ProjectFacts> = {}) =>
+    vierge({ hasDescription: true, analyses: 1, etincelle: 80, ...overrides });
+
+  it('montre tout le chemin dès le premier jour, décrire en cours', () => {
+    const f = vierge();
+    expect(ids(f)).toEqual([
+      'decrire',
+      'analyser',
+      'construire',
+      'premieres-taches',
+      'avancer-taches',
+      'developper',
+      'transmettre',
+    ]);
+    expect(guideSteps(f).map((e) => e.etat)).toEqual([
+      'en-cours',
+      'a-venir',
+      'a-venir',
+      'a-venir',
+      'a-venir',
+      'a-venir',
+      'a-venir',
+    ]);
+  });
+
+  it('passe à l’analyse une fois l’idée décrite', () => {
+    const f = vierge({ hasDescription: true });
+    expect(etat(f, 'decrire')).toBe('fait');
+    expect(etat(f, 'analyser')).toBe('en-cours');
+  });
+
+  it('insère « reprendre » juste après l’analyse quand la note est faible', () => {
+    const f = analyse({ etincelle: SEUIL_ETINCELLE - 10 });
+    expect(ids(f).slice(0, 4)).toEqual(['decrire', 'analyser', 'ameliorer', 'construire']);
+    expect(etat(f, 'analyser')).toBe('fait');
+    expect(etat(f, 'ameliorer')).toBe('en-cours');
+  });
+
+  it('ne parle pas de reprendre l’idée quand la note suffit', () => {
+    const f = analyse();
+    expect(ids(f)).not.toContain('ameliorer');
+    expect(etat(f, 'construire')).toBe('en-cours');
+  });
+
+  it('ajoute les démarches seulement quand il y en a', () => {
+    expect(ids(vierge({ complianceChecks: 2 }))).toEqual([
+      'decrire',
+      'analyser',
+      'construire',
+      'premieres-taches',
+      'conformite',
+      'avancer-taches',
+      'developper',
+      'transmettre',
+    ]);
+    expect(ids(vierge())).not.toContain('conformite');
+  });
+
+  it('met les tâches en cours en avant une fois les premières posées', () => {
+    const f = analyse({ buildPlans: 1, tasks: 3, openTasks: 2 });
+    expect(etat(f, 'premieres-taches')).toBe('fait');
+    expect(etat(f, 'avancer-taches')).toBe('en-cours');
+  });
+
+  it('coche tout quand le parcours est fini', () => {
+    const f = analyse({
+      buildPlans: 1,
+      tasks: 2,
+      openTasks: 0,
+      complianceChecks: 1,
+      completedComplianceChecks: 1,
+      developmentPlans: 1,
+      transmissionPlans: 1,
+    });
+    expect(nextStep(f)).toBeNull();
+    expect(guideSteps(f).every((e) => e.etat === 'fait')).toBe(true);
+  });
+
+  it('dit chaque étape avec ses mots', () => {
+    const f = analyse({ etincelle: SEUIL_ETINCELLE - 10, complianceChecks: 1 });
+    expect(guideSteps(f).map((e) => e.label)).toEqual([
+      'Décrire ton idée',
+      'Analyser ton idée',
+      'Reprendre ton idée',
+      'Établir ton plan',
+      'Poser tes premières tâches',
+      'Regarder tes démarches',
+      'Avancer tes tâches',
+      'Préparer le développement',
+      'Penser la transmission',
+    ]);
+  });
+
+  it('fait partie de la vue du parcours', () => {
+    expect(journeyView(vierge()).guide).toEqual(guideSteps(vierge()));
   });
 });
