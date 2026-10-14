@@ -836,12 +836,33 @@ describe('ProjectDetailPage', () => {
     expect(await screen.findByRole('button', { name: 'Plan de financement' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Analyser' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Tâches' })).not.toBeInTheDocument();
+    // Aucune liste que son rôle ne lit pas n'est demandée (pas de 403 en rafale).
+    const demandes = vi.mocked(global.fetch).mock.calls.map(([url]) => new URL(String(url)).pathname);
+    for (const interdite of ['analyses', 'plans', 'development-plans', 'transmission-plans', 'legal-forms']) {
+      expect(demandes, interdite).not.toContain(`/projects/p1/${interdite}`);
+    }
   });
 
   it('affiche une vue lecture seule pour un collaborateur (pas le propriétaire)', async () => {
     signInAs('tok456', { id: 'u2', email: 'collaborateur@b.com' });
     mockApiRoutes({
       'GET /projects/p1': { status: 200, body: PROJECT },
+      // Un collaborateur d'avant les rôles est un observateur : tout voir, rien modifier.
+      'GET /projects/p1/mon-acces': {
+        status: 200,
+        body: {
+          role: 'observateur',
+          capacites: [
+            'voir_projet',
+            'voir_plan_financement',
+            'voir_taches',
+            'voir_conformite_memoire',
+            'voir_evaluation',
+            'voir_financement',
+            'voir_documents_juridiques',
+          ],
+        },
+      },
       'GET /projects/p1/analyses': {
         status: 200,
         body: [

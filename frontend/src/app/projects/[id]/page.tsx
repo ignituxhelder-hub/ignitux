@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -10,27 +10,27 @@ import {
   type FormEvent,
   type ReactNode,
   type SetStateAction,
-} from 'react';
-import { Icone } from '@/components/icones';
-import { IginiMention } from '@/components/igini-mention';
+} from "react";
+import { Icone } from "@/components/icones";
+import { IginiMention } from "@/components/igini-mention";
 import {
   GuideParcours,
   ProchaineEtape,
   Progression,
   SectionsFermees,
   TableauDeBord,
-} from '@/components/parcours';
+} from "@/components/parcours";
 import {
   marquerVisiteVue,
   VisiteGuidee,
   visiteDejaVue,
   type ArretVisite,
-} from '@/components/visite-guidee';
-import { ETAPES_PROJET, OUTILS_PROJET } from '@/lib/etapes-projet';
-import { destinationDe } from '@/lib/guide-projet';
-import { AnalyseEnCours, AnalyseResultat } from './analyse-resultat';
-import { FormeJuridiqueResultat } from './forme-juridique-resultat';
-import { ChampsADemander } from '@/components/champs-profil';
+} from "@/components/visite-guidee";
+import { ETAPES_PROJET, OUTILS_PROJET } from "@/lib/etapes-projet";
+import { destinationDe } from "@/lib/guide-projet";
+import { AnalyseEnCours, AnalyseResultat } from "./analyse-resultat";
+import { FormeJuridiqueResultat } from "./forme-juridique-resultat";
+import { ChampsADemander } from "@/components/champs-profil";
 import {
   api,
   ApiError,
@@ -44,21 +44,32 @@ import {
   type ProfileField,
   type Project,
   type TransmissionPlan,
-} from '@/lib/api';
-import { useAuth } from '@/lib/auth';
-import { AutomationSection } from './automation-section';
-import { WorkflowSection } from './workflow-section';
-import { BuybackSection, FinancingSection } from './financing-section';
-import { ParticipationSection } from './participation-section';
-import { EvaluationSection } from './evaluation-section';
-import { CollaboratorsSection } from './collaborators-section';
-import { lectureDeSection, ROLE_EQUIPE_LABEL, type Capacite, type MonAcces } from '@/lib/equipe';
-import { StatutsSection } from './statuts-section';
-import { DossierCreationSection } from './dossier-creation-section';
-import { ImmatriculationSection } from './immatriculation-section';
-import { ComplianceSection } from './compliance-section';
-import { KnowledgeSection, MemorySection, ScoreHistorySection, ScoreSection, TasksSection } from './engine-sections';
-import { MandatSection } from './mandat-section';
+} from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { AutomationSection } from "./automation-section";
+import { WorkflowSection } from "./workflow-section";
+import { BuybackSection, FinancingSection } from "./financing-section";
+import { ParticipationSection } from "./participation-section";
+import { EvaluationSection } from "./evaluation-section";
+import { CollaboratorsSection } from "./collaborators-section";
+import {
+  lectureDeSection,
+  ROLE_EQUIPE_LABEL,
+  type Capacite,
+  type MonAcces,
+} from "@/lib/equipe";
+import { StatutsSection } from "./statuts-section";
+import { DossierCreationSection } from "./dossier-creation-section";
+import { ImmatriculationSection } from "./immatriculation-section";
+import { ComplianceSection } from "./compliance-section";
+import {
+  KnowledgeSection,
+  MemorySection,
+  ScoreHistorySection,
+  ScoreSection,
+  TasksSection,
+} from "./engine-sections";
+import { MandatSection } from "./mandat-section";
 
 /**
  * Les arrêts de la visite guidée, à la première ouverture d'un projet. Cinq
@@ -66,32 +77,32 @@ import { MandatSection } from './mandat-section';
  */
 const ARRETS_VISITE: readonly ArretVisite[] = [
   {
-    cible: 'reperes',
-    titre: 'L’état de ton projet',
-    texte: 'Ici, l’état de ton projet en un coup d’œil.',
+    cible: "reperes",
+    titre: "L’état de ton projet",
+    texte: "Ici, l’état de ton projet en un coup d’œil.",
   },
   {
-    cible: 'progression',
-    titre: 'Les trois phases',
+    cible: "progression",
+    titre: "Les trois phases",
     texte:
-      'Ton projet passe par trois phases : découvrir, construire, transmettre. La tienne est mise en avant.',
+      "Ton projet passe par trois phases : découvrir, construire, transmettre. La tienne est mise en avant.",
   },
   {
-    cible: 'guide',
-    titre: 'Ton parcours',
+    cible: "guide",
+    titre: "Ton parcours",
     texte:
-      'Chaque fois que tu reviens, regarde ici : Ignitux te dit quoi faire ensuite. Touche « Y aller » et il t’y emmène.',
+      "Chaque fois que tu reviens, regarde ici : Ignitux te dit quoi faire ensuite. Touche « Y aller » et il t’y emmène.",
   },
   {
-    cible: 'etapes',
-    titre: 'Les étapes',
-    texte: 'Le travail fait avec IGINI est rangé ici, une étape par icône.',
+    cible: "etapes",
+    titre: "Les étapes",
+    texte: "Le travail fait avec IGINI est rangé ici, une étape par icône.",
   },
   {
-    cible: 'vue-avancee',
-    titre: 'Vue avancée',
+    cible: "vue-avancee",
+    titre: "Vue avancée",
     texte:
-      'Les outils plus poussés (tâches, score, conformité…) sont ici, quand tu en auras besoin.',
+      "Les outils plus poussés (tâches, score, conformité…) sont ici, quand tu en auras besoin.",
   },
 ];
 
@@ -117,7 +128,7 @@ function useIginiStatus() {
         // On n'accepte que ce qui est réellement exploitable. Une réponse
         // inattendue laisse l'état à `null` : elle ne doit pas pouvoir
         // éteindre une fonctionnalité qui marche.
-        if (typeof data?.generatorsEnabled === 'boolean') setStatus(data);
+        if (typeof data?.generatorsEnabled === "boolean") setStatus(data);
       })
       .catch(() => {
         // On ne sait pas : on laisse le serveur trancher au clic.
@@ -136,11 +147,13 @@ function usePlanList<T>(
   token: string | null,
   id: string,
   list: (token: string, id: string) => Promise<T[]>,
+  /** Faux tant que le rôle ne permet pas de lire cette liste : on ne la demande pas. */
+  actif = true,
 ) {
   const [items, setItems] = useState<T[]>([]);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token || !actif) return;
     let cancelled = false;
 
     // Repart de zéro à chaque changement de projet, pour ne pas laisser
@@ -159,7 +172,7 @@ function usePlanList<T>(
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, id]);
+  }, [token, id, actif]);
 
   return [items, setItems] as const;
 }
@@ -209,11 +222,12 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<Project | null>(null);
   // Le rôle de la personne sur ce projet et ce qu'il permet (voir lib/equipe.ts).
   const [acces, setAcces] = useState<MonAcces | null>(null);
+  const [accesEchoue, setAccesEchoue] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -258,11 +272,17 @@ export default function ProjectDetailPage() {
       .getMonAcces(token, id)
       .then((a) => {
         // Garde défensive : une réponse inattendue retombe sur l'affichage par défaut.
-        if (!annule) setAcces(a && Array.isArray(a.capacites) ? a : null);
+        if (annule) return;
+        const lu = a && Array.isArray(a.capacites) ? a : null;
+        setAcces(lu);
+        setAccesEchoue(lu === null);
       })
       // Sans réponse : l'affichage d'avant les rôles (voir peut()), le serveur tranche.
       .catch(() => {
-        if (!annule) setAcces(null);
+        if (!annule) {
+          setAcces(null);
+          setAccesEchoue(true);
+        }
       });
     return () => {
       annule = true;
@@ -271,10 +291,15 @@ export default function ProjectDetailPage() {
 
   useEffect(() => {
     if (!allerAuxTaches) return;
-    const cible = document.getElementById('taches');
+    const cible = document.getElementById("taches");
     if (!cible) return;
-    const sansAnimation = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    cible.scrollIntoView({ behavior: sansAnimation ? 'auto' : 'smooth', block: 'start' });
+    const sansAnimation = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    cible.scrollIntoView({
+      behavior: sansAnimation ? "auto" : "smooth",
+      block: "start",
+    });
     setAllerAuxTaches(false);
   }, [allerAuxTaches, vueAvancee]);
 
@@ -285,27 +310,34 @@ export default function ProjectDetailPage() {
    * secondes ; absent (générateurs éteints : pas de bouton), on mène à la
    * section sans rien faire pulser dans le vide.
    */
-  const [cibleGuide, setCibleGuide] = useState<{ selecteur: string | null; section: string } | null>(
-    null,
-  );
+  const [cibleGuide, setCibleGuide] = useState<{
+    selecteur: string | null;
+    section: string;
+  } | null>(null);
   useEffect(() => {
     if (!cibleGuide) return;
     const sansAnimation =
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const element = cibleGuide.selecteur
       ? document.querySelector<HTMLElement>(cibleGuide.selecteur)
       : null;
     const repli = document.getElementById(`section-${cibleGuide.section}`);
     setCibleGuide(null);
     if (!element) {
-      repli?.scrollIntoView?.({ behavior: sansAnimation ? 'auto' : 'smooth', block: 'start' });
+      repli?.scrollIntoView?.({
+        behavior: sansAnimation ? "auto" : "smooth",
+        block: "start",
+      });
       return;
     }
-    element.scrollIntoView?.({ behavior: sansAnimation ? 'auto' : 'smooth', block: 'center' });
-    if (element.id === 'description') element.focus();
-    element.classList.add('guide-cible');
-    window.setTimeout(() => element.classList.remove('guide-cible'), 3000);
+    element.scrollIntoView?.({
+      behavior: sansAnimation ? "auto" : "smooth",
+      block: "center",
+    });
+    if (element.id === "description") element.focus();
+    element.classList.add("guide-cible");
+    window.setTimeout(() => element.classList.remove("guide-cible"), 3000);
   }, [cibleGuide, etapeOuverte, vueAvancee]);
 
   // La visite se propose d'elle-même une seule fois, au porteur, une fois
@@ -322,7 +354,20 @@ export default function ProjectDetailPage() {
 
   const iginiStatus = useIginiStatus();
 
-  const [analyses, setAnalyses] = usePlanList<Analysis>(token, id, api.listAnalyses);
+  /**
+   * Ce que le rôle permet de lire, pour ne demander que les listes permises.
+   * Sans /mon-acces, seul le propriétaire (reconnu sur le projet) charge tout.
+   */
+  const proprietaire = !!project && !!user && project.owner_id === user.id;
+  const lisible = (c: Capacite): boolean =>
+    acces ? acces.capacites.includes(c) : accesEchoue && proprietaire;
+
+  const [analyses, setAnalyses] = usePlanList<Analysis>(
+    token,
+    id,
+    api.listAnalyses,
+    lisible("voir_projet"),
+  );
   const analysis = useGeneration(
     token,
     id,
@@ -336,33 +381,44 @@ export default function ProjectDetailPage() {
     token,
     id,
     api.listLegalFormRecommendations,
+    lisible("voir_projet"),
   );
   const legalForm = useGeneration(
     token,
     id,
     api.recommendLegalForm,
     setLegalForms,
-    'Impossible de recommander une forme juridique.',
+    "Impossible de recommander une forme juridique.",
     onGenerated,
   );
 
-  const [buildPlans, setBuildPlans] = usePlanList<BuildPlan>(token, id, api.listBuildPlans);
+  const [buildPlans, setBuildPlans] = usePlanList<BuildPlan>(
+    token,
+    id,
+    api.listBuildPlans,
+    lisible("voir_projet"),
+  );
   const plan = useGeneration(
     token,
     id,
     api.createBuildPlan,
     setBuildPlans,
-    'Impossible de générer le plan.',
+    "Impossible de générer le plan.",
     onGenerated,
   );
 
-  const [financingPlans, setFinancingPlans] = usePlanList<FinancingPlan>(token, id, api.listFinancingPlans);
+  const [financingPlans, setFinancingPlans] = usePlanList<FinancingPlan>(
+    token,
+    id,
+    api.listFinancingPlans,
+    lisible("voir_plan_financement"),
+  );
   const financing = useGeneration(
     token,
     id,
     api.createFinancingPlan,
     setFinancingPlans,
-    'Impossible de générer le plan de financement.',
+    "Impossible de générer le plan de financement.",
     onGenerated,
   );
 
@@ -370,34 +426,37 @@ export default function ProjectDetailPage() {
     token,
     id,
     api.listDevelopmentPlans,
+    lisible("voir_projet"),
   );
   const development = useGeneration(
     token,
     id,
     api.createDevelopmentPlan,
     setDevelopmentPlans,
-    'Impossible de générer le plan de développement.',
+    "Impossible de générer le plan de développement.",
     onGenerated,
   );
 
-  const [transmissionPlans, setTransmissionPlans] = usePlanList<TransmissionPlan>(
-    token,
-    id,
-    api.listTransmissionPlans,
-  );
+  const [transmissionPlans, setTransmissionPlans] =
+    usePlanList<TransmissionPlan>(
+      token,
+      id,
+      api.listTransmissionPlans,
+      lisible("voir_projet"),
+    );
   const transmission = useGeneration(
     token,
     id,
     api.createTransmissionPlan,
     setTransmissionPlans,
-    'Impossible de générer le plan de transmission.',
+    "Impossible de générer le plan de transmission.",
     onGenerated,
   );
 
   useEffect(() => {
     if (!isReady) return;
     if (!token) {
-      router.replace('/login');
+      router.replace("/login");
       return;
     }
 
@@ -411,11 +470,15 @@ export default function ProjectDetailPage() {
         if (cancelled) return;
         setProject(data);
         setTitle(data.title);
-        setDescription(data.description ?? '');
+        setDescription(data.description ?? "");
       })
       .catch((err) => {
         if (cancelled) return;
-        setLoadError(err instanceof ApiError ? err.message : 'Impossible de charger le projet.');
+        setLoadError(
+          err instanceof ApiError
+            ? err.message
+            : "Impossible de charger le projet.",
+        );
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -435,7 +498,9 @@ export default function ProjectDetailPage() {
       const updated = await api.updateProject(token, id, title, description);
       setProject(updated);
     } catch (err) {
-      setFormError(err instanceof ApiError ? err.message : 'Impossible de sauvegarder.');
+      setFormError(
+        err instanceof ApiError ? err.message : "Impossible de sauvegarder.",
+      );
     } finally {
       setIsSaving(false);
     }
@@ -446,9 +511,11 @@ export default function ProjectDetailPage() {
     setIsDeleting(true);
     try {
       await api.deleteProject(token, id);
-      router.replace('/projects');
+      router.replace("/projects");
     } catch (err) {
-      setFormError(err instanceof ApiError ? err.message : 'Impossible de supprimer.');
+      setFormError(
+        err instanceof ApiError ? err.message : "Impossible de supprimer.",
+      );
       setIsDeleting(false);
     }
   }
@@ -458,10 +525,18 @@ export default function ProjectDetailPage() {
     setFormError(null);
     setIsTogglingVisibility(true);
     try {
-      const updated = await api.updateProjectVisibility(token, id, !project.is_public);
+      const updated = await api.updateProjectVisibility(
+        token,
+        id,
+        !project.is_public,
+      );
       setProject(updated);
     } catch (err) {
-      setFormError(err instanceof ApiError ? err.message : 'Impossible de changer la visibilité.');
+      setFormError(
+        err instanceof ApiError
+          ? err.message
+          : "Impossible de changer la visibilité.",
+      );
     } finally {
       setIsTogglingVisibility(false);
     }
@@ -491,7 +566,7 @@ export default function ProjectDetailPage() {
   useEffect(() => {
     if (!token) return;
     api
-      .getProfileFieldsToAsk(token, 'premier-projet')
+      .getProfileFieldsToAsk(token, "premier-projet")
       .then(setADemander)
       .catch(() => setADemander([]));
   }, [token, refreshSignal]);
@@ -504,11 +579,11 @@ export default function ProjectDetailPage() {
 
   /**
    * Ce que le rôle de la personne permet sur ce projet (lu sur le serveur).
-   * Tant que ce n'est pas chargé : tout pour le propriétaire, la lecture pour
-   * les autres — l'affichage d'avant les rôles. Le serveur revérifie tout.
+   * Tant que ce n'est pas chargé : tout pour le propriétaire, rien de réservé
+   * pour les autres (pas de 403 en rafale). Le serveur revérifie tout.
    */
   const peut = (capacite: Capacite): boolean =>
-    acces ? acces.capacites.includes(capacite) : isOwner || capacite.startsWith('voir_');
+    acces ? acces.capacites.includes(capacite) : isOwner;
 
   /**
    * Une section s'affiche si le parcours l'a ouverte, ou si la vue avancée
@@ -522,7 +597,7 @@ export default function ProjectDetailPage() {
     const lecture = lectureDeSection(section);
     if (lecture && !peut(lecture)) return false;
     if (vueAvancee) return true;
-    if (!parcours) return section === 'analyse';
+    if (!parcours) return section === "analyse";
     return parcours.visible.some((s) => s.section === section);
   };
 
@@ -530,8 +605,8 @@ export default function ProjectDetailPage() {
   const outilVisible = (outil: { id: string; section: string }): boolean => {
     // Le formulaire d'édition n'est pas une section du parcours : il est
     // toujours là pour le propriétaire, jamais pour un collaborateur.
-    if (outil.id === 'infos') return !!project && peut('modifier_projet');
-    if (outil.id === 'collaborateurs') return montrer(outil.section);
+    if (outil.id === "infos") return !!project && peut("modifier_projet");
+    if (outil.id === "collaborateurs") return montrer(outil.section);
     return montrer(outil.section);
   };
 
@@ -542,7 +617,9 @@ export default function ProjectDetailPage() {
     // « infos » n'est pas une section du parcours : le formulaire est
     // toujours là pour le porteur, la vue simple suffit.
     const visibleEnVueSimple =
-      destination.ouvre === 'infos' ? outilVisible({ id: 'infos', section: 'infos' }) : montrer(destination.ouvre);
+      destination.ouvre === "infos"
+        ? outilVisible({ id: "infos", section: "infos" })
+        : montrer(destination.ouvre);
     if (destination.avancee || !visibleEnVueSimple) setVueAvancee(true);
     setEtapeOuverte(destination.ouvre);
     setCibleGuide({ selecteur: destination.cible, section: destination.ouvre });
@@ -551,7 +628,14 @@ export default function ProjectDetailPage() {
   return (
     <main className="page page--wide">
       <div className="top-bar">
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "1rem",
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
           <Link href="/projects" className="muted">
             ← Retour aux projets
           </Link>
@@ -565,8 +649,19 @@ export default function ProjectDetailPage() {
         </div>
         {/* L'argent a son propre écran : la fiche projet faisait déjà sept
             mille pixels, et le financement s'y perdait tout en bas. */}
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          {peut('voir_financement') && <Link href={`/projects/${id}/finances`}>Financement et investisseurs</Link>}
+        <div
+          style={{
+            display: "flex",
+            gap: "1rem",
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          {peut("voir_financement") && (
+            <Link href={`/projects/${id}/finances`}>
+              Financement et investisseurs
+            </Link>
+          )}
           {/* Le mode par défaut reste simple. La vue avancée est un choix,
               jamais l'état initial : quelqu'un qui arrive ne devrait pas
               avoir à comprendre Ignitux avant de s'en servir. */}
@@ -574,7 +669,7 @@ export default function ProjectDetailPage() {
             <button
               className="secondary"
               type="button"
-              style={{ width: 'auto' }}
+              style={{ width: "auto" }}
               aria-label="Revoir la visite"
               onClick={() => setVisiteOuverte(true)}
             >
@@ -588,7 +683,7 @@ export default function ProjectDetailPage() {
             aria-pressed={vueAvancee}
             onClick={() => setVueAvancee((v) => !v)}
           >
-            {vueAvancee ? 'Revenir au parcours' : 'Vue avancée'}
+            {vueAvancee ? "Revenir au parcours" : "Vue avancée"}
           </button>
         </div>
       </div>
@@ -598,7 +693,7 @@ export default function ProjectDetailPage() {
 
       {project && (
         <>
-          <h1 style={{ marginBottom: '0.75rem' }}>{project.title}</h1>
+          <h1 style={{ marginBottom: "0.75rem" }}>{project.title}</h1>
 
           {/* Le bandeau disait « les 5 étapes ci-dessous » en montrant quinze
               sections. La progression et la prochaine étape le remplacent :
@@ -623,10 +718,10 @@ export default function ProjectDetailPage() {
                    qu'il venait d'ouvrir. Un raccourci vers un endroit où l'on se
                    trouve déjà n'est plus un raccourci. */
                 surTacheVide={
-                  peut('modifier_taches') && !montrer('taches')
+                  peut("modifier_taches") && !montrer("taches")
                     ? () => {
                         setVueAvancee(true);
-                        setEtapeOuverte('taches');
+                        setEtapeOuverte("taches");
                         setAllerAuxTaches(true);
                       }
                     : undefined
@@ -641,20 +736,30 @@ export default function ProjectDetailPage() {
           )}
           {/* Le guide pas à pas pour le porteur. Sans `guide` (serveur pas
               encore à jour pendant un déploiement), l'ancienne carte reste. */}
-          {parcours && peut('modifier_projet') && Array.isArray(parcours.guide) && (
-            <GuideParcours
-              parcours={parcours}
-              iaDisponible={iginiStatus?.generatorsEnabled ?? true}
-              onAller={allerA}
+          {parcours &&
+            peut("modifier_projet") &&
+            Array.isArray(parcours.guide) && (
+              <GuideParcours
+                parcours={parcours}
+                iaDisponible={iginiStatus?.generatorsEnabled ?? true}
+                onAller={allerA}
+              />
+            )}
+          {parcours &&
+            peut("modifier_projet") &&
+            !Array.isArray(parcours.guide) && (
+              <ProchaineEtape
+                parcours={parcours}
+                iaDisponible={iginiStatus?.generatorsEnabled ?? true}
+              />
+            )}
+          {isOwner && (
+            <VisiteGuidee
+              arrets={ARRETS_VISITE}
+              ouverte={visiteOuverte}
+              onFermer={fermerVisite}
             />
           )}
-          {parcours && peut('modifier_projet') && !Array.isArray(parcours.guide) && (
-            <ProchaineEtape
-              parcours={parcours}
-              iaDisponible={iginiStatus?.generatorsEnabled ?? true}
-            />
-          )}
-          {isOwner && <VisiteGuidee arrets={ARRETS_VISITE} ouverte={visiteOuverte} onFermer={fermerVisite} />}
 
           {/* Demandé ici parce que c'est ici que ça sert, pas à
               l'inscription où la personne n'avait encore rien vu. */}
@@ -666,12 +771,12 @@ export default function ProjectDetailPage() {
                  ce qui reste a repondre, et annoncer « deux choses » au-dessus
                  de quatre champs est le genre de petit faux qui use la
                  confiance. Le sous-titre, lui, dit le compte exact. */
-              titre="Pour t&apos;accompagner correctement"
+              titre="Pour t'accompagner correctement"
               onEnregistre={() => setRefreshSignal((s) => s + 1)}
             />
           )}
           {!parcours && (
-            <IginiMention style={{ marginBottom: '1.5rem' }}>
+            <IginiMention style={{ marginBottom: "1.5rem" }}>
               prépare ton parcours…
             </IginiMention>
           )}
@@ -683,13 +788,20 @@ export default function ProjectDetailPage() {
           {!isOwner && (
             <div className="card">
               {project.description && (
-                <p style={{ marginTop: 0, marginBottom: 0 }}>{project.description}</p>
+                <p style={{ marginTop: 0, marginBottom: 0 }}>
+                  {project.description}
+                </p>
               )}
-              <p className="muted" style={{ marginTop: '0.75rem', marginBottom: 0 }}>
+              <p
+                className="muted"
+                style={{ marginTop: "0.75rem", marginBottom: 0 }}
+              >
                 Projet partagé avec toi
-                {acces && acces.role !== 'proprietaire' ? ` (${ROLE_EQUIPE_LABEL[acces.role]})` : ''} — tu
-                vois et fais ce que ton rôle permet ; le propriétaire garde les actes juridiques et
-                l&apos;équipe.
+                {acces && acces.role !== "proprietaire"
+                  ? ` (${ROLE_EQUIPE_LABEL[acces.role]})`
+                  : ""}{" "}
+                — tu vois et fais ce que ton rôle permet ; le propriétaire garde
+                les actes juridiques et l&apos;équipe.
               </p>
             </div>
           )}
@@ -700,35 +812,56 @@ export default function ProjectDetailPage() {
           complet visible en même temps. On choisit laquelle ouvrir ; les
           autres restent fermées jusqu'au prochain clic. */}
       {ETAPES_PROJET.some((etape) => montrer(etape.section)) && (
-        <div className="card" style={{ marginTop: '1.5rem' }} data-visite="etapes">
+        <div
+          className="card"
+          style={{ marginTop: "1.5rem" }}
+          data-visite="etapes"
+        >
           <h2 style={{ marginTop: 0 }}>Les étapes</h2>
           <ul
             className="etapes-grille"
-            style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', listStyle: 'none', margin: 0, padding: 0 }}
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "1rem",
+              listStyle: "none",
+              margin: 0,
+              padding: 0,
+            }}
           >
-            {ETAPES_PROJET.filter((etape) => montrer(etape.section)).map((etape) => {
-              const active = etapeOuverte === etape.id;
-              return (
-                <li key={etape.id}>
-                  <button
-                    type="button"
-                    className="icone"
-                    aria-pressed={active}
-                    onClick={() => setEtapeOuverte((courante) => (courante === etape.id ? null : etape.id))}
-                  >
-                    <span className="icone__glyphe" data-categorie="creer" aria-hidden="true">
-                      <Icone id={etape.id} />
-                    </span>
-                    <span className="icone__nom">{etape.label}</span>
-                  </button>
-                </li>
-              );
-            })}
+            {ETAPES_PROJET.filter((etape) => montrer(etape.section)).map(
+              (etape) => {
+                const active = etapeOuverte === etape.id;
+                return (
+                  <li key={etape.id}>
+                    <button
+                      type="button"
+                      className="icone"
+                      aria-pressed={active}
+                      onClick={() =>
+                        setEtapeOuverte((courante) =>
+                          courante === etape.id ? null : etape.id,
+                        )
+                      }
+                    >
+                      <span
+                        className="icone__glyphe"
+                        data-categorie="creer"
+                        aria-hidden="true"
+                      >
+                        <Icone id={etape.id} />
+                      </span>
+                      <span className="icone__nom">{etape.label}</span>
+                    </button>
+                  </li>
+                );
+              },
+            )}
           </ul>
         </div>
       )}
 
-      {montrer('analyse') && etapeOuverte === 'analyse' && (
+      {montrer("analyse") && etapeOuverte === "analyse" && (
         <GenerationSection
           guideCible="analyse"
           title="Analyse"
@@ -751,10 +884,13 @@ export default function ProjectDetailPage() {
                   // Le champ description n'existe que lorsque l'icône
                   // « Titre et description » est ouverte : on l'ouvre d'abord
                   // (ce qui ferme l'analyse), puis on y mène.
-                  setEtapeOuverte('infos');
+                  setEtapeOuverte("infos");
                   window.requestAnimationFrame(() => {
-                    const champ = window.document.getElementById('description');
-                    champ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const champ = window.document.getElementById("description");
+                    champ?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center",
+                    });
                     (champ as HTMLTextAreaElement | null)?.focus();
                   });
                 }}
@@ -762,11 +898,11 @@ export default function ProjectDetailPage() {
                   // La section de construction n'existe dans le DOM que
                   // lorsque son icône est ouverte : on l'ouvre d'abord, et on
                   // ne défile qu'une fois qu'elle est montée.
-                  setEtapeOuverte('construction');
+                  setEtapeOuverte("construction");
                   window.requestAnimationFrame(() => {
                     window.document
-                      .getElementById('section-construction')
-                      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      .getElementById("section-construction")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" });
                   });
                 }}
               />
@@ -778,12 +914,12 @@ export default function ProjectDetailPage() {
              quelque chose a cassé. On dit ce qui est en cours, sans feindre
              une progression que le modèle ne fournit pas. */
           busyContent={<AnalyseEnCours />}
-          readOnly={!peut('lancer_ia')}
+          readOnly={!peut("lancer_ia")}
           iginiStatus={iginiStatus}
         />
       )}
 
-      {montrer('analyse') && etapeOuverte === 'forme-juridique' && (
+      {montrer("analyse") && etapeOuverte === "forme-juridique" && (
         <>
           <GenerationSection
             title="Forme juridique"
@@ -794,8 +930,10 @@ export default function ProjectDetailPage() {
             isBusy={legalForm.isBusy}
             error={legalForm.error}
             onGenerate={legalForm.generate}
-            renderItem={(item) => <FormeJuridiqueResultat recommandation={item} key={item.id} />}
-            readOnly={!peut('lancer_ia')}
+            renderItem={(item) => (
+              <FormeJuridiqueResultat recommandation={item} key={item.id} />
+            )}
+            readOnly={!peut("lancer_ia")}
             iginiStatus={iginiStatus}
           />
           {/* Les statuts suivent la forme juridique : même étape. Leur création est
@@ -806,7 +944,11 @@ export default function ProjectDetailPage() {
               projectId={id}
               confirmedLegalForm={project?.confirmed_legal_form ?? null}
               onFormConfirmed={(form) =>
-                setProject((courant) => (courant ? { ...courant, confirmed_legal_form: form } : courant))
+                setProject((courant) =>
+                  courant
+                    ? { ...courant, confirmed_legal_form: form }
+                    : courant,
+                )
               }
               onChanged={() => setVersionStatuts((v) => v + 1)}
             />
@@ -839,7 +981,7 @@ export default function ProjectDetailPage() {
         </>
       )}
 
-      {montrer('construction') && etapeOuverte === 'construction' && (
+      {montrer("construction") && etapeOuverte === "construction" && (
         <GenerationSection
           anchorId="section-construction"
           guideCible="construction"
@@ -852,7 +994,7 @@ export default function ProjectDetailPage() {
           error={plan.error}
           onGenerate={plan.generate}
           renderItem={(item) => <BuildPlanCard plan={item} key={item.id} />}
-          readOnly={!peut('lancer_ia')}
+          readOnly={!peut("lancer_ia")}
           iginiStatus={iginiStatus}
         />
       )}
@@ -860,7 +1002,7 @@ export default function ProjectDetailPage() {
       {/* Deux sections portaient le même nom : celle-ci, où IGINI rédige un plan,
           et celle du bas, où figure l'argent réellement reçu. En faisant défiler,
           on ne pouvait pas les distinguer. */}
-      {montrer('financement') && etapeOuverte === 'financement' && (
+      {montrer("financement") && etapeOuverte === "financement" && (
         <GenerationSection
           title="Plan de financement"
           buttonLabel="Générer un plan de financement"
@@ -871,16 +1013,20 @@ export default function ProjectDetailPage() {
           error={financing.error}
           onGenerate={financing.generate}
           renderItem={(item) => <FinancingPlanCard plan={item} key={item.id} />}
-          readOnly={!peut('lancer_ia')}
+          readOnly={!peut("lancer_ia")}
           iginiStatus={iginiStatus}
         />
       )}
       {/* Le jugement (« est-ce finançable ? »), séparé du plan ci-dessus qui dit comment financer. */}
-      {montrer('financement') && etapeOuverte === 'financement' && (
-        <EvaluationSection token={token} projectId={id} readOnly={!peut('demander_evaluation')} />
+      {montrer("financement") && etapeOuverte === "financement" && (
+        <EvaluationSection
+          token={token}
+          projectId={id}
+          readOnly={!peut("demander_evaluation")}
+        />
       )}
 
-      {montrer('developpement') && etapeOuverte === 'developpement' && (
+      {montrer("developpement") && etapeOuverte === "developpement" && (
         <GenerationSection
           guideCible="developpement"
           title="Développement"
@@ -891,13 +1037,15 @@ export default function ProjectDetailPage() {
           isBusy={development.isBusy}
           error={development.error}
           onGenerate={development.generate}
-          renderItem={(item) => <DevelopmentPlanCard plan={item} key={item.id} />}
-          readOnly={!peut('lancer_ia')}
+          renderItem={(item) => (
+            <DevelopmentPlanCard plan={item} key={item.id} />
+          )}
+          readOnly={!peut("lancer_ia")}
           iginiStatus={iginiStatus}
         />
       )}
 
-      {montrer('transmission') && etapeOuverte === 'transmission' && (
+      {montrer("transmission") && etapeOuverte === "transmission" && (
         <GenerationSection
           guideCible="transmission"
           title="Transmission"
@@ -908,8 +1056,10 @@ export default function ProjectDetailPage() {
           isBusy={transmission.isBusy}
           error={transmission.error}
           onGenerate={transmission.generate}
-          renderItem={(item) => <TransmissionPlanCard plan={item} key={item.id} />}
-          readOnly={!peut('lancer_ia')}
+          renderItem={(item) => (
+            <TransmissionPlanCard plan={item} key={item.id} />
+          )}
+          readOnly={!peut("lancer_ia")}
           iginiStatus={iginiStatus}
         />
       )}
@@ -920,11 +1070,18 @@ export default function ProjectDetailPage() {
           déclenchement manuel de l'automatisation restent réservés au
           propriétaire, y compris pour l'icône elle-même. */}
       {OUTILS_PROJET.some(outilVisible) && (
-        <div className="card" style={{ marginTop: '1.5rem' }}>
+        <div className="card" style={{ marginTop: "1.5rem" }}>
           <h2 style={{ marginTop: 0 }}>Les outils</h2>
           <ul
             className="etapes-grille"
-            style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', listStyle: 'none', margin: 0, padding: 0 }}
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "1rem",
+              listStyle: "none",
+              margin: 0,
+              padding: 0,
+            }}
           >
             {OUTILS_PROJET.filter(outilVisible).map((outil) => {
               const active = etapeOuverte === outil.id;
@@ -934,9 +1091,17 @@ export default function ProjectDetailPage() {
                     type="button"
                     className="icone"
                     aria-pressed={active}
-                    onClick={() => setEtapeOuverte((courante) => (courante === outil.id ? null : outil.id))}
+                    onClick={() =>
+                      setEtapeOuverte((courante) =>
+                        courante === outil.id ? null : outil.id,
+                      )
+                    }
                   >
-                    <span className="icone__glyphe" data-categorie="gerer" aria-hidden="true">
+                    <span
+                      className="icone__glyphe"
+                      data-categorie="gerer"
+                      aria-hidden="true"
+                    >
                       <Icone id={outil.id} />
                     </span>
                     <span className="icone__nom">{outil.label}</span>
@@ -948,12 +1113,21 @@ export default function ProjectDetailPage() {
         </div>
       )}
 
-      {project && peut('modifier_projet') && etapeOuverte === 'infos' && (
-        <form className="card" onSubmit={handleSave} style={{ marginTop: '1.5rem' }}>
+      {project && peut("modifier_projet") && etapeOuverte === "infos" && (
+        <form
+          className="card"
+          onSubmit={handleSave}
+          style={{ marginTop: "1.5rem" }}
+        >
           {formError && <p className="error">{formError}</p>}
           <div className="field">
             <label htmlFor="title">Titre</label>
-            <input id="title" required value={title} onChange={(e) => setTitle(e.target.value)} />
+            <input
+              id="title"
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
           </div>
           <div className="field">
             <label htmlFor="description">Description</label>
@@ -964,13 +1138,18 @@ export default function ProjectDetailPage() {
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
             <button className="primary" type="submit" disabled={isSaving}>
-              {isSaving ? 'Sauvegarde…' : 'Sauvegarder'}
+              {isSaving ? "Sauvegarde…" : "Sauvegarder"}
             </button>
-            {peut('supprimer_projet') && (
-              <button className="secondary" type="button" onClick={handleDelete} disabled={isDeleting}>
-                {isDeleting ? 'Suppression…' : 'Supprimer le projet'}
+            {peut("supprimer_projet") && (
+              <button
+                className="secondary"
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Suppression…" : "Supprimer le projet"}
               </button>
             )}
             <button
@@ -980,34 +1159,45 @@ export default function ProjectDetailPage() {
               disabled={isTogglingVisibility}
             >
               {isTogglingVisibility
-                ? 'Mise à jour…'
+                ? "Mise à jour…"
                 : project.is_public
-                  ? 'Rendre privé'
-                  : 'Rendre public'}
+                  ? "Rendre privé"
+                  : "Rendre public"}
             </button>
           </div>
-          <p className="muted" style={{ marginTop: '0.75rem', marginBottom: 0 }}>
+          <p
+            className="muted"
+            style={{ marginTop: "0.75rem", marginBottom: 0 }}
+          >
             {project.is_public
-              ? 'Ce projet est visible dans la communauté.'
+              ? "Ce projet est visible dans la communauté."
               : "Ce projet n'est visible que par toi."}
           </p>
         </form>
       )}
 
-      {montrer('score') && etapeOuverte === 'score' && (
+      {montrer("score") && etapeOuverte === "score" && (
         <>
-          <ScoreSection token={token} projectId={id} refreshSignal={refreshSignal} />
-          <ScoreHistorySection token={token} projectId={id} refreshSignal={refreshSignal} />
+          <ScoreSection
+            token={token}
+            projectId={id}
+            refreshSignal={refreshSignal}
+          />
+          <ScoreHistorySection
+            token={token}
+            projectId={id}
+            refreshSignal={refreshSignal}
+          />
         </>
       )}
       {/* Nommée pour que le raccourci de la tuile « Tâches » puisse amener
           ici — voir `allerAuxTaches` plus haut. */}
-      {montrer('taches') && etapeOuverte === 'taches' && (
+      {montrer("taches") && etapeOuverte === "taches" && (
         <div id="taches">
           <TasksSection
             token={token}
             projectId={id}
-            readOnly={!peut('modifier_taches')}
+            readOnly={!peut("modifier_taches")}
             refreshSignal={refreshSignal}
             /* Même signal que les générateurs : une tâche cochée à la main
                doit rafraîchir le score et le parcours exactement comme une
@@ -1017,42 +1207,78 @@ export default function ProjectDetailPage() {
           />
         </div>
       )}
-      {montrer('memoire') && etapeOuverte === 'memoire' && (
-        <MemorySection token={token} projectId={id} readOnly={!peut('modifier_conformite_memoire')} />
+      {montrer("memoire") && etapeOuverte === "memoire" && (
+        <MemorySection
+          token={token}
+          projectId={id}
+          readOnly={!peut("modifier_conformite_memoire")}
+        />
       )}
-      {montrer('connaissances') && etapeOuverte === 'connaissances' && (
+      {montrer("connaissances") && etapeOuverte === "connaissances" && (
         <KnowledgeSection
           token={token}
           projectId={id}
-          readOnly={!peut('modifier_conformite_memoire')}
+          readOnly={!peut("modifier_conformite_memoire")}
           refreshSignal={refreshSignal}
           onChanged={onGenerated}
         />
       )}
       {/* MANDAT — une autorisation que le porteur donne, pas un résultat de générateur IGINI. Propriétaire seulement (assertOwnsProject côté serveur). */}
       {isOwner && <MandatSection token={token} projectId={id} />}
-      {montrer('conformite') && etapeOuverte === 'conformite' && (
+      {montrer("conformite") && etapeOuverte === "conformite" && (
         <div data-guide-cible="conformite">
-          <ComplianceSection token={token} projectId={id} readOnly={!peut('modifier_conformite_memoire')} />
+          <ComplianceSection
+            token={token}
+            projectId={id}
+            readOnly={!peut("modifier_conformite_memoire")}
+          />
         </div>
       )}
-      {montrer('automatisation') && etapeOuverte === 'automatisation' && (
-        <AutomationSection token={token} projectId={id} readOnly={!peut('lancer_ia')} refreshSignal={refreshSignal} />
+      {montrer("automatisation") && etapeOuverte === "automatisation" && (
+        <AutomationSection
+          token={token}
+          projectId={id}
+          readOnly={!peut("lancer_ia")}
+          refreshSignal={refreshSignal}
+        />
       )}
-      {montrer('processus') && etapeOuverte === 'processus' && (
-        <WorkflowSection token={token} projectId={id} readOnly={!peut('modifier_taches')} refreshSignal={refreshSignal} />
+      {montrer("processus") && etapeOuverte === "processus" && (
+        <WorkflowSection
+          token={token}
+          projectId={id}
+          readOnly={!peut("modifier_taches")}
+          refreshSignal={refreshSignal}
+        />
       )}
-      {montrer('financement') && peut('voir_financement') && etapeOuverte === 'financement-recu' && (
-        <FinancingSection token={token} projectId={id} readOnly={!peut('modifier_financement')} />
+      {montrer("financement") &&
+        peut("voir_financement") &&
+        etapeOuverte === "financement-recu" && (
+          <FinancingSection
+            token={token}
+            projectId={id}
+            readOnly={!peut("modifier_financement")}
+          />
+        )}
+      {montrer("capital") && etapeOuverte === "capital" && (
+        <ParticipationSection
+          token={token}
+          projectId={id}
+          readOnly={!peut("modifier_financement")}
+        />
       )}
-      {montrer('capital') && etapeOuverte === 'capital' && (
-        <ParticipationSection token={token} projectId={id} readOnly={!peut('modifier_financement')} />
+      {montrer("capital") && etapeOuverte === "capital" && (
+        <BuybackSection
+          token={token}
+          projectId={id}
+          readOnly={!peut("modifier_financement")}
+        />
       )}
-      {montrer('capital') && etapeOuverte === 'capital' && (
-        <BuybackSection token={token} projectId={id} readOnly={!peut('modifier_financement')} />
-      )}
-      {montrer('collaborateurs') && etapeOuverte === 'collaborateurs' && (
-        <CollaboratorsSection token={token} projectId={id} peutGerer={peut('gerer_equipe')} />
+      {montrer("collaborateurs") && etapeOuverte === "collaborateurs" && (
+        <CollaboratorsSection
+          token={token}
+          projectId={id}
+          peutGerer={peut("gerer_equipe")}
+        />
       )}
 
       {vueAvancee && parcours && <SectionsFermees parcours={parcours} />}
@@ -1112,9 +1338,12 @@ function GenerationSection<T>({
       // Sans ancre explicite, « Y aller » mène quand même à la section quand
       // son bouton manque (générateurs éteints).
       id={anchorId ?? (guideCible ? `section-${guideCible}` : undefined)}
-      style={{ marginTop: '1.5rem' }}
+      style={{ marginTop: "1.5rem" }}
     >
-      <div className="top-bar" style={{ marginBottom: items.length ? '1rem' : 0 }}>
+      <div
+        className="top-bar"
+        style={{ marginBottom: items.length ? "1rem" : 0 }}
+      >
         <h2 style={{ margin: 0 }}>{title}</h2>
         {!readOnly && !generatorsOff && (
           <button
@@ -1127,17 +1356,19 @@ function GenerationSection<T>({
             {isBusy ? buttonBusyLabel : buttonLabel}
           </button>
         )}
-        {!readOnly && generatorsOff && <span className="pill">IA indisponible</span>}
+        {!readOnly && generatorsOff && (
+          <span className="pill">IA indisponible</span>
+        )}
       </div>
 
       {/* Un encart neutre, pas un message d'erreur rouge : rien n'est
           cassé et rien n'a échoué — la fonctionnalité est éteinte. */}
       {generatorsOff && (
-        <p className="notice" style={{ marginTop: items.length ? 0 : '1rem' }}>
+        <p className="notice" style={{ marginTop: items.length ? 0 : "1rem" }}>
           <span>
             {iginiStatus?.unavailableReason ??
               "Fonctionnalité IA non disponible pour ce test. Rien n'est cassé : les " +
-                'générateurs sont volontairement éteints.'}
+                "générateurs sont volontairement éteints."}
           </span>
         </p>
       )}
@@ -1146,8 +1377,10 @@ function GenerationSection<T>({
       {/* Pendant la génération : ce qui est en cours, plutôt que rien. Un
           écran muet pendant une minute fait croire à une panne. */}
       {isBusy && busyContent}
-      {items.length === 0 && !isBusy && !generatorsOff && <p className="muted">{emptyLabel}</p>}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {items.length === 0 && !isBusy && !generatorsOff && (
+        <p className="muted">{emptyLabel}</p>
+      )}
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         {items.map(renderItem)}
       </div>
     </div>
@@ -1176,24 +1409,26 @@ function ProvenanceBadge({
   generatedBy?: string;
   generatedModel?: string | null;
 }) {
-  if (generatedBy === 'human') {
+  if (generatedBy === "human") {
     return <span className="muted">Saisi par un humain</span>;
   }
   return (
-    <span className="muted" title={generatedModel ?? 'Modèle non tracé'}>
-      Généré par IGINI{generatedModel ? '' : ' (modèle non tracé)'}
+    <span className="muted" title={generatedModel ?? "Modèle non tracé"}>
+      Généré par IGINI{generatedModel ? "" : " (modèle non tracé)"}
     </span>
   );
 }
 
 function AnalysisCard({ analysis }: { analysis: Analysis }) {
   return (
-    <div className="project-item" style={{ cursor: 'default' }}>
-      <div className="top-bar" style={{ marginBottom: '0.5rem' }}>
+    <div className="project-item" style={{ cursor: "default" }}>
+      <div className="top-bar" style={{ marginBottom: "0.5rem" }}>
         <strong>Score de faisabilité : {analysis.feasibility_score}/10</strong>
-        <span className="muted">{new Date(analysis.created_at).toLocaleString('fr-FR')}</span>
+        <span className="muted">
+          {new Date(analysis.created_at).toLocaleString("fr-FR")}
+        </span>
       </div>
-      <p style={{ margin: '0 0 0.5rem' }}>
+      <p style={{ margin: "0 0 0.5rem" }}>
         <ProvenanceBadge
           generatedBy={analysis.generated_by}
           generatedModel={analysis.generated_model}
@@ -1209,13 +1444,18 @@ function AnalysisCard({ analysis }: { analysis: Analysis }) {
 
 function BuildPlanCard({ plan }: { plan: BuildPlan }) {
   return (
-    <div className="project-item" style={{ cursor: 'default' }}>
-      <div className="top-bar" style={{ marginBottom: '0.5rem' }}>
+    <div className="project-item" style={{ cursor: "default" }}>
+      <div className="top-bar" style={{ marginBottom: "0.5rem" }}>
         <strong>Délai estimé : {plan.estimated_timeline}</strong>
-        <span className="muted">{new Date(plan.created_at).toLocaleString('fr-FR')}</span>
+        <span className="muted">
+          {new Date(plan.created_at).toLocaleString("fr-FR")}
+        </span>
       </div>
-      <p style={{ margin: '0 0 0.5rem' }}>
-        <ProvenanceBadge generatedBy={plan.generated_by} generatedModel={plan.generated_model} />
+      <p style={{ margin: "0 0 0.5rem" }}>
+        <ProvenanceBadge
+          generatedBy={plan.generated_by}
+          generatedModel={plan.generated_model}
+        />
       </p>
       <p>{plan.summary}</p>
       <ItemList title="Jalons" items={plan.milestones} />
@@ -1226,13 +1466,18 @@ function BuildPlanCard({ plan }: { plan: BuildPlan }) {
 
 function FinancingPlanCard({ plan }: { plan: FinancingPlan }) {
   return (
-    <div className="project-item" style={{ cursor: 'default' }}>
-      <div className="top-bar" style={{ marginBottom: '0.5rem' }}>
+    <div className="project-item" style={{ cursor: "default" }}>
+      <div className="top-bar" style={{ marginBottom: "0.5rem" }}>
         <strong>Budget estimé : {plan.estimated_budget}</strong>
-        <span className="muted">{new Date(plan.created_at).toLocaleString('fr-FR')}</span>
+        <span className="muted">
+          {new Date(plan.created_at).toLocaleString("fr-FR")}
+        </span>
       </div>
-      <p style={{ margin: '0 0 0.5rem' }}>
-        <ProvenanceBadge generatedBy={plan.generated_by} generatedModel={plan.generated_model} />
+      <p style={{ margin: "0 0 0.5rem" }}>
+        <ProvenanceBadge
+          generatedBy={plan.generated_by}
+          generatedModel={plan.generated_model}
+        />
       </p>
       <p>{plan.summary}</p>
       <ItemList title="Sources de financement" items={plan.funding_sources} />
@@ -1243,36 +1488,52 @@ function FinancingPlanCard({ plan }: { plan: FinancingPlan }) {
 
 function DevelopmentPlanCard({ plan }: { plan: DevelopmentPlan }) {
   return (
-    <div className="project-item" style={{ cursor: 'default' }}>
-      <div className="top-bar" style={{ marginBottom: '0.5rem' }}>
+    <div className="project-item" style={{ cursor: "default" }}>
+      <div className="top-bar" style={{ marginBottom: "0.5rem" }}>
         <strong>Plan de croissance</strong>
-        <span className="muted">{new Date(plan.created_at).toLocaleString('fr-FR')}</span>
+        <span className="muted">
+          {new Date(plan.created_at).toLocaleString("fr-FR")}
+        </span>
       </div>
-      <p style={{ margin: '0 0 0.5rem' }}>
-        <ProvenanceBadge generatedBy={plan.generated_by} generatedModel={plan.generated_model} />
+      <p style={{ margin: "0 0 0.5rem" }}>
+        <ProvenanceBadge
+          generatedBy={plan.generated_by}
+          generatedModel={plan.generated_model}
+        />
       </p>
       <p>{plan.summary}</p>
       <ItemList title="Leviers de croissance" items={plan.growth_levers} />
       <ItemList title="Indicateurs clés" items={plan.key_metrics} />
-      <ItemList title="Risques de passage à l'échelle" items={plan.scaling_risks} />
+      <ItemList
+        title="Risques de passage à l'échelle"
+        items={plan.scaling_risks}
+      />
     </div>
   );
 }
 
 function TransmissionPlanCard({ plan }: { plan: TransmissionPlan }) {
   return (
-    <div className="project-item" style={{ cursor: 'default' }}>
-      <div className="top-bar" style={{ marginBottom: '0.5rem' }}>
+    <div className="project-item" style={{ cursor: "default" }}>
+      <div className="top-bar" style={{ marginBottom: "0.5rem" }}>
         <strong>Plan de transmission</strong>
-        <span className="muted">{new Date(plan.created_at).toLocaleString('fr-FR')}</span>
+        <span className="muted">
+          {new Date(plan.created_at).toLocaleString("fr-FR")}
+        </span>
       </div>
-      <p style={{ margin: '0 0 0.5rem' }}>
-        <ProvenanceBadge generatedBy={plan.generated_by} generatedModel={plan.generated_model} />
+      <p style={{ margin: "0 0 0.5rem" }}>
+        <ProvenanceBadge
+          generatedBy={plan.generated_by}
+          generatedModel={plan.generated_model}
+        />
       </p>
       <p>{plan.summary}</p>
       <ItemList title="Options de transmission" items={plan.transfer_options} />
       <ItemList title="À documenter" items={plan.key_documentation} />
-      <ItemList title="Check-list de préparation" items={plan.readiness_checklist} />
+      <ItemList
+        title="Check-list de préparation"
+        items={plan.readiness_checklist}
+      />
     </div>
   );
 }
@@ -1280,9 +1541,9 @@ function TransmissionPlanCard({ plan }: { plan: TransmissionPlan }) {
 function ItemList({ title, items }: { title: string; items: string[] }) {
   if (items.length === 0) return null;
   return (
-    <div style={{ marginTop: '0.5rem' }}>
+    <div style={{ marginTop: "0.5rem" }}>
       <strong>{title}</strong>
-      <ul style={{ margin: '0.25rem 0 0', paddingLeft: '1.25rem' }}>
+      <ul style={{ margin: "0.25rem 0 0", paddingLeft: "1.25rem" }}>
         {items.map((item, index) => (
           <li key={index}>{item}</li>
         ))}
