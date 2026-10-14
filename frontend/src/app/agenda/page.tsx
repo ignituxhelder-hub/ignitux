@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
+import { IconesPanneaux } from '@/components/icones-panneaux';
 import { api, ApiError, type AgendaItem, type CrmContact } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
@@ -147,128 +148,149 @@ export default function AgendaPage() {
 
       {error && <p className="error">{error}</p>}
 
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Ajouter un rendez-vous</h2>
-        <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <input
-            aria-label="Titre du rendez-vous"
-            placeholder="Titre"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <input
-            aria-label="Date et heure du rendez-vous"
-            type="datetime-local"
-            value={occurredAt}
-            onChange={(e) => setOccurredAt(e.target.value)}
-          />
-          <input
-            aria-label="Lieu"
-            placeholder="Lieu (facultatif)"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-          <select
-            aria-label="Contact lié"
-            value={contactId}
-            onChange={(e) => setContactId(e.target.value)}
-          >
-            <option value="">Aucun contact</option>
-            {contacts.map((contact) => (
-              <option key={contact.id} value={contact.id}>
-                {contact.first_name} {contact.last_name}
-              </option>
-            ))}
-          </select>
-          <input
-            aria-label="Note"
-            placeholder="Note (facultatif)"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            style={{ flex: '1 1 200px' }}
-          />
-          <button className="secondary" type="submit" disabled={isSaving}>
-            {isSaving ? 'Ajout…' : 'Ajouter'}
-          </button>
-        </form>
-      </div>
+      <IconesPanneaux
+        titre="À venir"
+        ouvertParDefaut="liste"
+        panneaux={[
+          {
+            id: 'liste',
+            nom: 'À venir',
+            glyphe: 'agenda',
+            categorie: 'creer',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>À venir</h2>
 
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>À venir</h2>
+          {isLoading && <p className="loading">Chargement…</p>}
+          {!isLoading && items.length === 0 && (
+            <p className="muted">Aucun rendez-vous ni échéance pour l&apos;instant.</p>
+          )}
 
-        {isLoading && <p className="loading">Chargement…</p>}
-        {!isLoading && items.length === 0 && (
-          <p className="muted">Aucun rendez-vous ni échéance pour l&apos;instant.</p>
-        )}
-
-        <ul aria-label="Agenda" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {items.map((item) => (
-            <li key={`${item.type}-${item.id}`} className="project-item" style={{ marginBottom: '0.5rem' }}>
-              {item.type === 'evenement' && editingId === item.id ? (
-                <form
-                  onSubmit={(e) => void handleUpdate(item.id, e)}
-                  style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
-                >
-                  <input
-                    aria-label={`Titre de ${item.title}`}
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                  />
-                  <input
-                    aria-label={`Date de ${item.title}`}
-                    type="datetime-local"
-                    value={editOccurredAt}
-                    onChange={(e) => setEditOccurredAt(e.target.value)}
-                  />
-                  <input
-                    aria-label={`Lieu de ${item.title}`}
-                    placeholder="Lieu (facultatif)"
-                    value={editLocation}
-                    onChange={(e) => setEditLocation(e.target.value)}
-                  />
-                  <button className="secondary" type="submit">
-                    Enregistrer
-                  </button>
-                  <button className="secondary" type="button" onClick={() => setEditingId(null)}>
-                    Annuler
-                  </button>
-                </form>
-              ) : (
-                <div className="top-bar">
-                  <span>
-                    <span className="muted">{formatDate(item.date)}</span>{' '}
-                    {item.type === 'echeance' && (
-                      <span style={{ color: 'var(--danger)' }}>— échéance —</span>
-                    )}{' '}
-                    <strong>{item.title}</strong>
-                    {item.type === 'evenement' && item.location && (
-                      <span className="muted"> · {item.location}</span>
-                    )}
-                  </span>
-                  {item.type === 'evenement' && (
-                    <span style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button
-                        className="secondary"
-                        type="button"
-                        onClick={() => startEdit(item as AgendaItem & { type: 'evenement' })}
-                      >
-                        Modifier
-                      </button>
-                      <button
-                        className="secondary"
-                        type="button"
-                        onClick={() => void handleDelete(item as AgendaItem & { type: 'evenement' })}
-                      >
-                        Supprimer
-                      </button>
+          <ul aria-label="Agenda" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {items.map((item) => (
+              <li key={`${item.type}-${item.id}`} className="project-item" style={{ marginBottom: '0.5rem' }}>
+                {item.type === 'evenement' && editingId === item.id ? (
+                  <form
+                    onSubmit={(e) => void handleUpdate(item.id, e)}
+                    style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
+                  >
+                    <input
+                      aria-label={`Titre de ${item.title}`}
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                    />
+                    <input
+                      aria-label={`Date de ${item.title}`}
+                      type="datetime-local"
+                      value={editOccurredAt}
+                      onChange={(e) => setEditOccurredAt(e.target.value)}
+                    />
+                    <input
+                      aria-label={`Lieu de ${item.title}`}
+                      placeholder="Lieu (facultatif)"
+                      value={editLocation}
+                      onChange={(e) => setEditLocation(e.target.value)}
+                    />
+                    <button className="secondary" type="submit">
+                      Enregistrer
+                    </button>
+                    <button className="secondary" type="button" onClick={() => setEditingId(null)}>
+                      Annuler
+                    </button>
+                  </form>
+                ) : (
+                  <div className="top-bar">
+                    <span>
+                      <span className="muted">{formatDate(item.date)}</span>{' '}
+                      {item.type === 'echeance' && (
+                        <span style={{ color: 'var(--danger)' }}>— échéance —</span>
+                      )}{' '}
+                      <strong>{item.title}</strong>
+                      {item.type === 'evenement' && item.location && (
+                        <span className="muted"> · {item.location}</span>
+                      )}
                     </span>
-                  )}
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+                    {item.type === 'evenement' && (
+                      <span style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          className="secondary"
+                          type="button"
+                          onClick={() => startEdit(item as AgendaItem & { type: 'evenement' })}
+                        >
+                          Modifier
+                        </button>
+                        <button
+                          className="secondary"
+                          type="button"
+                          onClick={() => void handleDelete(item as AgendaItem & { type: 'evenement' })}
+                        >
+                          Supprimer
+                        </button>
+                      </span>
+                    )}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+            ),
+          },
+          {
+            id: 'ajouter',
+            nom: 'Nouveau rendez-vous',
+            glyphe: 'infos',
+            categorie: 'creer',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>Ajouter un rendez-vous</h2>
+          <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <input
+              aria-label="Titre du rendez-vous"
+              placeholder="Titre"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <input
+              aria-label="Date et heure du rendez-vous"
+              type="datetime-local"
+              value={occurredAt}
+              onChange={(e) => setOccurredAt(e.target.value)}
+            />
+            <input
+              aria-label="Lieu"
+              placeholder="Lieu (facultatif)"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+            <select
+              aria-label="Contact lié"
+              value={contactId}
+              onChange={(e) => setContactId(e.target.value)}
+            >
+              <option value="">Aucun contact</option>
+              {contacts.map((contact) => (
+                <option key={contact.id} value={contact.id}>
+                  {contact.first_name} {contact.last_name}
+                </option>
+              ))}
+            </select>
+            <input
+              aria-label="Note"
+              placeholder="Note (facultatif)"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              style={{ flex: '1 1 200px' }}
+            />
+            <button className="secondary" type="submit" disabled={isSaving}>
+              {isSaving ? 'Ajout…' : 'Ajouter'}
+            </button>
+          </form>
+        </div>
+            ),
+          },
+        ]}
+      />
     </main>
   );
 }

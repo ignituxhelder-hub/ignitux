@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
+import { IconesPanneaux } from '@/components/icones-panneaux';
 import { api, ApiError, type RealEstateMovement, type RealEstateProperty } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { centimesDepuisEuros, euros, jour } from '@/lib/montants';
@@ -157,88 +158,109 @@ export default function ImmobilierPage() {
 
       {error && <p className="error">{error}</p>}
 
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Ajouter un bien</h2>
-        <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <input
-            aria-label="Nom du bien"
-            placeholder="Nom du bien"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-          />
-          <input
-            aria-label="Adresse"
-            placeholder="Adresse (facultatif)"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            style={{ flex: '1 1 200px' }}
-          />
-          <button className="secondary" type="submit" disabled={isSaving}>
-            {isSaving ? 'Ajout…' : 'Ajouter'}
-          </button>
-        </form>
-      </div>
+      <IconesPanneaux
+        titre="Biens"
+        ouvertParDefaut="liste"
+        panneaux={[
+          {
+            id: 'liste',
+            nom: 'Biens',
+            glyphe: 'immobilier',
+            categorie: 'gerer',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>Biens</h2>
 
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Biens</h2>
+          {isLoading && <p className="loading">Chargement…</p>}
+          {!isLoading && properties.length === 0 && (
+            <p className="muted">Aucun bien enregistré pour l&apos;instant.</p>
+          )}
 
-        {isLoading && <p className="loading">Chargement…</p>}
-        {!isLoading && properties.length === 0 && (
-          <p className="muted">Aucun bien enregistré pour l&apos;instant.</p>
-        )}
-
-        <ul aria-label="Liste des biens" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {properties.map((property) => (
-            <li key={property.id} className="project-item" style={{ marginBottom: '0.5rem' }}>
-              {editingId === property.id ? (
-                <form
-                  onSubmit={(e) => void handleUpdate(property.id, e)}
-                  style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
-                >
-                  <input
-                    aria-label={`Nom de ${property.label}`}
-                    value={editLabel}
-                    onChange={(e) => setEditLabel(e.target.value)}
-                  />
-                  <input
-                    aria-label={`Adresse de ${property.label}`}
-                    placeholder="Adresse (facultatif)"
-                    value={editAddress}
-                    onChange={(e) => setEditAddress(e.target.value)}
-                  />
-                  <button className="secondary" type="submit">
-                    Enregistrer
-                  </button>
-                  <button className="secondary" type="button" onClick={() => setEditingId(null)}>
-                    Annuler
-                  </button>
-                </form>
-              ) : (
-                <div className="top-bar">
-                  <span>
-                    <strong>{property.label}</strong>{' '}
-                    <span className="muted">
-                      {property.address ? `${property.address} · ` : ''}
-                      {euros(property.balance_cents)}
+          <ul aria-label="Liste des biens" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {properties.map((property) => (
+              <li key={property.id} className="project-item" style={{ marginBottom: '0.5rem' }}>
+                {editingId === property.id ? (
+                  <form
+                    onSubmit={(e) => void handleUpdate(property.id, e)}
+                    style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
+                  >
+                    <input
+                      aria-label={`Nom de ${property.label}`}
+                      value={editLabel}
+                      onChange={(e) => setEditLabel(e.target.value)}
+                    />
+                    <input
+                      aria-label={`Adresse de ${property.label}`}
+                      placeholder="Adresse (facultatif)"
+                      value={editAddress}
+                      onChange={(e) => setEditAddress(e.target.value)}
+                    />
+                    <button className="secondary" type="submit">
+                      Enregistrer
+                    </button>
+                    <button className="secondary" type="button" onClick={() => setEditingId(null)}>
+                      Annuler
+                    </button>
+                  </form>
+                ) : (
+                  <div className="top-bar">
+                    <span>
+                      <strong>{property.label}</strong>{' '}
+                      <span className="muted">
+                        {property.address ? `${property.address} · ` : ''}
+                        {euros(property.balance_cents)}
+                      </span>
                     </span>
-                  </span>
-                  <span style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="secondary" type="button" onClick={() => void handleSelect(property)}>
-                      Historique
-                    </button>
-                    <button className="secondary" type="button" onClick={() => startEdit(property)}>
-                      Modifier
-                    </button>
-                    <button className="secondary" type="button" onClick={() => void handleDelete(property)}>
-                      Supprimer
-                    </button>
-                  </span>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+                    <span style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button className="secondary" type="button" onClick={() => void handleSelect(property)}>
+                        Historique
+                      </button>
+                      <button className="secondary" type="button" onClick={() => startEdit(property)}>
+                        Modifier
+                      </button>
+                      <button className="secondary" type="button" onClick={() => void handleDelete(property)}>
+                        Supprimer
+                      </button>
+                    </span>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+            ),
+          },
+          {
+            id: 'ajouter',
+            nom: 'Nouveau bien',
+            glyphe: 'infos',
+            categorie: 'creer',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>Ajouter un bien</h2>
+          <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <input
+              aria-label="Nom du bien"
+              placeholder="Nom du bien"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+            />
+            <input
+              aria-label="Adresse"
+              placeholder="Adresse (facultatif)"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              style={{ flex: '1 1 200px' }}
+            />
+            <button className="secondary" type="submit" disabled={isSaving}>
+              {isSaving ? 'Ajout…' : 'Ajouter'}
+            </button>
+          </form>
+        </div>
+            ),
+          },
+        ]}
+      />
 
       {selected && (
         <div className="card" style={{ marginTop: '1.5rem' }}>

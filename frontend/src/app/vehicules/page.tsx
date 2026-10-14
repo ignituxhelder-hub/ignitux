@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
+import { IconesPanneaux } from '@/components/icones-panneaux';
 import { api, ApiError, type FleetEntries, type FleetVehicle } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { centimesDepuisEuros, euros, jour } from '@/lib/montants';
@@ -161,84 +162,105 @@ export default function VehiculesPage() {
 
       {error && <p className="error">{error}</p>}
 
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Ajouter un véhicule</h2>
-        <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <input
-            aria-label="Nom du véhicule"
-            placeholder="Nom du véhicule"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-          />
-          <input
-            aria-label="Plaque"
-            placeholder="Plaque (facultatif)"
-            value={plate}
-            onChange={(e) => setPlate(e.target.value)}
-          />
-          <button className="secondary" type="submit" disabled={isSaving}>
-            {isSaving ? 'Ajout…' : 'Ajouter'}
-          </button>
-        </form>
-      </div>
+      <IconesPanneaux
+        titre="Flotte"
+        ouvertParDefaut="liste"
+        panneaux={[
+          {
+            id: 'liste',
+            nom: 'Flotte',
+            glyphe: 'vehicules',
+            categorie: 'gerer',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>Flotte</h2>
 
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Flotte</h2>
+          {isLoading && <p className="loading">Chargement…</p>}
+          {!isLoading && vehicles.length === 0 && (
+            <p className="muted">Aucun véhicule enregistré pour l&apos;instant.</p>
+          )}
 
-        {isLoading && <p className="loading">Chargement…</p>}
-        {!isLoading && vehicles.length === 0 && (
-          <p className="muted">Aucun véhicule enregistré pour l&apos;instant.</p>
-        )}
-
-        <ul aria-label="Liste des véhicules" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {vehicles.map((vehicle) => (
-            <li key={vehicle.id} className="project-item" style={{ marginBottom: '0.5rem' }}>
-              {editingId === vehicle.id ? (
-                <form
-                  onSubmit={(e) => void handleUpdate(vehicle.id, e)}
-                  style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
-                >
-                  <input
-                    aria-label={`Nom de ${vehicle.label}`}
-                    value={editLabel}
-                    onChange={(e) => setEditLabel(e.target.value)}
-                  />
-                  <input
-                    aria-label={`Plaque de ${vehicle.label}`}
-                    placeholder="Plaque (facultatif)"
-                    value={editPlate}
-                    onChange={(e) => setEditPlate(e.target.value)}
-                  />
-                  <button className="secondary" type="submit">
-                    Enregistrer
-                  </button>
-                  <button className="secondary" type="button" onClick={() => setEditingId(null)}>
-                    Annuler
-                  </button>
-                </form>
-              ) : (
-                <div className="top-bar">
-                  <span>
-                    <strong>{vehicle.label}</strong>{' '}
-                    {vehicle.plate && <span className="muted">{vehicle.plate}</span>}
-                  </span>
-                  <span style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="secondary" type="button" onClick={() => void handleSelect(vehicle)}>
-                      Entretien
+          <ul aria-label="Liste des véhicules" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {vehicles.map((vehicle) => (
+              <li key={vehicle.id} className="project-item" style={{ marginBottom: '0.5rem' }}>
+                {editingId === vehicle.id ? (
+                  <form
+                    onSubmit={(e) => void handleUpdate(vehicle.id, e)}
+                    style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
+                  >
+                    <input
+                      aria-label={`Nom de ${vehicle.label}`}
+                      value={editLabel}
+                      onChange={(e) => setEditLabel(e.target.value)}
+                    />
+                    <input
+                      aria-label={`Plaque de ${vehicle.label}`}
+                      placeholder="Plaque (facultatif)"
+                      value={editPlate}
+                      onChange={(e) => setEditPlate(e.target.value)}
+                    />
+                    <button className="secondary" type="submit">
+                      Enregistrer
                     </button>
-                    <button className="secondary" type="button" onClick={() => startEdit(vehicle)}>
-                      Modifier
+                    <button className="secondary" type="button" onClick={() => setEditingId(null)}>
+                      Annuler
                     </button>
-                    <button className="secondary" type="button" onClick={() => void handleDelete(vehicle)}>
-                      Supprimer
-                    </button>
-                  </span>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+                  </form>
+                ) : (
+                  <div className="top-bar">
+                    <span>
+                      <strong>{vehicle.label}</strong>{' '}
+                      {vehicle.plate && <span className="muted">{vehicle.plate}</span>}
+                    </span>
+                    <span style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button className="secondary" type="button" onClick={() => void handleSelect(vehicle)}>
+                        Entretien
+                      </button>
+                      <button className="secondary" type="button" onClick={() => startEdit(vehicle)}>
+                        Modifier
+                      </button>
+                      <button className="secondary" type="button" onClick={() => void handleDelete(vehicle)}>
+                        Supprimer
+                      </button>
+                    </span>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+            ),
+          },
+          {
+            id: 'ajouter',
+            nom: 'Nouveau véhicule',
+            glyphe: 'infos',
+            categorie: 'creer',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>Ajouter un véhicule</h2>
+          <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <input
+              aria-label="Nom du véhicule"
+              placeholder="Nom du véhicule"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+            />
+            <input
+              aria-label="Plaque"
+              placeholder="Plaque (facultatif)"
+              value={plate}
+              onChange={(e) => setPlate(e.target.value)}
+            />
+            <button className="secondary" type="submit" disabled={isSaving}>
+              {isSaving ? 'Ajout…' : 'Ajouter'}
+            </button>
+          </form>
+        </div>
+            ),
+          },
+        ]}
+      />
 
       {selected && (
         <div className="card" style={{ marginTop: '1.5rem' }}>

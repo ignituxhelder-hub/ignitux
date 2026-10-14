@@ -108,12 +108,15 @@ describe('AgendaPage', () => {
     );
 
     await screen.findByText("Aucun rendez-vous ni échéance pour l'instant.");
+    fireEvent.click(screen.getByRole('button', { name: 'Nouveau rendez-vous' }));
     routeMap['GET /agenda'] = { status: 200, body: [EVENEMENT] };
 
     fireEvent.change(screen.getByLabelText('Titre du rendez-vous'), {
       target: { value: 'Rendez-vous Ada' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Ajouter' }));
+    // La liste est derrière son icône : on va la lire.
+    fireEvent.click(screen.getByRole('button', { name: 'À venir' }));
 
     const list = await screen.findByRole('list', { name: 'Agenda' });
     await waitFor(() => expect(within(list).getAllByRole('listitem')).toHaveLength(1));

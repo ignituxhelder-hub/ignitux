@@ -63,10 +63,13 @@ describe('VehiculesPage', () => {
     );
 
     await screen.findByText("Aucun véhicule enregistré pour l'instant.");
+    fireEvent.click(screen.getByRole('button', { name: 'Nouveau véhicule' }));
     routeMap['GET /vehicules'] = { status: 200, body: [VEHICLE] };
 
     fireEvent.change(screen.getByLabelText('Nom du véhicule'), { target: { value: 'Fourgon' } });
     fireEvent.click(screen.getByRole('button', { name: 'Ajouter' }));
+    // La liste est derrière son icône : on va la lire.
+    fireEvent.click(screen.getByRole('button', { name: 'Flotte' }));
 
     const list = await screen.findByRole('list', { name: 'Liste des véhicules' });
     await waitFor(() => expect(within(list).getAllByRole('listitem')).toHaveLength(1));

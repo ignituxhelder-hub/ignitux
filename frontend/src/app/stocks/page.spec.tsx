@@ -91,12 +91,15 @@ describe('StocksPage', () => {
     );
 
     await screen.findByText("Aucun article en stock pour l'instant.");
+    fireEvent.click(screen.getByRole('button', { name: 'Nouvel article' }));
     routeMap['GET /stocks'] = { status: 200, body: [ITEM] };
 
     fireEvent.change(screen.getByLabelText("Nom de l'article"), {
       target: { value: 'Farine' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Ajouter' }));
+    // La liste est derrière son icône : on va la lire.
+    fireEvent.click(screen.getByRole('button', { name: 'Articles' }));
 
     const list = await screen.findByRole('list', { name: 'Liste des articles' });
     await waitFor(() => expect(within(list).getAllByRole('listitem')).toHaveLength(1));

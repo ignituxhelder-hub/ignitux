@@ -65,10 +65,13 @@ describe('ImmobilierPage', () => {
     );
 
     await screen.findByText("Aucun bien enregistré pour l'instant.");
+    fireEvent.click(screen.getByRole('button', { name: 'Nouveau bien' }));
     routeMap['GET /immobilier'] = { status: 200, body: [PROPERTY] };
 
     fireEvent.change(screen.getByLabelText('Nom du bien'), { target: { value: 'Studio centre-ville' } });
     fireEvent.click(screen.getByRole('button', { name: 'Ajouter' }));
+    // La liste est derrière son icône : on va la lire.
+    fireEvent.click(screen.getByRole('button', { name: 'Biens' }));
 
     const list = await screen.findByRole('list', { name: 'Liste des biens' });
     await waitFor(() => expect(within(list).getAllByRole('listitem')).toHaveLength(1));

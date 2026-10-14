@@ -63,10 +63,13 @@ describe('PublicitePage', () => {
     );
 
     await screen.findByText("Aucune campagne enregistrée pour l'instant.");
+    fireEvent.click(screen.getByRole('button', { name: 'Nouvelle campagne' }));
     routeMap['GET /publicite'] = { status: 200, body: [CAMPAIGN] };
 
     fireEvent.change(screen.getByLabelText('Nom de la campagne'), { target: { value: 'Soldes' } });
     fireEvent.click(screen.getByRole('button', { name: 'Ajouter' }));
+    // La liste est derrière son icône : on va la lire.
+    fireEvent.click(screen.getByRole('button', { name: 'Campagnes' }));
 
     const list = await screen.findByRole('list', { name: 'Liste des campagnes' });
     await waitFor(() => expect(within(list).getAllByRole('listitem')).toHaveLength(1));
