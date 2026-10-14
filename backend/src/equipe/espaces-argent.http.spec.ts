@@ -154,7 +154,7 @@ function fauxPrisma(collaborateurs: Collaborateur[], donnees: { lignes: Record<s
             const owner_id = PROJETS.find((p) => p.id === c.project_id)!.owner_id;
             return {
               role: c.role,
-              project: { owner_id, owner: { email: `${owner_id.slice(0, 4)}@exemple.fr`, profile: null } },
+              project: { owner_id, title: 'Projet du proprio', owner: { profile: null } },
             };
           }),
       ),
@@ -400,7 +400,7 @@ describe('Espace argent sur les vrais contrôleurs — application entière, san
       expect(res.status).toBe(200);
       expect(res.body).toEqual([
         { ownerId: MOI, nom: 'Mon espace', roles: ['proprietaire'] },
-        { ownerId: PROPRIO, nom: 'Espace de 2222@exemple.fr', roles: ['comptable'] },
+        { ownerId: PROPRIO, nom: 'Espace de l’entreprise Projet du proprio', roles: ['comptable'] },
       ]);
     });
 

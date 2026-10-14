@@ -38,8 +38,16 @@ export function espaceEtranger(userId: string, enTete: string | string[] | undef
   return valeur;
 }
 
-function nomAffiche(compte: { email: string; profile?: { display_name: string | null } | null }): string {
-  return compte.profile?.display_name?.trim() || compte.email;
+/**
+ * Le nom d'un espace : le nom affiché du propriétaire, sinon le titre du
+ * premier projet partagé avec moi. JAMAIS son e-mail — un comptable n'a pas
+ * à recevoir l'adresse personnelle du propriétaire par la liste des espaces.
+ */
+function nomEspace(projet: { title: string | null; owner: { profile?: { display_name: string | null } | null } }): string {
+  const nom = projet.owner.profile?.display_name?.trim();
+  if (nom) return `Espace de ${nom}`;
+  const titre = projet.title?.trim();
+  return titre ? `Espace de l’entreprise ${titre}` : 'Espace de l’entreprise';
 }
 
 /**
@@ -97,7 +105,8 @@ export class EspaceService {
         project: {
           select: {
             owner_id: true,
-            owner: { select: { email: true, profile: { select: { display_name: true } } } },
+            title: true,
+            owner: { select: { profile: { select: { display_name: true } } } },
           },
         },
       },
@@ -109,7 +118,9 @@ export class EspaceService {
       // Jamais « l'espace d'un autre » qui serait le mien.
       if (ownerId === userId || !estRoleArgent(lien.role)) continue;
       const espace = parProprietaire.get(ownerId) ?? {
-        nom: `Espace de ${nomAffiche(lien.project.owner)}`,
+        // Le premier lien (le plus ancien) donne le nom : il ne change pas
+        // d'une lecture à l'autre.
+        nom: nomEspace(lien.project),
         roles: new Set<RoleArgent>(),
       };
       espace.roles.add(lien.role);

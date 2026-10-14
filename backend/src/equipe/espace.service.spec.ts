@@ -82,9 +82,15 @@ describe('EspaceService.resoudre — l’espace argent par les rôles de projet'
 });
 
 describe('EspaceService.mesEspaces', () => {
-  const lien = (role: string, owner_id: string, email: string, display_name: string | null = null) => ({
+  const lien = (
+    role: string,
+    owner_id: string,
+    email: string,
+    display_name: string | null = null,
+    title = 'Boulangerie Dupont',
+  ) => ({
     role,
-    project: { owner_id, owner: { email, profile: display_name === null ? null : { display_name } } },
+    project: { owner_id, title, owner: { email, profile: display_name === null ? null : { display_name } } },
   });
 
   it('« Mon espace » d’abord, puis un espace par propriétaire avec mes rôles (sans doublon)', async () => {
@@ -99,10 +105,40 @@ describe('EspaceService.mesEspaces', () => {
     await expect(service.mesEspaces(MOI)).resolves.toEqual([
       { ownerId: MOI, nom: 'Mon espace', roles: ['proprietaire'] },
       { ownerId: PROPRIO, nom: 'Espace de Alice', roles: ['comptable', 'associe'] },
-      { ownerId: AUTRE, nom: 'Espace de bob@exemple.fr', roles: ['associe'] },
+      { ownerId: AUTRE, nom: 'Espace de l’entreprise Boulangerie Dupont', roles: ['associe'] },
     ]);
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: { user_id: MOI, role: { in: ['comptable', 'associe'] } } }),
+    );
+  });
+
+  it('sans nom affiché : jamais l’e-mail du propriétaire, mais le titre du PREMIER projet partagé', async () => {
+    const findMany = vi.fn().mockResolvedValue([
+      lien('comptable', PROPRIO, 'alice@exemple.fr', '   ', 'Atelier Alice'),
+      lien('associe', PROPRIO, 'alice@exemple.fr', '   ', 'Second projet'),
+      lien('associe', AUTRE, 'bob@exemple.fr', null, '  '),
+    ]);
+    const service = new EspaceService({ project_collaborators: { findMany } } as never);
+
+    const espaces = await service.mesEspaces(MOI);
+    expect(espaces.map((e) => e.nom)).toEqual([
+      'Mon espace',
+      'Espace de l’entreprise Atelier Alice',
+      // Titre vide : le nom générique, toujours sans e-mail.
+      'Espace de l’entreprise',
+    ]);
+    expect(JSON.stringify(espaces)).not.toContain('@');
+    // L'e-mail n'est même plus lu en base.
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: { created_at: 'asc' },
+        select: {
+          role: true,
+          project: {
+            select: { owner_id: true, title: true, owner: { select: { profile: { select: { display_name: true } } } } },
+          },
+        },
+      }),
     );
   });
 
