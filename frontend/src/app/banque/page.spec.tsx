@@ -171,6 +171,7 @@ describe('BanquePage', () => {
     mockApiRoutes(AVEC_COMPTE);
 
     afficher();
+    fireEvent.click(await screen.findByRole('button', { name: 'Saisir' }));
 
     fireEvent.change(await screen.findByLabelText('Libellé'), {
       target: { value: 'Essai' },
@@ -189,6 +190,7 @@ describe('BanquePage', () => {
     mockApiRoutes(AVEC_COMPTE);
 
     afficher();
+    fireEvent.click(await screen.findByRole('button', { name: 'Saisir' }));
 
     fireEvent.change(await screen.findByLabelText('Libellé'), { target: { value: 'Essai' } });
     fireEvent.change(screen.getByLabelText('Montant en euros'), { target: { value: '0' } });
@@ -204,6 +206,7 @@ describe('BanquePage', () => {
     });
 
     afficher();
+    fireEvent.click(await screen.findByRole('button', { name: 'Saisir' }));
 
     fireEvent.change(await screen.findByLabelText('Libellé'), {
       target: { value: 'Achat de matériel' },

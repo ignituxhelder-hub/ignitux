@@ -162,8 +162,9 @@ describe('BillingPage', () => {
         <BillingPage />
       </AuthProvider>,
     );
+    fireEvent.click(await screen.findByRole('button', { name: 'Nouveau' }));
 
-    await screen.findByText("Aucun document pour l'instant.");
+    await screen.findByLabelText('Nom du client');
     fireEvent.change(screen.getByLabelText('Nom du client'), { target: { value: 'Dupont' } });
     fireEvent.change(screen.getByLabelText('Désignation'), { target: { value: 'Prestation' } });
     fireEvent.change(screen.getByLabelText('Montant hors taxes en euros'), {

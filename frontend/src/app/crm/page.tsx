@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
+import { IconesPanneaux } from '@/components/icones-panneaux';
 import {
   api,
   ApiError,
@@ -265,241 +266,269 @@ export default function CrmPage() {
 
       {error && <p className="error">{error}</p>}
 
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Entreprises</h2>
-        <form
-          onSubmit={handleCreateCompany}
-          style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}
-        >
-          <input
-            aria-label="Nom de l'entreprise"
-            placeholder="Nom de l'entreprise"
-            value={companyName}
-            onChange={(e) => setCompanyName(e.target.value)}
-          />
-          <input
-            aria-label="Secteur d'activité"
-            placeholder="Secteur (facultatif)"
-            value={companySector}
-            onChange={(e) => setCompanySector(e.target.value)}
-          />
-          <input
-            aria-label="Site web de l'entreprise"
-            placeholder="Site web (facultatif)"
-            value={companyWebsite}
-            onChange={(e) => setCompanyWebsite(e.target.value)}
-          />
-          <button className="secondary" type="submit" disabled={isSavingCompany}>
-            {isSavingCompany ? 'Ajout…' : 'Ajouter une entreprise'}
-          </button>
-        </form>
+      <IconesPanneaux
+        titre="Relations"
+        ouvertParDefaut="contacts"
+        panneaux={[
+          {
+            id: 'contacts',
+            nom: 'Contacts',
+            glyphe: 'relations',
+            categorie: 'vendre',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <div className="top-bar" style={{ marginBottom: '0.75rem' }}>
+            <h2 style={{ margin: 0 }}>Contacts</h2>
+          </div>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setAppliedQuery(query.trim());
+            }}
+            style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}
+          >
+            <input
+              aria-label="Rechercher un contact"
+              placeholder="Rechercher (nom, prénom, e-mail)"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <select
+              aria-label="Filtrer par étape"
+              value={stageFilter}
+              onChange={(e) => setStageFilter(e.target.value as CrmStage | '')}
+            >
+              <option value="">Toutes les étapes</option>
+              {STAGES.map((stage) => (
+                <option key={stage} value={stage}>
+                  {STAGE_LABELS[stage]}
+                </option>
+              ))}
+            </select>
+            <button className="secondary" type="submit">
+              Rechercher
+            </button>
+          </form>
 
-        {companies.length === 0 ? (
-          <p className="muted" style={{ marginBottom: 0 }}>
-            Aucune entreprise enregistrée pour l&apos;instant.
-          </p>
-        ) : (
-          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-            {companies.map((company) => (
+          {isLoading && <p className="loading">Chargement…</p>}
+          {!isLoading && contacts.length === 0 && (
+            <p className="muted">Aucun contact ne correspond.</p>
+          )}
+
+          <ul aria-label="Liste des contacts" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {contacts.map((contact) => (
               <li
-                key={company.id}
+                key={contact.id}
                 className="project-item"
                 style={{ cursor: 'default', marginBottom: '0.5rem' }}
               >
-                {editingCompanyId === company.id ? (
-                  <form
-                    onSubmit={(e) => void handleUpdateCompany(company.id, e)}
-                    style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
-                  >
-                    <input
-                      aria-label={`Nom de ${company.name}`}
-                      value={editCompanyName}
-                      onChange={(e) => setEditCompanyName(e.target.value)}
-                    />
-                    <input
-                      aria-label={`Secteur de ${company.name}`}
-                      placeholder="Secteur (facultatif)"
-                      value={editCompanySector}
-                      onChange={(e) => setEditCompanySector(e.target.value)}
-                    />
-                    <input
-                      aria-label={`Site web de ${company.name}`}
-                      placeholder="Site web (facultatif)"
-                      value={editCompanyWebsite}
-                      onChange={(e) => setEditCompanyWebsite(e.target.value)}
-                    />
-                    <button className="secondary" type="submit">
-                      Enregistrer
-                    </button>
-                    <button
-                      className="secondary"
-                      type="button"
-                      onClick={() => setEditingCompanyId(null)}
-                    >
-                      Annuler
-                    </button>
-                  </form>
-                ) : (
-                  <div className="top-bar">
-                    <span>
-                      <strong>{company.name}</strong>
-                      {company.sector && <span className="muted"> — {company.sector}</span>}
-                    </span>
-                    <span style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button
-                        className="secondary"
-                        type="button"
-                        onClick={() => startEditCompany(company)}
-                      >
-                        Modifier
-                      </button>
-                      <button
-                        className="secondary"
-                        type="button"
-                        onClick={() => void handleDeleteCompany(company)}
-                      >
-                        Supprimer
-                      </button>
-                    </span>
-                  </div>
+                <div className="top-bar" style={{ marginBottom: '0.25rem' }}>
+                  <strong>
+                    {contact.first_name} {contact.last_name}
+                  </strong>
+                  <span className="muted">{KIND_LABELS[contact.kind]}</span>
+                </div>
+                {contact.email && <p className="muted" style={{ margin: 0 }}>{contact.email}</p>}
+                {contact.company_id && (
+                  <p className="muted" style={{ margin: 0 }}>
+                    {companies.find((c) => c.id === contact.company_id)?.name ?? 'Entreprise'}
+                  </p>
                 )}
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                  <select
+                    aria-label={`Étape de ${contact.first_name} ${contact.last_name}`}
+                    value={contact.stage}
+                    onChange={(e) => void handleStageChange(contact, e.target.value as CrmStage)}
+                  >
+                    {STAGES.map((stage) => (
+                      <option key={stage} value={stage}>
+                        {STAGE_LABELS[stage]}
+                      </option>
+                    ))}
+                  </select>
+                  <button className="secondary" type="button" onClick={() => void handleSelect(contact)}>
+                    Historique
+                  </button>
+                  <button className="secondary" type="button" onClick={() => void handleDelete(contact)}>
+                    Supprimer
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
-        )}
-      </div>
-
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ marginTop: 0 }}>Ajouter un contact</h2>
-        <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <input
-            aria-label="Prénom"
-            placeholder="Prénom"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-          <input
-            aria-label="Nom"
-            placeholder="Nom"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-          <input
-            aria-label="Adresse e-mail"
-            placeholder="E-mail (facultatif)"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <select
-            aria-label="Type de contact"
-            value={kind}
-            onChange={(e) => setKind(e.target.value as CrmKind)}
-          >
-            {(Object.keys(KIND_LABELS) as CrmKind[]).map((value) => (
-              <option key={value} value={value}>
-                {KIND_LABELS[value]}
-              </option>
-            ))}
-          </select>
-          <select
-            aria-label="Entreprise du contact"
-            value={contactCompanyId}
-            onChange={(e) => setContactCompanyId(e.target.value)}
-          >
-            <option value="">Aucune entreprise</option>
-            {companies.map((company) => (
-              <option key={company.id} value={company.id}>
-                {company.name}
-              </option>
-            ))}
-          </select>
-          <button className="secondary" type="submit" disabled={isSaving}>
-            {isSaving ? 'Ajout…' : 'Ajouter'}
-          </button>
-        </form>
-      </div>
-
-      <div className="card" style={{ marginTop: '1.5rem' }}>
-        <div className="top-bar" style={{ marginBottom: '0.75rem' }}>
-          <h2 style={{ margin: 0 }}>Contacts</h2>
         </div>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setAppliedQuery(query.trim());
-          }}
-          style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}
-        >
-          <input
-            aria-label="Rechercher un contact"
-            placeholder="Rechercher (nom, prénom, e-mail)"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <select
-            aria-label="Filtrer par étape"
-            value={stageFilter}
-            onChange={(e) => setStageFilter(e.target.value as CrmStage | '')}
-          >
-            <option value="">Toutes les étapes</option>
-            {STAGES.map((stage) => (
-              <option key={stage} value={stage}>
-                {STAGE_LABELS[stage]}
-              </option>
-            ))}
-          </select>
-          <button className="secondary" type="submit">
-            Rechercher
-          </button>
-        </form>
-
-        {isLoading && <p className="loading">Chargement…</p>}
-        {!isLoading && contacts.length === 0 && (
-          <p className="muted">Aucun contact ne correspond.</p>
-        )}
-
-        <ul aria-label="Liste des contacts" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {contacts.map((contact) => (
-            <li
-              key={contact.id}
-              className="project-item"
-              style={{ cursor: 'default', marginBottom: '0.5rem' }}
+            ),
+          },
+          {
+            id: 'ajouter',
+            nom: 'Nouveau contact',
+            glyphe: 'infos',
+            categorie: 'creer',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>Ajouter un contact</h2>
+          <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <input
+              aria-label="Prénom"
+              placeholder="Prénom"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+            <input
+              aria-label="Nom"
+              placeholder="Nom"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+            <input
+              aria-label="Adresse e-mail"
+              placeholder="E-mail (facultatif)"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <select
+              aria-label="Type de contact"
+              value={kind}
+              onChange={(e) => setKind(e.target.value as CrmKind)}
             >
-              <div className="top-bar" style={{ marginBottom: '0.25rem' }}>
-                <strong>
-                  {contact.first_name} {contact.last_name}
-                </strong>
-                <span className="muted">{KIND_LABELS[contact.kind]}</span>
-              </div>
-              {contact.email && <p className="muted" style={{ margin: 0 }}>{contact.email}</p>}
-              {contact.company_id && (
-                <p className="muted" style={{ margin: 0 }}>
-                  {companies.find((c) => c.id === contact.company_id)?.name ?? 'Entreprise'}
-                </p>
-              )}
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-                <select
-                  aria-label={`Étape de ${contact.first_name} ${contact.last_name}`}
-                  value={contact.stage}
-                  onChange={(e) => void handleStageChange(contact, e.target.value as CrmStage)}
+              {(Object.keys(KIND_LABELS) as CrmKind[]).map((value) => (
+                <option key={value} value={value}>
+                  {KIND_LABELS[value]}
+                </option>
+              ))}
+            </select>
+            <select
+              aria-label="Entreprise du contact"
+              value={contactCompanyId}
+              onChange={(e) => setContactCompanyId(e.target.value)}
+            >
+              <option value="">Aucune entreprise</option>
+              {companies.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.name}
+                </option>
+              ))}
+            </select>
+            <button className="secondary" type="submit" disabled={isSaving}>
+              {isSaving ? 'Ajout…' : 'Ajouter'}
+            </button>
+          </form>
+        </div>
+            ),
+          },
+          {
+            id: 'entreprises',
+            nom: 'Entreprises',
+            glyphe: 'immobilier',
+            categorie: 'gerer',
+            contenu: (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>Entreprises</h2>
+          <form
+            onSubmit={handleCreateCompany}
+            style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}
+          >
+            <input
+              aria-label="Nom de l'entreprise"
+              placeholder="Nom de l'entreprise"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+            />
+            <input
+              aria-label="Secteur d'activité"
+              placeholder="Secteur (facultatif)"
+              value={companySector}
+              onChange={(e) => setCompanySector(e.target.value)}
+            />
+            <input
+              aria-label="Site web de l'entreprise"
+              placeholder="Site web (facultatif)"
+              value={companyWebsite}
+              onChange={(e) => setCompanyWebsite(e.target.value)}
+            />
+            <button className="secondary" type="submit" disabled={isSavingCompany}>
+              {isSavingCompany ? 'Ajout…' : 'Ajouter une entreprise'}
+            </button>
+          </form>
+
+          {companies.length === 0 ? (
+            <p className="muted" style={{ marginBottom: 0 }}>
+              Aucune entreprise enregistrée pour l&apos;instant.
+            </p>
+          ) : (
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+              {companies.map((company) => (
+                <li
+                  key={company.id}
+                  className="project-item"
+                  style={{ cursor: 'default', marginBottom: '0.5rem' }}
                 >
-                  {STAGES.map((stage) => (
-                    <option key={stage} value={stage}>
-                      {STAGE_LABELS[stage]}
-                    </option>
-                  ))}
-                </select>
-                <button className="secondary" type="button" onClick={() => void handleSelect(contact)}>
-                  Historique
-                </button>
-                <button className="secondary" type="button" onClick={() => void handleDelete(contact)}>
-                  Supprimer
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+                  {editingCompanyId === company.id ? (
+                    <form
+                      onSubmit={(e) => void handleUpdateCompany(company.id, e)}
+                      style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
+                    >
+                      <input
+                        aria-label={`Nom de ${company.name}`}
+                        value={editCompanyName}
+                        onChange={(e) => setEditCompanyName(e.target.value)}
+                      />
+                      <input
+                        aria-label={`Secteur de ${company.name}`}
+                        placeholder="Secteur (facultatif)"
+                        value={editCompanySector}
+                        onChange={(e) => setEditCompanySector(e.target.value)}
+                      />
+                      <input
+                        aria-label={`Site web de ${company.name}`}
+                        placeholder="Site web (facultatif)"
+                        value={editCompanyWebsite}
+                        onChange={(e) => setEditCompanyWebsite(e.target.value)}
+                      />
+                      <button className="secondary" type="submit">
+                        Enregistrer
+                      </button>
+                      <button
+                        className="secondary"
+                        type="button"
+                        onClick={() => setEditingCompanyId(null)}
+                      >
+                        Annuler
+                      </button>
+                    </form>
+                  ) : (
+                    <div className="top-bar">
+                      <span>
+                        <strong>{company.name}</strong>
+                        {company.sector && <span className="muted"> — {company.sector}</span>}
+                      </span>
+                      <span style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          className="secondary"
+                          type="button"
+                          onClick={() => startEditCompany(company)}
+                        >
+                          Modifier
+                        </button>
+                        <button
+                          className="secondary"
+                          type="button"
+                          onClick={() => void handleDeleteCompany(company)}
+                        >
+                          Supprimer
+                        </button>
+                      </span>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+            ),
+          },
+        ]}
+      />
 
       {selected && (
         <div className="card" style={{ marginTop: '1.5rem' }}>
