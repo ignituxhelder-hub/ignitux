@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { IconesPanneaux } from '@/components/icones-panneaux';
 import { RoleBar } from '@/components/role-bar';
 import {
   api,
@@ -130,8 +131,6 @@ export default function InvestorSpacePage() {
 
       {space && space.investorId && (
         <>
-          <MonIdentifiant investorId={space.investorId} nom={space.displayName} />
-
           <div className="card" style={{ marginTop: '1.5rem' }}>
             <h2 style={{ marginTop: 0 }}>Portefeuille global</h2>
             <div
@@ -157,46 +156,70 @@ export default function InvestorSpacePage() {
             <span>{space.notice}</span>
           </p>
 
-          <div className="card" style={{ marginTop: '1.5rem' }}>
-            <h2 style={{ marginTop: 0 }}>Mes investissements</h2>
-            {space.lines.length === 0 ? (
-              /*
-               * L'état vide disait « Aucun investissement enregistré » et
-               * s'arrêtait là. L'explication existe bien — dans la carte
-               * « Mon identifiant », juste au-dessus — mais elle est lue
-               * avant qu'on se pose la question. Quelqu'un qui arrive ici
-               * voit un portefeuille vide et aucune liste de projets : sans
-               * ce rappel, la lecture la plus naturelle est « le produit ne
-               * marche pas », pas « personne ne m'a encore enregistré ».
-               */
-              <>
-                <p className="muted" style={{ marginTop: 0 }}>
-                  Aucun investissement enregistré pour l&apos;instant.
-                </p>
-                <p className="muted" style={{ marginBottom: 0 }}>
-                  C&apos;est normal tant que personne ne t&apos;a inscrit : Ignitux tient le
-                  registre de tes investissements, il ne les organise pas. Un apport apparaît
-                  ici quand le porteur du projet l&apos;enregistre, avec l&apos;identifiant
-                  ci-dessus.
-                </p>
-              </>
-            ) : (
-              <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                {space.lines.map((ligne) => (
-                  <LigneProjet key={ligne.financedProjectId} ligne={ligne} token={token} />
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <Participations participations={participations} />
+          <IconesPanneaux
+            titre="Mon portefeuille"
+            ouvertParDefaut="investissements"
+            panneaux={[
+              {
+                id: 'investissements',
+                nom: 'Mes investissements',
+                glyphe: 'portefeuille',
+                categorie: 'investir',
+                contenu: (
+                  <div className="card" style={{ marginTop: '1rem' }}>
+                    <h2 style={{ marginTop: 0 }}>Mes investissements</h2>
+                    {space.lines.length === 0 ? (
+                      /*
+                       * L'état vide disait « Aucun investissement enregistré » et
+                       * s'arrêtait là. L'explication existe bien — dans la carte
+                       * « Mon identifiant », juste au-dessus — mais elle est lue
+                       * avant qu'on se pose la question. Quelqu'un qui arrive ici
+                       * voit un portefeuille vide et aucune liste de projets : sans
+                       * ce rappel, la lecture la plus naturelle est « le produit ne
+                       * marche pas », pas « personne ne m'a encore enregistré ».
+                       */
+                      <>
+                        <p className="muted" style={{ marginTop: 0 }}>
+                          Aucun investissement enregistré pour l&apos;instant.
+                        </p>
+                        <p className="muted" style={{ marginBottom: 0 }}>
+                          C&apos;est normal tant que personne ne t&apos;a inscrit : Ignitux tient le
+                          registre de tes investissements, il ne les organise pas. Un apport apparaît
+                          ici quand le porteur du projet l&apos;enregistre, avec ton
+                          identifiant (icône « Mon identifiant »).
+                        </p>
+                      </>
+                    ) : (
+                      <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                        {space.lines.map((ligne) => (
+                          <LigneProjet key={ligne.financedProjectId} ligne={ligne} token={token} />
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ),
+              },
+              {
+                id: 'participations',
+                nom: 'Mes participations',
+                glyphe: 'capital',
+                categorie: 'gerer',
+                contenu: <Participations participations={participations} />,
+              },
+              {
+                id: 'identifiant',
+                nom: 'Mon identifiant',
+                glyphe: 'profil',
+                categorie: 'creer',
+                contenu: <MonIdentifiant investorId={space.investorId} nom={space.displayName} />,
+              },
+            ]}
+          />
         </>
       )}
 
       {portefeuille && (
         <>
-          <MonIdentifiant investorId={portefeuille.investorId} nom={portefeuille.displayName} />
-
           <p className="notice" style={{ marginTop: '1.5rem' }}>
             <span>
               Cette vue montre les montants sans la part détenue dans chaque projet, parce que
@@ -226,26 +249,54 @@ export default function InvestorSpacePage() {
             </p>
           </div>
 
-          <div className="card" style={{ marginTop: '1.5rem' }}>
-            <h2 style={{ marginTop: 0 }}>Mes investissements</h2>
-            {portefeuille.parProjet.length === 0 ? (
-              <p className="muted" style={{ marginBottom: 0 }}>
-                Aucun investissement enregistré pour l&apos;instant.
-              </p>
-            ) : (
-              <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                {portefeuille.parProjet.map((ligne) => (
-                  <LigneProjet
-                    key={ligne.financedProjectId}
-                    ligne={versLigneEspace(ligne)}
-                    token={token}
-                  />
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <Participations participations={participations} />
+          <IconesPanneaux
+            titre="Mon portefeuille"
+            ouvertParDefaut="investissements"
+            panneaux={[
+              {
+                id: 'investissements',
+                nom: 'Mes investissements',
+                glyphe: 'portefeuille',
+                categorie: 'investir',
+                contenu: (
+                  <div className="card" style={{ marginTop: '1rem' }}>
+                    <h2 style={{ marginTop: 0 }}>Mes investissements</h2>
+                    {portefeuille.parProjet.length === 0 ? (
+                      <p className="muted" style={{ marginBottom: 0 }}>
+                        Aucun investissement enregistré pour l&apos;instant.
+                      </p>
+                    ) : (
+                      <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                        {portefeuille.parProjet.map((ligne) => (
+                          <LigneProjet
+                            key={ligne.financedProjectId}
+                            ligne={versLigneEspace(ligne)}
+                            token={token}
+                          />
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ),
+              },
+              {
+                id: 'participations',
+                nom: 'Mes participations',
+                glyphe: 'capital',
+                categorie: 'gerer',
+                contenu: <Participations participations={participations} />,
+              },
+              {
+                id: 'identifiant',
+                nom: 'Mon identifiant',
+                glyphe: 'profil',
+                categorie: 'creer',
+                contenu: (
+                  <MonIdentifiant investorId={portefeuille.investorId} nom={portefeuille.displayName} />
+                ),
+              },
+            ]}
+          />
         </>
       )}
     </main>

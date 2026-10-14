@@ -305,6 +305,9 @@ describe('InvestorSpacePage', () => {
       </AuthProvider>,
     );
 
+    // L'identifiant vit derrière son icône : on l'ouvre pour le lire.
+    fireEvent.click(await screen.findByRole('button', { name: 'Mon identifiant' }));
+
     expect(await screen.findByText('i1')).toBeInTheDocument();
     expect(screen.getByText(/aucune recherche d'investisseur par email/i)).toBeInTheDocument();
   });
