@@ -16,7 +16,9 @@ import { EspaceService } from './espace.service.js';
  */
 export function espaceSansMembres(): Provider {
   const prisma = {
-    project_collaborators: { findFirst: async () => null, findMany: async () => [] },
+    project_collaborators: { findMany: async () => [] },
+    // Aucun choix d'accès enregistré (jamais lu : personne n'est collaborateur).
+    space_members: { findUnique: async () => null, findMany: async () => [] },
   } as unknown as PrismaService;
   return { provide: EspaceService, useValue: new EspaceService(prisma) };
 }

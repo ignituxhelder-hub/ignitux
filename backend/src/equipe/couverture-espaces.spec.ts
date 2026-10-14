@@ -161,6 +161,20 @@ describe('Couverture des espaces : chaque route authentifiée est classée', () 
     expect(audit.filter((r) => r.domaine || r.horsEspace).map(decrire)).toEqual([]);
   });
 
+  it('les routes du propriétaire sur SON équipe (journal, accès à son argent) ne portent aucune marque', () => {
+    // Sans marque = refusées (403) avec l'espace d'un autre : un membre ne
+    // lit ni ne change jamais les choix d'un propriétaire en se plaçant dans
+    // son espace.
+    const attendues = [
+      'EspacesController.activite',
+      'EspacesController.accesArgent',
+      'EspacesController.choisirAccesArgent',
+    ];
+    const trouvees = toutes.filter((r) => attendues.includes(cle(r)));
+    expect(trouvees.map(cle).sort()).toEqual([...attendues].sort());
+    expect(trouvees.filter((r) => !r.authentifiee || r.domaine || r.horsEspace).map(decrire)).toEqual([]);
+  });
+
   it('une seule marque par route (jamais @Espace et @HorsEspace ensemble)', () => {
     expect(toutes.filter((r) => r.domaine && r.horsEspace).map(decrire)).toEqual([]);
   });

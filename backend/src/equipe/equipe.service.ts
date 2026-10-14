@@ -5,15 +5,23 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { accesProjet, exigerCapacite } from './acces-projet.js';
 import { capacitesDe, estRoleEquipe, ROLE_LABEL, type RoleEquipe } from './droits-equipe.js';
 
+/**
+ * Ce que l'accès à l'argent du propriétaire veut dire, pour les rôles qui
+ * l'ouvrent. Automatique pour une invitation faite à partir du 15/10/2026
+ * (`acces-argent.ts`) : c'est ce texte qui en informe la personne invitée.
+ */
+const ACCES_ARGENT = 'accès automatique, que le propriétaire peut couper à tout moment';
+
 /** Ce que chaque rôle fait, en une phrase, pour l'email d'invitation. */
 const DESCRIPTION: Record<RoleEquipe, string> = {
   associe:
     'tu peux voir et modifier le projet et lancer IGINI, et travailler dans la facturation, la comptabilité, ' +
-    'la banque et la caisse du propriétaire ; le financement et les actes juridiques restent au propriétaire.',
+    `la banque et la caisse du propriétaire (${ACCES_ARGENT}) ; le financement et les actes juridiques ` +
+    'restent au propriétaire.',
   salarie: 'tu peux voir le projet et travailler sur ses tâches.',
   comptable:
-    'tu peux travailler dans la facturation, la comptabilité, la banque et la caisse du propriétaire, et voir ' +
-    'le financement, l’évaluation de financement et les documents juridiques du projet.',
+    'tu peux travailler dans la facturation, la comptabilité, la banque et la caisse du propriétaire ' +
+    `(${ACCES_ARGENT}), et voir le financement, l’évaluation de financement et les documents juridiques du projet.`,
   observateur: 'tu peux tout voir, sans rien modifier.',
 };
 

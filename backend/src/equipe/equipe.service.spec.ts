@@ -59,6 +59,29 @@ describe('EquipeService', () => {
     expect(text).toContain('https://ignitux.com');
   });
 
+  it.each(['associe', 'comptable'])(
+    '%s : l’email dit que l’accès à l’argent du propriétaire est automatique et qu’il peut le couper',
+    async (role) => {
+      const { service, mail } = monter();
+
+      await service.inviter('proprio', 'p1', 'b@exemple.fr', role);
+
+      const [{ text }] = mail.send.mock.calls[0];
+      expect(text).toContain('la facturation, la comptabilité, la banque et la caisse du propriétaire');
+      expect(text).toContain('accès automatique, que le propriétaire peut couper à tout moment');
+    },
+  );
+
+  it.each(['salarie', 'observateur'])('%s : l’email ne parle pas de l’argent du propriétaire', async (role) => {
+    const { service, mail } = monter();
+
+    await service.inviter('proprio', 'p1', 'b@exemple.fr', role);
+
+    const [{ text }] = mail.send.mock.calls[0];
+    expect(text).not.toContain('facturation');
+    expect(text).not.toContain('automatique');
+  });
+
   it('un email qui ne part pas n’annule pas l’invitation', async () => {
     const { service, mail, prisma } = monter();
     mail.send.mockRejectedValue(new Error('SMTP injoignable'));

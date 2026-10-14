@@ -15,6 +15,10 @@ import type { PrismaService as PrismaServiceType } from '../prisma/prisma.servic
  *   lisent les lignes du PROPRIÉTAIRE ;
  * - comptable / associé d'un projet du propriétaire : ses 4 modules d'argent ;
  *   salarié, observateur, retiré, inconnu : 404 « Espace introuvable. » ;
+ * - l'accès automatique ou activé (décision du 2026-10-14, `acces-argent.ts`) :
+ *   ajouté avant le 15/10/2026 → 404 jusqu'à l'activation ; coupé → 404 ;
+ *   `GET /espaces` suit la même règle ; le propriétaire choisit par
+ *   `GET` / `PUT /espaces/acces-argent`, chez lui seulement ;
  * - toute autre route avec l'espace d'un autre : 403 (fermé par défaut) ;
  * - le propriétaire chez lui : inchangé ; le journal `space_activity` reçoit
  *   les écritures d'un membre.
@@ -85,16 +89,41 @@ function tableEvaluee(lignes: () => Ligne[]) {
   };
 }
 
-/** Un collaborateur de projet : la seule source des droits sur l'espace argent. */
+/**
+ * Un collaborateur de projet : la source des droits sur l'espace argent,
+ * avec la date de sa ligne (accès automatique à partir du 15/10/2026).
+ */
 interface Collaborateur {
   user_id: string;
   project_id: string;
   role: string;
+  created_at?: Date | null;
 }
+
+/** Un choix du propriétaire (`space_members`) : `'argent'` activé, `'refuse'` coupé. */
+interface Choix {
+  owner_id: string;
+  member_id: string;
+  role: string;
+  created_at?: Date;
+}
+
+/** Après la date limite de l'accès automatique : le cas par défaut des tests. */
+const RECENT = new Date('2026-10-20T09:00:00Z');
+const ANCIEN = new Date('2026-10-01T09:00:00Z');
 
 function collaborateurCorrespond(c: Collaborateur, where: Ligne): boolean {
   return Object.entries(where).every(([cle, valeur]) => {
-    if (cle === 'user_id') return c.user_id === valeur;
+    if (cle === 'user_id') {
+      if (valeur !== null && typeof valeur === 'object') {
+        const { not, ...reste } = valeur as { not?: string };
+        if (Object.keys(reste).length > 0 || not === undefined) {
+          throw new Error(`Filtre de collaborateur non géré : user_id=${JSON.stringify(valeur)}`);
+        }
+        return c.user_id !== not;
+      }
+      return c.user_id === valeur;
+    }
     if (cle === 'role') return ((valeur as { in: string[] }).in ?? []).includes(c.role);
     if (cle === 'project') {
       const projet = PROJETS.find((p) => p.id === c.project_id);
@@ -104,7 +133,7 @@ function collaborateurCorrespond(c: Collaborateur, where: Ligne): boolean {
   });
 }
 
-function fauxPrisma(collaborateurs: Collaborateur[], donnees: { lignes: Record<string, Ligne[]> }) {
+function fauxPrisma(collaborateurs: Collaborateur[], choix: Choix[], donnees: { lignes: Record<string, Ligne[]> }) {
   const modeles = new Map<string, Record<string, Fn>>();
   const neutre = (op: string) =>
     vi.fn(async (args?: { data?: unknown; create?: unknown }) => {
@@ -143,20 +172,55 @@ function fauxPrisma(collaborateurs: Collaborateur[], donnees: { lignes: Record<s
       ),
     },
     project_collaborators: {
-      findFirst: vi.fn(async ({ where }: { where: Ligne }) => {
-        const trouve = collaborateurs.find((c) => collaborateurCorrespond(c, where));
-        return trouve ? { role: trouve.role } : null;
-      }),
       findMany: vi.fn(async ({ where }: { where: Ligne }) =>
         collaborateurs
           .filter((c) => collaborateurCorrespond(c, where))
           .map((c) => {
             const owner_id = PROJETS.find((p) => p.id === c.project_id)!.owner_id;
             return {
+              user_id: c.user_id,
               role: c.role,
+              created_at: c.created_at === undefined ? RECENT : c.created_at,
+              user: { email: `${c.user_id.slice(0, 4)}@exemple.fr`, profile: null },
               project: { owner_id, title: 'Projet du proprio', owner: { profile: null } },
             };
           }),
+      ),
+    },
+    space_members: {
+      findUnique: vi.fn(
+        async ({ where }: { where: { owner_id_member_id: { owner_id: string; member_id: string } } }) => {
+          const { owner_id, member_id } = where.owner_id_member_id;
+          return choix.find((c) => c.owner_id === owner_id && c.member_id === member_id) ?? null;
+        },
+      ),
+      findMany: vi.fn(async ({ where }: { where: Record<string, unknown> }) =>
+        choix.filter((c) =>
+          Object.entries(where).every(([cle, valeur]) => {
+            const champ = c[cle as keyof Choix];
+            if (valeur !== null && typeof valeur === 'object') {
+              const { in: liste, ...reste } = valeur as { in?: string[] };
+              if (Object.keys(reste).length > 0 || !liste) {
+                throw new Error(`Filtre de choix non géré : ${cle}=${JSON.stringify(valeur)}`);
+              }
+              return liste.includes(champ as string);
+            }
+            return champ === valeur;
+          }),
+        ),
+      ),
+      upsert: vi.fn(
+        async (args: {
+          where: { owner_id_member_id: { owner_id: string; member_id: string } };
+          create: Choix;
+          update: { role: string; created_at?: Date };
+        }) => {
+          const { owner_id, member_id } = args.where.owner_id_member_id;
+          const existant = choix.find((c) => c.owner_id === owner_id && c.member_id === member_id);
+          if (existant) Object.assign(existant, args.update);
+          else choix.push({ ...args.create });
+          return existant ?? args.create;
+        },
       ),
     },
     space_activity: {
@@ -198,7 +262,8 @@ function fauxPrisma(collaborateurs: Collaborateur[], donnees: { lignes: Record<s
   });
   return prisma as unknown as PrismaServiceType & {
     space_activity: { create: Fn; deleteMany: Fn; findMany: Fn };
-    project_collaborators: { findFirst: Fn; findMany: Fn };
+    project_collaborators: { findMany: Fn };
+    space_members: { findUnique: Fn; findMany: Fn; upsert: Fn };
   };
 }
 
@@ -206,6 +271,7 @@ describe('Espace argent sur les vrais contrôleurs — application entière, san
   let app: INestApplication;
   let prisma: ReturnType<typeof fauxPrisma>;
   const collaborateurs: Collaborateur[] = [];
+  const choix: Choix[] = [];
   const donnees = { lignes: lignesArgent() };
   let jeton: (userId: string) => string;
   let service: <T>(classe: Type<T>) => T;
@@ -231,7 +297,7 @@ describe('Espace argent sur les vrais contrôleurs — application entière, san
       import('../app.module.js'),
       import('../prisma/prisma.service.js'),
     ]);
-    prisma = fauxPrisma(collaborateurs, donnees);
+    prisma = fauxPrisma(collaborateurs, choix, donnees);
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(PrismaService)
       .useValue(prisma)
@@ -252,11 +318,13 @@ describe('Espace argent sur les vrais contrôleurs — application entière, san
 
   beforeEach(() => {
     collaborateurs.length = 0;
+    choix.length = 0;
     donnees.lignes = lignesArgent();
     vi.restoreAllMocks();
     prisma.space_activity.create.mockClear();
     prisma.space_activity.findMany.mockClear();
-    prisma.project_collaborators.findFirst.mockClear();
+    prisma.project_collaborators.findMany.mockClear();
+    prisma.space_members.upsert.mockClear();
   });
 
   type Methode = 'get' | 'post' | 'put' | 'patch' | 'delete';
@@ -265,8 +333,8 @@ describe('Espace argent sur les vrais contrôleurs — application entière, san
     return espace ? req.set('X-Espace', espace) : req;
   };
   const en = (methode: Methode, chemin: string, espace?: string) => par(MOI, methode, chemin, espace);
-  const roleSurProjetDuProprio = (role: string) =>
-    collaborateurs.push({ user_id: MOI, project_id: PROJET, role });
+  const roleSurProjetDuProprio = (role: string, created_at: Date | null = RECENT) =>
+    collaborateurs.push({ user_id: MOI, project_id: PROJET, role, created_at });
   const attendreLesEcritures = () => new Promise((resolve) => setImmediate(resolve));
 
   /** Ce que chaque module rend, réduit à ce qui dit À QUI sont les données. */
@@ -327,7 +395,7 @@ describe('Espace argent sur les vrais contrôleurs — application entière, san
       const res = await par(PROPRIO, 'get', chemin);
       expect(res.status).toBe(200);
       expect(extraire(res.body)).toEqual(DU_PROPRIO[nom]);
-      expect(prisma.project_collaborators.findFirst).not.toHaveBeenCalled();
+      expect(prisma.project_collaborators.findMany).not.toHaveBeenCalled();
     });
 
     it.each(MODULES)('%s : en-tête égal à son propre id = chez lui', async (nom, chemin, extraire) => {
@@ -397,7 +465,7 @@ describe('Espace argent sur les vrais contrôleurs — application entière, san
       expect(res.body.message).toBe(
         'Cette action ne se fait que dans ton propre espace. Reviens sur « Mon espace » pour la faire.',
       );
-      expect(prisma.project_collaborators.findFirst).not.toHaveBeenCalled();
+      expect(prisma.project_collaborators.findMany).not.toHaveBeenCalled();
     });
 
     it('le service n’est jamais appelé', async () => {
@@ -465,6 +533,142 @@ describe('Espace argent sur les vrais contrôleurs — application entière, san
         'Cette action ne se fait que dans ton propre espace. Reviens sur « Mon espace » pour la faire.',
       );
       expect(prisma.space_activity.findMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('accès automatique ou activé (décision du 2026-10-14)', () => {
+    const lireCaisse = () => en('get', '/caisse/journees', PROPRIO);
+
+    it('(a) ligne « argent » du propriétaire : accès, même pour un comptable ajouté avant la date limite', async () => {
+      roleSurProjetDuProprio('comptable', ANCIEN);
+      choix.push({ owner_id: PROPRIO, member_id: MOI, role: 'argent' });
+      const res = await lireCaisse();
+      expect(res.status).toBe(200);
+      expect(res.body.map((l: Ligne) => l.cash_cents)).toEqual([999]);
+    });
+
+    it('(b) ajouté après la date limite, sans choix : accès automatique', async () => {
+      roleSurProjetDuProprio('associe', RECENT);
+      expect((await lireCaisse()).status).toBe(200);
+    });
+
+    it('ajouté avant la date limite : 404 tant que le propriétaire ne l’a pas activé, puis 200', async () => {
+      roleSurProjetDuProprio('comptable', ANCIEN);
+      const avant = await lireCaisse();
+      expect(avant.status).toBe(404);
+      expect(avant.body.message).toBe('Espace introuvable.');
+      expect((await en('get', '/espaces')).body).toEqual([{ ownerId: MOI, nom: 'Mon espace', roles: ['proprietaire'] }]);
+
+      const active = await par(PROPRIO, 'put', `/espaces/acces-argent/${MOI}`).send({ acces: true });
+      expect(active.status).toBe(200);
+
+      expect((await lireCaisse()).status).toBe(200);
+      expect((await en('get', '/espaces')).body).toEqual([
+        { ownerId: MOI, nom: 'Mon espace', roles: ['proprietaire'] },
+        { ownerId: PROPRIO, nom: 'Espace de l’entreprise Projet du proprio', roles: ['comptable'] },
+      ]);
+    });
+
+    it('ligne « refuse » : 404 même ajouté après la date limite, et l’espace disparaît de GET /espaces', async () => {
+      roleSurProjetDuProprio('comptable', RECENT);
+      expect((await lireCaisse()).status).toBe(200);
+
+      const coupe = await par(PROPRIO, 'put', `/espaces/acces-argent/${MOI}`).send({ acces: false });
+      expect(coupe.status).toBe(200);
+      expect(choix).toEqual([{ owner_id: PROPRIO, member_id: MOI, role: 'refuse' }]);
+
+      const res = await lireCaisse();
+      expect(res.status).toBe(404);
+      expect(res.body.message).toBe('Espace introuvable.');
+      expect((await en('get', '/espaces')).body).toEqual([{ ownerId: MOI, nom: 'Mon espace', roles: ['proprietaire'] }]);
+    });
+
+    it('retiré des projets : 404 même avec une ligne « argent »', async () => {
+      roleSurProjetDuProprio('comptable', ANCIEN);
+      choix.push({ owner_id: PROPRIO, member_id: MOI, role: 'argent' });
+      expect((await lireCaisse()).status).toBe(200);
+
+      collaborateurs.length = 0;
+      expect((await lireCaisse()).status).toBe(404);
+      // Passé observateur : même chose.
+      roleSurProjetDuProprio('observateur', RECENT);
+      expect((await lireCaisse()).status).toBe(404);
+      expect((await en('get', '/espaces')).body).toHaveLength(1);
+    });
+  });
+
+  describe('GET / PUT /espaces/acces-argent — le propriétaire choisit, chez lui seulement', () => {
+    const lireCaisseDe = (qui: string) => par(qui, 'get', '/caisse/journees', PROPRIO);
+
+    it('GET liste ses comptables et associés avec leur accès et la raison', async () => {
+      roleSurProjetDuProprio('comptable', ANCIEN);
+      const res = await par(PROPRIO, 'get', '/espaces/acces-argent');
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual([
+        {
+          memberId: MOI,
+          nom: '1111@exemple.fr',
+          email: '1111@exemple.fr',
+          roles: ['comptable'],
+          acces: false,
+          raison: 'a_activer',
+        },
+      ]);
+    });
+
+    it('PUT rend la liste relue (la réponse du serveur, pas celle du client)', async () => {
+      roleSurProjetDuProprio('associe', RECENT);
+      const res = await par(PROPRIO, 'put', `/espaces/acces-argent/${MOI}`).send({ acces: false });
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual([expect.objectContaining({ memberId: MOI, acces: false, raison: 'coupe_par_toi' })]);
+
+      const reactive = await par(PROPRIO, 'put', `/espaces/acces-argent/${MOI}`).send({ acces: true });
+      expect(reactive.body).toEqual([expect.objectContaining({ memberId: MOI, acces: true, raison: 'active_par_toi' })]);
+      // Une seule ligne par couple, mise à jour.
+      expect(choix).toHaveLength(1);
+      expect(choix[0]).toEqual(expect.objectContaining({ role: 'argent', created_at: expect.any(Date) }));
+    });
+
+    it('PUT : 404 pour quelqu’un qui n’est ni comptable ni associé chez lui', async () => {
+      roleSurProjetDuProprio('salarie', RECENT);
+      const res = await par(PROPRIO, 'put', `/espaces/acces-argent/${MOI}`).send({ acces: true });
+      expect(res.status).toBe(404);
+      expect(res.body.message).toBe('Cette personne n’est ni comptable ni associée sur un de tes projets.');
+      expect(prisma.space_members.upsert).not.toHaveBeenCalled();
+    });
+
+    it('PUT : corps invalide (400), identifiant illisible (400) — rien n’est écrit', async () => {
+      roleSurProjetDuProprio('comptable', ANCIEN);
+      expect((await par(PROPRIO, 'put', `/espaces/acces-argent/${MOI}`).send({ acces: 'oui' })).status).toBe(400);
+      expect((await par(PROPRIO, 'put', `/espaces/acces-argent/${MOI}`).send({})).status).toBe(400);
+      expect((await par(PROPRIO, 'put', '/espaces/acces-argent/pas-un-uuid').send({ acces: true })).status).toBe(400);
+      expect(prisma.space_members.upsert).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['get', '/espaces/acces-argent'],
+      ['put', `/espaces/acces-argent/${MOI}`],
+    ] as [Methode, string][])('%s %s avec l’espace d’un autre : 403, sans rien lire ni écrire', async (methode, chemin) => {
+      roleSurProjetDuProprio('associe', RECENT);
+      const res = await en(methode, chemin, PROPRIO).send({ acces: true });
+      expect(res.status).toBe(403);
+      expect(res.body.message).toBe(
+        'Cette action ne se fait que dans ton propre espace. Reviens sur « Mon espace » pour la faire.',
+      );
+      expect(prisma.project_collaborators.findMany).not.toHaveBeenCalled();
+      expect(prisma.space_members.upsert).not.toHaveBeenCalled();
+    });
+
+    it('un membre ne peut pas choisir pour l’espace d’un autre : chez lui, 404 ; avec l’en-tête, 403', async () => {
+      // MOI est associé chez PROPRIO, ajouté avant la date limite : à activer.
+      // Il tente de s'activer lui-même dans l'argent de PROPRIO.
+      roleSurProjetDuProprio('associe', ANCIEN);
+      const chezMoi = await en('put', `/espaces/acces-argent/${MOI}`).send({ acces: true });
+      expect(chezMoi.status).toBe(404);
+      const avecEnTete = await en('put', `/espaces/acces-argent/${MOI}`, PROPRIO).send({ acces: true });
+      expect(avecEnTete.status).toBe(403);
+      expect(prisma.space_members.upsert).not.toHaveBeenCalled();
+      expect((await lireCaisseDe(MOI)).status).toBe(404);
     });
   });
 });

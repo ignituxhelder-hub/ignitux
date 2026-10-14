@@ -22,7 +22,10 @@ describe('contexte d’espace : la preuve que l’intercepteur est câblé', () 
 
 describe('ResoudreEspacePipe : fermé par défaut sans contexte', () => {
   const espaces = new EspaceService({
-    project_collaborators: { findFirst: async () => ({ role: 'comptable' }) },
+    // Comptable ajouté après la date limite, sans choix du propriétaire :
+    // accès automatique.
+    project_collaborators: { findMany: async () => [{ role: 'comptable', created_at: new Date('2026-10-20T09:00:00Z') }] },
+    space_members: { findUnique: async () => null },
   } as never);
   const pipe = new ResoudreEspacePipe(espaces);
   const demande = (enTete?: string) => ({
