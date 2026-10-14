@@ -351,7 +351,13 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
           </p>
           {aFaire.length > 1 && (
             <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <input type="checkbox" checked={toutCoche} disabled={isRunning} onChange={basculerTout} />
+              <input
+                type="checkbox"
+                aria-label="Tout sélectionner"
+                checked={toutCoche}
+                disabled={isRunning}
+                onChange={basculerTout}
+              />
               <span className="muted">Tout sélectionner</span>
             </label>
           )}

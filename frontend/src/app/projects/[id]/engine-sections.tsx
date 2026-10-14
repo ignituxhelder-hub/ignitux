@@ -631,7 +631,13 @@ export function TasksSection({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
             {groupe.cle === 'a_faire' && !readOnly && aFaire.length > 1 && (
               <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <input type="checkbox" checked={toutCoche} disabled={isRunning} onChange={basculerTout} />
+                <input
+                  type="checkbox"
+                  aria-label="Tout sélectionner"
+                  checked={toutCoche}
+                  disabled={isRunning}
+                  onChange={basculerTout}
+                />
                 <span className="muted">Tout sélectionner</span>
               </label>
             )}
