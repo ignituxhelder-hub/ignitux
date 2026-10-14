@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
-import { api, ApiError, type Collaborator } from '@/lib/api';
+import { api, ApiError, type ActiviteEquipe, type Collaborator } from '@/lib/api';
 import {
   ROLE_EQUIPE_DESCRIPTION,
   ROLE_EQUIPE_LABEL,
@@ -170,6 +170,86 @@ export function CollaboratorsSection({ token, projectId, peutGerer = true }: Col
           </div>
         ))}
       </div>
+
+      {peutGerer && <ActiviteDeMonEquipe token={token} />}
+    </div>
+  );
+}
+
+const TITRE_ACTIVITE = 'Activité de mon équipe dans mon argent';
+
+function dateCourte(iso: string | null): string {
+  if (!iso) return 'date inconnue';
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime())
+    ? 'date inconnue'
+    : date.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+}
+
+/**
+ * LE JOURNAL DE MON ÉQUIPE — ce que mes comptables et associés ont écrit dans
+ * ma facturation, ma comptabilité, ma banque et ma caisse (lecture seule).
+ *
+ * Replié par défaut et chargé seulement à l'ouverture : la section Équipe
+ * reste telle quelle pour qui ne le cherche pas. Le journal est celui du
+ * propriétaire, pas du projet : le même dans chacun de ses projets.
+ */
+function ActiviteDeMonEquipe({ token }: { token: string | null }) {
+  const [ouvert, setOuvert] = useState(false);
+  const [lignes, setLignes] = useState<ActiviteEquipe[] | null>(null);
+  const [erreur, setErreur] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!ouvert || !token || lignes !== null) return;
+    let annule = false;
+    setErreur(null);
+    api
+      .activiteDeMonEquipe(token)
+      .then((data) => {
+        if (!annule) setLignes(data);
+      })
+      .catch((err: unknown) => {
+        if (!annule) setErreur(err instanceof ApiError ? err.message : 'Impossible de lire l’activité de ton équipe.');
+      });
+    return () => {
+      annule = true;
+    };
+  }, [ouvert, token, lignes]);
+
+  return (
+    <div style={{ marginTop: '1rem' }}>
+      <button
+        type="button"
+        className="secondary"
+        aria-expanded={ouvert}
+        aria-controls="activite-equipe"
+        onClick={() => setOuvert((o) => !o)}
+      >
+        {TITRE_ACTIVITE}
+      </button>
+      {ouvert && (
+        <div id="activite-equipe" style={{ marginTop: '0.75rem' }}>
+          <p className="muted" style={{ marginTop: 0 }}>
+            Ce que tes comptables et associés ont écrit dans ta facturation, ta comptabilité, ta banque et ta
+            caisse (les 200 dernières actions, conservées 12 mois). Le même journal dans chacun de tes projets.
+          </p>
+          {erreur && <p className="error">{erreur}</p>}
+          {!erreur && lignes === null && <p className="loading">Chargement…</p>}
+          {lignes !== null && lignes.length === 0 && (
+            <p className="muted">Aucune activité de ton équipe dans ton argent pour l’instant.</p>
+          )}
+          {lignes !== null && lignes.length > 0 && (
+            <ul aria-label={TITRE_ACTIVITE} style={{ paddingLeft: '1.25rem', margin: 0 }}>
+              {lignes.map((ligne, i) => (
+                <li key={`${ligne.date ?? ''}-${i}`}>
+                  {dateCourte(ligne.date)} — {ligne.acteur} — <code>{ligne.methode} {ligne.chemin}</code> —{' '}
+                  {ligne.statut < 400 ? `réussie (${ligne.statut})` : `refusée (${ligne.statut})`}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mockApiRoutes } from '@/test-utils/mocks';
 import { CollaboratorsSection } from './collaborators-section';
@@ -169,5 +169,67 @@ describe('CollaboratorsSection', () => {
     expect(screen.getByText('Salarié')).toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+  });
+
+  describe('« Activité de mon équipe dans mon argent » (propriétaire, lecture seule)', () => {
+    const ACTIVITE = [
+      { date: '2026-10-14T10:00:00.000Z', acteur: 'Bob', methode: 'POST', chemin: '/caisse/journees', statut: 201 },
+      { date: '2026-10-13T09:00:00.000Z', acteur: 'un membre', methode: 'PATCH', chemin: '/billing/documents/d1', statut: 422 },
+    ];
+    const lectures = () =>
+      (global.fetch as unknown as { mock: { calls: [string][] } }).mock.calls.filter(([u]) => u.endsWith('/espaces/activite'));
+
+    it('rien n’est chargé tant qu’on ne l’ouvre pas, puis la liste s’affiche, la plus récente d’abord', async () => {
+      mockApiRoutes({
+        'GET /projects/p1/collaborators': { status: 200, body: [] },
+        'GET /espaces/activite': { status: 200, body: ACTIVITE },
+      });
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+      await screen.findByText("Aucun collaborateur pour l'instant.");
+      expect(lectures()).toHaveLength(0);
+
+      const bouton = screen.getByRole('button', { name: 'Activité de mon équipe dans mon argent' });
+      expect(bouton).toHaveAttribute('aria-expanded', 'false');
+      fireEvent.click(bouton);
+
+      const liste = await screen.findByRole('list', { name: 'Activité de mon équipe dans mon argent' });
+      const lignes = within(liste).getAllByRole('listitem');
+      expect(lignes).toHaveLength(2);
+      expect(lignes[0]).toHaveTextContent('Bob');
+      expect(lignes[0]).toHaveTextContent('POST /caisse/journees');
+      expect(lignes[0]).toHaveTextContent('201');
+      expect(lignes[1]).toHaveTextContent('un membre');
+      expect(lignes[1]).toHaveTextContent('PATCH /billing/documents/d1');
+      expect(lignes[1]).toHaveTextContent('422');
+      expect(bouton).toHaveAttribute('aria-expanded', 'true');
+      expect(lectures()).toHaveLength(1);
+    });
+
+    it('journal vide : un message, aucune action proposée sur les lignes', async () => {
+      mockApiRoutes({
+        'GET /projects/p1/collaborators': { status: 200, body: [] },
+        'GET /espaces/activite': { status: 200, body: [] },
+      });
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+      fireEvent.click(await screen.findByRole('button', { name: 'Activité de mon équipe dans mon argent' }));
+      expect(await screen.findByText('Aucune activité de ton équipe dans ton argent pour l’instant.')).toBeInTheDocument();
+    });
+
+    it('un échec du serveur est dit, sans casser la section', async () => {
+      mockApiRoutes({
+        'GET /projects/p1/collaborators': { status: 200, body: [] },
+        'GET /espaces/activite': { status: 403, body: { message: 'Refusé.' } },
+      });
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+      fireEvent.click(await screen.findByRole('button', { name: 'Activité de mon équipe dans mon argent' }));
+      expect(await screen.findByText('Refusé.')).toBeInTheDocument();
+    });
+
+    it('un membre ne la voit pas', async () => {
+      mockApiRoutes({ 'GET /projects/p1/collaborators': { status: 200, body: [MEMBRE] } });
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} peutGerer={false} />);
+      await screen.findByText('b@b.com');
+      expect(screen.queryByText('Activité de mon équipe dans mon argent')).not.toBeInTheDocument();
+    });
   });
 });

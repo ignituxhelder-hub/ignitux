@@ -2294,6 +2294,16 @@ export interface ProfileView {
 // banque, caisse). Forme : backend/src/equipe/espace.service.ts.
 
 /** Un espace où je peux travailler. Le premier est toujours « Mon espace ». */
+/** Une ligne du journal de mon équipe dans mon argent (`GET /espaces/activite`). */
+export interface ActiviteEquipe {
+  date: string | null;
+  /** Nom affiché de l'acteur, sinon « un membre ». */
+  acteur: string;
+  methode: string;
+  chemin: string;
+  statut: number;
+}
+
 export interface EspaceListe {
   ownerId: string;
   nom: string;
@@ -4267,4 +4277,11 @@ export const api = {
   /** Jamais servi par le cache : c'est cette liste qui confirme un accès perdu. */
   mesEspaces: (token: string) =>
     request<EspaceListe[]>('/espaces', { headers: { Authorization: `Bearer ${token}` } }, { skipOfflineCache: true }),
+
+  /**
+   * Ce que mes comptables et associés ont écrit dans MON argent (lecture
+   * seule, 200 dernières lignes). Route personnelle : jamais d'`X-Espace`.
+   */
+  activiteDeMonEquipe: (token: string) =>
+    request<ActiviteEquipe[]>('/espaces/activite', { headers: { Authorization: `Bearer ${token}` } }, { skipOfflineCache: true }),
 };
