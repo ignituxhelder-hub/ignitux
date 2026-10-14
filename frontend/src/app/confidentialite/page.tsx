@@ -25,6 +25,9 @@ export const metadata = {
  * le code ou la configuration documentée ne fasse réellement — en
  * particulier, aucune durée de conservation n'est annoncée là où le code
  * n'en applique pas.
+ *
+ * Mise à jour du 2026-10-14 : durée de conservation du journal d'activité
+ * des membres d'une équipe (12 mois, purge automatique côté serveur).
  */
 export default function ConfidentialitePage() {
   return (
@@ -36,7 +39,7 @@ export default function ConfidentialitePage() {
       </div>
       <Brand />
       <h1>Politique de confidentialité</h1>
-      <p className="muted">Dernière mise à jour : 11 octobre 2026</p>
+      <p className="muted">Dernière mise à jour : 14 octobre 2026</p>
 
       <div className="card">
         <p style={{ marginTop: 0 }}>
@@ -217,7 +220,9 @@ export default function ConfidentialitePage() {
           mandat révoqué reste enregistré comme révoqué jusqu&apos;à la suppression du
           compte ; les statuts, le dossier de création, la fiche d&apos;immatriculation,
           l&apos;évaluation de financement et la connexion à ta boutique Shopify sont
-          supprimés avec le projet auquel ils se rattachent, ou avec ton compte.
+          supprimés avec le projet auquel ils se rattachent, ou avec ton compte. Si tu
+          travailles en équipe, le journal d&apos;activité des membres (qui a fait quoi dans
+          ton espace) est conservé 12 mois, puis supprimé automatiquement.
         </p>
       </div>
 

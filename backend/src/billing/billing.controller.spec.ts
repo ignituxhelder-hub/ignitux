@@ -3,6 +3,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { EcritureDepasseeGuard } from '../hors-ligne/ecriture-depassee.guard.js';
 import { BillingController } from './billing.controller.js';
 import { BillingService } from './billing.service.js';
+import { espaceSansMembres } from '../equipe/espace.testing.js';
 
 describe('BillingController', () => {
   let controller: BillingController;
@@ -24,7 +25,7 @@ describe('BillingController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [BillingController],
-      providers: [{ provide: BillingService, useValue: billingService }],
+      providers: [espaceSansMembres(), { provide: BillingService, useValue: billingService }],
     })
       .overrideGuard(JwtAuthGuard)
       .useValue({ canActivate: () => true })
@@ -43,7 +44,7 @@ describe('BillingController', () => {
   });
 
   it('ignore un filtre de type ou de statut inconnu', async () => {
-    await controller.listDocuments(currentUser, 'bon-de-commande', 'presque-paye');
+    await controller.listDocuments(currentUser.id, 'bon-de-commande', 'presque-paye');
 
     expect(billingService.listDocuments).toHaveBeenCalledWith('u1', {
       type: undefined,
@@ -52,7 +53,7 @@ describe('BillingController', () => {
   });
 
   it('transmet un filtre valide', async () => {
-    await controller.listDocuments(currentUser, 'facture', 'emis');
+    await controller.listDocuments(currentUser.id, 'facture', 'emis');
 
     expect(billingService.listDocuments).toHaveBeenCalledWith('u1', {
       type: 'facture',
@@ -61,7 +62,7 @@ describe('BillingController', () => {
   });
 
   it("convertit les dates fournies en chaîne", async () => {
-    await controller.createDocument(currentUser, {
+    await controller.createDocument(currentUser.id, {
       type: 'facture',
       clientName: 'Dupont',
       dueAt: '2026-10-01T00:00:00.000Z',
@@ -74,7 +75,7 @@ describe('BillingController', () => {
   });
 
   it("retombe sur « autre » pour un moyen de paiement inconnu", async () => {
-    await controller.addPayment(currentUser, 'd1', {
+    await controller.addPayment(currentUser.id, 'd1', {
       amountCents: 1000,
       method: 'troc',
     });
@@ -91,17 +92,17 @@ describe('BillingController', () => {
 
   it('expose la notice légale et l\'export', async () => {
     await controller.getLegalNotice();
-    await controller.exportCsv(currentUser);
+    await controller.exportCsv(currentUser.id);
 
     expect(billingService.getLegalNotice).toHaveBeenCalled();
     expect(billingService.exportCsv).toHaveBeenCalledWith('u1');
   });
 
   it('changeStatus, updateDraft et deleteDraft délèguent au service', async () => {
-    await controller.changeStatus(currentUser, 'd1', { status: 'emis' });
-    await controller.updateDraft(currentUser, 'd1', { clientName: 'X' });
-    await controller.deleteDraft(currentUser, 'd1');
-    await controller.getDocument(currentUser, 'd1');
+    await controller.changeStatus(currentUser.id, 'd1', { status: 'emis' });
+    await controller.updateDraft(currentUser.id, 'd1', { clientName: 'X' });
+    await controller.deleteDraft(currentUser.id, 'd1');
+    await controller.getDocument(currentUser.id, 'd1');
 
     expect(billingService.changeStatus).toHaveBeenCalledWith('u1', 'd1', 'emis');
     expect(billingService.updateDraft).toHaveBeenCalled();

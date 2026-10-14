@@ -91,13 +91,14 @@ l'avertissement affiché avant l'export (`frontend/src/app/account/page.tsx`).
 
 ## 8. Journaux techniques — groupe `journaux_techniques`
 
-**Tables :** `workflow_runs`, `workflow_events`, `automation_runs`, `project_compliance_checks`, `project_compliance_ai_runs`, `constitution_violations`, `ai_usage_events`
+**Tables :** `workflow_runs`, `workflow_events`, `automation_runs`, `project_compliance_checks`, `project_compliance_ai_runs`, `constitution_violations`, `ai_usage_events`, `space_activity`
 
-- **Finalité :** traçabilité des automatisations et de leurs échecs, contrôle constitutionnel (l'article 8), suivi de ce que les générateurs IGINI ont réellement consommé.
+- **Finalité :** traçabilité des automatisations et de leurs échecs, contrôle constitutionnel (l'article 8), suivi de ce que les générateurs IGINI ont réellement consommé, et journal d'activité des membres d'une équipe (`space_activity` : qui a écrit quoi — méthode, chemin, statut — dans l'espace d'un autre, montré au propriétaire).
 - **Base légale :** intérêt légitime (sécurité, fiabilité du service, comptabilité vérifiable des coûts déjà facturés par le fournisseur d'IA).
-- **Durée de conservation — deux régimes différents dans ce même groupe :**
+- **Durée de conservation — trois régimes différents dans ce même groupe :**
   - `workflow_runs`, `workflow_events`, `automation_runs`, `project_compliance_checks`, `project_compliance_ai_runs` sont rattachées au projet et supprimées avec lui.
   - `constitution_violations` et `ai_usage_events` **ne sont pas supprimées** à la suppression du compte, faute de clé étrangère cascadante vers `users` — et ce n'est pas un oubli : elles sont **anonymisées** (l'identifiant utilisateur est mis à `null`). Le fait reste consultable pour l'audit et pour que le total mensuel des coûts IA déjà facturés ne change pas rétroactivement ; la personne, elle, en disparaît.
+  - `space_activity` (journal d'activité des membres) est conservé **12 mois** : les lignes de plus de 365 jours sont supprimées automatiquement au fil des écritures (`EspaceInterceptor`, à la première écriture après le démarrage puis une fois toutes les 200). Supprimé en cascade avec le compte du propriétaire de l'espace ; l'acteur est détaché (`null`) quand c'est son compte qui est supprimé.
 
 ## 9. Vérification d'identité — groupe `compte`
 

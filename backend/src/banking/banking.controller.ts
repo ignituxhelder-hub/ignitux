@@ -1,8 +1,7 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CurrentUser } from '../auth/current-user.decorator.js';
-import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { Espace } from '../equipe/espace.decorator.js';
 import { userOwner } from '../ledger/ledger-owner.js';
 import { BankingService } from './banking.service.js';
 import { DeclareBankAccountDto, ImportTransactionDto, ReconcileDto } from './dto/banking.dto.js';
@@ -25,13 +24,13 @@ export class BankingController {
   constructor(private readonly banking: BankingService) {}
 
   @Get('comptes')
-  listAccounts(@CurrentUser() user: AuthenticatedUser) {
-    return this.banking.listAccounts(userOwner(user.id));
+  listAccounts(@Espace('argent') ownerId: string) {
+    return this.banking.listAccounts(userOwner(ownerId));
   }
 
   @Post('comptes')
-  declareAccount(@CurrentUser() user: AuthenticatedUser, @Body() dto: DeclareBankAccountDto) {
-    return this.banking.declareAccount(userOwner(user.id), {
+  declareAccount(@Espace('argent') ownerId: string, @Body() dto: DeclareBankAccountDto) {
+    return this.banking.declareAccount(userOwner(ownerId), {
       label: dto.label,
       kind: dto.kind,
       currency: dto.currency,
@@ -42,19 +41,19 @@ export class BankingController {
 
   @Get('comptes/:id/mouvements')
   listTransactions(
-    @CurrentUser() user: AuthenticatedUser,
+    @Espace('argent') ownerId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.banking.listTransactions(userOwner(user.id), id);
+    return this.banking.listTransactions(userOwner(ownerId), id);
   }
 
   @Post('comptes/:id/mouvements')
   importTransaction(
-    @CurrentUser() user: AuthenticatedUser,
+    @Espace('argent') ownerId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ImportTransactionDto,
   ) {
-    return this.banking.importTransaction(userOwner(user.id), id, {
+    return this.banking.importTransaction(userOwner(ownerId), id, {
       amountCents: dto.amountCents,
       occurredOn: new Date(dto.occurredOn),
       label: dto.label,
@@ -63,16 +62,16 @@ export class BankingController {
   }
 
   @Get('comptes/:id/solde')
-  balance(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
-    return this.banking.balance(userOwner(user.id), id);
+  balance(@Espace('argent') ownerId: string, @Param('id', ParseUUIDPipe) id: string) {
+    return this.banking.balance(userOwner(ownerId), id);
   }
 
   @Post('mouvements/:id/rapprochement')
   reconcile(
-    @CurrentUser() user: AuthenticatedUser,
+    @Espace('argent') ownerId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ReconcileDto,
   ) {
-    return this.banking.reconcile(userOwner(user.id), id, dto.entryId);
+    return this.banking.reconcile(userOwner(ownerId), id, dto.entryId);
   }
 }

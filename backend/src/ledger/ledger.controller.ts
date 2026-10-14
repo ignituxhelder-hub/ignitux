@@ -1,8 +1,7 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CurrentUser } from '../auth/current-user.decorator.js';
-import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { Espace } from '../equipe/espace.decorator.js';
 import { OpenAccountDto, RecordEntryDto } from './dto/ledger.dto.js';
 import { userOwner } from './ledger-owner.js';
 import { LedgerService } from './ledger.service.js';
@@ -29,13 +28,13 @@ export class LedgerController {
   constructor(private readonly ledger: LedgerService) {}
 
   @Get('comptes')
-  listAccounts(@CurrentUser() user: AuthenticatedUser) {
-    return this.ledger.listAccounts(userOwner(user.id));
+  listAccounts(@Espace('argent') ownerId: string) {
+    return this.ledger.listAccounts(userOwner(ownerId));
   }
 
   @Post('comptes')
-  openAccount(@CurrentUser() user: AuthenticatedUser, @Body() dto: OpenAccountDto) {
-    return this.ledger.openAccount(userOwner(user.id), {
+  openAccount(@Espace('argent') ownerId: string, @Body() dto: OpenAccountDto) {
+    return this.ledger.openAccount(userOwner(ownerId), {
       code: dto.code,
       label: dto.label,
       kind: dto.kind,
@@ -44,13 +43,13 @@ export class LedgerController {
   }
 
   @Get('ecritures')
-  listEntries(@CurrentUser() user: AuthenticatedUser) {
-    return this.ledger.listEntries(userOwner(user.id));
+  listEntries(@Espace('argent') ownerId: string) {
+    return this.ledger.listEntries(userOwner(ownerId));
   }
 
   @Post('ecritures')
-  recordEntry(@CurrentUser() user: AuthenticatedUser, @Body() dto: RecordEntryDto) {
-    return this.ledger.recordEntry(userOwner(user.id), {
+  recordEntry(@Espace('argent') ownerId: string, @Body() dto: RecordEntryDto) {
+    return this.ledger.recordEntry(userOwner(ownerId), {
       occurredOn: new Date(dto.occurredOn),
       label: dto.label,
       reference: dto.reference,
@@ -65,7 +64,7 @@ export class LedgerController {
   }
 
   @Get('balance')
-  trialBalance(@CurrentUser() user: AuthenticatedUser) {
-    return this.ledger.trialBalance(userOwner(user.id));
+  trialBalance(@Espace('argent') ownerId: string) {
+    return this.ledger.trialBalance(userOwner(ownerId));
   }
 }

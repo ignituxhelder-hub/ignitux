@@ -7,9 +7,13 @@ import { capacitesDe, estRoleEquipe, ROLE_LABEL, type RoleEquipe } from './droit
 
 /** Ce que chaque rôle fait, en une phrase, pour l'email d'invitation. */
 const DESCRIPTION: Record<RoleEquipe, string> = {
-  associe: 'tu peux voir et modifier le projet et lancer IGINI ; le financement et les actes juridiques restent au propriétaire.',
+  associe:
+    'tu peux voir et modifier le projet et lancer IGINI, et travailler dans la facturation, la comptabilité, ' +
+    'la banque et la caisse du propriétaire ; le financement et les actes juridiques restent au propriétaire.',
   salarie: 'tu peux voir le projet et travailler sur ses tâches.',
-  comptable: 'tu peux voir le financement, l’évaluation de financement et les documents juridiques du projet.',
+  comptable:
+    'tu peux travailler dans la facturation, la comptabilité, la banque et la caisse du propriétaire, et voir ' +
+    'le financement, l’évaluation de financement et les documents juridiques du projet.',
   observateur: 'tu peux tout voir, sans rien modifier.',
 };
 

@@ -14,9 +14,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CurrentUser } from '../auth/current-user.decorator.js';
-import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { Espace, HorsEspace } from '../equipe/espace.decorator.js';
 import { RefuserEcritureDepassee } from '../hors-ligne/ecriture-depassee.decorator.js';
 import { EcritureDepasseeGuard } from '../hors-ligne/ecriture-depassee.guard.js';
 import {
@@ -43,17 +42,18 @@ export class BillingController {
   constructor(private readonly billingService: BillingService) {}
 
   @Get('legal-notice')
+  @HorsEspace()
   getLegalNotice() {
     return this.billingService.getLegalNotice();
   }
 
   @Get('documents')
   listDocuments(
-    @CurrentUser() user: AuthenticatedUser,
+    @Espace('argent') ownerId: string,
     @Query('type') type?: string,
     @Query('status') status?: string,
   ) {
-    return this.billingService.listDocuments(user.id, {
+    return this.billingService.listDocuments(ownerId, {
       type: type && isDocumentType(type) ? type : undefined,
       status: status && isDocumentStatus(status) ? status : undefined,
     });
@@ -61,8 +61,8 @@ export class BillingController {
 
   @Post('documents')
   @HttpCode(HttpStatus.CREATED)
-  createDocument(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateDocumentDto) {
-    return this.billingService.createDocument(user.id, {
+  createDocument(@Espace('argent') ownerId: string, @Body() dto: CreateDocumentDto) {
+    return this.billingService.createDocument(ownerId, {
       type: dto.type as DocumentType,
       clientName: dto.clientName,
       clientDetails: dto.clientDetails,
@@ -83,23 +83,23 @@ export class BillingController {
   @Get('documents/export')
   @Header('Content-Type', 'text/csv; charset=utf-8')
   @Header('Content-Disposition', 'attachment; filename="ignitux-facturation.csv"')
-  exportCsv(@CurrentUser() user: AuthenticatedUser) {
-    return this.billingService.exportCsv(user.id);
+  exportCsv(@Espace('argent') ownerId: string) {
+    return this.billingService.exportCsv(ownerId);
   }
 
   @Get('documents/:id')
-  getDocument(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
-    return this.billingService.getDocument(user.id, id);
+  getDocument(@Espace('argent') ownerId: string, @Param('id', ParseUUIDPipe) id: string) {
+    return this.billingService.getDocument(ownerId, id);
   }
 
   @RefuserEcritureDepassee('billing_documents')
   @Patch('documents/:id')
   updateDraft(
-    @CurrentUser() user: AuthenticatedUser,
+    @Espace('argent') ownerId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateDraftDto,
   ) {
-    return this.billingService.updateDraft(user.id, id, {
+    return this.billingService.updateDraft(ownerId, id, {
       clientName: dto.clientName,
       clientDetails: dto.clientDetails,
       notes: dto.notes,
@@ -111,33 +111,33 @@ export class BillingController {
   @Delete('documents/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteDraft(
-    @CurrentUser() user: AuthenticatedUser,
+    @Espace('argent') ownerId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    await this.billingService.deleteDraft(user.id, id);
+    await this.billingService.deleteDraft(ownerId, id);
   }
 
   @RefuserEcritureDepassee('billing_documents')
   @Patch('documents/:id/status')
   changeStatus(
-    @CurrentUser() user: AuthenticatedUser,
+    @Espace('argent') ownerId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ChangeStatusDto,
   ) {
-    return this.billingService.changeStatus(user.id, id, dto.status as DocumentStatus);
+    return this.billingService.changeStatus(ownerId, id, dto.status as DocumentStatus);
   }
 
   @Post('documents/:id/payments')
   @HttpCode(HttpStatus.CREATED)
   addPayment(
-    @CurrentUser() user: AuthenticatedUser,
+    @Espace('argent') ownerId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AddPaymentDto,
   ) {
     const method: PaymentMethod = isPaymentMethod(dto.method) ? dto.method : 'autre';
 
     return this.billingService.addPayment(
-      user.id,
+      ownerId,
       id,
       dto.amountCents,
       method,

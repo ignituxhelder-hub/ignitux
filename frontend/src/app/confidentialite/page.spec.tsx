@@ -25,7 +25,12 @@ describe('politique de confidentialité', () => {
 
     expect(texte).toContain('contact@ignitux.com');
     expect(texte).not.toContain('outlook');
-    expect(texte).toContain('Dernière mise à jour : 11 octobre 2026');
+    expect(texte).toContain('Dernière mise à jour : 14 octobre 2026');
+  });
+
+  it("annonce la conservation de 12 mois du journal d'activité des membres d'une équipe", () => {
+    const { container } = render(<ConfidentialitePage />);
+    expect(container.textContent ?? '').toMatch(/journal d.activité des membres[^.]*conservé 12 mois/);
   });
 });
 

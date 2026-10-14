@@ -1,8 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CurrentUser } from '../auth/current-user.decorator.js';
-import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { Espace } from '../equipe/espace.decorator.js';
 import { CaisseService } from './caisse.service.js';
 import { RecordCaisseDayDto } from './dto/caisse.dto.js';
 
@@ -15,8 +14,8 @@ export class CaisseController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  recordDay(@CurrentUser() user: AuthenticatedUser, @Body() dto: RecordCaisseDayDto) {
-    return this.caisseService.recordDay(user.id, {
+  recordDay(@Espace('argent') ownerId: string, @Body() dto: RecordCaisseDayDto) {
+    return this.caisseService.recordDay(ownerId, {
       occurredOn: new Date(dto.occurredOn),
       cashCents: dto.cashCents,
       cardCents: dto.cardCents,
@@ -26,7 +25,7 @@ export class CaisseController {
   }
 
   @Get()
-  list(@CurrentUser() user: AuthenticatedUser) {
-    return this.caisseService.list(user.id);
+  list(@Espace('argent') ownerId: string) {
+    return this.caisseService.list(ownerId);
   }
 }

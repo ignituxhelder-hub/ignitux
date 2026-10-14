@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { CaisseController } from './caisse.controller.js';
 import { CaisseService } from './caisse.service.js';
+import { espaceSansMembres } from '../equipe/espace.testing.js';
 
 describe('CaisseController', () => {
   let controller: CaisseController;
@@ -16,7 +17,7 @@ describe('CaisseController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CaisseController],
-      providers: [{ provide: CaisseService, useValue: caisseService }],
+      providers: [espaceSansMembres(), { provide: CaisseService, useValue: caisseService }],
     })
       .overrideGuard(JwtAuthGuard)
       .useValue({ canActivate: () => true })
@@ -30,7 +31,7 @@ describe('CaisseController', () => {
   });
 
   it('recordDay convertit la date et transmet les montants', async () => {
-    await controller.recordDay(currentUser, {
+    await controller.recordDay(currentUser.id, {
       occurredOn: '2026-10-01',
       cashCents: 5000,
       cardCents: 3000,
@@ -48,7 +49,7 @@ describe('CaisseController', () => {
   });
 
   it('list délègue directement au service', async () => {
-    await controller.list(currentUser);
+    await controller.list(currentUser.id);
 
     expect(caisseService.list).toHaveBeenCalledWith('u1');
   });
