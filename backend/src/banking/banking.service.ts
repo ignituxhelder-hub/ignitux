@@ -176,6 +176,8 @@ export class BankingService {
         bankAccountOwner: describeOwner(bankOwner),
         entryOwner: describeOwner(entryOwner),
       },
+      // Le propriétaire des comptes, même quand un membre agit pour lui :
+      // l'acteur est dans `space_activity` (voir ConstitutionContext).
       owner.type === 'user' ? { userId: owner.userId } : {},
     );
 

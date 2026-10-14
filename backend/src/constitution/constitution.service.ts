@@ -15,6 +15,18 @@ import {
 } from './constitution-rules.js';
 
 export interface ConstitutionContext {
+  /**
+   * Le PROPRIÉTAIRE des données concernées — pas forcément la personne qui
+   * agit. Quand un comptable ou un associé agit dans l'espace argent d'un
+   * autre, les moteurs d'argent (comptabilité, banque) passent ici le
+   * propriétaire de l'espace.
+   *
+   * L'acteur réel n'est pas enregistré : `constitution_violations` n'a pas de
+   * colonne pour lui, et en ajouter une demande une migration. Il se retrouve
+   * dans `space_activity` (même propriétaire, même instant, méthode et
+   * chemin), où chaque écriture d'un membre — refusée comprise — est
+   * journalisée. Voir docs/registre-de-traitements.md.
+   */
   userId?: string;
   projectId?: string;
 }

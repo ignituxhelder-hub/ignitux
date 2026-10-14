@@ -216,6 +216,8 @@ export class LedgerService implements OnModuleInit {
         entryOwner: describeOwner(owner),
         lineOwners: input.lines.map((line) => describeOwner(accounts.get(line.accountId)!.owner)),
       },
+      // Le propriétaire des livres, même quand un membre agit pour lui :
+      // l'acteur est dans `space_activity` (voir ConstitutionContext).
       owner.type === 'user' ? { userId: owner.userId } : {},
     );
 
