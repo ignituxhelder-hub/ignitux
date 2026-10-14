@@ -261,6 +261,8 @@ describe('Constitution et données personnelles (e2e)', () => {
         'cgu_acceptees_le',
         'cgu_version_acceptee',
         'compte_cree_le',
+        // Le CV décrit (expériences, formations) saisi pour le questionnaire.
+        'cv',
         'email',
         'email_verifie_le',
         'id',
