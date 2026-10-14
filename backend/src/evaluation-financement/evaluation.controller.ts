@@ -1,3 +1,4 @@
+import { Throttle } from '@nestjs/throttler';
 import {
   Body,
   Controller,
@@ -30,6 +31,8 @@ import { EvaluationService } from './evaluation.service.js';
 export class EvaluationController {
   constructor(private readonly evaluations: EvaluationService) {}
 
+  // Un appel IA payé par le propriétaire : limite propre, en plus de la limite globale.
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @Post()
   demander(@CurrentUser() user: AuthenticatedUser, @Param('projectId', ParseUUIDPipe) projectId: string) {
     return this.evaluations.demander(user.id, projectId);

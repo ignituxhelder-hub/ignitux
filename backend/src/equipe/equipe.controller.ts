@@ -1,3 +1,4 @@
+import { Throttle } from '@nestjs/throttler';
 import {
   Body,
   Controller,
@@ -36,6 +37,8 @@ export class EquipeController {
     return this.equipe.lister(user.id, id);
   }
 
+  // Chaque invitation envoie un email : pas de rafale.
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @Post('collaborators')
   @HttpCode(HttpStatus.CREATED)
   inviter(

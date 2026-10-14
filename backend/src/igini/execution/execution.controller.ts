@@ -1,3 +1,4 @@
+import { Throttle } from '@nestjs/throttler';
 import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../auth/current-user.decorator.js';
@@ -24,6 +25,8 @@ export class ExecutionController {
   constructor(private readonly executionService: ExecutionService) {}
 
   @RefuserEcritureDepassee('tasks', 'taskId')
+  // Un appel IA payé par le propriétaire : limite propre, en plus de la limite globale.
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @Post('projects/:projectId/tasks/:taskId/run')
   @HttpCode(HttpStatus.OK)
   runTask(
@@ -57,6 +60,8 @@ export class ExecutionController {
     return this.executionService.refuseTask(user.id, projectId, taskId, dto?.reason);
   }
 
+  // Un appel IA payé par le propriétaire : limite propre, en plus de la limite globale.
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @Post('projects/:projectId/compliance/:requirementId/run')
   @HttpCode(HttpStatus.OK)
   runCompliance(
