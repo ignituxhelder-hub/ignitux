@@ -1,88 +1,54 @@
-import { ACCES_ARGENT_AUTOMATIQUE_DEPUIS, accesArgent, CHOIX_ACCES_ARGENT } from './acces-argent.js';
+import * as regle from './acces-argent.js';
+import { accesArgent, CHOIX_ACCES_ARGENT } from './acces-argent.js';
 
-const AVANT = new Date('2026-10-14T21:59:59.999Z'); // 14/10/2026 23:59:59,999 à Paris
-const PILE = new Date('2026-10-14T22:00:00.000Z'); // 15/10/2026 00:00 à Paris
-const APRES = new Date('2026-11-02T09:00:00.000Z');
-
-describe('accesArgent — accès automatique ou activé (décision du 2026-10-14)', () => {
-  it('la date limite est le 15/10/2026 à minuit, heure de Paris', () => {
-    expect(ACCES_ARGENT_AUTOMATIQUE_DEPUIS.toISOString()).toBe('2026-10-14T22:00:00.000Z');
-    expect(CHOIX_ACCES_ARGENT).toEqual({ active: 'argent', coupe: 'refuse' });
+describe('accesArgent — accès consenti au geste du propriétaire (décision du 2026-10-14, après revue)', () => {
+  it('trois choix écrits : activé, accordé à l’invitation, coupé', () => {
+    expect(CHOIX_ACCES_ARGENT).toEqual({ active: 'argent', automatique: 'argent_auto', coupe: 'refuse' });
   });
 
-  it('(a) activé par le propriétaire : accès, même pour un collaborateur d’avant', () => {
-    expect(accesArgent([{ role: 'comptable', created_at: AVANT }], 'argent')).toEqual({
-      acces: true,
-      raison: 'active_par_toi',
-    });
+  it('plus aucune date limite : le module n’exporte que la règle et ses choix', () => {
+    expect(Object.keys(regle).sort()).toEqual(['CHOIX_ACCES_ARGENT', 'accesArgent']);
   });
 
-  it('(b) ajouté à partir de la date limite, sans choix : accès automatique', () => {
-    expect(accesArgent([{ role: 'associe', created_at: PILE }], null)).toEqual({ acces: true, raison: 'automatique' });
-    expect(accesArgent([{ role: 'comptable', created_at: APRES }], undefined)).toEqual({
+  it.each(['comptable', 'associe'])('%s, ligne « argent » (activé par le propriétaire) : accès', (role) => {
+    expect(accesArgent([{ role }], 'argent')).toEqual({ acces: true, raison: 'active_par_toi' });
+  });
+
+  it.each(['comptable', 'associe'])('%s, ligne « argent_auto » (accordé à l’invitation) : accès', (role) => {
+    expect(accesArgent([{ role }], 'argent_auto')).toEqual({ acces: true, raison: 'automatique' });
+  });
+
+  it('ligne « refuse » (coupé par le propriétaire) : pas d’accès', () => {
+    expect(accesArgent([{ role: 'comptable' }], 'refuse')).toEqual({ acces: false, raison: 'coupe_par_toi' });
+  });
+
+  it('aucune ligne (collaborateur d’avant) : à activer, pas d’accès', () => {
+    expect(accesArgent([{ role: 'comptable' }], null)).toEqual({ acces: false, raison: 'a_activer' });
+    expect(accesArgent([{ role: 'associe' }], undefined)).toEqual({ acces: false, raison: 'a_activer' });
+  });
+
+  it('une valeur inconnue (reste de la version abandonnée) vaut « aucune ligne »', () => {
+    for (const reste of ['comptable', 'associe', 'salarie', 'ARGENT', 'argent ', '']) {
+      expect(accesArgent([{ role: 'comptable' }], reste)).toEqual({ acces: false, raison: 'a_activer' });
+    }
+  });
+
+  it('plusieurs projets : un seul rôle comptable ou associé actuel suffit, la ligne décide', () => {
+    expect(accesArgent([{ role: 'salarie' }, { role: 'associe' }], 'argent_auto')).toEqual({
       acces: true,
       raison: 'automatique',
     });
-  });
-
-  it('ajouté avant la date limite, sans choix : à activer (pas d’accès)', () => {
-    expect(accesArgent([{ role: 'comptable', created_at: AVANT }], null)).toEqual({
-      acces: false,
-      raison: 'a_activer',
-    });
-  });
-
-  it('une ligne sans date compte comme ancienne (côté prudent)', () => {
-    expect(accesArgent([{ role: 'associe', created_at: null }], null)).toEqual({ acces: false, raison: 'a_activer' });
-  });
-
-  it('coupé par le propriétaire : pas d’accès, même invité après la date limite', () => {
-    expect(accesArgent([{ role: 'comptable', created_at: APRES }], 'refuse')).toEqual({
+    expect(accesArgent([{ role: 'observateur' }, { role: 'comptable' }], 'refuse')).toEqual({
       acces: false,
       raison: 'coupe_par_toi',
     });
   });
 
-  it('plusieurs projets : une seule ligne récente comptable ou associé suffit', () => {
-    expect(
-      accesArgent(
-        [
-          { role: 'comptable', created_at: AVANT },
-          { role: 'associe', created_at: APRES },
-        ],
-        null,
-      ),
-    ).toEqual({ acces: true, raison: 'automatique' });
-  });
-
-  it('seule la date d’une ligne dont le rôle ACTUEL ouvre l’argent compte', () => {
-    // Récent comme salarié, ancien comme comptable : l'invitation récente ne
-    // parlait pas d'argent, il faut une activation.
-    expect(
-      accesArgent(
-        [
-          { role: 'salarie', created_at: APRES },
-          { role: 'comptable', created_at: AVANT },
-        ],
-        null,
-      ),
-    ).toEqual({ acces: false, raison: 'a_activer' });
-  });
-
-  it('plus comptable ni associé nulle part : aucun accès, même activé (null)', () => {
+  it('plus comptable ni associé nulle part : aucun accès, quelle que soit la ligne (null)', () => {
     expect(accesArgent([], 'argent')).toBeNull();
-    expect(accesArgent([{ role: 'observateur', created_at: APRES }], 'argent')).toBeNull();
-    expect(accesArgent([{ role: 'salarie', created_at: APRES }], null)).toBeNull();
-  });
-
-  it('un choix inconnu (reste de la version abandonnée) vaut « aucun choix »', () => {
-    expect(accesArgent([{ role: 'comptable', created_at: AVANT }], 'comptable')).toEqual({
-      acces: false,
-      raison: 'a_activer',
-    });
-    expect(accesArgent([{ role: 'comptable', created_at: APRES }], 'salarie')).toEqual({
-      acces: true,
-      raison: 'automatique',
-    });
+    expect(accesArgent([], 'argent_auto')).toBeNull();
+    expect(accesArgent([{ role: 'observateur' }], 'argent')).toBeNull();
+    expect(accesArgent([{ role: 'salarie' }], 'argent_auto')).toBeNull();
+    expect(accesArgent([{ role: 'inconnu' }], null)).toBeNull();
   });
 });

@@ -94,13 +94,13 @@ function nomEspace(projet: { title: string | null; owner: { profile?: { display_
  * Rend l'`ownerId` effectif d'une requête : le mien, ou celui du
  * propriétaire X quand je suis, sur AU MOINS UN projet dont X est
  * propriétaire, collaborateur avec un rôle qui ouvre le domaine (`comptable`
- * ou `associe` pour l'argent) ET que cet accès est en vigueur : activé par
- * X, ou automatique (invité à partir du 15/10/2026) et non coupé par X —
- * la règle est dans `acces-argent.ts`.
+ * ou `associe` pour l'argent) ET que X y a consenti : ligne `space_members`
+ * (X, moi) `'argent'` (activé par X) ou `'argent_auto'` (accordé quand X
+ * m'a invité ou m'a donné ce rôle) — la règle est dans `acces-argent.ts`.
  *
  * Sinon — pas collaborateur de X, collaborateur avec un autre rôle
- * (`salarie`, `observateur`), accès coupé ou jamais activé, en-tête mal
- * formé — 404 « Espace introuvable. », la même réponse qu'un espace qui
+ * (`salarie`, `observateur`), accès coupé ou à activer (aucune ligne),
+ * en-tête mal formé — 404 « Espace introuvable. », la même réponse qu'un espace qui
  * n'existe pas : rien ne révèle l'espace à qui n'y a pas accès.
  *
  * Relu en base à chaque appel, sans cache : retiré de tous les projets de X
@@ -124,7 +124,7 @@ export class EspaceService {
         role: { in: [...ROLES_ARGENT] },
         project: { owner_id: proprietaire },
       },
-      select: { role: true, created_at: true },
+      select: { role: true },
     });
     // Le rôle est revérifié ici, pas seulement dans le filtre : une fausse
     // route de la requête ne doit jamais ouvrir plus que la table.
@@ -143,8 +143,9 @@ export class EspaceService {
   /**
    * « Mon espace » d'abord, puis l'espace argent de chaque propriétaire
    * dont je suis comptable ou associé sur au moins un projet ET où mon accès
-   * est en vigueur (activé, ou automatique et non coupé), avec mes rôles
-   * chez lui (un rôle par valeur, même s'il revient sur plusieurs projets).
+   * est en vigueur (activé par lui, ou accordé à l'invitation, jamais
+   * coupé), avec mes rôles chez lui (un rôle par valeur, même s'il revient
+   * sur plusieurs projets).
    */
   async mesEspaces(userId: string): Promise<EspaceListe[]> {
     const liens = await this.prisma.project_collaborators.findMany({
@@ -152,7 +153,6 @@ export class EspaceService {
       orderBy: { created_at: 'asc' },
       select: {
         role: true,
-        created_at: true,
         project: {
           select: {
             owner_id: true,
@@ -176,7 +176,7 @@ export class EspaceService {
         liens: [],
       };
       espace.roles.add(lien.role);
-      espace.liens.push({ role: lien.role, created_at: lien.created_at });
+      espace.liens.push({ role: lien.role });
       parProprietaire.set(ownerId, espace);
     }
 
@@ -215,7 +215,6 @@ export class EspaceService {
       select: {
         user_id: true,
         role: true,
-        created_at: true,
         user: { select: { email: true, profile: { select: { display_name: true } } } },
       },
     });
@@ -234,7 +233,7 @@ export class EspaceService {
         liens: [],
       };
       membre.roles.add(lien.role);
-      membre.liens.push({ role: lien.role, created_at: lien.created_at });
+      membre.liens.push({ role: lien.role });
       parMembre.set(lien.user_id, membre);
     }
     if (parMembre.size === 0) return [];
@@ -255,7 +254,8 @@ export class EspaceService {
   /**
    * J'active (`acces: true`) ou je coupe (`false`) l'accès d'un de mes
    * comptables ou associés à MON argent. Enregistré dans `space_members`
-   * (une ligne par couple propriétaire / membre, `'argent'` ou `'refuse'`),
+   * (une ligne par couple propriétaire / membre : `'argent'` ou `'refuse'`,
+   * qui remplace aussi un `'argent_auto'` accordé à l'invitation),
    * `created_at` portant la date du choix en vigueur. Rend la liste relue :
    * l'interface affiche ce que le serveur a retenu, rien d'autre.
    *

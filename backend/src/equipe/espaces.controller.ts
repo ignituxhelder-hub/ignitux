@@ -10,7 +10,8 @@ import { EspaceService } from './espace.service.js';
 /**
  * Les espaces argent où je peux travailler : le mien, puis celui de chaque
  * propriétaire dont je suis comptable ou associé sur au moins un projet et
- * où mon accès est en vigueur (activé, ou automatique et non coupé).
+ * où mon accès est en vigueur (activé par lui, ou accordé à l'invitation, et
+ * jamais coupé).
  * Pour `GET /espaces`, l'en-tête `X-Espace` est ignoré : la liste est la même quel que soit
  * l'espace sélectionné (le client la relit pour vérifier un accès perdu).
  */

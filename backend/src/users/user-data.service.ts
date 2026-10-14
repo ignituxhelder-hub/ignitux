@@ -425,8 +425,9 @@ export class UserDataService {
           mandats_donnes_a_ignitux: mandats,
           // L'accès d'un comptable ou d'un associé à la facturation, la
           // comptabilité, la banque et la caisse d'un propriétaire : role
-          // 'argent' (activé) ou 'refuse' (coupé), created_at = date du
-          // choix en vigueur.
+          // 'argent' (activé par le propriétaire), 'argent_auto' (accordé à
+          // l'invitation ou au passage comptable / associé) ou 'refuse'
+          // (coupé), created_at = date du choix en vigueur.
           acces_a_l_argent: {
             choix_que_j_ai_faits_pour_mon_argent: choixAccesArgentFaits,
             choix_des_autres_me_concernant: choixAccesArgentMeConcernant,

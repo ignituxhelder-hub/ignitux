@@ -2,13 +2,16 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import { getEnv } from '../config/env.js';
 import { MailService } from '../mail/mail.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { CHOIX_ACCES_ARGENT } from './acces-argent.js';
 import { accesProjet, exigerCapacite } from './acces-projet.js';
+import { estRoleArgent } from './domaines.js';
 import { capacitesDe, estRoleEquipe, ROLE_LABEL, type RoleEquipe } from './droits-equipe.js';
 
 /**
  * Ce que l'accès à l'argent du propriétaire veut dire, pour les rôles qui
- * l'ouvrent. Automatique pour une invitation faite à partir du 15/10/2026
- * (`acces-argent.ts`) : c'est ce texte qui en informe la personne invitée.
+ * l'ouvrent. Automatique : inviter comme comptable ou associé enregistre
+ * l'accès (`'argent_auto'`, voir `acces-argent.ts`) ; c'est ce texte qui en
+ * informe la personne invitée.
  */
 const ACCES_ARGENT = 'accès automatique, que le propriétaire peut couper à tout moment';
 
@@ -30,6 +33,12 @@ const DESCRIPTION: Record<RoleEquipe, string> = {
  *
  * Seul le propriétaire gère l'équipe (`gerer_equipe`). Tout membre peut voir
  * qui en fait partie.
+ *
+ * Inviter quelqu'un comme comptable ou associé, ou lui donner l'un de ces
+ * rôles, c'est aussi consentir à son accès à l'argent du propriétaire
+ * (facturation, comptabilité, banque, caisse) : les textes des rôles le
+ * disent au moment du geste. Le consentement est enregistré à ce moment-là
+ * (`accorderAccesArgent`), jamais déduit d'une date.
  */
 @Injectable()
 export class EquipeService {
@@ -56,7 +65,7 @@ export class EquipeService {
 
   async inviter(ownerId: string, projectId: string, email: string, roleDemande = 'observateur') {
     const role = this.roleValide(roleDemande);
-    await exigerCapacite(this.prisma, ownerId, projectId, 'gerer_equipe');
+    const { ownerId: proprietaire } = await exigerCapacite(this.prisma, ownerId, projectId, 'gerer_equipe');
 
     const user = await this.prisma.users.findUnique({ where: { email } });
     if (!user) throw new NotFoundException('Aucun compte ne correspond à cet email.');
@@ -72,25 +81,67 @@ export class EquipeService {
       data: { project_id: projectId, user_id: user.id, role },
       include: { user: { select: { id: true, email: true } } },
     });
+    // Avant l'e-mail : quand il arrive, l'accès annoncé est déjà là.
+    if (estRoleArgent(role)) await this.accorderAccesArgent(proprietaire, user.id);
     await this.prevenir(user.email, projectId, role);
     return membre;
   }
 
   async changerRole(ownerId: string, projectId: string, memberUserId: string, roleDemande: string) {
     const role = this.roleValide(roleDemande);
-    await exigerCapacite(this.prisma, ownerId, projectId, 'gerer_equipe');
+    const { ownerId: proprietaire } = await exigerCapacite(this.prisma, ownerId, projectId, 'gerer_equipe');
     const { count } = await this.prisma.project_collaborators.updateMany({
       where: { project_id: projectId, user_id: memberUserId },
       data: { role },
     });
     if (count === 0) throw new NotFoundException('Cette personne ne fait pas partie de l’équipe du projet.');
+    // Passé comptable ou associé (y compris de l'un à l'autre) : même
+    // consentement qu'à l'invitation.
+    if (estRoleArgent(role)) await this.accorderAccesArgent(proprietaire, memberUserId);
   }
 
+  /**
+   * Retire la personne du projet. Son accès à l'argent du propriétaire
+   * (`space_members`) n'est PAS supprimé : il dépend déjà de son rôle actuel
+   * (plus comptable ni associée sur aucun projet du propriétaire, elle le
+   * perd à la requête suivante). Si elle le redevient, le choix enregistré
+   * s'applique de nouveau — un accès coupé reste coupé.
+   */
   async retirer(ownerId: string, projectId: string, memberUserId: string) {
     await exigerCapacite(this.prisma, ownerId, projectId, 'gerer_equipe');
     await this.prisma.project_collaborators.deleteMany({
       where: { project_id: projectId, user_id: memberUserId },
     });
+  }
+
+  /**
+   * LE CONSENTEMENT DU PROPRIÉTAIRE À L'ACCÈS À SON ARGENT, pris au geste :
+   * inviter comme comptable ou associé, ou donner l'un de ces rôles.
+   *
+   * Crée la ligne `space_members` (propriétaire, membre) avec `'argent_auto'`
+   * SEULEMENT SI AUCUNE LIGNE N'EXISTE (`INSERT … ON CONFLICT DO NOTHING`,
+   * atomique) : un choix explicite du propriétaire — `'argent'` activé,
+   * `'refuse'` coupé — n'est jamais écrasé.
+   *
+   * Pas de transaction autour de l'invitation : écrit juste après. Ne lève
+   * jamais — un échec n'annule ni l'invitation ni le changement de rôle ; il
+   * est journalisé, et la personne reste « à activer » (côté prudent) : le
+   * propriétaire peut l'activer lui-même.
+   */
+  private async accorderAccesArgent(ownerId: string, memberId: string): Promise<void> {
+    const membre = memberId.toLowerCase();
+    // Jamais membre de son propre argent, même si la base le permettait.
+    if (membre === ownerId.toLowerCase()) return;
+    try {
+      await this.prisma.space_members.createMany({
+        data: [{ owner_id: ownerId, member_id: membre, role: CHOIX_ACCES_ARGENT.automatique }],
+        skipDuplicates: true,
+      });
+    } catch (erreur) {
+      this.logger.error(
+        `Accès à l’argent de ${ownerId} pour ${membre} : consentement non enregistré (reste à activer) — ${String(erreur)}`,
+      );
+    }
   }
 
   private roleValide(role: string): RoleEquipe {

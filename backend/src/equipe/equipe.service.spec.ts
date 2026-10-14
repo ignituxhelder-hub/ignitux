@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Logger, NotFoundException } from '@nestjs/common';
 import { EquipeService } from './equipe.service.js';
 
 vi.mock('../config/env.js', () => ({ getEnv: () => ({ FRONTEND_URL: 'https://ignitux.com' }) }));
@@ -16,9 +16,26 @@ function monter() {
       updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
     },
+    // Les choix d'accès à l'argent : seule la création « si aucune ligne »
+    // est permise à l'équipe ; tout le reste doit rester intact.
+    space_members: {
+      createMany: vi.fn().mockResolvedValue({ count: 1 }),
+      upsert: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn(),
+    },
   };
   const mail = { send: vi.fn().mockResolvedValue('sent') };
   return { prisma, mail, service: new EquipeService(prisma as never, mail as never) };
+}
+
+/** Ce qui ne doit jamais toucher un choix existant : ni écraser, ni supprimer. */
+function rienNEstEcraseNiSupprime(prisma: ReturnType<typeof monter>['prisma']) {
+  for (const op of ['upsert', 'update', 'updateMany', 'delete', 'deleteMany'] as const) {
+    expect(prisma.space_members[op]).not.toHaveBeenCalled();
+  }
 }
 
 describe('EquipeService', () => {
@@ -140,5 +157,119 @@ describe('EquipeService', () => {
     prisma.project_collaborators.findMany.mockResolvedValue([{ user_id: 'u2', role: 'comptable' }]);
 
     await expect(service.lister('u2', 'p1')).resolves.toEqual([{ user_id: 'u2', role: 'comptable' }]);
+  });
+});
+
+describe('EquipeService — le consentement à l’accès à l’argent, pris au geste du propriétaire', () => {
+  /** La ligne (propriétaire du projet, membre) « argent_auto », créée seulement si aucune n'existe. */
+  const ACCORD = {
+    data: [{ owner_id: 'proprio', member_id: 'u2', role: 'argent_auto' }],
+    skipDuplicates: true,
+  };
+
+  it.each(['comptable', 'associe'])(
+    'inviter comme %s crée la ligne « argent_auto » si aucune n’existe — sans jamais écraser',
+    async (role) => {
+      const { service, prisma } = monter();
+
+      await service.inviter('proprio', 'p1', 'b@exemple.fr', role);
+
+      expect(prisma.space_members.createMany).toHaveBeenCalledTimes(1);
+      expect(prisma.space_members.createMany).toHaveBeenCalledWith(ACCORD);
+      rienNEstEcraseNiSupprime(prisma);
+    },
+  );
+
+  it('la ligne est écrite après l’ajout au projet et avant l’e-mail d’invitation', async () => {
+    const { service, prisma, mail } = monter();
+
+    await service.inviter('proprio', 'p1', 'b@exemple.fr', 'comptable');
+
+    const [ajout] = prisma.project_collaborators.create.mock.invocationCallOrder;
+    const [accord] = prisma.space_members.createMany.mock.invocationCallOrder;
+    const [email] = mail.send.mock.invocationCallOrder;
+    expect(ajout).toBeLessThan(accord);
+    expect(accord).toBeLessThan(email);
+  });
+
+  it.each(['salarie', 'observateur'])('inviter comme %s n’écrit aucun choix d’accès', async (role) => {
+    const { service, prisma } = monter();
+
+    await service.inviter('proprio', 'p1', 'b@exemple.fr', role);
+
+    expect(prisma.space_members.createMany).not.toHaveBeenCalled();
+    rienNEstEcraseNiSupprime(prisma);
+  });
+
+  it.each(['comptable', 'associe'])(
+    'passer un membre %s (promotion, ou de l’un à l’autre) crée la ligne si aucune n’existe',
+    async (role) => {
+      const { service, prisma } = monter();
+
+      await service.changerRole('proprio', 'p1', 'u2', role);
+
+      expect(prisma.space_members.createMany).toHaveBeenCalledWith(ACCORD);
+      rienNEstEcraseNiSupprime(prisma);
+    },
+  );
+
+  it.each(['salarie', 'observateur'])(
+    'passer un membre %s n’écrit ni ne supprime aucun choix (l’accès suit le rôle actuel)',
+    async (role) => {
+      const { service, prisma } = monter();
+
+      await service.changerRole('proprio', 'p1', 'u2', role);
+
+      expect(prisma.space_members.createMany).not.toHaveBeenCalled();
+      rienNEstEcraseNiSupprime(prisma);
+    },
+  );
+
+  it('changer le rôle de quelqu’un hors de l’équipe (404) : aucun choix écrit', async () => {
+    const { service, prisma } = monter();
+    prisma.project_collaborators.updateMany.mockResolvedValueOnce({ count: 0 });
+
+    await expect(service.changerRole('proprio', 'p1', 'inconnu', 'associe')).rejects.toBeInstanceOf(NotFoundException);
+    expect(prisma.space_members.createMany).not.toHaveBeenCalled();
+  });
+
+  it('retirer quelqu’un ne supprime pas son choix d’accès (l’accès dépend déjà du rôle actuel)', async () => {
+    const { service, prisma } = monter();
+
+    await service.retirer('proprio', 'p1', 'u2');
+
+    expect(prisma.project_collaborators.deleteMany).toHaveBeenCalled();
+    expect(prisma.space_members.createMany).not.toHaveBeenCalled();
+    rienNEstEcraseNiSupprime(prisma);
+  });
+
+  it('un associé (sans gerer_equipe) ne déclenche jamais d’écriture du choix', async () => {
+    const { service, prisma } = monter();
+    prisma.projects.findFirst.mockResolvedValue({ ...PROJET, collaborators: [{ role: 'associe' }] });
+
+    await expect(service.inviter('u3', 'p1', 'b@exemple.fr', 'comptable')).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(service.changerRole('u3', 'p1', 'u2', 'comptable')).rejects.toBeInstanceOf(ForbiddenException);
+    expect(prisma.space_members.createMany).not.toHaveBeenCalled();
+  });
+
+  it('un échec de cette écriture n’annule ni l’invitation ni le changement de rôle : journalisé seulement', async () => {
+    const { service, prisma, mail } = monter();
+    prisma.space_members.createMany.mockRejectedValue(new Error('base injoignable'));
+    const journal = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+
+    try {
+      await expect(service.inviter('proprio', 'p1', 'b@exemple.fr', 'comptable')).resolves.toMatchObject({
+        user_id: 'u2',
+        role: 'comptable',
+      });
+      // L'invitation est allée au bout : l'e-mail est parti.
+      expect(mail.send).toHaveBeenCalledTimes(1);
+      await expect(service.changerRole('proprio', 'p1', 'u2', 'associe')).resolves.toBeUndefined();
+
+      expect(journal).toHaveBeenCalledTimes(2);
+      expect(String(journal.mock.calls[0][0])).toContain('consentement non enregistré');
+    } finally {
+      journal.mockRestore();
+    }
   });
 });
