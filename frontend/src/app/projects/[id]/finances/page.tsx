@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Brand } from '@/components/ignitux-mark';
+import { IconesPanneaux } from '@/components/icones-panneaux';
 import {
   api,
   ApiError,
@@ -156,52 +157,93 @@ export default function ProjectFinancesPage() {
             </p>
           </div>
 
-          <Investisseurs registre={registre} />
-
-          <Capital capTable={capTable} />
-
-          <div className="card" style={{ marginTop: '1.5rem' }}>
-            <h2 style={{ marginTop: 0 }}>Enregistrer un mouvement</h2>
-            <p className="muted" style={{ marginTop: 0 }}>
-              Ce qui est enregistré ici est un fait, pas une prévision : la date est celle du
-              virement, pas celle de la saisie. Rien ne s&apos;annule — une erreur se corrige
-              par une écriture de correction, qui référence celle qu&apos;elle rectifie.
-            </p>
-            <FormulaireApport
-              financedProjectId={finance.id}
-              token={token}
-              onFait={async (m) => {
-                setMessage(m);
-                await charger();
-              }}
-              onErreur={setError}
-            />
-            <FormulaireVersement
-              financedProjectId={finance.id}
-              token={token}
-              onFait={async (m) => {
-                setMessage(m);
-                await charger();
-              }}
-              onErreur={setError}
-            />
-          </div>
-
-          <Historique
-            registre={registre}
-            token={token}
-            onFait={async (m) => {
-              setMessage(m);
-              await charger();
-            }}
-            onErreur={setError}
+          <IconesPanneaux
+            titre="Le financement du projet"
+            ouvertParDefaut="mouvement"
+            panneaux={[
+              {
+                id: 'mouvement',
+                nom: 'Enregistrer',
+                glyphe: 'financement',
+                categorie: 'investir',
+                contenu: (
+                  <div className="card" style={{ marginTop: '1.5rem' }}>
+                    <h2 style={{ marginTop: 0 }}>Enregistrer un mouvement</h2>
+                    <p className="muted" style={{ marginTop: 0 }}>
+                      Ce qui est enregistré ici est un fait, pas une prévision : la date est celle du
+                      virement, pas celle de la saisie. Rien ne s&apos;annule — une erreur se corrige
+                      par une écriture de correction, qui référence celle qu&apos;elle rectifie.
+                    </p>
+                    <FormulaireApport
+                      financedProjectId={finance.id}
+                      token={token}
+                      onFait={async (m) => {
+                        setMessage(m);
+                        await charger();
+                      }}
+                      onErreur={setError}
+                    />
+                    <FormulaireVersement
+                      financedProjectId={finance.id}
+                      token={token}
+                      onFait={async (m) => {
+                        setMessage(m);
+                        await charger();
+                      }}
+                      onErreur={setError}
+                    />
+                  </div>
+                ),
+              },
+              {
+                id: 'investisseurs',
+                nom: 'Investisseurs',
+                glyphe: 'collaborateurs',
+                categorie: 'reseau',
+                contenu: <Investisseurs registre={registre} />,
+              },
+              {
+                id: 'capital',
+                nom: 'Capital',
+                glyphe: 'capital',
+                categorie: 'gerer',
+                contenu: <Capital capTable={capTable} />,
+              },
+              {
+                id: 'historique',
+                nom: 'Historique',
+                glyphe: 'taches',
+                categorie: 'vendre',
+                contenu: (
+                  <Historique
+                    registre={registre}
+                    token={token}
+                    onFait={async (m) => {
+                      setMessage(m);
+                      await charger();
+                    }}
+                    onErreur={setError}
+                  />
+                ),
+              },
+              {
+                id: 'dividendes',
+                nom: 'Dividendes',
+                glyphe: 'financement-recu',
+                categorie: 'investir',
+                contenu: <Dividendes dividendes={dividendes} />,
+              },
+              {
+                id: 'controles',
+                nom: 'Contrôles',
+                glyphe: 'conformite',
+                categorie: 'reglages',
+                // En dernier, volontairement : on lit d'abord ce que le projet a
+                // reçu et versé, puis on vérifie que tout cela tient ensemble.
+                contenu: <AuditFinancier token={token} projectId={projectId} />,
+              },
+            ]}
           />
-
-          <Dividendes dividendes={dividendes} />
-
-          {/* En dernier, volontairement : on lit d'abord ce que le projet a
-              reçu et versé, puis on vérifie que tout cela tient ensemble. */}
-          <AuditFinancier token={token} projectId={projectId} />
         </>
       )}
     </main>
