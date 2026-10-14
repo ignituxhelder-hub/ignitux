@@ -50,9 +50,11 @@ interface RequeteHttp extends RequeteAvecEspace {
  *    compris quand elle échoue. L'écriture du journal ne casse jamais la
  *    requête : un échec est seulement journalisé côté serveur.
  * 3. **Contexte d'espace.** Chaque requête HTTP s'exécute dans un contexte
- *    d'espace neuf (`contexte-espace.ts`), que `ResoudreEspacePipe` remplit :
- *    c'est ce qui restreint les lectures de projet au propriétaire seul dans
- *    l'espace d'un autre.
+ *    d'espace neuf (`contexte-espace.ts`), que `ResoudreEspacePipe` remplit.
+ *    Il sert de preuve de câblage : sans lui, le pipe refuse tout espace
+ *    étranger (403 « Espace indéterminable. »), car sans cet intercepteur il
+ *    n'y aurait ni refus des routes non marquées ni journal. Il ne filtre
+ *    aucune lecture : les routes hors argent sont simplement refusées (point 1).
  */
 @Injectable()
 export class EspaceInterceptor implements NestInterceptor, OnModuleInit {

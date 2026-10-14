@@ -1,47 +1,22 @@
 import { ForbiddenException } from '@nestjs/common';
-import { dansUnContexteEspace, dansUnEspaceEtranger, noterEspaceResolu } from './contexte-espace.js';
+import { dansUnContexteEspace, noterEspaceResolu } from './contexte-espace.js';
 import { ResoudreEspacePipe } from './espace.decorator.js';
 import { EspaceService } from './espace.service.js';
 
 const MOI = '11111111-1111-4111-8111-111111111111';
 const PROPRIO = '22222222-2222-4222-8222-222222222222';
 
-describe('contexte d’espace : chez qui agit la requête', () => {
-  it('hors requête (tâche de fond) : jamais « chez un autre »', () => {
-    expect(dansUnEspaceEtranger()).toBe(false);
+describe('contexte d’espace : la preuve que l’intercepteur est câblé', () => {
+  it('hors requête (tâche de fond, intercepteur absent) : rien n’est noté', () => {
     expect(noterEspaceResolu(MOI, PROPRIO)).toBe(false);
   });
 
-  it('chez soi (espace résolu = moi) : pas étranger', () => {
-    dansUnContexteEspace(() => {
-      expect(noterEspaceResolu(MOI, MOI)).toBe(true);
-      expect(dansUnEspaceEtranger()).toBe(false);
-    });
-  });
-
-  it('dans l’espace d’un autre, y compris après un await', async () => {
+  it('dans un contexte, la résolution est notée, y compris après un await', async () => {
     await dansUnContexteEspace(async () => {
-      noterEspaceResolu(MOI, PROPRIO);
+      expect(noterEspaceResolu(MOI, MOI)).toBe(true);
       await new Promise((resolve) => setImmediate(resolve));
-      expect(dansUnEspaceEtranger()).toBe(true);
+      expect(noterEspaceResolu(MOI, PROPRIO)).toBe(true);
     });
-  });
-
-  it('deux requêtes simultanées ne se mélangent pas', async () => {
-    const vus: Array<[string, boolean]> = [];
-    await Promise.all([
-      dansUnContexteEspace(async () => {
-        noterEspaceResolu(MOI, PROPRIO);
-        await new Promise((resolve) => setTimeout(resolve, 5));
-        vus.push(['etranger', dansUnEspaceEtranger()]);
-      }),
-      dansUnContexteEspace(async () => {
-        noterEspaceResolu(PROPRIO, PROPRIO);
-        await new Promise((resolve) => setTimeout(resolve, 1));
-        vus.push(['chez-soi', dansUnEspaceEtranger()]);
-      }),
-    ]);
-    expect(Object.fromEntries(vus)).toEqual({ etranger: true, 'chez-soi': false });
   });
 });
 
@@ -61,8 +36,9 @@ describe('ResoudreEspacePipe : fermé par défaut sans contexte', () => {
 
   it('dans un contexte, l’espace étranger passe et y est noté', async () => {
     await dansUnContexteEspace(async () => {
-      await expect(pipe.transform(demande(PROPRIO))).resolves.toBe(PROPRIO);
-      expect(dansUnEspaceEtranger()).toBe(true);
+      const requete = demande(PROPRIO);
+      await expect(pipe.transform(requete)).resolves.toBe(PROPRIO);
+      expect(requete.requete).toMatchObject({ espace: { ownerId: PROPRIO, domaine: 'argent' } });
     });
   });
 
