@@ -79,6 +79,18 @@ export function CollaboratorsSection({ token, projectId, peutGerer = true }: Col
 
   async function handleRole(userId: string, nouveau: RoleEquipe) {
     if (!token) return;
+    // Passer quelqu'un comptable ou associé ouvre l'accès à mon argent (le
+    // serveur l'enregistre au moment du changement) : le propriétaire doit le
+    // lire avant, comme à l'invitation où la description du rôle est affichée.
+    if (nouveau === 'comptable' || nouveau === 'associe') {
+      const email = collaborators.find((c) => c.user_id === userId)?.user.email ?? 'Cette personne';
+      const accord = window.confirm(
+        `${email} deviendra ${ROLE_EQUIPE_LABEL[nouveau].toLowerCase()} : sauf si tu lui as déjà coupé cet accès, ` +
+          'elle pourra voir et modifier ta facturation, ta compta, ta banque et ta caisse. ' +
+          'Tu pourras couper cet accès à tout moment dans « Accès à mon argent ». Continuer ?',
+      );
+      if (!accord) return;
+    }
     setError(null);
     const avant = collaborators;
     setCollaborators((prev) => prev.map((c) => (c.user_id === userId ? { ...c, role: nouveau } : c)));

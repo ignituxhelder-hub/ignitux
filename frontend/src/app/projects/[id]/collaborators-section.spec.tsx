@@ -151,6 +151,7 @@ describe('CollaboratorsSection', () => {
       'GET /projects/p1/collaborators': { status: 200, body: [MEMBRE] },
       'PATCH /projects/p1/collaborators/u2': { status: 204, body: null },
     });
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
     render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
 
     fireEvent.change(await screen.findByLabelText('Rôle de b@b.com'), { target: { value: 'comptable' } });
@@ -158,6 +159,55 @@ describe('CollaboratorsSection', () => {
     await waitFor(() => expect(appels('PATCH', '/projects/p1/collaborators/u2')).toHaveLength(1));
     expect(JSON.parse(String(appels('PATCH', '/projects/p1/collaborators/u2')[0][1]?.body))).toEqual({
       role: 'comptable',
+    });
+  });
+
+  describe('passer quelqu’un comptable ou associé ouvre l’accès à mon argent : le dire avant', () => {
+    it.each(['comptable', 'associe'])('vers %s : confirmation qui nomme la personne et l’argent', async (nouveau) => {
+      mockApiRoutes({
+        'GET /projects/p1/collaborators': { status: 200, body: [MEMBRE] },
+        'PATCH /projects/p1/collaborators/u2': { status: 204, body: null },
+      });
+      const confirmer = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      fireEvent.change(await screen.findByLabelText('Rôle de b@b.com'), { target: { value: nouveau } });
+
+      await waitFor(() => expect(appels('PATCH', '/projects/p1/collaborators/u2')).toHaveLength(1));
+      expect(confirmer).toHaveBeenCalledTimes(1);
+      const texte = String(confirmer.mock.calls[0][0]);
+      expect(texte).toContain('b@b.com');
+      expect(texte).toMatch(/facturation, ta compta, ta banque et ta caisse/);
+      expect(texte).toMatch(/couper/);
+    });
+
+    it('confirmation refusée : rien n’est envoyé et le rôle affiché ne change pas', async () => {
+      mockApiRoutes({
+        'GET /projects/p1/collaborators': { status: 200, body: [MEMBRE] },
+        'PATCH /projects/p1/collaborators/u2': { status: 204, body: null },
+      });
+      vi.spyOn(window, 'confirm').mockReturnValue(false);
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      const choix = await screen.findByLabelText('Rôle de b@b.com');
+      fireEvent.change(choix, { target: { value: 'comptable' } });
+
+      expect(appels('PATCH', '/projects/p1/collaborators/u2')).toHaveLength(0);
+      expect(choix).toHaveValue('salarie');
+    });
+
+    it('vers un rôle sans argent (observateur) : aucune confirmation', async () => {
+      mockApiRoutes({
+        'GET /projects/p1/collaborators': { status: 200, body: [MEMBRE] },
+        'PATCH /projects/p1/collaborators/u2': { status: 204, body: null },
+      });
+      const confirmer = vi.spyOn(window, 'confirm');
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      fireEvent.change(await screen.findByLabelText('Rôle de b@b.com'), { target: { value: 'observateur' } });
+
+      await waitFor(() => expect(appels('PATCH', '/projects/p1/collaborators/u2')).toHaveLength(1));
+      expect(confirmer).not.toHaveBeenCalled();
     });
   });
 
@@ -437,6 +487,7 @@ describe('CollaboratorsSection', () => {
               : null;
         return { ok: true, status: methode === 'PATCH' ? 204 : 200, json: () => Promise.resolve(body) };
       }) as unknown as typeof fetch;
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
       render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
 
       await waitFor(() => expect(lecturesAcces()).toHaveLength(1));
@@ -498,7 +549,7 @@ describe('CollaboratorsSection', () => {
         await waitFor(() => expect(screen.getByLabelText('Bob (Comptable)')).not.toBeDisabled());
 
         // Un changement de rôle dans l'équipe relance la lecture : toutes les cases l'attendent.
-        fireEvent.change(screen.getByLabelText('Rôle de b@b.com'), { target: { value: 'comptable' } });
+        fireEvent.change(screen.getByLabelText('Rôle de b@b.com'), { target: { value: 'observateur' } });
         const relue = await prochaine('GET');
         await waitFor(() => {
           for (const nom of CASES) expect(screen.getByLabelText(nom)).toBeDisabled();
@@ -526,7 +577,7 @@ describe('CollaboratorsSection', () => {
         const choix = await prochaine('PUT');
         expect(choix.corps).toEqual({ acces: false });
         // … et pendant son envoi, un changement de rôle dans l'équipe relance une lecture.
-        fireEvent.change(screen.getByLabelText('Rôle de b@b.com'), { target: { value: 'comptable' } });
+        fireEvent.change(screen.getByLabelText('Rôle de b@b.com'), { target: { value: 'observateur' } });
         const lanceePendantLeChoix = await prochaine('GET');
 
         // Le choix répond (Chloé coupée) ; la lecture, servie avant que le
@@ -551,7 +602,7 @@ describe('CollaboratorsSection', () => {
 
         fireEvent.click(await screen.findByLabelText('Chloé (Associé)'));
         const choix = await prochaine('PUT');
-        fireEvent.change(screen.getByLabelText('Rôle de b@b.com'), { target: { value: 'comptable' } });
+        fireEvent.change(screen.getByLabelText('Rôle de b@b.com'), { target: { value: 'observateur' } });
         const lanceePendantLeChoix = await prochaine('GET');
 
         choix.repondre({ status: 200, body: CHLOE_COUPEE });
