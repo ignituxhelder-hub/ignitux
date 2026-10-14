@@ -1,4 +1,5 @@
 import { exigerCapacite } from '../equipe/acces-projet.js';
+import type { Capacite } from '../equipe/droits-equipe.js';
 import {
   BadRequestException,
   ForbiddenException,
@@ -211,11 +212,8 @@ export class InvestorsService {
    * l'écran à traiter une absence banale comme une panne.
    */
   async projectRegisterByProject(ownerId: string, projectId: string) {
-    const projet = await this.prisma.projects.findFirst({
-      where: { id: projectId, owner_id: ownerId },
-      select: { id: true },
-    });
-    if (!projet) throw new NotFoundException('Projet introuvable.');
+    // Lecture : tout membre qui voit le financement (associé, comptable, observateur).
+    await exigerCapacite(this.prisma, ownerId, projectId, 'voir_financement');
 
     const financed = await this.prisma.financed_projects.findUnique({
       where: { project_id: projectId },
@@ -235,7 +233,7 @@ export class InvestorsService {
   }
 
   async projectRegister(ownerId: string, financedProjectId: string) {
-    const financed = await this.requireOwnedFinancedProject(ownerId, financedProjectId);
+    const financed = await this.requireFinancedProject(ownerId, financedProjectId, 'voir_financement');
 
     const [participations, movements] = await Promise.all([
       this.prisma.participations.findMany({
@@ -660,7 +658,12 @@ export class InvestorsService {
 
   // ── Interne ─────────────────────────────────────────────────────────────
 
-  private async requireOwnedFinancedProject(ownerId: string, financedProjectId: string) {
+  /** Écrire dans le registre : le propriétaire seul. */
+  private requireOwnedFinancedProject(ownerId: string, financedProjectId: string) {
+    return this.requireFinancedProject(ownerId, financedProjectId, 'modifier_financement');
+  }
+
+  private async requireFinancedProject(userId: string, financedProjectId: string, capacite: Capacite) {
     const financed = await this.prisma.financed_projects.findUnique({
       where: { id: financedProjectId },
     });
@@ -680,7 +683,7 @@ export class InvestorsService {
     // fier à `entrepreneur_user_id` recopié ici : une colonne dénormalisée
     // est une vérité de plus à maintenir, et celle-ci ne doit jamais servir
     // de garde.
-    await exigerCapacite(this.prisma, ownerId, financed.project_id, 'modifier_financement');
+    await exigerCapacite(this.prisma, userId, financed.project_id, capacite);
     return { ...financed, project_id: financed.project_id };
   }
 }

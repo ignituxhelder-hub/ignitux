@@ -122,6 +122,29 @@ describe('ProjectFinancesPage', () => {
     expect(screen.getByText(/1\s?200,00/)).toBeInTheDocument();
   });
 
+  it('montre le registre à un comptable, sans rien qui écrive', async () => {
+    signInAs('tok456', { id: 'u2', email: 'compta@b.com' });
+    mockApiRoutes(
+      routes({
+        'GET /projects/p1/mon-acces': {
+          status: 200,
+          body: { role: 'comptable', capacites: ['voir_plan_financement', 'voir_financement'] },
+        },
+      }),
+    );
+
+    render(
+      <AuthProvider>
+        <ProjectFinancesPage />
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByRole('heading', { name: /Ressourcerie du Val/ })).toBeInTheDocument();
+    expect(screen.getAllByText(/5\s?000,00/).length).toBeGreaterThan(0);
+    expect(screen.queryByRole('heading', { name: 'Enregistrer un mouvement' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Corriger le mouvement/ })).not.toBeInTheDocument();
+  });
+
   it('regroupe les apports par investisseur', async () => {
     mockApiRoutes(routes());
 
