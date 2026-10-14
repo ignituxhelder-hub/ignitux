@@ -466,6 +466,27 @@ describe('UserDataService', () => {
         where: { to_profile_id: 'p1' },
       });
     });
+
+    it("exporte le journal d'équipe : l'activité dans mon espace argent et la mienne chez les autres", async () => {
+      prisma.space_activity.findMany.mockImplementation(({ where }: { where: Record<string, string> }) =>
+        Promise.resolve(where.owner_id ? [{ id: 'a1' }] : [{ id: 'a2' }]),
+      );
+
+      const exported = await service.exportUserData('u1');
+
+      expect(exported.donnees.journaux_techniques.activite_des_membres_dans_mon_espace).toEqual([{ id: 'a1' }]);
+      expect(exported.donnees.journaux_techniques.mes_actions_dans_d_autres_espaces).toEqual([{ id: 'a2' }]);
+      expect(prisma.space_activity.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { owner_id: 'u1' } }),
+      );
+      expect(prisma.space_activity.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { actor_id: 'u1' } }),
+      );
+      // Les tables réservées de la version abandonnée sont exclues : le faux
+      // client ne les a pas, et l'export n'a pas échoué en les lisant.
+      expect(prisma.space_members).toBeUndefined();
+      expect(prisma.space_invitations).toBeUndefined();
+    });
   });
 
   describe('aperçu de suppression', () => {

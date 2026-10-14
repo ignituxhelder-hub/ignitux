@@ -204,6 +204,8 @@ export class UserDataService {
       campagnesPublicitaires,
       dossiersDeCreation,
       fichesDImmatriculation,
+      activiteDansMonEspace,
+      mesActionsChezLesAutres,
       cvExperiences,
       cvFormations,
       questionnaires,
@@ -353,6 +355,16 @@ export class UserDataService {
       this.prisma.creation_filings.findMany({ where: { owner_id: userId } }),
       // Les fiches d'immatriculation, saisies par la personne elle-même.
       this.prisma.company_registrations.findMany({ where: { owner_id: userId } }),
+      // Équipe : les actions des comptables et associés dans mon espace
+      // argent, et les miennes dans l'espace argent des autres.
+      this.prisma.space_activity.findMany({
+        where: { owner_id: userId },
+        orderBy: { created_at: 'asc' },
+      }),
+      this.prisma.space_activity.findMany({
+        where: { actor_id: userId },
+        orderBy: { created_at: 'asc' },
+      }),
       // Le CV décrit, et les réponses au questionnaire de chaque projet.
       this.prisma.user_experiences.findMany({
         where: { user_id: userId },
@@ -483,6 +495,10 @@ export class UserDataService {
           // de vérifier ce qui lui a été décompté le jour où un quota
           // existera.
           appels_aux_generateurs_igini: appelsIa,
+          // Équipe : les actions des membres dans mon espace argent, et les
+          // miennes dans l'espace argent des autres.
+          activite_des_membres_dans_mon_espace: activiteDansMonEspace,
+          mes_actions_dans_d_autres_espaces: mesActionsChezLesAutres,
         },
       },
       non_inclus: exclusions(),

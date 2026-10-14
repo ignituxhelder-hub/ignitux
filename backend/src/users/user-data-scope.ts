@@ -216,8 +216,24 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   project_compliance_ai_runs: exported('journaux_techniques'),
   constitution_violations: exported('journaux_techniques'),
   ai_usage_events: exported('journaux_techniques'),
+  // Journal des actions (non-GET) faites par un comptable ou un associé dans
+  // l'espace argent d'un propriétaire : celles faites dans le mien, et les
+  // miennes chez les autres (l'acteur est une donnée me concernant).
+  // Conservé 12 mois : purgé au fil des écritures (EspaceInterceptor).
+  space_activity: exported('journaux_techniques'),
 
   // — Exclusions, chacune motivée —
+
+  // Tables créées en production le 14/10/2026 pour une version de l'équipe
+  // abandonnée le jour même. Elles restent déclarées dans schema.prisma pour
+  // qu'un `db push` ne les supprime pas, mais aucun code ne les lit ni ne
+  // les écrit.
+  space_members: excluded(
+    'réservées, inutilisées — version abandonnée le 14/10/2026 ; à retirer par une migration décidée',
+  ),
+  space_invitations: excluded(
+    'réservées, inutilisées — version abandonnée le 14/10/2026 ; à retirer par une migration décidée',
+  ),
 
   auth_tokens: excluded(
     "Jetons de sécurité à usage unique (réinitialisation de mot de passe, vérification d'email). " +

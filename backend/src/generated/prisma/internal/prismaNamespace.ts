@@ -477,6 +477,9 @@ export const ModelName = {
   company_registrations: 'company_registrations',
   financing_evaluations: 'financing_evaluations',
   financing_evaluation_edits: 'financing_evaluation_edits',
+  space_members: 'space_members',
+  space_invitations: 'space_invitations',
+  space_activity: 'space_activity',
   user_experiences: 'user_experiences',
   user_formations: 'user_formations',
   project_questionnaires: 'project_questionnaires',
@@ -496,7 +499,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "company_bylaws" | "bylaw_associates" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "chat_messages" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "project_compliance_ai_runs" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "participation_agreements" | "participation_milestones" | "dividend_right_entries" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "shopify_connections" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries" | "identity_verifications" | "mandates" | "creation_filings" | "company_registrations" | "financing_evaluations" | "financing_evaluation_edits" | "user_experiences" | "user_formations" | "project_questionnaires" | "project_igini_questions"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "company_bylaws" | "bylaw_associates" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "chat_messages" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "project_compliance_ai_runs" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "participation_agreements" | "participation_milestones" | "dividend_right_entries" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "shopify_connections" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries" | "identity_verifications" | "mandates" | "creation_filings" | "company_registrations" | "financing_evaluations" | "financing_evaluation_edits" | "space_members" | "space_invitations" | "space_activity" | "user_experiences" | "user_formations" | "project_questionnaires" | "project_igini_questions"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -6420,6 +6423,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    space_members: {
+      payload: Prisma.$space_membersPayload<ExtArgs>
+      fields: Prisma.space_membersFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.space_membersFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_membersPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.space_membersFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_membersPayload>
+        }
+        findFirst: {
+          args: Prisma.space_membersFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_membersPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.space_membersFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_membersPayload>
+        }
+        findMany: {
+          args: Prisma.space_membersFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_membersPayload>[]
+        }
+        create: {
+          args: Prisma.space_membersCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_membersPayload>
+        }
+        createMany: {
+          args: Prisma.space_membersCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.space_membersCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_membersPayload>[]
+        }
+        delete: {
+          args: Prisma.space_membersDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_membersPayload>
+        }
+        update: {
+          args: Prisma.space_membersUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_membersPayload>
+        }
+        deleteMany: {
+          args: Prisma.space_membersDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.space_membersUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.space_membersUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_membersPayload>[]
+        }
+        upsert: {
+          args: Prisma.space_membersUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_membersPayload>
+        }
+        aggregate: {
+          args: Prisma.Space_membersAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSpace_members>
+        }
+        groupBy: {
+          args: Prisma.space_membersGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Space_membersGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.space_membersCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Space_membersCountAggregateOutputType> | number
+        }
+      }
+    }
+    space_invitations: {
+      payload: Prisma.$space_invitationsPayload<ExtArgs>
+      fields: Prisma.space_invitationsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.space_invitationsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_invitationsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.space_invitationsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_invitationsPayload>
+        }
+        findFirst: {
+          args: Prisma.space_invitationsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_invitationsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.space_invitationsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_invitationsPayload>
+        }
+        findMany: {
+          args: Prisma.space_invitationsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_invitationsPayload>[]
+        }
+        create: {
+          args: Prisma.space_invitationsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_invitationsPayload>
+        }
+        createMany: {
+          args: Prisma.space_invitationsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.space_invitationsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_invitationsPayload>[]
+        }
+        delete: {
+          args: Prisma.space_invitationsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_invitationsPayload>
+        }
+        update: {
+          args: Prisma.space_invitationsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_invitationsPayload>
+        }
+        deleteMany: {
+          args: Prisma.space_invitationsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.space_invitationsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.space_invitationsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_invitationsPayload>[]
+        }
+        upsert: {
+          args: Prisma.space_invitationsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_invitationsPayload>
+        }
+        aggregate: {
+          args: Prisma.Space_invitationsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSpace_invitations>
+        }
+        groupBy: {
+          args: Prisma.space_invitationsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Space_invitationsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.space_invitationsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Space_invitationsCountAggregateOutputType> | number
+        }
+      }
+    }
+    space_activity: {
+      payload: Prisma.$space_activityPayload<ExtArgs>
+      fields: Prisma.space_activityFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.space_activityFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_activityPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.space_activityFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_activityPayload>
+        }
+        findFirst: {
+          args: Prisma.space_activityFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_activityPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.space_activityFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_activityPayload>
+        }
+        findMany: {
+          args: Prisma.space_activityFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_activityPayload>[]
+        }
+        create: {
+          args: Prisma.space_activityCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_activityPayload>
+        }
+        createMany: {
+          args: Prisma.space_activityCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.space_activityCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_activityPayload>[]
+        }
+        delete: {
+          args: Prisma.space_activityDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_activityPayload>
+        }
+        update: {
+          args: Prisma.space_activityUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_activityPayload>
+        }
+        deleteMany: {
+          args: Prisma.space_activityDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.space_activityUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.space_activityUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_activityPayload>[]
+        }
+        upsert: {
+          args: Prisma.space_activityUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$space_activityPayload>
+        }
+        aggregate: {
+          args: Prisma.Space_activityAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSpace_activity>
+        }
+        groupBy: {
+          args: Prisma.space_activityGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Space_activityGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.space_activityCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Space_activityCountAggregateOutputType> | number
+        }
+      }
+    }
     user_experiences: {
       payload: Prisma.$user_experiencesPayload<ExtArgs>
       fields: Prisma.user_experiencesFieldRefs
@@ -7922,6 +8147,46 @@ export const Financing_evaluation_editsScalarFieldEnum = {
 export type Financing_evaluation_editsScalarFieldEnum = (typeof Financing_evaluation_editsScalarFieldEnum)[keyof typeof Financing_evaluation_editsScalarFieldEnum]
 
 
+export const Space_membersScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  member_id: 'member_id',
+  role: 'role',
+  created_at: 'created_at'
+} as const
+
+export type Space_membersScalarFieldEnum = (typeof Space_membersScalarFieldEnum)[keyof typeof Space_membersScalarFieldEnum]
+
+
+export const Space_invitationsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  email: 'email',
+  role: 'role',
+  token_hash: 'token_hash',
+  expires_at: 'expires_at',
+  accepted_at: 'accepted_at',
+  accepted_by: 'accepted_by',
+  revoked_at: 'revoked_at',
+  created_at: 'created_at'
+} as const
+
+export type Space_invitationsScalarFieldEnum = (typeof Space_invitationsScalarFieldEnum)[keyof typeof Space_invitationsScalarFieldEnum]
+
+
+export const Space_activityScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  actor_id: 'actor_id',
+  methode: 'methode',
+  chemin: 'chemin',
+  statut: 'statut',
+  created_at: 'created_at'
+} as const
+
+export type Space_activityScalarFieldEnum = (typeof Space_activityScalarFieldEnum)[keyof typeof Space_activityScalarFieldEnum]
+
+
 export const User_experiencesScalarFieldEnum = {
   id: 'id',
   user_id: 'user_id',
@@ -8365,6 +8630,9 @@ export type GlobalOmitConfig = {
   company_registrations?: Prisma.company_registrationsOmit
   financing_evaluations?: Prisma.financing_evaluationsOmit
   financing_evaluation_edits?: Prisma.financing_evaluation_editsOmit
+  space_members?: Prisma.space_membersOmit
+  space_invitations?: Prisma.space_invitationsOmit
+  space_activity?: Prisma.space_activityOmit
   user_experiences?: Prisma.user_experiencesOmit
   user_formations?: Prisma.user_formationsOmit
   project_questionnaires?: Prisma.project_questionnairesOmit

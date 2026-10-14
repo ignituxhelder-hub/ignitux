@@ -58,6 +58,14 @@ model users {
   evaluations_demandees  financing_evaluations[]      @relation("evaluation_demandeur")
   evaluations_revues     financing_evaluations[]      @relation("evaluation_relecteur")
   evaluation_edits       financing_evaluation_edits[]
+  // Équipe : l'espace de la personne partagé avec d'autres comptes.
+  // Spec : docs/superpowers/specs/2026-10-11-equipe-design.md
+  membres_de_mon_espace       space_members[]     @relation("espace_proprietaire")
+  mes_appartenances           space_members[]     @relation("espace_membre")
+  invitations_envoyees        space_invitations[] @relation("invitation_proprietaire")
+  invitations_acceptees       space_invitations[] @relation("invitation_acceptee_par")
+  activite_de_mon_espace      space_activity[]    @relation("activite_espace")
+  mes_actions_chez_les_autres space_activity[]    @relation("activite_acteur")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -2087,6 +2095,62 @@ model financing_evaluation_edits {
   created_at    DateTime              @default(now()) @db.Timestamptz(6)
 
   @@index([evaluation_id])
+}
+
+/// ÉQUIPE — un membre invité dans l'espace d'un propriétaire, avec un rôle.
+/// Le rôle décide des domaines accessibles (src/equipe/domaines.ts) ; le
+/// domaine « personnel » n'est jamais délégué. Vérifié à chaque requête.
+/// Spec : docs/superpowers/specs/2026-10-11-equipe-design.md
+model space_members {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_id   String    @db.Uuid
+  owner      users     @relation("espace_proprietaire", fields: [owner_id], references: [id], onDelete: Cascade)
+  member_id  String    @db.Uuid
+  member     users     @relation("espace_membre", fields: [member_id], references: [id], onDelete: Cascade)
+  /// 'associe' | 'comptable' | 'salarie' (salarie : lot 2, non invitable)
+  role       String
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([owner_id, member_id])
+  @@index([owner_id])
+  @@index([member_id])
+}
+
+/// Invitation par e-mail dans un espace. Seul le hash SHA-256 du jeton est
+/// stocké, jamais le jeton en clair (même principe que auth_tokens).
+model space_invitations {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_id         String    @db.Uuid
+  owner            users     @relation("invitation_proprietaire", fields: [owner_id], references: [id], onDelete: Cascade)
+  /// Normalisée en minuscules.
+  email            String
+  role             String
+  token_hash       String    @unique
+  /// 7 jours après la création.
+  expires_at       DateTime  @db.Timestamptz(6)
+  accepted_at      DateTime? @db.Timestamptz(6)
+  accepted_by      String?   @db.Uuid
+  accepted_by_user users?    @relation("invitation_acceptee_par", fields: [accepted_by], references: [id], onDelete: SetNull)
+  revoked_at       DateTime? @db.Timestamptz(6)
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([owner_id])
+}
+
+/// Journal des actions (non-GET) faites par un membre dans l'espace d'un
+/// autre : méthode, chemin sans chaîne de requête, code HTTP de la réponse.
+model space_activity {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_id   String    @db.Uuid
+  owner      users     @relation("activite_espace", fields: [owner_id], references: [id], onDelete: Cascade)
+  actor_id   String?   @db.Uuid
+  actor      users?    @relation("activite_acteur", fields: [actor_id], references: [id], onDelete: SetNull)
+  methode    String
+  chemin     String
+  statut     Int
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([owner_id, created_at])
 }
 
 /// LE CV, DÉCRIT PLUTÔT QU'IMPORTÉ.

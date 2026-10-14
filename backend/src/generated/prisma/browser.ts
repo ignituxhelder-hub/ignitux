@@ -685,6 +685,26 @@ export type financing_evaluations = Prisma.financing_evaluationsModel
  */
 export type financing_evaluation_edits = Prisma.financing_evaluation_editsModel
 /**
+ * Model space_members
+ * ÉQUIPE — un membre invité dans l'espace d'un propriétaire, avec un rôle.
+ * Le rôle décide des domaines accessibles (src/equipe/domaines.ts) ; le
+ * domaine « personnel » n'est jamais délégué. Vérifié à chaque requête.
+ * Spec : docs/superpowers/specs/2026-10-11-equipe-design.md
+ */
+export type space_members = Prisma.space_membersModel
+/**
+ * Model space_invitations
+ * Invitation par e-mail dans un espace. Seul le hash SHA-256 du jeton est
+ * stocké, jamais le jeton en clair (même principe que auth_tokens).
+ */
+export type space_invitations = Prisma.space_invitationsModel
+/**
+ * Model space_activity
+ * Journal des actions (non-GET) faites par un membre dans l'espace d'un
+ * autre : méthode, chemin sans chaîne de requête, code HTTP de la réponse.
+ */
+export type space_activity = Prisma.space_activityModel
+/**
  * Model user_experiences
  * LE CV, DÉCRIT PLUTÔT QU'IMPORTÉ.
  * 

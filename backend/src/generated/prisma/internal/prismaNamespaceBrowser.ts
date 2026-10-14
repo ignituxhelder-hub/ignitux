@@ -131,6 +131,9 @@ export const ModelName = {
   company_registrations: 'company_registrations',
   financing_evaluations: 'financing_evaluations',
   financing_evaluation_edits: 'financing_evaluation_edits',
+  space_members: 'space_members',
+  space_invitations: 'space_invitations',
+  space_activity: 'space_activity',
   user_experiences: 'user_experiences',
   user_formations: 'user_formations',
   project_questionnaires: 'project_questionnaires',
@@ -1318,6 +1321,46 @@ export const Financing_evaluation_editsScalarFieldEnum = {
 } as const
 
 export type Financing_evaluation_editsScalarFieldEnum = (typeof Financing_evaluation_editsScalarFieldEnum)[keyof typeof Financing_evaluation_editsScalarFieldEnum]
+
+
+export const Space_membersScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  member_id: 'member_id',
+  role: 'role',
+  created_at: 'created_at'
+} as const
+
+export type Space_membersScalarFieldEnum = (typeof Space_membersScalarFieldEnum)[keyof typeof Space_membersScalarFieldEnum]
+
+
+export const Space_invitationsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  email: 'email',
+  role: 'role',
+  token_hash: 'token_hash',
+  expires_at: 'expires_at',
+  accepted_at: 'accepted_at',
+  accepted_by: 'accepted_by',
+  revoked_at: 'revoked_at',
+  created_at: 'created_at'
+} as const
+
+export type Space_invitationsScalarFieldEnum = (typeof Space_invitationsScalarFieldEnum)[keyof typeof Space_invitationsScalarFieldEnum]
+
+
+export const Space_activityScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  actor_id: 'actor_id',
+  methode: 'methode',
+  chemin: 'chemin',
+  statut: 'statut',
+  created_at: 'created_at'
+} as const
+
+export type Space_activityScalarFieldEnum = (typeof Space_activityScalarFieldEnum)[keyof typeof Space_activityScalarFieldEnum]
 
 
 export const User_experiencesScalarFieldEnum = {
