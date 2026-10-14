@@ -161,7 +161,11 @@ describe('TasksSection', () => {
     const select = await screen.findByLabelText('Statut de Valider le pitch');
     fireEvent.change(select, { target: { value: 'done' } });
 
-    await waitFor(() => expect((select as HTMLSelectElement).value).toBe('done'));
+    // La tâche terminée passe dans le groupe « Faites » : l'élément est recréé.
+    await waitFor(() =>
+      expect((screen.getByLabelText('Statut de Valider le pitch') as HTMLSelectElement).value).toBe('done'),
+    );
+    expect(screen.getByText('Faites (1)')).toBeInTheDocument();
   });
 
   it('masque le formulaire d\'ajout et le statut modifiable en lecture seule', async () => {

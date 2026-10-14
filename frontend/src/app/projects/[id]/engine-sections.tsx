@@ -507,29 +507,107 @@ export function TasksSection({
   const lancable = (t: Task) => t.source !== 'automation' && t.status !== 'done' && t.ai_status !== 'a_valider' && t.ai_status !== 'valide';
   const coches = tasks.filter((t) => selected.has(t.id) && lancable(t)).map((t) => t.id);
 
+  const GROUPES: { cle: string; titre: string; filtre: (t: Task) => boolean }[] = [
+    { cle: 'a_valider', titre: 'À valider', filtre: (t) => t.ai_status === 'a_valider' && t.status !== 'done' },
+    {
+      cle: 'a_faire',
+      titre: 'À faire',
+      filtre: (t) => t.status !== 'done' && t.ai_status !== 'a_valider' && t.ai_status !== 'valide' && t.ai_status !== 'echec',
+    },
+    { cle: 'echec', titre: 'En échec', filtre: (t) => t.ai_status === 'echec' && t.status !== 'done' },
+    { cle: 'faites', titre: 'Faites', filtre: (t) => t.status === 'done' || t.ai_status === 'valide' },
+  ];
+  const aFaire = tasks.filter((t) => GROUPES[1].filtre(t) && lancable(t)).map((t) => t.id);
+  const toutCoche = aFaire.length > 0 && aFaire.every((id) => selected.has(id));
+
+  function basculerTout() {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      for (const id of aFaire) {
+        if (toutCoche) next.delete(id);
+        else next.add(id);
+      }
+      return next;
+    });
+  }
+
+  function renderTache(task: Task) {
+    return (
+      <div className="project-item" style={{ cursor: 'default' }} key={task.id}>
+        <div className="top-bar">
+          {!readOnly && lancable(task) ? (
+            <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <input
+                type="checkbox"
+                aria-label={`Faire faire : ${task.title}`}
+                checked={selected.has(task.id)}
+                disabled={isRunning}
+                onChange={() => basculer(task.id)}
+              />
+              <span>{task.title}</span>
+            </label>
+          ) : (
+            <span>{task.title}</span>
+          )}
+          {readOnly ? (
+            <span className="muted">{STATUS_LABELS[task.status]}</span>
+          ) : (
+            <select
+              aria-label={`Statut de ${task.title}`}
+              value={task.status}
+              onChange={(e) => handleStatusChange(task.id, e.target.value as TaskStatus)}
+            >
+              {TASK_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {STATUS_LABELS[status]}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+        <span className="muted">{SOURCE_LABELS[task.source] ?? task.source}</span>
+        {!readOnly && task.ai_status === 'a_valider' && task.ai_result && task.ai_result_kind && (
+          <ResultatIa
+            kind={task.ai_result_kind}
+            contenu={task.ai_result}
+            libelleValider="Valider"
+            disabled={busyId === task.id}
+            onValider={() => handleValider(task.id)}
+            onRefuser={(motif) => handleRefuser(task.id, motif)}
+          />
+        )}
+        {!readOnly && task.ai_status === 'echec' && (
+          <p style={{ margin: '0.5rem 0 0' }}>
+            IGINI n&apos;a pas pu faire cette tâche{' '}
+            <button
+              className="secondary"
+              type="button"
+              disabled={isRunning}
+              onClick={() => lancerLot([task.id])}
+            >
+              Réessayer
+            </button>
+            {raisons[task.id] && (
+              <span className="muted" style={{ display: 'block' }}>
+                {raisons[task.id]}
+              </span>
+            )}
+          </p>
+        )}
+        {task.ai_status === 'refuse' && (
+          <p className="muted" style={{ margin: '0.5rem 0 0' }}>
+            Refusé{task.ai_refusal_reason ? ` : ${task.ai_refusal_reason}` : ''}
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="card" style={{ marginTop: '1.5rem' }}>
       <h2 style={{ marginTop: 0 }}>Tâches</h2>
       {error && <p className="error">{error}</p>}
       {limite && <p className="error">{limite}</p>}
-      {!readOnly && (
-        <div style={{ marginBottom: '1rem' }}>
-          <button type="button" disabled={coches.length === 0 || isRunning} onClick={() => lancerLot(coches)}>
-            Faire faire par IGINI
-          </button>{' '}
-          {isRunning && progress ? (
-            <span className="muted">
-              {progress.courant} / {progress.total}
-            </span>
-          ) : (
-            coches.length > 0 && (
-              <span className="muted">
-                {`${coches.length} élément${coches.length > 1 ? 's' : ''}, ~${coches.length} appel${coches.length > 1 ? 's' : ''} IA`}
-              </span>
-            )
-          )}
-        </div>
-      )}
       {!readOnly && (
         <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
           <input
@@ -546,77 +624,67 @@ export function TasksSection({
       )}
       {isLoading && <p className="loading">Chargement…</p>}
       {!isLoading && tasks.length === 0 && <p className="muted">Aucune tâche pour l&apos;instant.</p>}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        {tasks.map((task) => (
-          <div className="project-item" style={{ cursor: 'default' }} key={task.id}>
-            <div className="top-bar">
-              {!readOnly && lancable(task) ? (
-                <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <input
-                    type="checkbox"
-                    aria-label={`Faire faire : ${task.title}`}
-                    checked={selected.has(task.id)}
-                    disabled={isRunning}
-                    onChange={() => basculer(task.id)}
-                  />
-                  <span>{task.title}</span>
-                </label>
-              ) : (
-                <span>{task.title}</span>
-              )}
-              {readOnly ? (
-                <span className="muted">{STATUS_LABELS[task.status]}</span>
-              ) : (
-                <select
-                  aria-label={`Statut de ${task.title}`}
-                  value={task.status}
-                  onChange={(e) => handleStatusChange(task.id, e.target.value as TaskStatus)}
-                >
-                  {TASK_STATUSES.map((status) => (
-                    <option key={status} value={status}>
-                      {STATUS_LABELS[status]}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-            <span className="muted">{SOURCE_LABELS[task.source] ?? task.source}</span>
-            {!readOnly && task.ai_status === 'a_valider' && task.ai_result && task.ai_result_kind && (
-              <ResultatIa
-                kind={task.ai_result_kind}
-                contenu={task.ai_result}
-                libelleValider="Valider"
-                disabled={busyId === task.id}
-                onValider={() => handleValider(task.id)}
-                onRefuser={(motif) => handleRefuser(task.id, motif)}
-              />
+      {GROUPES.map((groupe) => {
+        const liste = tasks.filter(groupe.filtre);
+        if (liste.length === 0) return null;
+        const contenu = (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
+            {groupe.cle === 'a_faire' && !readOnly && aFaire.length > 1 && (
+              <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <input type="checkbox" checked={toutCoche} disabled={isRunning} onChange={basculerTout} />
+                <span className="muted">Tout sélectionner</span>
+              </label>
             )}
-            {!readOnly && task.ai_status === 'echec' && (
-              <p style={{ margin: '0.5rem 0 0' }}>
-                IGINI n&apos;a pas pu faire cette tâche{' '}
-                <button
-                  className="secondary"
-                  type="button"
-                  disabled={isRunning}
-                  onClick={() => lancerLot([task.id])}
-                >
-                  Réessayer
-                </button>
-                {raisons[task.id] && (
-                  <span className="muted" style={{ display: 'block' }}>
-                    {raisons[task.id]}
-                  </span>
-                )}
-              </p>
-            )}
-            {task.ai_status === 'refuse' && (
-              <p className="muted" style={{ margin: '0.5rem 0 0' }}>
-                Refusé{task.ai_refusal_reason ? ` : ${task.ai_refusal_reason}` : ''}
-              </p>
-            )}
+            {liste.map(renderTache)}
           </div>
-        ))}
-      </div>
+        );
+        const titre = `${groupe.titre} (${liste.length})`;
+        return groupe.cle === 'faites' ? (
+          <details key={groupe.cle} style={{ marginTop: '1rem' }}>
+            <summary style={{ cursor: 'pointer', fontWeight: 600 }}>{titre}</summary>
+            {contenu}
+          </details>
+        ) : (
+          <section key={groupe.cle} style={{ marginTop: '1rem' }} aria-label={groupe.titre}>
+            <h3 style={{ margin: 0, fontSize: '1rem' }}>{titre}</h3>
+            {contenu}
+          </section>
+        );
+      })}
+      {!readOnly && (coches.length > 0 || isRunning) && (
+        <div
+          style={{
+            position: 'sticky',
+            bottom: 0,
+            marginTop: '1rem',
+            padding: '0.75rem 1rem',
+            display: 'flex',
+            gap: '1rem',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: 'var(--surface, #fff)',
+            border: '1px solid var(--border, #ddd)',
+            borderRadius: 8,
+            boxShadow: '0 -2px 8px rgba(0,0,0,0.08)',
+          }}
+        >
+          {isRunning && progress ? (
+            <span className="muted">
+              IGINI travaille…{' '}
+              <span>
+                {progress.courant} / {progress.total}
+              </span>
+          </span>
+          ) : (
+            <span className="muted">
+              {`${coches.length} élément${coches.length > 1 ? 's' : ''} sélectionné${coches.length > 1 ? 's' : ''}, ~${coches.length} appel${coches.length > 1 ? 's' : ''} IA`}
+            </span>
+          )}
+          <button type="button" disabled={coches.length === 0 || isRunning} onClick={() => lancerLot(coches)}>
+            Démarrer IGINI
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -279,6 +279,19 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
   const lancable = (r: ComplianceRequirement) =>
     !r.completed && r.ai?.status !== 'a_valider' && r.ai?.status !== 'valide';
   const coches = requirements.filter((r) => selected.has(r.id) && lancable(r)).map((r) => r.id);
+  const aFaire = requirements.filter(lancable).map((r) => r.id);
+  const toutCoche = aFaire.length > 0 && aFaire.every((id) => selected.has(id));
+
+  function basculerTout() {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      for (const id of aFaire) {
+        if (toutCoche) next.delete(id);
+        else next.add(id);
+      }
+      return next;
+    });
+  }
 
   const nomDuPays = pays ? (NOMS_DE_PAYS[pays.code] ?? pays.code) : null;
   const parId = new Map(requirements.map((r) => [r.id, r]));
@@ -333,23 +346,15 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
       {limite && <p className="error">{limite}</p>}
       {!isLoading && !readOnly && requirements.length > 0 && (
         <div style={{ marginBottom: '1rem' }}>
-          <button type="button" disabled={coches.length === 0 || isRunning} onClick={() => lancerLot(coches)}>
-            Faire faire par IGINI
-          </button>{' '}
-          {isRunning && progress ? (
-            <span className="muted">
-              {progress.courant} / {progress.total}
-            </span>
-          ) : (
-            coches.length > 0 && (
-              <span className="muted">
-                {`${coches.length} élément${coches.length > 1 ? 's' : ''}, ~${coches.length} appel${coches.length > 1 ? 's' : ''} IA`}
-              </span>
-            )
-          )}
-          <p className="muted" style={{ margin: '0.25rem 0 0', fontSize: '0.8rem' }}>
+          <p className="muted" style={{ margin: '0 0 0.5rem', fontSize: '0.8rem' }}>
             IGINI lit la fiche officielle et prépare le document, il ne dépose rien à ta place.
           </p>
+          {aFaire.length > 1 && (
+            <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <input type="checkbox" checked={toutCoche} disabled={isRunning} onChange={basculerTout} />
+              <span className="muted">Tout sélectionner</span>
+            </label>
+          )}
         </div>
       )}
       {!isLoading && !readOnly && secteur === null && requirements.length > 0 && (
@@ -450,6 +455,39 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
             </ul>
           </div>
         ))}
+      {!isLoading && !readOnly && (coches.length > 0 || isRunning) && (
+        <div
+          style={{
+            position: 'sticky',
+            bottom: 0,
+            padding: '0.75rem 1rem',
+            display: 'flex',
+            gap: '1rem',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: 'var(--surface, #fff)',
+            border: '1px solid var(--border, #ddd)',
+            borderRadius: 8,
+            boxShadow: '0 -2px 8px rgba(0,0,0,0.08)',
+          }}
+        >
+          {isRunning && progress ? (
+            <span className="muted">
+              IGINI travaille…{' '}
+              <span>
+                {progress.courant} / {progress.total}
+              </span>
+            </span>
+          ) : (
+            <span className="muted">
+              {`${coches.length} élément${coches.length > 1 ? 's' : ''} sélectionné${coches.length > 1 ? 's' : ''}, ~${coches.length} appel${coches.length > 1 ? 's' : ''} IA`}
+            </span>
+          )}
+          <button type="button" disabled={coches.length === 0 || isRunning} onClick={() => lancerLot(coches)}>
+            Démarrer IGINI
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -61,12 +61,13 @@ describe('TasksSection — IGINI fait les tâches', () => {
     });
     render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
 
-    const bouton = await screen.findByRole('button', { name: /Faire faire par IGINI/ });
-    expect(bouton).toBeDisabled();
+    await screen.findByText('Tâche t1');
+    expect(screen.queryByRole('button', { name: /Démarrer IGINI/ })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByLabelText('Faire faire : Tâche t1'));
     fireEvent.click(screen.getByLabelText('Faire faire : Tâche t2'));
-    expect(screen.getByText('2 éléments, ~2 appels IA')).toBeInTheDocument();
+    expect(screen.getByText('2 éléments sélectionnés, ~2 appels IA')).toBeInTheDocument();
+    const bouton = screen.getByRole('button', { name: /Démarrer IGINI/ });
     expect(bouton).not.toBeDisabled();
     fireEvent.click(bouton);
 
@@ -90,7 +91,7 @@ describe('TasksSection — IGINI fait les tâches', () => {
     fireEvent.click(screen.getByLabelText('Faire faire : Tâche t1'));
     fireEvent.click(screen.getByLabelText('Faire faire : Tâche t2'));
     fireEvent.click(screen.getByLabelText('Faire faire : Tâche t3'));
-    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Démarrer IGINI/ }));
 
     expect(await screen.findByText('Limite atteinte : 2 éléments non traités')).toBeInTheDocument();
     expect(screen.getByLabelText('Faire faire : Tâche t2')).toBeChecked();
@@ -174,7 +175,7 @@ describe('TasksSection — IGINI fait les tâches', () => {
     render(<TasksSection token={TOKEN} projectId={PROJECT_ID} readOnly />);
 
     await screen.findByText('Tâche t1');
-    expect(screen.queryByRole('button', { name: /Faire faire par IGINI/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Démarrer IGINI/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Valider' })).not.toBeInTheDocument();
   }, TIMEOUT);
@@ -212,7 +213,7 @@ describe('TasksSection — lot en cours', () => {
     await screen.findByText('Tâche t1');
     fireEvent.click(screen.getByLabelText('Faire faire : Tâche t1'));
     fireEvent.click(screen.getByLabelText('Faire faire : Tâche t2'));
-    const bouton = screen.getByRole('button', { name: /Faire faire par IGINI/ });
+    const bouton = screen.getByRole('button', { name: /Démarrer IGINI/ });
     fireEvent.click(bouton);
 
     expect(await screen.findByText('1 / 2')).toBeInTheDocument();
@@ -235,7 +236,7 @@ describe('TasksSection — lot en cours', () => {
     await screen.findByText('Tâche t1');
     fireEvent.click(screen.getByLabelText('Faire faire : Tâche t1'));
     fireEvent.click(screen.getByLabelText('Faire faire : Tâche t2'));
-    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Démarrer IGINI/ }));
     await waitFor(() => expect(appels.filter((a) => a.endsWith('/run'))).toHaveLength(1));
 
     unmount();
@@ -257,7 +258,7 @@ describe('TasksSection — lot en cours', () => {
 
     await screen.findByText('Tâche t1');
     for (const id of ['t1', 't2', 't3']) fireEvent.click(screen.getByLabelText(`Faire faire : Tâche ${id}`));
-    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Démarrer IGINI/ }));
 
     expect(await screen.findByText('Texte t3')).toBeInTheDocument();
     expect(screen.getByText("IGINI n'a pas pu faire cette tâche")).toBeInTheDocument();
@@ -282,7 +283,7 @@ describe('TasksSection — lot en cours', () => {
 
     await screen.findByText('Tâche t1');
     for (const id of ["t1","t2","t3"]) fireEvent.click(screen.getByLabelText('Faire faire : Tâche ' + id));
-    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Démarrer IGINI/ }));
 
     expect(await screen.findByText('Connexion perdue : 3 éléments non traités')).toBeInTheDocument();
     expect(appels).toHaveLength(1);
@@ -299,7 +300,7 @@ describe('TasksSection — lot en cours', () => {
 
     await screen.findByText('Tâche t1');
     fireEvent.click(screen.getByLabelText('Faire faire : Tâche t1'));
-    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Démarrer IGINI/ }));
 
     expect(await screen.findByText("IGINI n'a pas pu faire cette tâche")).toBeInTheDocument();
     expect(screen.getByText('Le modèle a répondu hors format.')).toBeInTheDocument();
@@ -327,7 +328,7 @@ describe('TasksSection — lot en cours', () => {
     await screen.findByText('Tâche t1');
     fireEvent.click(screen.getByLabelText('Faire faire : Tâche t1'));
     fireEvent.click(screen.getByLabelText('Faire faire : Tâche t2'));
-    const bouton = screen.getByRole('button', { name: /Faire faire par IGINI/ });
+    const bouton = screen.getByRole('button', { name: /Démarrer IGINI/ });
     fireEvent.click(bouton);
     fireEvent.click(bouton);
 
@@ -347,7 +348,7 @@ describe('TasksSection — lot en cours', () => {
 
     await screen.findByText('Tâche t1');
     for (const id of ['t1', 't2', 't3']) fireEvent.click(screen.getByLabelText(`Faire faire : Tâche ${id}`));
-    fireEvent.click(screen.getByRole('button', { name: /Faire faire par IGINI/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Démarrer IGINI/ }));
 
     expect(await screen.findByText('Limite atteinte : 3 éléments non traités')).toBeInTheDocument();
     expect(appels.filter((a) => a.endsWith('/run'))).toHaveLength(1);
@@ -364,5 +365,43 @@ describe('TasksSection — lot en cours', () => {
 
     await screen.findByText('Tâche t1');
     expect(screen.queryByLabelText('Faire faire : Tâche t1')).not.toBeInTheDocument();
+  }, TIMEOUT);
+});
+
+describe('TasksSection — organisation en groupes', () => {
+  it('range les tâches par groupe avec un compteur', async () => {
+    mockFetch({
+      'GET /projects/p1/tasks': {
+        status: 200,
+        body: [
+          tache('t1'),
+          tache('t2', { ai_status: 'a_valider', ai_result_kind: 'livrable', ai_result: 'X' }),
+          tache('t3', { ai_status: 'echec' }),
+          tache('t4', { status: 'done' }),
+        ],
+      },
+    });
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText('Tâche t1');
+    expect(screen.getByText('À valider (1)')).toBeInTheDocument();
+    expect(screen.getByText('À faire (1)')).toBeInTheDocument();
+    expect(screen.getByText('En échec (1)')).toBeInTheDocument();
+    expect(screen.getByText('Faites (1)')).toBeInTheDocument();
+  }, TIMEOUT);
+
+  it('« Tout sélectionner » coche toutes les tâches à faire et fait apparaître la barre', async () => {
+    mockFetch({
+      'GET /projects/p1/tasks': { status: 200, body: [tache('t1'), tache('t2'), tache('t3', { source: 'automation' })] },
+    });
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText('Tâche t1');
+    fireEvent.click(screen.getByLabelText('Tout sélectionner'));
+    expect(screen.getByText('2 éléments sélectionnés, ~2 appels IA')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Démarrer IGINI' })).not.toBeDisabled();
+
+    fireEvent.click(screen.getByLabelText('Tout sélectionner'));
+    expect(screen.queryByRole('button', { name: 'Démarrer IGINI' })).not.toBeInTheDocument();
   }, TIMEOUT);
 });
