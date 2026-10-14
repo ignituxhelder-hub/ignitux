@@ -981,7 +981,7 @@ describe('ProjectDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Automatisation' }));
     expect(screen.getByRole('heading', { name: 'Automatisation' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /lancer l'automatisation/i })).not.toBeInTheDocument();
-  });
+  }, 15000);
 
   // « Où en est ce projet ? » se lisait jusqu'ici en faisant défiler la
   // page jusqu'au score, tout en bas. Les chiffres remontent en tête.

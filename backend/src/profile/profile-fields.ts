@@ -72,7 +72,16 @@ export const DISPONIBILITES = [
   'À plein temps',
 ] as const;
 
-export const NIVEAUX_RISQUE = ['Faible', 'Moyen', 'Élevé'] as const;
+export const SITUATIONS = [
+  'Salarié',
+  'Demandeur d’emploi',
+  'Étudiant',
+  'Indépendant ou chef d’entreprise',
+  'Retraité',
+  'Autre',
+] as const;
+
+export const NIVEAUX_RISQUE =['Faible', 'Moyen', 'Élevé'] as const;
 
 export const HORIZONS = ['Moins de 2 ans', '2 à 5 ans', 'Plus de 5 ans'] as const;
 
@@ -180,7 +189,10 @@ export const PROFILE_FIELDS: readonly ProfileField[] = [
       'qu’Ignitux te propose.',
     unlocks: 'Des recommandations qui partent de là où tu es, pas de zéro.',
     roles: ['entrepreneur'],
-    moment: 'premier-projet',
+    // Plus demandé sur la page projet : le questionnaire de projet pose le
+    // CV décrit (cv.service.ts), plus précis que ce texte libre. Le champ
+    // reste pour ceux qui l'ont rempli, et sur la page Profil.
+    moment: 'au-besoin',
     kind: 'texte-long',
     countsTowardCompletion: true,
   },
@@ -210,6 +222,23 @@ export const PROFILE_FIELDS: readonly ProfileField[] = [
     moment: 'au-besoin',
     kind: 'choix',
     options: ['Oui', 'Non'],
+    countsTowardCompletion: false,
+  },
+  {
+    // Posée par le questionnaire de projet (étape « Ta situation »), pas par
+    // le parcours général : c'est là qu'elle change quelque chose.
+    id: 'current_situation',
+    label: 'Ta situation actuelle',
+    question: 'Quelle est ta situation aujourd’hui ?',
+    purpose:
+      'Un demandeur d’emploi qui crée son entreprise a droit à des aides (ACRE, maintien ou ' +
+      'versement en capital de ses allocations) qu’un salarié n’a pas : le plan de financement ' +
+      'n’est pas le même.',
+    unlocks: 'Un plan de financement qui compte les aides auxquelles tu as droit.',
+    roles: ['entrepreneur'],
+    moment: 'au-besoin',
+    kind: 'choix',
+    options: SITUATIONS,
     countsTowardCompletion: false,
   },
   {

@@ -214,13 +214,16 @@ describe('CrmPage', () => {
         <CrmPage />
       </AuthProvider>,
     );
+    fireEvent.click(await screen.findByRole('button', { name: 'Nouveau contact' }));
 
-    await screen.findByText('Aucun contact ne correspond.');
+    await screen.findByLabelText('Prénom');
     routeMap['GET /crm/contacts'] = { status: 200, body: [CONTACT] };
 
     fireEvent.change(screen.getByLabelText('Prénom'), { target: { value: 'Ada' } });
     fireEvent.change(screen.getByLabelText('Nom'), { target: { value: 'Lovelace' } });
     fireEvent.click(screen.getByRole('button', { name: 'Ajouter' }));
+    // La liste est derrière son icône : on va la lire.
+    fireEvent.click(screen.getByRole('button', { name: 'Contacts' }));
 
     const list = await screen.findByRole('list', { name: 'Liste des contacts' });
     await waitFor(() => expect(within(list).getAllByRole('listitem')).toHaveLength(1));
@@ -250,6 +253,7 @@ describe('CrmPage', () => {
           <CrmPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Entreprises' }));
 
       expect(await screen.findByText('Acme SARL', { selector: 'strong' })).toBeInTheDocument();
       expect(screen.getByText(/Bâtiment/)).toBeInTheDocument();
@@ -278,8 +282,9 @@ describe('CrmPage', () => {
           <CrmPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Entreprises' }));
 
-      await screen.findByText('Ada Lovelace');
+      await screen.findByLabelText("Nom de l'entreprise");
       fireEvent.change(screen.getByLabelText("Nom de l'entreprise"), {
         target: { value: 'Acme SARL' },
       });
@@ -308,6 +313,7 @@ describe('CrmPage', () => {
           <CrmPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Entreprises' }));
 
       await screen.findByText('Acme SARL', { selector: 'strong' });
       fireEvent.click(screen.getByRole('button', { name: 'Modifier' }));
@@ -335,6 +341,7 @@ describe('CrmPage', () => {
           <CrmPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Entreprises' }));
 
       const companyName = await screen.findByText('Acme SARL', { selector: 'strong' });
       const companyItem = companyName.closest('li') as HTMLElement;
@@ -370,8 +377,9 @@ describe('CrmPage', () => {
           <CrmPage />
         </AuthProvider>,
       );
+      fireEvent.click(await screen.findByRole('button', { name: 'Nouveau contact' }));
 
-      await screen.findByText('Ada Lovelace');
+      await screen.findByLabelText('Prénom');
       fireEvent.change(screen.getByLabelText('Prénom'), { target: { value: 'Bob' } });
       fireEvent.change(screen.getByLabelText('Nom'), { target: { value: 'Martin' } });
       fireEvent.change(screen.getByLabelText('Entreprise du contact'), {

@@ -215,7 +215,7 @@ describe('AiUsageService', () => {
 
       expect(table.count).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: expect.objectContaining({ generator: { not: 'discuter' } }),
+          where: expect.objectContaining({ generator: { notIn: ['discuter', 'questionner'] } }),
         }),
       );
     });

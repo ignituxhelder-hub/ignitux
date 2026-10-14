@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Brand } from '@/components/ignitux-mark';
+import { IconesPanneaux } from '@/components/icones-panneaux';
 import { api, ApiError, type AiUsageHistory, type AiUsageMonth } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { jourEtHeure } from '@/lib/montants';
@@ -175,85 +176,114 @@ export default function AiUsagePage() {
               </p>
             )}
           </div>
-
-          <div className="card" style={{ marginTop: '1.5rem' }}>
-            <h2 style={{ marginTop: 0 }}>Par générateur</h2>
-            {mois.par_generateur.length === 0 ? (
-              <p className="muted" style={{ marginBottom: 0 }}>
-                Aucun appel ce mois-ci.
-              </p>
-            ) : (
-              <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                {mois.par_generateur.map((ligne) => (
-                  <li
-                    key={ligne.generateur}
-                    className="project-item"
-                    style={{ cursor: 'default', marginBottom: '0.5rem' }}
-                  >
-                    <div className="top-bar" style={{ marginBottom: '0.25rem' }}>
-                      <strong>{GENERATEURS[ligne.generateur] ?? ligne.generateur}</strong>
-                      <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-                        {eurosDepuisNombre(ligne.cout_euros)}
-                      </span>
-                    </div>
-                    <p className="muted" style={{ margin: 0 }}>
-                      {ligne.appels} appel(s) · {milliers(ligne.tokens_entree)} jetons en entrée ·{' '}
-                      {milliers(ligne.tokens_sortie)} en sortie
-                      {ligne.dont_reflexion > 0 &&
-                        `, dont ${milliers(ligne.dont_reflexion)} de réflexion`}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <p className="muted" style={{ marginBottom: 0, marginTop: '0.75rem' }}>
-              La réflexion interne du modèle est <strong>comprise</strong> dans les jetons de
-              sortie, pas en plus : ne l&apos;additionne pas.
-            </p>
-          </div>
         </>
       )}
 
-      {historique && (
-        <div className="card" style={{ marginTop: '1.5rem' }}>
-          <h2 style={{ marginTop: 0 }}>Historique</h2>
-          {historique.appels.length === 0 ? (
-            <p className="muted" style={{ marginBottom: 0 }}>
-              Aucun appel enregistré. Les générateurs sont éteints tant qu&apos;une clé
-              n&apos;est pas configurée — rien n&apos;est cassé, rien n&apos;a été dépensé.
-            </p>
-          ) : (
-            <>
-              <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                {historique.appels.map((appel) => (
-                  <li
-                    key={appel.id}
-                    className="top-bar"
-                    style={{ marginBottom: '0.4rem', cursor: 'default', alignItems: 'baseline' }}
-                  >
-                    <span>
-                      <span className="muted">{jourEtHeure(appel.quand)}</span>{' '}
-                      {GENERATEURS[appel.generateur] ?? appel.generateur}
-                      <span className="muted">
-                        {' '}
-                        · {appel.modele} · {milliers(appel.tokens_entree)}↓{' '}
-                        {milliers(appel.tokens_sortie)}↑ · {appel.duree_ms} ms
-                      </span>
-                    </span>
-                    <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-                      {eurosDepuisNombre(appel.cout_euros)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              <p className="muted" style={{ marginBottom: 0, marginTop: '0.75rem' }}>
-                Les {historique.limite} appels les plus récents. Un tiret dans la colonne de
-                droite signifie que le modèle échappe à la grille du {historique.grille_du} —
-                pas que l&apos;appel était gratuit.
-              </p>
-            </>
-          )}
-        </div>
+      {(mois || historique) && (
+        <IconesPanneaux
+          titre="Détail de la consommation"
+          ouvertParDefaut="generateur"
+          panneaux={[
+            ...(mois
+              ? [
+                  {
+                    id: 'generateur',
+                    nom: 'Par générateur',
+                    glyphe: 'consommation-ia',
+                    categorie: 'investir',
+                    contenu: (
+                      <div className="card" style={{ marginTop: '1.5rem' }}>
+                        <h2 style={{ marginTop: 0 }}>Par générateur</h2>
+                        {mois.par_generateur.length === 0 ? (
+                          <p className="muted" style={{ marginBottom: 0 }}>
+                            Aucun appel ce mois-ci.
+                          </p>
+                        ) : (
+                          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                            {mois.par_generateur.map((ligne) => (
+                              <li
+                                key={ligne.generateur}
+                                className="project-item"
+                                style={{ cursor: 'default', marginBottom: '0.5rem' }}
+                              >
+                                <div className="top-bar" style={{ marginBottom: '0.25rem' }}>
+                                  <strong>{GENERATEURS[ligne.generateur] ?? ligne.generateur}</strong>
+                                  <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                                    {eurosDepuisNombre(ligne.cout_euros)}
+                                  </span>
+                                </div>
+                                <p className="muted" style={{ margin: 0 }}>
+                                  {ligne.appels} appel(s) · {milliers(ligne.tokens_entree)} jetons en entrée ·{' '}
+                                  {milliers(ligne.tokens_sortie)} en sortie
+                                  {ligne.dont_reflexion > 0 &&
+                                    `, dont ${milliers(ligne.dont_reflexion)} de réflexion`}
+                                </p>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        <p className="muted" style={{ marginBottom: 0, marginTop: '0.75rem' }}>
+                          La réflexion interne du modèle est <strong>comprise</strong> dans les jetons de
+                          sortie, pas en plus : ne l&apos;additionne pas.
+                        </p>
+                      </div>
+                    ),
+                  },
+                ]
+              : []),
+            ...(historique
+              ? [
+                  {
+                    id: 'historique',
+                    nom: 'Historique',
+                    glyphe: 'taches',
+                    categorie: 'vendre',
+                    contenu: (
+                      <div className="card" style={{ marginTop: '1.5rem' }}>
+                        <h2 style={{ marginTop: 0 }}>Historique</h2>
+                        {historique.appels.length === 0 ? (
+                          <p className="muted" style={{ marginBottom: 0 }}>
+                            Aucun appel enregistré. Les générateurs sont éteints tant qu&apos;une clé
+                            n&apos;est pas configurée — rien n&apos;est cassé, rien n&apos;a été dépensé.
+                          </p>
+                        ) : (
+                          <>
+                            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                              {historique.appels.map((appel) => (
+                                <li
+                                  key={appel.id}
+                                  className="top-bar"
+                                  style={{ marginBottom: '0.4rem', cursor: 'default', alignItems: 'baseline' }}
+                                >
+                                  <span>
+                                    <span className="muted">{jourEtHeure(appel.quand)}</span>{' '}
+                                    {GENERATEURS[appel.generateur] ?? appel.generateur}
+                                    <span className="muted">
+                                      {' '}
+                                      · {appel.modele} · {milliers(appel.tokens_entree)}↓{' '}
+                                      {milliers(appel.tokens_sortie)}↑ · {appel.duree_ms} ms
+                                    </span>
+                                  </span>
+                                  <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                                    {eurosDepuisNombre(appel.cout_euros)}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                            <p className="muted" style={{ marginBottom: 0, marginTop: '0.75rem' }}>
+                              Les {historique.limite} appels les plus récents. Un tiret dans la colonne de
+                              droite signifie que le modèle échappe à la grille du {historique.grille_du} —
+                              pas que l&apos;appel était gratuit.
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    ),
+                  },
+                ]
+              : []),
+          ]}
+        />
       )}
     </main>
   );

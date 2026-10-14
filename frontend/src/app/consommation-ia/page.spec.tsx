@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
 import { createRouterMock, mockApiRoutes, signInAs } from '@/test-utils/mocks';
@@ -236,6 +236,8 @@ describe('AiUsagePage', () => {
       </AuthProvider>,
     );
 
+    fireEvent.click(await screen.findByRole('button', { name: 'Historique' }));
+
     expect(await screen.findByText(/rien n'a été dépensé/)).toBeInTheDocument();
   });
 
@@ -286,6 +288,8 @@ describe('AiUsagePage', () => {
         <AiUsagePage />
       </AuthProvider>,
     );
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Historique' }));
 
     expect(await screen.findByText(/claude-opus-5/)).toBeInTheDocument();
     expect(screen.getByText(/0,28/)).toBeInTheDocument();

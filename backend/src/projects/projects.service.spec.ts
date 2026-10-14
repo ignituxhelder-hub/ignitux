@@ -94,6 +94,10 @@ describe('ProjectsService', () => {
       findUnique: ReturnType<typeof vi.fn>;
     };
     user_profiles: { findUnique: ReturnType<typeof vi.fn> };
+    user_experiences: { findMany: ReturnType<typeof vi.fn> };
+    user_formations: { findMany: ReturnType<typeof vi.fn> };
+    project_questionnaires: { findUnique: ReturnType<typeof vi.fn> };
+    project_igini_questions: { findMany: ReturnType<typeof vi.fn> };
     participation_agreements: { findFirst: ReturnType<typeof vi.fn> };
     participation_milestones: { findMany: ReturnType<typeof vi.fn> };
     equity_events: { findMany: ReturnType<typeof vi.fn> };
@@ -151,6 +155,11 @@ describe('ProjectsService', () => {
       // Le profil alimente le contexte de chaque generation. Vide par
       // defaut : ces tests eprouvent le fil des etapes, pas la personne.
       user_profiles: { findUnique: vi.fn().mockResolvedValue(null) },
+      // Le CV et le questionnaire : vides par défaut, pour la même raison.
+      user_experiences: { findMany: vi.fn().mockResolvedValue([]) },
+      user_formations: { findMany: vi.fn().mockResolvedValue([]) },
+      project_questionnaires: { findUnique: vi.fn().mockResolvedValue(null) },
+      project_igini_questions: { findMany: vi.fn().mockResolvedValue([]) },
       // Aucun accord de participation par défaut : le contexte reste ce qu'il était.
       participation_agreements: { findFirst: vi.fn().mockResolvedValue(null) },
       participation_milestones: { findMany: vi.fn().mockResolvedValue([]) },

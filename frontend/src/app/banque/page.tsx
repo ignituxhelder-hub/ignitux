@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Brand } from '@/components/ignitux-mark';
+import { IconesPanneaux } from '@/components/icones-panneaux';
 import {
   api,
   ApiError,
@@ -187,37 +188,69 @@ export default function BanquePage() {
         </div>
       )}
 
-      {compte && (
-        <>
-          <SaisirUnMouvement
-            compteId={compte.id}
-            token={token}
-            onFait={async (m) => {
-              setMessage(m);
-              await chargerCompte();
-            }}
-            onErreur={setError}
-          />
-          <Mouvements
-            mouvements={mouvements}
-            ecritures={ecritures}
-            token={token}
-            onFait={async (m) => {
-              setMessage(m);
-              await chargerCompte();
-            }}
-            onErreur={setError}
-          />
-        </>
-      )}
-
-      <DeclarerUnCompte
-        token={token}
-        onFait={async (m) => {
-          setMessage(m);
-          await chargerComptes();
-        }}
-        onErreur={setError}
+      <IconesPanneaux
+        // Remontée quand le compte arrive : le panneau ouvert d'office
+        // dépend de lui.
+        key={compte ? 'avec-compte' : 'sans-compte'}
+        titre="Banque"
+        ouvertParDefaut={compte ? 'mouvements' : 'declarer'}
+        panneaux={[
+          ...(compte
+            ? [
+                {
+                  id: 'mouvements',
+                  nom: 'Mouvements',
+                  glyphe: 'banque',
+                  categorie: 'gerer',
+                  contenu: (
+                    <Mouvements
+                      mouvements={mouvements}
+                      ecritures={ecritures}
+                      token={token}
+                      onFait={async (m) => {
+                        setMessage(m);
+                        await chargerCompte();
+                      }}
+                      onErreur={setError}
+                    />
+                  ),
+                },
+                {
+                  id: 'saisir',
+                  nom: 'Saisir',
+                  glyphe: 'infos',
+                  categorie: 'creer',
+                  contenu: (
+                    <SaisirUnMouvement
+                      compteId={compte.id}
+                      token={token}
+                      onFait={async (m) => {
+                        setMessage(m);
+                        await chargerCompte();
+                      }}
+                      onErreur={setError}
+                    />
+                  ),
+                },
+              ]
+            : []),
+          {
+            id: 'declarer',
+            nom: 'Déclarer un compte',
+            glyphe: 'portefeuille',
+            categorie: 'investir',
+            contenu: (
+              <DeclarerUnCompte
+                token={token}
+                onFait={async (m) => {
+                  setMessage(m);
+                  await chargerComptes();
+                }}
+                onErreur={setError}
+              />
+            ),
+          },
+        ]}
       />
     </main>
   );

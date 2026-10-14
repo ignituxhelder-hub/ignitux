@@ -21,10 +21,10 @@ import { WorkflowEngineService } from '../igini/workflow/workflow-engine.service
 import { WorkflowService } from '../igini/workflow/workflow.service.js';
 import { FormerService, type LegalFormRecommendationResult } from '../igini/former/former.service.js';
 import { OffresService } from '../offres/offres.service.js';
-import { contextePersonne } from '../profile/contexte-personne.js';
 import { chargerContexteParticipation } from '../participation/participation-context.js';
 import { exigerCapacite } from '../equipe/acces-projet.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { chargerContexteDeclare } from './questionnaire/charger-contexte.js';
 
 @Injectable()
 export class ProjectsService {
@@ -247,25 +247,15 @@ export class ProjectsService {
   }
 
   /**
-   * Ce qu'IGINI sait de la personne, injecté dans CHAQUE génération.
+   * Ce que la personne a déclaré — sur elle (profil, CV) et sur ce projet
+   * (questionnaire) — injecté dans CHAQUE génération.
    *
    * Le profil se remplissait consciencieusement sans que rien ne le relise
    * jamais — le même défaut que la mémoire avait avant d'être branchée ici.
-   *
-   * L'échec est avalé : une analyse ne doit pas échouer parce qu'un profil
-   * n'a pas pu être lu. Elle sera simplement moins bien renseignée, ce qui
-   * est exactement l'état d'avant.
+   * L'échec est avalé dans le chargeur (voir charger-contexte.ts).
    */
-  private async personContext(ownerId: string): Promise<string | undefined> {
-    try {
-      const [profil, projetsPortes] = await Promise.all([
-        this.prisma.user_profiles.findUnique({ where: { user_id: ownerId } }),
-        this.prisma.projects.count({ where: { owner_id: ownerId } }),
-      ]);
-      return contextePersonne(profil, { projetsPortes }) ?? undefined;
-    } catch {
-      return undefined;
-    }
+  private personContext(ownerId: string, projectId: string): Promise<string | undefined> {
+    return chargerContexteDeclare(this.prisma, ownerId, projectId);
   }
 
   /**
@@ -292,7 +282,7 @@ export class ProjectsService {
       project.title,
       project.description,
       { userId: ownerId, projectId: project.id },
-      this.joinContext(await this.personContext(ownerId), await this.memoryContext(ownerId, id)),
+      this.joinContext(await this.personContext(ownerId, id), await this.memoryContext(ownerId, id)),
     );
 
     const analysis = await this.prisma.analyses.create({
@@ -435,7 +425,7 @@ export class ProjectsService {
           project.title,
           project.description,
           { userId: ownerId, projectId },
-          this.joinContext(await this.personContext(ownerId), await this.memoryContext(ownerId, projectId)),
+          this.joinContext(await this.personContext(ownerId, projectId), await this.memoryContext(ownerId, projectId)),
         );
       } catch (error) {
         // Refus d'entitlement (offre, plafond, interrupteur) : attendu et
@@ -463,7 +453,7 @@ export class ProjectsService {
       project.title,
       project.description,
       { userId: ownerId, projectId: project.id },
-      this.joinContext(await this.personContext(ownerId), await this.memoryContext(ownerId, id)),
+      this.joinContext(await this.personContext(ownerId, id), await this.memoryContext(ownerId, id)),
     );
     return this.persistFormerRecommendation(project.id, ownerId, result);
   }
@@ -482,7 +472,7 @@ export class ProjectsService {
     const { ownerId } = await exigerCapacite(this.prisma, demandeurId, id, 'lancer_ia');
     const project = await this.findOneForOwner(ownerId, id);
     const [personne, memory, analysis, participation] = await Promise.all([
-      this.personContext(ownerId),
+      this.personContext(ownerId, id),
       this.memoryContext(ownerId, id),
       this.latestAnalysisContext(id),
       this.participationContext(id),
@@ -534,7 +524,7 @@ export class ProjectsService {
   ): Promise<{ titre: string; description: string | null; contexte: string | undefined }> {
     const project = await this.findOneForOwner(ownerId, projectId);
     const parts = await Promise.all([
-      this.personContext(ownerId),
+      this.personContext(ownerId, projectId),
       this.memoryContext(ownerId, projectId),
       this.latestAnalysisContext(projectId),
       this.latestBuildPlanContext(projectId),
@@ -550,7 +540,7 @@ export class ProjectsService {
     const { ownerId } = await exigerCapacite(this.prisma, demandeurId, id, 'lancer_ia');
     const project = await this.findOneForOwner(ownerId, id);
     const [personne, memory, analysis, buildPlan, participation] = await Promise.all([
-      this.personContext(ownerId),
+      this.personContext(ownerId, id),
       this.memoryContext(ownerId, id),
       this.latestAnalysisContext(id),
       this.latestBuildPlanContext(id),
@@ -600,7 +590,7 @@ export class ProjectsService {
     const { ownerId } = await exigerCapacite(this.prisma, demandeurId, id, 'lancer_ia');
     const project = await this.findOneForOwner(ownerId, id);
     const [personne, memory, analysis, buildPlan, financingPlan, participation] = await Promise.all([
-      this.personContext(ownerId),
+      this.personContext(ownerId, id),
       this.memoryContext(ownerId, id),
       this.latestAnalysisContext(id),
       this.latestBuildPlanContext(id),
@@ -652,7 +642,7 @@ export class ProjectsService {
     const project = await this.findOneForOwner(ownerId, id);
     const [personne, memory, analysis, buildPlan, financingPlan, developmentPlan, participation] =
       await Promise.all([
-      this.personContext(ownerId),
+      this.personContext(ownerId, id),
       this.memoryContext(ownerId, id),
       this.latestAnalysisContext(id),
       this.latestBuildPlanContext(id),

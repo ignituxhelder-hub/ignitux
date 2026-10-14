@@ -43,6 +43,35 @@ export interface ProfilLu {
   risk_level?: string | null;
   investment_horizon?: string | null;
   skills?: string[] | null;
+  current_situation?: string | null;
+}
+
+/** Le CV décrit (voir cv.service.ts) — un sous-ensemble de CvVue. */
+export interface CvLu {
+  experiences: Array<{
+    poste: string;
+    entreprise: string | null;
+    debut: string | null;
+    fin: string | null;
+    enCours: boolean;
+    description: string | null;
+  }>;
+  formations: Array<{ diplome: string; etablissement: string | null; annee: number | null }>;
+}
+
+/**
+ * Au-delà, le CV prendrait la place du projet dans le contexte. Ce sont les
+ * dernières lignes de la liste qui tombent : l'ordre est celui que la
+ * personne a choisi, et c'est lui qu'on respecte.
+ */
+const CV_LIGNES_CONTEXTE = 8;
+
+function periode(e: CvLu['experiences'][number]): string | null {
+  if (e.debut && e.enCours) return `depuis ${e.debut}`;
+  if (e.debut && e.fin) return `de ${e.debut} à ${e.fin}`;
+  if (e.debut) return `à partir de ${e.debut}`;
+  if (e.enCours) return 'poste actuel';
+  return null;
 }
 
 /** Nombre de projets déjà portés, pour situer la personne dans son parcours. */
@@ -70,10 +99,16 @@ function liste(valeurs: string[] | null | undefined): string | null {
 export function contextePersonne(
   profil: ProfilLu | null | undefined,
   historique?: HistoriquePersonne,
+  cv?: CvLu | null,
 ): string | null {
-  if (!profil) return null;
+  const cvRempli = !!cv && (cv.experiences.length > 0 || cv.formations.length > 0);
+  if (!profil && !cvRempli) return null;
+  profil ??= {};
 
   const lignes: string[] = [];
+
+  const situation = nettoyer(profil.current_situation);
+  if (situation) lignes.push(`Situation actuelle : ${situation}.`);
 
   const secteurs = liste(profil.sectors);
   if (secteurs) lignes.push(`A déjà travaillé dans : ${secteurs}.`);
@@ -89,6 +124,29 @@ export function contextePersonne(
       `Parcours, dans ses mots : ${parcours.length > 400 ? `${parcours.slice(0, 400)}…` : parcours}`,
     );
   }
+
+  // Le CV décrit, ligne par ligne : des postes et des dates, recopiés tels
+  // que la personne les a écrits.
+  for (const e of (cv?.experiences ?? []).slice(0, CV_LIGNES_CONTEXTE)) {
+    const ou = nettoyer(e.entreprise);
+    const quand = periode(e);
+    const quoi = nettoyer(e.description);
+    lignes.push(
+      `Expérience : ${e.poste}${ou ? ` chez ${ou}` : ''}${quand ? ` (${quand})` : ''}` +
+        (quoi ? ` — ${quoi.length > 200 ? `${quoi.slice(0, 200)}…` : quoi}` : '') +
+        '.',
+    );
+  }
+
+  // Les diplômes servent à une chose : savoir si une activité réglementée
+  // peut être exercée. Ils sont écrits comme le reste — un fait déclaré.
+  const formations = (cv?.formations ?? [])
+    .slice(0, CV_LIGNES_CONTEXTE)
+    .map((f) => {
+      const details = [nettoyer(f.etablissement), f.annee ? String(f.annee) : null].filter(Boolean);
+      return details.length > 0 ? `${f.diplome} (${details.join(', ')})` : f.diplome;
+    });
+  if (formations.length > 0) lignes.push(`Formations et diplômes déclarés : ${formations.join(' ; ')}.`);
 
   const pays = nettoyer(profil.activity_country);
   if (pays) lignes.push(`Activité prévue en : ${pays}.`);

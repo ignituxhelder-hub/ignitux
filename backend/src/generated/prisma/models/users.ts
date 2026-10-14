@@ -227,6 +227,8 @@ export type usersWhereInput = {
   roles?: Prisma.User_rolesListRelationFilter
   applications?: Prisma.User_applicationsListRelationFilter
   profile?: Prisma.XOR<Prisma.User_profilesNullableScalarRelationFilter, Prisma.user_profilesWhereInput> | null
+  experiences?: Prisma.User_experiencesListRelationFilter
+  formations?: Prisma.User_formationsListRelationFilter
   subscription?: Prisma.XOR<Prisma.SubscriptionsNullableScalarRelationFilter, Prisma.subscriptionsWhereInput> | null
   identity_verifications?: Prisma.Identity_verificationsListRelationFilter
   mandates?: Prisma.MandatesListRelationFilter
@@ -268,6 +270,8 @@ export type usersOrderByWithRelationInput = {
   roles?: Prisma.user_rolesOrderByRelationAggregateInput
   applications?: Prisma.user_applicationsOrderByRelationAggregateInput
   profile?: Prisma.user_profilesOrderByWithRelationInput
+  experiences?: Prisma.user_experiencesOrderByRelationAggregateInput
+  formations?: Prisma.user_formationsOrderByRelationAggregateInput
   subscription?: Prisma.subscriptionsOrderByWithRelationInput
   identity_verifications?: Prisma.identity_verificationsOrderByRelationAggregateInput
   mandates?: Prisma.mandatesOrderByRelationAggregateInput
@@ -312,6 +316,8 @@ export type usersWhereUniqueInput = Prisma.AtLeast<{
   roles?: Prisma.User_rolesListRelationFilter
   applications?: Prisma.User_applicationsListRelationFilter
   profile?: Prisma.XOR<Prisma.User_profilesNullableScalarRelationFilter, Prisma.user_profilesWhereInput> | null
+  experiences?: Prisma.User_experiencesListRelationFilter
+  formations?: Prisma.User_formationsListRelationFilter
   subscription?: Prisma.XOR<Prisma.SubscriptionsNullableScalarRelationFilter, Prisma.subscriptionsWhereInput> | null
   identity_verifications?: Prisma.Identity_verificationsListRelationFilter
   mandates?: Prisma.MandatesListRelationFilter
@@ -381,6 +387,8 @@ export type usersCreateInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -422,6 +430,8 @@ export type usersUncheckedCreateInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -463,6 +473,8 @@ export type usersUpdateInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -504,6 +516,8 @@ export type usersUncheckedUpdateInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1027,6 +1041,34 @@ export type usersUpdateOneWithoutEvaluation_editsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutEvaluation_editsInput, Prisma.usersUpdateWithoutEvaluation_editsInput>, Prisma.usersUncheckedUpdateWithoutEvaluation_editsInput>
 }
 
+export type usersCreateNestedOneWithoutExperiencesInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutExperiencesInput, Prisma.usersUncheckedCreateWithoutExperiencesInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutExperiencesInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutExperiencesNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutExperiencesInput, Prisma.usersUncheckedCreateWithoutExperiencesInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutExperiencesInput
+  upsert?: Prisma.usersUpsertWithoutExperiencesInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutExperiencesInput, Prisma.usersUpdateWithoutExperiencesInput>, Prisma.usersUncheckedUpdateWithoutExperiencesInput>
+}
+
+export type usersCreateNestedOneWithoutFormationsInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutFormationsInput, Prisma.usersUncheckedCreateWithoutFormationsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutFormationsInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutFormationsNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutFormationsInput, Prisma.usersUncheckedCreateWithoutFormationsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutFormationsInput
+  upsert?: Prisma.usersUpsertWithoutFormationsInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutFormationsInput, Prisma.usersUpdateWithoutFormationsInput>, Prisma.usersUncheckedUpdateWithoutFormationsInput>
+}
+
 export type usersCreateWithoutAuth_tokensInput = {
   id?: string
   email: string
@@ -1056,6 +1098,8 @@ export type usersCreateWithoutAuth_tokensInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -1096,6 +1140,8 @@ export type usersUncheckedCreateWithoutAuth_tokensInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -1152,6 +1198,8 @@ export type usersUpdateWithoutAuth_tokensInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -1192,6 +1240,8 @@ export type usersUncheckedUpdateWithoutAuth_tokensInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1232,6 +1282,8 @@ export type usersCreateWithoutProjectsInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -1272,6 +1324,8 @@ export type usersUncheckedCreateWithoutProjectsInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -1328,6 +1382,8 @@ export type usersUpdateWithoutProjectsInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -1368,6 +1424,8 @@ export type usersUncheckedUpdateWithoutProjectsInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1409,6 +1467,8 @@ export type usersCreateWithoutCompany_bylawsInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -1449,6 +1509,8 @@ export type usersUncheckedCreateWithoutCompany_bylawsInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -1505,6 +1567,8 @@ export type usersUpdateWithoutCompany_bylawsInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -1545,6 +1609,8 @@ export type usersUncheckedUpdateWithoutCompany_bylawsInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1584,6 +1650,8 @@ export type usersCreateWithoutMemoriesInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -1624,6 +1692,8 @@ export type usersUncheckedCreateWithoutMemoriesInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -1680,6 +1750,8 @@ export type usersUpdateWithoutMemoriesInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -1720,6 +1792,8 @@ export type usersUncheckedUpdateWithoutMemoriesInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1760,6 +1834,8 @@ export type usersCreateWithoutChat_messagesInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -1800,6 +1876,8 @@ export type usersUncheckedCreateWithoutChat_messagesInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -1856,6 +1934,8 @@ export type usersUpdateWithoutChat_messagesInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -1896,6 +1976,8 @@ export type usersUncheckedUpdateWithoutChat_messagesInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1936,6 +2018,8 @@ export type usersCreateWithoutConceptsInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -1976,6 +2060,8 @@ export type usersUncheckedCreateWithoutConceptsInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -2032,6 +2118,8 @@ export type usersUpdateWithoutConceptsInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -2072,6 +2160,8 @@ export type usersUncheckedUpdateWithoutConceptsInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2112,6 +2202,8 @@ export type usersCreateWithoutCommunity_commentsInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -2152,6 +2244,8 @@ export type usersUncheckedCreateWithoutCommunity_commentsInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -2208,6 +2302,8 @@ export type usersUpdateWithoutCommunity_commentsInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -2248,6 +2344,8 @@ export type usersUncheckedUpdateWithoutCommunity_commentsInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2288,6 +2386,8 @@ export type usersCreateWithoutCollaborationsInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -2328,6 +2428,8 @@ export type usersUncheckedCreateWithoutCollaborationsInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -2384,6 +2486,8 @@ export type usersUpdateWithoutCollaborationsInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -2424,6 +2528,8 @@ export type usersUncheckedUpdateWithoutCollaborationsInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2464,6 +2570,8 @@ export type usersCreateWithoutMarketplace_profileInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -2504,6 +2612,8 @@ export type usersUncheckedCreateWithoutMarketplace_profileInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -2560,6 +2670,8 @@ export type usersUpdateWithoutMarketplace_profileInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -2600,6 +2712,8 @@ export type usersUncheckedUpdateWithoutMarketplace_profileInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2640,6 +2754,8 @@ export type usersCreateWithoutMarketplace_contacts_sentInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -2680,6 +2796,8 @@ export type usersUncheckedCreateWithoutMarketplace_contacts_sentInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -2736,6 +2854,8 @@ export type usersUpdateWithoutMarketplace_contacts_sentInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -2776,6 +2896,8 @@ export type usersUncheckedUpdateWithoutMarketplace_contacts_sentInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2816,6 +2938,8 @@ export type usersCreateWithoutBilling_documentsInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -2856,6 +2980,8 @@ export type usersUncheckedCreateWithoutBilling_documentsInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -2912,6 +3038,8 @@ export type usersUpdateWithoutBilling_documentsInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -2952,6 +3080,8 @@ export type usersUncheckedUpdateWithoutBilling_documentsInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2992,6 +3122,8 @@ export type usersCreateWithoutCrm_companiesInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -3032,6 +3164,8 @@ export type usersUncheckedCreateWithoutCrm_companiesInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -3088,6 +3222,8 @@ export type usersUpdateWithoutCrm_companiesInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -3128,6 +3264,8 @@ export type usersUncheckedUpdateWithoutCrm_companiesInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -3168,6 +3306,8 @@ export type usersCreateWithoutCrm_contactsInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -3208,6 +3348,8 @@ export type usersUncheckedCreateWithoutCrm_contactsInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -3264,6 +3406,8 @@ export type usersUpdateWithoutCrm_contactsInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -3304,6 +3448,8 @@ export type usersUncheckedUpdateWithoutCrm_contactsInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -3344,6 +3490,8 @@ export type usersCreateWithoutStock_itemsInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -3384,6 +3532,8 @@ export type usersUncheckedCreateWithoutStock_itemsInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -3440,6 +3590,8 @@ export type usersUpdateWithoutStock_itemsInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -3480,6 +3632,8 @@ export type usersUncheckedUpdateWithoutStock_itemsInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -3520,6 +3674,8 @@ export type usersCreateWithoutAgenda_eventsInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -3560,6 +3716,8 @@ export type usersUncheckedCreateWithoutAgenda_eventsInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -3616,6 +3774,8 @@ export type usersUpdateWithoutAgenda_eventsInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -3656,6 +3816,8 @@ export type usersUncheckedUpdateWithoutAgenda_eventsInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -3696,6 +3858,8 @@ export type usersCreateWithoutCash_register_entriesInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -3736,6 +3900,8 @@ export type usersUncheckedCreateWithoutCash_register_entriesInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -3792,6 +3958,8 @@ export type usersUpdateWithoutCash_register_entriesInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -3832,6 +4000,8 @@ export type usersUncheckedUpdateWithoutCash_register_entriesInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -3872,6 +4042,8 @@ export type usersCreateWithoutRolesInput = {
   ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -3912,6 +4084,8 @@ export type usersUncheckedCreateWithoutRolesInput = {
   ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -3968,6 +4142,8 @@ export type usersUpdateWithoutRolesInput = {
   ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -4008,6 +4184,8 @@ export type usersUncheckedUpdateWithoutRolesInput = {
   ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -4048,6 +4226,8 @@ export type usersCreateWithoutApplicationsInput = {
   ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -4088,6 +4268,8 @@ export type usersUncheckedCreateWithoutApplicationsInput = {
   ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -4144,6 +4326,8 @@ export type usersUpdateWithoutApplicationsInput = {
   ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -4184,6 +4368,8 @@ export type usersUncheckedUpdateWithoutApplicationsInput = {
   ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -4224,6 +4410,8 @@ export type usersCreateWithoutProfileInput = {
   ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -4264,6 +4452,8 @@ export type usersUncheckedCreateWithoutProfileInput = {
   ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -4320,6 +4510,8 @@ export type usersUpdateWithoutProfileInput = {
   ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -4360,6 +4552,8 @@ export type usersUncheckedUpdateWithoutProfileInput = {
   ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -4401,6 +4595,8 @@ export type usersCreateWithoutSubscriptionInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
@@ -4441,6 +4637,8 @@ export type usersUncheckedCreateWithoutSubscriptionInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
@@ -4497,6 +4695,8 @@ export type usersUpdateWithoutSubscriptionInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
@@ -4537,6 +4737,8 @@ export type usersUncheckedUpdateWithoutSubscriptionInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -4576,6 +4778,8 @@ export type usersCreateWithoutReal_estate_propertiesInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -4616,6 +4820,8 @@ export type usersUncheckedCreateWithoutReal_estate_propertiesInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -4672,6 +4878,8 @@ export type usersUpdateWithoutReal_estate_propertiesInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -4712,6 +4920,8 @@ export type usersUncheckedUpdateWithoutReal_estate_propertiesInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -4752,6 +4962,8 @@ export type usersCreateWithoutFleet_vehiclesInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -4792,6 +5004,8 @@ export type usersUncheckedCreateWithoutFleet_vehiclesInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -4848,6 +5062,8 @@ export type usersUpdateWithoutFleet_vehiclesInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -4888,6 +5104,8 @@ export type usersUncheckedUpdateWithoutFleet_vehiclesInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -4928,6 +5146,8 @@ export type usersCreateWithoutAd_campaignsInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -4968,6 +5188,8 @@ export type usersUncheckedCreateWithoutAd_campaignsInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -5024,6 +5246,8 @@ export type usersUpdateWithoutAd_campaignsInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -5064,6 +5288,8 @@ export type usersUncheckedUpdateWithoutAd_campaignsInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -5105,6 +5331,8 @@ export type usersCreateWithoutIdentity_verificationsInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
@@ -5145,6 +5373,8 @@ export type usersUncheckedCreateWithoutIdentity_verificationsInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
@@ -5201,6 +5431,8 @@ export type usersUpdateWithoutIdentity_verificationsInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
@@ -5241,6 +5473,8 @@ export type usersUncheckedUpdateWithoutIdentity_verificationsInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -5281,6 +5515,8 @@ export type usersCreateWithoutMandatesInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
@@ -5321,6 +5557,8 @@ export type usersUncheckedCreateWithoutMandatesInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
@@ -5377,6 +5615,8 @@ export type usersUpdateWithoutMandatesInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
@@ -5417,6 +5657,8 @@ export type usersUncheckedUpdateWithoutMandatesInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
@@ -5457,6 +5699,8 @@ export type usersCreateWithoutCreation_filingsInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -5497,6 +5741,8 @@ export type usersUncheckedCreateWithoutCreation_filingsInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -5553,6 +5799,8 @@ export type usersUpdateWithoutCreation_filingsInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -5593,6 +5841,8 @@ export type usersUncheckedUpdateWithoutCreation_filingsInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -5633,6 +5883,8 @@ export type usersCreateWithoutCompany_registrationsInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -5673,6 +5925,8 @@ export type usersUncheckedCreateWithoutCompany_registrationsInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -5729,6 +5983,8 @@ export type usersUpdateWithoutCompany_registrationsInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -5769,6 +6025,8 @@ export type usersUncheckedUpdateWithoutCompany_registrationsInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -5809,6 +6067,8 @@ export type usersCreateWithoutEvaluations_demandeesInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -5849,6 +6109,8 @@ export type usersUncheckedCreateWithoutEvaluations_demandeesInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -5894,6 +6156,8 @@ export type usersCreateWithoutEvaluations_revuesInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -5934,6 +6198,8 @@ export type usersUncheckedCreateWithoutEvaluations_revuesInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -5990,6 +6256,8 @@ export type usersUpdateWithoutEvaluations_demandeesInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -6030,6 +6298,8 @@ export type usersUncheckedUpdateWithoutEvaluations_demandeesInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -6081,6 +6351,8 @@ export type usersUpdateWithoutEvaluations_revuesInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -6121,6 +6393,8 @@ export type usersUncheckedUpdateWithoutEvaluations_revuesInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -6161,6 +6435,8 @@ export type usersCreateWithoutEvaluation_editsInput = {
   roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
@@ -6201,6 +6477,8 @@ export type usersUncheckedCreateWithoutEvaluation_editsInput = {
   roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
   applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
   identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
@@ -6257,6 +6535,8 @@ export type usersUpdateWithoutEvaluation_editsInput = {
   roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
@@ -6297,6 +6577,8 @@ export type usersUncheckedUpdateWithoutEvaluation_editsInput = {
   roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
   applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
   identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
@@ -6305,6 +6587,374 @@ export type usersUncheckedUpdateWithoutEvaluation_editsInput = {
   company_registrations?: Prisma.company_registrationsUncheckedUpdateManyWithoutOwnerNestedInput
   evaluations_demandees?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutRequesterNestedInput
   evaluations_revues?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutReviewerNestedInput
+}
+
+export type usersCreateWithoutExperiencesInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
+  subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
+  identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
+  company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
+  company_registrations?: Prisma.company_registrationsCreateNestedManyWithoutOwnerInput
+  evaluations_demandees?: Prisma.financing_evaluationsCreateNestedManyWithoutRequesterInput
+  evaluations_revues?: Prisma.financing_evaluationsCreateNestedManyWithoutReviewerInput
+  evaluation_edits?: Prisma.financing_evaluation_editsCreateNestedManyWithoutEditorInput
+}
+
+export type usersUncheckedCreateWithoutExperiencesInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
+  subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
+  identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
+  company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
+  company_registrations?: Prisma.company_registrationsUncheckedCreateNestedManyWithoutOwnerInput
+  evaluations_demandees?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutRequesterInput
+  evaluations_revues?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutReviewerInput
+  evaluation_edits?: Prisma.financing_evaluation_editsUncheckedCreateNestedManyWithoutEditorInput
+}
+
+export type usersCreateOrConnectWithoutExperiencesInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutExperiencesInput, Prisma.usersUncheckedCreateWithoutExperiencesInput>
+}
+
+export type usersUpsertWithoutExperiencesInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutExperiencesInput, Prisma.usersUncheckedUpdateWithoutExperiencesInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutExperiencesInput, Prisma.usersUncheckedCreateWithoutExperiencesInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutExperiencesInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutExperiencesInput, Prisma.usersUncheckedUpdateWithoutExperiencesInput>
+}
+
+export type usersUpdateWithoutExperiencesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
+  identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
+  company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
+  company_registrations?: Prisma.company_registrationsUpdateManyWithoutOwnerNestedInput
+  evaluations_demandees?: Prisma.financing_evaluationsUpdateManyWithoutRequesterNestedInput
+  evaluations_revues?: Prisma.financing_evaluationsUpdateManyWithoutReviewerNestedInput
+  evaluation_edits?: Prisma.financing_evaluation_editsUpdateManyWithoutEditorNestedInput
+}
+
+export type usersUncheckedUpdateWithoutExperiencesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
+  identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
+  company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
+  company_registrations?: Prisma.company_registrationsUncheckedUpdateManyWithoutOwnerNestedInput
+  evaluations_demandees?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutRequesterNestedInput
+  evaluations_revues?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutReviewerNestedInput
+  evaluation_edits?: Prisma.financing_evaluation_editsUncheckedUpdateManyWithoutEditorNestedInput
+}
+
+export type usersCreateWithoutFormationsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
+  identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
+  company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
+  company_registrations?: Prisma.company_registrationsCreateNestedManyWithoutOwnerInput
+  evaluations_demandees?: Prisma.financing_evaluationsCreateNestedManyWithoutRequesterInput
+  evaluations_revues?: Prisma.financing_evaluationsCreateNestedManyWithoutReviewerInput
+  evaluation_edits?: Prisma.financing_evaluation_editsCreateNestedManyWithoutEditorInput
+}
+
+export type usersUncheckedCreateWithoutFormationsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
+  identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
+  company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
+  company_registrations?: Prisma.company_registrationsUncheckedCreateNestedManyWithoutOwnerInput
+  evaluations_demandees?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutRequesterInput
+  evaluations_revues?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutReviewerInput
+  evaluation_edits?: Prisma.financing_evaluation_editsUncheckedCreateNestedManyWithoutEditorInput
+}
+
+export type usersCreateOrConnectWithoutFormationsInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutFormationsInput, Prisma.usersUncheckedCreateWithoutFormationsInput>
+}
+
+export type usersUpsertWithoutFormationsInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutFormationsInput, Prisma.usersUncheckedUpdateWithoutFormationsInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutFormationsInput, Prisma.usersUncheckedCreateWithoutFormationsInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutFormationsInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutFormationsInput, Prisma.usersUncheckedUpdateWithoutFormationsInput>
+}
+
+export type usersUpdateWithoutFormationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
+  identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
+  company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
+  company_registrations?: Prisma.company_registrationsUpdateManyWithoutOwnerNestedInput
+  evaluations_demandees?: Prisma.financing_evaluationsUpdateManyWithoutRequesterNestedInput
+  evaluations_revues?: Prisma.financing_evaluationsUpdateManyWithoutReviewerNestedInput
+  evaluation_edits?: Prisma.financing_evaluation_editsUpdateManyWithoutEditorNestedInput
+}
+
+export type usersUncheckedUpdateWithoutFormationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
+  identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
+  company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
+  company_registrations?: Prisma.company_registrationsUncheckedUpdateManyWithoutOwnerNestedInput
+  evaluations_demandees?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutRequesterNestedInput
+  evaluations_revues?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutReviewerNestedInput
+  evaluation_edits?: Prisma.financing_evaluation_editsUncheckedUpdateManyWithoutEditorNestedInput
 }
 
 
@@ -6332,6 +6982,8 @@ export type UsersCountOutputType = {
   ad_campaigns: number
   roles: number
   applications: number
+  experiences: number
+  formations: number
   identity_verifications: number
   mandates: number
   company_bylaws: number
@@ -6362,6 +7014,8 @@ export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   ad_campaigns?: boolean | UsersCountOutputTypeCountAd_campaignsArgs
   roles?: boolean | UsersCountOutputTypeCountRolesArgs
   applications?: boolean | UsersCountOutputTypeCountApplicationsArgs
+  experiences?: boolean | UsersCountOutputTypeCountExperiencesArgs
+  formations?: boolean | UsersCountOutputTypeCountFormationsArgs
   identity_verifications?: boolean | UsersCountOutputTypeCountIdentity_verificationsArgs
   mandates?: boolean | UsersCountOutputTypeCountMandatesArgs
   company_bylaws?: boolean | UsersCountOutputTypeCountCompany_bylawsArgs
@@ -6518,6 +7172,20 @@ export type UsersCountOutputTypeCountApplicationsArgs<ExtArgs extends runtime.Ty
 /**
  * UsersCountOutputType without action
  */
+export type UsersCountOutputTypeCountExperiencesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.user_experiencesWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountFormationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.user_formationsWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
 export type UsersCountOutputTypeCountIdentity_verificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.identity_verificationsWhereInput
 }
@@ -6602,6 +7270,8 @@ export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   roles?: boolean | Prisma.users$rolesArgs<ExtArgs>
   applications?: boolean | Prisma.users$applicationsArgs<ExtArgs>
   profile?: boolean | Prisma.users$profileArgs<ExtArgs>
+  experiences?: boolean | Prisma.users$experiencesArgs<ExtArgs>
+  formations?: boolean | Prisma.users$formationsArgs<ExtArgs>
   subscription?: boolean | Prisma.users$subscriptionArgs<ExtArgs>
   identity_verifications?: boolean | Prisma.users$identity_verificationsArgs<ExtArgs>
   mandates?: boolean | Prisma.users$mandatesArgs<ExtArgs>
@@ -6670,6 +7340,8 @@ export type usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   roles?: boolean | Prisma.users$rolesArgs<ExtArgs>
   applications?: boolean | Prisma.users$applicationsArgs<ExtArgs>
   profile?: boolean | Prisma.users$profileArgs<ExtArgs>
+  experiences?: boolean | Prisma.users$experiencesArgs<ExtArgs>
+  formations?: boolean | Prisma.users$formationsArgs<ExtArgs>
   subscription?: boolean | Prisma.users$subscriptionArgs<ExtArgs>
   identity_verifications?: boolean | Prisma.users$identity_verificationsArgs<ExtArgs>
   mandates?: boolean | Prisma.users$mandatesArgs<ExtArgs>
@@ -6708,6 +7380,8 @@ export type $usersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     roles: Prisma.$user_rolesPayload<ExtArgs>[]
     applications: Prisma.$user_applicationsPayload<ExtArgs>[]
     profile: Prisma.$user_profilesPayload<ExtArgs> | null
+    experiences: Prisma.$user_experiencesPayload<ExtArgs>[]
+    formations: Prisma.$user_formationsPayload<ExtArgs>[]
     subscription: Prisma.$subscriptionsPayload<ExtArgs> | null
     identity_verifications: Prisma.$identity_verificationsPayload<ExtArgs>[]
     mandates: Prisma.$mandatesPayload<ExtArgs>[]
@@ -7147,6 +7821,8 @@ export interface Prisma__usersClient<T, Null = never, ExtArgs extends runtime.Ty
   roles<T extends Prisma.users$rolesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$rolesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$user_rolesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   applications<T extends Prisma.users$applicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$applicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$user_applicationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   profile<T extends Prisma.users$profileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$profileArgs<ExtArgs>>): Prisma.Prisma__user_profilesClient<runtime.Types.Result.GetResult<Prisma.$user_profilesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  experiences<T extends Prisma.users$experiencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$experiencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$user_experiencesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  formations<T extends Prisma.users$formationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$formationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$user_formationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   subscription<T extends Prisma.users$subscriptionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$subscriptionArgs<ExtArgs>>): Prisma.Prisma__subscriptionsClient<runtime.Types.Result.GetResult<Prisma.$subscriptionsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   identity_verifications<T extends Prisma.users$identity_verificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$identity_verificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$identity_verificationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mandates<T extends Prisma.users$mandatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$mandatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$mandatesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -8077,6 +8753,54 @@ export type users$profileArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    */
   include?: Prisma.user_profilesInclude<ExtArgs> | null
   where?: Prisma.user_profilesWhereInput
+}
+
+/**
+ * users.experiences
+ */
+export type users$experiencesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the user_experiences
+   */
+  select?: Prisma.user_experiencesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the user_experiences
+   */
+  omit?: Prisma.user_experiencesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.user_experiencesInclude<ExtArgs> | null
+  where?: Prisma.user_experiencesWhereInput
+  orderBy?: Prisma.user_experiencesOrderByWithRelationInput | Prisma.user_experiencesOrderByWithRelationInput[]
+  cursor?: Prisma.user_experiencesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.User_experiencesScalarFieldEnum | Prisma.User_experiencesScalarFieldEnum[]
+}
+
+/**
+ * users.formations
+ */
+export type users$formationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the user_formations
+   */
+  select?: Prisma.user_formationsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the user_formations
+   */
+  omit?: Prisma.user_formationsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.user_formationsInclude<ExtArgs> | null
+  where?: Prisma.user_formationsWhereInput
+  orderBy?: Prisma.user_formationsOrderByWithRelationInput | Prisma.user_formationsOrderByWithRelationInput[]
+  cursor?: Prisma.user_formationsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.User_formationsScalarFieldEnum | Prisma.User_formationsScalarFieldEnum[]
 }
 
 /**

@@ -11,7 +11,10 @@ import { FinancingModule } from '../igini/financing/financing.module.js';
 import { PlanningModule } from '../igini/planning/planning.module.js';
 import { TransmissionModule } from '../igini/transmission/transmission.module.js';
 import { WorkflowModule } from '../igini/workflow/workflow.module.js';
+import { QuestionnerModule } from '../igini/questionner/questionner.module.js';
 import { ProjectsController } from './projects.controller.js';
+import { QuestionnaireController } from './questionnaire/questionnaire.controller.js';
+import { QuestionnaireService } from './questionnaire/questionnaire.service.js';
 import { ProjectsService } from './projects.service.js';
 
 @Module({
@@ -33,9 +36,10 @@ import { ProjectsService } from './projects.service.js';
     AutomationModule,
     ConstitutionModule,
     MemoryModule,
+    QuestionnerModule,
   ],
-  controllers: [ProjectsController],
-  providers: [ProjectsService],
+  controllers: [ProjectsController, QuestionnaireController],
+  providers: [ProjectsService, QuestionnaireService],
   // Exporté pour que ChatModule puisse appeler les mêmes méthodes que les
   // boutons (analyzeForOwner, createBuildPlanForOwner, ...) depuis les
   // outils de l'orchestrateur, sans dupliquer leur logique.

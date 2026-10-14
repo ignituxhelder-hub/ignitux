@@ -99,6 +99,7 @@ describe('ComptabilitePage', () => {
     });
 
     afficher();
+    fireEvent.click(await screen.findByRole('button', { name: 'Saisir' }));
 
     expect(await screen.findByText(/il en faut donc au moins deux/)).toBeInTheDocument();
     expect(screen.queryByLabelText('Compte débité')).not.toBeInTheDocument();
@@ -113,6 +114,7 @@ describe('ComptabilitePage', () => {
     });
 
     afficher();
+    fireEvent.click(await screen.findByRole('button', { name: 'Saisir' }));
 
     fireEvent.change(await screen.findByLabelText('Libellé'), {
       target: { value: 'Facture client' },
@@ -136,6 +138,7 @@ describe('ComptabilitePage', () => {
     mockApiRoutes(AVEC_PLAN);
 
     afficher();
+    fireEvent.click(await screen.findByRole('button', { name: 'Saisir' }));
 
     fireEvent.change(await screen.findByLabelText('Libellé'), { target: { value: 'Essai' } });
     fireEvent.change(screen.getByLabelText('Montant en euros'), { target: { value: '100' } });
@@ -152,6 +155,7 @@ describe('ComptabilitePage', () => {
     mockApiRoutes(AVEC_PLAN);
 
     afficher();
+    fireEvent.click(await screen.findByRole('button', { name: 'Saisir' }));
 
     fireEvent.change(await screen.findByLabelText('Libellé'), { target: { value: 'Essai' } });
     fireEvent.change(screen.getByLabelText('Montant en euros'), { target: { value: '-100' } });
@@ -168,6 +172,7 @@ describe('ComptabilitePage', () => {
     });
 
     afficher();
+    fireEvent.click(await screen.findByRole('button', { name: 'Ouvrir un compte' }));
 
     fireEvent.change(await screen.findByLabelText('Code'), { target: { value: '627' } });
     fireEvent.change(screen.getByLabelText('Intitulé'), { target: { value: 'Frais bancaires' } });

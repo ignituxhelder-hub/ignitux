@@ -3,6 +3,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthModule } from '../auth/auth.module.js';
 import { RolesModule } from '../roles/roles.module.js';
 import { ProfileController } from './profile.controller.js';
+import { CvService } from './cv.service.js';
 import { ProfileService } from './profile.service.js';
 
 /**
@@ -13,7 +14,7 @@ import { ProfileService } from './profile.service.js';
 @Module({
   imports: [AuthModule, PassportModule.register({ defaultStrategy: 'jwt' }), RolesModule],
   controllers: [ProfileController],
-  providers: [ProfileService],
-  exports: [ProfileService],
+  providers: [ProfileService, CvService],
+  exports: [ProfileService, CvService],
 })
 export class ProfileModule {}

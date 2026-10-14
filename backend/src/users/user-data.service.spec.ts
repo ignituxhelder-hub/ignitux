@@ -157,6 +157,7 @@ describe('UserDataService', () => {
         'cgu_acceptees_le',
         'cgu_version_acceptee',
         'compte_cree_le',
+        'cv',
         'email',
         'email_verifie_le',
         'id',

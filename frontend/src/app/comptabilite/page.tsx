@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Brand } from '@/components/ignitux-mark';
+import { IconesPanneaux } from '@/components/icones-panneaux';
 import {
   api,
   ApiError,
@@ -107,35 +108,64 @@ export default function ComptabilitePage() {
       )}
       {isLoading && <p className="loading">Chargement…</p>}
 
-      {!isLoading && <Balance balance={balance} />}
-
-      {comptes.length >= 2 && (
-        <SaisirUneEcriture
-          comptes={comptes}
-          token={token}
-          onFait={async (m) => {
-            setMessage(m);
-            await charger();
-          }}
-          onErreur={setError}
-        />
-      )}
-      {!isLoading && comptes.length < 2 && (
-        <p className="muted">
-          Une écriture déplace un montant d&apos;un compte vers un autre : il en faut donc au
-          moins deux avant de pouvoir en saisir une.
-        </p>
-      )}
-
-      <Journal ecritures={ecritures} />
-
-      <OuvrirUnCompte
-        token={token}
-        onFait={async (m) => {
-          setMessage(m);
-          await charger();
-        }}
-        onErreur={setError}
+      <IconesPanneaux
+        titre="Comptabilité"
+        ouvertParDefaut="balance"
+        panneaux={[
+          {
+            id: 'balance',
+            nom: 'Balance',
+            glyphe: 'comptabilite',
+            categorie: 'gerer',
+            contenu: isLoading ? null : <Balance balance={balance} />,
+          },
+          {
+            id: 'ecritures',
+            nom: 'Écritures',
+            glyphe: 'taches',
+            categorie: 'vendre',
+            contenu: <Journal ecritures={ecritures} />,
+          },
+          {
+            id: 'saisir',
+            nom: 'Saisir',
+            glyphe: 'infos',
+            categorie: 'creer',
+            contenu:
+              comptes.length >= 2 ? (
+                <SaisirUneEcriture
+                  comptes={comptes}
+                  token={token}
+                  onFait={async (m) => {
+                    setMessage(m);
+                    await charger();
+                  }}
+                  onErreur={setError}
+                />
+              ) : (
+                <p className="muted">
+                  Une écriture déplace un montant d&apos;un compte vers un autre : il en faut
+                  donc au moins deux avant de pouvoir en saisir une.
+                </p>
+              ),
+          },
+          {
+            id: 'compte',
+            nom: 'Ouvrir un compte',
+            glyphe: 'banque',
+            categorie: 'investir',
+            contenu: (
+              <OuvrirUnCompte
+                token={token}
+                onFait={async (m) => {
+                  setMessage(m);
+                  await charger();
+                }}
+                onErreur={setError}
+              />
+            ),
+          },
+        ]}
       />
     </main>
   );
