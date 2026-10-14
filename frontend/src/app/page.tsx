@@ -4,20 +4,26 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { IconesExplicatives } from '@/components/icones-explicatives';
 import { IginiMention } from '@/components/igini-mention';
 import { Brand, IgnituxMark } from '@/components/ignitux-mark';
 import { SelecteurLangue } from '@/components/selecteur-langue';
 import { useAuth } from '@/lib/auth';
 
 const STEPS = [
-  { num: '01', key: 'analyser' },
-  { num: '02', key: 'construire' },
-  { num: '03', key: 'financer' },
-  { num: '04', key: 'developper' },
-  { num: '05', key: 'transmettre' },
+  { key: 'analyser', glyphe: 'analyse', categorie: 'creer' },
+  { key: 'construire', glyphe: 'construction', categorie: 'vendre' },
+  { key: 'financer', glyphe: 'financement', categorie: 'investir' },
+  { key: 'developper', glyphe: 'developpement', categorie: 'gerer' },
+  { key: 'transmettre', glyphe: 'transmission', categorie: 'reseau' },
 ] as const;
 
-const ENGINES = ['memoire', 'connaissance', 'workflow', 'score'] as const;
+const ENGINES = [
+  { key: 'memoire', glyphe: 'memoire' },
+  { key: 'connaissance', glyphe: 'connaissances' },
+  { key: 'workflow', glyphe: 'automatisation' },
+  { key: 'score', glyphe: 'score' },
+] as const;
 
 export default function HomePage() {
   const t = useTranslations('accueil');
@@ -69,34 +75,39 @@ export default function HomePage() {
 
       <section className="section">
         <p className="section-title">{t('methode')}</p>
-        <div className="steps-grid">
-          {STEPS.map((step) => (
-            <div className="card step-card" key={step.num}>
-              <div className="step-num">{step.num}</div>
-              <h3>{t(`etapes.${step.key}.nom`)}</h3>
-              <p>{t(`etapes.${step.key}.description`)}</p>
-            </div>
-          ))}
-        </div>
+        <IconesExplicatives
+          titre={t('methode')}
+          icones={STEPS.map((step) => ({
+            id: step.key,
+            nom: t(`etapes.${step.key}.nom`),
+            glyphe: step.glyphe,
+            categorie: step.categorie,
+            texte: t(`etapes.${step.key}.description`),
+          }))}
+        />
       </section>
 
       <section className="section">
         <p className="section-title">{t('gardeEnTete')}</p>
-        <div className="card engine-list">
-          {ENGINES.map((engine) => (
-            <div key={engine}>
-              <h3>{t(`moteurs.${engine}.nom`)}</h3>
-              <p>{t(`moteurs.${engine}.description`)}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="section">
-        <p className="section-title">{t('communaute')}</p>
-        <div className="card">
-          <p style={{ margin: 0 }}>{t('communauteTexte')}</p>
-        </div>
+        <IconesExplicatives
+          titre={t('gardeEnTete')}
+          icones={[
+            ...ENGINES.map((engine) => ({
+              id: engine.key,
+              nom: t(`moteurs.${engine.key}.nom`),
+              glyphe: engine.glyphe,
+              categorie: 'reglages',
+              texte: t(`moteurs.${engine.key}.description`),
+            })),
+            {
+              id: 'communaute',
+              nom: t('communaute'),
+              glyphe: 'communaute',
+              categorie: 'reseau',
+              texte: t('communauteTexte'),
+            },
+          ]}
+        />
       </section>
 
       <section className="section" style={{ marginBottom: '2rem' }}>
