@@ -221,8 +221,9 @@ export default function ConfidentialitePage() {
           compte ; les statuts, le dossier de création, la fiche d&apos;immatriculation,
           l&apos;évaluation de financement et la connexion à ta boutique Shopify sont
           supprimés avec le projet auquel ils se rattachent, ou avec ton compte. Si tu
-          travailles en équipe, le journal d&apos;activité des membres (qui a fait quoi dans
-          ton espace) est conservé 12 mois, puis supprimé automatiquement.
+          travailles en équipe, le journal d&apos;activité des membres (ce que ton comptable
+          ou ton associé a fait dans ta facturation, ta comptabilité, ta banque ou ta
+          caisse) est conservé 12 mois, puis supprimé automatiquement.
         </p>
       </div>
 

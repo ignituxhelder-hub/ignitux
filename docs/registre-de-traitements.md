@@ -93,7 +93,7 @@ l'avertissement affiché avant l'export (`frontend/src/app/account/page.tsx`).
 
 **Tables :** `workflow_runs`, `workflow_events`, `automation_runs`, `project_compliance_checks`, `project_compliance_ai_runs`, `constitution_violations`, `ai_usage_events`, `space_activity`
 
-- **Finalité :** traçabilité des automatisations et de leurs échecs, contrôle constitutionnel (l'article 8), suivi de ce que les générateurs IGINI ont réellement consommé, et journal d'activité des membres d'une équipe (`space_activity` : qui a écrit quoi — méthode, chemin, statut — dans l'espace d'un autre, montré au propriétaire).
+- **Finalité :** traçabilité des automatisations et de leurs échecs, contrôle constitutionnel (l'article 8), suivi de ce que les générateurs IGINI ont réellement consommé, et journal d'activité de l'équipe (`space_activity` : ce qu'un comptable ou un associé a écrit — méthode, chemin, statut — dans la facturation, la comptabilité, la banque ou la caisse d'un propriétaire).
 - **Base légale :** intérêt légitime (sécurité, fiabilité du service, comptabilité vérifiable des coûts déjà facturés par le fournisseur d'IA).
 - **Durée de conservation — trois régimes différents dans ce même groupe :**
   - `workflow_runs`, `workflow_events`, `automation_runs`, `project_compliance_checks`, `project_compliance_ai_runs` sont rattachées au projet et supprimées avec lui.
@@ -229,6 +229,7 @@ Dérivé de `exclusions()` dans `user-data-scope.ts` :
 - **`compliance_requirements`** — liste des démarches réglementaires proposées par Ignitux, identique pour tout le monde. Ce que la personne a coché, en revanche, fait partie de son export (`project_compliance_checks`, groupe 8).
 - **`constitution_articles`** — texte de la Constitution Ignitux, document public identique pour tout le monde.
 - **`financing_evaluation_edits`** — traces internes de la revue d'une évaluation de financement par un administrateur : elles décrivent son travail sur le rapport, pas une donnée fournie par la personne.
+- **`space_members`, `space_invitations`** — réservées, inutilisées : créées en production le 14/10/2026 pour une version de l'équipe abandonnée le jour même. Aucun code ne les lit ni ne les écrit ; elles restent déclarées pour qu'un `db push` ne les supprime pas, et seront retirées par une migration décidée.
 - **`shopify_connections`** — jeton d'accès Shopify, chiffré au repos. Même motif que `auth_tokens` : le remettre chiffré n'apprendrait rien, et une fuite de l'export ne doit pas faire circuler du matériel de sécurité. Le domaine de la boutique et le forfait déclaré restent visibles depuis l'écran Boutique en ligne.
 
 ## Ce que ce registre n'est pas
