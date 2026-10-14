@@ -119,6 +119,43 @@ describe('WorkflowService', () => {
     });
   });
 
+  describe('updateNote', () => {
+    it('lève une NotFoundException si la tâche est introuvable', async () => {
+      prisma.tasks.findFirst.mockResolvedValue(null);
+
+      await expect(service.updateNote('u1', 't1', 'bloqué')).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it("n'écrit rien si le projet n'appartient pas à l'utilisateur", async () => {
+      prisma.tasks.findFirst.mockResolvedValue({ id: 't1', project_id: 'p1' });
+      prisma.projects.findFirst.mockResolvedValue(null);
+
+      await expect(service.updateNote('u1', 't1', 'bloqué')).rejects.toBeInstanceOf(NotFoundException);
+      expect(prisma.tasks.update).not.toHaveBeenCalled();
+    });
+
+    it('enregistre la note sans toucher au statut ni au score', async () => {
+      prisma.tasks.findFirst.mockResolvedValue({ id: 't1', project_id: 'p1' });
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.tasks.update.mockResolvedValue({ id: 't1', note: 'à faire par téléphone' });
+
+      await service.updateNote('u1', 't1', '  à faire par téléphone ');
+
+      expect(prisma.tasks.update).toHaveBeenCalledWith({ where: { id: 't1' }, data: { note: 'à faire par téléphone' } });
+      expect(automation.runAfterChange).not.toHaveBeenCalled();
+    });
+
+    it('efface la note quand le texte est vide', async () => {
+      prisma.tasks.findFirst.mockResolvedValue({ id: 't1', project_id: 'p1' });
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.tasks.update.mockResolvedValue({ id: 't1', note: null });
+
+      await service.updateNote('u1', 't1', '   ');
+
+      expect(prisma.tasks.update).toHaveBeenCalledWith({ where: { id: 't1' }, data: { note: null } });
+    });
+  });
+
   describe('createTasksFromSuggestions', () => {
     it('ne fait aucun appel si la liste est vide', async () => {
       const result = await service.createTasksFromSuggestions('p1', [], 'analysis');

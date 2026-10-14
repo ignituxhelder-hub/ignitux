@@ -323,6 +323,59 @@ const SOURCE_LABELS: Record<string, string> = {
   build_plan: 'Suggérée par le plan de construction',
 };
 
+/**
+ * Note sur une tâche qu'IGINI n'a pas pu faire : ce qui bloque, ce qu'il
+ * reste à faire à la main. Le parent la remonte avec `key` : un enregistrement
+ * remet le brouillon à la valeur sauvegardée.
+ */
+function NoteTache({
+  task,
+  disabled,
+  onSave,
+}: {
+  task: Task;
+  disabled: boolean;
+  onSave: (taskId: string, note: string) => Promise<void>;
+}) {
+  const [texte, setTexte] = useState(task.note ?? '');
+  const [enregistrement, setEnregistrement] = useState(false);
+  const modifie = texte.trim() !== (task.note ?? '');
+
+  async function enregistrer() {
+    setEnregistrement(true);
+    try {
+      await onSave(task.id, texte);
+    } finally {
+      setEnregistrement(false);
+    }
+  }
+
+  return (
+    <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <textarea
+        aria-label={`Note sur ${task.title}`}
+        placeholder="Une note : ce qui bloque, ce qu'il reste à faire à la main…"
+        rows={2}
+        maxLength={1000}
+        value={texte}
+        disabled={disabled}
+        onChange={(e) => setTexte(e.target.value)}
+      />
+      {modifie && (
+        <button
+          className="secondary"
+          type="button"
+          style={{ alignSelf: 'flex-start' }}
+          disabled={disabled || enregistrement}
+          onClick={enregistrer}
+        >
+          {enregistrement ? 'Enregistrement…' : 'Enregistrer la note'}
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function TasksSection({
   token,
   projectId,
@@ -399,6 +452,16 @@ export function TasksSection({
       onChanged?.();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de mettre à jour la tâche.');
+    }
+  }
+
+  async function handleNote(taskId: string, note: string) {
+    if (!token) return;
+    setError(null);
+    try {
+      remplacer(await api.updateTaskNote(token, taskId, note));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Impossible d'enregistrer la note.");
     }
   }
 
@@ -599,6 +662,15 @@ export function TasksSection({
             Refusé{task.ai_refusal_reason ? ` : ${task.ai_refusal_reason}` : ''}
           </p>
         )}
+        {!readOnly && task.ai_status === 'echec' ? (
+          <NoteTache key={`${task.id}:${task.note ?? ''}`} task={task} disabled={isRunning} onSave={handleNote} />
+        ) : (
+          task.note && (
+            <p className="muted" style={{ margin: '0.5rem 0 0' }}>
+              Note : {task.note}
+            </p>
+          )
+        )}
       </div>
     );
   }
@@ -686,7 +758,13 @@ export function TasksSection({
               {`${coches.length} élément${coches.length > 1 ? 's' : ''} sélectionné${coches.length > 1 ? 's' : ''}, ~${coches.length} appel${coches.length > 1 ? 's' : ''} IA`}
             </span>
           )}
-          <button type="button" disabled={coches.length === 0 || isRunning} onClick={() => lancerLot(coches)}>
+          <button
+            className="primary"
+            style={{ width: 'auto' }}
+            type="button"
+            disabled={coches.length === 0 || isRunning}
+            onClick={() => lancerLot(coches)}
+          >
             Démarrer IGINI
           </button>
         </div>

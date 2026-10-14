@@ -72,6 +72,21 @@ export class WorkflowService {
     return misAJour;
   }
 
+  /** Sans effet sur le score : une note n'avance ni ne recule la tâche. */
+  async updateNote(userId: string, taskId: string, note: string) {
+    const task = await this.prisma.tasks.findFirst({ where: { id: taskId } });
+    if (!task) {
+      throw new NotFoundException('Tâche introuvable.');
+    }
+    await exigerCapacite(this.prisma, userId, task.project_id, 'modifier_taches');
+
+    const propre = note.trim();
+    return this.prisma.tasks.update({
+      where: { id: taskId },
+      data: { note: propre === '' ? null : propre },
+    });
+  }
+
   /**
    * Convertit une liste de suggestions textuelles (prochaines étapes d'une
    * analyse, jalons d'un plan de construction…) en tâches assignées à

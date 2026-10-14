@@ -6,6 +6,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard.js';
 import { RefuserEcritureDepassee } from '../../hors-ligne/ecriture-depassee.decorator.js';
 import { EcritureDepasseeGuard } from '../../hors-ligne/ecriture-depassee.guard.js';
 import { CreateTaskDto } from './dto/create-task.dto.js';
+import { UpdateTaskNoteDto } from './dto/update-task-note.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
 import { WorkflowService } from './workflow.service.js';
 
@@ -39,5 +40,15 @@ export class WorkflowController {
     @Body() dto: UpdateTaskStatusDto,
   ) {
     return this.workflowService.updateStatus(user.id, taskId, dto.status);
+  }
+
+  @RefuserEcritureDepassee('tasks', 'taskId')
+  @Patch('tasks/:taskId/note')
+  updateNote(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('taskId', ParseUUIDPipe) taskId: string,
+    @Body() dto: UpdateTaskNoteDto,
+  ) {
+    return this.workflowService.updateNote(user.id, taskId, dto.note);
   }
 }

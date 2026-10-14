@@ -409,6 +409,7 @@ export const TasksScalarFieldEnum = {
   ai_result: 'ai_result',
   ai_refusal_reason: 'ai_refusal_reason',
   ai_run_at: 'ai_run_at',
+  note: 'note',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
