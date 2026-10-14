@@ -27,7 +27,7 @@ export {
   estGenerateur,
   type GeneratorName,
 } from './generator-names.js';
-import { GENERATOR_NAMES, type GeneratorName } from './generator-names.js';
+import { GENERATOR_NAMES, HORS_FORFAIT, type GeneratorName } from './generator-names.js';
 
 /**
  * Le « qui » d'un appel.
@@ -238,7 +238,9 @@ export class AiUsageService {
    * offre inclut. Les deux repondent a des questions differentes et n ont
    * pas les memes seuils.
    *
-   * Exclut `'discuter'` (les tours de l'orchestrateur du chat) : ce
+   * Exclut les générateurs HORS_FORFAIT (`discuter`, les tours de
+   * l'orchestrateur du chat, et `questionner`, les questions du
+   * questionnaire de projet) : ce
    * compteur nourrit `appelsCeMois` pour `droits.ts` côté générateurs
    * (« 3 analyses incluses en Découverte »), une promesse commerciale qui
    * ne porte que sur les générateurs (et « executer »). Sans cette exclusion, une simple
@@ -252,7 +254,7 @@ export class AiUsageService {
       where: {
         user_id: userId,
         created_at: { gte: depuis, lt: jusqua },
-        generator: { not: 'discuter' },
+        generator: { notIn: [...HORS_FORFAIT] },
       },
     });
   }

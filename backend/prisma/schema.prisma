@@ -43,6 +43,8 @@ model users {
   roles                     user_roles[]
   applications              user_applications[]
   profile                   user_profiles?
+  experiences               user_experiences[]
+  formations                user_formations[]
   subscription              subscriptions?
   identity_verifications    identity_verifications[]
   mandates                  mandates[]
@@ -139,6 +141,8 @@ model projects {
   creation_filing  creation_filings?
   company_registration company_registrations?
   financing_evaluations financing_evaluations[]
+  questionnaire         project_questionnaires?
+  igini_questions       project_igini_questions[]
 
   mandates             mandates[]
 
@@ -1752,6 +1756,9 @@ model user_profiles {
   has_founded_before String?
   motivation         String?
   skills             String[]
+  /// Salarié, demandeur d'emploi, étudiant… Change les aides de création
+  /// (ACRE, ARCE) et donc le plan de financement.
+  current_situation  String?
 
   investor_kind      String?
   investment_horizon String?
@@ -2077,4 +2084,80 @@ model financing_evaluation_edits {
   created_at    DateTime              @default(now()) @db.Timestamptz(6)
 
   @@index([evaluation_id])
+}
+
+/// LE CV, DÉCRIT PLUTÔT QU'IMPORTÉ.
+///
+/// Une ligne par expérience, saisie par la personne elle-même. Les dates
+/// sont des mois (`AAAA-MM`) : personne ne se souvient du jour où il a
+/// changé de poste, et l'exiger ferait inventer.
+model user_experiences {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id     String   @db.Uuid
+  user        users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  poste       String
+  entreprise  String?
+  /// AAAA-MM
+  debut       String?
+  /// AAAA-MM ; null avec `en_cours` = poste actuel.
+  fin         String?
+  en_cours    Boolean  @default(false)
+  description String?
+  position    Int      @default(0)
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([user_id, position])
+}
+
+/// Les formations et diplômes — facultatifs, et jamais un critère.
+///
+/// Ils servent à une seule chose : vérifier qu'une activité réglementée
+/// (CAP coiffure, diplôme d'État en santé…) peut être exercée. Le catalogue
+/// du profil refuse le « niveau d'étude » parce qu'il trie les gens ; ici on
+/// ne trie personne, on vérifie un droit d'exercer, et seulement si la
+/// personne a voulu le dire.
+model user_formations {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id       String   @db.Uuid
+  user          users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  diplome       String
+  etablissement String?
+  annee         Int?
+  position      Int      @default(0)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([user_id, position])
+}
+
+/// LE QUESTIONNAIRE DU PROJET — ce qu'IGINI supposait jusqu'ici.
+///
+/// Une ligne par projet. `reponses` est un objet validé contre le catalogue
+/// (`projects/questionnaire/questionnaire-catalogue.ts`) : une question
+/// s'ajoute à un seul endroit, comme pour le profil.
+model project_questionnaires {
+  project_id String    @id @db.Uuid
+  project    projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  reponses   Json      @default("{}")
+  /// Posé quand la personne arrive au bout du parcours.
+  termine_le DateTime? @db.Timestamptz(6)
+  /// Posé quand IGINI a préparé ses questions — même s'il n'en a posé
+  /// aucune : zéro question est une réponse, pas une raison de relancer.
+  questions_igini_le DateTime? @db.Timestamptz(6)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @updatedAt @db.Timestamptz(6)
+}
+
+/// Les questions qu'IGINI a jugées utiles après le questionnaire fixe.
+/// Générées une seule fois par projet ; la réponse est celle de la personne.
+model project_igini_questions {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id String   @db.Uuid
+  project    projects @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  question   String
+  pourquoi   String?
+  reponse    String?
+  position   Int      @default(0)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([project_id, position])
 }

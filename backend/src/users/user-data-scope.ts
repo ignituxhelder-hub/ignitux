@@ -58,6 +58,10 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   // motivations, disponibilité. Elle appartient à la personne de la façon
   // la plus directe qui soit : elle l'a écrite sur elle-même.
   user_profiles: exported('compte'),
+  // Le CV décrit : écrit par la personne sur elle-même, au même titre que
+  // le profil — et exporté au même endroit.
+  user_experiences: exported('compte'),
+  user_formations: exported('compte'),
   // L offre souscrite fait partie du compte : c est une relation
   // contractuelle avec Ignitux, pas une donnee metier du projet. Exportee
   // parce que la personne a le droit de savoir ce qu Ignitux retient de
@@ -94,6 +98,11 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   // la personne tient elle-même (pièces cochées, date et référence du dépôt).
   // Un contenu de travail du projet, pas un contenu généré par IGINI.
   creation_filings: exported('projets_et_contenus'),
+  // Ses réponses sur son projet. Les questions d'IGINI sont rédigées par
+  // IGINI, mais les réponses sont les siennes : la paire sort avec le
+  // projet plutôt qu'avec les contenus générés.
+  project_questionnaires: exported('projets_et_contenus'),
+  project_igini_questions: exported('projets_et_contenus'),
   // La fiche d'immatriculation : SIREN, siège, dénomination… saisis par la
   // personne depuis son Kbis. Même nature que le dossier de création.
   company_registrations: exported('projets_et_contenus'),

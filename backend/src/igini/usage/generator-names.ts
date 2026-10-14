@@ -47,7 +47,25 @@ export const GENERATEURS_METHODE = [
  * le coût seulement — dans aucune offre, jamais soumis à
  * `OffresService.exiger()` (voir plus haut).
  */
-export const GENERATOR_NAMES = [...GENERATEURS_METHODE, 'executer', 'discuter', 'evaluer'] as const;
+export const GENERATOR_NAMES = [
+  ...GENERATEURS_METHODE,
+  'executer',
+  'discuter',
+  'evaluer',
+  'questionner',
+] as const;
+
+/**
+ * Journalisés pour le coût, jamais décomptés du forfait mensuel.
+ *
+ * « questionner » (les questions ciblées d'IGINI à la fin du questionnaire
+ * de projet) y est pour une raison simple : Découverte n'a que trois
+ * générations par mois, et en consommer une pour POSER des questions —
+ * avant même la première analyse — serait faire payer à la personne l'effort
+ * qu'on lui demande. Le plafond de coût global le borne, et il ne tourne
+ * qu'une fois par projet.
+ */
+export const HORS_FORFAIT: readonly GeneratorName[] = ['discuter', 'questionner'];
 
 export type GeneratorName = (typeof GENERATOR_NAMES)[number];
 

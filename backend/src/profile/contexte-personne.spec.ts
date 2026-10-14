@@ -107,4 +107,67 @@ describe('ce qu’IGINI sait de la personne', () => {
       expect(contextePersonne({ sectors: ['  ', ''], skills: [''] })).toBeNull();
     });
   });
+
+  describe('le CV décrit et la situation', () => {
+    const CV = {
+      experiences: [
+        {
+          poste: 'Chef de rayon',
+          entreprise: 'Carrefour',
+          debut: '2015-03',
+          fin: '2021-08',
+          enCours: false,
+          description: 'Gestion d’une équipe de six personnes.',
+        },
+        { poste: 'Gérant', entreprise: null, debut: '2021-09', fin: null, enCours: true, description: null },
+      ],
+      formations: [{ diplome: 'CAP Coiffure', etablissement: 'CFA de Lyon', annee: 2012 }],
+    };
+
+    it('rapporte chaque expérience avec ses dates', () => {
+      const texte = contextePersonne(null, undefined, CV);
+      expect(texte).toContain('Expérience : Chef de rayon chez Carrefour (de 2015-03 à 2021-08)');
+      expect(texte).toContain('Gestion d’une équipe de six personnes.');
+      expect(texte).toContain('Expérience : Gérant (depuis 2021-09).');
+    });
+
+    it('rapporte les diplômes comme des faits déclarés', () => {
+      expect(contextePersonne(null, undefined, CV)).toContain(
+        'Formations et diplômes déclarés : CAP Coiffure (CFA de Lyon, 2012).',
+      );
+    });
+
+    it('rapporte la situation actuelle', () => {
+      expect(contextePersonne({ current_situation: 'Demandeur d’emploi' })).toContain(
+        'Situation actuelle : Demandeur d’emploi.',
+      );
+    });
+
+    it('n’énonce aucune conséquence à partir du CV', () => {
+      const texte = contextePersonne({ current_situation: 'Salarié' }, undefined, CV) ?? '';
+      for (const mot of ['donc', 'réduit', 'augmente', 'favorise', 'grâce à', 'atout']) {
+        expect(texte).not.toContain(mot);
+      }
+    });
+
+    it('reste silencieux sur un CV vide', () => {
+      expect(contextePersonne(null, undefined, { experiences: [], formations: [] })).toBeNull();
+    });
+
+    it('borne le nombre d’expériences transmises', () => {
+      const long = {
+        experiences: Array.from({ length: 20 }, (_, i) => ({
+          poste: `Poste ${i}`,
+          entreprise: null,
+          debut: null,
+          fin: null,
+          enCours: false,
+          description: null,
+        })),
+        formations: [],
+      };
+      const texte = contextePersonne(null, undefined, long) ?? '';
+      expect(texte.match(/Expérience :/g)).toHaveLength(8);
+    });
+  });
 });

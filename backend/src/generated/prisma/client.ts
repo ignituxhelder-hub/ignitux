@@ -708,3 +708,38 @@ export type financing_evaluations = Prisma.financing_evaluationsModel
  * avant, après.
  */
 export type financing_evaluation_edits = Prisma.financing_evaluation_editsModel
+/**
+ * Model user_experiences
+ * LE CV, DÉCRIT PLUTÔT QU'IMPORTÉ.
+ * 
+ * Une ligne par expérience, saisie par la personne elle-même. Les dates
+ * sont des mois (`AAAA-MM`) : personne ne se souvient du jour où il a
+ * changé de poste, et l'exiger ferait inventer.
+ */
+export type user_experiences = Prisma.user_experiencesModel
+/**
+ * Model user_formations
+ * Les formations et diplômes — facultatifs, et jamais un critère.
+ * 
+ * Ils servent à une seule chose : vérifier qu'une activité réglementée
+ * (CAP coiffure, diplôme d'État en santé…) peut être exercée. Le catalogue
+ * du profil refuse le « niveau d'étude » parce qu'il trie les gens ; ici on
+ * ne trie personne, on vérifie un droit d'exercer, et seulement si la
+ * personne a voulu le dire.
+ */
+export type user_formations = Prisma.user_formationsModel
+/**
+ * Model project_questionnaires
+ * LE QUESTIONNAIRE DU PROJET — ce qu'IGINI supposait jusqu'ici.
+ * 
+ * Une ligne par projet. `reponses` est un objet validé contre le catalogue
+ * (`projects/questionnaire/questionnaire-catalogue.ts`) : une question
+ * s'ajoute à un seul endroit, comme pour le profil.
+ */
+export type project_questionnaires = Prisma.project_questionnairesModel
+/**
+ * Model project_igini_questions
+ * Les questions qu'IGINI a jugées utiles après le questionnaire fixe.
+ * Générées une seule fois par projet ; la réponse est celle de la personne.
+ */
+export type project_igini_questions = Prisma.project_igini_questionsModel

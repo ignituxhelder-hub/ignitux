@@ -130,7 +130,11 @@ export const ModelName = {
   creation_filings: 'creation_filings',
   company_registrations: 'company_registrations',
   financing_evaluations: 'financing_evaluations',
-  financing_evaluation_edits: 'financing_evaluation_edits'
+  financing_evaluation_edits: 'financing_evaluation_edits',
+  user_experiences: 'user_experiences',
+  user_formations: 'user_formations',
+  project_questionnaires: 'project_questionnaires',
+  project_igini_questions: 'project_igini_questions'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1086,6 +1090,7 @@ export const User_profilesScalarFieldEnum = {
   has_founded_before: 'has_founded_before',
   motivation: 'motivation',
   skills: 'skills',
+  current_situation: 'current_situation',
   investor_kind: 'investor_kind',
   investment_horizon: 'investment_horizon',
   risk_level: 'risk_level',
@@ -1314,6 +1319,60 @@ export const Financing_evaluation_editsScalarFieldEnum = {
 export type Financing_evaluation_editsScalarFieldEnum = (typeof Financing_evaluation_editsScalarFieldEnum)[keyof typeof Financing_evaluation_editsScalarFieldEnum]
 
 
+export const User_experiencesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  poste: 'poste',
+  entreprise: 'entreprise',
+  debut: 'debut',
+  fin: 'fin',
+  en_cours: 'en_cours',
+  description: 'description',
+  position: 'position',
+  created_at: 'created_at'
+} as const
+
+export type User_experiencesScalarFieldEnum = (typeof User_experiencesScalarFieldEnum)[keyof typeof User_experiencesScalarFieldEnum]
+
+
+export const User_formationsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  diplome: 'diplome',
+  etablissement: 'etablissement',
+  annee: 'annee',
+  position: 'position',
+  created_at: 'created_at'
+} as const
+
+export type User_formationsScalarFieldEnum = (typeof User_formationsScalarFieldEnum)[keyof typeof User_formationsScalarFieldEnum]
+
+
+export const Project_questionnairesScalarFieldEnum = {
+  project_id: 'project_id',
+  reponses: 'reponses',
+  termine_le: 'termine_le',
+  questions_igini_le: 'questions_igini_le',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Project_questionnairesScalarFieldEnum = (typeof Project_questionnairesScalarFieldEnum)[keyof typeof Project_questionnairesScalarFieldEnum]
+
+
+export const Project_igini_questionsScalarFieldEnum = {
+  id: 'id',
+  project_id: 'project_id',
+  question: 'question',
+  pourquoi: 'pourquoi',
+  reponse: 'reponse',
+  position: 'position',
+  created_at: 'created_at'
+} as const
+
+export type Project_igini_questionsScalarFieldEnum = (typeof Project_igini_questionsScalarFieldEnum)[keyof typeof Project_igini_questionsScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1328,6 +1387,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

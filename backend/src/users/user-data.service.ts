@@ -204,6 +204,10 @@ export class UserDataService {
       campagnesPublicitaires,
       dossiersDeCreation,
       fichesDImmatriculation,
+      cvExperiences,
+      cvFormations,
+      questionnaires,
+      questionsIgini,
     ] = await Promise.all([
       this.prisma.tasks.findMany({ where: byProject }),
       this.prisma.memories.findMany({ where: { user_id: userId } }),
@@ -349,6 +353,20 @@ export class UserDataService {
       this.prisma.creation_filings.findMany({ where: { owner_id: userId } }),
       // Les fiches d'immatriculation, saisies par la personne elle-même.
       this.prisma.company_registrations.findMany({ where: { owner_id: userId } }),
+      // Le CV décrit, et les réponses au questionnaire de chaque projet.
+      this.prisma.user_experiences.findMany({
+        where: { user_id: userId },
+        orderBy: { position: 'asc' },
+      }),
+      this.prisma.user_formations.findMany({
+        where: { user_id: userId },
+        orderBy: { position: 'asc' },
+      }),
+      this.prisma.project_questionnaires.findMany({ where: byProject }),
+      this.prisma.project_igini_questions.findMany({
+        where: byProject,
+        orderBy: [{ project_id: 'asc' }, { position: 'asc' }],
+      }),
     ]);
 
     return {
@@ -374,6 +392,7 @@ export class UserDataService {
           ...compte,
           roles_tenus: roles,
           profil: monProfil,
+          cv: { experiences: cvExperiences, formations: cvFormations },
           bureau,
           abonnement,
           verifications_d_identite: verificationsDIdentite.map(avecImagesEnBase64),
@@ -397,6 +416,8 @@ export class UserDataService {
           flotte,
           dossiers_de_creation: dossiersDeCreation,
           fiches_d_immatriculation: fichesDImmatriculation,
+          questionnaires_de_projet: questionnaires,
+          questions_d_igini_et_reponses: questionsIgini,
         },
         contenus_generes_par_igini: {
           analyses,

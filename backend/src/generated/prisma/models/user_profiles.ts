@@ -43,6 +43,7 @@ export type User_profilesMinAggregateOutputType = {
   availability: string | null
   has_founded_before: string | null
   motivation: string | null
+  current_situation: string | null
   investor_kind: string | null
   investment_horizon: string | null
   risk_level: string | null
@@ -58,6 +59,7 @@ export type User_profilesMaxAggregateOutputType = {
   availability: string | null
   has_founded_before: string | null
   motivation: string | null
+  current_situation: string | null
   investor_kind: string | null
   investment_horizon: string | null
   risk_level: string | null
@@ -75,6 +77,7 @@ export type User_profilesCountAggregateOutputType = {
   has_founded_before: number
   motivation: number
   skills: number
+  current_situation: number
   investor_kind: number
   investment_horizon: number
   risk_level: number
@@ -93,6 +96,7 @@ export type User_profilesMinAggregateInputType = {
   availability?: true
   has_founded_before?: true
   motivation?: true
+  current_situation?: true
   investor_kind?: true
   investment_horizon?: true
   risk_level?: true
@@ -108,6 +112,7 @@ export type User_profilesMaxAggregateInputType = {
   availability?: true
   has_founded_before?: true
   motivation?: true
+  current_situation?: true
   investor_kind?: true
   investment_horizon?: true
   risk_level?: true
@@ -125,6 +130,7 @@ export type User_profilesCountAggregateInputType = {
   has_founded_before?: true
   motivation?: true
   skills?: true
+  current_situation?: true
   investor_kind?: true
   investment_horizon?: true
   risk_level?: true
@@ -216,6 +222,7 @@ export type User_profilesGroupByOutputType = {
   has_founded_before: string | null
   motivation: string | null
   skills: string[]
+  current_situation: string | null
   investor_kind: string | null
   investment_horizon: string | null
   risk_level: string | null
@@ -255,6 +262,7 @@ export type user_profilesWhereInput = {
   has_founded_before?: Prisma.StringNullableFilter<"user_profiles"> | string | null
   motivation?: Prisma.StringNullableFilter<"user_profiles"> | string | null
   skills?: Prisma.StringNullableListFilter<"user_profiles">
+  current_situation?: Prisma.StringNullableFilter<"user_profiles"> | string | null
   investor_kind?: Prisma.StringNullableFilter<"user_profiles"> | string | null
   investment_horizon?: Prisma.StringNullableFilter<"user_profiles"> | string | null
   risk_level?: Prisma.StringNullableFilter<"user_profiles"> | string | null
@@ -274,6 +282,7 @@ export type user_profilesOrderByWithRelationInput = {
   has_founded_before?: Prisma.SortOrderInput | Prisma.SortOrder
   motivation?: Prisma.SortOrderInput | Prisma.SortOrder
   skills?: Prisma.SortOrder
+  current_situation?: Prisma.SortOrderInput | Prisma.SortOrder
   investor_kind?: Prisma.SortOrderInput | Prisma.SortOrder
   investment_horizon?: Prisma.SortOrderInput | Prisma.SortOrder
   risk_level?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -296,6 +305,7 @@ export type user_profilesWhereUniqueInput = Prisma.AtLeast<{
   has_founded_before?: Prisma.StringNullableFilter<"user_profiles"> | string | null
   motivation?: Prisma.StringNullableFilter<"user_profiles"> | string | null
   skills?: Prisma.StringNullableListFilter<"user_profiles">
+  current_situation?: Prisma.StringNullableFilter<"user_profiles"> | string | null
   investor_kind?: Prisma.StringNullableFilter<"user_profiles"> | string | null
   investment_horizon?: Prisma.StringNullableFilter<"user_profiles"> | string | null
   risk_level?: Prisma.StringNullableFilter<"user_profiles"> | string | null
@@ -315,6 +325,7 @@ export type user_profilesOrderByWithAggregationInput = {
   has_founded_before?: Prisma.SortOrderInput | Prisma.SortOrder
   motivation?: Prisma.SortOrderInput | Prisma.SortOrder
   skills?: Prisma.SortOrder
+  current_situation?: Prisma.SortOrderInput | Prisma.SortOrder
   investor_kind?: Prisma.SortOrderInput | Prisma.SortOrder
   investment_horizon?: Prisma.SortOrderInput | Prisma.SortOrder
   risk_level?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -339,6 +350,7 @@ export type user_profilesScalarWhereWithAggregatesInput = {
   has_founded_before?: Prisma.StringNullableWithAggregatesFilter<"user_profiles"> | string | null
   motivation?: Prisma.StringNullableWithAggregatesFilter<"user_profiles"> | string | null
   skills?: Prisma.StringNullableListFilter<"user_profiles">
+  current_situation?: Prisma.StringNullableWithAggregatesFilter<"user_profiles"> | string | null
   investor_kind?: Prisma.StringNullableWithAggregatesFilter<"user_profiles"> | string | null
   investment_horizon?: Prisma.StringNullableWithAggregatesFilter<"user_profiles"> | string | null
   risk_level?: Prisma.StringNullableWithAggregatesFilter<"user_profiles"> | string | null
@@ -356,6 +368,7 @@ export type user_profilesCreateInput = {
   has_founded_before?: string | null
   motivation?: string | null
   skills?: Prisma.user_profilesCreateskillsInput | string[]
+  current_situation?: string | null
   investor_kind?: string | null
   investment_horizon?: string | null
   risk_level?: string | null
@@ -375,6 +388,7 @@ export type user_profilesUncheckedCreateInput = {
   has_founded_before?: string | null
   motivation?: string | null
   skills?: Prisma.user_profilesCreateskillsInput | string[]
+  current_situation?: string | null
   investor_kind?: string | null
   investment_horizon?: string | null
   risk_level?: string | null
@@ -392,6 +406,7 @@ export type user_profilesUpdateInput = {
   has_founded_before?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   skills?: Prisma.user_profilesUpdateskillsInput | string[]
+  current_situation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   investor_kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   investment_horizon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   risk_level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -411,6 +426,7 @@ export type user_profilesUncheckedUpdateInput = {
   has_founded_before?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   skills?: Prisma.user_profilesUpdateskillsInput | string[]
+  current_situation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   investor_kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   investment_horizon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   risk_level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -429,6 +445,7 @@ export type user_profilesCreateManyInput = {
   has_founded_before?: string | null
   motivation?: string | null
   skills?: Prisma.user_profilesCreateskillsInput | string[]
+  current_situation?: string | null
   investor_kind?: string | null
   investment_horizon?: string | null
   risk_level?: string | null
@@ -446,6 +463,7 @@ export type user_profilesUpdateManyMutationInput = {
   has_founded_before?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   skills?: Prisma.user_profilesUpdateskillsInput | string[]
+  current_situation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   investor_kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   investment_horizon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   risk_level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -464,6 +482,7 @@ export type user_profilesUncheckedUpdateManyInput = {
   has_founded_before?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   skills?: Prisma.user_profilesUpdateskillsInput | string[]
+  current_situation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   investor_kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   investment_horizon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   risk_level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -487,6 +506,7 @@ export type user_profilesCountOrderByAggregateInput = {
   has_founded_before?: Prisma.SortOrder
   motivation?: Prisma.SortOrder
   skills?: Prisma.SortOrder
+  current_situation?: Prisma.SortOrder
   investor_kind?: Prisma.SortOrder
   investment_horizon?: Prisma.SortOrder
   risk_level?: Prisma.SortOrder
@@ -503,6 +523,7 @@ export type user_profilesMaxOrderByAggregateInput = {
   availability?: Prisma.SortOrder
   has_founded_before?: Prisma.SortOrder
   motivation?: Prisma.SortOrder
+  current_situation?: Prisma.SortOrder
   investor_kind?: Prisma.SortOrder
   investment_horizon?: Prisma.SortOrder
   risk_level?: Prisma.SortOrder
@@ -518,6 +539,7 @@ export type user_profilesMinOrderByAggregateInput = {
   availability?: Prisma.SortOrder
   has_founded_before?: Prisma.SortOrder
   motivation?: Prisma.SortOrder
+  current_situation?: Prisma.SortOrder
   investor_kind?: Prisma.SortOrder
   investment_horizon?: Prisma.SortOrder
   risk_level?: Prisma.SortOrder
@@ -593,6 +615,7 @@ export type user_profilesCreateWithoutUserInput = {
   has_founded_before?: string | null
   motivation?: string | null
   skills?: Prisma.user_profilesCreateskillsInput | string[]
+  current_situation?: string | null
   investor_kind?: string | null
   investment_horizon?: string | null
   risk_level?: string | null
@@ -610,6 +633,7 @@ export type user_profilesUncheckedCreateWithoutUserInput = {
   has_founded_before?: string | null
   motivation?: string | null
   skills?: Prisma.user_profilesCreateskillsInput | string[]
+  current_situation?: string | null
   investor_kind?: string | null
   investment_horizon?: string | null
   risk_level?: string | null
@@ -643,6 +667,7 @@ export type user_profilesUpdateWithoutUserInput = {
   has_founded_before?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   skills?: Prisma.user_profilesUpdateskillsInput | string[]
+  current_situation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   investor_kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   investment_horizon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   risk_level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -660,6 +685,7 @@ export type user_profilesUncheckedUpdateWithoutUserInput = {
   has_founded_before?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   skills?: Prisma.user_profilesUpdateskillsInput | string[]
+  current_situation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   investor_kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   investment_horizon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   risk_level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -680,6 +706,7 @@ export type user_profilesSelect<ExtArgs extends runtime.Types.Extensions.Interna
   has_founded_before?: boolean
   motivation?: boolean
   skills?: boolean
+  current_situation?: boolean
   investor_kind?: boolean
   investment_horizon?: boolean
   risk_level?: boolean
@@ -699,6 +726,7 @@ export type user_profilesSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   has_founded_before?: boolean
   motivation?: boolean
   skills?: boolean
+  current_situation?: boolean
   investor_kind?: boolean
   investment_horizon?: boolean
   risk_level?: boolean
@@ -718,6 +746,7 @@ export type user_profilesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   has_founded_before?: boolean
   motivation?: boolean
   skills?: boolean
+  current_situation?: boolean
   investor_kind?: boolean
   investment_horizon?: boolean
   risk_level?: boolean
@@ -737,6 +766,7 @@ export type user_profilesSelectScalar = {
   has_founded_before?: boolean
   motivation?: boolean
   skills?: boolean
+  current_situation?: boolean
   investor_kind?: boolean
   investment_horizon?: boolean
   risk_level?: boolean
@@ -745,7 +775,7 @@ export type user_profilesSelectScalar = {
   updated_at?: boolean
 }
 
-export type user_profilesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"user_id" | "display_name" | "activity_country" | "sectors" | "experience" | "availability" | "has_founded_before" | "motivation" | "skills" | "investor_kind" | "investment_horizon" | "risk_level" | "preferred_sectors" | "created_at" | "updated_at", ExtArgs["result"]["user_profiles"]>
+export type user_profilesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"user_id" | "display_name" | "activity_country" | "sectors" | "experience" | "availability" | "has_founded_before" | "motivation" | "skills" | "current_situation" | "investor_kind" | "investment_horizon" | "risk_level" | "preferred_sectors" | "created_at" | "updated_at", ExtArgs["result"]["user_profiles"]>
 export type user_profilesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.usersDefaultArgs<ExtArgs>
 }
@@ -777,6 +807,11 @@ export type $user_profilesPayload<ExtArgs extends runtime.Types.Extensions.Inter
     has_founded_before: string | null
     motivation: string | null
     skills: string[]
+    /**
+     * Salarié, demandeur d'emploi, étudiant… Change les aides de création
+     * (ACRE, ARCE) et donc le plan de financement.
+     */
+    current_situation: string | null
     investor_kind: string | null
     investment_horizon: string | null
     risk_level: string | null
@@ -1216,6 +1251,7 @@ export interface user_profilesFieldRefs {
   readonly has_founded_before: Prisma.FieldRef<"user_profiles", 'String'>
   readonly motivation: Prisma.FieldRef<"user_profiles", 'String'>
   readonly skills: Prisma.FieldRef<"user_profiles", 'String[]'>
+  readonly current_situation: Prisma.FieldRef<"user_profiles", 'String'>
   readonly investor_kind: Prisma.FieldRef<"user_profiles", 'String'>
   readonly investment_horizon: Prisma.FieldRef<"user_profiles", 'String'>
   readonly risk_level: Prisma.FieldRef<"user_profiles", 'String'>

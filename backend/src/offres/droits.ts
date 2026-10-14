@@ -33,6 +33,7 @@ import {
   type Offre,
   type OffreId,
 } from './offres-catalogue.js';
+import { HORS_FORFAIT } from '../igini/usage/generator-names.js';
 
 export type Action =
   | { kind: 'creer_projet'; projetsActuels: number }
@@ -95,7 +96,7 @@ function refus(
  * a le droit d'y accéder les lance, et seul le quota mensuel les borne.
  * « evaluer » passe d'abord par le droit `evaluer_financement`.
  */
-const HORS_METHODE: readonly GenerateurId[] = ['executer', 'evaluer'];
+const HORS_METHODE: readonly GenerateurId[] = ['executer', 'evaluer', 'questionner'];
 
 export function peut(offreId: OffreId, action: Action): Verdict {
   const { capacites } = offre(offreId);
@@ -118,6 +119,9 @@ export function peut(offreId: OffreId, action: Action): Verdict {
       // « executer » n'est pas un des six générateurs de méthode : toute
       // offre le permet, et seul le quota mensuel de générations le borne.
       const horsListe = HORS_METHODE.includes(action.generateur);
+      // Hors forfait : ni dans une liste d'offre, ni décompté. Seul le
+      // plafond de coût global le borne (voir generator-names.ts).
+      if (HORS_FORFAIT.includes(action.generateur)) return OUI;
       if (!horsListe && !capacites.generateurs.includes(action.generateur)) {
         const quiOuvre = premiereOffreQui(offreId, (c) =>
           c.generateurs.includes(action.generateur),
