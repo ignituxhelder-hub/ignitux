@@ -150,9 +150,11 @@ describe('UserDataService', () => {
       // c'est la table user_applications. `abonnement`,
       // `verifications_d_identite` et `mandats_donnes_a_ignitux` viennent de
       // leurs propres tables (subscriptions, identity_verifications,
-      // mandates), toutes trois classées dans le groupe « compte ».
+      // mandates), toutes trois classées dans le groupe « compte » ; de même
+      // `acces_a_l_argent` (space_members, les choix d'accès à l'argent).
       expect(Object.keys(exported.donnees.compte).sort()).toEqual([
         'abonnement',
+        'acces_a_l_argent',
         'bureau',
         'cgu_acceptees_le',
         'cgu_version_acceptee',
@@ -482,10 +484,39 @@ describe('UserDataService', () => {
       expect(prisma.space_activity.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ where: { actor_id: 'u1' } }),
       );
-      // Les tables réservées de la version abandonnée sont exclues : le faux
-      // client ne les a pas, et l'export n'a pas échoué en les lisant.
-      expect(prisma.space_members).toBeUndefined();
+      // La table réservée de la version abandonnée reste exclue : le faux
+      // client ne l'a pas, et l'export n'a pas échoué en la lisant.
       expect(prisma.space_invitations).toBeUndefined();
+    });
+
+    it("exporte les choix d'accès à l'argent : ceux que j'ai faits et ceux qui me concernent", async () => {
+      const quand = new Date('2026-10-20T09:00:00Z');
+      prisma.space_members.findMany.mockImplementation(({ where }: { where: Record<string, string> }) =>
+        Promise.resolve(
+          where.owner_id
+            ? [{ owner_id: 'u1', member_id: 'u2', role: 'argent', created_at: quand }]
+            : [{ owner_id: 'u3', member_id: 'u1', role: 'refuse', created_at: quand }],
+        ),
+      );
+
+      const exported = await service.exportUserData('u1');
+
+      expect(exported.donnees.compte.acces_a_l_argent).toEqual({
+        choix_que_j_ai_faits_pour_mon_argent: [
+          { owner_id: 'u1', member_id: 'u2', role: 'argent', created_at: quand },
+        ],
+        choix_des_autres_me_concernant: [{ owner_id: 'u3', member_id: 'u1', role: 'refuse', created_at: quand }],
+      });
+      expect(prisma.space_members.findMany).toHaveBeenCalledWith({
+        where: { owner_id: 'u1' },
+        orderBy: { created_at: 'asc' },
+        select: { owner_id: true, member_id: true, role: true, created_at: true },
+      });
+      expect(prisma.space_members.findMany).toHaveBeenCalledWith({
+        where: { member_id: 'u1' },
+        orderBy: { created_at: 'asc' },
+        select: { owner_id: true, member_id: true, role: true, created_at: true },
+      });
     });
   });
 

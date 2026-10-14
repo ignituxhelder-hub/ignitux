@@ -1,6 +1,6 @@
 # Registre des traitements — Ignitux
 
-26 septembre 2026 — mis à jour le 11 octobre 2026 (traitements 9 à 19, prestataires).
+26 septembre 2026 — mis à jour le 11 octobre 2026 (traitements 9 à 19, prestataires), puis le 14 octobre 2026 (traitement 20, accès d'une équipe à l'argent).
 
 Ce document est le registre interne des traitements (RGPD art. 30) : il liste
 ce qu'Ignitux traite, pourquoi, sur quelle base légale et pour combien de
@@ -32,7 +32,7 @@ l'avertissement affiché avant l'export (`frontend/src/app/account/page.tsx`).
 
 ## 1. Compte — groupe `compte`
 
-**Tables :** `users`, `user_roles`, `user_applications`, `user_profiles`, `subscriptions` (et `identity_verifications`, `mandates`, classées dans ce groupe d'export mais décrites à part : traitements 9 et 10)
+**Tables :** `users`, `user_roles`, `user_applications`, `user_profiles`, `subscriptions` (et `identity_verifications`, `mandates`, `space_members`, classées dans ce groupe d'export mais décrites à part : traitements 9, 10 et 20)
 
 - **Finalité :** créer et faire fonctionner le compte (identification, rôles tenus, applications activées sur le bureau, abonnement souscrit). L'acceptation des CGU, enregistrée dans `users`, est décrite au traitement 16.
 - **Base légale :** exécution du contrat (art. 6.1.b).
@@ -204,6 +204,16 @@ l'avertissement affiché avant l'export (`frontend/src/app/account/page.tsx`).
 - **Base légale :** intérêt légitime (sécurité) — à valider.
 - **Durée de conservation :** chez Cloudflare, à préciser ; ce que le widget enregistre dans le navigateur (cookies ou stockage) relève de Cloudflare — à préciser.
 
+## 20. Accès d'une équipe à l'argent du propriétaire — groupe `compte`
+
+**Tables :** `space_members`
+
+- **Finalité :** enregistrer le choix d'un propriétaire d'**activer** ou de **couper** l'accès d'un de ses comptables ou associés à sa facturation, sa comptabilité, sa banque et sa caisse (décision du 14/10/2026, spec `docs/superpowers/specs/2026-10-14-equipe-argent-design.md`). Sans choix, l'accès est automatique pour une personne ajoutée comme comptable ou associée à partir du 15/10/2026, et fermé pour une personne ajoutée avant (invitée sous les anciens textes). Le propriétaire voit et change ces choix dans la section Équipe de ses projets (`GET` / `PUT /espaces/acces-argent`, refusés dans l'espace d'un autre) ; chaque requête d'un membre dans l'argent du propriétaire relit le choix, sans cache.
+- **Données :** une ligne par couple propriétaire / membre : identifiants des deux comptes, choix (`argent` = activé, `refuse` = coupé), date du choix en vigueur (`created_at`, remise à jour à chaque changement).
+- **Base légale :** exécution du contrat (art. 6.1.b) — à valider.
+- **Durée de conservation :** tant que les deux comptes existent ; supprimée en cascade avec le compte du propriétaire ou celui du membre. Une ligne n'ouvre rien seule : retiré de tous les projets du propriétaire, le membre n'a plus accès, mais le choix reste enregistré (il s'applique de nouveau si la personne redevient comptable ou associée).
+- **Export :** inclus pour les deux personnes concernées — les choix que j'ai faits pour mon argent, et ceux des propriétaires qui me concernent (`compte.acces_a_l_argent`).
+
 ---
 
 ## Prestataires
@@ -230,7 +240,7 @@ Dérivé de `exclusions()` dans `user-data-scope.ts` :
 - **`compliance_requirements`** — liste des démarches réglementaires proposées par Ignitux, identique pour tout le monde. Ce que la personne a coché, en revanche, fait partie de son export (`project_compliance_checks`, groupe 8).
 - **`constitution_articles`** — texte de la Constitution Ignitux, document public identique pour tout le monde.
 - **`financing_evaluation_edits`** — traces internes de la revue d'une évaluation de financement par un administrateur : elles décrivent son travail sur le rapport, pas une donnée fournie par la personne.
-- **`space_members`, `space_invitations`** — réservées, inutilisées : créées en production le 14/10/2026 pour une version de l'équipe abandonnée le jour même. Aucun code ne les lit ni ne les écrit ; elles restent déclarées pour qu'un `db push` ne les supprime pas, et seront retirées par une migration décidée.
+- **`space_invitations`** — réservée, inutilisée : créée en production le 14/10/2026 pour une version de l'équipe abandonnée le jour même. Aucun code ne la lit ni ne l'écrit ; elle reste déclarée pour qu'un `db push` ne la supprime pas, et sera retirée par une migration décidée. (`space_members`, créée le même jour, est réutilisée depuis le 14/10/2026 : traitement 20.)
 - **`shopify_connections`** — jeton d'accès Shopify, chiffré au repos. Même motif que `auth_tokens` : le remettre chiffré n'apprendrait rien, et une fuite de l'export ne doit pas faire circuler du matériel de sécurité. Le domaine de la boutique et le forfait déclaré restent visibles depuis l'écran Boutique en ligne.
 
 ## Ce que ce registre n'est pas

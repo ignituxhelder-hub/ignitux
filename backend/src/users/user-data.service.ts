@@ -206,6 +206,8 @@ export class UserDataService {
       fichesDImmatriculation,
       activiteDansMonEspace,
       mesActionsChezLesAutres,
+      choixAccesArgentFaits,
+      choixAccesArgentMeConcernant,
       cvExperiences,
       cvFormations,
       questionnaires,
@@ -365,6 +367,18 @@ export class UserDataService {
         where: { actor_id: userId },
         orderBy: { created_at: 'asc' },
       }),
+      // Équipe : les choix d'accès à l'argent — ceux que j'ai faits pour mon
+      // argent, et ceux des propriétaires qui me concernent.
+      this.prisma.space_members.findMany({
+        where: { owner_id: userId },
+        orderBy: { created_at: 'asc' },
+        select: { owner_id: true, member_id: true, role: true, created_at: true },
+      }),
+      this.prisma.space_members.findMany({
+        where: { member_id: userId },
+        orderBy: { created_at: 'asc' },
+        select: { owner_id: true, member_id: true, role: true, created_at: true },
+      }),
       // Le CV décrit, et les réponses au questionnaire de chaque projet.
       this.prisma.user_experiences.findMany({
         where: { user_id: userId },
@@ -409,6 +423,14 @@ export class UserDataService {
           abonnement,
           verifications_d_identite: verificationsDIdentite.map(avecImagesEnBase64),
           mandats_donnes_a_ignitux: mandats,
+          // L'accès d'un comptable ou d'un associé à la facturation, la
+          // comptabilité, la banque et la caisse d'un propriétaire : role
+          // 'argent' (activé) ou 'refuse' (coupé), created_at = date du
+          // choix en vigueur.
+          acces_a_l_argent: {
+            choix_que_j_ai_faits_pour_mon_argent: choixAccesArgentFaits,
+            choix_des_autres_me_concernant: choixAccesArgentMeConcernant,
+          },
         },
         projets_et_contenus: {
           projets: projects,

@@ -73,6 +73,11 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   // avec Ignitux, pas une donnée métier de projet.
   identity_verifications: exported('compte'),
   mandates: exported('compte'),
+  // Équipe : les choix d'accès à l'argent (facturation, comptabilité,
+  // banque, caisse) accordés ou refusés — ceux que la personne a faits pour
+  // son argent (`owner_id`), et ceux des propriétaires qui la concernent
+  // (`member_id`). Une décision sur son compte, comme un mandat.
+  space_members: exported('compte'),
 
   projects: exported('projets_et_contenus'),
   tasks: exported('projets_et_contenus'),
@@ -224,15 +229,13 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
 
   // — Exclusions, chacune motivée —
 
-  // Tables créées en production le 14/10/2026 pour une version de l'équipe
-  // abandonnée le jour même. Elles restent déclarées dans schema.prisma pour
-  // qu'un `db push` ne les supprime pas, mais aucun code ne les lit ni ne
-  // les écrit.
-  space_members: excluded(
-    'réservées, inutilisées — version abandonnée le 14/10/2026 ; à retirer par une migration décidée',
-  ),
+  // Table créée en production le 14/10/2026 pour une version de l'équipe
+  // abandonnée le jour même. Elle reste déclarée dans schema.prisma pour
+  // qu'un `db push` ne la supprime pas, mais aucun code ne la lit ni ne
+  // l'écrit. (`space_members`, créée le même jour, est réutilisée : voir
+  // plus haut, groupe « compte ».)
   space_invitations: excluded(
-    'réservées, inutilisées — version abandonnée le 14/10/2026 ; à retirer par une migration décidée',
+    'réservée, inutilisée — version abandonnée le 14/10/2026 ; à retirer par une migration décidée',
   ),
 
   auth_tokens: excluded(
