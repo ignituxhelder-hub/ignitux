@@ -98,7 +98,7 @@ l'avertissement affiché avant l'export (`frontend/src/app/account/page.tsx`).
 - **Durée de conservation — trois régimes différents dans ce même groupe :**
   - `workflow_runs`, `workflow_events`, `automation_runs`, `project_compliance_checks`, `project_compliance_ai_runs` sont rattachées au projet et supprimées avec lui.
   - `constitution_violations` et `ai_usage_events` **ne sont pas supprimées** à la suppression du compte, faute de clé étrangère cascadante vers `users` — et ce n'est pas un oubli : elles sont **anonymisées** (l'identifiant utilisateur est mis à `null`). Le fait reste consultable pour l'audit et pour que le total mensuel des coûts IA déjà facturés ne change pas rétroactivement ; la personne, elle, en disparaît.
-  - `space_activity` (journal d'activité des membres) est conservé **12 mois** : les lignes de plus de 365 jours sont supprimées automatiquement au fil des écritures (`EspaceInterceptor`, à la première écriture après le démarrage puis une fois toutes les 200). Supprimé en cascade avec le compte du propriétaire de l'espace ; l'acteur est détaché (`null`) quand c'est son compte qui est supprimé.
+  - `space_activity` (journal d'activité des membres) est conservé **12 mois** : les lignes de plus de 365 jours sont supprimées automatiquement à chaque démarrage du serveur (même sans aucune activité des membres), puis au fil des écritures (`EspaceInterceptor`, à la première écriture après le démarrage puis une fois toutes les 200). Supprimé en cascade avec le compte du propriétaire de l'espace ; l'acteur est détaché (`null`) quand c'est son compte qui est supprimé.
 
 ## 9. Vérification d'identité — groupe `compte`
 

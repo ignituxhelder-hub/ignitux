@@ -60,4 +60,41 @@ describe('EspaceInterceptor — rétention du journal d’activité', () => {
     intercepteur = new EspaceInterceptor(new Reflector(), prisma as never);
     expect(() => noter()).not.toThrow();
   });
+
+  describe('au démarrage : la purge ne dépend pas de l’activité des membres', () => {
+    it('purge les lignes de plus de 365 jours sans attendre aucune écriture', () => {
+      intercepteur.onModuleInit();
+      expect(prisma.space_activity.deleteMany).toHaveBeenCalledTimes(1);
+      expect(prisma.space_activity.create).not.toHaveBeenCalled();
+      const limite = prisma.space_activity.deleteMany.mock.calls[0][0].where.created_at.lt.getTime();
+      expect(Math.abs(Date.now() - 365 * JOUR - limite)).toBeLessThan(5_000);
+    });
+
+    it('ne bloque pas le démarrage : rien n’est attendu (aucune promesse rendue)', () => {
+      prisma.space_activity.deleteMany.mockReturnValue(new Promise(() => undefined));
+      expect(intercepteur.onModuleInit()).toBeUndefined();
+    });
+
+    it('une base indisponible au démarrage est seulement journalisée', async () => {
+      const avertir = vi.spyOn(
+        (intercepteur as unknown as { logger: { warn: (m: string) => void } }).logger,
+        'warn',
+      ).mockImplementation(() => undefined);
+      prisma.space_activity.deleteMany.mockRejectedValue(new Error('base indisponible'));
+      expect(() => intercepteur.onModuleInit()).not.toThrow();
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(avertir).toHaveBeenCalledWith(expect.stringContaining('base indisponible'));
+
+      prisma.space_activity.deleteMany.mockImplementation(() => {
+        throw new Error('synchrone');
+      });
+      expect(() => intercepteur.onModuleInit()).not.toThrow();
+    });
+
+    it('la purge au fil des écritures reste en place après celle du démarrage', () => {
+      intercepteur.onModuleInit();
+      noter();
+      expect(prisma.space_activity.deleteMany).toHaveBeenCalledTimes(2);
+    });
+  });
 });

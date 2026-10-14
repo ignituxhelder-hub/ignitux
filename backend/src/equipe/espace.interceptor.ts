@@ -6,6 +6,7 @@ import {
   type CallHandler,
   type ExecutionContext,
   type NestInterceptor,
+  type OnModuleInit,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { type Observable, tap } from 'rxjs';
@@ -20,8 +21,10 @@ const CHEMIN_MAX = 500;
 /**
  * Rétention du journal d'activité des membres : 12 mois (registre des
  * traitements, docs/registre-de-traitements.md). Les lignes plus anciennes
- * sont supprimées au fil des écritures : à la première après le démarrage,
- * puis une fois toutes les PURGE_TOUTES_LES — jamais en bloquant la requête.
+ * sont supprimées au démarrage du serveur (`onModuleInit`, même si aucun
+ * membre n'écrit plus jamais rien), puis au fil des écritures : à la
+ * première après le démarrage, puis une fois toutes les PURGE_TOUTES_LES —
+ * jamais en bloquant ni le démarrage ni la requête.
  */
 export const RETENTION_ACTIVITE_JOURS = 365;
 export const PURGE_TOUTES_LES = 200;
@@ -52,7 +55,7 @@ interface RequeteHttp extends RequeteAvecEspace {
  *    l'espace d'un autre.
  */
 @Injectable()
-export class EspaceInterceptor implements NestInterceptor {
+export class EspaceInterceptor implements NestInterceptor, OnModuleInit {
   private readonly logger = new Logger(EspaceInterceptor.name);
   /** Écritures du journal depuis le démarrage : cadence de la purge. */
   private ecritures = 0;
@@ -61,6 +64,14 @@ export class EspaceInterceptor implements NestInterceptor {
     private readonly reflector: Reflector,
     private readonly prisma: PrismaService,
   ) {}
+
+  /**
+   * Purge de démarrage : lancée sans être attendue (le démarrage ne dépend
+   * pas de la base du journal), une erreur est seulement journalisée.
+   */
+  onModuleInit(): void {
+    this.purger();
+  }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     if (context.getType() !== 'http') return next.handle();
@@ -113,15 +124,15 @@ export class EspaceInterceptor implements NestInterceptor {
     try {
       this.prisma.space_activity
         .deleteMany({ where: { created_at: { lt: limite } } })
-        .catch((erreur: unknown) => this.signaler(erreur));
+        .catch((erreur: unknown) => this.signaler(erreur, 'purgé'));
     } catch (erreur) {
-      this.signaler(erreur);
+      this.signaler(erreur, 'purgé');
     }
   }
 
-  private signaler(erreur: unknown): void {
+  private signaler(erreur: unknown, quoi: 'écrit' | 'purgé' = 'écrit'): void {
     this.logger.warn(
-      `Journal d'activité d'espace non écrit : ${erreur instanceof Error ? erreur.message : String(erreur)}`,
+      `Journal d'activité d'espace non ${quoi} : ${erreur instanceof Error ? erreur.message : String(erreur)}`,
     );
   }
 }

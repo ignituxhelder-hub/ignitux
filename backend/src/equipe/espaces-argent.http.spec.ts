@@ -193,6 +193,11 @@ describe('Espace argent sur les vrais contrôleurs — application entière, san
   const donnees = { lignes: lignesArgent() };
   let jeton: (userId: string) => string;
   let service: <T>(classe: Type<T>) => T;
+  let purgesAuDemarrage = 0;
+
+  it('au démarrage de l’application, le journal de plus de 12 mois est purgé (sans aucune requête)', () => {
+    expect(purgesAuDemarrage).toBe(1);
+  });
 
   beforeAll(async () => {
     // Avant le premier import de l'application : certains modules lisent la
@@ -218,6 +223,7 @@ describe('Espace argent sur les vrais contrôleurs — application entière, san
     app = moduleRef.createNestApplication({ logger: false });
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
     await app.init();
+    purgesAuDemarrage = prisma.space_activity.deleteMany.mock.calls.length;
 
     const jwt = app.get(JwtService);
     jeton = (userId) => jwt.sign({ sub: userId, email: `${userId.slice(0, 4)}@exemple.fr` });
