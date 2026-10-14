@@ -415,6 +415,9 @@ const JAMAIS_EN_FILE_MOTIFS = [
   // ne doit jamais être servie depuis un cache périmé.
   // (`/espaces/entrepreneur` et `/espaces/investisseur` ne sont pas concernés.)
   /^\/espaces$/,
+  // L'accès de mon équipe à mon argent : ni lu depuis un cache périmé, ni
+  // activé ou coupé plus tard à mon insu — un tel choix se fait en ligne.
+  /^\/espaces\/acces-argent(?:\/[^/?#]+)?$/,
 ];
 
 /**
@@ -2323,6 +2326,23 @@ export interface EspaceListe {
   nom: string;
   /** `['proprietaire']` pour « Mon espace » ; sinon mes rôles chez ce propriétaire (comptable, associe). */
   roles: string[];
+}
+
+/**
+ * Pourquoi un de mes comptables ou associés a (ou n'a pas) accès à mon
+ * argent — voir backend/src/equipe/acces-argent.ts.
+ */
+export type RaisonAccesArgent = 'active_par_toi' | 'automatique' | 'coupe_par_toi' | 'a_activer';
+
+/** Un de mes comptables ou associés et son accès à mon argent (`GET /espaces/acces-argent`). */
+export interface MembreAccesArgent {
+  memberId: string;
+  /** Nom affiché, sinon l'e-mail. */
+  nom: string;
+  email: string;
+  roles: string[];
+  acces: boolean;
+  raison: RaisonAccesArgent;
 }
 
 // ── LE CV DÉCRIT ────────────────────────────────────────────────────────────
@@ -4298,4 +4318,24 @@ export const api = {
    */
   activiteDeMonEquipe: (token: string) =>
     request<ActiviteEquipe[]>('/espaces/activite', { headers: { Authorization: `Bearer ${token}` } }, { skipOfflineCache: true }),
+
+  /**
+   * Qui, parmi mes comptables et associés, a accès à MON argent, et pourquoi.
+   * Route personnelle : jamais d'`X-Espace`. Jamais servie depuis le cache :
+   * un accès affiché doit être l'accès réel.
+   */
+  accesArgent: (token: string) =>
+    request<MembreAccesArgent[]>(
+      '/espaces/acces-argent',
+      { headers: { Authorization: `Bearer ${token}` } },
+      { skipOfflineCache: true },
+    ),
+
+  /** J'active (`true`) ou je coupe (`false`) son accès à mon argent ; rend la liste relue par le serveur. */
+  choisirAccesArgent: (token: string, memberId: string, acces: boolean) =>
+    request<MembreAccesArgent[]>(`/espaces/acces-argent/${memberId}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ acces }),
+    }),
 };

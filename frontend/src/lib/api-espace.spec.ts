@@ -254,6 +254,29 @@ describe('le cache hors ligne est cloisonné par espace', () => {
     horsLigne();
     await expect(api.mesEspaces('t')).rejects.toMatchObject({ status: 0 });
   });
+
+  it('l’accès de mon équipe à mon argent : jamais d’X-Espace, jamais gardé, jamais mis en file', async () => {
+    const storage = fakeStorage();
+    setOfflineStorage(storage);
+    // Même placé dans l'espace d'un autre : ces routes sont les miennes.
+    setEspaceActif(A);
+    const envois = reseau(200, []);
+    await api.accesArgent('t');
+    await api.choisirAccesArgent('t', B, true);
+    expect(envois.map((e) => [e.method, new URL(e.url).pathname, e.headers['X-Espace']])).toEqual([
+      ['GET', '/espaces/acces-argent', undefined],
+      ['PUT', `/espaces/acces-argent/${B}`, undefined],
+    ]);
+    expect(storage.entries.size).toBe(0);
+
+    horsLigne();
+    await expect(api.accesArgent('t')).rejects.toMatchObject({ status: 0 });
+    await expect(api.choisirAccesArgent('t', B, false)).rejects.toMatchObject({
+      status: 0,
+      message: expect.stringContaining('ne peut pas être mis de côté'),
+    });
+    expect(readOfflineState().pending).toEqual([]);
+  });
 });
 
 describe('le cache et la file sont cloisonnés par utilisateur', () => {

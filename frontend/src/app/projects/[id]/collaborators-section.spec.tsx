@@ -232,4 +232,199 @@ describe('CollaboratorsSection', () => {
       expect(screen.queryByText('Activité de mon équipe dans mon argent')).not.toBeInTheDocument();
     });
   });
+
+  describe('« Accès à mon argent » (propriétaire) — automatique ou activé', () => {
+    const TITRE = 'Accès à mon argent (facturation, compta, banque, caisse)';
+    const BOB = '66666666-6666-4666-8666-666666666666';
+    const CHLOE = '77777777-7777-4777-8777-777777777777';
+    const DAN = '88888888-8888-4888-8888-888888888888';
+    const EVE = '99999999-9999-4999-8999-999999999999';
+    const membre = (memberId: string, nom: string, acces: boolean, raison: string, roles = ['comptable']) => ({
+      memberId,
+      nom,
+      email: `${nom.toLowerCase()}@exemple.fr`,
+      roles,
+      acces,
+      raison,
+    });
+    const EQUIPE = [
+      membre(BOB, 'Bob', false, 'a_activer'),
+      membre(CHLOE, 'Chloé', true, 'automatique', ['associe']),
+      membre(DAN, 'Dan', true, 'active_par_toi', ['comptable', 'associe']),
+      membre(EVE, 'Eve', false, 'coupe_par_toi'),
+    ];
+
+    type Reponse = { status: number; body: unknown };
+    /** Un faux serveur : GET de la liste, et PUT dont on garde le corps. */
+    function serveur(liste: unknown[], put: (memberId: string, corps: unknown) => Reponse | Promise<Reponse>) {
+      const envois: { memberId: string; corps: unknown }[] = [];
+      global.fetch = vi.fn().mockImplementation(async (url: string, options?: RequestInit) => {
+        const chemin = new URL(url).pathname;
+        const methode = options?.method ?? 'GET';
+        let reponse: Reponse = { status: 200, body: [] };
+        if (methode === 'GET' && chemin === '/espaces/acces-argent') reponse = { status: 200, body: liste };
+        const cible = /^\/espaces\/acces-argent\/([^/]+)$/.exec(chemin);
+        if (methode === 'PUT' && cible) {
+          const corps = JSON.parse(String(options?.body));
+          envois.push({ memberId: cible[1], corps });
+          reponse = await put(cible[1], corps);
+        }
+        return {
+          ok: reponse.status >= 200 && reponse.status < 300,
+          status: reponse.status,
+          json: () => Promise.resolve(reponse.body),
+        };
+      }) as unknown as typeof fetch;
+      return envois;
+    }
+
+    const lecturesAcces = () =>
+      vi
+        .mocked(global.fetch)
+        .mock.calls.filter(
+          ([u, o]) => new URL(String(u)).pathname === '/espaces/acces-argent' && (o?.method ?? 'GET') === 'GET',
+        );
+
+    it('liste mes comptables et associés, chacun avec une case étiquetée et sa raison en clair', async () => {
+      serveur(EQUIPE, () => ({ status: 200, body: EQUIPE }));
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      const bloc = await screen.findByRole('region', { name: TITRE });
+      const caseBob = await within(bloc).findByLabelText('Bob (Comptable)');
+      expect(caseBob).toHaveAttribute('type', 'checkbox');
+      expect(caseBob).not.toBeChecked();
+      expect(within(bloc).getByLabelText('Chloé (Associé)')).toBeChecked();
+      expect(within(bloc).getByLabelText('Dan (Comptable et associé)')).toBeChecked();
+      expect(within(bloc).getByLabelText('Eve (Comptable)')).not.toBeChecked();
+
+      // La raison est rattachée à la case (lue par les lecteurs d'écran).
+      expect(caseBob).toHaveAccessibleDescription('À activer — invité avant le changement');
+      expect(within(bloc).getByLabelText('Chloé (Associé)')).toHaveAccessibleDescription(
+        'Automatique (invité à partir du 15/10/2026)',
+      );
+      expect(within(bloc).getByLabelText('Dan (Comptable et associé)')).toHaveAccessibleDescription('Activé par toi');
+      expect(within(bloc).getByLabelText('Eve (Comptable)')).toHaveAccessibleDescription('Coupé par toi');
+      expect(lecturesAcces()).toHaveLength(1);
+    });
+
+    it('activer demande confirmation, envoie le choix, puis affiche la réponse du serveur (rien avant)', async () => {
+      let repondre: (r: Reponse) => void = () => {};
+      const envois = serveur(EQUIPE, () => new Promise<Reponse>((resolve) => (repondre = resolve)));
+      const confirmer = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      const caseBob = await screen.findByLabelText('Bob (Comptable)');
+      fireEvent.click(caseBob);
+
+      expect(confirmer).toHaveBeenCalledWith(
+        'Bob pourra voir et modifier ta facturation, ta compta, ta banque et ta caisse.',
+      );
+      await waitFor(() => expect(envois).toEqual([{ memberId: BOB, corps: { acces: true } }]));
+      // Pas d'affichage anticipé : tant que le serveur n'a pas répondu, la case reste décochée.
+      expect(screen.getByLabelText('Bob (Comptable)')).not.toBeChecked();
+      expect(screen.getByLabelText('Bob (Comptable)')).toBeDisabled();
+
+      repondre({ status: 200, body: [membre(BOB, 'Bob', true, 'active_par_toi'), ...EQUIPE.slice(1)] });
+
+      await waitFor(() => expect(screen.getByLabelText('Bob (Comptable)')).toBeChecked());
+      expect(screen.getByLabelText('Bob (Comptable)')).toHaveAccessibleDescription('Activé par toi');
+      expect(screen.getByLabelText('Bob (Comptable)')).not.toBeDisabled();
+    });
+
+    it('activer puis annuler la confirmation : rien n’est envoyé, la case reste décochée', async () => {
+      const envois = serveur(EQUIPE, () => ({ status: 200, body: EQUIPE }));
+      vi.spyOn(window, 'confirm').mockReturnValue(false);
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      fireEvent.click(await screen.findByLabelText('Bob (Comptable)'));
+
+      expect(screen.getByLabelText('Bob (Comptable)')).not.toBeChecked();
+      expect(envois).toEqual([]);
+    });
+
+    it('couper ne demande pas de confirmation et affiche « Coupé par toi » renvoyé par le serveur', async () => {
+      const envois = serveur(EQUIPE, () => ({
+        status: 200,
+        body: [EQUIPE[0], membre(CHLOE, 'Chloé', false, 'coupe_par_toi', ['associe']), ...EQUIPE.slice(2)],
+      }));
+      const confirmer = vi.spyOn(window, 'confirm');
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      fireEvent.click(await screen.findByLabelText('Chloé (Associé)'));
+
+      await waitFor(() => expect(screen.getByLabelText('Chloé (Associé)')).not.toBeChecked());
+      expect(screen.getByLabelText('Chloé (Associé)')).toHaveAccessibleDescription('Coupé par toi');
+      expect(envois).toEqual([{ memberId: CHLOE, corps: { acces: false } }]);
+      expect(confirmer).not.toHaveBeenCalled();
+    });
+
+    it('un refus du serveur est dit, et la case garde l’état du serveur', async () => {
+      serveur(EQUIPE, () => ({
+        status: 404,
+        body: { message: 'Cette personne n’est ni comptable ni associée sur un de tes projets.' },
+      }));
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      fireEvent.click(await screen.findByLabelText('Bob (Comptable)'));
+
+      expect(
+        await screen.findByText('Cette personne n’est ni comptable ni associée sur un de tes projets.'),
+      ).toBeInTheDocument();
+      expect(screen.getByLabelText('Bob (Comptable)')).not.toBeChecked();
+      expect(screen.getByLabelText('Bob (Comptable)')).not.toBeDisabled();
+    });
+
+    it('sans comptable ni associé : un message, aucune case', async () => {
+      serveur([], () => ({ status: 200, body: [] }));
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      const bloc = await screen.findByRole('region', { name: TITRE });
+      expect(
+        await within(bloc).findByText('Aucun comptable ni associé : personne d’autre que toi n’a accès à ton argent.'),
+      ).toBeInTheDocument();
+      expect(within(bloc).queryByRole('checkbox')).not.toBeInTheDocument();
+    });
+
+    it('la liste est relue après un changement de rôle dans l’équipe', async () => {
+      global.fetch = vi.fn().mockImplementation(async (url: string, options?: RequestInit) => {
+        const chemin = new URL(url).pathname;
+        const methode = options?.method ?? 'GET';
+        const body =
+          methode === 'GET' && chemin === '/projects/p1/collaborators'
+            ? [MEMBRE]
+            : methode === 'GET' && chemin === '/espaces/acces-argent'
+              ? []
+              : null;
+        return { ok: true, status: methode === 'PATCH' ? 204 : 200, json: () => Promise.resolve(body) };
+      }) as unknown as typeof fetch;
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+
+      await waitFor(() => expect(lecturesAcces()).toHaveLength(1));
+      fireEvent.change(await screen.findByLabelText('Rôle de b@b.com'), { target: { value: 'comptable' } });
+
+      await waitFor(() => expect(lecturesAcces()).toHaveLength(2));
+    });
+
+    it('un membre ne voit pas le bloc et ne le charge pas', async () => {
+      mockApiRoutes({ 'GET /projects/p1/collaborators': { status: 200, body: [MEMBRE] } });
+      render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} peutGerer={false} />);
+      await screen.findByText('b@b.com');
+      expect(screen.queryByText(TITRE)).not.toBeInTheDocument();
+      expect(lecturesAcces()).toHaveLength(0);
+    });
+  });
+
+  it('les textes des rôles disent que l’accès à l’argent est automatique et se coupe', async () => {
+    mockApiRoutes({ 'GET /projects/p1/collaborators': { status: 200, body: [] } });
+    render(<CollaboratorsSection token={TOKEN} projectId={PROJECT_ID} />);
+    await screen.findByText("Aucun collaborateur pour l'instant.");
+
+    for (const role of ['comptable', 'associe']) {
+      fireEvent.change(screen.getByLabelText('Rôle de la personne invitée'), { target: { value: role } });
+      expect(screen.getByText(/accès automatique, que tu peux couper à tout moment/)).toBeInTheDocument();
+    }
+    fireEvent.change(screen.getByLabelText('Rôle de la personne invitée'), { target: { value: 'salarie' } });
+    expect(screen.queryByText(/accès automatique, que tu peux couper/)).not.toBeInTheDocument();
+  });
 });

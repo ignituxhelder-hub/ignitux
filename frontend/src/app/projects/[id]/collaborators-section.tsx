@@ -1,7 +1,15 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
-import { api, ApiError, type ActiviteEquipe, type Collaborator } from '@/lib/api';
+import {
+  api,
+  ApiError,
+  type ActiviteEquipe,
+  type Collaborator,
+  type MembreAccesArgent,
+  type RaisonAccesArgent,
+} from '@/lib/api';
+import { libelleRoles } from '@/lib/domaines';
 import {
   ROLE_EQUIPE_DESCRIPTION,
   ROLE_EQUIPE_LABEL,
@@ -30,6 +38,9 @@ export function CollaboratorsSection({ token, projectId, peutGerer = true }: Col
   const [isAdding, setIsAdding] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Change à chaque invitation, changement de rôle ou retrait réussi : l'accès
+  // à mon argent en dépend, il est alors relu.
+  const [versionEquipe, setVersionEquipe] = useState(0);
 
   useEffect(() => {
     if (!token) return;
@@ -57,6 +68,7 @@ export function CollaboratorsSection({ token, projectId, peutGerer = true }: Col
     try {
       const collaborator = await api.addCollaborator(token, projectId, email.trim(), role);
       setCollaborators((prev) => [...prev, collaborator]);
+      setVersionEquipe((v) => v + 1);
       setEmail('');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Impossible d'ajouter ce collaborateur.");
@@ -72,6 +84,7 @@ export function CollaboratorsSection({ token, projectId, peutGerer = true }: Col
     setCollaborators((prev) => prev.map((c) => (c.user_id === userId ? { ...c, role: nouveau } : c)));
     try {
       await api.changerRoleCollaborateur(token, projectId, userId, nouveau);
+      setVersionEquipe((v) => v + 1);
     } catch (err) {
       setCollaborators(avant);
       setError(err instanceof ApiError ? err.message : 'Impossible de changer ce rôle.');
@@ -85,6 +98,7 @@ export function CollaboratorsSection({ token, projectId, peutGerer = true }: Col
     try {
       await api.removeCollaborator(token, projectId, userId);
       setCollaborators((prev) => prev.filter((c) => c.user_id !== userId));
+      setVersionEquipe((v) => v + 1);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de retirer ce collaborateur.');
     } finally {
@@ -171,8 +185,118 @@ export function CollaboratorsSection({ token, projectId, peutGerer = true }: Col
         ))}
       </div>
 
+      {peutGerer && <AccesAMonArgent token={token} version={versionEquipe} />}
       {peutGerer && <ActiviteDeMonEquipe token={token} />}
     </div>
+  );
+}
+
+const TITRE_ACCES = 'Accès à mon argent (facturation, compta, banque, caisse)';
+
+/** La raison de chaque accès, en clair (voir backend/src/equipe/acces-argent.ts). */
+const RAISON_ACCES: Record<RaisonAccesArgent, string> = {
+  active_par_toi: 'Activé par toi',
+  automatique: 'Automatique (invité à partir du 15/10/2026)',
+  coupe_par_toi: 'Coupé par toi',
+  a_activer: 'À activer — invité avant le changement',
+};
+
+/**
+ * L'ACCÈS DE MON ÉQUIPE À MON ARGENT — chaque comptable ou associé de mes
+ * projets, avec une case pour activer ou couper son accès à ma facturation,
+ * ma comptabilité, ma banque et ma caisse, et la raison de l'état actuel.
+ *
+ * Aucun affichage anticipé : la case montre toujours ce que le serveur a
+ * répondu (la liste relue après chaque choix). Activer demande une
+ * confirmation ; couper, jamais (c'est le sens prudent). Le choix vaut pour
+ * tout mon argent, quel que soit le projet où la personne travaille.
+ */
+function AccesAMonArgent({ token, version }: { token: string | null; version: number }) {
+  const [membres, setMembres] = useState<MembreAccesArgent[] | null>(null);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [enCours, setEnCours] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    let annule = false;
+    api
+      .accesArgent(token)
+      .then((data) => {
+        if (annule) return;
+        setMembres(data);
+        setErreur(null);
+      })
+      .catch((err: unknown) => {
+        if (!annule) {
+          setErreur(err instanceof ApiError ? err.message : 'Impossible de lire l’accès de ton équipe à ton argent.');
+        }
+      });
+    return () => {
+      annule = true;
+    };
+  }, [token, version]);
+
+  async function choisir(membre: MembreAccesArgent, acces: boolean) {
+    if (!token || enCours !== null) return;
+    if (
+      acces &&
+      !window.confirm(`${membre.nom} pourra voir et modifier ta facturation, ta compta, ta banque et ta caisse.`)
+    ) {
+      return;
+    }
+    setErreur(null);
+    setEnCours(membre.memberId);
+    try {
+      setMembres(await api.choisirAccesArgent(token, membre.memberId, acces));
+    } catch (err) {
+      setErreur(err instanceof ApiError ? err.message : 'Impossible d’enregistrer ce choix.');
+    } finally {
+      setEnCours(null);
+    }
+  }
+
+  return (
+    <section aria-labelledby="acces-argent-titre" style={{ marginTop: '1rem' }}>
+      <h3 id="acces-argent-titre" style={{ marginBottom: '0.25rem' }}>
+        {TITRE_ACCES}
+      </h3>
+      <p className="muted" style={{ marginTop: 0 }}>
+        Tes comptables et associés peuvent voir et modifier ta facturation, ta compta, ta banque et ta caisse.
+        Ceux que tu as ajoutés à partir du 15/10/2026 y ont accès automatiquement ; ceux ajoutés avant n&apos;y
+        ont accès que si tu l&apos;actives. Tu peux couper l&apos;accès de chacun à tout moment. Le choix vaut
+        pour tous tes projets.
+      </p>
+      {erreur && <p className="error">{erreur}</p>}
+      {membres === null && !erreur && <p className="loading">Chargement…</p>}
+      {membres !== null && membres.length === 0 && (
+        <p className="muted">Aucun comptable ni associé : personne d’autre que toi n’a accès à ton argent.</p>
+      )}
+      {membres !== null && membres.length > 0 && (
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {membres.map((membre) => {
+            const id = `acces-argent-${membre.memberId}`;
+            return (
+              <li key={membre.memberId} style={{ display: 'flex', gap: '0.5rem', alignItems: 'baseline', flexWrap: 'wrap' }}>
+                <input
+                  type="checkbox"
+                  id={id}
+                  checked={membre.acces}
+                  disabled={enCours !== null}
+                  aria-describedby={`${id}-raison`}
+                  onChange={() => void choisir(membre, !membre.acces)}
+                />
+                <label htmlFor={id}>
+                  {membre.nom} ({libelleRoles(membre.roles)})
+                </label>
+                <span id={`${id}-raison`} className="muted">
+                  {RAISON_ACCES[membre.raison] ?? ''}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }
 
