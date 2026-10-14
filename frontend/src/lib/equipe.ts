@@ -64,6 +64,7 @@ const LECTURE: Record<string, Capacite | null> = {
   memoire: 'voir_conformite_memoire',
   conformite: 'voir_conformite_memoire',
   capital: 'voir_financement',
+  'documents-juridiques': 'voir_documents_juridiques',
   infos: 'modifier_projet',
   collaborateurs: null,
 };

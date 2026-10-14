@@ -148,9 +148,16 @@ export class ComplianceService implements OnModuleInit {
    * l'interface doit le présenter comme tel.
    */
   async listForProject(userId: string, projectId: string, country?: string) {
-    await exigerCapacite(this.prisma, userId, projectId, 'voir_conformite_memoire');
+    const { ownerId } = await exigerCapacite(
+      this.prisma,
+      userId,
+      projectId,
+      'voir_conformite_memoire',
+    );
 
-    const declare = country ?? (await this.paysDeclare(userId));
+    // Le pays du projet est celui de son propriétaire : un membre de l'équipe
+    // installé ailleurs voit les mêmes démarches que lui.
+    const declare = country ?? (await this.paysDeclare(ownerId));
     const pays = declare ?? 'FR';
 
     const [requirements, checks, aiRuns, projet] = await Promise.all([

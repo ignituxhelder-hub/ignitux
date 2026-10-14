@@ -42,8 +42,8 @@ export class WorkflowService {
     return tache;
   }
 
-  // Lecture seule : un collaborateur peut consulter les tâches, pas en créer
-  // ni changer leur statut (voir createTask/updateStatus, restés owner-only).
+  // Lecture : tout membre qui a « voir_taches ». Créer une tâche ou changer
+  // son statut demande « modifier_taches » (propriétaire, associé, salarié).
   async listTasks(userId: string, projectId: string) {
     await exigerCapacite(this.prisma, userId, projectId, 'voir_taches');
 

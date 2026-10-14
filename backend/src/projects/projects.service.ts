@@ -126,12 +126,9 @@ export class ProjectsService {
     return project;
   }
 
-  // Un collaborateur peut consulter le projet, son historique généré par
-  // IGINI, et les 4 moteurs transverses (lecture seule, voir
-  // assertHasProjectAccess), mais pas modifier le projet, le supprimer,
-  // changer sa visibilité, en ajouter/retirer un collaborateur, ni
-  // déclencher une génération ou une automatisation — toutes ces actions
-  // restent strictement réservées au propriétaire (findOneForOwner).
+  // Tout membre de l'équipe lit le titre et la description du projet, quel
+  // que soit son rôle. Le reste dépend de ses capacités (voir
+  // src/equipe/droits-equipe.ts et exigerCapacite).
   async findOneForViewer(userId: string, id: string) {
     const project = await this.prisma.projects.findFirst({
       where: {

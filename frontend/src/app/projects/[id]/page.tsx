@@ -61,6 +61,7 @@ import {
 import { StatutsSection } from "./statuts-section";
 import { DossierCreationSection } from "./dossier-creation-section";
 import { ImmatriculationSection } from "./immatriculation-section";
+import { DocumentsJuridiquesLecture } from "./documents-juridiques-lecture";
 import { ComplianceSection } from "./compliance-section";
 import {
   KnowledgeSection,
@@ -607,6 +608,10 @@ export default function ProjectDetailPage() {
     // toujours là pour le propriétaire, jamais pour un collaborateur.
     if (outil.id === "infos") return !!project && peut("modifier_projet");
     if (outil.id === "collaborateurs") return montrer(outil.section);
+    // Les membres lisent les documents juridiques ici ; le propriétaire les a,
+    // complets, dans l'étape « Forme juridique ».
+    if (outil.id === "documents-juridiques")
+      return !!project && !isOwner && peut("voir_documents_juridiques");
     return montrer(outil.section);
   };
 
@@ -936,8 +941,9 @@ export default function ProjectDetailPage() {
             readOnly={!peut("lancer_ia")}
             iginiStatus={iginiStatus}
           />
-          {/* Les statuts suivent la forme juridique : même étape. Leur création est
-              réservée au propriétaire côté serveur, donc la section l'est aussi. */}
+          {/* Les statuts suivent la forme juridique : même étape. Les écrire est
+              réservé au propriétaire ; les membres qui ont le droit les lisent
+              dans l'outil « Documents juridiques ». */}
           {isOwner && (
             <StatutsSection
               token={token}
@@ -953,8 +959,7 @@ export default function ProjectDetailPage() {
               onChanged={() => setVersionStatuts((v) => v + 1)}
             />
           )}
-          {/* Le dossier de création suit les statuts ; réservé au propriétaire
-              côté serveur (un collaborateur reçoit un 404), donc ici aussi. */}
+          {/* Le dossier de création suit les statuts ; même règle. */}
           {isOwner && (
             <DossierCreationSection
               token={token}
@@ -965,8 +970,7 @@ export default function ProjectDetailPage() {
               refreshSignal={versionStatuts + versionImmatriculation}
             />
           )}
-          {/* L'immatriculation suit le dépôt du dossier ; réservée au propriétaire
-              côté serveur (un collaborateur reçoit un 404), donc ici aussi. */}
+          {/* L'immatriculation suit le dépôt du dossier ; même règle. */}
           {isOwner && (
             <ImmatriculationSection
               token={token}
@@ -1273,6 +1277,12 @@ export default function ProjectDetailPage() {
           readOnly={!peut("modifier_financement")}
         />
       )}
+      {project &&
+        !isOwner &&
+        peut("voir_documents_juridiques") &&
+        etapeOuverte === "documents-juridiques" && (
+          <DocumentsJuridiquesLecture token={token} projectId={id} />
+        )}
       {montrer("collaborateurs") && etapeOuverte === "collaborateurs" && (
         <CollaboratorsSection
           token={token}

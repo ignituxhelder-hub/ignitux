@@ -169,6 +169,23 @@ describe('ComplianceService', () => {
       expect(result.countryDeclared).toBe(true);
     });
 
+    it("prend le pays du propriétaire, pas celui du membre qui consulte", async () => {
+      prisma.projects.findFirst.mockResolvedValue({
+        id: 'p1',
+        owner_id: 'u1',
+        collaborators: [{ role: 'associe' }],
+      });
+      prisma.user_profiles.findUnique.mockResolvedValue({ activity_country: 'France' });
+      prisma.compliance_requirements.findMany.mockResolvedValue([]);
+      prisma.project_compliance_checks.findMany.mockResolvedValue([]);
+
+      await service.listForProject('u2', 'p1');
+
+      expect(prisma.user_profiles.findUnique).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { user_id: 'u1' } }),
+      );
+    });
+
     // Sans déclaration, on affiche quand même quelque chose — mais on dit
     // que c'est une supposition. Présenter les obligations d'un pays comme
     // celles du projet serait une erreur qu'aucun avertissement général ne

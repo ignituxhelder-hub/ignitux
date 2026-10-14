@@ -843,6 +843,44 @@ describe('ProjectDetailPage', () => {
     }
   });
 
+  it('donne au comptable les documents juridiques en lecture seule ; le propriétaire ne voit pas cet outil', async () => {
+    signInAs('tok456', { id: 'u2', email: 'compta@b.com' });
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      'GET /projects/p1/mon-acces': {
+        status: 200,
+        body: {
+          role: 'comptable',
+          capacites: ['voir_plan_financement', 'voir_evaluation', 'voir_financement', 'voir_documents_juridiques'],
+        },
+      },
+      'GET /projects/p1/statuts': { status: 200, body: null },
+      ...ENGINE_ROUTES,
+    });
+
+    const { unmount } = render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Documents juridiques' }));
+    expect(await screen.findByText(/Lecture seule : seul le propriétaire/)).toBeInTheDocument();
+    expect(await screen.findByText(/Pas encore de statuts/)).toBeInTheDocument();
+    unmount();
+
+    // Le propriétaire a les sections complètes ailleurs : pas d'outil en double.
+    signInAs('tok123', { id: 'u1', email: 'a@b.com' });
+    mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    expect(screen.queryByRole('button', { name: 'Documents juridiques' })).not.toBeInTheDocument();
+  });
+
   it('affiche une vue lecture seule pour un collaborateur (pas le propriétaire)', async () => {
     signInAs('tok456', { id: 'u2', email: 'collaborateur@b.com' });
     mockApiRoutes({

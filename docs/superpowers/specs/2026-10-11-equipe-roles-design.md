@@ -46,6 +46,14 @@ du bureau).
 Le tableau validé disait « Financement : propriétaire modifie, associé voit » : `modifier_financement`
 reste au propriétaire. L'Observateur reprend exactement l'accès des collaborateurs actuels.
 
+Tout membre, quel que soit son rôle (comptable compris), voit le **titre et la description** du
+projet et la liste de l'équipe : c'est ce qui lui dit sur quel projet il travaille. Le reste suit
+le tableau.
+
+Les membres qui ont `voir_documents_juridiques` lisent les statuts, le dossier de création et
+l'immatriculation dans l'outil « Documents juridiques » (lecture seule, PDF téléchargeables). Le
+propriétaire garde les sections complètes dans l'étape « Forme juridique ».
+
 ## 4. Ce qui n'est PAS dans cette livraison
 
 - **Le comptable dans la comptabilité, la facturation et la banque du propriétaire** (livraison 2).

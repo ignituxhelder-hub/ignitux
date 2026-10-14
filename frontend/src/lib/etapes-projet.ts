@@ -55,5 +55,8 @@ export const OUTILS_PROJET: readonly OutilProjet[] = [
   { id: 'processus', label: 'Processus', section: 'processus' },
   { id: 'financement-recu', label: 'Financements reçus', section: 'financement' },
   { id: 'capital', label: 'Rachat de parts', section: 'capital' },
+  // Pour les membres seulement : le propriétaire a les sections complètes
+  // dans l'étape « Forme juridique » (voir `outilVisible` côté page).
+  { id: 'documents-juridiques', label: 'Documents juridiques', section: 'documents-juridiques' },
   { id: 'collaborateurs', label: 'Collaborateurs', section: 'collaborateurs' },
 ];
