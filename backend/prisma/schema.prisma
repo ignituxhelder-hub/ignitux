@@ -2100,17 +2100,23 @@ model financing_evaluation_edits {
   @@index([evaluation_id])
 }
 
-/// ÉQUIPE — un membre invité dans l'espace d'un propriétaire, avec un rôle.
-/// Le rôle décide des domaines accessibles (src/equipe/domaines.ts) ; le
-/// domaine « personnel » n'est jamais délégué. Vérifié à chaque requête.
-/// Spec : docs/superpowers/specs/2026-10-11-equipe-design.md
+/// ÉQUIPE — le choix d'un propriétaire (owner_id) sur l'accès d'un de ses
+/// comptables ou associés (member_id) à son argent : facturation,
+/// comptabilité, banque, caisse. Une ligne par couple, pour tout l'argent du
+/// propriétaire. Elle n'ouvre rien seule : le membre doit être encore
+/// comptable ou associé sur un projet du propriétaire (relu à chaque requête,
+/// src/equipe/acces-argent.ts). Aucune ligne : accès « à activer ».
+/// Spec : docs/superpowers/specs/2026-10-14-equipe-argent-design.md
 model space_members {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   owner_id   String    @db.Uuid
   owner      users     @relation("espace_proprietaire", fields: [owner_id], references: [id], onDelete: Cascade)
   member_id  String    @db.Uuid
   member     users     @relation("espace_membre", fields: [member_id], references: [id], onDelete: Cascade)
-  /// 'associe' | 'comptable' | 'salarie' (salarie : lot 2, non invitable)
+  /// 'argent' (activé par le propriétaire) | 'argent_auto' (accordé quand le
+  /// propriétaire l'a invité ou passé comptable / associé, si aucune ligne
+  /// n'existait) | 'refuse' (coupé par le propriétaire). Toute autre valeur
+  /// (reste de la version abandonnée le 14/10/2026) vaut « aucune ligne ».
   role       String
   created_at DateTime? @default(now()) @db.Timestamptz(6)
 

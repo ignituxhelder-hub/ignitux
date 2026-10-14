@@ -686,10 +686,13 @@ export type financing_evaluations = Prisma.financing_evaluationsModel
 export type financing_evaluation_edits = Prisma.financing_evaluation_editsModel
 /**
  * Model space_members
- * ÉQUIPE — un membre invité dans l'espace d'un propriétaire, avec un rôle.
- * Le rôle décide des domaines accessibles (src/equipe/domaines.ts) ; le
- * domaine « personnel » n'est jamais délégué. Vérifié à chaque requête.
- * Spec : docs/superpowers/specs/2026-10-11-equipe-design.md
+ * ÉQUIPE — le choix d'un propriétaire (owner_id) sur l'accès d'un de ses
+ * comptables ou associés (member_id) à son argent : facturation,
+ * comptabilité, banque, caisse. Une ligne par couple, pour tout l'argent du
+ * propriétaire. Elle n'ouvre rien seule : le membre doit être encore
+ * comptable ou associé sur un projet du propriétaire (relu à chaque requête,
+ * src/equipe/acces-argent.ts). Aucune ligne : accès « à activer ».
+ * Spec : docs/superpowers/specs/2026-10-14-equipe-argent-design.md
  */
 export type space_members = Prisma.space_membersModel
 /**
