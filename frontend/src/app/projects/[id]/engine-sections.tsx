@@ -15,6 +15,7 @@ import {
   type TaskStatus,
 } from '@/lib/api';
 import { executerEnSerie } from '@/lib/executer-en-serie';
+import { titreCourt } from '@/lib/titre-court';
 import { ResultatIa } from './resultat-ia';
 
 interface SectionProps {
@@ -321,7 +322,52 @@ const SOURCE_LABELS: Record<string, string> = {
   manual: 'Ajoutée manuellement',
   analysis: "Suggérée par l'analyse",
   build_plan: 'Suggérée par le plan de construction',
+  financing_plan: 'Suggérée par le plan de financement',
+  development_plan: 'Suggérée par le plan de développement',
+  transmission_plan: 'Suggérée par le plan de transmission',
+  workflow: 'Étape du parcours',
+  automation: 'Étape automatique',
 };
+
+// « À faire » est rangé par origine, dans cet ordre : une cinquantaine de
+// suggestions affichées à plat font une page qu'on ne lit plus.
+const ORIGINES: { source: string; titre: string }[] = [
+  { source: 'analysis', titre: "Suggérées par l'analyse" },
+  { source: 'build_plan', titre: 'Plan de construction' },
+  { source: 'financing_plan', titre: 'Plan de financement' },
+  { source: 'development_plan', titre: 'Plan de développement' },
+  { source: 'transmission_plan', titre: 'Plan de transmission' },
+  { source: 'manual', titre: 'Ajoutées par toi' },
+  { source: 'workflow', titre: 'Étapes du parcours' },
+  { source: 'automation', titre: 'Étapes automatiques' },
+];
+
+function parOrigine(taches: Task[]): { source: string; titre: string; taches: Task[] }[] {
+  const groupes = new Map<string, Task[]>();
+  for (const tache of taches) groupes.set(tache.source, [...(groupes.get(tache.source) ?? []), tache]);
+  const rang = (source: string) => {
+    const i = ORIGINES.findIndex((o) => o.source === source);
+    return i === -1 ? ORIGINES.length : i;
+  };
+  return [...groupes.entries()]
+    .sort(([a], [b]) => rang(a) - rang(b))
+    .map(([source, liste]) => ({
+      source,
+      titre: ORIGINES.find((o) => o.source === source)?.titre ?? SOURCE_LABELS[source] ?? source,
+      taches: liste,
+    }));
+}
+
+const STYLE_LIEN = {
+  background: 'none',
+  border: 'none',
+  padding: 0,
+  color: 'var(--accent)',
+  cursor: 'pointer',
+  fontSize: '0.85rem',
+  textDecoration: 'underline',
+  alignSelf: 'flex-start',
+} as const;
 
 /**
  * Note sur une tâche qu'IGINI n'a pas pu faire : ce qui bloque, ce qu'il
@@ -339,6 +385,9 @@ function NoteTache({
 }) {
   const [texte, setTexte] = useState(task.note ?? '');
   const [enregistrement, setEnregistrement] = useState(false);
+  // Replié par défaut : un champ vide sous chaque tâche en échec allonge la
+  // liste pour rien.
+  const [ouvert, setOuvert] = useState(false);
   const modifie = texte.trim() !== (task.note ?? '');
 
   async function enregistrer() {
@@ -348,6 +397,17 @@ function NoteTache({
     } finally {
       setEnregistrement(false);
     }
+  }
+
+  if (!ouvert) {
+    return (
+      <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        {task.note && <span className="muted">Note : {task.note}</span>}
+        <button type="button" style={STYLE_LIEN} disabled={disabled} onClick={() => setOuvert(true)}>
+          {task.note ? 'Modifier la note' : 'Ajouter une note'}
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -397,6 +457,8 @@ export function TasksSection({
   const [progress, setProgress] = useState<{ courant: number; total: number } | null>(null);
   const [limite, setLimite] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  // Tâches dont le texte complet est déplié (sinon seul le titre court s'affiche).
+  const [deplies, setDeplies] = useState<Set<string>>(new Set());
   // Faux dès que l'écran est quitté : un lot qui coûte des appels IA doit s'arrêter.
   const actif = useRef(true);
   useEffect(() => {
@@ -471,6 +533,15 @@ export function TasksSection({
 
   function basculer(taskId: string) {
     setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(taskId)) next.delete(taskId);
+      else next.add(taskId);
+      return next;
+    });
+  }
+
+  function basculerDetail(taskId: string) {
+    setDeplies((prev) => {
       const next = new Set(prev);
       if (next.has(taskId)) next.delete(taskId);
       else next.add(taskId);
@@ -581,20 +652,40 @@ export function TasksSection({
     { cle: 'faites', titre: 'Faites', filtre: (t) => t.status === 'done' || t.ai_status === 'valide' },
   ];
   const aFaire = tasks.filter((t) => GROUPES[1].filtre(t) && lancable(t)).map((t) => t.id);
-  const toutCoche = aFaire.length > 0 && aFaire.every((id) => selected.has(id));
 
-  function basculerTout() {
+  /** Coche tout l'ensemble, ou le décoche s'il l'est déjà en entier. */
+  function basculerEnsemble(ids: string[]) {
     setSelected((prev) => {
       const next = new Set(prev);
-      for (const id of aFaire) {
-        if (toutCoche) next.delete(id);
+      const tousCoches = ids.every((id) => next.has(id));
+      for (const id of ids) {
+        if (tousCoches) next.delete(id);
         else next.add(id);
       }
       return next;
     });
   }
 
-  function renderTache(task: Task) {
+  function caseEnsemble(ids: string[], libelle: string, ariaLabel: string) {
+    if (readOnly || ids.length < 2) return null;
+    return (
+      <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        <input
+          type="checkbox"
+          aria-label={ariaLabel}
+          checked={ids.every((id) => selected.has(id))}
+          disabled={isRunning}
+          onChange={() => basculerEnsemble(ids)}
+        />
+        <span className="muted">{libelle}</span>
+      </label>
+    );
+  }
+
+  function renderTache(task: Task, avecOrigine = true) {
+    const court = titreCourt(task.title);
+    const deplie = deplies.has(task.id);
+    const titre = deplie ? task.title : court;
     return (
       <div className="project-item" style={{ cursor: 'default' }} key={task.id}>
         <div className="top-bar">
@@ -607,10 +698,10 @@ export function TasksSection({
                 disabled={isRunning}
                 onChange={() => basculer(task.id)}
               />
-              <span>{task.title}</span>
+              <span>{titre}</span>
             </label>
           ) : (
-            <span>{task.title}</span>
+            <span>{titre}</span>
           )}
           {readOnly ? (
             <span className="muted">{STATUS_LABELS[task.status]}</span>
@@ -628,7 +719,18 @@ export function TasksSection({
             </select>
           )}
         </div>
-        <span className="muted">{SOURCE_LABELS[task.source] ?? task.source}</span>
+        {court !== task.title && (
+          <button
+            type="button"
+            style={STYLE_LIEN}
+            aria-expanded={deplie}
+            aria-label={`${deplie ? 'Réduire' : 'Voir le détail'} : ${court}`}
+            onClick={() => basculerDetail(task.id)}
+          >
+            {deplie ? 'Réduire' : 'Voir le détail'}
+          </button>
+        )}
+        {avecOrigine && <span className="muted">{SOURCE_LABELS[task.source] ?? task.source}</span>}
         {!readOnly && task.ai_status === 'a_valider' && task.ai_result && task.ai_result_kind && (
           <ResultatIa
             kind={task.ai_result_kind}
@@ -699,21 +801,32 @@ export function TasksSection({
       {GROUPES.map((groupe) => {
         const liste = tasks.filter(groupe.filtre);
         if (liste.length === 0) return null;
+        const origines = groupe.cle === 'a_faire' ? parOrigine(liste) : [];
         const contenu = (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
-            {groupe.cle === 'a_faire' && !readOnly && aFaire.length > 1 && (
-              <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <input
-                  type="checkbox"
-                  aria-label="Tout sélectionner"
-                  checked={toutCoche}
-                  disabled={isRunning}
-                  onChange={basculerTout}
-                />
-                <span className="muted">Tout sélectionner</span>
-              </label>
-            )}
-            {liste.map(renderTache)}
+            {groupe.cle === 'a_faire' && caseEnsemble(aFaire, 'Tout sélectionner', 'Tout sélectionner')}
+            {origines.length > 1
+              ? origines.map((origine) => {
+                  const ids = origine.taches.filter(lancable).map((t) => t.id);
+                  const nbCoches = ids.filter((id) => selected.has(id)).length;
+                  return (
+                    <details key={origine.source}>
+                      <summary style={{ cursor: 'pointer', fontWeight: 600 }}>
+                        {origine.titre} ({origine.taches.length})
+                        {nbCoches > 0 && (
+                          <span className="muted" style={{ fontWeight: 400 }}>
+                            {` · ${nbCoches} sélectionnée${nbCoches > 1 ? 's' : ''}`}
+                          </span>
+                        )}
+                      </summary>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
+                        {caseEnsemble(ids, 'Sélectionner ce groupe', `Sélectionner : ${origine.titre}`)}
+                        {origine.taches.map((t) => renderTache(t, false))}
+                      </div>
+                    </details>
+                  );
+                })
+              : liste.map((t) => renderTache(t))}
           </div>
         );
         const titre = `${groupe.titre} (${liste.length})`;

@@ -119,7 +119,10 @@ describe('TasksSection', () => {
     fireEvent.change(screen.getByLabelText('Nouvelle tâche'), { target: { value: 'Nouvelle tâche' } });
     fireEvent.click(screen.getByRole('button', { name: /^ajouter$/i }));
 
-    expect(await screen.findByText('Ajoutée manuellement')).toBeInTheDocument();
+    // Deux origines désormais : « À faire » se range par groupe.
+    expect(await screen.findByText('Nouvelle tâche')).toBeInTheDocument();
+    expect(screen.getByText(/^Ajoutées par toi \(1\)/)).toBeInTheDocument();
+    expect(screen.getByText(/^Suggérées par l'analyse \(1\)/)).toBeInTheDocument();
   });
 
   it('met à jour le statut d\'une tâche', async () => {

@@ -175,15 +175,63 @@ describe('TasksSection — IGINI fait les tâches', () => {
     });
     render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
 
-    const champ = await screen.findByLabelText('Note sur Tâche t1');
+    // Replié : seul un lien, pas de champ vide sous chaque tâche en échec.
+    fireEvent.click(await screen.findByRole('button', { name: 'Ajouter une note' }));
+    const champ = screen.getByLabelText('Note sur Tâche t1');
     expect(screen.queryByRole('button', { name: 'Enregistrer la note' })).not.toBeInTheDocument();
     fireEvent.change(champ, { target: { value: 'À faire par téléphone' } });
     fireEvent.click(screen.getByRole('button', { name: 'Enregistrer la note' }));
 
     await waitFor(() => expect(appels).toContain('PATCH /tasks/t1/note'));
     expect(bodies['PATCH /tasks/t1/note']).toEqual({ note: 'À faire par téléphone' });
-    await waitFor(() => expect(screen.queryByRole('button', { name: 'Enregistrer la note' })).not.toBeInTheDocument());
+    // Une fois enregistrée, la note s'affiche et le champ se replie.
+    expect(await screen.findByText('Note : À faire par téléphone')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Note sur Tâche t1')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Modifier la note' })).toBeInTheDocument();
     expect(appels.filter((a) => a.endsWith('/run'))).toEqual([]);
+  }, TIMEOUT);
+
+  it('un long texte suggéré ne montre que sa première phrase, le reste à la demande', async () => {
+    const long =
+      'Faites le test d’assurabilité cette semaine, avant tout le reste. Appelez 4 à 5 assureurs spécialisés bâtiment en décrivant précisément l’activité et demandez un devis écrit.';
+    mockFetch({ 'GET /projects/p1/tasks': { status: 200, body: [tache('t1', { title: long, source: 'analysis' })] } });
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    expect(await screen.findByText('Faites le test d’assurabilité cette semaine, avant tout le reste.')).toBeInTheDocument();
+    expect(screen.queryByText(long)).not.toBeInTheDocument();
+    // La case garde le texte complet : c'est lui que lit un lecteur d'écran.
+    expect(screen.getByLabelText(`Faire faire : ${long}`)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /^Voir le détail/ }));
+    expect(screen.getByText(long)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /^Réduire/ }));
+    expect(screen.queryByText(long)).not.toBeInTheDocument();
+  }, TIMEOUT);
+
+  it('« À faire » est rangé par origine, chaque groupe se sélectionne d’un coup', async () => {
+    mockFetch({
+      'GET /projects/p1/tasks': {
+        status: 200,
+        body: [
+          tache('t1', { source: 'financing_plan' }),
+          tache('t2', { source: 'analysis' }),
+          tache('t3', { source: 'analysis' }),
+        ],
+      },
+    });
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    const groupes = (await screen.findAllByRole('group')).map((g) => g.querySelector('summary')?.textContent);
+    // L'analyse d'abord, puis les plans ; libellés en français, jamais « financing_plan ».
+    expect(groupes).toEqual(["Suggérées par l'analyse (2)", 'Plan de financement (1)']);
+    expect(screen.queryByText('financing_plan')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText("Sélectionner : Suggérées par l'analyse"));
+    expect(screen.getByLabelText('Faire faire : Tâche t2')).toBeChecked();
+    expect(screen.getByLabelText('Faire faire : Tâche t3')).toBeChecked();
+    expect(screen.getByLabelText('Faire faire : Tâche t1')).not.toBeChecked();
+    expect(screen.getByText('· 2 sélectionnées')).toBeInTheDocument();
+    expect(screen.getByText('2 éléments sélectionnés, ~2 appels IA')).toBeInTheDocument();
   }, TIMEOUT);
 
   it('en lecture seule, la note est affichée mais ne se modifie pas', async () => {
