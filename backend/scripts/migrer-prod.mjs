@@ -25,6 +25,17 @@
  *    migration n'est plus additive — et ce n'est pas une case à cocher, c'est
  *    une conversation à avoir.
  *
+ * 4. **Ce que Prisma supprime sans rien demander.** Le point 3 ne suffit pas :
+ *    Prisma ne réclame `--accept-data-loss` que si la table ou la colonne à
+ *    supprimer contient des lignes. **Vide, elle disparaît sans un mot.** Le
+ *    14/10/2026, deux migrations lancées depuis le mauvais dossier (une
+ *    branche, puis un `main` local en retard de 23 commits) ont ainsi supprimé
+ *    `project_collaborators.role` et les tables `space_*`. Le script vérifie
+ *    donc, avant d'écrire quoi que ce soit, que ce dossier contient tout
+ *    `origin/main` et un schéma committé, puis calcule ce que Prisma ferait
+ *    (`prisma migrate diff`, en lecture seule) et refuse dès qu'il y a une
+ *    suppression ou un changement de type.
+ *
  * ── Avant de lancer ──────────────────────────────────────────────────────
  *
  *   node scripts/verifier-base.mjs .env.production   (lecture seule)
@@ -32,8 +43,15 @@
  *
  * Le premier doit répondre ADDITIF. Sinon, s'arrêter et lire ce qu'il nomme.
  */
-import { spawn } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { execFileSync, spawn, spawnSync } from 'node:child_process';
+import { readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// Le dossier `backend` : git et Prisma y tournent quel que soit l'endroit
+// d'où le script est lancé.
+const BACKEND = fileURLToPath(new URL('..', import.meta.url));
 
 const INTERDITS = ['--accept-data-loss', '--force-reset'];
 const passeInterdit = process.argv.find((a) => INTERDITS.includes(a));
@@ -84,14 +102,123 @@ if (base === 'postgres') {
   process.exit(1);
 }
 
+/**
+ * Le schéma envoyé est celui de CE dossier. S'il n'a pas tout `origin/main`,
+ * il ignore ce que `main` a ajouté — et `db push` l'effacerait de la base.
+ */
+function verifierDossier() {
+  const git = (...args) =>
+    execFileSync('git', args, { cwd: BACKEND, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+  try {
+    git('fetch', '--quiet', 'origin', 'main');
+  } catch {
+    return ['Impossible de joindre GitHub (git fetch) : rien ne permet de vérifier que ce dossier a tout main.'];
+  }
+  try {
+    const problemes = [];
+    const retard = Number(git('rev-list', '--count', 'HEAD..origin/main'));
+    if (retard > 0) {
+      problemes.push(
+        `Ce dossier a ${retard} commit(s) de retard sur origin/main : son schéma ignore ce que main a ajouté, ` +
+          'et db push l’effacerait. Se placer sur main à jour (ou y fusionner main) avant de migrer.',
+      );
+    }
+    if (git('status', '--porcelain', '--', 'prisma/schema.prisma') !== '') {
+      problemes.push(
+        'prisma/schema.prisma a des modifications non committées : la base recevrait un schéma qui n’est dans aucun commit.',
+      );
+    }
+    return problemes;
+  } catch (erreur) {
+    return [`Vérification git impossible : ${erreur.message.split('\n')[0]}`];
+  }
+}
+
+// Ce qui détruit ou peut détruire des données. `DROP NOT NULL` et
+// `DROP DEFAULT` n'en font pas partie : ils relâchent une contrainte.
+const DESTRUCTIF = /\bDROP\s+(TABLE|COLUMN|INDEX|CONSTRAINT|TYPE|VIEW|SCHEMA|EXTENSION)\b|\bSET\s+DATA\s+TYPE\b/i;
+
+/**
+ * Ce que `db push` ferait, calculé sans rien écrire. Le script SQL passe par
+ * un fichier : sur la sortie standard, il serait mêlé aux messages de dotenv
+ * et de Prisma.
+ */
+function calculerDiff() {
+  const sortie = join(tmpdir(), `ignitux-diff-${process.pid}.sql`);
+  try {
+    const resultat = spawnSync(
+      `npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script --output "${sortie}"`,
+      { cwd: BACKEND, shell: true, encoding: 'utf8', env: { ...process.env, DATABASE_URL: url } },
+    );
+    if (resultat.status !== 0) {
+      const message = `${resultat.stderr ?? ''}${resultat.stdout ?? ''}`.trim().split('\n').slice(-3).join(' ');
+      return { erreur: message || `code ${resultat.status}` };
+    }
+    const sql = readFileSync(sortie, 'utf8')
+      .split(/\r?\n/)
+      .filter((ligne) => !ligne.trim().startsWith('--'))
+      .join('\n');
+    const instructions = sql
+      .split(';')
+      .map((i) => i.trim())
+      .filter(Boolean);
+    return { instructions, destructives: instructions.filter((i) => DESTRUCTIF.test(i)) };
+  } finally {
+    rmSync(sortie, { force: true });
+  }
+}
+
+const problemes = verifierDossier();
+const diff = calculerDiff();
+
+console.log('Vérifications :');
+if (problemes.length === 0) {
+  console.log('  ✓ ce dossier contient tout origin/main, et son schéma est committé');
+}
+for (const probleme of problemes) console.log(`  ✗ ${probleme}`);
+if (diff.erreur) {
+  console.log(`  ✗ Impossible de calculer ce que Prisma ferait : ${diff.erreur}`);
+} else if (diff.instructions.length === 0) {
+  console.log('  ✓ la base correspond déjà au schéma : rien à migrer');
+} else {
+  const marque = diff.destructives.length > 0 ? '✗' : '✓';
+  console.log(`  ${marque} Prisma exécuterait ${diff.instructions.length} instruction(s) :`);
+  for (const instruction of diff.instructions.slice(0, 40)) {
+    const premiere = instruction.split('\n')[0];
+    console.log(`      ${DESTRUCTIF.test(instruction) ? 'SUPPRIME → ' : ''}${premiere}`);
+  }
+  if (diff.instructions.length > 40) console.log(`      … et ${diff.instructions.length - 40} autre(s)`);
+}
+console.log('');
+
+if (diff.destructives?.length > 0) {
+  console.error(
+    'ARRÊT. Cette migration supprimerait ou transformerait des données (lignes « SUPPRIME » ci-dessus).\n' +
+      'Prisma le ferait sans rien demander si c’est vide. Cause habituelle : une autre branche a déjà\n' +
+      'migré la production avec des tables que ce dossier ne connaît pas. Fusionner d’abord, ou en parler.',
+  );
+}
+const bloque = problemes.length > 0 || Boolean(diff.erreur) || diff.destructives?.length > 0;
+
+if (APPLIQUER && bloque) {
+  console.error('Refus : rien n’a été écrit. Corriger les points ✗ ci-dessus, puis relancer.');
+  process.exit(1);
+}
+
+if (APPLIQUER && diff.instructions.length === 0) {
+  console.log('Rien à faire : la base est déjà à jour.');
+  process.exit(0);
+}
+
 if (!APPLIQUER) {
+  if (bloque) console.log('--appliquer sera refusé tant qu’un point ✗ reste.\n');
   console.log('Commande qui serait lancée :');
   console.log('  npx prisma db push          (sans --accept-data-loss, sans --force-reset)');
   console.log('\nAvant, si ce n’est pas déjà fait :');
   console.log(`  node scripts/verifier-base.mjs ${fichier}   → doit répondre ADDITIF`);
   console.log(`  node scripts/sauvegarde.mjs ${fichier}`);
   console.log('\nRelancer avec --appliquer pour migrer.');
-  process.exit(0);
+  process.exit(bloque ? 1 : 0);
 }
 
 // `dotenv` ne remplace jamais une variable déjà posée : en la donnant ici, on
@@ -103,6 +230,7 @@ if (!APPLIQUER) {
 // celui qui comptera. `shell: true` reste nécessaire sous Windows, où `npx`
 // est un `.cmd`.
 const fils = spawn('npx prisma db push', {
+  cwd: BACKEND,
   stdio: 'inherit',
   shell: true,
   env: { ...process.env, DATABASE_URL: url },

@@ -106,6 +106,12 @@ dans le dossier `backend`, dans cet ordre :
 3. Appliquer : `node scripts/migrer-prod.mjs` (montre la cible sans rien faire — vérifier que c'est
    bien `ignitux_prod`), puis `node scripts/migrer-prod.mjs --appliquer`.
 
+Le dossier compte : la base reçoit le schéma **du dossier d'où la commande part**. `migrer-prod.mjs`
+le vérifie lui-même et refuse d'écrire si ce dossier est en retard sur `origin/main`, si son schéma
+n'est pas committé, ou si l'aperçu montre une ligne « SUPPRIME » — Prisma supprime sans rien demander
+une table ou une colonne vide qu'il ne connaît pas (incident du 14/10/2026 : `project_collaborators.role`
+et les tables `space_*`).
+
 ## URLs de production
 
 *(à compléter une fois le déploiement réel fait — Tâche 8)*
