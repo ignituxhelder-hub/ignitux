@@ -1649,7 +1649,9 @@ body {
   grid-area: boussole;
   justify-self: center;
   display: block;
-  width: min(520px, 100%);
+  /* 460 et non 520 : à 520, les deux colonnes de mots n'avaient plus que
+     180 px et « La vérité avant tout » s'empilait sur quatre lignes. */
+  width: min(460px, 100%);
   height: auto;
   /* Les bords de la photo se fondent dans la nuit au lieu de s'arrêter net. */
   -webkit-mask-image: radial-gradient(closest-side, #000 70%, transparent 100%);
@@ -1668,6 +1670,7 @@ body {
 
 .scene__cote span {
   display: block;
+  text-wrap: balance;
 }
 
 .scene__cote--gauche {
