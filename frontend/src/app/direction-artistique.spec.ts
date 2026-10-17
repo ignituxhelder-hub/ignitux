@@ -100,6 +100,15 @@ describe('direction artistique « Gravure »', () => {
     },
   );
 
+  it('les titres de page sont en or clair', () => {
+    expect(/\nh1\s*\{[^}]*color:\s*var\(--or-clair\)/.test(css)).toBe(true);
+  });
+
+  it('le bureau porte la boussole en filigrane', () => {
+    const bureau = readFileSync(join(APP, 'accueil', 'page.tsx'), 'utf8');
+    expect(bureau).toMatch(/<IgnituxMark[^>]*className="hero-rose"/);
+  });
+
   it('la boussole des pages de compte ne capte aucun toucher', () => {
     const decor = /\.page--scene::before\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
     expect(decor).toMatch(/pointer-events:\s*none/);

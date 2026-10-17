@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { Brand } from '@/components/ignitux-mark';
+import { Brand, IgnituxMark } from '@/components/ignitux-mark';
 import { Icone } from '@/components/icones';
 import { InvitationInstallation } from '@/components/invitation-installation';
 import {
@@ -469,6 +469,9 @@ export default function LanceurPage() {
 
   return (
     <main className="page page--home ecran-accueil">
+      {/* La boussole en filigrane derrière le bureau (direction « Gravure ») :
+          un décor, masqué sur téléphone où il n'aurait pas la place. */}
+      <IgnituxMark size={260} className="hero-rose" />
       <div className="top-bar">
         <Brand />
         <button

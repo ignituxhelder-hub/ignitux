@@ -224,6 +224,8 @@ h3 {
 h1 {
   font-size: clamp(1.5rem, 4vw, 1.9rem);
   line-height: 1.22;
+  /* Le titre de chaque page, gravé en or clair. */
+  color: var(--or-clair);
 }
 
 h2 {
@@ -1101,6 +1103,10 @@ a.secondary:hover {
    -------------------------------------------------------------------------- */
 
 .ecran-accueil {
+  /* La boussole en filigrane (.hero-rose) se cale sur le bureau, et passe
+     sous son contenu sans passer sous son fond. */
+  position: relative;
+  isolation: isolate;
   /* Le fond d'écran : deux lueurs, le feu en haut, l'acier en bas. */
   background:
     radial-gradient(60rem 28rem at 10% -10%, rgb(255 90 31 / 13%), transparent 60%),
@@ -1802,10 +1808,20 @@ body {
   position: absolute;
   top: -5.5rem;
   right: -6rem;
-  color: var(--steel);
+  color: var(--or);
   opacity: 0.1;
   pointer-events: none;
   z-index: 0;
+}
+
+/* Sur le bureau, la page touche les bords de l'écran jusqu'à ~1 100 px de
+   large : décalée à droite, la boussole y ferait glisser la page sur le
+   côté. Elle reste donc dans le cadre. */
+.ecran-accueil > .hero-rose {
+  top: -1.5rem;
+  right: 0;
+  /* Sous les icônes, pas par-dessus (le bureau isole son empilement). */
+  z-index: -1;
 }
 
 .hero-actions {
