@@ -42,9 +42,11 @@ de propriétaire inconnu — l'identifier avant tout `migrate resolve`/`reset`.
 
 ### 1. ~~Hébergement et domaine~~ — fait (10-11/10/2026)
 
-Le site est en ligne : interface sur Vercel (`ignitux.vercel.app`), serveur sur
-Render (offre gratuite), base `ignitux_prod` sur Supabase. Domaine **ignitux.com**
-acheté chez OVH le 11/10/2026 (pas encore relié au site : il sert aux emails).
+Le site est en ligne : interface sur Vercel, serveur sur Render (offre
+gratuite), base `ignitux_prod` sur Supabase. Domaine **ignitux.com** acheté
+chez OVH le 11/10/2026 et relié au site le même jour ; il sert aussi aux
+emails. `ignitux.vercel.app` affiche encore le site, mais la connexion y
+échoue : le serveur n'accepte qu'une seule origine (`FRONTEND_URL`).
 Rappel : appliquer les migrations sur `ignitux_prod` **avant** de pousser sur
 `main` (voir `deploiement-v1.md`).
 
@@ -96,10 +98,12 @@ Un salon Discord privé (serveur « ignitux ») reçoit chaque erreur 5xx :
 rapport (déjà expurgé) au format Discord (marche à suivre dans
 `docs/deployer.md`, « Recevoir les erreurs dans Discord »).
 
-### 8. Sonde externe sur `/health`
+### 8. ~~Sonde externe sur `/health`~~ — fait (11/10/2026)
 
-UptimeRobot (gratuit) ou Better Uptime. Si le serveur tombe, personne ne le
-sait à moins que quelqu'un essaie de se connecter.
+UptimeRobot (gratuit) interroge `https://ignitux-backend.onrender.com/health`
+toutes les 5 minutes et alerte par e-mail si la réponse n'est pas 200. Comme
+`/health` exécute un `SELECT 1`, une base injoignable déclenche aussi l'alerte.
+Le site lui-même (`ignitux.com`, sur Vercel) n'est pas encore surveillé.
 
 ### 9. ~~Sauvegarde planifiée~~ — fait (26/09/2026)
 
