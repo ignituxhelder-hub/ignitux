@@ -224,8 +224,12 @@ export class CrmService {
   }
 
   async deleteInteraction(ownerId: string, interactionId: string) {
+    // Filtrée par le propriétaire du contact : l'interaction d'un autre
+    // reçoit le même 404 qu'un id qui n'existe pas, en autant de requêtes.
+    // Lue seule, elle répondait « Contact introuvable. » à un autre compte,
+    // qui apprenait ainsi qu'elle existe.
     const interaction = await this.prisma.crm_interactions.findFirst({
-      where: { id: interactionId },
+      where: { id: interactionId, contact: { owner_id: ownerId } },
     });
     if (!interaction) {
       throw new NotFoundException('Interaction introuvable.');

@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { refus, requetes } from '../equipe/visibilite.testing.js';
 import { CrmService } from './crm.service.js';
 
 type Mock = ReturnType<typeof vi.fn>;
@@ -158,6 +159,51 @@ describe('CrmService', () => {
         NotFoundException,
       );
       expect(prisma.crm_interactions.delete).not.toHaveBeenCalled();
+    });
+
+    describe('ne dit pas à qui n’a pas accès si une interaction existe', () => {
+      // Lue par son seul id puis jugée sur son contact, l'interaction d'un
+      // autre répondait « Contact introuvable. », un id inconnu
+      // « Interaction introuvable. » : n'importe quel compte apprenait
+      // qu'elle existe. Ici, la fausse base évalue VRAIMENT le filtre.
+      const INTERACTION = { id: 'i1', contact_id: 'c1' };
+      const CONTACT = { id: 'c1', owner_id: 'u1' };
+
+      beforeEach(() => {
+        prisma.crm_interactions.findFirst.mockImplementation(
+          async ({ where }: { where: { id: string; contact?: Record<string, unknown> } }) => {
+            if (where.id !== INTERACTION.id) return null;
+            if (where.contact !== undefined) {
+              const { owner_id, ...reste } = where.contact;
+              if (Object.keys(reste).length > 0) throw new Error(`Filtre non géré : ${JSON.stringify(where.contact)}`);
+              if (CONTACT.owner_id !== owner_id) return null;
+            }
+            return INTERACTION;
+          },
+        );
+        prisma.crm_contacts.findFirst.mockImplementation(
+          async ({ where }: { where: { id: string; owner_id: string } }) =>
+            where.id === CONTACT.id && where.owner_id === CONTACT.owner_id ? CONTACT : null,
+        );
+      });
+
+      it('même 404 « Interaction introuvable. », que l’interaction existe ou non, en autant de requêtes', async () => {
+        const existante = await refus(service.deleteInteraction('u2', 'i1'));
+        const pourExistante = requetes(prisma);
+        const absente = await refus(service.deleteInteraction('u2', 'i-absente'));
+
+        expect(existante).toBeInstanceOf(NotFoundException);
+        expect(existante.message).toBe('Interaction introuvable.');
+        expect(existante.getResponse?.()).toEqual(absente.getResponse?.());
+        expect(requetes(prisma) - pourExistante).toBe(pourExistante);
+        expect(prisma.crm_interactions.delete).not.toHaveBeenCalled();
+      });
+
+      it('le propriétaire supprime toujours son interaction', async () => {
+        await service.deleteInteraction('u1', 'i1');
+
+        expect(prisma.crm_interactions.delete).toHaveBeenCalledWith({ where: { id: 'i1' } });
+      });
     });
   });
 
