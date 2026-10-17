@@ -15,6 +15,29 @@
     "iginiMention": "acompanha-te para analisar, construir, financiar, desenvolver e transmitir o teu projeto — a partir de um só lugar.",
     "commencer": "Começar gratuitamente",
     "dejaCompte": "Já tenho uma conta",
+    "histoire": {
+      "titre": "A história",
+      "etapes": {
+        "etincelle": { "nom": "A centelha", "texte": "Tudo começa com uma ideia." },
+        "doute": {
+          "nom": "A dúvida",
+          "texte": "Mas entre uma ideia e a realidade, há muitas vezes um obstáculo."
+        },
+        "rencontre": { "nom": "O encontro", "texte": "E se já não estivesses sozinho?" },
+        "construction": {
+          "nom": "A construção",
+          "texte": "O Igini analisa, orienta e acompanha cada etapa."
+        },
+        "reussite": {
+          "nom": "O sucesso",
+          "texte": "Uma ideia torna-se um projeto. Um projeto torna-se realidade."
+        },
+        "avenir": {
+          "nom": "Um futuro maior",
+          "texte": "Cada centelha conta. Por um mundo de possibilidades."
+        }
+      }
+    },
     "methode": "O método em 5 etapas",
     "etapes": {
       "analyser": { "nom": "Analisar", "description": "Resumo, pontuação de viabilidade, pontos fortes, riscos, próximos passos." },

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { Histoire } from '@/components/histoire';
 import { IconesExplicatives } from '@/components/icones-explicatives';
 import { IginiMention } from '@/components/igini-mention';
 import { Brand } from '@/components/ignitux-mark';
@@ -92,6 +93,8 @@ export default function HomePage() {
           </Link>
         </div>
       </div>
+
+      <Histoire />
 
       <section className="section">
         <p className="section-title">{t('methode')}</p>

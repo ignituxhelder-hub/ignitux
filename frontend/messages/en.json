@@ -15,6 +15,29 @@
     "iginiMention": "helps you analyse, build, fund, grow and pass on your project — all from one place.",
     "commencer": "Start for free",
     "dejaCompte": "I already have an account",
+    "histoire": {
+      "titre": "The story",
+      "etapes": {
+        "etincelle": { "nom": "The spark", "texte": "Everything starts with an idea." },
+        "doute": {
+          "nom": "The doubt",
+          "texte": "But between an idea and reality, there is often an obstacle."
+        },
+        "rencontre": { "nom": "The encounter", "texte": "What if you were no longer alone?" },
+        "construction": {
+          "nom": "Building",
+          "texte": "Igini analyses, guides and supports every step."
+        },
+        "reussite": {
+          "nom": "Success",
+          "texte": "An idea becomes a project. A project becomes reality."
+        },
+        "avenir": {
+          "nom": "A bigger future",
+          "texte": "Every spark counts. For a world of possibilities."
+        }
+      }
+    },
     "methode": "The method in 5 steps",
     "etapes": {
       "analyser": { "nom": "Analyse", "description": "Summary, feasibility score, strengths, risks, next steps." },

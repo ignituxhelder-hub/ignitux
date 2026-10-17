@@ -1824,6 +1824,98 @@ body {
 }
 
 /* --------------------------------------------------------------------------
+   L'histoire : six vignettes reliées par un fil de feu (composant Histoire).
+   Sur téléphone, la frise défile au doigt au lieu de rallonger la page.
+   -------------------------------------------------------------------------- */
+
+.frise {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin: 0;
+  padding: 2.1rem 0 0;
+  list-style: none;
+}
+
+.frise__etape {
+  position: relative;
+  text-align: center;
+}
+
+/* Le fil de feu : un segment par étape, de la pastille précédente à la
+   sienne. Un seul trait posé sur toute la liste ne suivrait pas le
+   défilement horizontal du téléphone. */
+.frise__etape:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  /* Au centre des pastilles (30 px, posées à -2.1rem), d'un centre à
+     l'autre : la moitié de l'étape plus l'écart de la grille. */
+  top: calc(-2.1rem + 14px);
+  left: calc(-50% - 0.9rem);
+  right: 50%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--spark), var(--flame));
+  box-shadow: 0 0 10px var(--flame);
+}
+
+.frise__num {
+  position: absolute;
+  top: -2.1rem;
+  left: 50%;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  transform: translateX(-50%);
+  border: 2px solid var(--or-texte);
+  border-radius: 50%;
+  background: #0d0d10;
+  box-shadow: 0 0 12px rgb(255 140 60 / 50%);
+  font-family: var(--font-display), 'Segoe UI', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--or);
+}
+
+.frise__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border: 1px solid var(--or-liseré);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+.frise__nom {
+  margin: 0.6rem 0 0.25rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.frise__texte {
+  margin: 0;
+  font-size: var(--texte-etiquette);
+  color: var(--text-muted);
+}
+
+@media (max-width: 760px) {
+  .frise {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .frise__etape {
+    flex: 0 0 42%;
+    scroll-snap-align: start;
+  }
+}
+
+/* --------------------------------------------------------------------------
    La méthode en 5 étapes.
    -------------------------------------------------------------------------- */
 

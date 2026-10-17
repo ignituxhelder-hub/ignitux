@@ -15,6 +15,29 @@
     "iginiMention": "t'accompagne pour analyser, construire, financer, développer et transmettre ton projet — depuis un seul endroit.",
     "commencer": "Commencer gratuitement",
     "dejaCompte": "J'ai déjà un compte",
+    "histoire": {
+      "titre": "L'histoire",
+      "etapes": {
+        "etincelle": { "nom": "L'étincelle", "texte": "Tout commence par une idée." },
+        "doute": {
+          "nom": "Le doute",
+          "texte": "Mais entre une idée et la réalité, il y a souvent un obstacle."
+        },
+        "rencontre": { "nom": "La rencontre", "texte": "Et si tu n'étais plus seul ?" },
+        "construction": {
+          "nom": "La construction",
+          "texte": "Igini analyse, guide et accompagne chaque étape."
+        },
+        "reussite": {
+          "nom": "La réussite",
+          "texte": "Une idée devient un projet. Un projet devient une réalité."
+        },
+        "avenir": {
+          "nom": "Un avenir plus grand",
+          "texte": "Chaque étincelle compte. Pour un monde de possibilités."
+        }
+      }
+    },
     "methode": "La méthode en 5 étapes",
     "etapes": {
       "analyser": { "nom": "Analyser", "description": "Résumé, score de faisabilité, points forts, risques, prochaines étapes." },
