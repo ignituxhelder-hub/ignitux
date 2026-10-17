@@ -13,8 +13,9 @@ import type { PrismaService } from '../prisma/prisma.service.js';
  * fichier est la réponse à la question « qu'est-ce qui est protégé ? ».
  *
  * Pour en ajouter une : le modèle doit porter `updated_at`, sa route doit
- * recevoir l'identifiant de la ligne dans un paramètre d'URL, et son lecteur
- * doit vérifier l'accès avec la même règle que le contrôleur. Les modèles qui
+ * recevoir l'identifiant (un uuid, validé par `ParseUUIDPipe` — le garde
+ * laisse passer tout le reste) dans un paramètre d'URL, et son lecteur doit
+ * vérifier l'accès avec la même règle que le contrôleur. Les modèles qui
  * n'ont pas `updated_at` — 39 des 50 — ne peuvent pas entrer ici sans
  * migration, et il vaut mieux qu'ils en restent dehors que d'y entrer avec
  * une date approchée.

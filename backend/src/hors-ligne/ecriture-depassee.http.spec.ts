@@ -67,12 +67,23 @@ function lignes(modifiee: Date): Record<string, Ligne[]> {
   };
 }
 
+/**
+ * Comme Postgres sur une colonne `uuid` : un identifiant mal formé n'est pas
+ * une ligne absente, c'est une erreur — qui finit en 500.
+ */
+function colonneUuid(valeur: unknown): void {
+  if (typeof valeur === 'string' && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(valeur)) {
+    throw new Error(`invalid input syntax for type uuid: "${valeur}"`);
+  }
+}
+
 /** Égalité stricte clé par clé : une forme de filtre inconnue fait échouer le test. */
 function correspond(ligne: Ligne, where: Ligne = {}): boolean {
   return Object.entries(where).every(([cle, valeur]) => {
     if (valeur !== null && typeof valeur === 'object') {
       throw new Error(`Filtre non géré par la fausse base : ${cle}=${JSON.stringify(valeur)}`);
     }
+    if (cle === 'id') colonneUuid(valeur);
     return ligne[cle] === valeur;
   });
 }
@@ -149,6 +160,7 @@ function fauxPrisma(donnees: { lignes: Record<string, Ligne[]> }) {
       // `accesProjet` (et la lecture d'un projet par son équipe) : propriétaire OU membre.
       findFirst: vi.fn(async ({ where }: { where: { id: string; OR?: Ligne[] } }) => {
         const { id, ...filtre } = where;
+        colonneUuid(id);
         const equipe = equipeSur(id, equipeDe(filtre));
         return equipe ? { ...equipe.projet, collaborators: equipe.sesLignes.map((c) => ({ role: c.role })) } : null;
       }),
@@ -413,6 +425,31 @@ describe('Écritures revenues du froid sur les vrais contrôleurs — applicatio
       const res = await envoyer(INCONNU, PROJET_MODIFIE, { [EN_TETE_CAPTURE]: 'bientot' });
 
       expect([res.status, res.body.message]).toEqual([404, 'Projet introuvable.']);
+    });
+  });
+
+  describe('un identifiant mal formé : le 400 de ParseUUIDPipe, pas un 500', () => {
+    // Le garde passe avant `ParseUUIDPipe` : sans son propre contrôle, la
+    // base recevait « pas-un-uuid » et la requête finissait en 500.
+    const MAL_FORME = 'pas-un-uuid';
+    const ROUTES: [string, Ecriture, Record<string, string>][] = [
+      ['projet', { ...PROJET_MODIFIE, chemin: `/projects/${MAL_FORME}` }, {}],
+      ['tâche', { ...TACHE_COCHEE, chemin: `/tasks/${MAL_FORME}/status` }, {}],
+      ['tâche (IGINI)', { ...TACHE_VALIDEE, chemin: `/projects/${PROJET}/tasks/${MAL_FORME}/validate` }, {}],
+      ['document', { ...DOCUMENT_MODIFIE, chemin: `/billing/documents/${MAL_FORME}` }, {}],
+      ['document, espace d’un autre', { ...DOCUMENT_MODIFIE, chemin: `/billing/documents/${MAL_FORME}` }, { 'X-Espace': PROPRIO }],
+      ['contact', { ...CONTACT_MODIFIE, chemin: `/crm/contacts/${MAL_FORME}` }, {}],
+      ['entreprise', { ...ENTREPRISE_MODIFIEE, chemin: `/crm/companies/${MAL_FORME}` }, {}],
+    ];
+
+    it.each(ROUTES)('%s : 400, la même réponse que sans l’en-tête d’âge', async (_nom, ecriture, entetes) => {
+      const qui = entetes['X-Espace'] ? COMPTABLE : PROPRIO;
+      const avecAge = await envoyer(qui, ecriture, { ...PERIMEE, ...entetes });
+      const sansAge = await envoyer(qui, ecriture, entetes);
+
+      expect(avecAge.status).toBe(400);
+      expect(avecAge.body.message).toContain('uuid');
+      expect(avecAge.body).toEqual(sansAge.body);
     });
   });
 });

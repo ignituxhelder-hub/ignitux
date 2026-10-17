@@ -9,6 +9,15 @@ import {
 } from './ecriture-depassee.decorator.js';
 import { NOM_LISIBLE, RESSOURCES_DATEES } from './ressources-datees.js';
 
+/**
+ * Un uuid tel que `ParseUUIDPipe` l'accepte par défaut (`version: 'all'` :
+ * versions 1 à 8 de variante RFC, uuid nil et max) — le tube posé sur
+ * l'identifiant de toutes les routes datées. Son expression est protégée
+ * chez Nest, d'où la copie ; un test vérifie que les deux disent pareil.
+ */
+const UUID_ACCEPTE =
+  /^(?:[0-9A-F]{8}-[0-9A-F]{4}-[1-8][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}|00000000-0000-0000-0000-000000000000|FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF)$/i;
+
 interface RequeteExaminee {
   headers: Record<string, string | string[] | undefined>;
   params: Record<string, string | undefined>;
@@ -39,8 +48,8 @@ interface RequeteExaminee {
  *
  * ── Il se trompe toujours du même côté ───────────────────────────────────
  *
- * Ressource introuvable ou inaccessible, paramètre absent, en-tête
- * illisible, personne non identifiée : il laisse passer et laisse le
+ * Ressource introuvable ou inaccessible, paramètre absent ou mal formé,
+ * en-tête illisible, personne non identifiée : il laisse passer et laisse le
  * contrôleur trancher. Refuser à tort bloque le travail réel de quelqu'un ;
  * laisser passer à tort ramène au comportement d'avant ce fichier. Entre les
  * deux erreurs, la seconde est la moins chère, et c'est celle qu'il
@@ -72,6 +81,10 @@ export class EcritureDepasseeGuard implements CanActivate {
 
     const identifiant = requete.params[cible.parametre];
     if (!identifiant) return true;
+    // Mal formé : le garde passe avant `ParseUUIDPipe`, et la base refuserait
+    // d'en faire un uuid — un 500 à la place du 400 du contrôleur. Aucune
+    // ligne ne porte un tel identifiant : rien à comparer, rien à lire.
+    if (!UUID_ACCEPTE.test(identifiant)) return true;
 
     // Personne d'identifié : le garde est monté sans `JwtAuthGuard`, ce qui
     // est une erreur de câblage — pas une raison de répondre à un inconnu.
