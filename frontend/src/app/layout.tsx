@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { IBM_Plex_Mono, IBM_Plex_Sans, Sora } from 'next/font/google';
+import { Cinzel, IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
@@ -11,11 +11,16 @@ import { EspaceProvider } from '@/lib/espace';
 import { imagesDemarrage } from '@/lib/ecrans-demarrage';
 import './globals.css';
 
-// Sora porte la personnalité de la marque (titres, chiffres des scores) ;
-// IBM Plex Sans reste lisible pour le texte courant ; IBM Plex Mono marque
-// les données précises (labels, tableau de bord de l'Étincelle) — la même
-// paire que les documents internes (feuille de route, rapports).
-const sora = Sora({ subsets: ['latin'], weight: ['600', '700'], variable: '--font-display' });
+// Cinzel, ce sont les capitales gravées de la boussole : titres, marque et
+// chiffres des scores (direction « Gravure », 17/10/2026). Le latin étendu
+// couvre le portugais. IBM Plex Sans reste lisible pour le texte courant ;
+// IBM Plex Mono marque les données précises (labels, tableau de bord de
+// l'Étincelle) — la même paire que les documents internes.
+const cinzel = Cinzel({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['500', '600', '700'],
+  variable: '--font-display',
+});
 const plexSans = IBM_Plex_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
@@ -54,7 +59,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getLocale();
   return (
-    <html lang={locale}className={`${sora.variable} ${plexSans.variable} ${plexMono.variable}`}>
+    <html lang={locale}className={`${cinzel.variable} ${plexSans.variable} ${plexMono.variable}`}>
       <body>
         {/* N'affiche rien : il pose le service worker qui rend l'ouverture
             possible sans réseau, et sait aussi le retirer. Article 16. */}

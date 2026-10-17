@@ -11,9 +11,14 @@
              lignes fines en acier. Elle indique, elle ne décide pas.
 
    La règle qui les sépare : le feu ne sert qu'à ce que la personne déclenche
-   elle-même ; l'acier sert à tout ce que le produit constate. Une donnée
-   mesurée n'est jamais en flamme — sinon l'interface aurait l'air d'affirmer
-   ce qu'elle ne fait que rapporter.
+   elle-même ; le métal de la boussole sert à tout ce que le produit constate.
+   Une donnée mesurée n'est jamais en flamme — sinon l'interface aurait l'air
+   d'affirmer ce qu'elle ne fait que rapporter.
+
+   LA GRAVURE (17/10/2026) — le métal de la boussole est l'or et l'acier. Les
+   titres, la marque et les chiffres sont gravés en capitales (Cinzel), en
+   or ; les cartes sont du métal sombre au liseré doré. Un score en or reste
+   du métal constaté, pas une flamme : la règle ci-dessus ne bouge pas.
    ========================================================================== */
 
 :root {
@@ -70,6 +75,17 @@
   --steel: #8fa1bd;
   --north: #9ec9e2;
   --steel-soft: #161b23;
+
+  /* — L'OR, le métal gravé de la boussole — */
+  --or-clair: #fff1cf;
+  --or: #f2c46d;
+  --or-sombre: #b9782a;
+  /* 8.5:1 sur --bg : étiquettes et petits textes dorés. */
+  --or-texte: #c9a46a;
+  /* Bordure décorative des cartes, pas un contour d'interface : elle n'a pas
+     à tenir les 3:1 de --border-strong. */
+  --or-liseré: #3a3326;
+  --grad-or: linear-gradient(180deg, #fff6df 0%, #f6d58e 38%, #d39a45 62%, #8a5420 100%);
 
   /* — Les états. Ils empruntent à l'acier, pas au feu. — */
   --danger: #ff6b6b;
@@ -153,9 +169,13 @@ h1,
 h2,
 h3 {
   font-family: var(--font-display), 'Segoe UI', sans-serif;
+  /* Cinzel 700 écrase les petites tailles ; 600 reste gravé sans empâter. */
+  font-weight: 600;
   text-wrap: balance;
   margin: 0 0 0.5rem;
-  letter-spacing: -0.015em;
+  /* Des capitales gravées respirent : l'espacement s'ouvre au lieu de se
+     resserrer comme pour Sora. */
+  letter-spacing: 0.04em;
 }
 
 h1 {
@@ -258,29 +278,29 @@ a:hover {
   gap: 0.55rem;
   font-family: var(--font-display), 'Segoe UI', sans-serif;
   font-weight: 700;
-  letter-spacing: 0.055em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--or);
   margin: 0 0 1.25rem;
 }
 
 .brand-mark {
-  /* `currentColor` pilote l'acier de la boussole ; le feu vient du dégradé
-     interne du SVG. Ici l'anneau se lit en gris, pas en orange. */
-  color: var(--steel);
+  /* `currentColor` pilote le métal de la boussole ; le feu vient du dégradé
+     interne du SVG. Ici l'anneau se lit en or gravé, pas en orange. */
+  color: var(--or);
   flex: none;
 }
 
-/* Le nom taillé dans la flamme. La couleur pleine est le cas de base :
+/* Le nom gravé dans l'or. La couleur pleine est le cas de base :
    sans le repli, un navigateur qui ignore `background-clip: text` afficherait
    du texte transparent — c'est-à-dire une marque invisible. */
 .brand-word {
-  color: var(--accent);
+  color: var(--or);
 }
 
 @supports ((-webkit-background-clip: text) or (background-clip: text)) {
   .brand-word {
-    background: var(--grad-fire);
+    background: var(--grad-or);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -1568,11 +1588,11 @@ body {
   align-items: center;
   gap: 0.5rem;
   margin: 0;
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-display), 'Segoe UI', sans-serif;
   font-size: var(--texte-etiquette);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--text-faint);
+  color: var(--or-texte);
 }
 
 .hero-eyebrow::before {
@@ -1602,11 +1622,12 @@ body {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  font-family: var(--font-mono), ui-monospace, monospace;
+  /* Gravé en or, comme les mots autour de la boussole. */
+  font-family: var(--font-display), 'Segoe UI', sans-serif;
   font-size: var(--texte-etiquette);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--text-muted);
+  letter-spacing: 0.3em;
+  color: var(--or-texte);
   margin: 0 0 1.15rem;
 }
 
@@ -1623,7 +1644,7 @@ body {
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, var(--border-strong), transparent);
+  background: linear-gradient(90deg, var(--or-sombre), transparent);
 }
 
 /* --------------------------------------------------------------------------

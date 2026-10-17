@@ -86,6 +86,15 @@ describe('contraste des couleurs', () => {
       ['succès sur une carte', 'ok', 'surface'],
       ['numéro d\'étape sur fond profond', 'spark', 'bg-deep'],
       ['pastille de feu', 'spark', 'accent-soft'],
+      // L'or gravé : étiquettes de section, chiffres, titres. `--or-liseré`
+      // n'est pas lu ici, et c'est voulu : une bordure décorative de carte,
+      // pas un contour d'élément d'interface.
+      ['étiquette dorée sur le fond', 'or-texte', 'bg'],
+      ['étiquette dorée sur une carte', 'or-texte', 'surface'],
+      ['étiquette dorée sur surface-2', 'or-texte', 'surface-2'],
+      ['chiffre doré sur le fond', 'or', 'bg'],
+      ['chiffre doré sur une carte', 'or', 'surface'],
+      ['titre or clair sur le fond', 'or-clair', 'bg'],
     ])('%s', (_label, foreground, background) => {
       expect(contrast(color(foreground), color(background))).toBeGreaterThanOrEqual(4.5);
     });
