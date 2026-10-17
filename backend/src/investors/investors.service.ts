@@ -603,7 +603,9 @@ export class InvestorsService {
     });
     if (!participation) throw new NotFoundException('Participation introuvable.');
     if (participation.investor_id !== investorId) {
-      throw new ForbiddenException("Cette participation n'est pas la tienne.");
+      // Même réponse qu'une participation inexistante : « pas la tienne »
+      // confirmerait qu'elle existe à qui en connaît l'identifiant.
+      throw new NotFoundException('Participation introuvable.');
     }
 
     const movements = await this.prisma.investor_movements.findMany({

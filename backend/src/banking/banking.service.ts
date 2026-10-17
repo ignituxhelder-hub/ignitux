@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConstitutionService } from '../constitution/constitution.service.js';
 import {
   describeOwner,
@@ -163,7 +163,9 @@ export class BankingService {
 
     const bankOwner = ownerFromColumns(transaction.bank_account);
     if (!sameOwner(bankOwner, owner)) {
-      throw new ForbiddenException("Ce mouvement n'est pas sur un de tes comptes.");
+      // Même réponse qu'un mouvement inexistant : dire « pas sur tes comptes »
+      // confirmerait qu'il existe à quelqu'un qui a gardé son identifiant.
+      throw new NotFoundException('Mouvement bancaire introuvable.');
     }
 
     const entry = await this.prisma.ledger_entries.findUnique({ where: { id: entryId } });
@@ -217,9 +219,11 @@ export class BankingService {
     const account = await this.prisma.bank_accounts.findUnique({ where: { id: bankAccountId } });
     if (!account) throw new NotFoundException('Compte bancaire introuvable.');
     if (!sameOwner(ownerFromColumns(account), owner)) {
-      // 403 et non 404 : la ressource existe, c'est l'accès qui est refusé.
-      // Et surtout pas 401, qui déconnecterait la personne côté interface.
-      throw new ForbiddenException("Ce compte bancaire n'est pas le tien.");
+      // 404 et non 403 : répondre « pas le tien » confirmerait que le compte
+      // existe à quelqu'un qui a gardé son identifiant (un comptable retiré,
+      // par son cache hors ligne). Même réponse qu'un compte inexistant — et
+      // toujours pas 401, qui déconnecterait la personne côté interface.
+      throw new NotFoundException('Compte bancaire introuvable.');
     }
     return account;
   }
