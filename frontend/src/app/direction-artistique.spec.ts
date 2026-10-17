@@ -90,4 +90,19 @@ describe('direction artistique « Gravure »', () => {
     expect(/\.scene__nom\s*\{[^}]*color:\s*var\(--or\)/.test(css)).toBe(true);
     expect(/@supports[^{]*background-clip: text[^{]*\{\s*\.scene__nom/.test(css)).toBe(true);
   });
+
+  it.each(['login', 'signup', 'forgot-password', 'reset-password', 'verify-email'])(
+    '%s pose la boussole derrière le formulaire',
+    (page) => {
+      expect(readFileSync(join(APP, page, 'page.tsx'), 'utf8')).toContain(
+        'className="page page--scene"',
+      );
+    },
+  );
+
+  it('la boussole des pages de compte ne capte aucun toucher', () => {
+    const decor = /\.page--scene::before\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(decor).toMatch(/pointer-events:\s*none/);
+    expect(decor).toMatch(/z-index:\s*-1/);
+  });
 });

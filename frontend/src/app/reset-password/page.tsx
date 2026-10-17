@@ -73,7 +73,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <main className="page">
+    <main className="page page--scene">
       <p className="brand">Ignitux</p>
       <h1>Nouveau mot de passe</h1>
       <div className="card">

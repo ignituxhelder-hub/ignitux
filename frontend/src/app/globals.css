@@ -303,6 +303,33 @@ a:hover {
   max-width: 920px;
 }
 
+/* Les pages de compte (connexion, inscription, mot de passe) : la boussole
+   de l'accueil, en grand et très atténuée, derrière le formulaire. Un décor
+   sous le contenu, qui ne capte aucun toucher. */
+.page--scene {
+  position: relative;
+  isolation: isolate;
+}
+
+.page--scene::before {
+  content: '';
+  position: absolute;
+  top: -1rem;
+  left: 50%;
+  z-index: -1;
+  /* Plus large que le formulaire, jamais plus large que l'écran : la page
+     est centrée, donc le décor aussi, et la marge absorbe la barre de
+     défilement. Au-delà, le téléphone glisserait sur le côté. */
+  width: min(720px, 100vw - 2rem);
+  aspect-ratio: 810 / 440;
+  transform: translateX(-50%);
+  background: url('/images/accueil/boussole.jpg') center / contain no-repeat;
+  opacity: 0.16;
+  -webkit-mask-image: radial-gradient(closest-side, #000 70%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 70%, transparent 100%);
+  pointer-events: none;
+}
+
 /* Le bandeau hors ligne vit hors des pages : ce conteneur lui donne la
    même gouttière, sinon il se collait aux deux bords de l'écran. */
 .offline-slot:not(:empty) {

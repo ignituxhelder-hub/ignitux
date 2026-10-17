@@ -33,7 +33,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="page">
+    <main className="page page--scene">
       <Brand />
       <h1>{t('titre')}</h1>
       <form className="card" onSubmit={handleSubmit}>

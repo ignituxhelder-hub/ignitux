@@ -54,7 +54,7 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="page">
+    <main className="page page--scene">
       <Brand />
       <h1>Créer un compte</h1>
       <form className="card" onSubmit={handleSubmit}>

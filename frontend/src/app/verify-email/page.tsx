@@ -58,7 +58,7 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <main className="page">
+    <main className="page page--scene">
       <p className="brand">Ignitux</p>
       <h1>Vérification de l&apos;email</h1>
       <div className="card">

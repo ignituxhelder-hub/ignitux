@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="page">
+    <main className="page page--scene">
       <p className="brand">Ignitux</p>
       <h1>Mot de passe oublié</h1>
       <div className="card">
