@@ -1,5 +1,6 @@
 import { type CanActivate, ConflictException, type ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { EN_TETE_ESPACE, EspaceService } from '../equipe/espace.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   type CibleDatee,
@@ -11,6 +12,7 @@ import { NOM_LISIBLE, RESSOURCES_DATEES } from './ressources-datees.js';
 interface RequeteExaminee {
   headers: Record<string, string | string[] | undefined>;
   params: Record<string, string | undefined>;
+  user?: { id?: string };
 }
 
 /**
@@ -27,19 +29,29 @@ interface RequeteExaminee {
  * la différence entre un 409 et un 401 lui dirait si un identifiant existe.
  * Monté après l'authentification, il ne parle qu'à des gens déjà identifiés.
  *
+ * ── Il ne parle qu'à qui a déjà accès à la ressource ─────────────────────
+ *
+ * Être connecté ne suffit pas : son 409 dit que la ligne existe et quand
+ * elle a changé. Chaque lecteur de `ressources-datees.ts` vérifie donc
+ * l'accès avec la règle du contrôleur (rôle sur le projet, espace argent
+ * ouvert, propriétaire du CRM). Sans accès, le garde laisse passer, et le
+ * contrôleur répond son 404 ou son 403 comme s'il n'existait pas.
+ *
  * ── Il se trompe toujours du même côté ───────────────────────────────────
  *
- * Ressource introuvable, paramètre absent, en-tête illisible : il laisse
- * passer et laisse le contrôleur trancher. Refuser à tort bloque le travail
- * réel de quelqu'un ; laisser passer à tort ramène au comportement d'avant ce
- * fichier. Entre les deux erreurs, la seconde est la moins chère, et c'est
- * celle qu'il choisit — délibérément.
+ * Ressource introuvable ou inaccessible, paramètre absent, en-tête
+ * illisible, personne non identifiée : il laisse passer et laisse le
+ * contrôleur trancher. Refuser à tort bloque le travail réel de quelqu'un ;
+ * laisser passer à tort ramène au comportement d'avant ce fichier. Entre les
+ * deux erreurs, la seconde est la moins chère, et c'est celle qu'il
+ * choisit — délibérément.
  */
 @Injectable()
 export class EcritureDepasseeGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly prisma: PrismaService,
+    private readonly espaces: EspaceService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -61,9 +73,20 @@ export class EcritureDepasseeGuard implements CanActivate {
     const identifiant = requete.params[cible.parametre];
     if (!identifiant) return true;
 
-    const ligne = await RESSOURCES_DATEES[cible.ressource](this.prisma, identifiant);
-    // Introuvable : le contrôleur rendra son 404, qui dit mieux que nous
-    // pourquoi. Le garde n'a pas à inventer une réponse à sa place.
+    // Personne d'identifié : le garde est monté sans `JwtAuthGuard`, ce qui
+    // est une erreur de câblage — pas une raison de répondre à un inconnu.
+    const userId = requete.user?.id;
+    if (!userId) return true;
+
+    const ligne = await RESSOURCES_DATEES[cible.ressource]({
+      prisma: this.prisma,
+      id: identifiant,
+      userId,
+      proprietaireArgent: () => this.espaces.resoudre(userId, requete.headers[EN_TETE_ESPACE], 'argent'),
+    });
+    // Introuvable ou inaccessible : le contrôleur rendra son 404 (ou son
+    // 403), qui dit mieux que nous pourquoi — et ne dit rien de plus à qui
+    // n'a pas accès. Le garde n'a pas à inventer une réponse à sa place.
     //
     // `updated_at` vide : la ligne ne sait pas quand elle a changé, il n'y a
     // donc rien à comparer. Refuser sur une date manquante reviendrait à
