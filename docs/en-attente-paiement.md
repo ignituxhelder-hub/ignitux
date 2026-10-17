@@ -70,10 +70,10 @@ Pour recevoir les alertes quand quelque chose casse en production.
 webhook. Options gratuites : Sentry (5 000 erreurs/mois gratuits), webhook
 maison vers Slack ou email.
 
-### Sonde de disponibilité — gratuit
+### ~~Sonde de disponibilité — gratuit~~ — fait (11/10/2026)
 
-UptimeRobot (gratuit) ou Better Uptime. Scrute `/health` et envoie un
-email si le serveur ne répond plus.
+UptimeRobot (gratuit) scrute `/health` et envoie un email si le serveur ne
+répond plus (voir `reste-a-faire.md`, point 8).
 
 ---
 

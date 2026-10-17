@@ -72,7 +72,8 @@ export class CommunityService {
 
   async listPublicProjects() {
     const projets = await this.prisma.projects.findMany({
-      where: { is_public: true },
+      // Un projet archivé quitte la communauté comme il quitte la liste de son porteur.
+      where: { is_public: true, archived_at: null },
       select: PROJET_PUBLIC,
       orderBy: { created_at: 'desc' },
     });

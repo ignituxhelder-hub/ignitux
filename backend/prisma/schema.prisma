@@ -111,6 +111,11 @@ model projects {
   // autres utilisateurs, qui peuvent y laisser des encouragements) — false
   // par défaut, l'utilisateur décide explicitement de le rendre public.
   is_public            Boolean                     @default(false)
+  /// Quand le propriétaire l'a archivé ; null tant qu'il est en cours. Un
+  /// projet archivé quitte la liste et la communauté sans rien perdre : c'est
+  /// l'issue proposée quand il ne peut pas être supprimé (société
+  /// immatriculée, factures émises — voir deleteForOwner).
+  archived_at          DateTime?                   @db.Timestamptz(6)
   created_at           DateTime?                   @default(now()) @db.Timestamptz(6)
   updated_at           DateTime?                   @updatedAt @db.Timestamptz(6)
   analyses             analyses[]

@@ -35,7 +35,8 @@ const ACTION: Record<Capacite, string> = {
   voir_documents_juridiques: 'voir les documents juridiques',
   actes_juridiques: 'faire un acte juridique (statuts, dépôt, mandat)',
   gerer_equipe: 'gérer l’équipe',
-  supprimer_projet: 'supprimer le projet',
+  // Archiver remplace la suppression quand elle est refusée : même capacité.
+  supprimer_projet: 'supprimer ou archiver le projet',
 };
 
 /**

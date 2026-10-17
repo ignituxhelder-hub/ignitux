@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Logger,
   NotFoundException,
@@ -48,7 +49,10 @@ describe('ProjectsService', () => {
       findUniqueOrThrow: ReturnType<typeof vi.fn>;
       update: ReturnType<typeof vi.fn>;
       delete: ReturnType<typeof vi.fn>;
+      deleteMany: ReturnType<typeof vi.fn>;
     };
+    company_registrations: { findUnique: ReturnType<typeof vi.fn> };
+    billing_documents: { count: ReturnType<typeof vi.fn> };
     analyses: {
       create: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
@@ -130,7 +134,11 @@ describe('ProjectsService', () => {
         findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'p1', title: 'Idée', description: 'Desc' }),
         update: vi.fn(),
         delete: vi.fn(),
+        deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
       },
+      // Ni société immatriculée ni facture émise par défaut : le projet se supprime.
+      company_registrations: { findUnique: vi.fn().mockResolvedValue(null) },
+      billing_documents: { count: vi.fn().mockResolvedValue(0) },
       analyses: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
       analysis_sources: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
       legal_form_recommendations: {
@@ -300,15 +308,124 @@ describe('ProjectsService', () => {
       prisma.projects.findFirst.mockResolvedValue(null);
 
       await expect(service.deleteForOwner('u1', 'p1')).rejects.toBeInstanceOf(NotFoundException);
-      expect(prisma.projects.delete).not.toHaveBeenCalled();
+      expect(prisma.projects.deleteMany).not.toHaveBeenCalled();
     });
 
-    it('supprime le projet une fois la propriété vérifiée', async () => {
+    it('supprime un projet sans société immatriculée ni facture émise', async () => {
       prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
 
       await service.deleteForOwner('u1', 'p1');
 
-      expect(prisma.projects.delete).toHaveBeenCalledWith({ where: { id: 'p1' } });
+      expect(prisma.projects.deleteMany).toHaveBeenCalledTimes(1);
+      expect(prisma.projects.deleteMany.mock.calls[0][0].where.id).toBe('p1');
+    });
+
+    // La fiche d'immatriculation partirait avec le projet (cascade) : SIREN,
+    // siège, lien vers l'écriture de capital. Ce sont des traces légales.
+    it('refuse de supprimer un projet dont la société est immatriculée, et propose de l’archiver', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.company_registrations.findUnique.mockResolvedValue({ id: 'r1' });
+
+      const erreur = await service.deleteForOwner('u1', 'p1').catch((e: unknown) => e);
+
+      expect(erreur).toBeInstanceOf(ConflictException);
+      expect((erreur as Error).message).toMatch(/immatricul/);
+      expect((erreur as Error).message).toMatch(/archive/i);
+      expect(prisma.projects.deleteMany).not.toHaveBeenCalled();
+    });
+
+    // Une facture ou un avoir émis se conserve ; un brouillon ou un devis non.
+    it('refuse de supprimer un projet qui a des factures émises', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.billing_documents.count.mockResolvedValue(2);
+
+      const erreur = await service.deleteForOwner('u1', 'p1').catch((e: unknown) => e);
+
+      expect(erreur).toBeInstanceOf(ConflictException);
+      expect((erreur as Error).message).toMatch(/factures/);
+      expect(prisma.billing_documents.count).toHaveBeenCalledWith({
+        where: { project_id: 'p1', type: { in: ['facture', 'avoir'] }, status: { not: 'brouillon' } },
+      });
+      expect(prisma.projects.deleteMany).not.toHaveBeenCalled();
+    });
+
+    // La suppression elle-même revérifie les deux conditions : une facture
+    // émise entre la lecture et la suppression ne doit pas passer.
+    it('ne supprime rien si une facture est émise entre la vérification et la suppression', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.projects.deleteMany.mockResolvedValue({ count: 0 });
+
+      await expect(service.deleteForOwner('u1', 'p1')).rejects.toBeInstanceOf(ConflictException);
+      expect(prisma.projects.deleteMany).toHaveBeenCalledWith({
+        where: {
+          id: 'p1',
+          company_registration: { is: null },
+          billing_documents: {
+            none: { type: { in: ['facture', 'avoir'] }, status: { not: 'brouillon' } },
+          },
+        },
+      });
+    });
+  });
+
+  describe('archiver un projet', () => {
+    it('archive le projet sans rien effacer', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.projects.update.mockResolvedValue({ id: 'p1', archived_at: new Date() });
+
+      await service.archiveForOwner('u1', 'p1');
+
+      expect(prisma.projects.update).toHaveBeenCalledWith({
+        where: { id: 'p1' },
+        data: { archived_at: expect.any(Date) },
+      });
+      expect(prisma.projects.deleteMany).not.toHaveBeenCalled();
+      expect(prisma.projects.delete).not.toHaveBeenCalled();
+    });
+
+    it('le restaure', async () => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1' });
+      prisma.projects.update.mockResolvedValue({ id: 'p1', archived_at: null });
+
+      await service.restoreForOwner('u1', 'p1');
+
+      expect(prisma.projects.update).toHaveBeenCalledWith({
+        where: { id: 'p1' },
+        data: { archived_at: null },
+      });
+    });
+
+    it('un associé n’archive pas le projet et ne le restaure pas', async () => {
+      prisma.projects.findFirst.mockResolvedValue({
+        id: 'p1',
+        owner_id: 'proprio',
+        collaborators: [{ role: 'associe' }],
+      });
+
+      await expect(service.archiveForOwner('u2', 'p1')).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(service.restoreForOwner('u2', 'p1')).rejects.toBeInstanceOf(ForbiddenException);
+      expect(prisma.projects.update).not.toHaveBeenCalled();
+    });
+
+    it('la liste des projets ne montre pas les projets archivés', async () => {
+      prisma.projects.findMany.mockResolvedValue([]);
+
+      await service.findAllForOwner('u1');
+
+      expect(prisma.projects.findMany.mock.calls[0][0].where.archived_at).toBeNull();
+    });
+
+    it('les projets archivés ont leur propre liste', async () => {
+      prisma.projects.findMany.mockResolvedValue([]);
+
+      await service.findArchivedForOwner('u1');
+
+      const requete = prisma.projects.findMany.mock.calls[0][0];
+      expect(requete.where.archived_at).toEqual({ not: null });
+      expect(requete.where.OR).toEqual([
+        { owner_id: 'u1' },
+        { collaborators: { some: { user_id: 'u1' } } },
+      ]);
     });
   });
 

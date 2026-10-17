@@ -655,6 +655,8 @@ export interface Project {
   /** La forme juridique confirmee par la personne. null tant qu elle n a pas tranche. */
   confirmed_legal_form: string | null;
   is_public: boolean;
+  /** Quand le propriétaire l'a archivé ; null tant qu'il est en cours. */
+  archived_at?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -2535,6 +2537,23 @@ export const api = {
 
   listProjects: (token: string) =>
     request<Project[]>('/projects', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listArchivedProjects: (token: string) =>
+    request<Project[]>('/projects/archives', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  archiveProject: (token: string, id: string) =>
+    request<Project>(`/projects/${id}/archiver`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  restoreProject: (token: string, id: string) =>
+    request<Project>(`/projects/${id}/restaurer`, {
+      method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
     }),
 
