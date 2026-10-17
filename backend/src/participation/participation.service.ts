@@ -1,4 +1,4 @@
-import { exigerCapacite } from '../equipe/acces-projet.js';
+import { exigerCapacite, projetVisiblePar } from '../equipe/acces-projet.js';
 import {
   BadRequestException,
   ConflictException,
@@ -250,8 +250,24 @@ export class ParticipationService {
     });
   }
 
-  private async requireMilestone(milestoneId: string) {
-    const milestone = await this.prisma.participation_milestones.findFirst({ where: { id: milestoneId } });
+  /**
+   * Le palier et son accord. `visiblePour` : la personne (porteur ou membre
+   * de l'équipe) qui doit voir le projet de l'accord — sans elle, l'appel
+   * vient d'un opérateur IGNITUX, déjà vérifié.
+   *
+   * Pour cette personne, une seule lecture filtrée par l'équipe du projet :
+   * sans accès, le même 404 « Palier introuvable. » qu'un id qui n'existe
+   * pas, en autant de requêtes. Lu seul puis jugé sur son projet, le palier
+   * répondait « Projet introuvable. » à un étranger : n'importe quel compte
+   * apprenait qu'il existe.
+   */
+  private async requireMilestone(milestoneId: string, visiblePour?: string) {
+    const milestone = await this.prisma.participation_milestones.findFirst({
+      where:
+        visiblePour === undefined
+          ? { id: milestoneId }
+          : { id: milestoneId, agreement: { project: projetVisiblePar(visiblePour) } },
+    });
     if (!milestone) throw new NotFoundException('Palier introuvable.');
     const agreement = await this.prisma.participation_agreements.findFirst({
       where: { id: milestone.agreement_id },
@@ -305,7 +321,7 @@ export class ParticipationService {
    * bouge.
    */
   async acknowledgeMilestone(userId: string, milestoneId: string) {
-    const { milestone, agreement } = await this.requireMilestone(milestoneId);
+    const { milestone, agreement } = await this.requireMilestone(milestoneId, userId);
     await exigerCapacite(this.prisma, userId, agreement.project_id, 'modifier_financement');
 
     return this.prisma.participation_milestones.update({

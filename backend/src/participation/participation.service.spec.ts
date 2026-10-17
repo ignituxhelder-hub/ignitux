@@ -21,6 +21,12 @@ import { ParticipationService } from './participation.service.js';
  */
 class FakeTable {
   rows: Array<Record<string, any>> = [];
+  /**
+   * Les relations qu'un filtre imbriqué peut suivre (`agreement: { project:
+   * … }`, `collaborators: { some: … }`) : la table liée et ses lignes.
+   */
+  relations: Record<string, (row: Record<string, any>) => { table: FakeTable; rows: Array<Record<string, any>> }> =
+    {};
   private sequence = 0;
 
   constructor(
@@ -28,9 +34,16 @@ class FakeTable {
     private readonly prefix = 'id',
   ) {}
 
-  private matches(row: Record<string, any>, where: Record<string, any> = {}): boolean {
+  matches(row: Record<string, any>, where: Record<string, any> = {}): boolean {
     return Object.entries(where).every(([key, expected]) => {
       if (key === 'OR') return (expected as Array<Record<string, any>>).some((w) => this.matches(row, w));
+      if (key in this.relations) {
+        const { table, rows } = this.relations[key](row);
+        if (expected && typeof expected === 'object' && 'some' in expected) {
+          return rows.some((liee) => table.matches(liee, expected.some));
+        }
+        return rows.length === 1 && table.matches(rows[0], expected);
+      }
       // `assertHasProjectAccess` interroge les collaborateurs : aucun ici.
       if (key === 'collaborators') return false;
       const actual = row[key];
@@ -111,6 +124,19 @@ describe('ParticipationService', () => {
       constitution_violations: { createMany: vi.fn() },
     };
     tables.projects.rows.push({ id: 'p1', owner_id: OWNER.id });
+    // Le chemin d'un palier jusqu'à l'équipe de son projet.
+    tables.participation_milestones.relations.agreement = (row) => ({
+      table: tables.participation_agreements,
+      rows: tables.participation_agreements.rows.filter((a) => a.id === row.agreement_id),
+    });
+    tables.participation_agreements.relations.project = (row) => ({
+      table: tables.projects,
+      rows: tables.projects.rows.filter((p) => p.id === row.project_id),
+    });
+    tables.projects.relations.collaborators = (row) => ({
+      table: tables.project_collaborators,
+      rows: tables.project_collaborators.rows.filter((c) => c.project_id === row.id),
+    });
     db = Object.assign(tables, { $transaction: (fn: (tx: unknown) => unknown) => fn(tables) }) as never;
 
     const module: TestingModule = await Test.createTestingModule({
@@ -342,6 +368,41 @@ describe('ParticipationService', () => {
 
     it('la prise de connaissance est refusée à quelqu’un d’étranger au projet', async () => {
       await expect(service.acknowledgeMilestone(STRANGER.id, milestoneId)).rejects.toThrow(NotFoundException);
+    });
+
+    it('un étranger reçoit le même 404 « Palier introuvable. », que le palier existe ou non', async () => {
+      // Lu par son seul id puis jugé sur son projet, le palier répondait
+      // « Projet introuvable. » à un étranger, « Palier introuvable. » à un
+      // id inconnu : n'importe quel compte apprenait qu'il existe.
+      const lectures = [
+        vi.spyOn(db.participation_milestones, 'findFirst'),
+        vi.spyOn(db.participation_agreements, 'findFirst'),
+        vi.spyOn(db.projects, 'findFirst'),
+      ];
+      const compter = () => lectures.reduce((total, l) => total + l.mock.calls.length, 0);
+      const refus = (promesse: Promise<unknown>) =>
+        promesse.then(
+          () => {
+            throw new Error('la prise de connaissance aurait dû être refusée');
+          },
+          (e: unknown) => e as NotFoundException,
+        );
+
+      const existant = await refus(service.acknowledgeMilestone(STRANGER.id, milestoneId));
+      const pourExistant = compter();
+      const absent = await refus(service.acknowledgeMilestone(STRANGER.id, 'ms-absent'));
+
+      expect(existant).toBeInstanceOf(NotFoundException);
+      expect(existant.message).toBe('Palier introuvable.');
+      expect(existant.getResponse()).toEqual(absent.getResponse());
+      expect(compter() - pourExistant).toBe(pourExistant);
+      expect(db.participation_milestones.rows[0].founder_acknowledged_at).toBeUndefined();
+    });
+
+    it('un membre de l’équipe sans droit sur le financement garde son 403', async () => {
+      db.project_collaborators.rows.push({ project_id: 'p1', user_id: STRANGER.id, role: 'observateur' });
+
+      await expect(service.acknowledgeMilestone(STRANGER.id, milestoneId)).rejects.toThrow(ForbiddenException);
     });
   });
 
