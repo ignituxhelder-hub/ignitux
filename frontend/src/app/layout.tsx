@@ -3,6 +3,7 @@ import { Cinzel, IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
+import { Braises } from '@/components/braises';
 import { OfflineBanner } from '@/components/offline-banner';
 import { ServiceWorker } from '@/components/service-worker';
 import { Systeme } from '@/components/systeme';
@@ -61,6 +62,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang={locale}className={`${cinzel.variable} ${plexSans.variable} ${plexMono.variable}`}>
       <body>
+        {/* Les étincelles qui montent derrière tout le site : un décor,
+            sous le contenu, qui ne capte aucun toucher. */}
+        <Braises />
         {/* N'affiche rien : il pose le service worker qui rend l'ouverture
             possible sans réseau, et sait aussi le retirer. Article 16. */}
         <ServiceWorker />

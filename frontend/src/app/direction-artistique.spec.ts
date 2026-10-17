@@ -60,4 +60,27 @@ describe('direction artistique « Gravure »', () => {
     );
     expect(questionnaire).toContain("background: 'linear-gradient(90deg, var(--or-sombre), var(--or))'");
   });
+
+  it('le calque de braises est posé une fois pour tout le site', () => {
+    expect(layout.match(/<Braises \/>/g)).toHaveLength(1);
+  });
+
+  it('les braises ne captent aucun toucher et passent sous le contenu', () => {
+    // Sur l'appli installée, la barre des tâches est fixe en bas de l'écran :
+    // un calque décoratif devant elle volerait les touchers.
+    const calque = /\.braises\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(calque).toMatch(/pointer-events:\s*none/);
+    expect(calque).toMatch(/z-index:\s*-1/);
+    expect(calque).toMatch(/position:\s*fixed/);
+  });
+
+  it("« moins d'animations » retire les braises au lieu de les faire clignoter", () => {
+    // Le fichier a plusieurs blocs prefers-reduced-motion : l'un d'eux doit
+    // retirer le calque. Sans ça, `animation-iteration-count: 1` les ferait
+    // passer une fois puis disparaître.
+    const blocs = [
+      ...css.matchAll(/@media \(prefers-reduced-motion: reduce\)\s*\{([\s\S]*?)\n\}/g),
+    ].map((m) => m[1]);
+    expect(blocs.some((bloc) => /\.braises\s*\{\s*display:\s*none/.test(bloc))).toBe(true);
+  });
 });

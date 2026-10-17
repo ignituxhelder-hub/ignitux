@@ -154,10 +154,53 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
+  /* Gravure : la braise remonte au centre, un halo chaud tombe d'en haut, et
+     un vignettage assombrit les bords comme dans les images de référence. */
   background:
-    radial-gradient(60rem 34rem at 12% 108%, rgb(255 90 31 / 13%), transparent 62%),
-    radial-gradient(44rem 28rem at 88% -6%, rgb(158 201 226 / 7%), transparent 60%),
+    radial-gradient(ellipse at center, transparent 55%, rgb(0 0 0 / 55%) 100%),
+    radial-gradient(70rem 30rem at 50% 112%, rgb(255 110 40 / 20%), transparent 62%),
+    radial-gradient(50rem 26rem at 50% -8%, rgb(255 190 110 / 7%), transparent 60%),
     linear-gradient(180deg, var(--bg-deep) 0%, var(--bg) 42%);
+}
+
+/* --------------------------------------------------------------------------
+   Les braises : cinq étincelles qui montent lentement (composant Braises).
+   Sous le contenu, jamais cliquables ; retirées si la personne a demandé
+   moins d'animations (voir plus bas).
+   -------------------------------------------------------------------------- */
+
+.braises {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.braise {
+  position: absolute;
+  bottom: -0.5rem;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--spark);
+  box-shadow: 0 0 6px 2px var(--flame);
+  opacity: 0;
+  animation: braise-monte 9s linear infinite;
+}
+
+@keyframes braise-monte {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-30px, -100vh);
+    opacity: 0;
+  }
 }
 
 ::selection {
@@ -1774,6 +1817,13 @@ th {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  /* Les braises ne sont que du mouvement : sans lui, elles n'ont plus de
+     raison d'être. La règle ci-dessus les ferait passer une fois en un
+     éclair ; on retire le calque. La lueur fixe de body::before reste. */
+  .braises {
+    display: none;
   }
 }
 
