@@ -37,6 +37,8 @@ const TACHE = '77777777-7777-4777-8777-777777777777';
 const DOCUMENT = '88888888-8888-4888-8888-888888888888';
 const CONTACT = '99999999-9999-4999-8999-999999999999';
 const ENTREPRISE = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+/** Un id bien formé qu'aucune tâche ne porte. */
+const TACHE_ABSENTE = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 
 const UTILISATEURS = [PROPRIO, COLLEGUE, COMPTABLE, COUPE, INCONNU];
 const COLLABORATEURS = [
@@ -120,6 +122,23 @@ function fauxPrisma(donnees: { lignes: Record<string, Ligne[]> }) {
   /** `findFirst` / `findUnique` évalués sur les lignes du test ; le reste neutre. */
   const evaluee = (nom: string) => avecRepli(nom, { findFirst: lecture(nom), findUnique: lecture(nom) });
 
+  /** La personne d'un filtre « propriétaire OU membre de l'équipe », et de lui seul. */
+  const equipeDe = (filtre: unknown): string => {
+    const userId = (filtre as { OR?: [{ owner_id?: string }] } | undefined)?.OR?.[0]?.owner_id;
+    const attendu = { OR: [{ owner_id: userId }, { collaborators: { some: { user_id: userId } } }] };
+    if (!userId || JSON.stringify(filtre) !== JSON.stringify(attendu)) {
+      throw new Error(`Filtre de projet non géré : ${JSON.stringify(filtre)}`);
+    }
+    return userId;
+  };
+  /** Mes lignes d'équipe sur ce projet, ou `null` si je n'en suis ni propriétaire ni membre. */
+  const equipeSur = (projectId: unknown, userId: string) => {
+    const projet = donnees.lignes.projects.find((p) => p.id === projectId);
+    if (!projet) return null;
+    const sesLignes = COLLABORATEURS.filter((c) => c.project_id === projet.id && c.user_id === userId);
+    return projet.owner_id === userId || sesLignes.length > 0 ? { projet, sesLignes } : null;
+  };
+
   const base: Record<string, unknown> = {
     users: {
       findUnique: vi.fn(async ({ where }: { where: { id: string } }) =>
@@ -128,17 +147,10 @@ function fauxPrisma(donnees: { lignes: Record<string, Ligne[]> }) {
     },
     projects: avecRepli('projects', {
       // `accesProjet` (et la lecture d'un projet par son équipe) : propriétaire OU membre.
-      findFirst: vi.fn(async ({ where }: { where: { id: string; OR?: Ligne[]; owner_id?: string } }) => {
-        const userId = (where.OR?.[0] as { owner_id?: string } | undefined)?.owner_id;
-        const attendu = { id: where.id, OR: [{ owner_id: userId }, { collaborators: { some: { user_id: userId } } }] };
-        if (!userId || JSON.stringify(where) !== JSON.stringify(attendu)) {
-          throw new Error(`Filtre de projet non géré : ${JSON.stringify(where)}`);
-        }
-        const projet = donnees.lignes.projects.find((p) => p.id === where.id);
-        if (!projet) return null;
-        const sesLignes = COLLABORATEURS.filter((c) => c.project_id === projet.id && c.user_id === userId);
-        if (projet.owner_id !== userId && sesLignes.length === 0) return null;
-        return { ...projet, collaborators: sesLignes.map((c) => ({ role: c.role })) };
+      findFirst: vi.fn(async ({ where }: { where: { id: string; OR?: Ligne[] } }) => {
+        const { id, ...filtre } = where;
+        const equipe = equipeSur(id, equipeDe(filtre));
+        return equipe ? { ...equipe.projet, collaborators: equipe.sesLignes.map((c) => ({ role: c.role })) } : null;
       }),
       findUnique: lecture('projects'),
     }),
@@ -165,7 +177,16 @@ function fauxPrisma(donnees: { lignes: Record<string, Ligne[]> }) {
         },
       ),
     },
-    tasks: evaluee('tasks'),
+    tasks: avecRepli('tasks', {
+      findUnique: lecture('tasks'),
+      // Avec un filtre `project` : la tâche seulement si je vois son projet.
+      findFirst: vi.fn(async ({ where }: { where: Ligne & { project?: unknown } }) => {
+        const { project, ...simple } = where;
+        const tache = donnees.lignes.tasks.find((t) => correspond(t, simple));
+        if (!tache) return null;
+        return project === undefined || equipeSur(tache.project_id, equipeDe(project)) ? tache : null;
+      }),
+    }),
     billing_documents: evaluee('billing_documents'),
     crm_contacts: evaluee('crm_contacts'),
     crm_companies: evaluee('crm_companies'),
@@ -306,8 +327,19 @@ describe('Écritures revenues du froid sur les vrais contrôleurs — applicatio
 
   describe('une tâche', () => {
     it('quelqu’un hors de l’équipe du projet reçoit le 404 du contrôleur, sans date', async () => {
-      await rienAppris(INCONNU, TACHE_COCHEE, {}, [404, 'Projet introuvable.']);
+      await rienAppris(INCONNU, TACHE_COCHEE, {}, [404, 'Tâche introuvable.']);
       await rienAppris(INCONNU, TACHE_VALIDEE, {}, [404, 'Projet introuvable.']);
+    });
+
+    it('quelqu’un hors de l’équipe reçoit la même réponse, que la tâche existe ou non', async () => {
+      for (const route of ['status', 'note']) {
+        const corps = route === 'status' ? { status: 'done' } : { note: 'rappeler' };
+        const existante = await envoyer(INCONNU, { methode: 'patch', chemin: `/tasks/${TACHE}/${route}`, corps });
+        const absente = await envoyer(INCONNU, { methode: 'patch', chemin: `/tasks/${TACHE_ABSENTE}/${route}`, corps });
+
+        expect([existante.status, existante.body.message]).toEqual([404, 'Tâche introuvable.']);
+        expect(existante.body).toEqual(absente.body);
+      }
     });
 
     it('le propriétaire du projet reçoit le 409', async () => {
