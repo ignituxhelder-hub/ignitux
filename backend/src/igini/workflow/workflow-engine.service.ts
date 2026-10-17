@@ -1,4 +1,5 @@
-import { exigerCapacite } from '../../equipe/acces-projet.js';
+import { exigerCapacite, projetVisiblePar } from '../../equipe/acces-projet.js';
+import type { Capacite } from '../../equipe/droits-equipe.js';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConstitutionService } from '../../constitution/constitution.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
@@ -176,11 +177,7 @@ export class WorkflowEngineService {
    * permet, puis s'arrête sur la première condition non satisfaite.
    */
   async advanceRun(userId: string, runId: string): Promise<AdvanceResult> {
-    const run = await this.prisma.workflow_runs.findFirst({ where: { id: runId } });
-    if (!run) {
-      throw new NotFoundException('Exécution introuvable.');
-    }
-    await exigerCapacite(this.prisma, userId, run.project_id, 'modifier_taches');
+    const run = await this.executionPour(userId, runId, 'modifier_taches');
 
     const [steps, snapshot] = await Promise.all([
       this.prisma.workflow_steps.findMany({
@@ -274,11 +271,7 @@ export class WorkflowEngineService {
    * données l'ont permis.
    */
   async confirmStep(userId: string, runId: string, position: number): Promise<AdvanceResult> {
-    const run = await this.prisma.workflow_runs.findFirst({ where: { id: runId } });
-    if (!run) {
-      throw new NotFoundException('Exécution introuvable.');
-    }
-    await exigerCapacite(this.prisma, userId, run.project_id, 'modifier_taches');
+    const run = await this.executionPour(userId, runId, 'modifier_taches');
 
     if (run.current_position !== position) {
       throw new BadRequestException(
@@ -291,11 +284,7 @@ export class WorkflowEngineService {
   }
 
   async listEvents(userId: string, runId: string) {
-    const run = await this.prisma.workflow_runs.findFirst({ where: { id: runId } });
-    if (!run) {
-      throw new NotFoundException('Exécution introuvable.');
-    }
-    await exigerCapacite(this.prisma, userId, run.project_id, 'voir_taches');
+    await this.executionPour(userId, runId, 'voir_taches');
 
     return this.prisma.workflow_events.findMany({
       where: { run_id: runId },
@@ -393,15 +382,36 @@ export class WorkflowEngineService {
     return (await this.prisma.workflow_events.count({ where: { run_id: runId } })) > 0;
   }
 
+  /**
+   * Le processus, puis l'exécution : la ligne, si je vois son projet — sinon
+   * 404 « … introuvable. », la même réponse que pour un id qui n'existe pas.
+   * Lue seule puis jugée sur son projet, elle répondait « Projet
+   * introuvable. » à qui n'y avait pas accès : n'importe quel compte
+   * apprenait qu'elle existe. Une seule lecture, filtrée par l'équipe du
+   * projet, ne laisse rien voir de plus — ni le message, ni le nombre de
+   * requêtes. Le rôle est vérifié ensuite : un membre qui n'a pas la
+   * capacité garde son 403, lui voit déjà le projet.
+   */
   private async findWorkflowForOwner(userId: string, workflowId: string) {
     const workflow = await this.prisma.workflow_definitions.findFirst({
-      where: { id: workflowId },
+      where: { id: workflowId, project: projetVisiblePar(userId) },
     });
     if (!workflow) {
       throw new NotFoundException('Processus introuvable.');
     }
     await exigerCapacite(this.prisma, userId, workflow.project_id, 'modifier_taches');
     return workflow;
+  }
+
+  private async executionPour(userId: string, runId: string, capacite: Capacite) {
+    const run = await this.prisma.workflow_runs.findFirst({
+      where: { id: runId, project: projetVisiblePar(userId) },
+    });
+    if (!run) {
+      throw new NotFoundException('Exécution introuvable.');
+    }
+    await exigerCapacite(this.prisma, userId, run.project_id, capacite);
+    return run;
   }
 
   private assertStepIsExecutable(step: WorkflowStepInput): void {
