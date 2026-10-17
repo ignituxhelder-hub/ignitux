@@ -314,8 +314,10 @@ a:hover {
 
 .card {
   position: relative;
-  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
-  border: 1px solid var(--border);
+  /* Du métal sombre : plus profond en bas, comme une plaque éclairée d'en
+     haut, cerclée d'un liseré doré. */
+  background: linear-gradient(180deg, #16171c 0%, #101115 100%);
+  border: 1px solid var(--or-liseré);
   border-radius: var(--radius-md);
   padding: 1.5rem;
   box-shadow: var(--shadow-md);
@@ -330,8 +332,8 @@ a:hover {
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(255 255 255 / 10%) 22%,
-    rgb(255 255 255 / 10%) 78%,
+    rgb(242 196 109 / 18%) 22%,
+    rgb(242 196 109 / 18%) 78%,
     transparent
   );
   pointer-events: none;
@@ -453,7 +455,7 @@ button.primary {
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  box-shadow: var(--glow-fire);
+  box-shadow: inset 0 1px 0 rgb(255 220 160 / 45%), 0 0 0 1px #6e3a14, var(--glow-fire);
   transition:
     filter 0.15s ease,
     box-shadow 0.15s ease,
@@ -462,7 +464,7 @@ button.primary {
 
 button.primary:hover:not(:disabled) {
   filter: brightness(1.08);
-  box-shadow: 0 8px 26px -8px rgb(255 90 31 / 75%);
+  box-shadow: inset 0 1px 0 rgb(255 220 160 / 45%), 0 0 0 1px #6e3a14, 0 8px 26px -8px rgb(255 90 31 / 75%);
 }
 
 button.primary:active:not(:disabled) {
@@ -544,7 +546,7 @@ a.primary {
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
-  box-shadow: var(--glow-fire);
+  box-shadow: inset 0 1px 0 rgb(255 220 160 / 45%), 0 0 0 1px #6e3a14, var(--glow-fire);
 }
 
 a.primary:hover {
@@ -1508,7 +1510,7 @@ body {
   position: relative;
   display: block;
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--or-liseré);
   border-radius: var(--radius-md);
   padding: 1rem 1rem 1rem 1.15rem;
   text-decoration: none;
@@ -1533,7 +1535,7 @@ body {
 }
 
 .project-item:hover {
-  border-color: var(--border-strong);
+  border-color: var(--or-sombre);
   background: var(--surface-2);
   transform: translateY(-1px);
 }
@@ -1677,9 +1679,9 @@ body {
   border-radius: 50%;
   border: 1px solid var(--border-strong);
   background: var(--bg-deep);
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-display), 'Segoe UI', sans-serif;
   font-size: 0.75rem;
-  color: var(--spark);
+  color: var(--or);
 }
 
 .step-card h3 {

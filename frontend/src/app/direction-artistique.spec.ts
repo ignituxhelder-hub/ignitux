@@ -41,4 +41,23 @@ describe('direction artistique « Gravure »', () => {
     // marque transparente, c'est-à-dire invisible.
     expect(/\.brand-word\s*\{\s*color:\s*var\(--or\)/.test(css)).toBe(true);
   });
+
+  it('les cartes portent le liseré doré', () => {
+    const carte = /\n\.card\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(carte).toContain('var(--or-liseré)');
+  });
+
+  it('le bouton principal garde le feu porteur de texte', () => {
+    // Le reflet doré s'ajoute ; le fond reste le dégradé testé pour le blanc.
+    const bouton = /button\.primary\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(bouton).toContain('var(--grad-fire-solid)');
+  });
+
+  it('la jauge du questionnaire est en or (une mesure, pas une action)', () => {
+    const questionnaire = readFileSync(
+      join(APP, 'projects', '[id]', 'questionnaire', 'page.tsx'),
+      'utf8',
+    );
+    expect(questionnaire).toContain("background: 'linear-gradient(90deg, var(--or-sombre), var(--or))'");
+  });
 });

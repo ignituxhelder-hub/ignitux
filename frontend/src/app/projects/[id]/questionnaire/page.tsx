@@ -242,7 +242,8 @@ export default function QuestionnairePage() {
                 style={{
                   width: `${((index + 2) / total) * 100}%`,
                   height: '100%',
-                  background: 'var(--accent)',
+                  // Une mesure (où on en est), pas une action : de l'or, pas du feu.
+                  background: 'linear-gradient(90deg, var(--or-sombre), var(--or))',
                 }}
               />
             </div>
