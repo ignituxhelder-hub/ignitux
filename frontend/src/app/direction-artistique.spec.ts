@@ -83,4 +83,11 @@ describe('direction artistique « Gravure »', () => {
     ].map((m) => m[1]);
     expect(blocs.some((bloc) => /\.braises\s*\{\s*display:\s*none/.test(bloc))).toBe(true);
   });
+
+  it('IGNITUX reste en or plein sans background-clip: text', () => {
+    // Le grand titre de l'accueil : de l'or plein d'abord, le dégradé
+    // découpé seulement là où le navigateur sait le faire.
+    expect(/\.scene__nom\s*\{[^}]*color:\s*var\(--or\)/.test(css)).toBe(true);
+    expect(/@supports[^{]*background-clip: text[^{]*\{\s*\.scene__nom/.test(css)).toBe(true);
+  });
 });

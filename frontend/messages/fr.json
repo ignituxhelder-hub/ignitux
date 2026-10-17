@@ -4,9 +4,15 @@
   "accueil": {
     "seConnecter": "Se connecter",
     "creerCompte": "Créer un compte",
-    "eyebrow": "Découvrir · Construire · Transmettre",
-    "titre": "Transformer une idée en réalité",
-    "iginiMention": "t'accompagne pour analyser, construire, financer, développer et transmettre ton projet — depuis un seul endroit. La vérité avant tout.",
+    "scene": {
+      "decouvrir": "Découvrir",
+      "construire": "Construire",
+      "transmettre": "Transmettre",
+      "nousServir": "Nous servir",
+      "verite": "La vérité avant tout",
+      "devise": "Des idées au monde réel"
+    },
+    "iginiMention": "t'accompagne pour analyser, construire, financer, développer et transmettre ton projet — depuis un seul endroit.",
     "commencer": "Commencer gratuitement",
     "dejaCompte": "J'ai déjà un compte",
     "methode": "La méthode en 5 étapes",

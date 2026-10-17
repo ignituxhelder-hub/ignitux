@@ -1,12 +1,13 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { IconesExplicatives } from '@/components/icones-explicatives';
 import { IginiMention } from '@/components/igini-mention';
-import { Brand, IgnituxMark } from '@/components/ignitux-mark';
+import { Brand } from '@/components/ignitux-mark';
 import { SelecteurLangue } from '@/components/selecteur-langue';
 import { useAuth } from '@/lib/auth';
 
@@ -53,13 +54,32 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="hero">
-        {/* La boussole en filigrane : elle donne sa forme à la page sans
-            rien affirmer. Masquée sur mobile, où elle n'aurait plus de
-            place pour respirer. */}
-        <IgnituxMark size={320} className="hero-rose" />
-        <p className="hero-eyebrow">{t('eyebrow')}</p>
-        <h1>{t('titre')}</h1>
+      {/* La grande scène (direction « Gravure ») : la boussole au centre,
+          la méthode à sa gauche, la mission et la devise à sa droite, puis le
+          nom gravé. Tout le texte est du vrai texte — traduit, lisible sur
+          téléphone, présent même si l'image ne charge pas. */}
+      <div className="scene">
+        <p className="scene__cote scene__cote--gauche">
+          <span>{t('scene.decouvrir')}</span>
+          <span>{t('scene.construire')}</span>
+          <span>{t('scene.transmettre')}</span>
+        </p>
+        <Image
+          className="scene__boussole"
+          src="/images/accueil/boussole.jpg"
+          width={810}
+          height={440}
+          alt=""
+          priority
+        />
+        <p className="scene__cote scene__cote--droite">
+          <span>{t('scene.nousServir')}</span>
+          <span className="scene__trait" aria-hidden="true" />
+          <span>{t('scene.verite')}</span>
+        </p>
+        <h1 className="scene__nom">Ignitux</h1>
+        <span className="scene__ligne" aria-hidden="true" />
+        <p className="scene__devise">{t('scene.devise')}</p>
         <IginiMention>{t('iginiMention')}</IginiMention>
         <div className="hero-actions">
           <Link href="/signup">

@@ -26,9 +26,19 @@ describe('HomePage', () => {
       </AuthProvider>,
     );
 
-    expect(screen.getByText('Transformer une idée en réalité')).toBeInTheDocument();
+    // La grande scène : IGNITUX, la devise, et les mots autour de la boussole.
+    expect(screen.getByRole('heading', { level: 1, name: 'Ignitux' })).toBeInTheDocument();
+    expect(screen.getByText('Des idées au monde réel')).toBeInTheDocument();
+    expect(screen.getByText('Nous servir')).toBeInTheDocument();
+    expect(screen.getByText('La vérité avant tout')).toBeInTheDocument();
+    expect(screen.getByText('Découvrir')).toBeInTheDocument();
+    expect(screen.queryByText('Transformer une idée en réalité')).not.toBeInTheDocument();
+    // La boussole est un décor : tout le sens est dans le texte voisin.
+    expect(document.querySelector('img.scene__boussole')).toHaveAttribute('alt', '');
+
     expect(screen.getByText('Analyser')).toBeInTheDocument();
-    expect(screen.getByText('Transmettre')).toBeInTheDocument();
+    // Deux fois : la colonne de la scène et l'étape de la méthode.
+    expect(screen.getAllByText('Transmettre')).toHaveLength(2);
     expect(screen.getByText('Mémoire')).toBeInTheDocument();
     expect(screen.getByText('Score')).toBeInTheDocument();
     // Le texte n'apparaît qu'au clic sur l'icône.

@@ -4,9 +4,15 @@
   "accueil": {
     "seConnecter": "Log in",
     "creerCompte": "Create an account",
-    "eyebrow": "Discover · Build · Pass on",
-    "titre": "Turn an idea into reality",
-    "iginiMention": "helps you analyse, build, fund, grow and pass on your project — all from one place. Truth above all.",
+    "scene": {
+      "decouvrir": "Discover",
+      "construire": "Build",
+      "transmettre": "Pass on",
+      "nousServir": "Serving us all",
+      "verite": "Truth above all",
+      "devise": "From ideas to the real world"
+    },
+    "iginiMention": "helps you analyse, build, fund, grow and pass on your project — all from one place.",
     "commencer": "Start for free",
     "dejaCompte": "I already have an account",
     "methode": "The method in 5 steps",

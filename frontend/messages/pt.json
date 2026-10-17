@@ -4,9 +4,15 @@
   "accueil": {
     "seConnecter": "Entrar",
     "creerCompte": "Criar uma conta",
-    "eyebrow": "Descobrir · Construir · Transmitir",
-    "titre": "Transformar uma ideia em realidade",
-    "iginiMention": "acompanha-te para analisar, construir, financiar, desenvolver e transmitir o teu projeto — a partir de um só lugar. A verdade acima de tudo.",
+    "scene": {
+      "decouvrir": "Descobrir",
+      "construire": "Construir",
+      "transmettre": "Transmitir",
+      "nousServir": "Servir-nos",
+      "verite": "A verdade acima de tudo",
+      "devise": "Das ideias ao mundo real"
+    },
+    "iginiMention": "acompanha-te para analisar, construir, financiar, desenvolver e transmitir o teu projeto — a partir de um só lugar.",
     "commencer": "Começar gratuitamente",
     "dejaCompte": "Já tenho uma conta",
     "methode": "O método em 5 etapas",
