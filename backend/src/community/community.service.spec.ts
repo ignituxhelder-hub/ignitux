@@ -54,7 +54,8 @@ describe('CommunityService', () => {
       await service.listPublicProjects();
 
       const appel = prisma.projects.findMany.mock.calls[0][0];
-      expect(appel.where).toEqual({ is_public: true });
+      // Un projet archivé quitte la communauté comme il quitte la liste de son porteur.
+      expect(appel.where).toEqual({ is_public: true, archived_at: null });
       expect(appel.select.owner).toBeDefined();
       // Le test le plus utile du lot : il échouerait si quelqu'un rajoutait
       // `email: true` un jour, pour une raison qui semblera bonne.

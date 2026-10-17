@@ -191,6 +191,7 @@ export const ProjectsScalarFieldEnum = {
   sector: 'sector',
   confirmed_legal_form: 'confirmed_legal_form',
   is_public: 'is_public',
+  archived_at: 'archived_at',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const

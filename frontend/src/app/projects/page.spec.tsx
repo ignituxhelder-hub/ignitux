@@ -213,6 +213,74 @@ describe('ProjectsPage', () => {
       });
     });
 
+    // Un projet archivé quitte la liste, pas l'application : il reste
+    // atteignable, replié sous les projets en cours.
+    describe('projets archivés', () => {
+      const ARCHIVE = {
+        id: 'p3',
+        owner_id: 'u1',
+        title: 'Ancien food-truck',
+        description: null,
+        archived_at: '2026-10-17T10:00:00.000Z',
+      };
+
+      it('les range dans un groupe replié sous les projets en cours', async () => {
+        mockApiRoutes(
+          routes({
+            'GET /projects': { status: 200, body: [PROJET, AUTRE_PROJET] },
+            'GET /projects/archives': { status: 200, body: [ARCHIVE] },
+          }),
+        );
+
+        render(
+          <AuthProvider>
+            <ProjectsPage />
+          </AuthProvider>,
+        );
+
+        const groupe = await screen.findByText('Projets archivés (1)');
+        expect(groupe.closest('details')).not.toHaveAttribute('open');
+        fireEvent.click(groupe);
+        expect(screen.getByRole('link', { name: /Ancien food-truck/ })).toHaveAttribute(
+          'href',
+          '/projects/p3',
+        );
+      });
+
+      // Sinon, avec un seul projet en cours, la redirection automatique
+      // cacherait pour toujours les projets archivés.
+      it('ne redirige pas dans l’unique projet en cours quand il y a des archives', async () => {
+        mockApiRoutes(routes({ 'GET /projects/archives': { status: 200, body: [ARCHIVE] } }));
+
+        render(
+          <AuthProvider>
+            <ProjectsPage />
+          </AuthProvider>,
+        );
+
+        expect(await screen.findByText('Projets archivés (1)')).toBeInTheDocument();
+        expect(router.replace).not.toHaveBeenCalledWith('/projects/p1');
+      });
+
+      it('ne dit pas « pas encore de projet » quand tous sont archivés', async () => {
+        mockApiRoutes(
+          routes({
+            'GET /projects': { status: 200, body: [] },
+            'GET /projects/archives': { status: 200, body: [ARCHIVE] },
+          }),
+        );
+
+        render(
+          <AuthProvider>
+            <ProjectsPage />
+          </AuthProvider>,
+        );
+
+        expect(await screen.findByText('Projets archivés (1)')).toBeInTheDocument();
+        expect(screen.queryByText(/pas encore de projet/i)).toBeNull();
+      });
+    });
+
     // Revenir à une liste après avoir créé serait un détour que personne ne
     // demande : c'est dans le projet que le parcours reprend la main.
     it('emmène directement dans le questionnaire du projet créé', async () => {

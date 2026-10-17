@@ -32,6 +32,7 @@ export type ProjectsMinAggregateOutputType = {
   sector: string | null
   confirmed_legal_form: string | null
   is_public: boolean | null
+  archived_at: Date | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -44,6 +45,7 @@ export type ProjectsMaxAggregateOutputType = {
   sector: string | null
   confirmed_legal_form: string | null
   is_public: boolean | null
+  archived_at: Date | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -56,6 +58,7 @@ export type ProjectsCountAggregateOutputType = {
   sector: number
   confirmed_legal_form: number
   is_public: number
+  archived_at: number
   created_at: number
   updated_at: number
   _all: number
@@ -70,6 +73,7 @@ export type ProjectsMinAggregateInputType = {
   sector?: true
   confirmed_legal_form?: true
   is_public?: true
+  archived_at?: true
   created_at?: true
   updated_at?: true
 }
@@ -82,6 +86,7 @@ export type ProjectsMaxAggregateInputType = {
   sector?: true
   confirmed_legal_form?: true
   is_public?: true
+  archived_at?: true
   created_at?: true
   updated_at?: true
 }
@@ -94,6 +99,7 @@ export type ProjectsCountAggregateInputType = {
   sector?: true
   confirmed_legal_form?: true
   is_public?: true
+  archived_at?: true
   created_at?: true
   updated_at?: true
   _all?: true
@@ -179,6 +185,7 @@ export type ProjectsGroupByOutputType = {
   sector: string | null
   confirmed_legal_form: string | null
   is_public: boolean
+  archived_at: Date | null
   created_at: Date | null
   updated_at: Date | null
   _count: ProjectsCountAggregateOutputType | null
@@ -212,6 +219,7 @@ export type projectsWhereInput = {
   sector?: Prisma.StringNullableFilter<"projects"> | string | null
   confirmed_legal_form?: Prisma.StringNullableFilter<"projects"> | string | null
   is_public?: Prisma.BoolFilter<"projects"> | boolean
+  archived_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   created_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   owner?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
@@ -264,6 +272,7 @@ export type projectsOrderByWithRelationInput = {
   sector?: Prisma.SortOrderInput | Prisma.SortOrder
   confirmed_legal_form?: Prisma.SortOrderInput | Prisma.SortOrder
   is_public?: Prisma.SortOrder
+  archived_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
   owner?: Prisma.usersOrderByWithRelationInput
@@ -319,6 +328,7 @@ export type projectsWhereUniqueInput = Prisma.AtLeast<{
   sector?: Prisma.StringNullableFilter<"projects"> | string | null
   confirmed_legal_form?: Prisma.StringNullableFilter<"projects"> | string | null
   is_public?: Prisma.BoolFilter<"projects"> | boolean
+  archived_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   created_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   owner?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
@@ -371,6 +381,7 @@ export type projectsOrderByWithAggregationInput = {
   sector?: Prisma.SortOrderInput | Prisma.SortOrder
   confirmed_legal_form?: Prisma.SortOrderInput | Prisma.SortOrder
   is_public?: Prisma.SortOrder
+  archived_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.projectsCountOrderByAggregateInput
@@ -389,6 +400,7 @@ export type projectsScalarWhereWithAggregatesInput = {
   sector?: Prisma.StringNullableWithAggregatesFilter<"projects"> | string | null
   confirmed_legal_form?: Prisma.StringNullableWithAggregatesFilter<"projects"> | string | null
   is_public?: Prisma.BoolWithAggregatesFilter<"projects"> | boolean
+  archived_at?: Prisma.DateTimeNullableWithAggregatesFilter<"projects"> | Date | string | null
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"projects"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableWithAggregatesFilter<"projects"> | Date | string | null
 }
@@ -400,6 +412,7 @@ export type projectsCreateInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -452,6 +465,7 @@ export type projectsUncheckedCreateInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -502,6 +516,7 @@ export type projectsUpdateInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -554,6 +569,7 @@ export type projectsUncheckedUpdateInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -605,6 +621,7 @@ export type projectsCreateManyInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
 }
@@ -616,6 +633,7 @@ export type projectsUpdateManyMutationInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -628,6 +646,7 @@ export type projectsUncheckedUpdateManyInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -650,6 +669,7 @@ export type projectsCountOrderByAggregateInput = {
   sector?: Prisma.SortOrder
   confirmed_legal_form?: Prisma.SortOrder
   is_public?: Prisma.SortOrder
+  archived_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -662,6 +682,7 @@ export type projectsMaxOrderByAggregateInput = {
   sector?: Prisma.SortOrder
   confirmed_legal_form?: Prisma.SortOrder
   is_public?: Prisma.SortOrder
+  archived_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -674,6 +695,7 @@ export type projectsMinOrderByAggregateInput = {
   sector?: Prisma.SortOrder
   confirmed_legal_form?: Prisma.SortOrder
   is_public?: Prisma.SortOrder
+  archived_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -1307,6 +1329,7 @@ export type projectsCreateWithoutOwnerInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
@@ -1357,6 +1380,7 @@ export type projectsUncheckedCreateWithoutOwnerInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -1437,6 +1461,7 @@ export type projectsScalarWhereInput = {
   sector?: Prisma.StringNullableFilter<"projects"> | string | null
   confirmed_legal_form?: Prisma.StringNullableFilter<"projects"> | string | null
   is_public?: Prisma.BoolFilter<"projects"> | boolean
+  archived_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   created_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
   updated_at?: Prisma.DateTimeNullableFilter<"projects"> | Date | string | null
 }
@@ -1448,6 +1473,7 @@ export type projectsCreateWithoutAnalysesInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -1499,6 +1525,7 @@ export type projectsUncheckedCreateWithoutAnalysesInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
@@ -1564,6 +1591,7 @@ export type projectsUpdateWithoutAnalysesInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -1615,6 +1643,7 @@ export type projectsUncheckedUpdateWithoutAnalysesInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
@@ -1664,6 +1693,7 @@ export type projectsCreateWithoutLegal_form_recommendationsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -1715,6 +1745,7 @@ export type projectsUncheckedCreateWithoutLegal_form_recommendationsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -1780,6 +1811,7 @@ export type projectsUpdateWithoutLegal_form_recommendationsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -1831,6 +1863,7 @@ export type projectsUncheckedUpdateWithoutLegal_form_recommendationsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -1880,6 +1913,7 @@ export type projectsCreateWithoutBylawsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -1931,6 +1965,7 @@ export type projectsUncheckedCreateWithoutBylawsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -1996,6 +2031,7 @@ export type projectsUpdateWithoutBylawsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -2047,6 +2083,7 @@ export type projectsUncheckedUpdateWithoutBylawsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -2096,6 +2133,7 @@ export type projectsCreateWithoutFinancing_plansInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -2147,6 +2185,7 @@ export type projectsUncheckedCreateWithoutFinancing_plansInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -2212,6 +2251,7 @@ export type projectsUpdateWithoutFinancing_plansInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -2263,6 +2303,7 @@ export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -2312,6 +2353,7 @@ export type projectsCreateWithoutDevelopment_plansInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -2363,6 +2405,7 @@ export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -2428,6 +2471,7 @@ export type projectsUpdateWithoutDevelopment_plansInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -2479,6 +2523,7 @@ export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -2528,6 +2573,7 @@ export type projectsCreateWithoutTransmission_plansInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -2579,6 +2625,7 @@ export type projectsUncheckedCreateWithoutTransmission_plansInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -2644,6 +2691,7 @@ export type projectsUpdateWithoutTransmission_plansInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -2695,6 +2743,7 @@ export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -2744,6 +2793,7 @@ export type projectsCreateWithoutMemoriesInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -2795,6 +2845,7 @@ export type projectsUncheckedCreateWithoutMemoriesInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -2860,6 +2911,7 @@ export type projectsUpdateWithoutMemoriesInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -2911,6 +2963,7 @@ export type projectsUncheckedUpdateWithoutMemoriesInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -2960,6 +3013,7 @@ export type projectsCreateWithoutConceptsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -3011,6 +3065,7 @@ export type projectsUncheckedCreateWithoutConceptsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -3076,6 +3131,7 @@ export type projectsUpdateWithoutConceptsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -3127,6 +3183,7 @@ export type projectsUncheckedUpdateWithoutConceptsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -3176,6 +3233,7 @@ export type projectsCreateWithoutTasksInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -3227,6 +3285,7 @@ export type projectsUncheckedCreateWithoutTasksInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -3292,6 +3351,7 @@ export type projectsUpdateWithoutTasksInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -3343,6 +3403,7 @@ export type projectsUncheckedUpdateWithoutTasksInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -3392,6 +3453,7 @@ export type projectsCreateWithoutCommunity_commentsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -3443,6 +3505,7 @@ export type projectsUncheckedCreateWithoutCommunity_commentsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -3508,6 +3571,7 @@ export type projectsUpdateWithoutCommunity_commentsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -3559,6 +3623,7 @@ export type projectsUncheckedUpdateWithoutCommunity_commentsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -3608,6 +3673,7 @@ export type projectsCreateWithoutCollaboratorsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -3659,6 +3725,7 @@ export type projectsUncheckedCreateWithoutCollaboratorsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -3724,6 +3791,7 @@ export type projectsUpdateWithoutCollaboratorsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -3775,6 +3843,7 @@ export type projectsUncheckedUpdateWithoutCollaboratorsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -3824,6 +3893,7 @@ export type projectsCreateWithoutBuild_plansInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -3875,6 +3945,7 @@ export type projectsUncheckedCreateWithoutBuild_plansInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -3940,6 +4011,7 @@ export type projectsUpdateWithoutBuild_plansInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -3991,6 +4063,7 @@ export type projectsUncheckedUpdateWithoutBuild_plansInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -4040,6 +4113,7 @@ export type projectsCreateWithoutCompliance_checksInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -4091,6 +4165,7 @@ export type projectsUncheckedCreateWithoutCompliance_checksInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -4156,6 +4231,7 @@ export type projectsUpdateWithoutCompliance_checksInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -4207,6 +4283,7 @@ export type projectsUncheckedUpdateWithoutCompliance_checksInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -4256,6 +4333,7 @@ export type projectsCreateWithoutCompliance_ai_runsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -4307,6 +4385,7 @@ export type projectsUncheckedCreateWithoutCompliance_ai_runsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -4372,6 +4451,7 @@ export type projectsUpdateWithoutCompliance_ai_runsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -4423,6 +4503,7 @@ export type projectsUncheckedUpdateWithoutCompliance_ai_runsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -4472,6 +4553,7 @@ export type projectsCreateWithoutAutomation_runsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -4523,6 +4605,7 @@ export type projectsUncheckedCreateWithoutAutomation_runsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -4588,6 +4671,7 @@ export type projectsUpdateWithoutAutomation_runsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -4639,6 +4723,7 @@ export type projectsUncheckedUpdateWithoutAutomation_runsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -4688,6 +4773,7 @@ export type projectsCreateWithoutFinancing_roundsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -4739,6 +4825,7 @@ export type projectsUncheckedCreateWithoutFinancing_roundsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -4804,6 +4891,7 @@ export type projectsUpdateWithoutFinancing_roundsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -4855,6 +4943,7 @@ export type projectsUncheckedUpdateWithoutFinancing_roundsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -4904,6 +4993,7 @@ export type projectsCreateWithoutEquity_holdersInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -4955,6 +5045,7 @@ export type projectsUncheckedCreateWithoutEquity_holdersInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -5020,6 +5111,7 @@ export type projectsUpdateWithoutEquity_holdersInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -5071,6 +5163,7 @@ export type projectsUncheckedUpdateWithoutEquity_holdersInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -5120,6 +5213,7 @@ export type projectsCreateWithoutEquity_eventsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -5171,6 +5265,7 @@ export type projectsUncheckedCreateWithoutEquity_eventsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -5236,6 +5331,7 @@ export type projectsUpdateWithoutEquity_eventsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -5287,6 +5383,7 @@ export type projectsUncheckedUpdateWithoutEquity_eventsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -5336,6 +5433,7 @@ export type projectsCreateWithoutDividendsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -5387,6 +5485,7 @@ export type projectsUncheckedCreateWithoutDividendsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -5452,6 +5551,7 @@ export type projectsUpdateWithoutDividendsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -5503,6 +5603,7 @@ export type projectsUncheckedUpdateWithoutDividendsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -5552,6 +5653,7 @@ export type projectsCreateWithoutParticipation_agreementInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -5603,6 +5705,7 @@ export type projectsUncheckedCreateWithoutParticipation_agreementInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -5668,6 +5771,7 @@ export type projectsUpdateWithoutParticipation_agreementInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -5719,6 +5823,7 @@ export type projectsUncheckedUpdateWithoutParticipation_agreementInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -5768,6 +5873,7 @@ export type projectsCreateWithoutBilling_documentsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -5819,6 +5925,7 @@ export type projectsUncheckedCreateWithoutBilling_documentsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -5884,6 +5991,7 @@ export type projectsUpdateWithoutBilling_documentsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -5935,6 +6043,7 @@ export type projectsUncheckedUpdateWithoutBilling_documentsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -5984,6 +6093,7 @@ export type projectsCreateWithoutCrm_contactsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -6035,6 +6145,7 @@ export type projectsUncheckedCreateWithoutCrm_contactsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -6100,6 +6211,7 @@ export type projectsUpdateWithoutCrm_contactsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -6151,6 +6263,7 @@ export type projectsUncheckedUpdateWithoutCrm_contactsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -6200,6 +6313,7 @@ export type projectsCreateWithoutStock_itemsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -6251,6 +6365,7 @@ export type projectsUncheckedCreateWithoutStock_itemsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -6316,6 +6431,7 @@ export type projectsUpdateWithoutStock_itemsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -6367,6 +6483,7 @@ export type projectsUncheckedUpdateWithoutStock_itemsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -6416,6 +6533,7 @@ export type projectsCreateWithoutShopify_connectionInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -6467,6 +6585,7 @@ export type projectsUncheckedCreateWithoutShopify_connectionInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -6532,6 +6651,7 @@ export type projectsUpdateWithoutShopify_connectionInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -6583,6 +6703,7 @@ export type projectsUncheckedUpdateWithoutShopify_connectionInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -6632,6 +6753,7 @@ export type projectsCreateWithoutAgenda_eventsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -6683,6 +6805,7 @@ export type projectsUncheckedCreateWithoutAgenda_eventsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -6748,6 +6871,7 @@ export type projectsUpdateWithoutAgenda_eventsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -6799,6 +6923,7 @@ export type projectsUncheckedUpdateWithoutAgenda_eventsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -6848,6 +6973,7 @@ export type projectsCreateWithoutWorkflow_definitionsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -6899,6 +7025,7 @@ export type projectsUncheckedCreateWithoutWorkflow_definitionsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -6964,6 +7091,7 @@ export type projectsUpdateWithoutWorkflow_definitionsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -7015,6 +7143,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_definitionsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -7064,6 +7193,7 @@ export type projectsCreateWithoutWorkflow_runsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -7115,6 +7245,7 @@ export type projectsUncheckedCreateWithoutWorkflow_runsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -7180,6 +7311,7 @@ export type projectsUpdateWithoutWorkflow_runsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -7231,6 +7363,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_runsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -7280,6 +7413,7 @@ export type projectsCreateWithoutBuyback_objectivesInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -7331,6 +7465,7 @@ export type projectsUncheckedCreateWithoutBuyback_objectivesInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -7396,6 +7531,7 @@ export type projectsUpdateWithoutBuyback_objectivesInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -7447,6 +7583,7 @@ export type projectsUncheckedUpdateWithoutBuyback_objectivesInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -7496,6 +7633,7 @@ export type projectsCreateWithoutFinancedProjectsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -7547,6 +7685,7 @@ export type projectsUncheckedCreateWithoutFinancedProjectsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -7612,6 +7751,7 @@ export type projectsUpdateWithoutFinancedProjectsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -7663,6 +7803,7 @@ export type projectsUncheckedUpdateWithoutFinancedProjectsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -7712,6 +7853,7 @@ export type projectsCreateWithoutScore_snapshotsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -7763,6 +7905,7 @@ export type projectsUncheckedCreateWithoutScore_snapshotsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -7828,6 +7971,7 @@ export type projectsUpdateWithoutScore_snapshotsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -7879,6 +8023,7 @@ export type projectsUncheckedUpdateWithoutScore_snapshotsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -7928,6 +8073,7 @@ export type projectsCreateWithoutReal_estate_propertiesInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -7979,6 +8125,7 @@ export type projectsUncheckedCreateWithoutReal_estate_propertiesInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -8044,6 +8191,7 @@ export type projectsUpdateWithoutReal_estate_propertiesInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -8095,6 +8243,7 @@ export type projectsUncheckedUpdateWithoutReal_estate_propertiesInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -8144,6 +8293,7 @@ export type projectsCreateWithoutFleet_vehiclesInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -8195,6 +8345,7 @@ export type projectsUncheckedCreateWithoutFleet_vehiclesInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -8260,6 +8411,7 @@ export type projectsUpdateWithoutFleet_vehiclesInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -8311,6 +8463,7 @@ export type projectsUncheckedUpdateWithoutFleet_vehiclesInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -8360,6 +8513,7 @@ export type projectsCreateWithoutAd_campaignsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -8411,6 +8565,7 @@ export type projectsUncheckedCreateWithoutAd_campaignsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -8476,6 +8631,7 @@ export type projectsUpdateWithoutAd_campaignsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -8527,6 +8683,7 @@ export type projectsUncheckedUpdateWithoutAd_campaignsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -8576,6 +8733,7 @@ export type projectsCreateWithoutMandatesInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -8627,6 +8785,7 @@ export type projectsUncheckedCreateWithoutMandatesInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -8692,6 +8851,7 @@ export type projectsUpdateWithoutMandatesInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -8743,6 +8903,7 @@ export type projectsUncheckedUpdateWithoutMandatesInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -8792,6 +8953,7 @@ export type projectsCreateWithoutCreation_filingInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -8843,6 +9005,7 @@ export type projectsUncheckedCreateWithoutCreation_filingInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -8908,6 +9071,7 @@ export type projectsUpdateWithoutCreation_filingInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -8959,6 +9123,7 @@ export type projectsUncheckedUpdateWithoutCreation_filingInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -9008,6 +9173,7 @@ export type projectsCreateWithoutCompany_registrationInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -9059,6 +9225,7 @@ export type projectsUncheckedCreateWithoutCompany_registrationInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -9124,6 +9291,7 @@ export type projectsUpdateWithoutCompany_registrationInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -9175,6 +9343,7 @@ export type projectsUncheckedUpdateWithoutCompany_registrationInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -9224,6 +9393,7 @@ export type projectsCreateWithoutFinancing_evaluationsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -9275,6 +9445,7 @@ export type projectsUncheckedCreateWithoutFinancing_evaluationsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -9340,6 +9511,7 @@ export type projectsUpdateWithoutFinancing_evaluationsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -9391,6 +9563,7 @@ export type projectsUncheckedUpdateWithoutFinancing_evaluationsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -9440,6 +9613,7 @@ export type projectsCreateWithoutQuestionnaireInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -9491,6 +9665,7 @@ export type projectsUncheckedCreateWithoutQuestionnaireInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -9556,6 +9731,7 @@ export type projectsUpdateWithoutQuestionnaireInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -9607,6 +9783,7 @@ export type projectsUncheckedUpdateWithoutQuestionnaireInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -9656,6 +9833,7 @@ export type projectsCreateWithoutIgini_questionsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   owner: Prisma.usersCreateNestedOneWithoutProjectsInput
@@ -9707,6 +9885,7 @@ export type projectsUncheckedCreateWithoutIgini_questionsInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
   analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
@@ -9772,6 +9951,7 @@ export type projectsUpdateWithoutIgini_questionsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
@@ -9823,6 +10003,7 @@ export type projectsUncheckedUpdateWithoutIgini_questionsInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -9872,6 +10053,7 @@ export type projectsCreateManyOwnerInput = {
   sector?: string | null
   confirmed_legal_form?: string | null
   is_public?: boolean
+  archived_at?: Date | string | null
   created_at?: Date | string | null
   updated_at?: Date | string | null
 }
@@ -9883,6 +10065,7 @@ export type projectsUpdateWithoutOwnerInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
@@ -9933,6 +10116,7 @@ export type projectsUncheckedUpdateWithoutOwnerInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
@@ -9983,6 +10167,7 @@ export type projectsUncheckedUpdateManyWithoutOwnerInput = {
   sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -10305,6 +10490,7 @@ export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   sector?: boolean
   confirmed_legal_form?: boolean
   is_public?: boolean
+  archived_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -10358,6 +10544,7 @@ export type projectsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   sector?: boolean
   confirmed_legal_form?: boolean
   is_public?: boolean
+  archived_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -10371,6 +10558,7 @@ export type projectsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   sector?: boolean
   confirmed_legal_form?: boolean
   is_public?: boolean
+  archived_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -10384,11 +10572,12 @@ export type projectsSelectScalar = {
   sector?: boolean
   confirmed_legal_form?: boolean
   is_public?: boolean
+  archived_at?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type projectsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_id" | "title" | "description" | "sector" | "confirmed_legal_form" | "is_public" | "created_at" | "updated_at", ExtArgs["result"]["projects"]>
+export type projectsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_id" | "title" | "description" | "sector" | "confirmed_legal_form" | "is_public" | "archived_at" | "created_at" | "updated_at", ExtArgs["result"]["projects"]>
 export type projectsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   analyses?: boolean | Prisma.projects$analysesArgs<ExtArgs>
@@ -10496,6 +10685,13 @@ export type $projectsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
      */
     confirmed_legal_form: string | null
     is_public: boolean
+    /**
+     * Quand le propriétaire l'a archivé ; null tant qu'il est en cours. Un
+     * projet archivé quitte la liste et la communauté sans rien perdre : c'est
+     * l'issue proposée quand il ne peut pas être supprimé (société
+     * immatriculée, factures émises — voir deleteForOwner).
+     */
+    archived_at: Date | null
     created_at: Date | null
     updated_at: Date | null
   }, ExtArgs["result"]["projects"]>
@@ -10968,6 +11164,7 @@ export interface projectsFieldRefs {
   readonly sector: Prisma.FieldRef<"projects", 'String'>
   readonly confirmed_legal_form: Prisma.FieldRef<"projects", 'String'>
   readonly is_public: Prisma.FieldRef<"projects", 'Boolean'>
+  readonly archived_at: Prisma.FieldRef<"projects", 'DateTime'>
   readonly created_at: Prisma.FieldRef<"projects", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"projects", 'DateTime'>
 }

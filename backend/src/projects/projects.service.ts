@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   HttpException,
   HttpStatus,
@@ -25,6 +26,15 @@ import { chargerContexteParticipation } from '../participation/participation-con
 import { exigerCapacite } from '../equipe/acces-projet.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { chargerContexteDeclare } from './questionnaire/charger-contexte.js';
+
+/**
+ * Une facture ou un avoir émis : un document qui se conserve. Un brouillon
+ * n'a jamais existé pour le client, et un devis n'est pas une facture.
+ */
+const DOCUMENT_A_CONSERVER = {
+  type: { in: ['facture', 'avoir'] },
+  status: { not: 'brouillon' },
+};
 
 @Injectable()
 export class ProjectsService {
@@ -109,8 +119,22 @@ export class ProjectsService {
 
   findAllForOwner(ownerId: string) {
     return this.prisma.projects.findMany({
-      where: { OR: [{ owner_id: ownerId }, { collaborators: { some: { user_id: ownerId } } }] },
+      where: {
+        OR: [{ owner_id: ownerId }, { collaborators: { some: { user_id: ownerId } } }],
+        archived_at: null,
+      },
       orderBy: { created_at: 'desc' },
+    });
+  }
+
+  /** Les projets archivés, à part : ils ont quitté la liste, pas l'application. */
+  findArchivedForOwner(ownerId: string) {
+    return this.prisma.projects.findMany({
+      where: {
+        OR: [{ owner_id: ownerId }, { collaborators: { some: { user_id: ownerId } } }],
+        archived_at: { not: null },
+      },
+      orderBy: { archived_at: 'desc' },
     });
   }
 
@@ -154,9 +178,59 @@ export class ProjectsService {
     });
   }
 
+  /**
+   * Supprime le projet, sauf s'il porte des traces légales de l'entreprise.
+   *
+   * La fiche d'immatriculation partirait avec lui (cascade) ; les factures
+   * émises resteraient, mais détachées de leur projet. Dans ces deux cas on
+   * refuse et on propose d'archiver. La suppression revérifie elle-même les
+   * deux conditions : une facture émise entre la lecture et la suppression
+   * ne passe pas.
+   */
   async deleteForOwner(ownerId: string, id: string) {
     await exigerCapacite(this.prisma, ownerId, id, 'supprimer_projet');
-    await this.prisma.projects.delete({ where: { id } });
+    await this.refuserSiTracesLegales(id);
+
+    const supprime = await this.prisma.projects.deleteMany({
+      where: {
+        id,
+        company_registration: { is: null },
+        billing_documents: { none: DOCUMENT_A_CONSERVER },
+      },
+    });
+    if (supprime.count === 0) {
+      await this.refuserSiTracesLegales(id);
+      throw new ConflictException('Ce projet a changé pendant la suppression. Recharge la page et réessaie.');
+    }
+  }
+
+  private async refuserSiTracesLegales(projectId: string) {
+    const [immatriculation, factures] = await Promise.all([
+      this.prisma.company_registrations.findUnique({ where: { project_id: projectId }, select: { id: true } }),
+      this.prisma.billing_documents.count({ where: { project_id: projectId, ...DOCUMENT_A_CONSERVER } }),
+    ]);
+    const raisons = [
+      ...(immatriculation ? ['sa société est immatriculée'] : []),
+      ...(factures > 0 ? ['il a des factures émises'] : []),
+    ];
+    if (raisons.length > 0) {
+      throw new ConflictException(
+        `Ce projet ne peut pas être supprimé : ${raisons.join(' et ')}, qu’il faut garder. ` +
+          'Archive-le plutôt : il quittera ta liste sans rien perdre.',
+      );
+    }
+  }
+
+  // La même capacité que la suppression : c'est son remplaçant, réservé lui
+  // aussi au propriétaire (droits-equipe.ts, validé le 11/10/2026).
+  async archiveForOwner(ownerId: string, id: string) {
+    await exigerCapacite(this.prisma, ownerId, id, 'supprimer_projet');
+    return this.prisma.projects.update({ where: { id }, data: { archived_at: new Date() } });
+  }
+
+  async restoreForOwner(ownerId: string, id: string) {
+    await exigerCapacite(this.prisma, ownerId, id, 'supprimer_projet');
+    return this.prisma.projects.update({ where: { id }, data: { archived_at: null } });
   }
 
   /**
