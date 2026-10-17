@@ -1,4 +1,4 @@
-import { exigerCapacite } from '../equipe/acces-projet.js';
+import { exigerCapacite, projetVisiblePar } from '../equipe/acces-projet.js';
 import type { Capacite } from '../equipe/droits-equipe.js';
 import {
   BadRequestException,
@@ -487,8 +487,10 @@ export class InvestorsService {
     movementId: string,
     input: { amountCents: number; occurredOn: Date; note: string },
   ) {
+    // Filtré par l'équipe du projet : sans accès, le même 404 qu'un id qui
+    // n'existe pas (voir `requireFinancedProject`).
     const original = await this.prisma.investor_movements.findUnique({
-      where: { id: movementId },
+      where: { id: movementId, financed_project: { project: projetVisiblePar(ownerId) } },
       include: { financed_project: true },
     });
     if (!original) throw new NotFoundException('Mouvement introuvable.');
@@ -663,21 +665,24 @@ export class InvestorsService {
     return this.requireFinancedProject(ownerId, financedProjectId, 'modifier_financement');
   }
 
+  /**
+   * Le registre, si je vois son projet — sinon 404 « Projet financé
+   * introuvable. », la même réponse que pour un id qui n'existe pas. Lu seul
+   * puis jugé sur son projet, il répondait « Projet introuvable. » à qui n'y
+   * avait pas accès : n'importe quel compte apprenait qu'il existe. Une
+   * seule lecture, filtrée par l'équipe du projet, ne laisse rien voir de
+   * plus — ni le message, ni le nombre de requêtes.
+   *
+   * Un registre détaché de son projet n'a plus d'équipe : le filtre ne le
+   * trouve pour personne, et il ne dit plus à personne qu'il existe. Il
+   * reste consultable par les investisseurs qui y figurent (leur
+   * portefeuille), et c'est tout — le porteur est parti, ses droits avec lui.
+   */
   private async requireFinancedProject(userId: string, financedProjectId: string, capacite: Capacite) {
     const financed = await this.prisma.financed_projects.findUnique({
-      where: { id: financedProjectId },
+      where: { id: financedProjectId, project: projetVisiblePar(userId) },
     });
-    if (!financed) throw new NotFoundException('Projet financé introuvable.');
-
-    // Un registre détaché de son projet n'a plus de propriétaire vivant :
-    // personne ne peut plus y écrire. Il reste consultable par les
-    // investisseurs qui y figurent, et c'est tout — le porteur est parti,
-    // ses droits avec lui.
-    if (!financed.project_id) {
-      throw new NotFoundException(
-        "Ce registre n'est plus rattaché à un projet : il se consulte, il ne se modifie plus.",
-      );
-    }
+    if (!financed?.project_id) throw new NotFoundException('Projet financé introuvable.');
 
     // On repasse par le contrôle de propriété du projet plutôt que de se
     // fier à `entrepreneur_user_id` recopié ici : une colonne dénormalisée
