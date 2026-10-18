@@ -52,6 +52,23 @@ const QUESTIONNAIRE: Questionnaire = {
   questionsIgini: [],
 };
 
+const AVEC_IDEE: Questionnaire = {
+  ...QUESTIONNAIRE,
+  etapes: [{ id: 'idee', titre: 'Ton idée', intro: 'Quelques phrases suffisent.' }, ...QUESTIONNAIRE.etapes],
+  questions: [
+    {
+      id: 'probleme',
+      etape: 'idee',
+      label: 'Problème réglé',
+      question: 'Quel problème règles-tu ?',
+      purpose: 'IGINI part de là.',
+      kind: 'texte-long',
+      longueurMax: 500,
+    },
+    ...QUESTIONNAIRE.questions,
+  ],
+};
+
 const PROFIL_COMPLET = {
   values: {
     current_situation: 'Salarié',
@@ -128,6 +145,25 @@ describe('le questionnaire du projet, étape par étape', () => {
     rendre();
     expect(await screen.findByRole('heading', { name: 'Ton parcours' })).toBeInTheDocument();
     expect(screen.getByText('Étape 2 sur 5')).toBeInTheDocument();
+  });
+
+  it('commence par l’idée, avant le CV : elle vient d’être décrite', async () => {
+    routes({
+      'GET /projects/p1/questionnaire': { status: 200, body: AVEC_IDEE },
+      'GET /profil/cv': { status: 200, body: { experiences: [], formations: [] } },
+    });
+    rendre();
+    expect(await screen.findByRole('heading', { name: 'Ton idée' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Suivant' }));
+    expect(await screen.findByRole('heading', { name: 'Ton parcours' })).toBeInTheDocument();
+  });
+
+  it('laisse quelques phrases pour l’idée, dans la limite que le serveur garde', async () => {
+    routes({ 'GET /projects/p1/questionnaire': { status: 200, body: AVEC_IDEE } });
+    rendre();
+    const champ = await screen.findByLabelText('Quel problème règles-tu ?');
+    expect(champ.tagName).toBe('TEXTAREA');
+    expect(champ).toHaveAttribute('maxLength', '500');
   });
 
   it('ne montre une question conditionnelle qu’au bon moment', async () => {

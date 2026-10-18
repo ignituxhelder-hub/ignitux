@@ -32,7 +32,7 @@ import { SECTEURS } from '../../profile/profile-fields.js';
 
 export const JE_NE_SAIS_PAS = 'Je ne sais pas encore';
 
-export type EtapeId = 'projet' | 'activite' | 'equipe' | 'argent';
+export type EtapeId = 'idee' | 'projet' | 'activite' | 'equipe' | 'argent';
 
 export interface EtapeQuestionnaire {
   id: EtapeId;
@@ -48,15 +48,21 @@ export interface QuestionProjet {
   question: string;
   /** À quoi sert la réponse — affiché sous la question, toujours. */
   purpose: string;
-  kind: 'choix' | 'liste' | 'texte';
+  /** `texte-long` : quelques phrases, dans une zone sur plusieurs lignes. */
+  kind: 'choix' | 'liste' | 'texte' | 'texte-long';
   options?: readonly string[];
-  /** Pour `texte`. */
+  /** Pour `texte` et `texte-long`. */
   longueurMax?: number;
   /** Affichée seulement si une autre réponse vaut l'une de ces valeurs. */
   visibleSi?: { question: string; parmi: readonly string[] };
 }
 
 export const ETAPES: readonly EtapeQuestionnaire[] = [
+  {
+    id: 'idee',
+    titre: 'Ton idée',
+    intro: 'Quelques phrases suffisent : c’est ce qu’IGINI lit en premier pour l’analyser.',
+  },
   {
     id: 'projet',
     titre: 'Le projet',
@@ -81,8 +87,67 @@ export const ETAPES: readonly EtapeQuestionnaire[] = [
 
 const STRUCTURE_EXISTE = 'Une structure existe déjà';
 const REPRISE = 'Reprise d’une entreprise existante';
+const JUSTE_UNE_IDEE = 'Juste une idée';
+const PREPARE_LANCEMENT = 'Je prépare le lancement';
 
 export const QUESTIONS_PROJET: readonly QuestionProjet[] = [
+  // ── L'idée ───────────────────────────────────────────────────────────────
+  // Ce qu'Analyser devinait à partir de la description de l'écran de
+  // création. Sans ces réponses, il juge un marché et une concurrence qu'il
+  // a imaginés.
+  {
+    id: 'probleme',
+    etape: 'idee',
+    label: 'Problème réglé',
+    question: 'Quel problème règles-tu ?',
+    purpose: 'Une idée qui règle un vrai problème se vend plus facilement : IGINI part de là.',
+    kind: 'texte-long',
+    longueurMax: 500,
+  },
+  {
+    id: 'cible',
+    etape: 'idee',
+    label: 'Pour qui',
+    question: 'Pour qui, précisément ? (ex. « les restaurateurs indépendants de Lyon »)',
+    purpose: 'Plus la cible est précise, plus l’analyse du marché l’est aussi.',
+    kind: 'texte-long',
+    longueurMax: 300,
+  },
+  {
+    id: 'alternatives',
+    etape: 'idee',
+    label: 'Comment ils font aujourd’hui',
+    question: 'Comment font ces gens aujourd’hui, sans toi ? (concurrents, solutions actuelles)',
+    purpose: 'Ta vraie concurrence, c’est souvent ce que les gens font déjà, même mal.',
+    kind: 'texte-long',
+    longueurMax: 500,
+  },
+  {
+    id: 'difference',
+    etape: 'idee',
+    label: 'Ce qui le distingue',
+    question: 'Qu’est-ce qui fera qu’on te choisira toi ?',
+    purpose: 'C’est ce qui fera la différence face aux autres : IGINI vérifie qu’elle tient.',
+    kind: 'texte-long',
+    longueurMax: 500,
+  },
+  {
+    id: 'revenus',
+    etape: 'idee',
+    label: 'Façon de gagner de l’argent',
+    question: 'Comment vas-tu gagner de l’argent ?',
+    purpose: 'Le prévisionnel et le financement ne se construisent pas pareil selon la réponse.',
+    kind: 'choix',
+    options: [
+      'Vente à l’unité',
+      'Abonnement',
+      'Prestation (à l’heure ou au forfait)',
+      'Commission sur des ventes',
+      'Publicité',
+      JE_NE_SAIS_PAS,
+    ],
+  },
+
   // ── Le projet ────────────────────────────────────────────────────────────
   {
     id: 'nature',
@@ -152,11 +217,23 @@ export const QUESTIONS_PROJET: readonly QuestionProjet[] = [
       'd’exigence au stade réel.',
     kind: 'choix',
     options: [
-      'Juste une idée',
-      'Je prépare le lancement',
+      JUSTE_UNE_IDEE,
+      PREPARE_LANCEMENT,
       'J’ai mes premiers clients',
       'J’ai déjà des ventes régulières',
     ],
+  },
+  {
+    id: 'validation',
+    etape: 'projet',
+    label: 'Idée confrontée à des clients',
+    question: 'En as-tu déjà parlé à des clients potentiels ?',
+    purpose:
+      'Une idée testée auprès de vrais clients pèse plus qu’une intuition, pour IGINI comme ' +
+      'pour un financeur.',
+    kind: 'choix',
+    options: ['Pas encore', 'À mon entourage', 'À des clients potentiels', 'J’ai des précommandes'],
+    visibleSi: { question: 'stade', parmi: [JUSTE_UNE_IDEE, PREPARE_LANCEMENT] },
   },
 
   // ── L'activité ───────────────────────────────────────────────────────────

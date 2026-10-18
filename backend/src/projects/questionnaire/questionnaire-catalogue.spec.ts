@@ -31,9 +31,31 @@ describe('le catalogue du questionnaire de projet', () => {
   });
 
   it('donne des options à chaque choix et chaque liste', () => {
-    for (const q of QUESTIONS_PROJET.filter((x) => x.kind !== 'texte')) {
+    for (const q of QUESTIONS_PROJET.filter((x) => x.kind === 'choix' || x.kind === 'liste')) {
       expect(q.options?.length ?? 0).toBeGreaterThan(1);
     }
+  });
+
+  it('donne une limite à chaque texte libre', () => {
+    for (const q of QUESTIONS_PROJET.filter((x) => x.kind === 'texte' || x.kind === 'texte-long')) {
+      expect(q.longueurMax ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it('ouvre sur l’idée elle-même, avant les démarches', () => {
+    expect(ETAPES[0].id).toBe('idee');
+  });
+
+  it('demande le problème, la cible, la concurrence, la différence et les revenus', () => {
+    // Ce qu'Analyser devinait à partir de la description : sans eux, il juge
+    // un marché et une concurrence qu'il a imaginés.
+    for (const id of ['probleme', 'cible', 'alternatives', 'difference', 'revenus']) {
+      expect(question(id).etape).toBe('idee');
+    }
+  });
+
+  it('laisse dire qu’on ne sait pas encore comment on gagnera de l’argent', () => {
+    expect(question('revenus').options).toContain(JE_NE_SAIS_PAS);
   });
 
   it('ne conditionne une question qu’à une question et une option qui existent', () => {
@@ -71,6 +93,16 @@ describe('les questions conditionnelles', () => {
       estVisible(question('anciennete'), { nature: 'Reprise d’une entreprise existante' }),
     ).toBe(true);
   });
+
+  it('demande si l’idée a été confrontée à des clients tant qu’elle ne vend pas', () => {
+    expect(estVisible(question('validation'), { stade: 'Juste une idée' })).toBe(true);
+    expect(estVisible(question('validation'), { stade: 'Je prépare le lancement' })).toBe(true);
+  });
+
+  it('ne le demande plus à qui vend déjà', () => {
+    expect(estVisible(question('validation'), { stade: 'J’ai mes premiers clients' })).toBe(false);
+    expect(estVisible(question('validation'), {})).toBe(false);
+  });
 });
 
 describe('fusionner les réponses', () => {
@@ -107,6 +139,17 @@ describe('fusionner les réponses', () => {
     const r = fusionnerReponses({}, { lieu: `  Lyon ${'x'.repeat(300)}` });
     expect((r.lieu as string).startsWith('Lyon')).toBe(true);
     expect((r.lieu as string).length).toBe(100);
+  });
+
+  it('garde quelques phrases pour un texte long, et le tronque à sa limite', () => {
+    const limite = question('probleme').longueurMax!;
+    expect(limite).toBeGreaterThan(200);
+    const r = fusionnerReponses({}, { probleme: 'Les livreurs perdent du temps. '.repeat(40) });
+    expect((r.probleme as string).length).toBe(limite);
+  });
+
+  it('refuse un texte long qui n’est pas du texte', () => {
+    expect(() => fusionnerReponses({}, { probleme: ['un', 'deux'] })).toThrow(ReponseInvalide);
   });
 
   it('ne range jamais le secteur dans les réponses', () => {

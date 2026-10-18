@@ -38,6 +38,9 @@ import { useAuth } from '@/lib/auth';
 /** Ce qui décrit la personne et sert l'analyse, demandé ici s'il manque. */
 const CHAMPS_SITUATION = ['current_situation', 'has_founded_before', 'skills', 'availability'];
 
+/** Les questions sur l'idée elle-même (problème, cible, concurrence…). */
+const ETAPE_IDEE = 'idee';
+
 type Etape =
   | { kind: 'cv' }
   | { kind: 'situation'; champs: ProfileField[] }
@@ -95,10 +98,14 @@ export default function QuestionnairePage() {
         const situation = vue.fields.filter(
           (f) => CHAMPS_SITUATION.includes(f.id) && !estRempli(vue.values[f.id]),
         );
-        const liste: Etape[] = [];
+        // L'idée d'abord, avant le CV : elle vient d'être décrite, elle est
+        // encore en tête.
+        const idee = q.etapes.filter((e) => e.id === ETAPE_IDEE);
+        const autres = q.etapes.filter((e) => e.id !== ETAPE_IDEE);
+        const liste: Etape[] = idee.map((e): Etape => ({ kind: 'projet', ...e }));
         if (cvEstVide(monCv)) liste.push({ kind: 'cv' });
         if (situation.length > 0) liste.push({ kind: 'situation', champs: situation });
-        for (const e of q.etapes) liste.push({ kind: 'projet', ...e });
+        for (const e of autres) liste.push({ kind: 'projet', ...e });
         liste.push({ kind: 'igini' });
 
         setQuestionnaire(q);
