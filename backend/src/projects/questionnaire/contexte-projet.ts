@@ -41,7 +41,9 @@ export function contexteProjet(entree: {
     if (valeur === null || valeur === undefined) continue;
     const texte = Array.isArray(valeur) ? valeur.join(', ') : valeur.trim();
     if (!texte) continue;
-    lignes.push(`${question.label} : ${texte}.`);
+    // Un texte libre finit souvent déjà sa phrase : pas de « Lyon.. ».
+    const fin = /[.!?…]$/.test(texte) ? '' : '.';
+    lignes.push(`${question.label} : ${texte}${fin}`);
   }
 
   for (const q of entree.questionsIgini ?? []) {

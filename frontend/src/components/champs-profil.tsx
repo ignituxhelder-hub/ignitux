@@ -17,10 +17,12 @@ import { api, ApiError, type ProfileField, type ProfileValues } from '@/lib/api'
  */
 /**
  * Ce qu'un champ doit dire pour être affiché. Le questionnaire de projet
- * réutilise ce composant : ses questions n'ont pas de « ce que ça ouvre ».
+ * réutilise ce composant : ses questions n'ont pas de « ce que ça ouvre »,
+ * mais une longueur au-delà de laquelle le serveur tronquerait sans le dire.
  */
 export type ChampAffichable = Pick<ProfileField, 'id' | 'question' | 'purpose' | 'kind' | 'options'> & {
   unlocks?: string | null;
+  longueurMax?: number;
 };
 
 function Champ({
@@ -50,6 +52,7 @@ function Champ({
         <textarea
           id={id}
           rows={4}
+          maxLength={champ.longueurMax}
           value={typeof valeur === 'string' ? valeur : ''}
           onChange={(e) => onChange(e.target.value)}
         />
@@ -58,6 +61,7 @@ function Champ({
       {champ.kind === 'texte' && (
         <input
           id={id}
+          maxLength={champ.longueurMax}
           value={typeof valeur === 'string' ? valeur : ''}
           onChange={(e) => onChange(e.target.value)}
         />

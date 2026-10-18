@@ -23,6 +23,24 @@ describe('ce qu’IGINI sait du projet par le questionnaire', () => {
     expect(texte).toContain('- Secteur : Commerce.');
   });
 
+  it('rapporte l’idée telle que la personne l’a décrite', () => {
+    const texte =
+      contexteProjet({
+        reponses: {
+          probleme: 'Les restaurateurs jettent leurs invendus',
+          revenus: 'Abonnement',
+        },
+      }) ?? '';
+    expect(texte).toContain('- Problème réglé : Les restaurateurs jettent leurs invendus.');
+    expect(texte).toContain('- Façon de gagner de l’argent : Abonnement.');
+  });
+
+  it('n’ajoute pas de point à une réponse qui finit déjà sa phrase', () => {
+    const texte = contexteProjet({ reponses: { cible: 'Les traiteurs de Lyon.' } }) ?? '';
+    expect(texte).toContain('Les traiteurs de Lyon.');
+    expect(texte).not.toContain('Lyon..');
+  });
+
   it('rapporte « je ne sais pas encore » comme une réponse', () => {
     const texte = contexteProjet({ reponses: REPONSES }) ?? '';
     expect(texte).toContain('Budget de démarrage : Je ne sais pas encore.');

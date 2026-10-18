@@ -278,10 +278,11 @@ describe('Investisseurs et remboursements (e2e)', () => {
     });
 
     it("refuse à l'investisseur 2 le détail d'une participation qui n'est pas la sienne", async () => {
+      // 404 et non 403 : « pas la tienne » confirmerait qu'elle existe.
       await api(app)
         .get(`/investisseurs/moi/participations/${partA1}`)
         .set(...auth(investisseur2))
-        .expect(403);
+        .expect(404);
     });
 
     it("permet de consulter UN projet indépendamment", async () => {

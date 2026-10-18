@@ -2387,7 +2387,7 @@ export interface QuestionProjet {
   label: string;
   question: string;
   purpose: string;
-  kind: 'choix' | 'liste' | 'texte';
+  kind: 'choix' | 'liste' | 'texte' | 'texte-long';
   options?: string[];
   longueurMax?: number;
   visibleSi?: { question: string; parmi: string[] };
