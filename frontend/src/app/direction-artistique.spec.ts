@@ -108,6 +108,22 @@ describe('direction artistique « Gravure »', () => {
     expect(scene).toMatch(/grid-template-columns:\s*1fr minmax\(0, 460px\) 1fr/);
   });
 
+  it("les cartes sous la méthode passent sur une colonne au lieu de déborder", () => {
+    // Sur un téléphone de 390 px, une colonne minimale plus large que l'écran
+    // ferait glisser la page sur le côté : `min(100%, …)` l'en empêche.
+    const grille = /\n\.accueil-grille\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(grille).toMatch(
+      /grid-template-columns:\s*repeat\(auto-fit,\s*minmax\(min\(100%,\s*\d+px\),\s*1fr\)\)/,
+    );
+  });
+
+  it("un prix de l'accueil est gravé en or, pas en feu", () => {
+    // Le feu est réservé à ce que la personne déclenche ; un prix se constate.
+    const prix = /\.accueil-prix\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(prix).toMatch(/color:\s*var\(--or\)/);
+    expect(prix).not.toMatch(/fire|flame|ember|spark|accent/);
+  });
+
   it('un titre imprimé reprend la couleur du document', () => {
     // La facture s'imprime en noir sur blanc (`.document { color: #000 }`) ;
     // un h1 en or clair y tombait à 1,12:1 — invisible sur le papier.

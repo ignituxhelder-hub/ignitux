@@ -55,6 +55,106 @@
     },
     "communaute": "Community",
     "communauteTexte": "Make a project public when you are ready and receive encouragement from other project owners — nothing more for now, no private messaging and no rankings.",
+    "concretement": {
+      "titre": "In practice",
+      "analyse": {
+        "nom": "IGINI analyses your idea",
+        "texte": "A summary, a feasibility score, strengths, risks and next steps."
+      },
+      "forme": {
+        "nom": "Legal form and articles",
+        "texte": "IGINI recommends a legal form, then drafts your articles of association for a professional to review."
+      },
+      "dossier": {
+        "nom": "Your company-creation file",
+        "texte": "The documents, the fees to expect and a step-by-step guide to filing on the French one-stop shop (guichet unique). You file it yourself: Ignitux files nothing and pays nothing for you."
+      },
+      "gestion": {
+        "nom": "Day-to-day management",
+        "texte": "Quotes and invoices, accounting, bank (entered by hand, no connection to your bank), cash register summary, stock, calendar and customer contacts."
+      },
+      "equipe": {
+        "nom": "Work as a team",
+        "texte": "Invite your partner, an employee or your accountant: each one only sees what their role allows."
+      },
+      "financement": {
+        "nom": "Fund your project",
+        "texte": "A financing plan prepared by IGINI, and a funding evaluation reviewed by Ignitux before it reaches you."
+      }
+    },
+    "pourQui": {
+      "titre": "Who is it for?",
+      "idee": {
+        "nom": "You have an idea",
+        "texte": "And you want to know if it holds up before putting your time and money into it."
+      },
+      "creation": {
+        "nom": "You're starting a company",
+        "texte": "In France: legal form, articles and creation file, step by step with IGINI."
+      },
+      "entreprise": {
+        "nom": "You already run a small business",
+        "texte": "Your quotes, invoices, accounting, bank and stock in one place."
+      }
+    },
+    "prix": {
+      "titre": "How much does it cost?",
+      "gratuit": "Free",
+      "parMois": "€{prix} / month",
+      "decouverte": {
+        "nom": "Découverte",
+        "projets": "1 project",
+        "analyses": "{n} IGINI analyses per month"
+      },
+      "entrepreneur": {
+        "nom": "Entrepreneur",
+        "projets": "Unlimited projects",
+        "generations": "Every IGINI step, {n} generations per month",
+        "gestion": "Accounting, invoicing, bank",
+        "financement": "Funding and investors, funding evaluation included",
+        "equipe": "Unlimited collaborators"
+      },
+      "paiement": "No payment method is in place yet: your account starts on Découverte, and the Entrepreneur plan will be offered as soon as payment is possible."
+    },
+    "donnees": {
+      "titre": "Your data",
+      "europe": "Your database is hosted in the European Union (Ireland); some technical providers are in the United States, and the policy names each one.",
+      "vente": "Your data is never sold, nor used for advertising.",
+      "export": "From your account page, you can download everything — including the images of your ID — and delete your account whenever you want.",
+      "ia": "When you use IGINI, Anthropic (United States), which provides its AI, receives the project content needed for the answer.",
+      "lien": "Read the privacy policy (in French)"
+    },
+    "faq": {
+      "titre": "Common questions",
+      "gratuit": {
+        "q": "Is it free?",
+        "r": "To start, yes: the Découverte plan is free, with one project and {n} IGINI analyses per month. Everything else is in the Entrepreneur plan, at €{prix} per month, which cannot be subscribed to yet."
+      },
+      "creation": {
+        "q": "Does Ignitux create my company for me?",
+        "r": "No. Ignitux prepares your file and walks you through filing it; you file it yourself on the French one-stop shop (guichet unique). Ignitux files nothing and pays nothing for you."
+      },
+      "statuts": {
+        "q": "Are the articles legally valid?",
+        "r": "Not as they are. IGINI writes an AI-generated draft: have it reviewed by a professional (lawyer, chartered accountant) before using it."
+      },
+      "ia": {
+        "q": "Is my data used to train an AI?",
+        "r": "No. No data is used to train an AI model, and nothing is sold."
+      },
+      "equipe": {
+        "q": "Can I work with my business partner or my accountant?",
+        "r": "Yes, with the Entrepreneur plan: invite them to your project with a role — partner, employee, accountant or observer. They need their own Ignitux account, and only see what their role allows."
+      },
+      "telephone": {
+        "q": "Does it work on a phone?",
+        "r": "Yes. Ignitux opens in your browser and installs like an app, on Android, iPhone and Windows."
+      },
+      "pays": {
+        "q": "And outside France?",
+        "r": "Company creation (legal form, articles, file) follows French rules for now. Other countries are not covered yet."
+      }
+    },
     "pret": "Ready to bring your idea to life?"
   },
   "connexion": {

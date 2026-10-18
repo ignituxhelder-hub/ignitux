@@ -55,6 +55,106 @@
     },
     "communaute": "Communauté",
     "communauteTexte": "Rends un projet public quand tu es prêt, et reçois des encouragements d'autres porteurs de projet — rien de plus pour l'instant, pas de messagerie privée ni de classement.",
+    "concretement": {
+      "titre": "Concrètement",
+      "analyse": {
+        "nom": "IGINI analyse ton idée",
+        "texte": "Un résumé, un score de faisabilité, les points forts, les risques et les prochaines étapes."
+      },
+      "forme": {
+        "nom": "Forme juridique et statuts",
+        "texte": "IGINI te recommande une forme juridique, puis rédige un brouillon de statuts à faire relire par un professionnel."
+      },
+      "dossier": {
+        "nom": "Ton dossier de création",
+        "texte": "Les pièces, les frais à prévoir et le dépôt pas à pas sur le guichet unique. C'est toi qui déposes : Ignitux ne dépose et ne paie rien à ta place."
+      },
+      "gestion": {
+        "nom": "Gérer au quotidien",
+        "texte": "Devis et factures, comptabilité, banque (saisie à la main, sans connexion à ta banque), relevé de caisse, stocks, agenda et contacts clients."
+      },
+      "equipe": {
+        "nom": "Travailler à plusieurs",
+        "texte": "Invite ton associé, un salarié ou ton comptable : chacun ne voit que ce que son rôle permet."
+      },
+      "financement": {
+        "nom": "Financer ton projet",
+        "texte": "Un plan de financement préparé par IGINI, et une évaluation de financement relue par Ignitux avant de t'être remise."
+      }
+    },
+    "pourQui": {
+      "titre": "Pour qui ?",
+      "idee": {
+        "nom": "Tu as une idée",
+        "texte": "Et tu veux savoir si elle tient debout, avant d'y mettre ton temps et ton argent."
+      },
+      "creation": {
+        "nom": "Tu crées ton entreprise",
+        "texte": "En France : forme juridique, statuts et dossier de création, étape par étape avec IGINI."
+      },
+      "entreprise": {
+        "nom": "Tu as déjà une petite entreprise",
+        "texte": "Tes devis, tes factures, ta comptabilité, ta banque et tes stocks au même endroit."
+      }
+    },
+    "prix": {
+      "titre": "Combien ça coûte ?",
+      "gratuit": "Gratuit",
+      "parMois": "{prix} € / mois",
+      "decouverte": {
+        "nom": "Découverte",
+        "projets": "1 projet",
+        "analyses": "{n} analyses IGINI par mois"
+      },
+      "entrepreneur": {
+        "nom": "Entrepreneur",
+        "projets": "Projets sans limite",
+        "generations": "Toutes les étapes d'IGINI, {n} générations par mois",
+        "gestion": "Comptabilité, facturation, banque",
+        "financement": "Financement et investisseurs, évaluation de financement incluse",
+        "equipe": "Collaborateurs sans limite"
+      },
+      "paiement": "Aucun moyen de paiement n'est encore en place : ton compte démarre sur Découverte, et l'offre Entrepreneur sera proposée dès qu'un paiement sera possible."
+    },
+    "donnees": {
+      "titre": "Tes données",
+      "europe": "Ta base de données est hébergée dans l'Union européenne (Irlande) ; certains prestataires techniques sont aux États-Unis, la politique les nomme un par un.",
+      "vente": "Tes données ne sont jamais revendues, ni utilisées pour de la publicité.",
+      "export": "Depuis Mon compte, tu télécharges tout — y compris les images de ta pièce d'identité — et tu supprimes ton compte quand tu veux.",
+      "ia": "Quand tu utilises IGINI, Anthropic (États-Unis), qui fournit son IA, reçoit le contenu de ton projet nécessaire à la réponse.",
+      "lien": "Lire la politique de confidentialité"
+    },
+    "faq": {
+      "titre": "Questions fréquentes",
+      "gratuit": {
+        "q": "Est-ce gratuit ?",
+        "r": "Pour commencer, oui : l'offre Découverte est gratuite, avec un projet et {n} analyses IGINI par mois. Le reste est dans l'offre Entrepreneur, à {prix} € par mois, qui ne peut pas encore être souscrite."
+      },
+      "creation": {
+        "q": "Ignitux crée-t-il mon entreprise à ma place ?",
+        "r": "Non. Ignitux prépare ton dossier et t'explique le dépôt pas à pas ; c'est toi qui le déposes sur le guichet unique. Ignitux ne dépose rien et ne paie rien à ta place."
+      },
+      "statuts": {
+        "q": "Les statuts sont-ils valables juridiquement ?",
+        "r": "Pas tels quels. IGINI en rédige un brouillon, généré par IA : fais-le relire par un professionnel (avocat, expert-comptable) avant de t'en servir."
+      },
+      "ia": {
+        "q": "Mes données servent-elles à entraîner une IA ?",
+        "r": "Non. Aucune donnée n'est utilisée pour entraîner un modèle d'IA, et rien n'est revendu."
+      },
+      "equipe": {
+        "q": "Puis-je travailler avec mon associé ou mon comptable ?",
+        "r": "Oui, avec l'offre Entrepreneur : invite-le sur ton projet avec un rôle — associé, salarié, comptable ou observateur. Il lui faut son propre compte Ignitux, et il ne voit que ce que son rôle permet."
+      },
+      "telephone": {
+        "q": "Ça marche sur téléphone ?",
+        "r": "Oui. Ignitux s'ouvre dans ton navigateur et s'installe comme une application, sur Android, iPhone et Windows."
+      },
+      "pays": {
+        "q": "Et hors de France ?",
+        "r": "La création d'entreprise (forme juridique, statuts, dossier) suit aujourd'hui les règles françaises. Les autres pays ne sont pas encore couverts."
+      }
+    },
     "pret": "Prêt à donner vie à ton idée ?"
   },
   "connexion": {

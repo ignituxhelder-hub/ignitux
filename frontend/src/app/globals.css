@@ -2047,6 +2047,99 @@ body {
 }
 
 /* --------------------------------------------------------------------------
+   L'accueil, sous la méthode : ce qu'Ignitux fait, pour qui, combien, les
+   données, puis les questions fréquentes.
+   -------------------------------------------------------------------------- */
+
+/* Trois cartes de front sur le bureau, une seule colonne sur un téléphone.
+   `min(100%, 240px)` : sur un écran plus étroit que la colonne, la carte
+   prend la largeur disponible au lieu de faire glisser la page. */
+.accueil-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.accueil-grille h3 {
+  margin: 0 0 0.4rem;
+}
+
+.accueil-grille p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Un prix est un chiffre constaté : gravé en or, jamais en feu. */
+.accueil-grille .accueil-prix {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display), 'Segoe UI', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--or);
+}
+
+.accueil-liste {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.accueil-liste li + li {
+  margin-top: 0.35rem;
+}
+
+.accueil-note {
+  margin: 1rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.accueil-lien {
+  margin: 1rem 0 0;
+}
+
+/* Les questions fréquentes, repliées : un filet entre deux questions, la
+   réponse sous la sienne. `.card.faq` : le rembourrage resserré tient aussi
+   sur téléphone, où `.card` en reprend un plus loin. */
+.card.faq {
+  padding-block: 0.4rem;
+}
+
+.faq details + details {
+  border-top: 1px solid var(--border);
+}
+
+.faq summary {
+  padding: 0.85rem 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.faq summary::marker {
+  color: var(--or-texte);
+}
+
+/* `summary` n'est pas dans la règle de focus commune : sans ceci, le
+   clavier y garderait le contour du navigateur, différent du reste. */
+.faq summary:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+.faq details p {
+  margin: 0 0 0.9rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* --------------------------------------------------------------------------
    Les listes et tableaux hérités des modules (CRM, facturation, moteurs).
    -------------------------------------------------------------------------- */
 
