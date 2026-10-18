@@ -215,6 +215,9 @@ h3 {
   /* Cinzel 700 écrase les petites tailles ; 600 reste gravé sans empâter. */
   font-weight: 600;
   text-wrap: balance;
+  /* Un titre saisi par quelqu'un (nom de projet sans espace) revient à la
+     ligne au lieu de sortir de l'écran du téléphone. */
+  overflow-wrap: break-word;
   margin: 0 0 0.5rem;
   /* Des capitales gravées respirent : l'espacement s'ouvre au lieu de se
      resserrer comme pour Sora. */
@@ -1638,7 +1641,9 @@ body {
 
 .scene {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  /* La colonne centrale a sa propre largeur : en `auto`, elle prenait celle
+     de la photo (810 px) et écrasait les deux colonnes de mots. */
+  grid-template-columns: 1fr minmax(0, 460px) 1fr;
   grid-template-areas:
     'gauche boussole droite'
     'nom nom nom'
@@ -1655,9 +1660,8 @@ body {
   grid-area: boussole;
   justify-self: center;
   display: block;
-  /* 460 et non 520 : à 520, les deux colonnes de mots n'avaient plus que
-     180 px et « La vérité avant tout » s'empilait sur quatre lignes. */
-  width: min(460px, 100%);
+  /* Toute la colonne centrale (460 px au plus, voir .scene). */
+  width: 100%;
   height: auto;
   /* Les bords de la photo se fondent dans la nuit au lieu de s'arrêter net. */
   -webkit-mask-image: radial-gradient(closest-side, #000 70%, transparent 100%);
@@ -2091,6 +2095,22 @@ th {
   /* Les braises ne sont que du mouvement : sans lui, elles n'ont plus de
      raison d'être. La règle ci-dessus les ferait passer une fois en un
      éclair ; on retire le calque. La lueur fixe de body::before reste. */
+  .braises {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   L'impression (facture, « Enregistrer en PDF ») : du noir sur du blanc.
+   -------------------------------------------------------------------------- */
+
+@media print {
+  /* Le titre suit la couleur du document au lieu de garder l'or clair de
+     l'écran, qui tombait à 1,12:1 sur le papier. */
+  h1 {
+    color: inherit;
+  }
+
   .braises {
     display: none;
   }

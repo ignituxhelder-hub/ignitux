@@ -35,6 +35,17 @@ describe('HomePage', () => {
     expect(screen.queryByText('Transformer une idée en réalité')).not.toBeInTheDocument();
     // La boussole est un décor : tout le sens est dans le texte voisin.
     expect(document.querySelector('img.scene__boussole')).toHaveAttribute('alt', '');
+    // Les mots des deux colonnes restent séparés pour un lecteur d'écran
+    // (et pour l'indexation), même quand le CSS les met en ligne.
+    expect(document.querySelector('.scene__cote--gauche')?.textContent).toBe(
+      'Découvrir Construire Transmettre',
+    );
+    expect(document.querySelector('.scene__cote--droite')?.textContent).toBe(
+      'Nous servir La vérité avant tout',
+    );
+    // L'histoire est bien posée sur l'accueil.
+    expect(screen.getByText("L'histoire")).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 3, name: 'Un avenir plus grand' })).toBeInTheDocument();
 
     expect(screen.getByText('Analyser')).toBeInTheDocument();
     // Deux fois : la colonne de la scène et l'étape de la méthode.

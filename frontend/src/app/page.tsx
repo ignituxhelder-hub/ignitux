@@ -61,8 +61,10 @@ export default function HomePage() {
           téléphone, présent même si l'image ne charge pas. */}
       <div className="scene">
         <p className="scene__cote scene__cote--gauche">
-          <span>{t('scene.decouvrir')}</span>
-          <span>{t('scene.construire')}</span>
+          {/* Les espaces entre les mots comptent : sans elles, un lecteur
+              d'écran lit « DécouvrirConstruireTransmettre ». */}
+          <span>{t('scene.decouvrir')}</span>{' '}
+          <span>{t('scene.construire')}</span>{' '}
           <span>{t('scene.transmettre')}</span>
         </p>
         <Image
@@ -74,7 +76,7 @@ export default function HomePage() {
           priority
         />
         <p className="scene__cote scene__cote--droite">
-          <span>{t('scene.nousServir')}</span>
+          <span>{t('scene.nousServir')}</span>{' '}
           <span className="scene__trait" aria-hidden="true" />
           <span>{t('scene.verite')}</span>
         </p>

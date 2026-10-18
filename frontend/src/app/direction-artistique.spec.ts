@@ -100,6 +100,27 @@ describe('direction artistique « Gravure »', () => {
     },
   );
 
+  it("la colonne de la boussole a une largeur définie, pas celle de l'image", () => {
+    // Avec une colonne `auto`, la grille prenait la largeur naturelle de la
+    // photo (810 px) et écrasait les deux colonnes de mots (« La vérité
+    // avant tout » sur six lignes).
+    const scene = /\n\.scene\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(scene).toMatch(/grid-template-columns:\s*1fr minmax\(0, 460px\) 1fr/);
+  });
+
+  it('un titre imprimé reprend la couleur du document', () => {
+    // La facture s'imprime en noir sur blanc (`.document { color: #000 }`) ;
+    // un h1 en or clair y tombait à 1,12:1 — invisible sur le papier.
+    expect(/@media print\s*\{[^@]*?\bh1\s*\{\s*color:\s*inherit/.test(css)).toBe(true);
+  });
+
+  it('un titre saisi très long revient à la ligne au lieu de déborder', () => {
+    // Un nom de projet sans espace, en capitales gravées, sortait de l'écran
+    // d'un téléphone.
+    const titres = /\nh1,\s*h2,\s*h3\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(titres).toMatch(/overflow-wrap:\s*break-word/);
+  });
+
   it('les titres de page sont en or clair', () => {
     expect(/\nh1\s*\{[^}]*color:\s*var\(--or-clair\)/.test(css)).toBe(true);
   });
