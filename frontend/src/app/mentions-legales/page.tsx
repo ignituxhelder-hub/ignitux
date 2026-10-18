@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Brand } from '@/components/ignitux-mark';
+import { RetourPagesLegales } from '@/components/retour-pages-legales';
 
 export const metadata = {
   title: 'Mentions légales — Ignitux',
@@ -25,9 +26,7 @@ export default function MentionsLegalesPage() {
   return (
     <main className="page">
       <div className="top-bar">
-        <Link href="/account" className="muted">
-          ← Retour à Mon compte
-        </Link>
+        <RetourPagesLegales />
       </div>
       <Brand />
       <h1>Mentions légales</h1>
