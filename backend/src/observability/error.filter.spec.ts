@@ -53,6 +53,20 @@ describe('le dernier filet', () => {
 
       expect(reponse.code).toBe(402);
     });
+
+    it('rend lisible le message d’une erreur levée avec une simple phrase', () => {
+      // `new HttpException('…', 402)` garde la phrase nue : renvoyée telle
+      // quelle, l'interface ne trouvait pas de `message` et affichait
+      // « Une erreur est survenue. » à la place du plafond atteint.
+      const { reponse } = attraper(
+        new HttpException('Plafond de coût du mois atteint.', HttpStatus.PAYMENT_REQUIRED),
+      );
+
+      expect(reponse.corps).toEqual({
+        statusCode: 402,
+        message: 'Plafond de coût du mois atteint.',
+      });
+    });
   });
 
   describe('un corps trop volumineux', () => {
