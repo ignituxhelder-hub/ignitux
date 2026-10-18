@@ -1139,6 +1139,66 @@ describe('ProjectDetailPage', () => {
   });
 
   describe('parcours guidé', () => {
+    const SANS_TRANSMISSION = {
+      'GET /projects/p1/parcours': {
+        status: 200,
+        body: parcours({
+          visible: TOUTES_SECTIONS.filter((s) => s !== 'transmission').map((section) => ({
+            section,
+            label: section,
+            phase: 'construire',
+          })),
+        }),
+      },
+    };
+
+    // Elle ne sert que des années plus tard : cachée tant que la personne ne
+    // la demande pas, et sans passer par la vue avancée qui montrerait tout.
+    it('ouvre la transmission à la demande, sans passer par la vue avancée', async () => {
+      mockApiRoutes({
+        'GET /projects/p1': { status: 200, body: PROJECT },
+        ...ENGINE_ROUTES,
+        ...SANS_TRANSMISSION,
+      });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      const lien = await screen.findByRole('button', {
+        name: 'Plus tard : préparer la transmission',
+      });
+      expect(screen.queryByRole('button', { name: 'Transmission' })).not.toBeInTheDocument();
+
+      fireEvent.click(lien);
+
+      expect(
+        await screen.findByRole('button', { name: 'Générer un plan de transmission' }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Transmission' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Vue avancée' })).toHaveAttribute(
+        'aria-pressed',
+        'false',
+      );
+    });
+
+    it('ne propose plus le lien une fois la transmission ouverte', async () => {
+      mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
+
+      render(
+        <AuthProvider>
+          <ProjectDetailPage />
+        </AuthProvider>,
+      );
+
+      await screen.findByRole('heading', { name: 'Ton parcours' });
+      expect(
+        screen.queryByRole('button', { name: 'Plus tard : préparer la transmission' }),
+      ).not.toBeInTheDocument();
+    });
+
     // Le cœur du refactor : on arrive, on voit UNE chose à faire.
     it("montre la prochaine étape et dit pourquoi, sans demander « que veux-tu faire ? »", async () => {
       mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
@@ -1175,7 +1235,7 @@ describe('ProjectDetailPage', () => {
       expect(screen.queryByRole('heading', { name: 'Ton parcours' })).not.toBeInTheDocument();
     });
 
-    it('affiche la progression Découvrir → Construire → Transmettre', async () => {
+    it('affiche la progression Découvrir → Construire, sans Transmettre avant l’heure', async () => {
       mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES });
 
       render(
@@ -1187,7 +1247,7 @@ describe('ProjectDetailPage', () => {
       const progression = await screen.findByRole('list', { name: 'Progression du projet' });
       expect(progression).toHaveTextContent('Découvrir');
       expect(progression).toHaveTextContent('Construire');
-      expect(progression).toHaveTextContent('Transmettre');
+      expect(progression).not.toHaveTextContent('Transmettre');
     });
 
     // Un projet qui vient de naître ne doit montrer qu'une porte.

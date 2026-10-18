@@ -104,6 +104,20 @@ describe('parcours — ce qui se voit', () => {
     expect(ouvertes).toContain('taches');
   });
 
+  // La transmission sert des années plus tard : un plan de développement ne
+  // suffit pas à la sortir, seule la personne la demande.
+  it("n'ouvre la transmission qu'une fois demandée", () => {
+    expect(visibles(vierge({ analyses: 1, buildPlans: 1, developmentPlans: 1 }))).not.toContain(
+      'transmission',
+    );
+    expect(visibles(vierge({ transmissionPlans: 1 }))).toContain('transmission');
+  });
+
+  it('dit où la demander tant qu’elle est fermée', () => {
+    const fermee = journeyView(vierge()).locked.find((s) => s.section === 'transmission');
+    expect(fermee?.condition).toContain('Préparer la transmission');
+  });
+
   // Cacher sans dire ferait croire que la fonction n'existe pas.
   it('dit ce qui ouvrira chaque section fermée', () => {
     for (const fermee of journeyView(vierge()).locked) {
@@ -198,7 +212,9 @@ describe('parcours — la prochaine étape', () => {
     expect(etape?.titre).toContain('3');
   });
 
-  it('mène jusqu’à la transmission', () => {
+  // Proposer la transmission juste après le développement pousserait vers
+  // une étape qui ne sert que des années plus tard.
+  it('s’arrête après le développement, sans proposer la transmission', () => {
     expect(
       nextStep(
         vierge({
@@ -209,8 +225,8 @@ describe('parcours — la prochaine étape', () => {
           openTasks: 0,
           developmentPlans: 1,
         }),
-      )?.id,
-    ).toBe('transmettre');
+      ),
+    ).toBeNull();
   });
 
   // Inventer une direction pour éviter un écran vide serait un conseil sans
@@ -301,9 +317,15 @@ describe('tableau de bord — les chiffres du haut de page', () => {
     expect(par(vierge()).taches.valeur).toBeNull();
   });
 
-  it('compte les étapes franchies sur cinq', () => {
-    expect(par(vierge()).etapes.valeur).toBe('0/5');
-    expect(par(vierge({ analyses: 1, buildPlans: 1 })).etapes.valeur).toBe('2/5');
+  it('compte les étapes franchies sur quatre, sans la transmission', () => {
+    expect(par(vierge()).etapes.valeur).toBe('0/4');
+    expect(par(vierge({ analyses: 1, buildPlans: 1 })).etapes.valeur).toBe('2/4');
+    expect(par(vierge()).etapes.precision).not.toContain('transmission');
+  });
+
+  it('compte la transmission en plus une fois un plan rédigé', () => {
+    expect(par(vierge({ analyses: 1, transmissionPlans: 1 })).etapes.valeur).toBe('2/5');
+    expect(par(vierge({ transmissionPlans: 1 })).etapes.precision).toContain('transmission');
   });
 
   // Le financement est une branche facultative : une tuile « Financement :
@@ -359,7 +381,6 @@ describe('le guide pas à pas', () => {
       'premieres-taches',
       'avancer-taches',
       'developper',
-      'transmettre',
     ]);
     expect(guideSteps(f).map((e) => e.etat)).toEqual([
       'en-cours',
@@ -368,8 +389,12 @@ describe('le guide pas à pas', () => {
       'a-venir',
       'a-venir',
       'a-venir',
-      'a-venir',
     ]);
+  });
+
+  it('ne parle de la transmission qu’une fois un plan rédigé, et la coche', () => {
+    expect(ids(analyse({ developmentPlans: 1 }))).not.toContain('transmettre');
+    expect(etat(analyse({ transmissionPlans: 1 }), 'transmettre')).toBe('fait');
   });
 
   it('passe à l’analyse une fois l’idée décrite', () => {
@@ -400,7 +425,6 @@ describe('le guide pas à pas', () => {
       'conformite',
       'avancer-taches',
       'developper',
-      'transmettre',
     ]);
     expect(ids(vierge())).not.toContain('conformite');
   });
@@ -426,7 +450,11 @@ describe('le guide pas à pas', () => {
   });
 
   it('dit chaque étape avec ses mots', () => {
-    const f = analyse({ etincelle: SEUIL_ETINCELLE - 10, complianceChecks: 1 });
+    const f = analyse({
+      etincelle: SEUIL_ETINCELLE - 10,
+      complianceChecks: 1,
+      transmissionPlans: 1,
+    });
     expect(guideSteps(f).map((e) => e.label)).toEqual([
       'Décrire ton idée',
       'Analyser ton idée',

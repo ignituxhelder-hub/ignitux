@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import type { JourneyEtapeGuide, JourneyRepere, JourneyView } from '@/lib/api';
-import { GuideParcours, TableauDeBord } from './parcours';
+import { GuideParcours, Progression, TableauDeBord } from './parcours';
 
 /**
  * LA TUILE QUI CONSTATE UN VIDE DOIT OFFRIR DE LE COMBLER.
@@ -75,6 +75,20 @@ describe('le tableau de bord d’un projet', () => {
     );
 
     expect(screen.queryByRole('button', { name: 'Ajouter une tâche' })).toBeNull();
+  });
+});
+
+describe('la progression du projet', () => {
+  it('ne montre pas « Transmettre » tant qu’aucun plan de transmission n’existe', () => {
+    render(<Progression phase="construire" />);
+    expect(screen.getByText('Découvrir')).toBeInTheDocument();
+    expect(screen.getByText('Construire')).toBeInTheDocument();
+    expect(screen.queryByText('Transmettre')).not.toBeInTheDocument();
+  });
+
+  it('la montre une fois la phase atteinte', () => {
+    render(<Progression phase="transmettre" />);
+    expect(screen.getByText('Transmettre')).toBeInTheDocument();
   });
 });
 
@@ -155,6 +169,28 @@ describe('le guide « Ton parcours »', () => {
   it('dit ce qui bloque quand l’IA est éteinte', () => {
     render(<GuideParcours parcours={parcours()} iaDisponible={false} onAller={() => {}} />);
     expect(screen.getByText(/générateurs sont éteints/)).toBeInTheDocument();
+  });
+
+  // La transmission ne sert que des années plus tard : le serveur ne la met
+  // plus dans le chemin, la personne la demande quand elle en a besoin.
+  it('propose discrètement de préparer la transmission', () => {
+    const onPreparerTransmission = vi.fn();
+    render(
+      <GuideParcours
+        parcours={parcours()}
+        onAller={() => {}}
+        onPreparerTransmission={onPreparerTransmission}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Plus tard : préparer la transmission' }));
+    expect(onPreparerTransmission).toHaveBeenCalledTimes(1);
+  });
+
+  it('ne le propose pas quand la page ne le permet pas', () => {
+    render(<GuideParcours parcours={parcours()} onAller={() => {}} />);
+    expect(
+      screen.queryByRole('button', { name: 'Plus tard : préparer la transmission' }),
+    ).not.toBeInTheDocument();
   });
 
   it('replie le reste du chemin derrière « Voir tout »', () => {

@@ -222,12 +222,15 @@ export const SECTION_RULES: readonly SectionRule[] = [
     condition: "S'ouvre une fois le projet assez avancé pour qu'on le partage.",
   },
   {
+    // Elle ne sert que des années plus tard : aucun autre plan ne l'ouvre,
+    // seule la personne la demande (le lien sous le parcours), et elle reste
+    // une fois un plan rédigé.
     section: 'transmission',
     label: 'Transmission',
     phase: 'transmettre',
-    unlocked: (f) => f.transmissionPlans > 0 || f.developmentPlans > 0,
+    unlocked: (f) => f.transmissionPlans > 0,
     condition:
-      "S'ouvre quand le projet tourne : un plan de développement, ou un plan de transmission déjà rédigé.",
+      "S'ouvre quand tu la demandes, par le lien « Préparer la transmission » sous ton parcours.",
   },
 ];
 
@@ -352,16 +355,9 @@ export function nextStep(f: ProjectFacts): NextStep | null {
     };
   }
 
-  if (f.transmissionPlans === 0) {
-    return {
-      id: 'transmettre',
-      titre: 'Penser la transmission',
-      pourquoi:
-        "Un projet qui tourne doit pouvoir continuer sans toi. C'est le moment d'écrire ce que toi seul sais.",
-      section: 'transmission',
-    };
-  }
-
+  // Pas de « Penser la transmission » ici : proposée juste après le
+  // développement, elle pousserait vers une étape qui ne sert que des années
+  // plus tard. La personne la demande quand elle en a besoin.
   return null;
 }
 
@@ -379,9 +375,10 @@ export interface EtapeGuide {
  * `nextStep` dit une seule chose à faire ; une personne qui découvre le
  * produit a aussi besoin de voir où elle en est sur l'ensemble. Mêmes ids
  * que `nextStep`, dans le même ordre : l'étape en cours est toujours celle
- * qu'il désigne. Les deux étapes conditionnelles n'apparaissent que si
- * elles s'appliquent — afficher « reprendre ton idée » à quelqu'un dont
- * l'analyse est bonne serait un faux reproche.
+ * qu'il désigne. Les étapes conditionnelles n'apparaissent que si elles
+ * s'appliquent — afficher « reprendre ton idée » à quelqu'un dont
+ * l'analyse est bonne serait un faux reproche, et « penser la
+ * transmission » à qui ne l'a pas demandée, une pression trop tôt.
  */
 export function guideSteps(f: ProjectFacts): EtapeGuide[] {
   const enCours = nextStep(f)?.id ?? null;
@@ -404,7 +401,13 @@ export function guideSteps(f: ProjectFacts): EtapeGuide[] {
       faite: f.tasks > 0 && f.openTasks === 0,
     },
     { id: 'developper', label: 'Préparer le développement', presente: true, faite: f.developmentPlans > 0 },
-    { id: 'transmettre', label: 'Penser la transmission', presente: true, faite: f.transmissionPlans > 0 },
+    // Seulement une fois demandée : voir la règle de la section.
+    {
+      id: 'transmettre',
+      label: 'Penser la transmission',
+      presente: f.transmissionPlans > 0,
+      faite: f.transmissionPlans > 0,
+    },
   ];
 
   return etapes
@@ -440,13 +443,17 @@ export interface Repere {
  * une branche facultative, pas une case vide à remplir.
  */
 export function reperes(f: ProjectFacts): Repere[] {
-  const etapesFaites = [
+  // La transmission ne compte qu'une fois demandée : sinon un projet fini
+  // resterait à 4/5, avec une case vide qui pousse vers elle.
+  const avecTransmission = f.transmissionPlans > 0;
+  const etapes = [
     f.analyses > 0,
     f.buildPlans > 0,
     f.financingPlans > 0,
     f.developmentPlans > 0,
-    f.transmissionPlans > 0,
-  ].filter(Boolean).length;
+    ...(avecTransmission ? [true] : []),
+  ];
+  const etapesFaites = etapes.filter(Boolean).length;
 
   const termines = f.tasks - f.openTasks;
 
@@ -469,8 +476,10 @@ export function reperes(f: ProjectFacts): Repere[] {
     {
       cle: 'etapes',
       label: 'Étapes',
-      valeur: `${etapesFaites}/5`,
-      precision: 'Analyse, construction, financement, développement, transmission.',
+      valeur: `${etapesFaites}/${etapes.length}`,
+      precision: avecTransmission
+        ? 'Analyse, construction, financement, développement, transmission.'
+        : 'Analyse, construction, financement, développement.',
     },
   ];
 

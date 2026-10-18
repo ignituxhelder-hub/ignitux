@@ -251,6 +251,10 @@ export default function ProjectDetailPage() {
   // ce moment — jamais plus d'une, c'est tout le principe de la grille
   // d'icônes qui remplace l'empilement de texte.
   const [etapeOuverte, setEtapeOuverte] = useState<string | null>(null);
+  // La transmission ne s'ouvre pas d'elle-même (voir journey-model.ts) :
+  // la personne la demande. Rien n'est enregistré — elle reste ouverte pour
+  // de bon une fois un plan rédigé, c'est le parcours qui le dira.
+  const [transmissionDemandee, setTransmissionDemandee] = useState(false);
   const [aDemander, setADemander] = useState<ProfileField[]>([]);
   // null tant qu'on ne sait pas : on n'affiche rien plutôt qu'un rappel
   // qui disparaîtrait une seconde plus tard.
@@ -654,6 +658,7 @@ export default function ProjectDetailPage() {
     const lecture = lectureDeSection(section);
     if (lecture && !peut(lecture)) return false;
     if (vueAvancee) return true;
+    if (section === "transmission" && transmissionDemandee) return true;
     if (!parcours) return section === "analyse";
     return parcours.visible.some((s) => s.section === section);
   };
@@ -684,6 +689,14 @@ export default function ProjectDetailPage() {
     if (destination.avancee || !visibleEnVueSimple) setVueAvancee(true);
     setEtapeOuverte(destination.ouvre);
     setCibleGuide({ selecteur: destination.cible, section: destination.ouvre });
+  };
+
+  /** Le lien discret du guide : ouvrir la transmission seule, sans la vue avancée. */
+  const preparerTransmission = () => {
+    const destination = destinationDe("transmettre");
+    setTransmissionDemandee(true);
+    setEtapeOuverte("transmission");
+    if (destination) setCibleGuide({ selecteur: destination.cible, section: destination.ouvre });
   };
 
   return (
@@ -825,6 +838,9 @@ export default function ProjectDetailPage() {
                 parcours={parcours}
                 iaDisponible={iginiStatus?.generatorsEnabled ?? true}
                 onAller={allerA}
+                onPreparerTransmission={
+                  montrer("transmission") ? undefined : preparerTransmission
+                }
               />
             )}
           {parcours &&

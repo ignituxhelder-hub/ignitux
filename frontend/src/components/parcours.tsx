@@ -20,7 +20,10 @@ const PHASES: Array<{ id: JourneyPhase; label: string }> = [
  * devinent. C'est tout ce dont quelqu'un a besoin pour savoir s'il avance.
  */
 export function Progression({ phase }: { phase: JourneyPhase }) {
-  const index = PHASES.findIndex((p) => p.id === phase);
+  // « Transmettre » ne sert que des années plus tard : elle n'apparaît
+  // qu'une fois atteinte, c'est-à-dire un plan de transmission rédigé.
+  const phases = phase === 'transmettre' ? PHASES : PHASES.filter((p) => p.id !== 'transmettre');
+  const index = phases.findIndex((p) => p.id === phase);
 
   return (
     <ol
@@ -34,7 +37,7 @@ export function Progression({ phase }: { phase: JourneyPhase }) {
         flexWrap: 'wrap',
       }}
     >
-      {PHASES.map((p, i) => {
+      {phases.map((p, i) => {
         const franchie = i < index;
         const courante = i === index;
         return (
@@ -289,10 +292,17 @@ export function GuideParcours({
   parcours,
   iaDisponible = true,
   onAller,
+  onPreparerTransmission,
 }: {
   parcours: JourneyView;
   iaDisponible?: boolean;
   onAller: (etapeId: string) => void;
+  /**
+   * La transmission n'est plus dans le chemin : elle ne sert que des années
+   * plus tard. Ce lien la fait ouvrir quand la personne en a besoin. Absent
+   * quand elle est déjà ouverte, ou que la page ne le permet pas.
+   */
+  onPreparerTransmission?: () => void;
 }) {
   const titreId = useId();
   const [tout, setTout] = useState(false);
@@ -379,6 +389,29 @@ export function GuideParcours({
         >
           {tout ? 'Replier' : 'Voir tout'}
         </button>
+      )}
+
+      {onPreparerTransmission && (
+        <p style={{ marginBottom: 0 }}>
+          {/* Un lien, pas un bouton de plus : rien ne presse, ça se voit. */}
+          <button
+            type="button"
+            className="muted"
+            onClick={onPreparerTransmission}
+            style={{
+              background: 'none',
+              border: 0,
+              padding: 0,
+              font: 'inherit',
+              fontSize: '0.8rem',
+              color: 'var(--text-muted)',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+            }}
+          >
+            Plus tard : préparer la transmission
+          </button>
+        </p>
       )}
     </section>
   );
