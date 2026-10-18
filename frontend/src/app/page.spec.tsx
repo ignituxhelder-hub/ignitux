@@ -154,6 +154,9 @@ describe('HomePage', () => {
     expect(within(prix).queryByRole('button')).not.toBeInTheDocument();
     // Rien n'encaisse : la page le dit, et ne promet ni carte ni engagement.
     expect(within(prix).getByText(/Aucun moyen de paiement n'est encore en place/)).toBeInTheDocument();
+    // L'offre attribuée par défaut dépend d'un réglage du serveur
+    // (IGNITUX_BETA_V1) qu'on ne lit pas d'ici : la page ne l'affirme pas.
+    expect(within(prix).queryByText(/démarre sur Découverte/)).not.toBeInTheDocument();
     expect(document.body.textContent).not.toMatch(/sans engagement|carte bancaire/i);
   });
 
