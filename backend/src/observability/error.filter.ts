@@ -58,7 +58,13 @@ export class UnexpectedErrorFilter implements ExceptionFilter {
     // Une exception HTTP est un refus voulu, pas une panne : elle traverse.
     if (exception instanceof HttpException) {
       const statut = exception.getStatus();
-      response.status(statut).json(exception.getResponse());
+      // `new HttpException('…', 402)` garde la phrase nue ; renvoyée telle
+      // quelle, l'interface n'y trouvait pas de `message` et affichait
+      // « Une erreur est survenue. » à la place du plafond atteint.
+      const corps = exception.getResponse();
+      response
+        .status(statut)
+        .json(typeof corps === 'string' ? { statusCode: statut, message: corps } : corps);
       // Les 5xx délibérées restent rares et méritent d'être vues.
       if (statut >= 500) {
         this.logger.error(
