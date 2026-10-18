@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { AutomationService } from '../automation/automation.service.js';
@@ -202,6 +202,91 @@ describe('WorkflowService', () => {
       await service.updateStatus('u1', 't1', 'done');
 
       expect(automation.runAfterChange).toHaveBeenCalledWith('p1');
+    });
+  });
+
+  describe('ne dit pas à qui n’a pas accès si une tâche existe', () => {
+    // Les routes `tasks/:taskId/...` ne reçoivent que l'id de la tâche. Lue
+    // seule, puis le droit vérifié sur son projet, elle répondait « Tâche
+    // introuvable. » à un id inconnu et « Projet introuvable. » à la tâche
+    // d'un autre : n'importe quel compte apprenait ainsi qu'elle existe.
+    // Ici, la fausse base évalue VRAIMENT le filtre de la lecture.
+    const PROPRIO = 'proprio';
+    const INCONNU = 'inconnu';
+    const TACHE = { id: 't1', project_id: 'p1', status: 'pending' };
+    const PROJET = { id: 'p1', owner_id: PROPRIO };
+    const EQUIPE = [
+      { user_id: 'observateur', role: 'observateur' },
+      { user_id: 'salarie', role: 'salarie' },
+    ];
+
+    /** Le filtre « propriétaire OU membre de l'équipe », et lui seul. */
+    function equipeDe(filtre: unknown): string {
+      const userId = (filtre as { OR?: [{ owner_id?: string }] } | undefined)?.OR?.[0]?.owner_id;
+      const attendu = { OR: [{ owner_id: userId }, { collaborators: { some: { user_id: userId } } }] };
+      if (!userId || JSON.stringify(filtre) !== JSON.stringify(attendu)) {
+        throw new Error(`Filtre de projet non géré : ${JSON.stringify(filtre)}`);
+      }
+      return userId;
+    }
+    const voitLeProjet = (userId: string) => PROJET.owner_id === userId || EQUIPE.some((m) => m.user_id === userId);
+
+    beforeEach(() => {
+      prisma.tasks.findFirst.mockImplementation(
+        async ({ where }: { where: { id: string; project?: unknown } }) => {
+          if (where.id !== TACHE.id) return null;
+          if (where.project !== undefined && !voitLeProjet(equipeDe(where.project))) return null;
+          return TACHE;
+        },
+      );
+      // La lecture d'`accesProjet` : `{ id, OR: [propriétaire, membre] }`.
+      prisma.projects.findFirst.mockImplementation(async ({ where }: { where: { id: string; OR: unknown } }) => {
+        const userId = equipeDe({ OR: where.OR });
+        if (where.id !== PROJET.id || !voitLeProjet(userId)) return null;
+        return {
+          owner_id: PROJET.owner_id,
+          collaborators: EQUIPE.filter((m) => m.user_id === userId).map((m) => ({ role: m.role })),
+        };
+      });
+      prisma.tasks.update.mockResolvedValue({ ...TACHE, status: 'done' });
+    });
+
+    const refus = (promesse: Promise<unknown>) =>
+      promesse.then(
+        () => {
+          throw new Error('la modification aurait dû être refusée');
+        },
+        (e: unknown) => e as NotFoundException,
+      );
+
+    const MODIFICATIONS: [string, (s: WorkflowService, userId: string, taskId: string) => Promise<unknown>][] = [
+      ['updateStatus', (s, userId, taskId) => s.updateStatus(userId, taskId, 'done')],
+      ['updateNote', (s, userId, taskId) => s.updateNote(userId, taskId, 'rappeler')],
+    ];
+
+    it.each(MODIFICATIONS)(
+      '%s : même 404 « Tâche introuvable. », que la tâche existe ou non',
+      async (_nom, modifier) => {
+        const existante = await refus(modifier(service, INCONNU, 't1'));
+        const absente = await refus(modifier(service, INCONNU, 't-absente'));
+
+        expect(existante).toBeInstanceOf(NotFoundException);
+        expect(existante.getResponse()).toEqual(absente.getResponse());
+        expect(existante.message).toBe('Tâche introuvable.');
+        expect(prisma.tasks.update).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each(MODIFICATIONS)('%s : un observateur garde son 403, il voit déjà la tâche', async (_nom, modifier) => {
+      await expect(modifier(service, 'observateur', 't1')).rejects.toBeInstanceOf(ForbiddenException);
+      expect(prisma.tasks.update).not.toHaveBeenCalled();
+    });
+
+    it.each(MODIFICATIONS)('%s : le propriétaire et un salarié modifient toujours', async (_nom, modifier) => {
+      await modifier(service, PROPRIO, 't1');
+      await modifier(service, 'salarie', 't1');
+
+      expect(prisma.tasks.update).toHaveBeenCalledTimes(2);
     });
   });
 });

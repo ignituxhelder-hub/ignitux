@@ -208,7 +208,13 @@ export class KnowledgeService {
   }
 
   async unlink(userId: string, linkId: string) {
-    const link = await this.prisma.concept_links.findFirst({ where: { id: linkId } });
+    // Filtré par le propriétaire du concept de départ : le lien d'un autre
+    // reçoit le même 404 qu'un id qui n'existe pas, en autant de requêtes.
+    // Lu seul, il répondait « Concept introuvable. » à un autre compte, qui
+    // apprenait ainsi qu'il existe.
+    const link = await this.prisma.concept_links.findFirst({
+      where: { id: linkId, from_concept: { user_id: userId } },
+    });
     if (!link) {
       throw new NotFoundException('Lien introuvable.');
     }

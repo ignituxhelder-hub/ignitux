@@ -1,8 +1,9 @@
 /** Les droits de l'équipe sur le financement et l'évaluation de financement. */
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { EvaluationService } from '../evaluation-financement/evaluation.service.js';
 import { FinancingService } from '../financing/financing.service.js';
 import { InvestorsService } from '../investors/investors.service.js';
+import { fausseEquipe, refus, requetes } from './visibilite.testing.js';
 
 vi.mock('../config/env.js', () => ({ getEnv: () => ({ FRONTEND_URL: 'https://ignitux.com' }) }));
 
@@ -90,5 +91,111 @@ describe('droits de l’équipe — registre des investisseurs', () => {
     await expect(
       investisseurs('associe').recordParticipation('u2', 'fp1', { investedCents: 100 } as never),
     ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+});
+
+describe('registre des investisseurs — ne dit pas à qui n’a pas accès qu’un registre ou un mouvement existe', () => {
+  // Lu par son seul id puis jugé sur son projet, le registre (ou le
+  // mouvement) répondait « Projet introuvable. » à qui n'y avait pas accès,
+  // « … introuvable. » à un id inconnu, et « n'est plus rattaché » à
+  // n'importe qui pour un registre détaché : chacun apprenait qu'il existe.
+  const PROPRIO = 'proprio';
+  const INCONNU = 'inconnu';
+  const equipe = fausseEquipe(
+    [{ id: 'p1', owner_id: PROPRIO }],
+    [{ project_id: 'p1', user_id: 'comptable', role: 'comptable' }],
+  );
+  const REGISTRES = [
+    { id: 'fp1', project_id: 'p1', project_title: 'Idée' },
+    { id: 'fp-detache', project_id: null, project_title: 'Projet supprimé' },
+  ];
+  const MOUVEMENT = { id: 'm1', financed_project_id: 'fp1', kind: 'versement' };
+
+  function investisseurs() {
+    const prisma = {
+      projects: { findFirst: vi.fn(equipe.lectureAccesProjet) },
+      financed_projects: {
+        findUnique: vi.fn(async ({ where }: { where: { id: string; project?: unknown } }) => {
+          const registre = REGISTRES.find((r) => r.id === where.id);
+          return registre && equipe.visible(registre.project_id, where.project) ? registre : null;
+        }),
+      },
+      investor_movements: {
+        findUnique: vi.fn(
+          async ({ where }: { where: { id: string; financed_project?: { project?: unknown } } }) => {
+            if (where.id !== MOUVEMENT.id) return null;
+            const registre = REGISTRES.find((r) => r.id === MOUVEMENT.financed_project_id)!;
+            const filtre = where.financed_project === undefined ? undefined : where.financed_project.project;
+            return equipe.visible(registre.project_id, filtre) ? { ...MOUVEMENT, financed_project: registre } : null;
+          },
+        ),
+        findMany: vi.fn().mockResolvedValue([]),
+        create: vi.fn(),
+      },
+      participations: { findMany: vi.fn().mockResolvedValue([]) },
+    };
+    return { prisma, service: new InvestorsService(prisma as never, { guard: vi.fn() } as never) };
+  }
+
+  type Appel = (s: InvestorsService, userId: string, id: string) => Promise<unknown>;
+  const APPELS: [string, string, Appel, string][] = [
+    ['projectRegister', 'Projet financé introuvable.', (s, u, id) => s.projectRegister(u, id), 'fp1'],
+    [
+      'recordParticipation',
+      'Projet financé introuvable.',
+      (s, u, id) => s.recordParticipation(u, id, { investedCents: 100 } as never),
+      'fp1',
+    ],
+    [
+      'correctMovement',
+      'Mouvement introuvable.',
+      (s, u, id) => s.correctMovement(u, id, { amountCents: -100, occurredOn: new Date('2026-10-01'), note: 'Erreur' }),
+      'm1',
+    ],
+  ];
+
+  it.each(APPELS)(
+    '%s : même 404 « %s », que la ligne existe ou non, en autant de requêtes',
+    async (_nom, message, appel, id) => {
+      const { prisma, service } = investisseurs();
+      const existante = await refus(appel(service, INCONNU, id));
+      const pourExistante = requetes(prisma);
+      const absente = await refus(appel(service, INCONNU, 'absent'));
+
+      expect(existante).toBeInstanceOf(NotFoundException);
+      expect(existante.message).toBe(message);
+      expect(existante.getResponse?.()).toEqual(absente.getResponse?.());
+      expect(requetes(prisma) - pourExistante).toBe(pourExistante);
+      expect(prisma.investor_movements.create).not.toHaveBeenCalled();
+    },
+  );
+
+  it('un registre détaché de son projet ne répond plus que « Projet financé introuvable. »', async () => {
+    // Plus de projet, donc plus d'équipe : personne n'y a accès, et il ne
+    // dit plus à personne qu'il existe.
+    const { service } = investisseurs();
+
+    for (const qui of [PROPRIO, INCONNU]) {
+      const erreur = await refus(service.projectRegister(qui, 'fp-detache'));
+      expect([erreur.constructor, erreur.message]).toEqual([NotFoundException, 'Projet financé introuvable.']);
+    }
+  });
+
+  it('le comptable lit toujours le registre, et garde son 403 en écriture', async () => {
+    const { service } = investisseurs();
+
+    await expect(service.projectRegister('comptable', 'fp1')).resolves.toMatchObject({ raisedCents: 0 });
+    await expect(
+      service.recordParticipation('comptable', 'fp1', { investedCents: 100 } as never),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(
+      service.correctMovement('comptable', 'm1', { amountCents: -100, occurredOn: new Date('2026-10-01'), note: 'x' }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('le propriétaire lit toujours son registre', async () => {
+    const { service } = investisseurs();
+
+    await expect(service.projectRegister(PROPRIO, 'fp1')).resolves.toMatchObject({ raisedCents: 0 });
   });
 });

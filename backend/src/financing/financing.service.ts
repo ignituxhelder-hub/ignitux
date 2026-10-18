@@ -1,4 +1,4 @@
-import { exigerCapacite } from '../equipe/acces-projet.js';
+import { exigerCapacite, projetVisiblePar } from '../equipe/acces-projet.js';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConstitutionService } from '../constitution/constitution.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -83,7 +83,11 @@ export class FinancingService {
   }
 
   async deleteRound(userId: string, roundId: string) {
-    const round = await this.prisma.financing_rounds.findFirst({ where: { id: roundId } });
+    // Une seule lecture, filtrée par l'équipe du projet : sans accès, le même
+    // 404 qu'un id qui n'existe pas (voir `findHolderForOwner`).
+    const round = await this.prisma.financing_rounds.findFirst({
+      where: { id: roundId, project: projetVisiblePar(userId) },
+    });
     if (!round) {
       throw new NotFoundException('Financement introuvable.');
     }
@@ -305,8 +309,19 @@ export class FinancingService {
     }
   }
 
+  /**
+   * Le détenteur, si je vois son projet — sinon 404 « Détenteur
+   * introuvable. », la même réponse que pour un id qui n'existe pas. Lu seul
+   * puis jugé sur son projet, il répondait « Projet introuvable. » à qui n'y
+   * avait pas accès : n'importe quel compte apprenait qu'il existe. Une seule
+   * lecture, filtrée par l'équipe du projet, ne laisse rien voir de plus —
+   * ni le message, ni le nombre de requêtes. Le rôle est vérifié ensuite :
+   * un membre qui ne peut pas modifier le financement garde son 403.
+   */
   private async findHolderForOwner(userId: string, holderId: string) {
-    const holder = await this.prisma.equity_holders.findFirst({ where: { id: holderId } });
+    const holder = await this.prisma.equity_holders.findFirst({
+      where: { id: holderId, project: projetVisiblePar(userId) },
+    });
     if (!holder) {
       throw new NotFoundException('Détenteur introuvable.');
     }

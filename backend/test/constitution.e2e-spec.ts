@@ -253,6 +253,10 @@ describe('Constitution et données personnelles (e2e)', () => {
         // Ignitux sont rattachés au compte : ils partent avec lui (voir
         // user-data.service.ts).
         'abonnement',
+        // Les choix d'accès à l'argent (comptable ou associé dans la facturation,
+        // la comptabilité, la banque et la caisse d'un propriétaire) : ceux que
+        // la personne a faits et ceux qui la concernent.
+        'acces_a_l_argent',
         // Le bureau (applications ajoutées ou retirées) est une préférence que la
         // personne a choisie : il part avec l'export, comme ses rôles.
         'bureau',

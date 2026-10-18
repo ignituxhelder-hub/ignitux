@@ -1,4 +1,4 @@
-import { exigerCapacite } from '../../equipe/acces-projet.js';
+import { exigerCapacite, projetVisiblePar } from '../../equipe/acces-projet.js';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { AutomationService } from '../automation/automation.service.js';
@@ -53,12 +53,28 @@ export class WorkflowService {
     });
   }
 
-  async updateStatus(userId: string, taskId: string, status: TaskStatus) {
-    const task = await this.prisma.tasks.findFirst({ where: { id: taskId } });
+  /**
+   * La tâche, si je vois son projet — sinon 404 « Tâche introuvable. », la
+   * même réponse que pour un id qui n'existe pas. Lue seule puis jugée sur
+   * son projet, elle répondait « Projet introuvable. » à qui n'y avait pas
+   * accès : n'importe quel compte apprenait qu'elle existe. Une seule
+   * lecture, filtrée par l'équipe du projet, ne laisse rien voir de plus —
+   * ni le message, ni le nombre de requêtes. Le rôle est vérifié ensuite :
+   * un membre qui ne peut pas la modifier garde son 403, lui la voit déjà.
+   */
+  private async tacheAModifier(userId: string, taskId: string) {
+    const task = await this.prisma.tasks.findFirst({
+      where: { id: taskId, project: projetVisiblePar(userId) },
+    });
     if (!task) {
       throw new NotFoundException('Tâche introuvable.');
     }
     await exigerCapacite(this.prisma, userId, task.project_id, 'modifier_taches');
+    return task;
+  }
+
+  async updateStatus(userId: string, taskId: string, status: TaskStatus) {
+    const task = await this.tacheAModifier(userId, taskId);
 
     const misAJour = await this.prisma.tasks.update({
       where: { id: taskId },
@@ -74,11 +90,7 @@ export class WorkflowService {
 
   /** Sans effet sur le score : une note n'avance ni ne recule la tâche. */
   async updateNote(userId: string, taskId: string, note: string) {
-    const task = await this.prisma.tasks.findFirst({ where: { id: taskId } });
-    if (!task) {
-      throw new NotFoundException('Tâche introuvable.');
-    }
-    await exigerCapacite(this.prisma, userId, task.project_id, 'modifier_taches');
+    await this.tacheAModifier(userId, taskId);
 
     const propre = note.trim();
     return this.prisma.tasks.update({

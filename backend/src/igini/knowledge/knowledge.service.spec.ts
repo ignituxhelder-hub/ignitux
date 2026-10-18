@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { refus, requetes } from '../../equipe/visibilite.testing.js';
 import { AutomationService } from '../automation/automation.service.js';
 import { KnowledgeService } from './knowledge.service.js';
 
@@ -316,6 +317,53 @@ describe('KnowledgeService', () => {
       await service.unlink('u1', 'l1');
 
       expect(prisma.concept_links.delete).toHaveBeenCalledWith({ where: { id: 'l1' } });
+    });
+
+    describe('ne dit pas à qui n’a pas accès si un lien existe', () => {
+      // Lu par son seul id puis jugé sur son concept, le lien d'un autre
+      // répondait « Concept introuvable. », un id inconnu « Lien
+      // introuvable. » : n'importe quel compte apprenait qu'il existe. Ici,
+      // la fausse base évalue VRAIMENT le filtre.
+      const LIEN = { id: 'l1', from_concept_id: 'c1' };
+      const CONCEPT = { id: 'c1', user_id: 'u1' };
+
+      beforeEach(() => {
+        prisma.concept_links.findFirst.mockImplementation(
+          async ({ where }: { where: { id: string; from_concept?: Record<string, unknown> } }) => {
+            if (where.id !== LIEN.id) return null;
+            if (where.from_concept !== undefined) {
+              const { user_id, ...reste } = where.from_concept;
+              if (Object.keys(reste).length > 0) {
+                throw new Error(`Filtre non géré : ${JSON.stringify(where.from_concept)}`);
+              }
+              if (CONCEPT.user_id !== user_id) return null;
+            }
+            return LIEN;
+          },
+        );
+        prisma.concepts.findFirst.mockImplementation(
+          async ({ where }: { where: { id: string; user_id: string } }) =>
+            where.id === CONCEPT.id && where.user_id === CONCEPT.user_id ? CONCEPT : null,
+        );
+      });
+
+      it('même 404 « Lien introuvable. », que le lien existe ou non, en autant de requêtes', async () => {
+        const existant = await refus(service.unlink('u2', 'l1'));
+        const pourExistant = requetes(prisma);
+        const absent = await refus(service.unlink('u2', 'l-absent'));
+
+        expect(existant).toBeInstanceOf(NotFoundException);
+        expect(existant.message).toBe('Lien introuvable.');
+        expect(existant.getResponse?.()).toEqual(absent.getResponse?.());
+        expect(requetes(prisma) - pourExistant).toBe(pourExistant);
+        expect(prisma.concept_links.delete).not.toHaveBeenCalled();
+      });
+
+      it('le propriétaire supprime toujours son lien', async () => {
+        await service.unlink('u1', 'l1');
+
+        expect(prisma.concept_links.delete).toHaveBeenCalledWith({ where: { id: 'l1' } });
+      });
     });
   });
 });

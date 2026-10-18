@@ -1,4 +1,5 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import type { Prisma } from '../generated/prisma/client.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import { estRoleEquipe, peutFaire, ROLE_LABEL, type Capacite, type Role } from './droits-equipe.js';
 
@@ -34,8 +35,21 @@ const ACTION: Record<Capacite, string> = {
   voir_documents_juridiques: 'voir les documents juridiques',
   actes_juridiques: 'faire un acte juridique (statuts, dépôt, mandat)',
   gerer_equipe: 'gérer l’équipe',
-  supprimer_projet: 'supprimer le projet',
+  // Archiver remplace la suppression quand elle est refusée : même capacité.
+  supprimer_projet: 'supprimer ou archiver le projet',
 };
+
+/**
+ * Le filtre « projet dont je suis propriétaire ou membre de l'équipe » : la
+ * règle de visibilité d'`accesProjet`, écrite une seule fois. Une lecture
+ * qui le porte ne trouve rien quand je n'ai pas accès — la même réponse
+ * que pour une ligne qui n'existe pas.
+ */
+export function projetVisiblePar(userId: string) {
+  return {
+    OR: [{ owner_id: userId }, { collaborators: { some: { user_id: userId } } }],
+  } satisfies Prisma.projectsWhereInput;
+}
 
 export async function accesProjet(
   prisma: Pick<PrismaService, 'projects'>,
@@ -43,10 +57,7 @@ export async function accesProjet(
   projectId: string,
 ): Promise<AccesProjet> {
   const projet = await prisma.projects.findFirst({
-    where: {
-      id: projectId,
-      OR: [{ owner_id: userId }, { collaborators: { some: { user_id: userId } } }],
-    },
+    where: { id: projectId, ...projetVisiblePar(userId) },
     select: { owner_id: true, collaborators: { where: { user_id: userId }, select: { role: true } } },
   });
   if (!projet) throw new NotFoundException('Projet introuvable.');

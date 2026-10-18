@@ -232,6 +232,8 @@ export default function ProjectDetailPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isArchiving, setIsArchiving] = useState(false);
+  const [erreurArchivage, setErreurArchivage] = useState<string | null>(null);
   const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
 
   // Incrémenté après chaque génération réussie : signale aux sections dérivées
@@ -511,7 +513,19 @@ export default function ProjectDetailPage() {
   }
 
   async function handleDelete() {
-    if (!token) return;
+    if (!token || !project) return;
+    // Un seul clic effaçait tout, définitivement. Le serveur refuse de son
+    // côté un projet qui a une société immatriculée ou des factures émises,
+    // et son message propose d'archiver : on l'affiche tel quel.
+    if (
+      !window.confirm(
+        `Supprimer définitivement « ${project.title} » ? Tout ce qu'il contient sera effacé. ` +
+          "Pour le garder sans le voir dans ta liste, choisis plutôt « Archiver le projet ».",
+      )
+    ) {
+      return;
+    }
+    setFormError(null);
     setIsDeleting(true);
     try {
       await api.deleteProject(token, id);
@@ -521,6 +535,32 @@ export default function ProjectDetailPage() {
         err instanceof ApiError ? err.message : "Impossible de supprimer.",
       );
       setIsDeleting(false);
+    }
+  }
+
+  // Réversible : pas de confirmation, « Restaurer » le défait.
+  async function handleArchivage(archiver: boolean) {
+    if (!token) return;
+    setFormError(null);
+    setErreurArchivage(null);
+    setIsArchiving(true);
+    try {
+      setProject(
+        archiver
+          ? await api.archiveProject(token, id)
+          : await api.restoreProject(token, id),
+      );
+    } catch (err) {
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : archiver
+            ? "Impossible d'archiver."
+            : "Impossible de restaurer.";
+      if (archiver) setFormError(message);
+      else setErreurArchivage(message);
+    } finally {
+      setIsArchiving(false);
     }
   }
 
@@ -715,6 +755,27 @@ export default function ProjectDetailPage() {
       {project && (
         <>
           <h1 style={{ marginBottom: "0.75rem" }}>{project.title}</h1>
+
+          {project.archived_at && (
+            <div className="card" style={{ marginBottom: "1.5rem" }}>
+              <p style={{ margin: 0 }}>
+                Ce projet est archivé : il n&apos;apparaît plus dans ta liste,
+                mais rien n&apos;est perdu.
+              </p>
+              {erreurArchivage && <p className="error">{erreurArchivage}</p>}
+              {peut("supprimer_projet") && (
+                <button
+                  className="secondary"
+                  type="button"
+                  style={{ marginTop: "0.75rem" }}
+                  onClick={() => void handleArchivage(false)}
+                  disabled={isArchiving}
+                >
+                  {isArchiving ? "Restauration…" : "Restaurer le projet"}
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Le bandeau disait « les 5 étapes ci-dessous » en montrant quinze
               sections. La progression et la prochaine étape le remplacent :
@@ -1174,6 +1235,16 @@ export default function ProjectDetailPage() {
             <button className="primary" type="submit" disabled={isSaving}>
               {isSaving ? "Sauvegarde…" : "Sauvegarder"}
             </button>
+            {peut("supprimer_projet") && !project.archived_at && (
+              <button
+                className="secondary"
+                type="button"
+                onClick={() => void handleArchivage(true)}
+                disabled={isArchiving}
+              >
+                {isArchiving ? "Archivage…" : "Archiver le projet"}
+              </button>
+            )}
             {peut("supprimer_projet") && (
               <button
                 className="secondary"

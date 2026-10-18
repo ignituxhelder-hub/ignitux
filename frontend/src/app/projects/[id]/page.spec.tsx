@@ -768,12 +768,13 @@ describe('ProjectDetailPage', () => {
     await waitFor(() => expect(screen.getByDisplayValue('École motocross avancée')).toBeInTheDocument());
   });
 
-  it('supprime le projet et redirige vers /projects', async () => {
+  it('supprime le projet une fois confirmé, et redirige vers /projects', async () => {
     mockApiRoutes({
       'GET /projects/p1': { status: 200, body: PROJECT },
       'DELETE /projects/p1': { status: 204, body: null },
       ...ENGINE_ROUTES,
     });
+    const confirmer = vi.spyOn(window, 'confirm').mockReturnValue(true);
 
     render(
       <AuthProvider>
@@ -785,7 +786,91 @@ describe('ProjectDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Titre et description' }));
     fireEvent.click(screen.getByRole('button', { name: /supprimer le projet/i }));
 
+    expect(confirmer).toHaveBeenCalledWith(expect.stringContaining('École motocross'));
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith('/projects'));
+  });
+
+  // Un seul clic effaçait tout, définitivement.
+  it('supprimer demande confirmation : refusée, rien n’est envoyé', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      ...ENGINE_ROUTES,
+    });
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    fireEvent.click(screen.getByRole('button', { name: 'Titre et description' }));
+    fireEvent.click(screen.getByRole('button', { name: /supprimer le projet/i }));
+
+    const appels = vi.mocked(global.fetch).mock.calls;
+    expect(appels.some((appel) => (appel[1] as RequestInit | undefined)?.method === 'DELETE')).toBe(false);
+    expect(router.replace).not.toHaveBeenCalledWith('/projects');
+  });
+
+  it('suppression refusée (factures, société) : dit pourquoi, le projet reste', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      'DELETE /projects/p1': {
+        status: 409,
+        body: {
+          message:
+            'Ce projet ne peut pas être supprimé : il a des factures émises, qu’il faut garder. ' +
+            'Archive-le plutôt : il quittera ta liste sans rien perdre.',
+        },
+      },
+      ...ENGINE_ROUTES,
+    });
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    fireEvent.click(screen.getByRole('button', { name: 'Titre et description' }));
+    fireEvent.click(screen.getByRole('button', { name: /supprimer le projet/i }));
+
+    expect(await screen.findByText(/il a des factures émises/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Archiver le projet' })).toBeInTheDocument();
+    expect(router.replace).not.toHaveBeenCalledWith('/projects');
+  });
+
+  it('archive le projet : un bandeau le dit, et « Restaurer » le défait', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      'POST /projects/p1/archiver': {
+        status: 200,
+        body: { ...PROJECT, archived_at: '2026-10-17T10:00:00.000Z' },
+      },
+      'POST /projects/p1/restaurer': { status: 200, body: { ...PROJECT, archived_at: null } },
+      ...ENGINE_ROUTES,
+    });
+
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    expect(screen.queryByText(/Ce projet est archivé/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Titre et description' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Archiver le projet' }));
+
+    expect(await screen.findByText(/Ce projet est archivé/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Archiver le projet' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Restaurer le projet' }));
+
+    await waitFor(() => expect(screen.queryByText(/Ce projet est archivé/)).not.toBeInTheDocument());
+    expect(screen.getByRole('button', { name: 'Archiver le projet' })).toBeInTheDocument();
   });
 
   it('rend le projet public puis privé', async () => {
@@ -934,6 +1019,7 @@ describe('ProjectDetailPage', () => {
     // Pas de bouton de génération, pas de formulaire d'édition.
     expect(screen.queryByRole('button', { name: /analyser ce projet/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /supprimer le projet/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /archiver le projet/i })).not.toBeInTheDocument();
     // La gestion des collaborateurs reste réservée au propriétaire.
     // Tout membre voit l'équipe ; seul le propriétaire la gère (pas de bouton Inviter).
     expect(screen.queryByRole('button', { name: /inviter/i })).not.toBeInTheDocument();

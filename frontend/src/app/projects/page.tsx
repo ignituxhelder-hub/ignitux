@@ -58,6 +58,7 @@ function ProjectsPageInterieur() {
   const { roles, switchTo } = useRoles(token, 'entrepreneur');
 
   const [projects, setProjects] = useState<Project[]>([]);
+  const [archives, setArchives] = useState<Project[]>([]);
   const [parcours, setParcours] = useState<ProjectJourneySummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
@@ -76,8 +77,13 @@ function ProjectsPageInterieur() {
     setIsLoading(true);
     setListError(null);
     try {
-      const liste = await api.listProjects(jeton);
+      const [liste, archivees] = await Promise.all([
+        api.listProjects(jeton),
+        // Les archives aussi sont un confort : sans elles, la liste reste utile.
+        api.listArchivedProjects(jeton).catch(() => [] as Project[]),
+      ]);
       setProjects(liste);
+      setArchives(archivees);
       // Le parcours est un confort : s'il échoue, la liste reste utile.
       try {
         setParcours(await api.getMyProjectsJourney(jeton));
@@ -104,12 +110,13 @@ function ProjectsPageInterieur() {
    * Un seul projet : passer par une liste qui ne contient qu'une ligne
    * n'aide personne, on entre directement dedans. `veutCreer` est
    * l'échappatoire — sans elle, cette redirection empêcherait pour toujours
-   * de créer un second projet depuis cette page.
+   * de créer un second projet depuis cette page. Des projets archivés
+   * l'empêchent aussi : ils ne sont visibles qu'ici.
    */
   useEffect(() => {
-    if (veutCreer || isLoading || projects.length !== 1) return;
+    if (veutCreer || isLoading || projects.length !== 1 || archives.length > 0) return;
     router.replace(`/projects/${projects[0].id}`);
-  }, [veutCreer, isLoading, projects, router]);
+  }, [veutCreer, isLoading, projects, archives, router]);
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
@@ -199,7 +206,7 @@ function ProjectsPageInterieur() {
         </form>
       )}
 
-      {!isLoading && !listError && projects.length === 0 && !creation && (
+      {!isLoading && !listError && projects.length === 0 && archives.length === 0 && !creation && (
         <p className="muted">
           Tu n&apos;as pas encore de projet. Commence par décrire ton idée — IGINI s&apos;occupe
           de la suite.
@@ -234,6 +241,21 @@ function ProjectsPageInterieur() {
             })}
           </div>
         </>
+      )}
+
+      {/* Replié : un projet archivé a quitté la liste, il ne doit pas y
+          revenir par le côté. On l'ouvre pour le consulter ou le restaurer. */}
+      {archives.length > 0 && (
+        <details style={{ marginTop: '1.5rem' }}>
+          <summary>Projets archivés ({archives.length})</summary>
+          <div className="project-list" style={{ marginTop: '0.75rem' }}>
+            {archives.map((project) => (
+              <Link className="project-item" href={`/projects/${project.id}`} key={project.id}>
+                <h3 style={{ margin: 0 }}>{project.title}</h3>
+              </Link>
+            ))}
+          </div>
+        </details>
       )}
     </main>
   );

@@ -2,6 +2,7 @@ import { BadRequestException, ForbiddenException, NotFoundException } from '@nes
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConstitutionService } from '../constitution/constitution.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { fausseEquipe, refus, requetes } from '../equipe/visibilite.testing.js';
 import { FinancingService } from './financing.service.js';
 
 type Mock = ReturnType<typeof vi.fn>;
@@ -335,6 +336,80 @@ describe('FinancingService', () => {
         service.setBuybackObjective('u2', 'p1', 'stabilite', 'Tentative.'),
       // Il connaît le projet (observateur) : un refus lisible, plus un « introuvable ».
       ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+  });
+
+  describe('ne dit pas à qui n’a pas accès si un tour ou un détenteur existe', () => {
+    // Lu par son seul id puis jugé sur son projet, il répondait « Projet
+    // introuvable. » à qui n'y avait pas accès, et « … introuvable. » à un
+    // id inconnu : n'importe quel compte apprenait qu'il existe.
+    const PROPRIO = 'proprio';
+    const INCONNU = 'inconnu';
+    const equipe = fausseEquipe(
+      [{ id: 'p1', owner_id: PROPRIO }],
+      [{ project_id: 'p1', user_id: 'associe', role: 'associe' }],
+    );
+    const TOUR = { id: 'r1', project_id: 'p1' };
+    const DETENTEUR = { id: 'h1', project_id: 'p1', name: 'Alice', is_founder: false };
+
+    beforeEach(() => {
+      prisma.projects.findFirst.mockImplementation(equipe.lectureAccesProjet);
+      prisma.financing_rounds.findFirst.mockImplementation(
+        async ({ where }: { where: { id: string; project?: unknown } }) =>
+          where.id === TOUR.id && equipe.visible(TOUR.project_id, where.project) ? TOUR : null,
+      );
+      prisma.equity_holders.findFirst.mockImplementation(
+        async ({ where }: { where: { id: string; project?: unknown } }) =>
+          where.id === DETENTEUR.id && equipe.visible(DETENTEUR.project_id, where.project) ? DETENTEUR : null,
+      );
+    });
+
+    type Appel = (s: FinancingService, userId: string, id: string) => Promise<unknown>;
+    const APPELS: [string, string, Appel, string][] = [
+      ['deleteRound', 'Financement introuvable.', (s, u, id) => s.deleteRound(u, id), 'r1'],
+      ['removeHolder', 'Détenteur introuvable.', (s, u, id) => s.removeHolder(u, id), 'h1'],
+      [
+        'recordEquityChange',
+        'Détenteur introuvable.',
+        (s, u, id) => s.recordEquityChange(u, id, 1000, 'Augmentation', new Date('2026-10-01')),
+        'h1',
+      ],
+      [
+        'recordDividend',
+        'Détenteur introuvable.',
+        (s, u, id) => s.recordDividend(u, id, 500, new Date('2026-10-01')),
+        'h1',
+      ],
+    ];
+
+    it.each(APPELS)(
+      '%s : même 404 « %s », que la ligne existe ou non, en autant de requêtes',
+      async (_nom, message, appel, id) => {
+        const avant = requetes(prisma);
+        const existante = await refus(appel(service, INCONNU, id));
+        const pourExistante = requetes(prisma) - avant;
+        const absente = await refus(appel(service, INCONNU, 'absent'));
+        const pourAbsente = requetes(prisma) - avant - pourExistante;
+
+        expect(existante).toBeInstanceOf(NotFoundException);
+        expect(existante.message).toBe(message);
+        expect(existante.getResponse?.()).toEqual(absente.getResponse?.());
+        expect(pourExistante).toBe(pourAbsente);
+        expect(prisma.financing_rounds.delete).not.toHaveBeenCalled();
+        expect(prisma.equity_holders.delete).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each(APPELS)('%s : un associé garde son 403, il voit déjà le projet', async (_nom, _message, appel, id) => {
+      await expect(appel(service, 'associe', id)).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('le propriétaire supprime toujours un tour et un détenteur', async () => {
+      await service.deleteRound(PROPRIO, 'r1');
+      await service.removeHolder(PROPRIO, 'h1');
+
+      expect(prisma.financing_rounds.delete).toHaveBeenCalledWith({ where: { id: 'r1' } });
+      expect(prisma.equity_holders.delete).toHaveBeenCalledWith({ where: { id: 'h1' } });
     });
   });
 });

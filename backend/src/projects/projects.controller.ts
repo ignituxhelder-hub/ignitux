@@ -43,6 +43,12 @@ export class ProjectsController {
     return this.projectsService.findAllForOwner(user.id);
   }
 
+  // Déclarée avant ':id', sinon « archives » serait lu comme un identifiant.
+  @Get('archives')
+  findArchived(@CurrentUser() user: AuthenticatedUser) {
+    return this.projectsService.findArchivedForOwner(user.id);
+  }
+
   @Get(':id')
   findOne(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.projectsService.findOneForViewer(user.id, id);
@@ -63,6 +69,20 @@ export class ProjectsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
     await this.projectsService.deleteForOwner(user.id, id);
+  }
+
+  @RefuserEcritureDepassee('projects')
+  @Post(':id/archiver')
+  @HttpCode(HttpStatus.OK)
+  archive(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
+    return this.projectsService.archiveForOwner(user.id, id);
+  }
+
+  @RefuserEcritureDepassee('projects')
+  @Post(':id/restaurer')
+  @HttpCode(HttpStatus.OK)
+  restore(@CurrentUser() user: AuthenticatedUser, @Param('id', ParseUUIDPipe) id: string) {
+    return this.projectsService.restoreForOwner(user.id, id);
   }
 
   @RefuserEcritureDepassee('projects')
