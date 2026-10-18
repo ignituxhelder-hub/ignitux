@@ -352,13 +352,14 @@ describe('Séparation des caisses (e2e)', () => {
       expect(inchange!.reconciled_entry_id).toBeNull();
     });
 
-    it("refuse en 403 un compte bancaire qui n'est pas le sien", async () => {
-      // 403 et non 404 : la ressource existe. Et surtout pas 401, qui
-      // déconnecterait Bob côté interface pour une erreur d'aiguillage.
+    it("répond 404 pour un compte bancaire qui n'est pas le sien", async () => {
+      // 404 et non 403 : « pas le tien » confirmerait que le compte existe.
+      // Et surtout pas 401, qui déconnecterait Bob côté interface pour une
+      // erreur d'aiguillage.
       await api(app)
         .get(`/banque/comptes/${compteBancaireAlice}/mouvements`)
         .set(...auth(bob))
-        .expect(403);
+        .expect(404);
     });
 
     it('rapproche un mouvement de sa propre écriture', async () => {
