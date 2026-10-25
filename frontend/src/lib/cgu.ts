@@ -4,4 +4,4 @@
  * avec l'acceptation ; le serveur refuse toute autre valeur. cgu.spec.ts
  * vérifie que les deux restent égales.
  */
-export const CGU_VERSION = '2026-10-01';
+export const CGU_VERSION = '2026-10-25';

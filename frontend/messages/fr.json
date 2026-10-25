@@ -98,23 +98,32 @@
       }
     },
     "prix": {
-      "titre": "Combien ça coûte ?",
+      "titre": "Combien ça coûte ?",
       "gratuit": "Gratuit",
-      "parMois": "{prix} € / mois",
-      "decouverte": {
-        "nom": "Découverte",
-        "projets": "1 projet",
-        "analyses": "{n} analyses IGINI par mois"
-      },
-      "entrepreneur": {
-        "nom": "Entrepreneur",
+      "outils": {
+        "nom": "Les outils",
         "projets": "Projets sans limite",
-        "generations": "Toutes les étapes d'IGINI, {n} générations par mois",
-        "gestion": "Comptabilité, facturation, banque",
-        "financement": "Financement et investisseurs, évaluation de financement incluse",
-        "equipe": "Collaborateurs sans limite"
+        "gestion": "Comptabilité, facturation, banque, caisse, stocks, agenda",
+        "equipe": "Équipe, financement et documents juridiques"
       },
-      "paiement": "Aucun moyen de paiement n'est encore en place : l'offre Entrepreneur sera proposée dès qu'un paiement sera possible."
+      "igini": {
+        "nom": "Les actions d'IGINI",
+        "valeur": "1 crédit = {valeur} €",
+        "bienvenue": "{n} crédits offerts à l'inscription",
+        "affiche": "Le prix s'affiche avant de lancer ; rien n'est débité si IGINI échoue",
+        "exemples": "Par exemple :"
+      },
+      "exemples": {
+        "analyser": "Analyse d'une idée : {credits}",
+        "construire": "Plan de construction : {credits}",
+        "statuts": "Rédaction des statuts : {credits}",
+        "discuter": "Message au chat : {credits}"
+      },
+      "credit": {
+        "un": "{n} crédit",
+        "plusieurs": "{n} crédits"
+      },
+      "paiement": "Recharges de {a} €, {b} € ou {c} € — paiement par carte bientôt disponible."
     },
     "donnees": {
       "titre": "Tes données",
@@ -128,7 +137,7 @@
       "titre": "Questions fréquentes",
       "gratuit": {
         "q": "Est-ce gratuit ?",
-        "r": "Pour commencer, oui : l'offre Découverte est gratuite, avec un projet et {n} analyses IGINI par mois. Le reste est dans l'offre Entrepreneur, à {prix} € par mois, qui ne peut pas encore être souscrite."
+        "r": "Les outils, oui : projets, comptabilité, facturation, banque, équipe et financement sont gratuits pour tout le monde, sans abonnement. Seules les actions d'IGINI se paient, en crédits (1 crédit = {valeur} €) ; {n} crédits sont offerts à l'inscription."
       },
       "creation": {
         "q": "Ignitux crée-t-il mon entreprise à ma place ?",
@@ -144,7 +153,7 @@
       },
       "equipe": {
         "q": "Puis-je travailler avec mon associé ou mon comptable ?",
-        "r": "Oui, avec l'offre Entrepreneur : invite-le sur ton projet avec un rôle — associé, salarié, comptable ou observateur. Il lui faut son propre compte Ignitux, et il ne voit que ce que son rôle permet."
+        "r": "Oui : invite-le sur ton projet avec un rôle — associé, salarié, comptable ou observateur. Il lui faut son propre compte Ignitux, et il ne voit que ce que son rôle permet. Quand un associé lance IGINI sur ton projet, ce sont tes crédits qui sont utilisés."
       },
       "telephone": {
         "q": "Ça marche sur téléphone ?",

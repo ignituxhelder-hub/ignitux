@@ -11,7 +11,7 @@ import { IginiMention } from '@/components/igini-mention';
 import { Brand } from '@/components/ignitux-mark';
 import { SelecteurLangue } from '@/components/selecteur-langue';
 import { useAuth } from '@/lib/auth';
-import { OFFRES_PUBLIQUES, prixEnEuros } from '@/lib/offres-publiques';
+import { BAREME_PUBLIC, prixEnEuros, type ExemplePublic } from '@/lib/bareme-public';
 
 const STEPS = [
   { key: 'analyser', glyphe: 'analyse', categorie: 'creer' },
@@ -37,8 +37,11 @@ const ENGINES = [
  */
 const CONCRETEMENT = ['analyse', 'forme', 'dossier', 'gestion', 'equipe', 'financement'] as const;
 const POUR_QUI = ['idee', 'creation', 'entreprise'] as const;
-const LIGNES_DECOUVERTE = ['projets', 'analyses'] as const;
-const LIGNES_ENTREPRENEUR = ['projets', 'generations', 'gestion', 'financement', 'equipe'] as const;
+// Depuis le 2026-10-25 : plus d'abonnement. Les outils sont gratuits, les
+// actions d'IGINI se paient en crédits (voir lib/bareme-public.ts).
+const LIGNES_OUTILS = ['projets', 'gestion', 'equipe'] as const;
+const LIGNES_IGINI = ['bienvenue', 'affiche'] as const;
+const EXEMPLES: readonly ExemplePublic[] = ['analyser', 'construire', 'statuts', 'discuter'];
 const DONNEES = ['europe', 'vente', 'export', 'ia'] as const;
 const FAQ = ['gratuit', 'creation', 'statuts', 'ia', 'equipe', 'telephone', 'pays'] as const;
 
@@ -48,15 +51,12 @@ export default function HomePage() {
   const { token, isReady } = useAuth();
   const router = useRouter();
 
-  // Les prix viennent du miroir du catalogue du serveur, jamais d'un texte
-  // traduit : un tarif changé d'un côté seulement fait échouer les tests.
-  const { decouverte, entrepreneur } = OFFRES_PUBLIQUES;
-  const prix = (centimes: number) =>
-    centimes === 0 ? t('prix.gratuit') : t('prix.parMois', { prix: prixEnEuros(centimes, locale) });
-  const chiffresFaq = {
-    n: decouverte.appelsIaParMois,
-    prix: prixEnEuros(entrepreneur.prixCentimes, locale),
-  };
+  // Les prix viennent du miroir du barème du serveur, jamais d'un texte
+  // traduit : un prix changé d'un côté seulement fait échouer les tests.
+  const valeurCredit = prixEnEuros(BAREME_PUBLIC.valeurCreditCentimes, locale);
+  const enCredits = (n: number) => t(n > 1 ? 'prix.credit.plusieurs' : 'prix.credit.un', { n });
+  const [r1, r2, r3] = BAREME_PUBLIC.recharges.map((r) => prixEnEuros(r.prixCentimes, locale));
+  const chiffresFaq = { n: BAREME_PUBLIC.bienvenue, valeur: valeurCredit };
 
   useEffect(() => {
     if (isReady && token) {
@@ -195,29 +195,36 @@ export default function HomePage() {
         </p>
         <ul className="accueil-grille">
           <li className="card">
-            <h3>{t('prix.decouverte.nom')}</h3>
-            <p className="accueil-prix">{prix(decouverte.prixCentimes)}</p>
+            <h3>{t('prix.outils.nom')}</h3>
+            <p className="accueil-prix">{t('prix.gratuit')}</p>
             <ul className="accueil-liste">
-              {LIGNES_DECOUVERTE.map((ligne) => (
-                <li key={ligne}>{t(`prix.decouverte.${ligne}`, { n: decouverte.appelsIaParMois })}</li>
+              {LIGNES_OUTILS.map((ligne) => (
+                <li key={ligne}>{t(`prix.outils.${ligne}`)}</li>
               ))}
             </ul>
           </li>
           <li className="card">
-            <h3>{t('prix.entrepreneur.nom')}</h3>
-            <p className="accueil-prix">{prix(entrepreneur.prixCentimes)}</p>
+            <h3>{t('prix.igini.nom')}</h3>
+            <p className="accueil-prix">{t('prix.igini.valeur', { valeur: valeurCredit })}</p>
             <ul className="accueil-liste">
-              {LIGNES_ENTREPRENEUR.map((ligne) => (
-                <li key={ligne}>
-                  {t(`prix.entrepreneur.${ligne}`, { n: entrepreneur.appelsIaParMois })}
+              {LIGNES_IGINI.map((ligne) => (
+                <li key={ligne}>{t(`prix.igini.${ligne}`, { n: BAREME_PUBLIC.bienvenue })}</li>
+              ))}
+            </ul>
+            <p style={{ marginTop: '0.75rem' }}>{t('prix.igini.exemples')}</p>
+            <ul className="accueil-liste">
+              {EXEMPLES.map((cle) => (
+                <li key={cle}>
+                  {t(`prix.exemples.${cle}`, { credits: enCredits(BAREME_PUBLIC.exemples[cle]) })}
                 </li>
               ))}
             </ul>
           </li>
         </ul>
-        {/* Rien n'encaisse encore (voir backend/src/offres/offres.service.ts) :
-            la page le dit plutôt que de laisser croire qu'on peut payer. */}
-        <p className="accueil-note">{t('prix.paiement')}</p>
+        {/* Rien n'encaisse encore (paiement par carte : lot 2, voir
+            backend/src/credits/bareme.ts) : la page le dit plutôt que de
+            laisser croire qu'on peut payer. */}
+        <p className="accueil-note">{t('prix.paiement', { a: r1, b: r2, c: r3 })}</p>
       </section>
 
       <section className="section" aria-labelledby="accueil-donnees">

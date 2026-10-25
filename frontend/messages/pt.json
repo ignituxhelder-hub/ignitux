@@ -100,21 +100,30 @@
     "prix": {
       "titre": "Quanto custa?",
       "gratuit": "Gratuito",
-      "parMois": "{prix} € / mês",
-      "decouverte": {
-        "nom": "Découverte",
-        "projets": "1 projeto",
-        "analyses": "{n} análises IGINI por mês"
-      },
-      "entrepreneur": {
-        "nom": "Entrepreneur",
+      "outils": {
+        "nom": "As ferramentas",
         "projets": "Projetos sem limite",
-        "generations": "Todas as etapas do IGINI, {n} gerações por mês",
-        "gestion": "Contabilidade, faturação, banco",
-        "financement": "Financiamento e investidores, avaliação de financiamento incluída",
-        "equipe": "Colaboradores sem limite"
+        "gestion": "Contabilidade, faturação, banco, caixa, stocks, agenda",
+        "equipe": "Equipa, financiamento e documentos jurídicos"
       },
-      "paiement": "Ainda não existe nenhum meio de pagamento: a oferta Entrepreneur será proposta assim que for possível pagar."
+      "igini": {
+        "nom": "As ações do IGINI",
+        "valeur": "1 crédito = {valeur} €",
+        "bienvenue": "{n} créditos oferecidos na inscrição",
+        "affiche": "O preço aparece antes de lançar; nada é debitado se o IGINI falhar",
+        "exemples": "Por exemplo:"
+      },
+      "exemples": {
+        "analyser": "Análise de uma ideia: {credits}",
+        "construire": "Plano de construção: {credits}",
+        "statuts": "Redação dos estatutos: {credits}",
+        "discuter": "Mensagem no chat: {credits}"
+      },
+      "credit": {
+        "un": "{n} crédito",
+        "plusieurs": "{n} créditos"
+      },
+      "paiement": "Carregamentos de {a} €, {b} € ou {c} € — pagamento por cartão disponível em breve."
     },
     "donnees": {
       "titre": "Os teus dados",
@@ -128,7 +137,7 @@
       "titre": "Perguntas frequentes",
       "gratuit": {
         "q": "É gratuito?",
-        "r": "Para começar, sim: a oferta Découverte é gratuita, com um projeto e {n} análises IGINI por mês. O resto está na oferta Entrepreneur, a {prix} € por mês, que ainda não pode ser subscrita."
+        "r": "As ferramentas, sim: projetos, contabilidade, faturação, banco, equipa e financiamento são gratuitos para todos, sem subscrição. Só as ações do IGINI se pagam, em créditos (1 crédito = {valeur} €); {n} créditos são oferecidos na inscrição."
       },
       "creation": {
         "q": "O Ignitux cria a minha empresa por mim?",
@@ -144,7 +153,7 @@
       },
       "equipe": {
         "q": "Posso trabalhar com o meu sócio ou o meu contabilista?",
-        "r": "Sim, com a oferta Entrepreneur: convida-o para o teu projeto com uma função — sócio, funcionário, contabilista ou observador. Precisa da sua própria conta Ignitux e só vê o que a sua função permite."
+        "r": "Sim: convida-o para o teu projeto com uma função — sócio, funcionário, contabilista ou observador. Precisa da sua própria conta Ignitux e só vê o que a sua função permite. Quando um sócio usa o IGINI no teu projeto, são os teus créditos que são usados."
       },
       "telephone": {
         "q": "Funciona no telemóvel?",

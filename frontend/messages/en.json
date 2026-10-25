@@ -100,21 +100,30 @@
     "prix": {
       "titre": "How much does it cost?",
       "gratuit": "Free",
-      "parMois": "€{prix} / month",
-      "decouverte": {
-        "nom": "Découverte",
-        "projets": "1 project",
-        "analyses": "{n} IGINI analyses per month"
-      },
-      "entrepreneur": {
-        "nom": "Entrepreneur",
+      "outils": {
+        "nom": "The tools",
         "projets": "Unlimited projects",
-        "generations": "Every IGINI step, {n} generations per month",
-        "gestion": "Accounting, invoicing, bank",
-        "financement": "Funding and investors, funding evaluation included",
-        "equipe": "Unlimited collaborators"
+        "gestion": "Accounting, invoicing, bank, till, stock, calendar",
+        "equipe": "Team, funding and legal documents"
       },
-      "paiement": "No payment method is in place yet: the Entrepreneur plan will be offered as soon as payment is possible."
+      "igini": {
+        "nom": "IGINI's actions",
+        "valeur": "1 credit = €{valeur}",
+        "bienvenue": "{n} free credits when you sign up",
+        "affiche": "The price shows before you start; nothing is charged if IGINI fails",
+        "exemples": "For example:"
+      },
+      "exemples": {
+        "analyser": "Analysing an idea: {credits}",
+        "construire": "Build plan: {credits}",
+        "statuts": "Drafting the articles: {credits}",
+        "discuter": "Chat message: {credits}"
+      },
+      "credit": {
+        "un": "{n} credit",
+        "plusieurs": "{n} credits"
+      },
+      "paiement": "Top-ups of €{a}, €{b} or €{c} — card payment coming soon."
     },
     "donnees": {
       "titre": "Your data",
@@ -128,7 +137,7 @@
       "titre": "Common questions",
       "gratuit": {
         "q": "Is it free?",
-        "r": "To start, yes: the Découverte plan is free, with one project and {n} IGINI analyses per month. Everything else is in the Entrepreneur plan, at €{prix} per month, which cannot be subscribed to yet."
+        "r": "The tools, yes: projects, accounting, invoicing, bank, team and funding are free for everyone, with no subscription. Only IGINI's actions are paid for, in credits (1 credit = €{valeur}); {n} credits are free when you sign up."
       },
       "creation": {
         "q": "Does Ignitux create my company for me?",
@@ -144,7 +153,7 @@
       },
       "equipe": {
         "q": "Can I work with my business partner or my accountant?",
-        "r": "Yes, with the Entrepreneur plan: invite them to your project with a role — partner, employee, accountant or observer. They need their own Ignitux account, and only see what their role allows."
+        "r": "Yes: invite them to your project with a role — partner, employee, accountant or observer. They need their own Ignitux account, and only see what their role allows. When a partner runs IGINI on your project, your credits are used."
       },
       "telephone": {
         "q": "Does it work on a phone?",

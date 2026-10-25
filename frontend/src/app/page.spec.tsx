@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
-import { OFFRES_PUBLIQUES } from '@/lib/offres-publiques';
+import { BAREME_PUBLIC } from '@/lib/bareme-public';
 import { createRouterMock, signInAs } from '@/test-utils/mocks';
 import HomePage from './page';
 
@@ -132,31 +132,31 @@ describe('HomePage', () => {
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
   });
 
-  it('annonce les prix du catalogue, en or, sans promettre un paiement', () => {
+  it('annonce les outils gratuits et les crédits du barème, en or, sans promettre un paiement', () => {
     afficher();
 
     const prix = section('Combien ça coûte ?');
-    const { decouverte, entrepreneur } = OFFRES_PUBLIQUES;
-    expect(decouverte.prixCentimes).toBe(0);
+    // Deux cartes : les outils, gratuits pour tous ; les actions d'IGINI, en crédits.
+    expect(within(prix).getByRole('heading', { level: 3, name: 'Les outils' })).toBeInTheDocument();
     expect(within(prix).getByText('Gratuit')).toHaveClass('accueil-prix');
+    expect(within(prix).getByText('Projets sans limite')).toBeInTheDocument();
+    expect(within(prix).getByRole('heading', { level: 3, name: "Les actions d'IGINI" })).toBeInTheDocument();
+    expect(BAREME_PUBLIC.valeurCreditCentimes).toBe(10);
+    expect(within(prix).getByText('1 crédit = 0,10 €')).toHaveClass('accueil-prix');
+    expect(within(prix).getByText(`${BAREME_PUBLIC.bienvenue} crédits offerts à l'inscription`)).toBeInTheDocument();
+    // Quelques exemples, aux prix du barème.
     expect(
-      within(prix).getByText(`${entrepreneur.prixCentimes / 100} € / mois`),
-    ).toHaveClass('accueil-prix');
-    expect(
-      within(prix).getByText(`${decouverte.appelsIaParMois} analyses IGINI par mois`),
+      within(prix).getByText(`Analyse d'une idée : ${BAREME_PUBLIC.exemples.analyser} crédits`),
     ).toBeInTheDocument();
+    expect(within(prix).getByText('Message au chat : 1 crédit')).toBeInTheDocument();
+    // Les recharges, et le paiement qui n'existe pas encore.
     expect(
-      within(prix).getByText(
-        `Toutes les étapes d'IGINI, ${entrepreneur.appelsIaParMois} générations par mois`,
-      ),
-    ).toBeInTheDocument();
+      within(prix).getByText('Recharges de 10 €, 20 € ou 50 € — paiement par carte bientôt disponible.'),
+    ).toHaveClass('accueil-note');
     // Un prix n'est pas une action : aucun bouton dans cette section.
     expect(within(prix).queryByRole('button')).not.toBeInTheDocument();
-    // Rien n'encaisse : la page le dit, et ne promet ni carte ni engagement.
-    expect(within(prix).getByText(/Aucun moyen de paiement n'est encore en place/)).toBeInTheDocument();
-    // L'offre attribuée par défaut dépend d'un réglage du serveur
-    // (IGNITUX_BETA_V1) qu'on ne lit pas d'ici : la page ne l'affirme pas.
-    expect(within(prix).queryByText(/démarre sur Découverte/)).not.toBeInTheDocument();
+    // Plus aucun abonnement nulle part.
+    expect(document.body.textContent).not.toMatch(/€ \/ mois|par mois|Entrepreneur|Découverte|abonnement payant/);
     expect(document.body.textContent).not.toMatch(/sans engagement|carte bancaire/i);
   });
 
@@ -185,12 +185,10 @@ describe('HomePage', () => {
     }
     expect(within(faq).getByText(/Pas tels quels/)).not.toBeVisible();
     expect(within(faq).getByText('Est-ce gratuit ?')).toBeVisible();
-    // La réponse sur le prix reprend les chiffres du catalogue.
-    expect(
-      within(faq).getByText(
-        new RegExp(`${OFFRES_PUBLIQUES.entrepreneur.prixCentimes / 100} € par mois`),
-      ),
-    ).toBeInTheDocument();
+    // La réponse sur le prix reprend les chiffres du barème, sans offre payante.
+    expect(within(faq).getByText(/1 crédit = 0,10 €\) ; 30 crédits sont offerts/)).toBeInTheDocument();
+    expect(within(faq).getByText(/ce sont tes crédits qui sont utilisés/)).toBeInTheDocument();
+    expect(faq.textContent).not.toMatch(/offre Entrepreneur|Découverte/);
 
     // L'appel à créer un compte vient après la dernière question.
     const liens = screen.getAllByRole('link', { name: 'Créer un compte' });
@@ -201,20 +199,39 @@ describe('HomePage', () => {
   });
 
   it.each([
-    ['en', 'In practice', 'How much does it cost?', '€20 / month', 'Free', 'Common questions'],
-    ['pt', 'Na prática', 'Quanto custa?', '20 € / mês', 'Gratuito', 'Perguntas frequentes'],
+    [
+      'en',
+      'In practice',
+      'How much does it cost?',
+      '1 credit = €0.10',
+      'Free',
+      'Common questions',
+      'Top-ups of €10, €20 or €50 — card payment coming soon.',
+      'Chat message: 1 credit',
+    ],
+    [
+      'pt',
+      'Na prática',
+      'Quanto custa?',
+      '1 crédito = 0,10 €',
+      'Gratuito',
+      'Perguntas frequentes',
+      'Carregamentos de 10 €, 20 € ou 50 € — pagamento por cartão disponível em breve.',
+      'Mensagem no chat: 1 crédito',
+    ],
   ] as const)(
     'se lit aussi en %s, avec les mêmes prix',
-    (code, concretement, combien, prixMensuel, gratuit, questions) => {
+    (code, concretement, combien, valeurCredit, gratuit, questions, recharges, message) => {
       langue.code = code;
       afficher();
 
       expect(section(concretement)).toBeInTheDocument();
       const prix = section(combien);
-      // Le montant vient du catalogue, la mise en forme de la langue.
-      expect(OFFRES_PUBLIQUES.entrepreneur.prixCentimes).toBe(2000);
-      expect(within(prix).getByText(prixMensuel)).toHaveClass('accueil-prix');
+      // Le montant vient du barème, la mise en forme de la langue.
+      expect(within(prix).getByText(valeurCredit)).toHaveClass('accueil-prix');
       expect(within(prix).getByText(gratuit)).toHaveClass('accueil-prix');
+      expect(within(prix).getByText(recharges)).toBeInTheDocument();
+      expect(within(prix).getByText(message)).toBeInTheDocument();
       const faq = section(questions);
       for (const question of faq.querySelectorAll('details')) {
         expect(question).not.toHaveAttribute('open');
