@@ -1081,8 +1081,12 @@ export interface ConceptPath {
 export type TaskStatus = 'pending' | 'in_progress' | 'done' | 'blocked';
 export type TaskAssignee = 'human' | 'igini';
 
-/** État d'une exécution IA : en attente de validation humaine, validée, refusée ou échouée. */
-export type AiStatus = 'a_valider' | 'valide' | 'refuse' | 'echec';
+/**
+ * État d'une exécution IA : en attente de validation humaine, validée, refusée ou échouée.
+ * `en_cours` : une exécution est partie (le serveur répond 409 « Déjà en cours. » à une
+ * seconde) ; l'écran la traite comme une tâche à faire, sans résultat à montrer.
+ */
+export type AiStatus = 'a_valider' | 'valide' | 'refuse' | 'echec' | 'en_cours';
 /** Livrable rédigé par l'IA, ou simples instructions à suivre par la personne. */
 export type AiResultKind = 'livrable' | 'instructions';
 

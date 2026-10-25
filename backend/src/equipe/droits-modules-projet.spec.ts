@@ -22,6 +22,7 @@ function prismaPour(role: string | null) {
       findFirst: vi.fn().mockResolvedValue({ id: 't1', project_id: 'p1', status: 'todo', source: 'manuel' }),
       findMany: vi.fn().mockResolvedValue([]),
       update: vi.fn().mockImplementation(({ data }) => Promise.resolve({ id: 't1', project_id: 'p1', ...data })),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       create: vi.fn().mockResolvedValue({ id: 't2' }),
     },
     memories: { create: vi.fn().mockResolvedValue({ id: 'm1' }) },
@@ -82,6 +83,7 @@ describe('droits de l’équipe — exécution par IGINI', () => {
       claude as never,
       { runAfterChange: vi.fn() } as never,
       {} as never,
+      { rendreResultatNonEnregistre: vi.fn() } as never,
     );
     return { service, claude };
   }

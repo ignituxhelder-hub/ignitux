@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   InternalServerErrorException,
   NotFoundException,
@@ -7,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { CreditsInsuffisantsException } from '../../credits/credits-insuffisants.js';
+import { CreditsService } from '../../credits/credits.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { ComplianceService } from '../../compliance/compliance.service.js';
 import { AutomationService } from '../automation/automation.service.js';
@@ -58,13 +60,22 @@ describe('ExecutionService', () => {
   let service: ExecutionService;
   let prisma: {
     projects: { findFirst: ReturnType<typeof vi.fn>; findUnique: ReturnType<typeof vi.fn> };
-    tasks: { findFirst: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> };
+    tasks: {
+      findFirst: ReturnType<typeof vi.fn>;
+      findUnique: ReturnType<typeof vi.fn>;
+      update: ReturnType<typeof vi.fn>;
+      updateMany: ReturnType<typeof vi.fn>;
+    };
     compliance_requirements: { findUnique: ReturnType<typeof vi.fn> };
     project_compliance_ai_runs: {
       findUnique: ReturnType<typeof vi.fn>;
       upsert: ReturnType<typeof vi.fn>;
+      create: ReturnType<typeof vi.fn>;
+      updateMany: ReturnType<typeof vi.fn>;
+      deleteMany: ReturnType<typeof vi.fn>;
     };
   };
+  let credits: { rendreResultatNonEnregistre: ReturnType<typeof vi.fn> };
   let claude: { generateStructuredOutput: ReturnType<typeof vi.fn> };
   let automation: { runAfterChange: ReturnType<typeof vi.fn> };
   let compliance: { markChecked: ReturnType<typeof vi.fn> };
@@ -77,14 +88,21 @@ describe('ExecutionService', () => {
       },
       tasks: {
         findFirst: vi.fn().mockResolvedValue({ ...TACHE }),
+        findUnique: vi.fn().mockResolvedValue({ ...TACHE, ai_status: 'en_cours' }),
         update: vi.fn().mockImplementation(({ data }) => Promise.resolve({ ...TACHE, ...data })),
+        // La prise « en cours » : conditionnelle, gagnée par défaut.
+        updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       },
       compliance_requirements: { findUnique: vi.fn().mockResolvedValue({ ...EXIGENCE }) },
       project_compliance_ai_runs: {
         findUnique: vi.fn().mockResolvedValue(null),
         upsert: vi.fn().mockImplementation(({ update }) => Promise.resolve({ ...RUN, ...update })),
+        create: vi.fn().mockImplementation(({ data }) => Promise.resolve({ ...RUN, ...data })),
+        updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+        deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
       },
     };
+    credits = { rendreResultatNonEnregistre: vi.fn().mockResolvedValue(undefined) };
     compliance = { markChecked: vi.fn().mockResolvedValue({}) };
     claude = { generateStructuredOutput: vi.fn() };
     automation = { runAfterChange: vi.fn().mockResolvedValue(undefined) };
@@ -96,6 +114,7 @@ describe('ExecutionService', () => {
         { provide: ClaudeService, useValue: claude },
         { provide: AutomationService, useValue: automation },
         { provide: ComplianceService, useValue: compliance },
+        { provide: CreditsService, useValue: credits },
       ],
     }).compile();
     service = module.get(ExecutionService);
@@ -219,6 +238,123 @@ describe('ExecutionService', () => {
 
     expect(prisma.tasks.update).toHaveBeenCalledTimes(1);
     expect(prisma.tasks.update.mock.calls[0][0].data.ai_status).toBe('a_valider');
+  });
+
+  /** Claude réserve le prix, puis répond (comme le vrai ClaudeService). */
+  function reserveEtRepond(reponse: unknown) {
+    claude.generateStructuredOutput.mockImplementation(
+      async (requete: { surReservation?: (r: { id: string; credits: number; soldeApres: number }) => void }) => {
+        requete.surReservation?.({ id: 'debit-tache', credits: 4, soldeApres: 26 });
+        return reponse;
+      },
+    );
+  }
+
+  describe('une seule exécution à la fois (deux clics ne paient pas deux fois)', () => {
+    it('prend la tâche « en cours » AVANT l’appel, par une écriture conditionnelle', async () => {
+      const ordre: string[] = [];
+      prisma.tasks.updateMany.mockImplementation(async () => {
+        ordre.push('prise');
+        return { count: 1 };
+      });
+      claude.generateStructuredOutput.mockImplementation(async () => {
+        ordre.push('appel');
+        return { kind: 'livrable', titre: 'x', contenu: 'y' };
+      });
+
+      await service.runTask('u1', 'p1', 't1');
+
+      expect(ordre).toEqual(['prise', 'appel']);
+      const prise = prisma.tasks.updateMany.mock.calls[0][0];
+      expect(prise.where).toEqual({
+        id: 't1',
+        OR: [
+          { ai_status: null },
+          { ai_status: { notIn: ['en_cours', 'a_valider', 'valide'] } },
+          { ai_status: 'en_cours', OR: [{ ai_run_at: null }, { ai_run_at: { lt: expect.any(Date) } }] },
+        ],
+      });
+      expect(prise.data).toEqual({ ai_status: 'en_cours', ai_run_at: expect.any(Date) });
+      // Une prise de plus de 15 minutes est tenue pour abandonnée (serveur arrêté).
+      const limite: Date = prise.where.OR[2].OR[1].ai_run_at.lt;
+      expect(prise.data.ai_run_at.getTime() - limite.getTime()).toBe(15 * 60_000);
+    });
+
+    it('prise perdue : 409 « Déjà en cours. », sans appel ni débit', async () => {
+      prisma.tasks.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(service.runTask('u1', 'p1', 't1')).rejects.toMatchObject({
+        status: 409,
+        message: 'Déjà en cours.',
+      });
+      expect(claude.generateStructuredOutput).not.toHaveBeenCalled();
+    });
+
+    it('prise perdue face à une exécution qui vient de finir : la tâche est rendue telle quelle', async () => {
+      prisma.tasks.updateMany.mockResolvedValue({ count: 0 });
+      const finie = { ...TACHE, ai_status: 'a_valider' };
+      prisma.tasks.findUnique.mockResolvedValue(finie);
+
+      await expect(service.runTask('u1', 'p1', 't1')).resolves.toBe(finie);
+      expect(claude.generateStructuredOutput).not.toHaveBeenCalled();
+    });
+
+    it('deux exécutions simultanées de la même tâche : un seul appel, donc un seul débit', async () => {
+      // La base : une seule ligne, et l'écriture conditionnelle de Postgres.
+      let aiStatus: string | null = null;
+      prisma.tasks.updateMany.mockImplementation(async ({ where, data }) => {
+        await new Promise((r) => setImmediate(r));
+        const libre = where.OR ? aiStatus === null || !['en_cours', 'a_valider', 'valide'].includes(aiStatus) : where.ai_status === aiStatus;
+        if (!libre) return { count: 0 };
+        aiStatus = data.ai_status;
+        return { count: 1 };
+      });
+      prisma.tasks.findUnique.mockImplementation(async () => ({ ...TACHE, ai_status: aiStatus }));
+      claude.generateStructuredOutput.mockImplementation(async () => {
+        await new Promise((r) => setTimeout(r, 5));
+        return { kind: 'livrable', titre: 'x', contenu: 'y' };
+      });
+
+      const issues = await Promise.allSettled([service.runTask('u1', 'p1', 't1'), service.runTask('u1', 'p1', 't1')]);
+
+      expect(claude.generateStructuredOutput).toHaveBeenCalledTimes(1);
+      const refus = issues.filter((i): i is PromiseRejectedResult => i.status === 'rejected');
+      expect(refus).toHaveLength(1);
+      expect(refus[0].reason).toBeInstanceOf(ConflictException);
+    });
+
+    it.each([
+      new CreditsInsuffisantsException(4, 1),
+      new ForbiddenException('Quota'),
+      new ServiceUnavailableException('Coupé'),
+    ])('refus avant l’appel (402/403/503) : la prise est rendue, la tâche retrouve son état', async (erreur) => {
+      prisma.tasks.findFirst.mockResolvedValue({ ...TACHE, ai_status: 'refuse', ai_run_at: new Date('2026-10-01') });
+      claude.generateStructuredOutput.mockRejectedValue(erreur);
+
+      await expect(service.runTask('u1', 'p1', 't1')).rejects.toBe(erreur);
+
+      expect(prisma.tasks.updateMany).toHaveBeenLastCalledWith({
+        where: { id: 't1', ai_status: 'en_cours' },
+        data: { ai_status: 'refuse', ai_run_at: new Date('2026-10-01') },
+      });
+    });
+
+    it('résultat obtenu mais pas enregistré : les crédits sont rendus', async () => {
+      reserveEtRepond({ kind: 'livrable', titre: 'x', contenu: 'y' });
+      prisma.tasks.update.mockRejectedValue(new Error('tâche supprimée entre-temps'));
+
+      await expect(service.runTask('u1', 'p1', 't1')).rejects.toThrow('tâche supprimée');
+
+      expect(credits.rendreResultatNonEnregistre).toHaveBeenCalledWith('debit-tache');
+    });
+
+    it('résultat enregistré : rien n’est rendu', async () => {
+      reserveEtRepond({ kind: 'livrable', titre: 'x', contenu: 'y' });
+
+      await service.runTask('u1', 'p1', 't1');
+
+      expect(credits.rendreResultatNonEnregistre).not.toHaveBeenCalled();
+    });
   });
 
   it("6c. le prompt de la tâche contient le projet (titre, description, secteur) et la tâche", async () => {
@@ -432,6 +568,116 @@ describe('ExecutionService', () => {
 
       expect(prisma.project_compliance_ai_runs.upsert).toHaveBeenCalledTimes(1);
       expect(prisma.project_compliance_ai_runs.upsert.mock.calls[0][0].update.status).toBe('a_valider');
+    });
+
+    describe('une seule exécution à la fois', () => {
+      it('sans ligne : la prise crée la ligne « en cours » avant l’appel', async () => {
+        claude.generateStructuredOutput.mockResolvedValue({ ...REPONSE });
+
+        await service.runCompliance('u1', 'p1', 'r1');
+
+        expect(prisma.project_compliance_ai_runs.create).toHaveBeenCalledWith({
+          data: { project_id: 'p1', requirement_id: 'r1', status: 'en_cours', updated_at: expect.any(Date) },
+        });
+        expect(prisma.project_compliance_ai_runs.create.mock.invocationCallOrder[0]).toBeLessThan(
+          claude.generateStructuredOutput.mock.invocationCallOrder[0],
+        );
+      });
+
+      it('création concurrente (P2002) : 409 « Déjà en cours. », sans appel', async () => {
+        prisma.project_compliance_ai_runs.create.mockRejectedValue(Object.assign(new Error('unique'), { code: 'P2002' }));
+        prisma.project_compliance_ai_runs.findUnique
+          .mockResolvedValueOnce(null)
+          .mockResolvedValue({ ...RUN, status: 'en_cours' });
+
+        await expect(service.runCompliance('u1', 'p1', 'r1')).rejects.toMatchObject({ status: 409, message: 'Déjà en cours.' });
+        expect(claude.generateStructuredOutput).not.toHaveBeenCalled();
+      });
+
+      it('avec ligne : prise conditionnelle (libre, ou « en cours » depuis plus de 15 minutes)', async () => {
+        run('echec');
+        claude.generateStructuredOutput.mockResolvedValue({ ...REPONSE });
+
+        await service.runCompliance('u1', 'p1', 'r1');
+
+        const prise = prisma.project_compliance_ai_runs.updateMany.mock.calls[0][0];
+        expect(prise.where).toEqual({
+          id: 'run1',
+          OR: [
+            { status: { notIn: ['en_cours', 'a_valider', 'valide'] } },
+            { status: 'en_cours', OR: [{ updated_at: null }, { updated_at: { lt: expect.any(Date) } }] },
+          ],
+        });
+        expect(prise.data).toEqual({ status: 'en_cours', updated_at: expect.any(Date) });
+      });
+
+      it('prise perdue sur une ligne existante : 409, sans appel', async () => {
+        run('echec');
+        prisma.project_compliance_ai_runs.updateMany.mockResolvedValue({ count: 0 });
+
+        await expect(service.runCompliance('u1', 'p1', 'r1')).rejects.toBeInstanceOf(ConflictException);
+        expect(claude.generateStructuredOutput).not.toHaveBeenCalled();
+      });
+
+      it('402 : la ligne créée par la prise est retirée', async () => {
+        claude.generateStructuredOutput.mockRejectedValue(new CreditsInsuffisantsException(7, 2));
+
+        await expect(service.runCompliance('u1', 'p1', 'r1')).rejects.toBeInstanceOf(CreditsInsuffisantsException);
+
+        expect(prisma.project_compliance_ai_runs.deleteMany).toHaveBeenCalledWith({
+          where: { project_id: 'p1', requirement_id: 'r1', status: 'en_cours' },
+        });
+      });
+
+      it('402 : une ligne existante retrouve son statut', async () => {
+        run('refuse', { refusal_reason: 'Trop vague' });
+        claude.generateStructuredOutput.mockRejectedValue(new CreditsInsuffisantsException(7, 2));
+
+        await expect(service.runCompliance('u1', 'p1', 'r1')).rejects.toBeInstanceOf(CreditsInsuffisantsException);
+
+        expect(prisma.project_compliance_ai_runs.updateMany).toHaveBeenLastCalledWith({
+          where: { id: 'run1', status: 'en_cours' },
+          data: { status: 'refuse' },
+        });
+        expect(prisma.project_compliance_ai_runs.deleteMany).not.toHaveBeenCalled();
+      });
+
+      it('deux exécutions simultanées : un seul appel, donc un seul débit', async () => {
+        let ligne: { status: string } | null = null;
+        prisma.project_compliance_ai_runs.findUnique.mockImplementation(async () => (ligne ? { ...RUN, ...ligne } : null));
+        prisma.project_compliance_ai_runs.create.mockImplementation(async ({ data }) => {
+          await new Promise((r) => setImmediate(r));
+          if (ligne) throw Object.assign(new Error('unique'), { code: 'P2002' });
+          ligne = { status: data.status };
+          return { ...RUN, ...data };
+        });
+        claude.generateStructuredOutput.mockImplementation(async () => {
+          await new Promise((r) => setTimeout(r, 5));
+          return { ...REPONSE };
+        });
+
+        const issues = await Promise.allSettled([
+          service.runCompliance('u1', 'p1', 'r1'),
+          service.runCompliance('u1', 'p1', 'r1'),
+        ]);
+
+        expect(claude.generateStructuredOutput).toHaveBeenCalledTimes(1);
+        expect(issues.filter((i) => i.status === 'rejected')).toHaveLength(1);
+      });
+
+      it('résultat obtenu mais pas enregistré : les crédits sont rendus', async () => {
+        claude.generateStructuredOutput.mockImplementation(
+          async (requete: { surReservation?: (r: { id: string; credits: number; soldeApres: number }) => void }) => {
+            requete.surReservation?.({ id: 'debit-conformite', credits: 7, soldeApres: 23 });
+            return { ...REPONSE };
+          },
+        );
+        prisma.project_compliance_ai_runs.upsert.mockRejectedValue(new Error('db down'));
+
+        await expect(service.runCompliance('u1', 'p1', 'r1')).rejects.toThrow('db down');
+
+        expect(credits.rendreResultatNonEnregistre).toHaveBeenCalledWith('debit-conformite');
+      });
     });
 
     it('C9. IGINI lit la source : web_fetch limité au seul site de la source', async () => {

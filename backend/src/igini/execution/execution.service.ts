@@ -1,5 +1,6 @@
-import { BadRequestException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { ComplianceService } from '../../compliance/compliance.service.js';
+import { CreditsService, EN_COURS_EXPIRE_MS } from '../../credits/credits.service.js';
 import type { project_compliance_ai_runs } from '../../generated/prisma/client.js';
 import { exigerCapacite } from '../../equipe/acces-projet.js';
 import type { Capacite } from '../../equipe/droits-equipe.js';
@@ -15,8 +16,19 @@ import {
 } from './execution-schema.js';
 import { promptExigence, promptTache } from './execution-prompts.js';
 
-/** Statuts IA possibles d'un résultat (tâche ou exigence). */
-type StatutIa = 'a_valider' | 'valide' | 'refuse' | 'echec';
+/**
+ * Statuts IA possibles d'un résultat (tâche ou exigence). `en_cours` : une
+ * exécution est partie (voir `prendre*`) — jamais montré comme un résultat.
+ */
+type StatutIa = 'a_valider' | 'valide' | 'refuse' | 'echec' | 'en_cours';
+
+/** Une exécution en cours ne se relance pas, un résultat déjà là non plus. */
+const NON_RELANCABLES = ['en_cours', 'a_valider', 'valide'];
+const DEJA_EN_COURS = 'Déjà en cours.';
+
+function estViolationUnique(erreur: unknown): boolean {
+  return typeof erreur === 'object' && erreur !== null && (erreur as { code?: unknown }).code === 'P2002';
+}
 
 const SYSTEM_PROMPT = buildSystemPrompt(`Ici, on te confie une tâche du projet. Si le travail est
 rédigeable (texte, brouillon, tableau, message), fais-le réellement et renvoie-le comme livrable.
@@ -64,6 +76,22 @@ const DEJA_EXECUTEES = ['a_valider', 'valide'];
  * Fait exécuter une tâche par IGINI, sous supervision humaine : le résultat
  * reste « à valider » tant que la personne ne l'a pas acceptée, et seule la
  * validation fait passer la tâche à « done ».
+ *
+ * ## Une seule exécution à la fois, et jamais deux débits pour un résultat
+ *
+ * Deux clics (ou deux onglets) lançaient deux appels, donc deux débits, pour
+ * un seul résultat gardé. Avant de réserver quoi que ce soit, l'exécution
+ * PREND la tâche (ou l'exigence) : une écriture conditionnelle la passe
+ * « en cours » si elle est libre. Perdue, la demande répond 409 « Déjà en
+ * cours. » sans appel ni débit. La prise tombe d'elle-même au résultat
+ * (« à valider ») ou à l'échec (« echec ») ; un refus avant l'appel (402,
+ * 403, 503) rend l'état d'avant. Une prise de plus de 15 minutes — serveur
+ * arrêté pendant l'appel — est tenue pour abandonnée. Aucune colonne de
+ * plus : `ai_status`/`ai_run_at` pour la tâche, `status`/`updated_at`
+ * pour l'exigence.
+ *
+ * Un résultat obtenu mais qu'on ne peut pas enregistrer (tâche supprimée
+ * entre-temps, base indisponible) ne se paie pas : ses crédits sont rendus.
  */
 @Injectable()
 export class ExecutionService {
@@ -72,6 +100,7 @@ export class ExecutionService {
     private readonly claude: ClaudeService,
     private readonly automation: AutomationService,
     private readonly compliance: ComplianceService,
+    private readonly credits: CreditsService,
   ) {}
 
   async runTask(userId: string, projectId: string, taskId: string) {
@@ -89,6 +118,10 @@ export class ExecutionService {
       return task;
     }
 
+    const prise = await this.prendreTache(taskId);
+    if (prise.dejaFaite) return prise.dejaFaite;
+
+    let reservationId: string | null = null;
     const resultat = await this.appelerClaude(
       () =>
         this.claude.generateStructuredOutput({
@@ -99,25 +132,65 @@ export class ExecutionService {
           userErrorMessage: "L'exécution de la tâche a échoué, réessaie dans un instant.",
           // Les crédits du propriétaire paient ; la personne qui lance reste l'acteur.
           usage: { userId: projet.owner_id, actorId: userId, projectId, generator: 'executer' },
+          surReservation: (reservation) => {
+            reservationId = reservation.id;
+          },
         }),
       () =>
         this.prisma.tasks.update({
           where: { id: taskId },
           data: { ai_status: 'echec', ai_run_at: new Date() },
         }),
+      // Refusé avant l'appel : la tâche retrouve l'état qu'elle avait.
+      () =>
+        this.prisma.tasks.updateMany({
+          where: { id: taskId, ai_status: 'en_cours' },
+          data: { ai_status: task.ai_status, ai_run_at: task.ai_run_at },
+        }),
     );
 
     // Hors du try : un échec d'enregistrement ne doit pas écrire « echec ».
-    return this.prisma.tasks.update({
-      where: { id: taskId },
-      data: {
-        ai_status: 'a_valider',
-        ai_result_kind: resultat.kind,
-        ai_result: formaterResultat(resultat),
-        ai_refusal_reason: null,
-        ai_run_at: new Date(),
+    try {
+      return await this.prisma.tasks.update({
+        where: { id: taskId },
+        data: {
+          ai_status: 'a_valider',
+          ai_result_kind: resultat.kind,
+          ai_result: formaterResultat(resultat),
+          ai_refusal_reason: null,
+          ai_run_at: new Date(),
+        },
+      });
+    } catch (erreur) {
+      await this.credits.rendreResultatNonEnregistre(reservationId);
+      throw erreur;
+    }
+  }
+
+  /**
+   * Passe la tâche « en cours », si elle est libre : sans statut, refusée,
+   * en échec — ou « en cours » depuis plus de 15 minutes (abandonnée). Une
+   * prise perdue face à une exécution qui vient de finir rend la tâche telle
+   * quelle (idempotence) ; sinon 409, sans appel ni débit.
+   */
+  private async prendreTache(taskId: string) {
+    const maintenant = new Date();
+    const abandonneeAvant = new Date(maintenant.getTime() - EN_COURS_EXPIRE_MS);
+    const { count } = await this.prisma.tasks.updateMany({
+      where: {
+        id: taskId,
+        OR: [
+          { ai_status: null },
+          { ai_status: { notIn: NON_RELANCABLES } },
+          { ai_status: 'en_cours', OR: [{ ai_run_at: null }, { ai_run_at: { lt: abandonneeAvant } }] },
+        ],
       },
+      data: { ai_status: 'en_cours', ai_run_at: maintenant },
     });
+    if (count > 0) return { dejaFaite: null };
+    const relue = await this.prisma.tasks.findUnique({ where: { id: taskId } });
+    if (relue && dejaExecute(relue.ai_status)) return { dejaFaite: relue };
+    throw new ConflictException(DEJA_EN_COURS);
   }
 
   async validateTask(userId: string, projectId: string, taskId: string) {
@@ -153,6 +226,10 @@ export class ExecutionService {
       return run;
     }
 
+    const prise = await this.prendreExigence(projectId, requirementId, run);
+    if (prise.dejaFaite) return prise.dejaFaite;
+
+    let reservationId: string | null = null;
     const resultat = await this.appelerClaude(
       () =>
         this.claude.generateStructuredOutput({
@@ -171,20 +248,83 @@ export class ExecutionService {
             maxUses: LECTURES_MAX,
             maxContentTokens: TOKENS_MAX_PAR_PAGE,
           },
+          surReservation: (reservation) => {
+            reservationId = reservation.id;
+          },
         }),
       () => this.saveCompliance(projectId, requirementId, { status: 'echec' }),
+      // Refusé avant l'appel : la ligne créée par la prise part, une ligne
+      // existante retrouve son statut.
+      () =>
+        run
+          ? this.prisma.project_compliance_ai_runs.updateMany({
+              where: { id: run.id, status: 'en_cours' },
+              data: { status: run.status },
+            })
+          : this.prisma.project_compliance_ai_runs.deleteMany({
+              where: { project_id: projectId, requirement_id: requirementId, status: 'en_cours' },
+            }),
     );
 
     // Hors du try : un échec d'enregistrement ne doit pas écrire « echec ».
-    return this.saveCompliance(projectId, requirementId, {
-      status: 'a_valider',
-      result_kind: resultat.kind,
-      result: formaterConformite(resultat, resultat.pagesLues, {
-        name: exigence.source_name,
-        url: exigence.source_url,
-      }),
-      refusal_reason: null,
+    try {
+      return await this.saveCompliance(projectId, requirementId, {
+        status: 'a_valider',
+        result_kind: resultat.kind,
+        result: formaterConformite(resultat, resultat.pagesLues, {
+          name: exigence.source_name,
+          url: exigence.source_url,
+        }),
+        refusal_reason: null,
+      });
+    } catch (erreur) {
+      await this.credits.rendreResultatNonEnregistre(reservationId);
+      throw erreur;
+    }
+  }
+
+  /**
+   * Passe l'exigence « en cours » (même règle que `prendreTache`). Sans
+   * ligne, la prise la crée : l'unicité (projet, exigence) fait perdre la
+   * seconde de deux créations simultanées.
+   */
+  private async prendreExigence(
+    projectId: string,
+    requirementId: string,
+    run: ComplianceAiRun | null,
+  ): Promise<{ dejaFaite: ComplianceAiRun | null }> {
+    const maintenant = new Date();
+    const abandonneeAvant = new Date(maintenant.getTime() - EN_COURS_EXPIRE_MS);
+    let prise: boolean;
+    if (!run) {
+      try {
+        await this.prisma.project_compliance_ai_runs.create({
+          data: { project_id: projectId, requirement_id: requirementId, status: 'en_cours', updated_at: maintenant },
+        });
+        prise = true;
+      } catch (erreur) {
+        if (!estViolationUnique(erreur)) throw erreur;
+        prise = false;
+      }
+    } else {
+      const { count } = await this.prisma.project_compliance_ai_runs.updateMany({
+        where: {
+          id: run.id,
+          OR: [
+            { status: { notIn: NON_RELANCABLES } },
+            { status: 'en_cours', OR: [{ updated_at: null }, { updated_at: { lt: abandonneeAvant } }] },
+          ],
+        },
+        data: { status: 'en_cours', updated_at: maintenant },
+      });
+      prise = count > 0;
+    }
+    if (prise) return { dejaFaite: null };
+    const relue = await this.prisma.project_compliance_ai_runs.findUnique({
+      where: { project_id_requirement_id: { project_id: projectId, requirement_id: requirementId } },
     });
+    if (relue && dejaExecute(relue.status)) return { dejaFaite: relue };
+    throw new ConflictException(DEJA_EN_COURS);
   }
 
   async validateCompliance(userId: string, projectId: string, requirementId: string): Promise<ComplianceAiRun> {
@@ -210,13 +350,18 @@ export class ExecutionService {
   }
 
   /**
-   * Appel Claude commun aux tâches et à la conformité. Offre, quota, plafond de
-   * coût, générateurs coupés (403/503) : rien n'a été tenté, on relance sans
-   * rien écrire. Toute autre erreur appelle `onEchec` (qui écrit « echec »)
-   * puis est relancée. Seul l'appel est dans le try : l'enregistrement du
-   * résultat, fait par l'appelant, ne peut donc jamais écrire « echec ».
+   * Appel Claude commun aux tâches et à la conformité. Crédits, plafond de
+   * coût, générateurs coupés (402/403/503) : rien n'a été tenté — `onRefus`
+   * rend la prise (l'état d'avant), et l'erreur est relancée. Toute autre
+   * erreur appelle `onEchec` (qui écrit « echec ») puis est relancée. Seul
+   * l'appel est dans le try : l'enregistrement du résultat, fait par
+   * l'appelant, ne peut donc jamais écrire « echec ».
    */
-  private async appelerClaude<R>(lancer: () => Promise<R>, onEchec: () => Promise<unknown>): Promise<R> {
+  private async appelerClaude<R>(
+    lancer: () => Promise<R>,
+    onEchec: () => Promise<unknown>,
+    onRefus: () => Promise<unknown>,
+  ): Promise<R> {
     try {
       return await lancer();
     } catch (erreur) {
@@ -224,7 +369,9 @@ export class ExecutionService {
       // 402 (crédits insuffisants, garde-fou de coût), 403, 503 : refusé avant
       // tout appel IA. IGINI n'a rien tenté — écrire « echec » ferait croire
       // à une panne, et la tâche quitterait sa sélection.
-      if (status !== 402 && status !== 403 && status !== 503) {
+      if (status === 402 || status === 403 || status === 503) {
+        await onRefus();
+      } else {
         await onEchec();
       }
       throw erreur;

@@ -3,6 +3,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthModule } from '../../auth/auth.module.js';
 import { AutomationModule } from '../automation/automation.module.js';
 import { ComplianceModule } from '../../compliance/compliance.module.js';
+import { CreditsModule } from '../../credits/credits.module.js';
 import { ClaudeModule } from '../claude/claude.module.js';
 import { ExecutionController } from './execution.controller.js';
 import { ExecutionService } from './execution.service.js';
@@ -17,6 +18,7 @@ import { ExecutionService } from './execution.service.js';
     ClaudeModule,
     AutomationModule,
     ComplianceModule,
+    CreditsModule,
   ],
   controllers: [ExecutionController],
   providers: [ExecutionService],
