@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
 import { createRouterMock, mockApiRoutes, signInAs } from '@/test-utils/mocks';
@@ -30,8 +30,9 @@ function mois(overrides: Record<string, unknown> = {}) {
       plafond_atteint: false,
       message: null,
       bientot_atteint: false,
-      restant: { analyses: 38, euros: 6.6 },
-      plafonds: { analyses_par_mois: 50, euros_par_mois: 10 },
+      // Depuis les crédits : plus d'analyses incluses, le serveur rend null.
+      restant: { analyses: null, euros: 6.6 },
+      plafonds: { analyses_par_mois: null, euros_par_mois: 10 },
     },
     ...overrides,
   };
@@ -63,6 +64,7 @@ function routes(overrides: Record<string, { status: number; body: unknown }> = {
   return {
     'GET /igini/usage/mois-en-cours': { status: 200, body: mois() },
     'GET /igini/usage/historique': { status: 200, body: historique() },
+    'GET /credits': { status: 200, body: { solde: 26, bareme: { actions: [] }, historique: [] } },
     ...overrides,
   };
 }
@@ -74,7 +76,7 @@ describe('AiUsagePage', () => {
     signInAs('tok123', { id: 'u1', email: 'a@b.com' });
   });
 
-  it('montre ce qui est utilisé, ce qui reste, et ce que ça a coûté', async () => {
+  it('montre ce qui est utilisé, le solde de crédits, et ce que ça a coûté', async () => {
     mockApiRoutes(routes());
 
     render(
@@ -84,8 +86,24 @@ describe('AiUsagePage', () => {
     );
 
     expect(await screen.findByText('12')).toBeInTheDocument();
-    expect(screen.getByText('38')).toBeInTheDocument();
+    // Là où se lisait le quota d'analyses : le solde, en or, qui mène à « Mes crédits ».
+    const lien = await screen.findByRole('link', { name: 'Mes crédits' });
+    expect(lien).toHaveAttribute('href', '/credits');
+    expect(await within(lien).findByText('26')).toHaveClass('credits-montant');
     expect(screen.getAllByText(/3,40/).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Analyses restantes|incluses ce mois-ci/)).not.toBeInTheDocument();
+  });
+
+  it('garde le lien vers « Mes crédits » quand le solde ne se lit pas', async () => {
+    mockApiRoutes(routes({ 'GET /credits': { status: 500, body: { message: 'Panne.' } } }));
+
+    render(
+      <AuthProvider>
+        <AiUsagePage />
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByRole('link', { name: 'Mes crédits' })).toHaveTextContent('Voir');
   });
 
   it('nomme le générateur « executer » « Exécution de tâches »', async () => {
@@ -155,7 +173,8 @@ describe('AiUsagePage', () => {
       </AuthProvider>,
     );
 
-    expect(await screen.findByText(/approches du plafond/)).toBeInTheDocument();
+    expect(await screen.findByText(/approches du garde-fou/)).toBeInTheDocument();
+    expect(screen.getByText(/distinct de ton solde de crédits/)).toBeInTheDocument();
   });
 
   it('affiche le refus quand le plafond est atteint', async () => {
@@ -241,29 +260,30 @@ describe('AiUsagePage', () => {
     expect(await screen.findByText(/rien n'a été dépensé/)).toBeInTheDocument();
   });
 
-  it('dit sur combien porte le reste, et qui fixe ce combien', async () => {
-    // « Il me reste 2 » ne veut rien dire tant qu'on ne sait pas 2 sur
-    // combien. Et le combien a une provenance : le produit a longtemps
-    // affiché son garde-fou technique (5) au lieu du chiffre de l'offre
-    // (3 en Découverte), donc un compteur juste à l'unité près et faux sur
-    // le plafond. Nommer la source est ce qui rend l'erreur visible.
+  it('dit que ce qui se paie, ce sont des crédits, et nomme le garde-fou', async () => {
+    mockApiRoutes(routes());
+
+    render(
+      <AuthProvider>
+        <AiUsagePage />
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByText(/Ce que tu paies, ce sont des crédits/)).toBeInTheDocument();
+    expect(screen.getByText(/Garde-fou anti-abus du mois : 10,00 €/)).toBeInTheDocument();
+    expect(screen.queryByText(/offre|analyses incluses/)).not.toBeInTheDocument();
+  });
+
+  it('nomme les appels des crédits (chat, statuts, conformité…)', async () => {
     mockApiRoutes(
       routes({
         'GET /igini/usage/mois-en-cours': {
           status: 200,
           body: mois({
-            quota: {
-              autorise: true,
-              plafond_atteint: false,
-              message: null,
-              bientot_atteint: false,
-              restant: { analyses: 2, euros: 1.8 },
-              plafonds: {
-                analyses_par_mois: 3,
-                analyses_selon: 'offre decouverte',
-                euros_par_mois: 2,
-              },
-            },
+            par_generateur: [
+              { generateur: 'discuter', appels: 3, tokens_entree: 900, tokens_sortie: 90, dont_reflexion: 0, cout_euros: 0.02 },
+              { generateur: 'statuts', appels: 1, tokens_entree: 1500, tokens_sortie: 5000, dont_reflexion: 0, cout_euros: 0.12 },
+            ],
           }),
         },
       }),
@@ -275,9 +295,8 @@ describe('AiUsagePage', () => {
       </AuthProvider>,
     );
 
-    expect(await screen.findByText(/Sur les 3 incluses ce mois-ci/)).toBeInTheDocument();
-    expect(screen.getByText(/offre decouverte/)).toBeInTheDocument();
-    expect(screen.getByText(/repart au premier jour du mois prochain/)).toBeInTheDocument();
+    expect(await screen.findByText('Chat')).toBeInTheDocument();
+    expect(screen.getByText('Statuts')).toBeInTheDocument();
   });
 
   it('détaille chaque appel avec son modèle et son coût', async () => {

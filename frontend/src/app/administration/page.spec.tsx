@@ -36,6 +36,10 @@ describe('AdministrationPage', () => {
       'href',
       '/identite/revue',
     );
+    expect(screen.getByRole('link', { name: 'Crédits des comptes' })).toHaveAttribute(
+      'href',
+      '/administration/credits',
+    );
   });
 
   it('dit que la page est réservée aux administrateurs sur un 403', async () => {

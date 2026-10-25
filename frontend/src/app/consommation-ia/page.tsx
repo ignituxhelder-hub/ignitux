@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Brand } from '@/components/ignitux-mark';
@@ -16,6 +17,11 @@ const GENERATEURS: Record<string, string> = {
   developper: 'Développer',
   transmettre: 'Transmettre',
   executer: 'Exécution de tâches',
+  discuter: 'Chat',
+  evaluer: 'Évaluation de financement',
+  questionner: 'Questions du questionnaire',
+  statuts: 'Statuts',
+  conformite: 'Conformité',
 };
 
 /** Euros décimaux → texte. Distinct de `euros()`, qui part de centimes entiers. */
@@ -37,6 +43,11 @@ function milliers(n: number): string {
  * tombe sans prévenir, au moment précis où la personne avait préparé son
  * travail.
  *
+ * Depuis les crédits IGINI (2026-10-25), il n'y a plus d'analyses « incluses
+ * ce mois-ci » : chaque action se paie en crédits, et ce qui reste se lit
+ * dans « Mes crédits ». Cette page garde ce que l'IA a réellement coûté, et le
+ * garde-fou de coût par compte (anti-abus), qui n'est pas le solde.
+ *
  * Deux honnêtetés tenues ici :
  *
  * — Le coût est **dérivé**, pas facturé. Il est calculé depuis une grille
@@ -51,6 +62,8 @@ export default function AiUsagePage() {
 
   const [mois, setMois] = useState<AiUsageMonth | null>(null);
   const [historique, setHistorique] = useState<AiUsageHistory | null>(null);
+  // Le solde de crédits, là où se lisait le quota d'analyses : null tant qu'on ne le sait pas.
+  const [solde, setSolde] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,6 +82,11 @@ export default function AiUsagePage() {
         setError(err instanceof ApiError ? err.message : 'Impossible de lire ta consommation.'),
       )
       .finally(() => setIsLoading(false));
+    // Pas bloquant : sans le solde, le lien vers « Mes crédits » reste.
+    api
+      .getCredits(token)
+      .then((vue) => setSolde(typeof vue?.solde === 'number' ? vue.solde : null))
+      .catch(() => setSolde(null));
   }, [isReady, token, router]);
 
   if (!isReady || !token) return null;
@@ -92,8 +110,8 @@ export default function AiUsagePage() {
       {quota && !quota.plafond_atteint && quota.bientot_atteint && (
         <p className="notice">
           <span>
-            Tu approches du plafond mensuel. Mieux vaut le savoir maintenant qu&apos;au moment
-            de lancer une analyse.
+            Tu approches du garde-fou de coût IA du mois : un plafond anti-abus, distinct de ton
+            solde de crédits. Une fois atteint, IGINI s&apos;arrête jusqu&apos;au mois prochain.
           </span>
         </p>
       )}
@@ -109,18 +127,25 @@ export default function AiUsagePage() {
                 gap: '1rem',
               }}
             >
-              <Chiffre libelle="Analyses utilisées" valeur={milliers(mois.appels)} />
-              <Chiffre
-                libelle="Analyses restantes"
-                valeur={
-                  mois.quota.restant.analyses === null
-                    ? 'sans plafond'
-                    : milliers(mois.quota.restant.analyses)
-                }
-              />
+              <Chiffre libelle="Appels ce mois-ci" valeur={milliers(mois.appels)} />
+              {/* Là où se lisait le quota d'analyses : ce qui reste, ce sont des crédits. */}
+              <div>
+                <p className="muted" style={{ margin: 0, fontSize: '0.8rem' }}>
+                  Mes crédits
+                </p>
+                <p style={{ margin: '0.25rem 0 0', fontSize: '1.4rem' }}>
+                  <Link href="/credits" aria-label="Mes crédits">
+                    {solde === null ? (
+                      'Voir'
+                    ) : (
+                      <span className="credits-montant">{milliers(solde)}</span>
+                    )}
+                  </Link>
+                </p>
+              </div>
               <Chiffre libelle="Coût total" valeur={eurosDepuisNombre(mois.cout.euros)} />
               <Chiffre
-                libelle="Budget restant"
+                libelle="Avant le garde-fou"
                 valeur={
                   mois.quota.restant.euros === null
                     ? '—'
@@ -129,29 +154,13 @@ export default function AiUsagePage() {
               />
             </div>
 
-            {mois.quota.plafonds.analyses_par_mois !== null && (
-              <p className="muted" style={{ marginTop: '1rem', marginBottom: 0 }}>
-                {/* Un compteur sans son plafond ne se lit pas : « il me reste 2 »
-                    ne veut rien dire tant qu'on ne sait pas 2 sur combien, ni
-                    qui fixe ce combien. */}
-                Sur les {milliers(mois.quota.plafonds.analyses_par_mois)} incluses ce mois-ci
-                {mois.quota.plafonds.analyses_selon
-                  ? ` par ton ${mois.quota.plafonds.analyses_selon}`
-                  : ''}
-                . Le compteur repart au premier jour du mois prochain.
-              </p>
-            )}
-
             <p className="muted" style={{ marginTop: '1rem', marginBottom: 0 }}>
               Coût <strong>estimé</strong> depuis la grille tarifaire du {mois.cout.grille_du} —
               ce n&apos;est pas un montant facturé, c&apos;est un calcul à partir des jetons
-              réellement consommés. Plafonds du mois :{' '}
-              {mois.quota.plafonds.analyses_par_mois === null
-                ? 'aucun plafond en nombre'
-                : `${milliers(mois.quota.plafonds.analyses_par_mois)} analyses`}
-              {' · '}
+              réellement consommés. Ce que tu paies, ce sont des crédits, au prix affiché avant
+              chaque action. Garde-fou anti-abus du mois :{' '}
               {mois.quota.plafonds.euros_par_mois === null
-                ? 'aucun plafond en euros'
+                ? 'aucun'
                 : eurosDepuisNombre(mois.quota.plafonds.euros_par_mois)}
               .
             </p>

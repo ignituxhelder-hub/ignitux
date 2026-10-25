@@ -1,203 +1,31 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import { Brand } from '@/components/ignitux-mark';
-import { api, ApiError, type CatalogueOffres, type Offre } from '@/lib/api';
-import { useAuth } from '@/lib/auth';
-import { euros } from '@/lib/montants';
-
-const GENERATEURS: Record<string, string> = {
-  analyser: 'Analyser',
-  former: 'Former',
-  construire: 'Construire',
-  financer: 'Financer',
-  developper: 'Développer',
-  transmettre: 'Transmettre',
-};
+import { useEffect } from 'react';
 
 /**
- * LES OFFRES — et ce qu'on refuse de leur faire dire.
+ * L'ANCIENNE PAGE DES OFFRES.
  *
- * ## Pas de bouton qui ne mène nulle part
- *
- * Tant qu'aucun fournisseur de paiement n'encaisse, la page n'affiche aucun
- * bouton « Choisir ». Trois boutons qui échoueraient tous seraient la pire
- * version de cet écran : la personne conclurait que le produit est cassé,
- * pas qu'il n'est pas encore en vente.
- *
- * ## Ce que la gratuite comporte, et pas seulement ce qui lui manque
- *
- * Une grille d'offres se lit d'habitude comme une liste de privations. Ici
- * la colonne gratuite dit d'abord ce qu'elle donne — un projet entier, les
- * tâches, la mémoire, la conformité, les scores — parce que c'est vrai et
- * que c'est le produit. Ce qui coûte à chaque clic est ailleurs, et c'est
- * la seule frontière.
+ * Depuis le 2026-10-25 il n'y a plus d'abonnement : tous les outils sont
+ * gratuits, seules les actions IGINI se paient, en crédits (voir
+ * docs/superpowers/specs/2026-10-25-credits-design.md). Un favori, un lien
+ * ancien ou une tâche du bureau qui pointe encore ici mène à « Mes crédits ».
  */
 export default function OffresPage() {
-  const { token, isReady } = useAuth();
   const router = useRouter();
 
-  const [catalogue, setCatalogue] = useState<CatalogueOffres | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const charger = useCallback(async () => {
-    if (!token) return;
-    setIsLoading(true);
-    try {
-      setCatalogue(await api.getOffres(token));
-      setError(null);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Impossible de charger les offres.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token]);
-
   useEffect(() => {
-    if (!isReady) return;
-    if (!token) {
-      router.replace('/login');
-      return;
-    }
-    void charger();
-  }, [isReady, token, router, charger]);
-
-  if (!isReady || !token) return null;
+    router.replace('/credits');
+  }, [router]);
 
   return (
-    <main className="page page--wide">
-      <div className="top-bar">
-        <Brand />
-      </div>
-
-      <h1>Offres</h1>
+    <main className="page">
+      <h1>Mes crédits</h1>
       <p className="muted">
-        Ce qui ne coûte rien à faire tourner est gratuit. Ce qui coûte à chaque clic — les
-        générateurs d&apos;IGINI — est payant, parce que chaque génération se paie en vrai.
+        Il n’y a plus d’offre à choisir : tout est gratuit, seules les actions d’IGINI se paient
+        en crédits. <Link href="/credits">Mes crédits</Link>
       </p>
-
-      {error && <p className="error">{error}</p>}
-      {isLoading && <p className="loading">Chargement…</p>}
-
-      {catalogue && !catalogue.souscriptionPossible && (
-        <p className="notice">
-          <span>
-            Aucun moyen de paiement n&apos;est en place pour l&apos;instant : ces offres
-            décrivent ce qui est prévu, rien ne peut encore être souscrit. Ton compte reste sur{' '}
-            {catalogue.offres.find((o) => o.actuelle)?.label ?? 'Découverte'}.
-          </span>
-        </p>
-      )}
-
-      {catalogue && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(17rem, 1fr))',
-            gap: '1rem',
-            marginTop: '1.5rem',
-          }}
-        >
-          {catalogue.offres.map((offre) => (
-            <CarteOffre
-              key={offre.id}
-              offre={offre}
-              souscriptionPossible={catalogue.souscriptionPossible}
-            />
-          ))}
-        </div>
-      )}
-
     </main>
-  );
-}
-
-function CarteOffre({
-  offre,
-  souscriptionPossible,
-}: {
-  offre: Offre;
-  souscriptionPossible: boolean;
-}) {
-  const { capacites } = offre;
-
-  return (
-    <div
-      className="card"
-      style={{
-        marginTop: 0,
-        borderColor: offre.actuelle ? 'var(--accent, var(--border))' : undefined,
-      }}
-    >
-      <div className="top-bar" style={{ gap: '1rem', alignItems: 'baseline' }}>
-        <h2 style={{ margin: 0 }}>{offre.label}</h2>
-        <strong style={{ whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
-          {offre.prixCentimes === 0 ? 'Gratuit' : `${euros(offre.prixCentimes)} / mois`}
-        </strong>
-      </div>
-
-      {offre.actuelle && (
-        <p className="muted" style={{ marginTop: '0.25rem', marginBottom: 0 }}>
-          Ton offre actuelle.
-        </p>
-      )}
-
-      <p style={{ marginTop: '0.75rem' }}>{offre.resume}</p>
-
-      <ul style={{ listStyle: 'none', margin: '0.75rem 0 0', padding: 0 }}>
-        <Ligne
-          texte={
-            capacites.projets === null
-              ? 'Projets sans limite'
-              : `${capacites.projets} projet${capacites.projets > 1 ? 's' : ''}`
-          }
-        />
-        <Ligne
-          texte={
-            capacites.appelsIaParMois === null
-              ? 'Générations sans limite'
-              : `${capacites.appelsIaParMois} générations par mois`
-          }
-        />
-        <Ligne
-          texte={
-            capacites.generateurs.length === 0
-              ? 'Aucun générateur'
-              : capacites.generateurs.map((g) => GENERATEURS[g] ?? g).join(', ')
-          }
-        />
-        {capacites.outilsDeGestion && <Ligne texte="Comptabilité, facturation, banque" />}
-        {capacites.investisseurs && <Ligne texte="Financement et investisseurs" />}
-        {capacites.collaborateurs === null && <Ligne texte="Collaborateurs sans limite" />}
-        {/* Comprise dans l'offre : IGINI rédige, Ignitux relit, voir la fiche projet. */}
-        {capacites.evaluationFinancement && (
-          <Ligne texte="Évaluation de financement incluse : audit, faisabilité, dossier, risque" />
-        )}
-      </ul>
-
-      {offre.argument && (
-        <p className="muted" style={{ marginTop: '0.75rem', marginBottom: 0 }}>
-          {offre.argument}
-        </p>
-      )}
-
-      {/* Aucun bouton tant que rien n'encaisse : un bouton qui échoue fait
-          croire à une panne, pas à une offre pas encore ouverte. */}
-      {souscriptionPossible && !offre.actuelle && (
-        <button className="primary" type="button" style={{ marginTop: '1rem' }}>
-          Choisir {offre.label}
-        </button>
-      )}
-    </div>
-  );
-}
-
-function Ligne({ texte }: { texte: string }) {
-  return (
-    <li className="muted" style={{ marginBottom: '0.25rem' }}>
-      {texte}
-    </li>
   );
 }

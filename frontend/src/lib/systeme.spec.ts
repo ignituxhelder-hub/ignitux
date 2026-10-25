@@ -41,6 +41,11 @@ describe('à quelle application appartient une adresse', () => {
     expect(applicationDe('/roles')?.id).toBe('compte');
   });
 
+  it("range « Mes crédits » et l'ancienne page des offres sous la même application", () => {
+    expect(applicationDe('/credits')?.nom).toBe('Mes crédits');
+    expect(applicationDe('/offres')?.id).toBe('offres');
+  });
+
   it("ne confond pas une adresse qui commence pareil", () => {
     expect(applicationDe('/projectsx')).toBeNull();
   });

@@ -36,7 +36,9 @@ export const APPS_SYSTEME: readonly AppSysteme[] = [
   { id: 'communaute', nom: 'Communauté', route: '/community' },
   { id: 'reseau', nom: 'Mentors & investisseurs', route: '/marketplace' },
   { id: 'profil', nom: 'Mon profil', route: '/profil' },
-  { id: 'offres', nom: 'Mon offre', route: '/offres' },
+  // L'identifiant reste « offres » (choix de bureau enregistrés) ; depuis le
+  // 2026-10-25 c'est « Mes crédits ». L'ancienne adresse y renvoie.
+  { id: 'offres', nom: 'Mes crédits', route: '/credits', aussi: ['/offres'] },
   { id: 'consommation-ia', nom: 'Consommation IA', route: '/consommation-ia' },
   { id: 'constitution', nom: 'Constitution', route: '/constitution' },
   // Les rôles se règlent avec le compte : ce sont des casquettes, pas une

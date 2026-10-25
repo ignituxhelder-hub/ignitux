@@ -141,7 +141,7 @@ describe('LanceurPage', () => {
         ],
         reglages: [
           ...LANCEUR.reglages,
-          { id: 'offres', nom: 'Mon offre', resume: 'Ton abonnement.', categorie: 'reglages', route: '/offres', horsOffre: false },
+          { id: 'offres', nom: 'Mes crédits', resume: 'Ton solde de crédits IGINI.', categorie: 'reglages', route: '/credits', horsOffre: false },
         ],
       };
 
@@ -191,7 +191,7 @@ describe('LanceurPage', () => {
         expect(screen.queryByRole('link', { name: 'Relations' })).not.toBeInTheDocument();
 
         fireEvent.click(screen.getByRole('button', { name: 'Ouvrir Réglages' }));
-        expect(screen.getByRole('link', { name: 'Mon offre' })).toHaveAttribute('href', '/offres');
+        expect(screen.getByRole('link', { name: 'Mes crédits' })).toHaveAttribute('href', '/credits');
 
         // Encore un cran, puis le bureau : Mes projets revient.
         fireEvent.click(screen.getByRole('button', { name: '← Entreprise' }));

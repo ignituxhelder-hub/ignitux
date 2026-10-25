@@ -32,7 +32,7 @@ describe('ProfilPage', () => {
       ['Mes informations', '/profil/informations'],
       ['Mon identité', '/identite'],
       ['Mes rôles', '/roles'],
-      ['Mon offre', '/offres'],
+      ['Mes crédits', '/credits'],
       ['Consommation IA', '/consommation-ia'],
       ['Mon compte', '/account'],
       ['Confidentialité', '/confidentialite'],

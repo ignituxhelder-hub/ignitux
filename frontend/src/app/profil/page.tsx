@@ -12,7 +12,7 @@ import { useAuth } from '@/lib/auth';
  *
  * Même idée que le dossier Entreprise du bureau : plutôt qu'un long
  * formulaire, des icônes qui disent où aller — ce qu'Ignitux sait de soi,
- * l'identité, les rôles, l'offre, la consommation, le compte, le cadre légal.
+ * l'identité, les rôles, les crédits, la consommation, le compte, le cadre légal.
  * Le formulaire de réponses n'a pas disparu : il est derrière « Mes
  * informations ».
  */
@@ -26,7 +26,7 @@ const ICONES_PROFIL: readonly {
   { id: 'informations', nom: 'Mes informations', route: '/profil/informations', glyphe: 'profil', categorie: 'creer' },
   { id: 'identite', nom: 'Mon identité', route: '/identite', glyphe: 'conformite', categorie: 'gerer' },
   { id: 'roles', nom: 'Mes rôles', route: '/roles', glyphe: 'collaborateurs', categorie: 'reseau' },
-  { id: 'offre', nom: 'Mon offre', route: '/offres', glyphe: 'offres', categorie: 'vendre' },
+  { id: 'credits', nom: 'Mes crédits', route: '/credits', glyphe: 'offres', categorie: 'vendre' },
   { id: 'ia', nom: 'Consommation IA', route: '/consommation-ia', glyphe: 'consommation-ia', categorie: 'investir' },
   { id: 'compte', nom: 'Mon compte', route: '/account', glyphe: 'compte', categorie: 'reglages' },
   { id: 'confidentialite', nom: 'Confidentialité', route: '/confidentialite', glyphe: 'conformite', categorie: 'reglages' },

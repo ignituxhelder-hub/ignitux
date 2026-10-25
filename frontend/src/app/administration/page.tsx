@@ -62,6 +62,11 @@ export default function AdministrationPage() {
           <li className="card" style={{ marginTop: '0.75rem' }}>
             <Link href="/identite/revue">Pièces d’identité à revoir ({nombre(identites)})</Link>
           </li>
+          {/* Pas de compteur : rien n'y « attend ». Ajouter ou retirer des
+              crédits, avec un motif, tant que le paiement par carte n'existe pas. */}
+          <li className="card" style={{ marginTop: '0.75rem' }}>
+            <Link href="/administration/credits">Crédits des comptes</Link>
+          </li>
         </ul>
       )}
     </main>
