@@ -6,6 +6,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { CreditsInsuffisantsException } from '../../credits/credits-insuffisants.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { ComplianceService } from '../../compliance/compliance.service.js';
 import { AutomationService } from '../automation/automation.service.js';
@@ -192,8 +193,14 @@ describe('ExecutionService', () => {
     );
   });
 
-  it.each([new ForbiddenException('Quota'), new ServiceUnavailableException('Coupé')])(
-    '5b. erreur 403/503 : relancée telle quelle, tâche non modifiée',
+  // 402 : crédits insuffisants (refusé avant tout appel IA). IGINI n'a rien
+  // tenté : la tâche ne doit pas passer « en échec ».
+  it.each([
+    new CreditsInsuffisantsException(4, 1),
+    new ForbiddenException('Quota'),
+    new ServiceUnavailableException('Coupé'),
+  ])(
+    '5b. erreur 402/403/503 : relancée telle quelle, tâche non modifiée',
     async (erreur) => {
       claude.generateStructuredOutput.mockRejectedValue(erreur);
 
@@ -403,8 +410,12 @@ describe('ExecutionService', () => {
       expect(arg.create.status).toBe('echec');
     });
 
-    it.each([new ForbiddenException('Quota'), new ServiceUnavailableException('Coupé')])(
-      'C5b. 403/503 : relancée telle quelle, rien écrit',
+    it.each([
+      new CreditsInsuffisantsException(7, 2),
+      new ForbiddenException('Quota'),
+      new ServiceUnavailableException('Coupé'),
+    ])(
+      'C5b. 402/403/503 : relancée telle quelle, rien écrit',
       async (erreur) => {
         claude.generateStructuredOutput.mockRejectedValue(erreur);
         await expect(service.runCompliance('u1', 'p1', 'r1')).rejects.toBe(erreur);

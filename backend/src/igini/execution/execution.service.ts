@@ -221,7 +221,10 @@ export class ExecutionService {
       return await lancer();
     } catch (erreur) {
       const status = erreur instanceof HttpException ? erreur.getStatus() : undefined;
-      if (status !== 403 && status !== 503) {
+      // 402 (crédits insuffisants, garde-fou de coût), 403, 503 : refusé avant
+      // tout appel IA. IGINI n'a rien tenté — écrire « echec » ferait croire
+      // à une panne, et la tâche quitterait sa sélection.
+      if (status !== 402 && status !== 403 && status !== 503) {
         await onEchec();
       }
       throw erreur;
