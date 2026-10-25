@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { BAREME, CREDITS_BIENVENUE } from './bareme.js';
 import { CreditsInsuffisantsException } from './credits-insuffisants.js';
-import { CreditsService, MOTIF_ORPHELIN } from './credits.service.js';
+import { CreditsService, MOTIF_NON_ENREGISTRE, MOTIF_ORPHELIN } from './credits.service.js';
 import { FausseBaseCredits } from './credits.testing.js';
 
 const PROPRIO = '11111111-1111-4111-8111-111111111111';
@@ -217,6 +217,115 @@ describe('CreditsService — réserver avant l’appel IA', () => {
       new CreditsService(db.client()).reserver({ ...reservation(), ownerId: '99999999-9999-4999-8999-999999999999' }),
     ).rejects.toBeInstanceOf(NotFoundException);
     expect(db.lignes).toHaveLength(0);
+  });
+});
+
+/**
+ * Deux clics sur « Régénérer les statuts » : sans garde, deux appels partent
+ * et deux débits tombent, pour un seul document gardé.
+ */
+describe('CreditsService — une seule action exclusive à la fois', () => {
+  // Les lignes de la fausse base sont datées du 2026-10-25 à 12:00.
+  const T_DEBIT = new Date(Date.UTC(2026, 9, 25, 12, 0, 0));
+  const aMinute = (minutes: number) => () => new Date(T_DEBIT.getTime() + minutes * 60_000);
+  const exclusive = (appelId: string, autre: Partial<ReturnType<typeof reservation>> = {}) => ({
+    ...reservation('statuts', appelId),
+    exclusif: true as const,
+    ...autre,
+  });
+
+  it('refuse en 409 « Déjà en cours. » tant que la première n’a ni réponse ni remboursement, sans débiter', async () => {
+    const db = avecSolde(30);
+    const credits = new CreditsService(db.client());
+    credits.maintenant = aMinute(2);
+    await credits.reserver(exclusive('appel-1'));
+
+    await expect(credits.reserver(exclusive('appel-2'))).rejects.toMatchObject({
+      status: HttpStatus.CONFLICT,
+      message: 'Déjà en cours.',
+    });
+    expect(db.de(PROPRIO, 'debit')).toHaveLength(1);
+  });
+
+  it('deux demandes simultanées : une seule est débitée, l’autre reçoit 409', async () => {
+    const db = avecSolde(30);
+    const credits = new CreditsService(db.client());
+    credits.maintenant = aMinute(0);
+
+    const issues = await Promise.allSettled([credits.reserver(exclusive('appel-a')), credits.reserver(exclusive('appel-b'))]);
+
+    expect(issues.filter((i) => i.status === 'fulfilled')).toHaveLength(1);
+    const refus = issues.filter((i): i is PromiseRejectedResult => i.status === 'rejected');
+    expect(refus[0].reason).toBeInstanceOf(ConflictException);
+    expect(db.solde(PROPRIO)).toBe(30 - BAREME.statuts.credits);
+  });
+
+  it('se libère dès que la première a sa réponse, ou qu’elle a été rendue', async () => {
+    const db = avecSolde(30);
+    const credits = new CreditsService(db.client());
+    credits.maintenant = aMinute(2);
+    await credits.reserver(exclusive('appel-1'));
+    db.appelsJournalises.add('appel-1');
+    const deuxieme = await credits.reserver(exclusive('appel-2'));
+    await credits.rembourser(deuxieme.id);
+
+    await expect(credits.reserver(exclusive('appel-3'))).resolves.toMatchObject({ credits: BAREME.statuts.credits });
+  });
+
+  it('une action restée « en cours » plus de 15 minutes (serveur arrêté) ne bloque plus', async () => {
+    const db = avecSolde(30);
+    const credits = new CreditsService(db.client());
+    credits.maintenant = aMinute(16);
+    await credits.reserver(exclusive('appel-1', {}));
+
+    // L'ancienne date de la première ligne : 12:00, la seconde demande à 12:16.
+    await expect(credits.reserver(exclusive('appel-2'))).resolves.toBeDefined();
+  });
+
+  it('ne gêne ni un autre projet, ni un autre générateur, ni une action non exclusive', async () => {
+    const db = avecSolde(30);
+    const credits = new CreditsService(db.client());
+    credits.maintenant = aMinute(1);
+    await credits.reserver(exclusive('appel-1'));
+
+    await expect(credits.reserver(exclusive('appel-2', { projectId: PROJET_AUTRE }))).resolves.toBeDefined();
+    await expect(credits.reserver({ ...reservation('analyser', 'appel-3'), exclusif: true })).resolves.toBeDefined();
+    await expect(credits.reserver(reservation('statuts', 'appel-4'))).resolves.toBeDefined();
+  });
+});
+
+describe('CreditsService — rendre un résultat non enregistré', () => {
+  it('rend le débit avec son motif, une seule fois', async () => {
+    const db = avecSolde(30);
+    const credits = new CreditsService(db.client());
+    const r = await credits.reserver(reservation('statuts'));
+
+    await credits.rendreResultatNonEnregistre(r.id);
+    await credits.rendreResultatNonEnregistre(r.id);
+
+    expect(db.de(PROPRIO, 'remboursement')).toEqual([
+      expect.objectContaining({ credits: BAREME.statuts.credits, motif: MOTIF_NON_ENREGISTRE }),
+    ]);
+    expect(db.solde(PROPRIO)).toBe(30);
+  });
+
+  it('ne lève jamais : l’erreur à montrer est celle de l’enregistrement', async () => {
+    const credits = new CreditsService(avecSolde(30).client());
+    vi.spyOn(credits, 'rembourser').mockRejectedValue(new Error('base indisponible'));
+
+    await expect(credits.rendreResultatNonEnregistre('debit-1')).resolves.toBeUndefined();
+    await expect(credits.rendreResultatNonEnregistre(null)).resolves.toBeUndefined();
+  });
+
+  it('retrouve un débit par l’identifiant de son appel (l’évaluation interrompue)', async () => {
+    const db = avecSolde(30);
+    const credits = new CreditsService(db.client());
+    await credits.reserver(reservation('evaluer', 'evaluation-1'));
+
+    expect(await credits.rembourserAppel('evaluation-1', MOTIF_ORPHELIN)).toBe(true);
+    expect(await credits.rembourserAppel('evaluation-1', MOTIF_ORPHELIN)).toBe(false);
+    expect(await credits.rembourserAppel('inconnu', MOTIF_ORPHELIN)).toBe(false);
+    expect(db.solde(PROPRIO)).toBe(30);
   });
 });
 

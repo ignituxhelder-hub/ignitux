@@ -58,7 +58,11 @@ function monter() {
   };
   prisma.$transaction.mockImplementation((fn: (tx: typeof prisma) => unknown) => fn(prisma));
   const claude = { generateStructuredOutput: vi.fn().mockResolvedValue(rapport()) };
-  const credits = { exigerSolde: vi.fn().mockResolvedValue(undefined) };
+  const credits = {
+    exigerSolde: vi.fn().mockResolvedValue(undefined),
+    rendreResultatNonEnregistre: vi.fn().mockResolvedValue(undefined),
+    rembourserAppel: vi.fn().mockResolvedValue(true),
+  };
   const projects = {
     contexteEvaluation: vi
       .fn()
@@ -122,7 +126,7 @@ describe('EvaluationService — demande et génération', () => {
     await finirArrierePlan();
 
     expect(claude.generateStructuredOutput).toHaveBeenCalledWith(
-      expect.objectContaining({ usage: { userId: 'u1', projectId: 'p1', generator: 'evaluer' } }),
+      expect.objectContaining({ usage: { userId: 'u1', actorId: 'u1', projectId: 'p1', generator: 'evaluer' } }),
     );
     const [ecriture] = ecritures(prisma);
     expect(ecriture.where).toEqual({ id: 'e1', status: 'en_preparation' });
@@ -262,6 +266,126 @@ describe('EvaluationService — demande et génération', () => {
   });
 });
 
+/**
+ * La génération tourne en arrière-plan, et le monde bouge pendant ce temps :
+ * ce qui n'arrive pas en revue ne se paie pas.
+ */
+describe('EvaluationService — les crédits de l’évaluation', () => {
+  const flagInitial = process.env.IGINI_AI_ENABLED;
+  beforeEach(() => {
+    process.env.IGINI_AI_ENABLED = 'true';
+  });
+  afterAll(() => {
+    if (flagInitial === undefined) delete process.env.IGINI_AI_ENABLED;
+    else process.env.IGINI_AI_ENABLED = flagInitial;
+  });
+
+  /** Claude réserve le prix, puis répond (comme le vrai ClaudeService). */
+  function reserveEtRepond(claude: ReturnType<typeof monter>['claude'], reponse: unknown = rapport()) {
+    claude.generateStructuredOutput.mockImplementation(
+      async (requete: { surReservation?: (r: { id: string; credits: number; soldeApres: number }) => void }) => {
+        requete.surReservation?.({ id: 'debit-eval', credits: 6, soldeApres: 24 });
+        return reponse;
+      },
+    );
+  }
+
+  it('un membre demande : le propriétaire du projet paie, le membre reste l’acteur', async () => {
+    const { service, prisma, claude, projects } = monter();
+    prisma.financing_evaluations.findUnique.mockResolvedValue(ligne({ requested_by: 'u2' }));
+
+    await service.generer('e1');
+
+    expect(claude.generateStructuredOutput).toHaveBeenCalledWith(
+      expect.objectContaining({ usage: { userId: 'u1', actorId: 'u2', projectId: 'p1', generator: 'evaluer' } }),
+    );
+    // Le contexte se lit chez le propriétaire, comme le paiement.
+    expect(projects.contexteEvaluation).toHaveBeenCalledWith('u1', 'p1');
+  });
+
+  it('le débit porte l’identifiant de l’évaluation, pour être retrouvé si elle est interrompue', async () => {
+    const { service, claude } = monter();
+
+    await service.generer('e1');
+
+    expect(claude.generateStructuredOutput.mock.calls[0][0].appelId).toBe('e1');
+  });
+
+  it('rend les crédits d’un rapport arrivé trop tard (l’évaluation n’est plus en préparation)', async () => {
+    const { service, prisma, claude, credits } = monter();
+    reserveEtRepond(claude);
+    prisma.financing_evaluations.updateMany.mockResolvedValue({ count: 0 });
+
+    await service.generer('e1');
+
+    expect(credits.rendreResultatNonEnregistre).toHaveBeenCalledTimes(1);
+    expect(credits.rendreResultatNonEnregistre).toHaveBeenCalledWith('debit-eval');
+  });
+
+  it('rend les crédits quand le rapport ne peut pas être enregistré', async () => {
+    const { service, prisma, claude, credits } = monter();
+    reserveEtRepond(claude);
+    prisma.financing_evaluations.updateMany
+      .mockRejectedValueOnce(new Error('base indisponible'))
+      .mockResolvedValue({ count: 1 });
+
+    await service.generer('e1');
+
+    expect(credits.rendreResultatNonEnregistre).toHaveBeenCalledWith('debit-eval');
+    expect(ecritures(prisma).at(-1)?.data).toMatchObject({ status: 'echec' });
+  });
+
+  it('ne rend rien quand le rapport passe en revue', async () => {
+    const { service, claude, credits } = monter();
+    reserveEtRepond(claude);
+
+    await service.generer('e1');
+
+    expect(credits.rendreResultatNonEnregistre).not.toHaveBeenCalled();
+  });
+
+  it('un échec de l’appel lui-même est déjà rendu par ClaudeService : pas une seconde fois ici', async () => {
+    const { service, claude, credits } = monter();
+    claude.generateStructuredOutput.mockRejectedValue(new InternalServerErrorException('panne'));
+
+    await service.generer('e1');
+
+    expect(credits.rendreResultatNonEnregistre).not.toHaveBeenCalled();
+  });
+
+  it('une préparation interrompue (serveur redémarré) est rendue quand on la range en échec', async () => {
+    const { service, prisma, credits } = monter();
+    prisma.financing_evaluations.findMany.mockResolvedValue([
+      ligne({ id: 'e-perdue', status: 'en_preparation', created_at: il_y_a(11), updated_at: il_y_a(11) }),
+    ]);
+    prisma.financing_evaluations.create.mockResolvedValue(ligne({ id: 'e2' }));
+
+    await service.demander('u1', 'p1');
+
+    expect(credits.rembourserAppel).toHaveBeenCalledTimes(1);
+    expect(credits.rembourserAppel).toHaveBeenCalledWith('e-perdue', expect.stringContaining('interrompu'));
+  });
+
+  it('ne rend pas une évaluation qui avait déjà son rapport (nouvelle version offerte interrompue)', async () => {
+    const { service, prisma, credits } = monter();
+    prisma.financing_evaluations.findMany.mockResolvedValue([
+      ligne({
+        id: 'e-refaite',
+        status: 'en_preparation',
+        ai_draft: rapport(),
+        redo_instruction: 'Reprends le marché.',
+        created_at: il_y_a(60),
+        updated_at: il_y_a(11),
+      }),
+    ]);
+    prisma.financing_evaluations.create.mockResolvedValue(ligne({ id: 'e2' }));
+
+    await service.demander('u1', 'p1');
+
+    expect(credits.rembourserAppel).not.toHaveBeenCalled();
+  });
+});
+
 describe('EvaluationService — prévenir les administrateurs', () => {
   const flagInitial = process.env.IGINI_AI_ENABLED;
   beforeEach(() => {
@@ -320,8 +444,13 @@ describe('EvaluationService — nouvelle version demandée par l’administrateu
     await service.generer('e1', 'Reprends le marché.');
 
     expect(claude.generateStructuredOutput).toHaveBeenCalledWith(
-      expect.objectContaining({ usage: { userId: 'u1', projectId: 'p1', generator: 'evaluer', offert: true } }),
+      expect.objectContaining({
+        usage: { userId: 'u1', actorId: 'u1', projectId: 'p1', generator: 'evaluer', offert: true },
+      }),
     );
+    // Offerte : pas de débit, donc pas l'identifiant de l'évaluation comme appel
+    // (il porte déjà la ligne de coût de la première version).
+    expect(claude.generateStructuredOutput.mock.calls[0][0].appelId).toBeUndefined();
   });
 
   it('une nouvelle version qui échoue laisse l’évaluation en revue, avec une alerte pour l’administrateur', async () => {

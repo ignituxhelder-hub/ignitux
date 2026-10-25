@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   HttpException,
   HttpStatus,
   InternalServerErrorException,
@@ -869,6 +870,74 @@ describe('ClaudeService', () => {
       await expect(genererQuelqueChose()).rejects.toBeInstanceOf(InternalServerErrorException);
       expect(aiUsage.record).toHaveBeenCalledTimes(1);
       expect(credits.rembourser).toHaveBeenCalledWith('debit-1');
+    });
+
+    it('donne la réservation à l’appelant avant l’appel, pour qu’il rende un résultat qu’il ne peut pas enregistrer', async () => {
+      const vue: string[] = [];
+      parseMock.mockImplementation(() => {
+        // Déjà connue au moment où l'appel part.
+        vue.push(`appel après ${surReservation.mock.calls.length} réservation(s)`);
+        return Promise.resolve({ parsed_output: { answer: 'ok' }, usage: UTILISATION });
+      });
+      const surReservation = vi.fn();
+
+      await service.generateStructuredOutput({
+        schema,
+        system: 'system',
+        userContent: 'user',
+        logContext: 'contexte',
+        userErrorMessage: 'échec',
+        usage: ATTRIBUTION,
+        surReservation,
+      });
+
+      expect(surReservation).toHaveBeenCalledTimes(1);
+      expect(surReservation).toHaveBeenCalledWith({ id: 'debit-1', credits: 4, soldeApres: 26 });
+      expect(vue).toEqual(['appel après 1 réservation(s)']);
+    });
+
+    it('ne signale aucune réservation pour un appel offert', async () => {
+      parseMock.mockResolvedValue({ parsed_output: { answer: 'ok' }, usage: UTILISATION });
+      const surReservation = vi.fn();
+
+      await service.generateStructuredOutput({
+        schema,
+        system: 'system',
+        userContent: 'user',
+        logContext: 'contexte',
+        userErrorMessage: 'échec',
+        usage: { ...ATTRIBUTION, offert: true },
+        surReservation,
+      });
+
+      expect(surReservation).not.toHaveBeenCalled();
+    });
+
+    it('transmet « une seule à la fois » et l’identifiant d’appel choisi par l’appelant', async () => {
+      parseMock.mockResolvedValue({ parsed_output: { answer: 'ok' }, usage: UTILISATION });
+      const appelId = '77777777-7777-4777-8777-777777777777';
+
+      await service.generateStructuredOutput({
+        schema,
+        system: 'system',
+        userContent: 'user',
+        logContext: 'contexte',
+        userErrorMessage: 'échec',
+        usage: ATTRIBUTION,
+        exclusif: true,
+        appelId,
+      });
+
+      expect(credits.reserver).toHaveBeenCalledWith(expect.objectContaining({ exclusif: true, appelId }));
+      expect(aiUsage.record.mock.calls[0][0].id).toBe(appelId);
+    });
+
+    it('un refus « déjà en cours » ressort tel quel (409), avant tout appel réseau', async () => {
+      const refus = new ConflictException('Déjà en cours.');
+      credits.reserver.mockRejectedValue(refus);
+
+      await expect(genererQuelqueChose()).rejects.toBe(refus);
+      expect(parseMock).not.toHaveBeenCalled();
     });
 
     it('un remboursement qui échoue ne masque pas l’erreur de la génération', async () => {

@@ -17,7 +17,7 @@ function prismaPour(role: string) {
 describe('droits de l’équipe — statuts', () => {
   const statuts = (role: string) => {
     const prisma = prismaPour(role);
-    return { prisma, service: new StatutsService(prisma as never, {} as never, { guard: vi.fn() } as never) };
+    return { prisma, service: new StatutsService(prisma as never, {} as never, { guard: vi.fn() } as never, {} as never) };
   };
 
   it('un comptable lit les statuts du propriétaire', async () => {

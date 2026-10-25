@@ -123,6 +123,30 @@ export interface StructuredOutputRequest<T> {
    */
   usage: AiUsageContext;
   /**
+   * Appelé dès que le prix est réservé, AVANT l'appel réseau, avec la
+   * réservation. Pour l'appelant qui enregistre lui-même le résultat : si
+   * l'appel réussit mais que le résultat ne peut pas être gardé (statuts
+   * retenus entre-temps, évaluation arrivée trop tard…), il rend les crédits
+   * avec `CreditsService.rendreResultatNonEnregistre(reservation.id)`. Un
+   * échec de l'appel lui-même est déjà rendu ici. Jamais appelé pour un
+   * appel offert (rien n'est réservé).
+   */
+  surReservation?: (reservation: Reservation) => void;
+  /**
+   * Une seule à la fois par projet et par générateur : si une autre est en
+   * cours (débit sans réponse ni remboursement, de moins de 15 minutes), 409
+   * « Déjà en cours. » avant tout appel et sans rien débiter. Voir
+   * `CreditsService.reserver`.
+   */
+  exclusif?: boolean;
+  /**
+   * L'identifiant de l'appel (un UUID), quand l'appelant doit pouvoir
+   * retrouver le débit plus tard sans rien stocker de plus : l'évaluation de
+   * financement passe son propre identifiant. Unique par appel — la ligne de
+   * coût porte cet `id`. Absent : tiré au hasard.
+   */
+  appelId?: string;
+  /**
    * Absent par défaut : les générateurs qui n'en ont pas besoin ne changent
    * pas de comportement, tokens et signature de retour compris. Quand il est
    * fourni, `generateStructuredOutput` renvoie un `sources` en plus — voir
@@ -217,8 +241,9 @@ export class ClaudeService {
     // ressortirait en « erreur interne », et la personne ne saurait pas
     // qu'il lui suffit de recharger.
     await this.aiUsage.assertWithinQuota(request.usage.userId);
-    const appelId = randomUUID();
-    const reservation = await this.reserver(request.usage, appelId);
+    const appelId = request.appelId ?? randomUUID();
+    const reservation = await this.reserver(request.usage, appelId, request.exclusif);
+    if (reservation) request.surReservation?.(reservation);
 
     const startedAt = Date.now();
 
@@ -329,7 +354,7 @@ export class ClaudeService {
    * propriétaire du projet), en gardant qui l'a lancé (`usage.actorId`).
    * `null` pour un appel offert : rien à réserver, rien à rendre.
    */
-  private reserver(usage: AiUsageContext, appelId: string): Promise<Reservation | null> {
+  private reserver(usage: AiUsageContext, appelId: string, exclusif?: boolean): Promise<Reservation | null> {
     if (usage.offert) return Promise.resolve(null);
     return this.credits.reserver({
       ownerId: usage.userId,
@@ -337,6 +362,7 @@ export class ClaudeService {
       generator: usage.generator,
       projectId: usage.projectId,
       appelId,
+      ...(exclusif ? { exclusif: true } : {}),
     });
   }
 

@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { ConstitutionService } from '../constitution/constitution.service.js';
+import { CreditsService } from '../credits/credits.service.js';
 import { ClaudeService } from '../igini/claude/claude.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { StatutsService } from './statuts.service.js';
@@ -10,6 +11,7 @@ describe('StatutsService — génération', () => {
   let prisma: any;
   let claude: { generateStructuredOutput: ReturnType<typeof vi.fn> };
   let constitution: { guard: ReturnType<typeof vi.fn> };
+  let credits: { rendreResultatNonEnregistre: ReturnType<typeof vi.fn> };
 
   const dtoValide = {
     capitalCents: 100000,
@@ -38,12 +40,14 @@ describe('StatutsService — génération', () => {
     claude = { generateStructuredOutput: vi.fn().mockResolvedValue({ content: 'texte généré' }) };
     prisma.company_bylaws.findFirst.mockResolvedValue(null);
     constitution = { guard: vi.fn().mockResolvedValue(undefined) };
+    credits = { rendreResultatNonEnregistre: vi.fn().mockResolvedValue(undefined) };
     const moduleRef = await Test.createTestingModule({
       providers: [
         StatutsService,
         { provide: PrismaService, useValue: prisma },
         { provide: ClaudeService, useValue: claude },
         { provide: ConstitutionService, useValue: constitution },
+        { provide: CreditsService, useValue: credits },
       ],
     }).compile();
     service = moduleRef.get(StatutsService);
@@ -149,6 +153,62 @@ describe('StatutsService — génération', () => {
     expect(prisma.bylaw_associates.deleteMany).not.toHaveBeenCalled();
     expect(prisma.bylaw_associates.createMany).not.toHaveBeenCalled();
     expect(prisma.company_bylaws.create).not.toHaveBeenCalled();
+  });
+
+  describe('les crédits d’une génération qui ne peut pas être gardée', () => {
+    /** Claude répond, après avoir réservé le prix (comme le vrai ClaudeService). */
+    function claudeReserveEtRepond() {
+      claude.generateStructuredOutput.mockImplementation(
+        async (requete: { surReservation?: (r: { id: string; credits: number; soldeApres: number }) => void }) => {
+          requete.surReservation?.({ id: 'debit-statuts', credits: 7, soldeApres: 23 });
+          return { content: 'Texte généré' };
+        },
+      );
+    }
+
+    beforeEach(() => {
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'user-1', confirmed_legal_form: 'SASU', title: 'Mon projet' });
+      claudeReserveEtRepond();
+    });
+
+    it('une seule génération à la fois : la demande est exclusive (deux clics ne paient pas deux fois)', async () => {
+      prisma.company_bylaws.findUnique.mockResolvedValue(null);
+      prisma.company_bylaws.create.mockResolvedValue({ id: 'b1', associates: [] });
+
+      await service.genererPourProjet('user-1', 'p1', dtoValide);
+
+      expect(claude.generateStructuredOutput).toHaveBeenCalledWith(expect.objectContaining({ exclusif: true }));
+      expect(credits.rendreResultatNonEnregistre).not.toHaveBeenCalled();
+    });
+
+    it('rend les crédits quand la version a été retenue pendant la génération (409)', async () => {
+      prisma.company_bylaws.findFirst.mockResolvedValue({ status: 'brouillon' });
+      prisma.company_bylaws.findUnique.mockResolvedValue({ id: 'b1' });
+      prisma.company_bylaws.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(service.genererPourProjet('user-1', 'p1', dtoValide)).rejects.toThrow(ConflictException);
+
+      expect(credits.rendreResultatNonEnregistre).toHaveBeenCalledTimes(1);
+      expect(credits.rendreResultatNonEnregistre).toHaveBeenCalledWith('debit-statuts');
+    });
+
+    it('rend les crédits quand une autre demande a créé la ligne entre-temps (P2002)', async () => {
+      prisma.company_bylaws.findUnique.mockResolvedValue(null);
+      prisma.company_bylaws.create.mockRejectedValue(Object.assign(new Error('unique'), { code: 'P2002' }));
+
+      await expect(service.genererPourProjet('user-1', 'p1', dtoValide)).rejects.toThrow(ConflictException);
+
+      expect(credits.rendreResultatNonEnregistre).toHaveBeenCalledWith('debit-statuts');
+    });
+
+    it('rend les crédits quand la Constitution refuse l’enregistrement', async () => {
+      constitution.guard.mockRejectedValue(new ConflictException('Refusé par la Constitution.'));
+
+      await expect(service.genererPourProjet('user-1', 'p1', dtoValide)).rejects.toThrow('Refusé par la Constitution.');
+
+      expect(credits.rendreResultatNonEnregistre).toHaveBeenCalledWith('debit-statuts');
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
   });
 
   it('refuse des parts qui dépassent 100 % cumulées sur plusieurs associés', async () => {

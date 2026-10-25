@@ -1,6 +1,7 @@
 import { exigerCapacite } from '../equipe/acces-projet.js';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConstitutionService } from '../constitution/constitution.service.js';
+import { CreditsService } from '../credits/credits.service.js';
 import { CLAUDE_MODEL, ClaudeService } from '../igini/claude/claude.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BYLAWS_SYSTEM_PROMPT, BylawsResultSchema } from './bylaws-prompt.js';
@@ -21,6 +22,16 @@ function isUniqueViolation(error: unknown): boolean {
  * sous `former`, dont il est la suite). Depuis les crédits, chaque appel a
  * un prix affiché, et un document de statuts coûte bien plus qu'une
  * recommandation de forme (voir credits/bareme.ts).
+ *
+ * Deux règles d'argent, parce qu'une génération dure des dizaines de
+ * secondes et que le monde bouge pendant ce temps :
+ *
+ * - **une seule génération à la fois par projet** (`exclusif`) : deux clics
+ *   sur « Régénérer » ne partent pas en deux appels payés pour un seul
+ *   document gardé — le second reçoit 409 « Déjà en cours. », sans débit ;
+ * - **un texte qui ne peut pas être gardé ne se paie pas** : version retenue
+ *   pendant la génération, ligne créée par une autre demande, Constitution
+ *   qui refuse l'enregistrement — les crédits sont rendus.
  */
 @Injectable()
 export class StatutsService {
@@ -28,6 +39,7 @@ export class StatutsService {
     private readonly prisma: PrismaService,
     private readonly claude: ClaudeService,
     private readonly constitution: ConstitutionService,
+    private readonly credits: CreditsService,
   ) {}
 
   async genererPourProjet(ownerId: string, projectId: string, dto: GenerateBylawsDto) {
@@ -74,6 +86,7 @@ export class StatutsService {
       `Associés :\n` +
       dto.associates.map((a) => `- ${a.fullName} : ${(a.shareBasisPoints / 100).toFixed(2)} %`).join('\n');
 
+    let reservationId: string | null = null;
     const result = await this.claude.generateStructuredOutput({
       schema: BylawsResultSchema,
       system: BYLAWS_SYSTEM_PROMPT,
@@ -81,8 +94,30 @@ export class StatutsService {
       logContext: 'Échec de la génération des statuts via Claude',
       userErrorMessage: 'La génération des statuts a échoué, réessaie dans un instant.',
       usage: { userId: ownerId, projectId, generator: 'statuts' },
+      exclusif: true,
+      surReservation: (reservation) => {
+        reservationId = reservation.id;
+      },
     });
 
+    try {
+      return await this.enregistrer(ownerId, projectId, forme, dto, result.content);
+    } catch (error) {
+      // Le texte est payé chez Anthropic, mais la personne ne le reçoit pas :
+      // il ne lui coûte rien.
+      await this.credits.rendreResultatNonEnregistre(reservationId);
+      throw error;
+    }
+  }
+
+  /** Garde le texte généré — ou lève, et l'appelant rend les crédits. */
+  private async enregistrer(
+    ownerId: string,
+    projectId: string,
+    forme: string,
+    dto: GenerateBylawsDto,
+    content: string,
+  ) {
     await this.constitution.guard(
       { kind: 'persist_generated', entity: 'company_bylaws', generatedBy: 'igini', generatedModel: CLAUDE_MODEL },
       { userId: ownerId, projectId },
@@ -93,7 +128,7 @@ export class StatutsService {
       capital_cents: dto.capitalCents,
       head_office: dto.headOffice,
       duration_years: dto.durationYears,
-      content: result.content,
+      content,
       status: 'brouillon' as const,
       generated_by: 'igini',
       generated_model: CLAUDE_MODEL,

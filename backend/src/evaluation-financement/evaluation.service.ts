@@ -15,7 +15,7 @@ import { Prisma } from '../generated/prisma/client.js';
 import { ClaudeService } from '../igini/claude/claude.service.js';
 import { readGeneratorsAvailability } from '../igini/claude/generators-availability.js';
 import { MailService } from '../mail/mail.service.js';
-import { CreditsService } from '../credits/credits.service.js';
+import { CreditsService, MOTIF_ORPHELIN } from '../credits/credits.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ProjectsService } from '../projects/projects.service.js';
 import {
@@ -96,10 +96,30 @@ export class EvaluationService {
     // débit lui-même se réserve au moment de l'appel, sous verrou.
     await this.credits.exigerSolde(ownerId, 'evaluer');
 
-    const creee = await this.creerSiAucuneActive(userId, projectId);
+    const { creee, interrompues } = await this.creerSiAucuneActive(userId, projectId);
+    await this.rendreInterrompues(interrompues);
     // Sans `await` : la demande rend la main, la génération continue seule.
     void this.generer(creee.id);
     return this.vue(creee);
+  }
+
+  /**
+   * Une préparation perdue (serveur redémarré pendant l'appel) n'a rien
+   * rendu : son débit est rendu au moment où on la range en échec. Le débit
+   * porte l'identifiant de l'évaluation (voir `generer`). Seulement celles
+   * qui n'ont jamais eu de rapport : une nouvelle version demandée par
+   * l'administrateur est offerte, et le débit de la première a payé un
+   * rapport bien reçu. Le rattrapage des débits orphelins (CreditsService)
+   * couvre aussi ce cas ; ceci le règle tout de suite, sans attendre.
+   */
+  private async rendreInterrompues(interrompues: financing_evaluations[]): Promise<void> {
+    for (const evaluation of interrompues) {
+      if (evaluation.ai_draft !== null) continue;
+      await this.credits.rembourserAppel(evaluation.id, MOTIF_ORPHELIN).catch((e: unknown) => {
+        this.logger.error(`Évaluation ${evaluation.id} interrompue : débit non rendu (${String(e)}).`);
+        return false;
+      });
+    }
   }
 
   /**
@@ -111,7 +131,7 @@ export class EvaluationService {
     userId: string,
     projectId: string,
     tentative = 1,
-  ): Promise<financing_evaluations> {
+  ): Promise<{ creee: financing_evaluations; interrompues: financing_evaluations[] }> {
     const maintenant = this.maintenant();
     try {
       return await this.prisma.$transaction(
@@ -135,9 +155,10 @@ export class EvaluationService {
               data: { status: 'echec', failure_reason: PREPARATION_INTERROMPUE },
             });
           }
-          return tx.financing_evaluations.create({
+          const creee = await tx.financing_evaluations.create({
             data: { project_id: projectId, requested_by: userId, status: 'en_preparation' },
           });
+          return { creee, interrompues: actives.filter((a) => a.status === 'en_preparation') };
         },
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
@@ -157,18 +178,30 @@ export class EvaluationService {
    * tout échec est écrit sur la ligne, que l'entrepreneur verra.
    *
    * `consigne` : la demande de l'administrateur quand il fait refaire.
+   *
+   * Qui paie : le propriétaire du projet, comme toute action IGINI lancée
+   * dans son projet ; la personne qui a demandé reste l'acteur. Un rapport
+   * qui n'arrive pas en revue (trop tard, écriture impossible) ne se paie pas.
    */
   async generer(evaluationId: string, consigne?: string): Promise<void> {
+    let reservationId: string | null = null;
+    let rapportRecu = false;
     try {
       const evaluation = await this.prisma.financing_evaluations.findUnique({ where: { id: evaluationId } });
       if (!evaluation) return;
-      const userId = evaluation.requested_by;
+      const acteurId = evaluation.requested_by;
       const projectId = evaluation.project_id;
+      const proprietaire = await this.prisma.projects.findUnique({
+        where: { id: projectId },
+        select: { owner_id: true },
+      });
+      if (!proprietaire) throw new NotFoundException('Projet introuvable.');
+      const ownerId = proprietaire.owner_id;
 
       const [projet, audit, conformite] = await Promise.all([
-        this.projects.contexteEvaluation(userId, projectId),
-        this.resumeAudit(userId, projectId),
-        this.resumeConformite(userId, projectId),
+        this.projects.contexteEvaluation(ownerId, projectId),
+        this.resumeAudit(ownerId, projectId),
+        this.resumeConformite(ownerId, projectId),
       ]);
       const contexte = [projet.contexte, audit, conformite].filter(Boolean).join('\n\n') || undefined;
 
@@ -180,8 +213,23 @@ export class EvaluationService {
         userErrorMessage: ECHEC_PAR_DEFAUT,
         // Une nouvelle version demandée par un administrateur (`consigne`)
         // est offerte : c'est Ignitux qui la veut, l'entrepreneur ne la paie pas.
-        usage: { userId, projectId, generator: 'evaluer', ...(consigne ? { offert: true } : {}) },
+        usage: {
+          userId: ownerId,
+          actorId: acteurId,
+          projectId,
+          generator: 'evaluer',
+          ...(consigne ? { offert: true } : {}),
+        },
+        // Le débit de la première version porte l'identifiant de l'évaluation :
+        // interrompue, elle se rend sans rien stocker de plus (`rendreInterrompues`).
+        // Pas pour une version offerte : rien n'est débité, et la ligne de coût
+        // de la première porte déjà cet identifiant.
+        ...(consigne ? {} : { appelId: evaluationId }),
+        surReservation: (reservation) => {
+          reservationId = reservation.id;
+        },
       });
+      rapportRecu = true;
       const rapport = normaliserRapport(brut);
 
       const enRevue = await this.ecrireSiEnPreparation(evaluationId, {
@@ -192,7 +240,13 @@ export class EvaluationService {
         failure_reason: null,
       });
       if (enRevue) await this.prevenirAdministrateurs(projet.titre);
+      // Arrivé trop tard : l'évaluation a été rangée (et peut-être redemandée)
+      // entre-temps. La personne ne verra jamais ce rapport ; elle ne le paie pas.
+      else await this.credits.rendreResultatNonEnregistre(reservationId);
     } catch (erreur) {
+      // Un appel qui a échoué est déjà rendu par ClaudeService ; un rapport
+      // reçu mais pas enregistré l'est ici.
+      if (rapportRecu) await this.credits.rendreResultatNonEnregistre(reservationId);
       this.logger.error(`Évaluation ${evaluationId} en échec : ${String(erreur)}`);
       // Seul un refus lisible (4xx : crédits insuffisants, garde-fou…) est montré à l'entrepreneur.
       // Une erreur serveur porte notre message générique, déjà affiché par

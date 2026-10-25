@@ -28,6 +28,8 @@ export const MOTIF_BIENVENUE = 'Cadeau de bienvenue';
 const MOTIF_REMBOURSEMENT = 'Génération échouée : crédits rendus.';
 /** Le motif d'un débit rendu par le rattrapage : l'appel n'est jamais revenu. */
 export const MOTIF_ORPHELIN = 'Appel interrompu (serveur redémarré) : crédits rendus.';
+/** L'appel a réussi, mais son résultat n'a pas pu être gardé : il ne se paie pas. */
+export const MOTIF_NON_ENREGISTRE = 'Résultat non enregistré : crédits rendus.';
 
 /**
  * Au-delà, un débit sans ligne de coût est un appel qui ne reviendra pas.
@@ -129,6 +131,9 @@ export class CreditsService implements OnModuleInit, OnModuleDestroy {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  /** L'horloge, remplaçable dans les tests. */
+  maintenant: () => Date = () => new Date();
+
   /** Le solde d'un compte (bienvenue versée au passage si elle manque). */
   async solde(ownerId: string): Promise<number> {
     await this.bienvenueUneFois(ownerId);
@@ -156,6 +161,14 @@ export class CreditsService implements OnModuleInit, OnModuleDestroy {
    * membre de son équipe lance l'action — et `actorId` qui l'a lancée.
    * `appelId` est l'identifiant de l'appel IA, choisi d'avance : la ligne de
    * coût (`ai_usage_events`) portera le même.
+   *
+   * `exclusif` : une seule à la fois pour ce compte, ce projet et ce
+   * générateur. Sous le même verrou, avant tout débit : si un débit de moins
+   * de 15 minutes n'a encore ni réponse (ligne de coût) ni remboursement,
+   * c'est qu'une autre demande est en cours — 409 « Déjà en cours. », et rien
+   * n'est écrit. Le débit EST la marque « en cours » : il s'efface de
+   * lui-même à la réponse, au remboursement, ou après 15 minutes (serveur
+   * arrêté pendant l'appel). Aucune colonne de plus.
    */
   async reserver(r: {
     ownerId: string;
@@ -163,10 +176,15 @@ export class CreditsService implements OnModuleInit, OnModuleDestroy {
     generator: GeneratorName;
     projectId: string | null;
     appelId: string;
+    exclusif?: boolean;
   }): Promise<Reservation> {
     const prix = prixEnCredits(r.generator);
+    if (r.exclusif && r.projectId === null) {
+      throw new Error('Une réservation exclusive porte sur un projet.');
+    }
     return this.prisma.$transaction(async (tx) => {
       await this.verrouiller(tx, r.ownerId);
+      if (r.exclusif) await this.exigerAucuneEnCours(tx, r.ownerId, r.generator, r.projectId as string);
       await this.bienvenueSousVerrou(tx, r.ownerId);
       const disponible = await this.somme(tx, r.ownerId);
       if (disponible < prix) throw new CreditsInsuffisantsException(prix, disponible);
@@ -237,6 +255,38 @@ export class CreditsService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
+   * Rend les crédits d'une action dont l'appel IA a réussi mais dont le
+   * résultat n'a pas pu être enregistré par l'appelant (statuts retenus
+   * pendant la génération, évaluation arrivée trop tard, écriture refusée) :
+   * la personne n'a rien reçu, elle ne paie rien. Une seule fois, comme tout
+   * remboursement.
+   *
+   * Ne lève jamais : l'erreur à montrer est celle de l'enregistrement. Un
+   * échec est journalisé — le rattrapage ne le reprendra pas (la ligne de
+   * coût existe : l'appel a répondu), il se règle alors par un ajustement.
+   */
+  async rendreResultatNonEnregistre(reservationId: string | null | undefined): Promise<void> {
+    if (!reservationId) return;
+    try {
+      await this.rembourser(reservationId, { motif: MOTIF_NON_ENREGISTRE });
+    } catch (erreur) {
+      this.logger.error(
+        `Résultat non enregistré, mais le débit ${reservationId} n'a pas pu être rendu : à rendre à la main.`,
+        erreur as Error,
+      );
+    }
+  }
+
+  /** Rend le débit d'un appel retrouvé par son identifiant (l'évaluation, qui le choisit). */
+  async rembourserAppel(appelId: string, motif: string): Promise<boolean> {
+    const debit = await this.prisma.credit_entries.findFirst({
+      where: { kind: 'debit', ai_usage_event_id: appelId },
+      select: { id: true },
+    });
+    return debit ? this.rembourser(debit.id, { motif }) : false;
+  }
+
+  /**
    * LE RATTRAPAGE DES DÉBITS ORPHELINS.
    *
    * Le débit s'écrit avant l'appel IA, et le `catch` de `ClaudeService` le
@@ -257,7 +307,7 @@ export class CreditsService implements OnModuleInit, OnModuleDestroy {
    * échoue après un appel réussi, le débit passe pour orphelin et l'action
    * est rendue — elle est offerte, jamais payée deux fois.
    */
-  async rattraperDebitsOrphelins(maintenant: Date = new Date()): Promise<number> {
+  async rattraperDebitsOrphelins(maintenant: Date = this.maintenant()): Promise<number> {
     const avant = new Date(maintenant.getTime() - DELAI_ORPHELIN_MS);
     const depuis = new Date(maintenant.getTime() - FENETRE_RATTRAPAGE_JOURS * 24 * 60 * 60_000);
     const orphelins = await this.prisma.$queryRaw<Array<{ id: string }>>`
@@ -491,6 +541,34 @@ export class CreditsService implements OnModuleInit, OnModuleDestroy {
   private async somme(client: Client | Transaction, ownerId: string): Promise<number> {
     const { _sum } = await client.credit_entries.aggregate({ where: { owner_id: ownerId }, _sum: { credits: true } });
     return _sum.credits ?? 0;
+  }
+
+  /**
+   * À appeler verrou tenu : 409 si une action exclusive du même générateur
+   * est déjà en cours sur ce projet (voir `reserver`). Les deux `NOT EXISTS`
+   * sont ceux du rattrapage : sans réponse, sans remboursement.
+   */
+  private async exigerAucuneEnCours(
+    tx: Transaction,
+    ownerId: string,
+    generator: GeneratorName,
+    projectId: string,
+  ): Promise<void> {
+    const depuis = new Date(this.maintenant().getTime() - EN_COURS_EXPIRE_MS);
+    const enCours = await tx.$queryRaw<Array<{ id: string }>>`
+      SELECT d.id FROM credit_entries d
+      WHERE d.owner_id = ${ownerId}::uuid
+        AND d.kind = 'debit'
+        AND d.generator = ${generator}
+        AND d.project_id = ${projectId}::uuid
+        AND d.created_at >= ${depuis}
+        AND NOT EXISTS (SELECT 1 FROM ai_usage_events e WHERE e.id = d.ai_usage_event_id)
+        AND NOT EXISTS (
+          SELECT 1 FROM credit_entries r
+          WHERE r.owner_id = d.owner_id AND r.kind = 'remboursement' AND r.ai_usage_event_id = d.ai_usage_event_id
+        )
+      LIMIT 1`;
+    if (enCours.length > 0) throw new ConflictException('Déjà en cours.');
   }
 
   /** Le verrou du compte, tenu jusqu'à la fin de la transaction. 404 si le compte n'existe pas. */
