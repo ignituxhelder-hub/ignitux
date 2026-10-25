@@ -1624,3 +1624,154 @@ describe('ProjectDetailPage — guide pas à pas et visite guidée', () => {
     expect(screen.queryByRole('button', { name: 'Revoir la visite' })).not.toBeInTheDocument();
   });
 });
+
+/**
+ * LES CRÉDITS IGINI SUR LA FICHE PROJET.
+ *
+ * Chaque bouton IGINI dit son prix avant d'être touché, et se grise quand le
+ * solde ne suffit pas. Dans le projet d'un autre, ce sont les crédits du
+ * propriétaire qui paient : le solde du membre ne compte pas.
+ */
+describe('ProjectDetailPage — le prix des actions IGINI', () => {
+  const BAREME = {
+    valeurCreditCentimes: 10,
+    bienvenue: 30,
+    recharges: [{ prixCentimes: 1000, credits: 100 }],
+    rechargeDisponible: false,
+    rechargeMessage: 'Bientôt disponible.',
+    actions: [
+      { generateur: 'analyser', libelle: 'Analyser une idée', credits: 4, par: 'action' },
+      { generateur: 'construire', libelle: 'Plan de construction', credits: 5, par: 'action' },
+    ],
+  };
+  const credits = (solde: number) => ({
+    'GET /credits': { status: 200, body: { solde, bareme: BAREME, historique: [] } },
+  });
+
+  beforeEach(() => {
+    window.localStorage.clear();
+    window.localStorage.setItem(CLE_VISITE_PROJET, 'vue');
+    router.replace.mockClear();
+    signInAs('tok123', { id: 'u1', email: 'a@b.com' });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function afficher() {
+    render(
+      <AuthProvider>
+        <ProjectDetailPage />
+      </AuthProvider>,
+    );
+  }
+
+  async function ouvrirAnalyse() {
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
+    return screen.findByRole('button', { name: /analyser ce projet/i });
+  }
+
+  it('dit le prix de l’analyse et ce qu’il restera', async () => {
+    mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES, ...credits(26) });
+    afficher();
+
+    const bouton = await ouvrirAnalyse();
+    expect(await screen.findByText(/Cette action coûte/)).toHaveTextContent(
+      'Cette action coûte 4 crédits — il t’en reste 26.',
+    );
+    expect(bouton).toBeEnabled();
+  });
+
+  it('grise le bouton quand le solde ne suffit pas, et mène aux crédits', async () => {
+    mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES, ...credits(1) });
+    afficher();
+
+    const bouton = await ouvrirAnalyse();
+    expect(await screen.findByText(/Crédits insuffisants/)).toHaveTextContent(
+      'Crédits insuffisants : il te faut 4 crédits, il t’en reste 1.',
+    );
+    await waitFor(() => expect(bouton).toBeDisabled());
+    expect(screen.getByRole('link', { name: 'Voir mes crédits' })).toHaveAttribute('href', '/credits');
+  });
+
+  it('montre le refus du serveur avec « Voir mes crédits », pas une erreur générique', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      ...ENGINE_ROUTES,
+      ...credits(26),
+      'POST /projects/p1/analyze': {
+        status: 402,
+        body: {
+          statusCode: 402,
+          code: 'credits_insuffisants',
+          message: 'Crédits insuffisants : il te faut 4 crédits, tu en as 1.',
+          requis: 4,
+          disponible: 1,
+        },
+      },
+    });
+    afficher();
+
+    fireEvent.click(await ouvrirAnalyse());
+
+    expect(await screen.findByText(/tu en as 1\./)).toHaveClass('error');
+    expect(screen.getByRole('link', { name: 'Voir mes crédits' })).toHaveAttribute('href', '/credits');
+  });
+
+  it('relit le solde après une analyse réussie', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      ...ENGINE_ROUTES,
+      ...credits(26),
+      'POST /projects/p1/analyze': {
+        status: 201,
+        body: {
+          id: 'a1',
+          project_id: 'p1',
+          summary: 'Idée solide.',
+          feasibility_score: 7,
+          strengths: [],
+          risks: [],
+          next_steps: [],
+          created_at: '2026-01-02T00:00:00.000Z',
+        },
+      },
+    });
+    afficher();
+    const lectures = () =>
+      (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.filter(
+        ([url, options]) => new URL(String(url)).pathname === '/credits' && !(options as RequestInit)?.method,
+      ).length;
+
+    fireEvent.click(await ouvrirAnalyse());
+    await screen.findByText('Idée solide.');
+
+    await waitFor(() => expect(lectures()).toBeGreaterThanOrEqual(2));
+  });
+
+  it('pour un associé, dit que les crédits du propriétaire paient, sans bloquer sur son solde', async () => {
+    signInAs('tok456', { id: 'u2', email: 'associe@b.com' });
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      'GET /projects/p1/mon-acces': {
+        status: 200,
+        body: {
+          role: 'associe',
+          capacites: ['voir_projet', 'voir_plan_financement', 'modifier_projet', 'voir_taches', 'lancer_ia'],
+        },
+      },
+      ...ENGINE_ROUTES,
+      // Le solde de l'associé lui-même : il ne décide de rien ici.
+      ...credits(0),
+    });
+    afficher();
+
+    const bouton = await ouvrirAnalyse();
+    expect(await screen.findByText(/propriétaire du projet/)).toHaveTextContent(
+      'Cette action coûte 4 crédits, pris sur les crédits du propriétaire du projet.',
+    );
+    expect(bouton).toBeEnabled();
+  });
+});

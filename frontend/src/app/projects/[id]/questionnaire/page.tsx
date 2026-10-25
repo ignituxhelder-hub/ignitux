@@ -7,6 +7,15 @@ import { Champ } from '@/components/champs-profil';
 import { cvAEnvoyer, cvEstVide, EditeurCv } from '@/components/editeur-cv';
 import { IginiMention } from '@/components/igini-mention';
 import {
+  CreditsProvider,
+  erreurIgini,
+  MessageErreurIgini,
+  PrixIgini,
+  useCredits,
+  usePrixIgini,
+  type ErreurIgini,
+} from '@/components/prix-igini';
+import {
   api,
   ApiError,
   type Cv,
@@ -33,6 +42,11 @@ import { useAuth } from '@/lib/auth';
  *
  * L'étape 1 (le nom et l'idée) a eu lieu sur l'écran de création : le
  * compteur commence donc à 2.
+ *
+ * Les questions d'IGINI, à la dernière étape, sont une action IGINI payée en
+ * crédits : elles se demandent (le prix est affiché sous le bouton), elles ne
+ * partent plus d'elles-mêmes à l'arrivée sur l'étape. Elles restent
+ * facultatives : « Terminer » marche sans elles.
  */
 
 /** Ce qui décrit la personne et sert l'analyse, demandé ici s'il manque. */
@@ -61,9 +75,21 @@ function estVisible(q: QuestionProjet, reponses: Reponses): boolean {
 }
 
 export default function QuestionnairePage() {
+  const { token } = useAuth();
+  // Le solde se lit une fois pour l'écran ; seul le propriétaire arrive ici.
+  return (
+    <CreditsProvider token={token}>
+      <QuestionnaireProjet />
+    </CreditsProvider>
+  );
+}
+
+function QuestionnaireProjet() {
   const { id } = useParams<{ id: string }>();
   const { token, isReady } = useAuth();
   const router = useRouter();
+  const credits = useCredits();
+  const prixQuestions = usePrixIgini('questionner');
 
   const [questionnaire, setQuestionnaire] = useState<Questionnaire | null>(null);
   const [etapes, setEtapes] = useState<Etape[]>([]);
@@ -73,6 +99,8 @@ export default function QuestionnairePage() {
   const [profil, setProfil] = useState<ProfileValues>({});
   const [reponsesIgini, setReponsesIgini] = useState<Record<string, string>>({});
   const [iginiIndisponible, setIginiIndisponible] = useState(false);
+  // Un refus de crédits se dit avec son lien ; toute autre panne reste « pas bloquant ».
+  const [erreurQuestions, setErreurQuestions] = useState<ErreurIgini | null>(null);
   const [preparation, setPreparation] = useState(false);
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -129,23 +157,27 @@ export default function QuestionnairePage() {
 
   const etape = etapes[index];
 
-  // Arrivée sur la dernière étape : IGINI prépare ses questions, une fois.
-  useEffect(() => {
-    if (!token || etape?.kind !== 'igini' || !questionnaire) return;
-    if (questionnaire.questionsIginiPreparees || iginiIndisponible || preparation) return;
-    setPreparation(true);
-    api
-      .prepareIginiQuestions(token, id)
-      .then((q) => {
-        setQuestionnaire(q);
-        setReponsesIgini(Object.fromEntries(q.questionsIgini.map((x) => [x.id, x.reponse ?? ''])));
-      })
-      // Pas bloquant : sans ses questions, on termine simplement sans elles.
-      .catch(() => setIginiIndisponible(true))
-      .finally(() => setPreparation(false));
-  }, [token, id, etape, questionnaire, iginiIndisponible, preparation]);
-
   if (!isReady || !token) return null;
+
+  /** Les questions d'IGINI, demandées par la personne (une fois par projet). */
+  async function demanderQuestions() {
+    if (!token || preparation) return;
+    setPreparation(true);
+    setErreurQuestions(null);
+    try {
+      const q = await api.prepareIginiQuestions(token, id);
+      setQuestionnaire(q);
+      setReponsesIgini(Object.fromEntries(q.questionsIgini.map((x) => [x.id, x.reponse ?? ''])));
+      credits?.actualiser();
+    } catch (err) {
+      // Pas bloquant : sans ses questions, on termine simplement sans elles.
+      const erreur = erreurIgini(err, '');
+      if (erreur.voirCredits) setErreurQuestions(erreur);
+      else setIginiIndisponible(true);
+    } finally {
+      setPreparation(false);
+    }
+  }
 
   /** Enregistre l'étape affichée. Rend false si l'enregistrement a échoué. */
   async function enregistrerEtape(termine = false): Promise<boolean> {
@@ -305,6 +337,24 @@ export default function QuestionnairePage() {
             {etape.kind === 'igini' && (
               <>
                 <h2 style={{ marginTop: 0 }}>Les questions d&apos;IGINI</h2>
+                {!questionnaire.questionsIginiPreparees && !preparation && !iginiIndisponible && (
+                  <>
+                    <p className="muted" style={{ marginTop: 0 }}>
+                      IGINI peut te poser jusqu&apos;à trois questions sur ce qui manque encore pour
+                      analyser ton projet. C&apos;est facultatif : tu peux terminer sans.
+                    </p>
+                    <button
+                      type="button"
+                      className="secondary"
+                      disabled={enCours || !!prixQuestions?.insuffisant}
+                      onClick={() => void demanderQuestions()}
+                    >
+                      Recevoir les questions d’IGINI
+                    </button>
+                    <PrixIgini generateur="questionner" />
+                    <MessageErreurIgini erreur={erreurQuestions} />
+                  </>
+                )}
                 {preparation && (
                   <IginiMention>lit tes réponses et prépare ses questions…</IginiMention>
                 )}

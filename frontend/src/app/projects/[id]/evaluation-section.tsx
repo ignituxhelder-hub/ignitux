@@ -1,7 +1,14 @@
 'use client';
 
-import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
+import {
+  erreurIgini,
+  MessageErreurIgini,
+  PrixIgini,
+  useCredits,
+  usePrixIgini,
+  type ErreurIgini,
+} from '@/components/prix-igini';
 import {
   api,
   ApiError,
@@ -32,15 +39,20 @@ function date(iso: string): string {
 /**
  * ÉVALUATION DE FINANCEMENT — IGINI rédige, Ignitux relit, le porteur reçoit.
  *
+ * Ouverte à tous depuis les crédits IGINI (2026-10-25) : plus d'offre à
+ * avoir, la demande se paie en crédits, au prix affiché sous le bouton.
+ *
  * Tant que l'évaluation n'est pas validée par Ignitux, le serveur n'en renvoie
  * pas le contenu : cette section n'affiche donc que l'état. Une fois validée,
  * le rapport s'affiche ici et le dossier se télécharge en PDF.
  */
 export function EvaluationSection({ token, projectId, readOnly = false }: EvaluationSectionProps) {
   const [evaluations, setEvaluations] = useState<EvaluationVue[] | null>(null);
-  const [incluse, setIncluse] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Le refus de la demande elle-même : un solde trop bas porte « Voir mes crédits ».
+  const [erreurDemande, setErreurDemande] = useState<ErreurIgini | null>(null);
   const [isBusy, setIsBusy] = useState(false);
+  const credits = useCredits();
 
   /** Relit les évaluations ; c'est aussi ce que fait le sondage. */
   const charger = useCallback(async () => {
@@ -58,18 +70,7 @@ export function EvaluationSection({ token, projectId, readOnly = false }: Evalua
   useEffect(() => {
     if (!token) return;
     void charger();
-    // Un membre ne demande pas : l'offre du propriétaire ne le concerne pas.
-    if (readOnly) return;
-    // L'offre ne change pas pendant qu'on regarde : lue une fois, pas à chaque sondage.
-    api
-      .getOffres(token)
-      .then((offres) => {
-        // Garde défensive : une réponse inattendue ne doit pas faire planter la fiche projet.
-        const actuelle = Array.isArray(offres?.offres) ? offres.offres.find((o) => o.actuelle) : undefined;
-        setIncluse(Boolean(actuelle?.capacites?.evaluationFinancement));
-      })
-      .catch(() => setIncluse(false));
-  }, [charger, readOnly, token]);
+  }, [charger, token]);
 
   const enPreparation = evaluations?.[0]?.status === 'en_preparation';
   useEffect(() => {
@@ -82,11 +83,14 @@ export function EvaluationSection({ token, projectId, readOnly = false }: Evalua
     if (!token) return;
     setIsBusy(true);
     setError(null);
+    setErreurDemande(null);
     try {
       const nouvelle = await api.demanderEvaluation(token, projectId);
       setEvaluations((avant) => [nouvelle, ...(avant ?? [])]);
+      // La génération part en arrière-plan et se paie à son lancement.
+      credits?.actualiser();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'La demande n’a pas pu être envoyée.');
+      setErreurDemande(erreurIgini(err, 'La demande n’a pas pu être envoyée.'));
     } finally {
       setIsBusy(false);
     }
@@ -122,7 +126,6 @@ export function EvaluationSection({ token, projectId, readOnly = false }: Evalua
       ) : (
         <Contenu
           evaluations={evaluations}
-          incluse={incluse}
           isBusy={isBusy}
           onDemander={demander}
           onTelecharger={telecharger}
@@ -130,6 +133,7 @@ export function EvaluationSection({ token, projectId, readOnly = false }: Evalua
       )}
 
       {error && <p className="error">{error}</p>}
+      <MessageErreurIgini erreur={erreurDemande} />
     </section>
   );
 }
@@ -172,34 +176,28 @@ function LectureSeule({
 
 function Contenu({
   evaluations,
-  incluse,
   isBusy,
   onDemander,
   onTelecharger,
 }: {
   evaluations: EvaluationVue[] | null;
-  incluse: boolean | null;
   isBusy: boolean;
   onDemander: () => void;
   onTelecharger: (id: string) => void;
 }) {
-  if (evaluations === null || incluse === null) return <p className="loading">Chargement…</p>;
-
-  if (!incluse) {
-    return (
-      <p className="notice">
-        <span>
-          Comprise dans l’offre Entrepreneur. <Link href="/offres">Voir les offres</Link>
-        </span>
-      </p>
-    );
-  }
+  // Une évaluation est une action IGINI : son prix se lit sous le bouton,
+  // et un solde trop bas le grise (le serveur revérifie, 402).
+  const prix = usePrixIgini('evaluer');
+  if (evaluations === null) return <p className="loading">Chargement…</p>;
 
   const [derniere, ...anciennes] = evaluations;
   const bouton = (libelle: string) => (
-    <button className="primary" type="button" onClick={onDemander} disabled={isBusy}>
-      {isBusy ? 'Envoi…' : libelle}
-    </button>
+    <>
+      <button className="primary" type="button" onClick={onDemander} disabled={isBusy || !!prix?.insuffisant}>
+        {isBusy ? 'Envoi…' : libelle}
+      </button>
+      <PrixIgini generateur="evaluer" />
+    </>
   );
 
   return (
@@ -242,10 +240,11 @@ function Contenu({
             <button className="primary" type="button" onClick={() => onTelecharger(derniere.id)}>
               Télécharger le dossier (PDF)
             </button>
-            <button type="button" onClick={onDemander} disabled={isBusy}>
+            <button type="button" onClick={onDemander} disabled={isBusy || !!prix?.insuffisant}>
               Demander une nouvelle évaluation
             </button>
           </div>
+          <PrixIgini generateur="evaluer" />
         </>
       )}
 

@@ -811,6 +811,43 @@ a.secondary:hover {
   color: var(--spark);
 }
 
+/* Les crédits IGINI. Un montant se constate : gravé en or, jamais en feu
+   (le feu reste au bouton qui lance l'action). Une ligne courte sous le
+   bouton : le prix ne doit pas rallonger l'écran. */
+.prix-igini {
+  margin: 0.35rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+/* Dans une barre de titre (titre à gauche, bouton à droite) : une ligne à
+   part entière, alignée sous le bouton. */
+.prix-igini--ligne {
+  flex-basis: 100%;
+  margin: 0;
+  text-align: right;
+}
+
+.credits-montant,
+.notice .credits-montant {
+  color: var(--or);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Le solde, en grand, sur « Mes crédits ». */
+.credits-solde {
+  margin: 0.25rem 0 0;
+  font-family: var(--font-display), 'Segoe UI', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--or);
+  font-variant-numeric: tabular-nums;
+}
+
 /* --------------------------------------------------------------------------
    Les en-têtes et la navigation.
    -------------------------------------------------------------------------- */
@@ -2309,6 +2346,13 @@ th {
   padding: 0.5rem 0.8rem;
   color: var(--danger);
   font-size: 0.85rem;
+}
+
+/* « 1 crédit par message » : discret, au-dessus de la saisie. */
+.panneau-chat-igini__prix {
+  margin: 0;
+  padding: 0.35rem 0.8rem 0;
+  font-size: 0.75rem;
 }
 
 .panneau-chat-igini__saisie {

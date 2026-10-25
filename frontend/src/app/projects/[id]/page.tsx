@@ -32,12 +32,21 @@ import { AnalyseEnCours, AnalyseResultat } from "./analyse-resultat";
 import { FormeJuridiqueResultat } from "./forme-juridique-resultat";
 import { ChampsADemander } from "@/components/champs-profil";
 import {
+  CreditsProvider,
+  erreurIgini,
+  MessageErreurIgini,
+  PrixIgini,
+  usePrixIgini,
+  type ErreurIgini,
+} from "@/components/prix-igini";
+import {
   api,
   ApiError,
   type Analysis,
   type BuildPlan,
   type DevelopmentPlan,
   type FinancingPlan,
+  type GenerateurIgini,
   type IginiStatus,
   type JourneyView,
   type LegalFormRecommendation,
@@ -195,7 +204,9 @@ function useGeneration<T>(
   onGenerated?: () => void,
 ) {
   const [isBusy, setIsBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Une erreur IGINI peut être un solde trop bas : elle porte alors le lien
+  // « Voir mes crédits » (voir components/prix-igini.tsx).
+  const [error, setError] = useState<ErreurIgini | null>(null);
 
   async function generate() {
     if (!token) return;
@@ -206,7 +217,7 @@ function useGeneration<T>(
       setItems((prev) => [created, ...prev]);
       onGenerated?.();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : failureMessage);
+      setError(erreurIgini(err, failureMessage));
     } finally {
       setIsBusy(false);
     }
@@ -700,6 +711,15 @@ export default function ProjectDetailPage() {
   };
 
   return (
+    // Le solde se lit une fois pour toute la fiche, et se relit après chaque
+    // génération réussie (`refreshSignal`). Dans le projet d'un autre, ce
+    // sont les crédits du propriétaire qui paient : le solde du membre ne
+    // bloque rien, le serveur tranche.
+    <CreditsProvider
+      token={token}
+      payeParLeProprietaire={!!project && !isOwner}
+      version={refreshSignal}
+    >
     <main className="page page--wide">
       <div className="top-bar">
         <div
@@ -974,6 +994,7 @@ export default function ProjectDetailPage() {
       {montrer("analyse") && etapeOuverte === "analyse" && (
         <GenerationSection
           guideCible="analyse"
+          generateur="analyser"
           title="Analyse"
           buttonLabel="Analyser ce projet"
           buttonBusyLabel="Analyse en cours…"
@@ -1032,6 +1053,7 @@ export default function ProjectDetailPage() {
       {montrer("analyse") && etapeOuverte === "forme-juridique" && (
         <>
           <GenerationSection
+            generateur="former"
             title="Forme juridique"
             buttonLabel="Proposer une forme juridique"
             buttonBusyLabel="Recommandation en cours…"
@@ -1094,6 +1116,7 @@ export default function ProjectDetailPage() {
         <GenerationSection
           anchorId="section-construction"
           guideCible="construction"
+          generateur="construire"
           title="Plan de construction"
           buttonLabel="Générer un plan"
           buttonBusyLabel="Génération…"
@@ -1113,6 +1136,7 @@ export default function ProjectDetailPage() {
           on ne pouvait pas les distinguer. */}
       {montrer("financement") && etapeOuverte === "financement" && (
         <GenerationSection
+          generateur="financer"
           title="Plan de financement"
           buttonLabel="Générer un plan de financement"
           buttonBusyLabel="Génération…"
@@ -1138,6 +1162,7 @@ export default function ProjectDetailPage() {
       {montrer("developpement") && etapeOuverte === "developpement" && (
         <GenerationSection
           guideCible="developpement"
+          generateur="developper"
           title="Développement"
           buttonLabel="Générer un plan de développement"
           buttonBusyLabel="Génération…"
@@ -1157,6 +1182,7 @@ export default function ProjectDetailPage() {
       {montrer("transmission") && etapeOuverte === "transmission" && (
         <GenerationSection
           guideCible="transmission"
+          generateur="transmettre"
           title="Transmission"
           buttonLabel="Générer un plan de transmission"
           buttonBusyLabel="Génération…"
@@ -1408,6 +1434,7 @@ export default function ProjectDetailPage() {
 
       {vueAvancee && parcours && <SectionsFermees parcours={parcours} />}
     </main>
+    </CreditsProvider>
   );
 }
 
@@ -1418,13 +1445,15 @@ interface GenerationSectionProps<T> {
   guideCible?: string;
   /** Ce qui s'affiche pendant la génération, à la place du vide. */
   busyContent?: ReactNode;
+  /** Le nom de l'action au barème des crédits : son prix s'affiche sous le bouton. */
+  generateur: GenerateurIgini;
   title: string;
   buttonLabel: string;
   buttonBusyLabel: string;
   emptyLabel: string;
   items: T[];
   isBusy: boolean;
-  error: string | null;
+  error: ErreurIgini | null;
   onGenerate: () => void;
   renderItem: (item: T) => ReactNode;
   /** Un collaborateur peut consulter l'historique, mais pas en générer de nouveau. */
@@ -1440,6 +1469,7 @@ function GenerationSection<T>({
   anchorId,
   guideCible,
   busyContent,
+  generateur,
   title,
   buttonLabel,
   buttonBusyLabel,
@@ -1456,6 +1486,9 @@ function GenerationSection<T>({
   // encore reçue, ou requête échouée) laisse le bouton en place : le
   // serveur reste seul juge, et il refusera proprement s'il le faut.
   const generatorsOff = iginiStatus !== null && !iginiStatus.generatorsEnabled;
+  // Le serveur revérifie toujours ; ici, on évite seulement de lancer une
+  // demande qu'on sait refusée.
+  const prix = usePrixIgini(generateur);
 
   return (
     <div
@@ -1475,7 +1508,7 @@ function GenerationSection<T>({
             className="secondary"
             type="button"
             onClick={onGenerate}
-            disabled={isBusy}
+            disabled={isBusy || !!prix?.insuffisant}
             data-guide-cible={guideCible}
           >
             {isBusy ? buttonBusyLabel : buttonLabel}
@@ -1483,6 +1516,10 @@ function GenerationSection<T>({
         )}
         {!readOnly && generatorsOff && (
           <span className="pill">IA indisponible</span>
+        )}
+        {/* Sur sa propre ligne, sous le bouton : le prix se lit avant de toucher. */}
+        {!readOnly && !generatorsOff && (
+          <PrixIgini generateur={generateur} className="prix-igini--ligne" />
         )}
       </div>
 
@@ -1498,7 +1535,7 @@ function GenerationSection<T>({
         </p>
       )}
 
-      {error && <p className="error">{error}</p>}
+      <MessageErreurIgini erreur={error} />
       {/* Pendant la génération : ce qui est en cours, plutôt que rien. Un
           écran muet pendant une minute fait croire à une panne. */}
       {isBusy && busyContent}

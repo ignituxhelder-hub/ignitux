@@ -206,6 +206,11 @@ describe('le questionnaire du projet, étape par étape', () => {
     await screen.findByRole('heading', { name: 'L’équipe et la protection' });
     fireEvent.click(screen.getByRole('button', { name: 'Suivant' }));
 
+    // Une action IGINI se paie : elle se demande, elle ne part pas seule.
+    await screen.findByRole('heading', { name: "Les questions d'IGINI" });
+    expect(appels('POST', '/projects/p1/questionnaire/questions-igini')).toHaveLength(0);
+    fireEvent.click(screen.getByRole('button', { name: 'Recevoir les questions d’IGINI' }));
+
     const champ = await screen.findByLabelText('Où sera le camion ?');
     fireEvent.change(champ, { target: { value: 'À Villeurbanne' } });
     fireEvent.click(screen.getByRole('button', { name: 'Terminer' }));
@@ -232,9 +237,80 @@ describe('le questionnaire du projet, étape par étape', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Suivant' }));
     await screen.findByRole('heading', { name: 'L’équipe et la protection' });
     fireEvent.click(screen.getByRole('button', { name: 'Suivant' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Recevoir les questions d’IGINI' }));
 
     expect(await screen.findByText(/n'a pas pu préparer ses questions/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Terminer' }));
     await waitFor(() => expect(router.push).toHaveBeenCalledWith('/projects/p1'));
+  });
+
+  describe('le prix des questions d’IGINI', () => {
+    const credits = (solde: number) => ({
+      'GET /credits': {
+        status: 200,
+        body: {
+          solde,
+          historique: [],
+          bareme: {
+            valeurCreditCentimes: 10,
+            bienvenue: 30,
+            recharges: [],
+            rechargeDisponible: false,
+            rechargeMessage: '',
+            actions: [{ generateur: 'questionner', libelle: 'Questions d’IGINI sur ton projet', credits: 1, par: 'action' }],
+          },
+        },
+      },
+    });
+
+    async function allerAuxQuestions() {
+      await screen.findByRole('heading', { name: 'Le projet' });
+      fireEvent.click(screen.getByRole('button', { name: 'Suivant' }));
+      await screen.findByRole('heading', { name: 'L’équipe et la protection' });
+      fireEvent.click(screen.getByRole('button', { name: 'Suivant' }));
+      return screen.findByRole('button', { name: 'Recevoir les questions d’IGINI' });
+    }
+
+    it('dit le prix avant de demander les questions', async () => {
+      routes(credits(26));
+      rendre();
+
+      const bouton = await allerAuxQuestions();
+      expect(await screen.findByText(/Cette action coûte/)).toHaveTextContent(
+        'Cette action coûte 1 crédit — il t’en reste 26.',
+      );
+      expect(bouton).toBeEnabled();
+    });
+
+    it('sans crédit, grise la demande mais laisse terminer', async () => {
+      routes(credits(0));
+      rendre();
+
+      const bouton = await allerAuxQuestions();
+      await waitFor(() => expect(bouton).toBeDisabled());
+      expect(screen.getByRole('link', { name: 'Voir mes crédits' })).toHaveAttribute('href', '/credits');
+      fireEvent.click(screen.getByRole('button', { name: 'Terminer' }));
+      await waitFor(() => expect(router.push).toHaveBeenCalledWith('/projects/p1'));
+    });
+
+    it('un refus « crédits insuffisants » le dit, avec le lien vers les crédits', async () => {
+      routes({
+        'POST /projects/p1/questionnaire/questions-igini': {
+          status: 402,
+          body: {
+            code: 'credits_insuffisants',
+            message: 'Crédits insuffisants : il te faut 1 crédit, tu en as 0.',
+            requis: 1,
+            disponible: 0,
+          },
+        },
+      });
+      rendre();
+
+      fireEvent.click(await allerAuxQuestions());
+
+      expect(await screen.findByText(/tu en as 0\./)).toHaveClass('error');
+      expect(screen.getByRole('link', { name: 'Voir mes crédits' })).toHaveAttribute('href', '/credits');
+    });
   });
 });

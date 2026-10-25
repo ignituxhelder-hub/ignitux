@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { CreditsProvider } from '@/components/prix-igini';
 import { mockApiRoutes } from '@/test-utils/mocks';
 import { StatutsSection } from './statuts-section';
 
@@ -923,5 +924,80 @@ describe('StatutsSection', () => {
       fireEvent.change(select, { target: { value: 'EURL' } });
       expect(screen.getByRole('button', { name: /confirmer cette forme/i })).toBeEnabled();
     });
+  });
+});
+
+describe('StatutsSection — le prix de la rédaction', () => {
+  const credits = (solde: number) => ({
+    'GET /credits': {
+      status: 200,
+      body: {
+        solde,
+        historique: [],
+        bareme: {
+          valeurCreditCentimes: 10,
+          bienvenue: 30,
+          recharges: [],
+          rechargeDisponible: false,
+          rechargeMessage: '',
+          actions: [{ generateur: 'statuts', libelle: 'Rédiger les statuts', credits: 7, par: 'action' }],
+        },
+      },
+    },
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function rendre() {
+    render(
+      <CreditsProvider token={TOKEN}>
+        <StatutsSection token={TOKEN} projectId={PROJECT_ID} confirmedLegalForm="SAS" onFormConfirmed={vi.fn()} />
+      </CreditsProvider>,
+    );
+  }
+
+  it('dit le prix sous « Générer les statuts »', async () => {
+    mockApiRoutes({ 'GET /projects/p1/statuts': { status: 200, body: null }, ...credits(30) });
+    rendre();
+
+    expect(await screen.findByText(/Cette action coûte/)).toHaveTextContent(
+      'Cette action coûte 7 crédits — il t’en reste 30.',
+    );
+    expect(screen.getByRole('button', { name: /générer les statuts/i })).toBeEnabled();
+  });
+
+  it('grise la génération quand le solde ne suffit pas', async () => {
+    mockApiRoutes({ 'GET /projects/p1/statuts': { status: 200, body: null }, ...credits(3) });
+    rendre();
+
+    expect(await screen.findByText(/Crédits insuffisants/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /générer les statuts/i })).toBeDisabled();
+    expect(screen.getByRole('link', { name: 'Voir mes crédits' })).toHaveAttribute('href', '/credits');
+  });
+
+  it('montre le refus « crédits insuffisants » du serveur avec le lien vers les crédits', async () => {
+    mockApiRoutes({
+      'GET /projects/p1/statuts': { status: 200, body: null },
+      ...credits(30),
+      'POST /projects/p1/statuts': {
+        status: 402,
+        body: {
+          code: 'credits_insuffisants',
+          message: 'Crédits insuffisants : il te faut 7 crédits, tu en as 2.',
+          requis: 7,
+          disponible: 2,
+        },
+      },
+    });
+    rendre();
+    await screen.findByText(/Cette action coûte/);
+
+    remplirFormulaire();
+    fireEvent.click(screen.getByRole('button', { name: /générer les statuts/i }));
+
+    expect(await screen.findByText(/tu en as 2\./)).toHaveClass('error');
+    expect(screen.getByRole('link', { name: 'Voir mes crédits' })).toHaveAttribute('href', '/credits');
   });
 });

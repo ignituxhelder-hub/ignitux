@@ -1,6 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import {
+  erreurIgini,
+  MessageErreurIgini,
+  PrixIgini,
+  useCredits,
+  usePrixIgini,
+  type ErreurIgini,
+} from '@/components/prix-igini';
 import { api, ApiError, type CompanyBylaws, type GenerateBylawsInput } from '@/lib/api';
 import { centimesDepuisEuros, jour } from '@/lib/montants';
 
@@ -107,6 +115,11 @@ export function StatutsSection({
   const [projetCharge, setProjetCharge] = useState<string | null>(null);
   const [chargementEchoue, setChargementEchoue] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Le refus de la génération elle-même : il peut porter « Voir mes crédits ».
+  const [erreurGeneration, setErreurGeneration] = useState<ErreurIgini | null>(null);
+  const credits = useCredits();
+  // Rédiger (ou réécrire) les statuts est une action IGINI, payée en crédits.
+  const prixStatuts = usePrixIgini('statuts');
 
   const [capital, setCapital] = useState('');
   const [headOffice, setHeadOffice] = useState('');
@@ -207,6 +220,7 @@ export function StatutsSection({
 
   const genererStatuts = async () => {
     setError(null);
+    setErreurGeneration(null);
     const demande = construireDemande({ capital, headOffice, durationYears, associes });
     if ('erreur' in demande) {
       setError(demande.erreur);
@@ -221,8 +235,9 @@ export function StatutsSection({
         recevoir(await api.genererStatuts(token, projectId, demande.dto));
       }
       onChanged?.();
+      credits?.actualiser();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'La génération a échoué.');
+      setErreurGeneration(erreurIgini(err, 'La génération a échoué.'));
     } finally {
       setIsGenerating(false);
     }
@@ -341,6 +356,7 @@ export function StatutsSection({
     <div className="card">
       <h2>Statuts</h2>
       {error && <p className="error">{error}</p>}
+      <MessageErreurIgini erreur={erreurGeneration} />
 
       {montrerChoixForme && (
         <>
@@ -463,9 +479,15 @@ export function StatutsSection({
           <button className="secondary" type="button" onClick={() => setAssocies([...associes, nouvelAssocie()])}>
             Ajouter un associé
           </button>
-          <button className="primary" type="button" onClick={genererStatuts} disabled={isGenerating}>
+          <button
+            className="primary"
+            type="button"
+            onClick={genererStatuts}
+            disabled={isGenerating || !!prixStatuts?.insuffisant}
+          >
             {isGenerating ? 'Génération…' : isRegenerating ? 'Régénérer les statuts' : 'Générer les statuts'}
           </button>
+          <PrixIgini generateur="statuts" />
           {isRegenerating && (
             <button className="secondary" type="button" onClick={() => setIsRegenerating(false)} disabled={isGenerating}>
               Annuler

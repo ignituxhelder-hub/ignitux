@@ -14,6 +14,15 @@ import {
   type Task,
   type TaskStatus,
 } from '@/lib/api';
+import {
+  erreurIgini,
+  MessageErreurIgini,
+  PrixIgini,
+  ResumeLot,
+  useCredits,
+  usePrixIgini,
+  type ErreurIgini,
+} from '@/components/prix-igini';
 import { executerEnSerie } from '@/lib/executer-en-serie';
 import { titreCourt } from '@/lib/titre-court';
 import { ResultatIa } from './resultat-ia';
@@ -456,6 +465,11 @@ export function TasksSection({
   const [raisons, setRaisons] = useState<Record<string, string>>({});
   const [progress, setProgress] = useState<{ courant: number; total: number } | null>(null);
   const [limite, setLimite] = useState<string | null>(null);
+  // Ce qui a arrêté un lot (crédits, droits, réseau) : un solde trop bas porte « Voir mes crédits ».
+  const [erreurLot, setErreurLot] = useState<ErreurIgini | null>(null);
+  const credits = useCredits();
+  // Le prix d'une seule tâche, pour « Réessayer ».
+  const prixUne = usePrixIgini('executer');
   const [busyId, setBusyId] = useState<string | null>(null);
   // Tâches dont le texte complet est déplié (sinon seul le titre court s'affiche).
   const [deplies, setDeplies] = useState<Set<string>>(new Set());
@@ -553,6 +567,7 @@ export function TasksSection({
     if (!token || ids.length === 0 || enCours.current) return;
     enCours.current = true;
     setError(null);
+    setErreurLot(null);
     setRaisons({});
     setLimite(null);
     setIsRunning(true);
@@ -584,7 +599,7 @@ export function TasksSection({
               return next;
             });
           } else if (info.etat === 'arret' && info.message) {
-            setError(info.message);
+            setErreurLot(erreurIgini(info.erreur ?? null, info.message));
           }
         },
         () => !actif.current,
@@ -598,6 +613,8 @@ export function TasksSection({
         // Les cases restent cochées : un clic relance ce qui n'a pas été traité.
         setLimite(`Connexion perdue : ${pluriel}`);
       }
+      // Le solde a bougé (ou un refus l'a révélé) : on le relit.
+      if (bilan.traites > 0 || bilan.arretePourLimite) credits?.actualiser();
       onChanged?.();
     } finally {
       enCours.current = false;
@@ -640,6 +657,8 @@ export function TasksSection({
   // Une tâche d'étape (source « automation ») se fait avec l'étape elle-même.
   const lancable = (t: Task) => t.source !== 'automation' && t.status !== 'done' && t.ai_status !== 'a_valider' && t.ai_status !== 'valide';
   const coches = tasks.filter((t) => selected.has(t.id) && lancable(t)).map((t) => t.id);
+  // Le lot entier se paie : grisé tant que le solde ne couvre pas la sélection.
+  const prixLot = usePrixIgini('executer', coches.length);
 
   const GROUPES: { cle: string; titre: string; filtre: (t: Task) => boolean }[] = [
     { cle: 'a_valider', titre: 'À valider', filtre: (t) => t.ai_status === 'a_valider' && t.status !== 'done' },
@@ -747,7 +766,7 @@ export function TasksSection({
             <button
               className="secondary"
               type="button"
-              disabled={isRunning}
+              disabled={isRunning || !!prixUne?.insuffisant}
               onClick={() => lancerLot([task.id])}
             >
               Réessayer
@@ -759,6 +778,7 @@ export function TasksSection({
             )}
           </p>
         )}
+        {!readOnly && task.ai_status === 'echec' && <PrixIgini generateur="executer" />}
         {task.ai_status === 'refuse' && (
           <p className="muted" style={{ margin: '0.5rem 0 0' }}>
             Refusé{task.ai_refusal_reason ? ` : ${task.ai_refusal_reason}` : ''}
@@ -781,6 +801,7 @@ export function TasksSection({
     <div className="card" style={{ marginTop: '1.5rem' }}>
       <h2 style={{ marginTop: 0 }}>Tâches</h2>
       {error && <p className="error">{error}</p>}
+      <MessageErreurIgini erreur={erreurLot} />
       {limite && <p className="error">{limite}</p>}
       {!readOnly && (
         <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
@@ -867,15 +888,13 @@ export function TasksSection({
               </span>
           </span>
           ) : (
-            <span className="muted">
-              {`${coches.length} élément${coches.length > 1 ? 's' : ''} sélectionné${coches.length > 1 ? 's' : ''}, ~${coches.length} appel${coches.length > 1 ? 's' : ''} IA`}
-            </span>
+            <ResumeLot nombre={coches.length} generateur="executer" />
           )}
           <button
             className="primary"
             style={{ width: 'auto' }}
             type="button"
-            disabled={coches.length === 0 || isRunning}
+            disabled={coches.length === 0 || isRunning || !!prixLot?.insuffisant}
             onClick={() => lancerLot(coches)}
           >
             Démarrer IGINI

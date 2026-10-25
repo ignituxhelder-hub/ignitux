@@ -2,8 +2,17 @@
 
 import Link from 'next/link';
 import { type FormEvent, useEffect, useRef, useState } from 'react';
-import { api, ApiError, type ChatMessage } from '@/lib/api';
+import { api, type ChatMessage } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import {
+  CreditsProvider,
+  erreurIgini,
+  MessageErreurIgini,
+  PrixIgini,
+  useCredits,
+  usePrixIgini,
+  type ErreurIgini,
+} from './prix-igini';
 
 // Global (pas ancré à `$`) : trouvaille de la revue finale, le prompt
 // système ne garantit aucun ordre entre les deux marqueurs (chacun dit
@@ -36,12 +45,28 @@ export function extraireMarqueurs(contenu: string): {
   return { texte, projetId, souvenirSuggere };
 }
 
+/**
+ * Chaque message à IGINI se paie un crédit (barème : « discuter », par
+ * message), sur le solde de la personne — le chat n'est attaché à aucun
+ * projet. Le solde se lit à l'ouverture du panneau.
+ */
 export function ChatIgini({ onClose }: { onClose: () => void }) {
   const { token } = useAuth();
+  return (
+    <CreditsProvider token={token}>
+      <PanneauChat onClose={onClose} />
+    </CreditsProvider>
+  );
+}
+
+function PanneauChat({ onClose }: { onClose: () => void }) {
+  const { token } = useAuth();
+  const credits = useCredits();
+  const prix = usePrixIgini('discuter');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [brouillon, setBrouillon] = useState('');
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
-  const [erreur, setErreur] = useState<string | null>(null);
+  const [erreur, setErreur] = useState<ErreurIgini | null>(null);
   const finRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,7 +74,7 @@ export function ChatIgini({ onClose }: { onClose: () => void }) {
     api
       .chatHistory(token)
       .then(setMessages)
-      .catch(() => setErreur('Impossible de charger la conversation.'));
+      .catch(() => setErreur({ message: 'Impossible de charger la conversation.', voirCredits: false }));
   }, [token]);
 
   useEffect(() => {
@@ -62,7 +87,7 @@ export function ChatIgini({ onClose }: { onClose: () => void }) {
   async function envoyer(event: FormEvent) {
     event.preventDefault();
     const contenu = brouillon.trim();
-    if (!token || !contenu || envoiEnCours) return;
+    if (!token || !contenu || envoiEnCours || prix?.insuffisant) return;
 
     setBrouillon('');
     setErreur(null);
@@ -75,8 +100,9 @@ export function ChatIgini({ onClose }: { onClose: () => void }) {
     try {
       const reponse = await api.sendChatMessage(token, contenu);
       setMessages((precedents) => [...precedents, reponse]);
+      credits?.actualiser();
     } catch (error) {
-      setErreur(error instanceof ApiError ? error.message : 'Impossible de contacter Igini.');
+      setErreur(erreurIgini(error, 'Impossible de contacter Igini.'));
     } finally {
       setEnvoiEnCours(false);
     }
@@ -98,7 +124,9 @@ export function ChatIgini({ onClose }: { onClose: () => void }) {
         <div ref={finRef} />
       </div>
 
-      {erreur && <p className="panneau-chat-igini__erreur">{erreur}</p>}
+      <MessageErreurIgini erreur={erreur} className="panneau-chat-igini__erreur" />
+      {/* Discret : une ligne, en petit, juste au-dessus de la saisie. */}
+      <PrixIgini generateur="discuter" className="panneau-chat-igini__prix" />
 
       <form className="panneau-chat-igini__saisie" onSubmit={envoyer}>
         <input
@@ -109,7 +137,11 @@ export function ChatIgini({ onClose }: { onClose: () => void }) {
           aria-label="Ton message"
           disabled={envoiEnCours}
         />
-        <button type="submit" className="primary" disabled={envoiEnCours || !brouillon.trim()}>
+        <button
+          type="submit"
+          className="primary"
+          disabled={envoiEnCours || !brouillon.trim() || !!prix?.insuffisant}
+        >
           Envoyer
         </button>
       </form>

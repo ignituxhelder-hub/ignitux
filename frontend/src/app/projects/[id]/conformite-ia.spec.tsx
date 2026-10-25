@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { CreditsProvider } from '@/components/prix-igini';
 import { ComplianceSection } from './compliance-section';
 
 const TOKEN = 'tok123';
@@ -264,5 +265,79 @@ describe('ComplianceSection — IGINI prépare les démarches', () => {
     await new Promise((r) => setTimeout(r, 50));
 
     expect(appels.filter((a) => a.endsWith('/run'))).toEqual(['POST /projects/p1/compliance/r1/run']);
+  }, TIMEOUT);
+});
+
+describe('ComplianceSection — le prix de « Démarrer IGINI »', () => {
+  const credits = (solde: number) => ({
+    'GET /credits': {
+      status: 200,
+      body: {
+        solde,
+        historique: [],
+        bareme: {
+          valeurCreditCentimes: 10,
+          bienvenue: 30,
+          recharges: [],
+          rechargeDisponible: false,
+          rechargeMessage: '',
+          actions: [{ generateur: 'conformite', libelle: 'Préparer une démarche de conformité', credits: 7, par: 'action' }],
+        },
+      },
+    },
+  });
+
+  function rendre() {
+    render(
+      <CreditsProvider token={TOKEN}>
+        <ComplianceSection token={TOKEN} projectId={PROJECT_ID} />
+      </CreditsProvider>,
+    );
+  }
+
+  it('dit ce que coûte la sélection', async () => {
+    mockFetch({ 'GET /projects/p1/compliance': checklist([exigence('r1'), exigence('r2')]), ...credits(30) });
+    rendre();
+
+    await screen.findByText('Démarche r1');
+    fireEvent.click(screen.getByLabelText('Faire faire : Démarche r1'));
+    fireEvent.click(screen.getByLabelText('Faire faire : Démarche r2'));
+
+    expect(await screen.findByText(/Ces 2 actions coûtent/)).toHaveTextContent(
+      'Ces 2 actions coûtent 14 crédits — il t’en reste 30.',
+    );
+    expect(screen.getByRole('button', { name: 'Démarrer IGINI' })).toBeEnabled();
+  }, TIMEOUT);
+
+  it('grise « Démarrer IGINI » quand le solde ne suffit pas', async () => {
+    mockFetch({ 'GET /projects/p1/compliance': checklist([exigence('r1')]), ...credits(6) });
+    rendre();
+
+    await screen.findByText('Démarche r1');
+    fireEvent.click(screen.getByLabelText('Faire faire : Démarche r1'));
+
+    expect(await screen.findByText(/Crédits insuffisants/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Démarrer IGINI' })).toBeDisabled();
+  }, TIMEOUT);
+
+  it('un refus « crédits insuffisants » arrête le lot et mène aux crédits', async () => {
+    mockFetch({
+      'GET /projects/p1/compliance': checklist([exigence('r1')]),
+      ...credits(30),
+      'POST /projects/p1/compliance/r1/run': {
+        status: 402,
+        body: { code: 'credits_insuffisants', message: 'Crédits insuffisants : il te faut 7 crédits, tu en as 2.', requis: 7, disponible: 2 },
+      },
+    });
+    rendre();
+
+    await screen.findByText('Démarche r1');
+    fireEvent.click(screen.getByLabelText('Faire faire : Démarche r1'));
+    await screen.findByText(/Cette action coûte/);
+    fireEvent.click(screen.getByRole('button', { name: 'Démarrer IGINI' }));
+
+    expect(await screen.findByText(/tu en as 2\./)).toHaveClass('error');
+    expect(screen.getByRole('link', { name: 'Voir mes crédits' })).toHaveAttribute('href', '/credits');
+    expect(screen.queryByText(/n'a pas pu préparer cette démarche/)).not.toBeInTheDocument();
   }, TIMEOUT);
 });

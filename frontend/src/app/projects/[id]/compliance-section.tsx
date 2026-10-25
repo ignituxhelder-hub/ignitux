@@ -10,6 +10,15 @@ import {
   type ComplianceGroupe,
   type ComplianceRequirement,
 } from '@/lib/api';
+import {
+  erreurIgini,
+  MessageErreurIgini,
+  PrixIgini,
+  ResumeLot,
+  useCredits,
+  usePrixIgini,
+  type ErreurIgini,
+} from '@/components/prix-igini';
 import { executerEnSerie } from '@/lib/executer-en-serie';
 import { ResultatIa } from './resultat-ia';
 
@@ -98,6 +107,11 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState<{ courant: number; total: number } | null>(null);
   const [limite, setLimite] = useState<string | null>(null);
+  // Ce qui a arrêté un lot (crédits, droits, réseau) : un solde trop bas porte « Voir mes crédits ».
+  const [erreurLot, setErreurLot] = useState<ErreurIgini | null>(null);
+  const credits = useCredits();
+  // Le prix d'une seule démarche, pour « Réessayer ».
+  const prixUne = usePrixIgini('conformite');
   const [busyId, setBusyId] = useState<string | null>(null);
   // Garde de ré-entrée : un state ne bouge qu'au rendu suivant, un double clic passerait.
   const enCours = useRef(false);
@@ -200,6 +214,7 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
     if (!token || ids.length === 0 || enCours.current) return;
     enCours.current = true;
     setError(null);
+    setErreurLot(null);
     setRaisons({});
     setLimite(null);
     setIsRunning(true);
@@ -223,7 +238,7 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
             remplacerIa(info.id, { status: 'echec', result_kind: null, result: null, refusal_reason: null });
             retirerDeLaSelection(info.id);
           } else if (info.etat === 'arret' && info.message) {
-            setError(info.message);
+            setErreurLot(erreurIgini(info.erreur ?? null, info.message));
           }
         },
         () => !actif.current,
@@ -237,6 +252,8 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
         // Les cases restent cochées : un clic relance ce qui n'a pas été traité.
         setLimite(`Connexion perdue : ${pluriel}`);
       }
+      // Le solde a bougé (ou un refus l'a révélé) : on le relit.
+      if (bilan.traites > 0 || bilan.arretePourLimite) credits?.actualiser();
     } finally {
       enCours.current = false;
       if (actif.current) {
@@ -279,6 +296,8 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
   const lancable = (r: ComplianceRequirement) =>
     !r.completed && r.ai?.status !== 'a_valider' && r.ai?.status !== 'valide';
   const coches = requirements.filter((r) => selected.has(r.id) && lancable(r)).map((r) => r.id);
+  // Le lot entier se paie : grisé tant que le solde ne couvre pas la sélection.
+  const prixLot = usePrixIgini('conformite', coches.length);
   const aFaire = requirements.filter(lancable).map((r) => r.id);
   const toutCoche = aFaire.length > 0 && aFaire.every((id) => selected.has(id));
 
@@ -343,6 +362,7 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
         </p>
       )}
       {error && <p className="error">{error}</p>}
+      <MessageErreurIgini erreur={erreurLot} />
       {limite && <p className="error">{limite}</p>}
       {!isLoading && !readOnly && requirements.length > 0 && (
         <div style={{ marginBottom: '1rem' }}>
@@ -439,7 +459,7 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
                       <button
                         className="secondary"
                         type="button"
-                        disabled={isRunning}
+                        disabled={isRunning || !!prixUne?.insuffisant}
                         onClick={() => lancerLot([requirement.id])}
                       >
                         Réessayer
@@ -451,6 +471,7 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
                       )}
                     </p>
                   )}
+                  {!readOnly && requirement.ai?.status === 'echec' && <PrixIgini generateur="conformite" />}
                   {requirement.ai?.status === 'refuse' && (
                     <p className="muted" style={{ margin: '0.5rem 0 0' }}>
                       Refusé{requirement.ai.refusal_reason ? ` : ${requirement.ai.refusal_reason}` : ''}
@@ -485,11 +506,13 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
               </span>
             </span>
           ) : (
-            <span className="muted">
-              {`${coches.length} élément${coches.length > 1 ? 's' : ''} sélectionné${coches.length > 1 ? 's' : ''}, ~${coches.length} appel${coches.length > 1 ? 's' : ''} IA`}
-            </span>
+            <ResumeLot nombre={coches.length} generateur="conformite" />
           )}
-          <button type="button" disabled={coches.length === 0 || isRunning} onClick={() => lancerLot(coches)}>
+          <button
+            type="button"
+            disabled={coches.length === 0 || isRunning || !!prixLot?.insuffisant}
+            onClick={() => lancerLot(coches)}
+          >
             Démarrer IGINI
           </button>
         </div>

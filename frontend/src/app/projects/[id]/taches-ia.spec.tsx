@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { CreditsProvider } from '@/components/prix-igini';
 import { TasksSection } from './engine-sections';
 
 const TOKEN = 'tok123';
@@ -482,5 +483,97 @@ describe('TasksSection — organisation en groupes', () => {
 
     fireEvent.click(screen.getByLabelText('Tout sélectionner'));
     expect(screen.queryByRole('button', { name: 'Démarrer IGINI' })).not.toBeInTheDocument();
+  }, TIMEOUT);
+});
+
+describe('TasksSection — le prix de « Démarrer IGINI »', () => {
+  const credits = (solde: number) => ({
+    'GET /credits': {
+      status: 200,
+      body: {
+        solde,
+        historique: [],
+        bareme: {
+          valeurCreditCentimes: 10,
+          bienvenue: 30,
+          recharges: [],
+          rechargeDisponible: false,
+          rechargeMessage: '',
+          actions: [{ generateur: 'executer', libelle: 'Faire faire une tâche par IGINI', credits: 4, par: 'action' }],
+        },
+      },
+    },
+  });
+
+  function rendre(payeParLeProprietaire = false) {
+    render(
+      <CreditsProvider token={TOKEN} payeParLeProprietaire={payeParLeProprietaire}>
+        <TasksSection token={TOKEN} projectId={PROJECT_ID} />
+      </CreditsProvider>,
+    );
+  }
+
+  it('dit ce que coûte la sélection, et ce qu’il restera', async () => {
+    mockFetch({ 'GET /projects/p1/tasks': { status: 200, body: [tache('t1'), tache('t2')] }, ...credits(26) });
+    rendre();
+
+    await screen.findByText('Tâche t1');
+    fireEvent.click(screen.getByLabelText('Faire faire : Tâche t1'));
+    fireEvent.click(screen.getByLabelText('Faire faire : Tâche t2'));
+
+    expect(await screen.findByText(/Ces 2 actions coûtent/)).toHaveTextContent(
+      'Ces 2 actions coûtent 8 crédits — il t’en reste 26.',
+    );
+    expect(screen.getByText('2 éléments sélectionnés')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Démarrer IGINI' })).toBeEnabled();
+  }, TIMEOUT);
+
+  it('grise « Démarrer IGINI » quand le solde ne couvre pas la sélection', async () => {
+    mockFetch({ 'GET /projects/p1/tasks': { status: 200, body: [tache('t1'), tache('t2')] }, ...credits(5) });
+    rendre();
+
+    await screen.findByText('Tâche t1');
+    fireEvent.click(screen.getByLabelText('Faire faire : Tâche t1'));
+    fireEvent.click(screen.getByLabelText('Faire faire : Tâche t2'));
+
+    expect(await screen.findByText(/Crédits insuffisants/)).toHaveTextContent(
+      'Crédits insuffisants : il te faut 8 crédits, il t’en reste 5.',
+    );
+    expect(screen.getByRole('button', { name: 'Démarrer IGINI' })).toBeDisabled();
+  }, TIMEOUT);
+
+  it('dans le projet d’un autre, ne bloque pas sur le solde du membre', async () => {
+    mockFetch({ 'GET /projects/p1/tasks': { status: 200, body: [tache('t1')] }, ...credits(0) });
+    rendre(true);
+
+    await screen.findByText('Tâche t1');
+    fireEvent.click(screen.getByLabelText('Faire faire : Tâche t1'));
+
+    expect(await screen.findByText(/propriétaire du projet/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Démarrer IGINI' })).toBeEnabled();
+  }, TIMEOUT);
+
+  it('un refus « crédits insuffisants » arrête le lot, sans marquer la tâche en échec', async () => {
+    const { appels } = mockFetch({
+      'GET /projects/p1/tasks': { status: 200, body: [tache('t1'), tache('t2')] },
+      ...credits(26),
+      'POST /projects/p1/tasks/t1/run': {
+        status: 402,
+        body: { code: 'credits_insuffisants', message: 'Crédits insuffisants : il te faut 4 crédits, tu en as 0.', requis: 4, disponible: 0 },
+      },
+    });
+    rendre();
+
+    await screen.findByText('Tâche t1');
+    fireEvent.click(screen.getByLabelText('Faire faire : Tâche t1'));
+    fireEvent.click(screen.getByLabelText('Faire faire : Tâche t2'));
+    await screen.findByText(/Ces 2 actions coûtent/);
+    fireEvent.click(screen.getByRole('button', { name: 'Démarrer IGINI' }));
+
+    expect(await screen.findByText(/tu en as 0\./)).toHaveClass('error');
+    expect(screen.getByRole('link', { name: 'Voir mes crédits' })).toHaveAttribute('href', '/credits');
+    expect(appels.filter((a) => a.endsWith('/run'))).toEqual(['POST /projects/p1/tasks/t1/run']);
+    expect(screen.queryByText('En échec (1)')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Faire faire : Tâche t1')).toBeChecked();
   }, TIMEOUT);
 });

@@ -212,4 +212,65 @@ describe('ChatIgini — marqueurs', () => {
 
     expect(await screen.findByText('Souvenir enregistré.')).toBeInTheDocument();
   });
+
+  describe('un crédit par message', () => {
+    const credits = (solde: number) => ({
+      'GET /credits': {
+        status: 200,
+        body: {
+          solde,
+          historique: [],
+          bareme: {
+            valeurCreditCentimes: 10,
+            bienvenue: 30,
+            recharges: [],
+            rechargeDisponible: false,
+            rechargeMessage: '',
+            actions: [{ generateur: 'discuter', libelle: 'Message à IGINI', credits: 1, par: 'message' }],
+          },
+        },
+      },
+    });
+
+    it('le dit discrètement sous la conversation', async () => {
+      mockApiRoutes({ 'GET /chat/messages': { status: 200, body: [] }, ...credits(26) });
+
+      afficher();
+
+      expect(await screen.findByText(/par message/)).toHaveTextContent('1 crédit par message — il t’en reste 26.');
+    });
+
+    it('sans crédit, n’envoie pas et mène aux crédits', async () => {
+      mockApiRoutes({ 'GET /chat/messages': { status: 200, body: [] }, ...credits(0) });
+
+      afficher();
+      fireEvent.change(await screen.findByLabelText('Ton message'), { target: { value: 'Salut' } });
+
+      expect(await screen.findByText(/Crédits insuffisants/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Envoyer' })).toBeDisabled();
+      expect(screen.getByRole('link', { name: 'Voir mes crédits' })).toHaveAttribute('href', '/credits');
+    });
+
+    it('un refus « crédits insuffisants » du serveur porte le lien vers les crédits', async () => {
+      mockApiRoutes({
+        'GET /chat/messages': { status: 200, body: [] },
+        'POST /chat/messages': {
+          status: 402,
+          body: {
+            code: 'credits_insuffisants',
+            message: 'Crédits insuffisants : il te faut 1 crédit, tu en as 0.',
+            requis: 1,
+            disponible: 0,
+          },
+        },
+      });
+
+      afficher();
+      fireEvent.change(await screen.findByLabelText('Ton message'), { target: { value: 'Salut' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Envoyer' }));
+
+      expect(await screen.findByText(/tu en as 0\./)).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Voir mes crédits' })).toHaveAttribute('href', '/credits');
+    });
+  });
 });
