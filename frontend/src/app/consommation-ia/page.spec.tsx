@@ -88,6 +88,51 @@ describe('AiUsagePage', () => {
     expect(screen.getAllByText(/3,40/).length).toBeGreaterThan(0);
   });
 
+  // « 38 utilisées, 16 restantes, sur 35 incluses » : les 38 comptaient le
+  // chat et les questions d'IGINI, hors forfait ; les 16 restantes, non.
+  it('compte les analyses utilisées comme celles qui restent, sans le chat', async () => {
+    const base = mois();
+    mockApiRoutes(
+      routes({
+        'GET /igini/usage/mois-en-cours': {
+          status: 200,
+          body: mois({
+            appels: 38,
+            quota: {
+              ...base.quota,
+              restant: { analyses: 16, euros: 1 },
+              utilisees: { analyses: 19 },
+              plafonds: { analyses_par_mois: 35, euros_par_mois: 5 },
+            },
+          }),
+        },
+      }),
+    );
+
+    render(
+      <AuthProvider>
+        <AiUsagePage />
+      </AuthProvider>,
+    );
+
+    const utilisees = await screen.findByText('Analyses utilisées');
+    expect(utilisees.nextElementSibling).toHaveTextContent('19');
+  });
+
+  it('garde le total des appels tant que le serveur ne donne pas ce compte', async () => {
+    // Vercel peut publier l'écran avant que Render ne redémarre.
+    mockApiRoutes(routes());
+
+    render(
+      <AuthProvider>
+        <AiUsagePage />
+      </AuthProvider>,
+    );
+
+    const utilisees = await screen.findByText('Analyses utilisées');
+    expect(utilisees.nextElementSibling).toHaveTextContent('12');
+  });
+
   it('nomme le générateur « executer » « Exécution de tâches »', async () => {
     const base = mois();
     mockApiRoutes(

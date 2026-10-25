@@ -109,7 +109,13 @@ export default function AiUsagePage() {
                 gap: '1rem',
               }}
             >
-              <Chiffre libelle="Analyses utilisées" valeur={milliers(mois.appels)} />
+              {/* Le même compte que « restantes » : `appels` mêle le chat et
+                  les questions d'IGINI, hors forfait (« 38 utilisées, 16
+                  restantes, sur 35 »). */}
+              <Chiffre
+                libelle="Analyses utilisées"
+                valeur={milliers(mois.quota.utilisees?.analyses ?? mois.appels)}
+              />
               <Chiffre
                 libelle="Analyses restantes"
                 valeur={

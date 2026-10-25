@@ -55,11 +55,16 @@ export class AiUsageController {
     ]);
     return {
       ...presenter(resume),
-      quota: presenterQuota(quota, this.aiUsage.limits(), {
-        inclusesParLOffre: offre(offreId).capacites.appelsIaParMois,
-        dejaUtilisees: appelsCeMois,
-        offreId,
-      }),
+      quota: presenterQuota(
+        quota,
+        this.aiUsage.limits(),
+        {
+          inclusesParLOffre: offre(offreId).capacites.appelsIaParMois,
+          dejaUtilisees: appelsCeMois,
+          offreId,
+        },
+        resume.appels,
+      ),
     };
   }
 }
@@ -73,10 +78,12 @@ export class AiUsageController {
  * près, ou à un cinquième du budget — assez tôt pour s'organiser, assez
  * tard pour ne pas devenir un décor qu'on n'aperçoit plus.
  */
-function presenterQuota(
+export function presenterQuota(
   verdict: QuotaVerdict,
   limites: QuotaLimits,
   offreEnCours: { inclusesParLOffre: number | null; dejaUtilisees: number; offreId: string },
+  /** Tous les appels du mois, chat compris : ce que compte le budget Ignitux. */
+  appelsDuMois: number,
 ) {
   // ── Deux plafonds, un seul chiffre à l'écran ──────────────────────────
   //
@@ -101,6 +108,7 @@ function presenterQuota(
       : resteTechnique === null
         ? resteOffre
         : Math.min(resteOffre, resteTechnique);
+  const selonOffre = resteOffre !== null && (resteTechnique === null || resteOffre <= resteTechnique);
 
   return {
     autorise: verdict.allowed,
@@ -118,16 +126,17 @@ function presenterQuota(
           ? null
           : microEurToEur(verdict.remaining.costMicroEur),
     },
+    // Compté sur le même axe que `restant` et le plafond affiché. L'écran
+    // montrait `appels` (chat et questions d'IGINI compris) : « 38 utilisées,
+    // 16 restantes, sur 35 incluses ».
+    utilisees: {
+      analyses: selonOffre || resteTechnique === null ? offreEnCours.dejaUtilisees : appelsDuMois,
+    },
     plafonds: {
       // Ce que l'offre annonce : le chiffre que la personne reconnaît.
-      analyses_par_mois:
-        resteOffre !== null && (resteTechnique === null || resteOffre <= resteTechnique)
-          ? offreEnCours.inclusesParLOffre
-          : limites.callsPerMonth,
+      analyses_par_mois: selonOffre ? offreEnCours.inclusesParLOffre : limites.callsPerMonth,
       // Nommé, pour qu'un « il me restait 3 » se raccroche à quelque chose.
-      analyses_selon: resteOffre !== null && (resteTechnique === null || resteOffre <= resteTechnique)
-        ? `offre ${offreEnCours.offreId}`
-        : 'budget Ignitux',
+      analyses_selon: selonOffre ? `offre ${offreEnCours.offreId}` : 'budget Ignitux',
       euros_par_mois:
         limites.costMicroEurPerMonth === null
           ? null

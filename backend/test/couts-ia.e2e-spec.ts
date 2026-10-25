@@ -268,6 +268,8 @@ describe('Coûts IA (e2e)', () => {
         .set(...auth(voisin))
         .expect(200);
       expect(reponse.body.quota.restant.analyses).toBe(3);
+      // Même axe que « restant » : utilisées + restantes = incluses.
+      expect(reponse.body.quota.utilisees.analyses).toBe(0);
 
       await deleteAccount(app, voisin);
     });

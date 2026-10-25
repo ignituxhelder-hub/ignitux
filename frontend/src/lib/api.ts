@@ -2168,6 +2168,11 @@ export interface AiUsageMonth {
     bientot_atteint: boolean;
     /** null = plafond non applicable, pas « il reste de la marge ». */
     restant: { analyses: number | null; euros: number | null };
+    /**
+     * Compté sur le même axe que `restant`, sans le chat. Absent d'un
+     * serveur pas encore à jour pendant un déploiement.
+     */
+    utilisees?: { analyses: number };
     plafonds: {
       analyses_par_mois: number | null;
       /** Lequel des deux plafonds donne ce chiffre : « offre decouverte » ou « budget Ignitux ». */
