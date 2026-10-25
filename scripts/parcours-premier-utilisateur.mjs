@@ -430,19 +430,19 @@ await etape('Revenir à ses projets', async () => {
   return `« ${clique} » → ${new URL(page.url()).pathname}`;
 });
 
-await etape('Trouver les offres depuis l’interface', async () => {
-  let clique = await cliquerSur(['offre', 'abonnement', 'tarif'], { obligatoire: false });
+await etape('Trouver ses crédits depuis l’interface', async () => {
+  let clique = await cliquerSur(['crédit', 'offre', 'tarif'], { obligatoire: false });
   let parLeMenu = false;
   if (!clique) {
     // La navigation est repliée derrière « Tous mes outils » — onze liens,
-    // dont les offres. Deux clics, pas zéro chemin.
+    // dont « Mes crédits ». Deux clics, pas zéro chemin.
     if (await deplier()) {
-      clique = await cliquerSur(['offre', 'abonnement', 'tarif'], { obligatoire: false });
+      clique = await cliquerSur(['crédit', 'offre', 'tarif'], { obligatoire: false });
       parLeMenu = Boolean(clique);
     }
   }
   if (!clique) {
-    note('Offres', 'MOYEN', 'les offres ne sont atteignables que par l’adresse directe');
+    note('Crédits', 'MOYEN', '« Mes crédits » n’est atteignable que par l’adresse directe');
     return 'aucun lien trouvé';
   }
   if (parLeMenu) {

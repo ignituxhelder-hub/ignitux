@@ -208,7 +208,7 @@ titre('Compte');
 await verifier('Inscription', async () => {
   const { statut } = await appelPatient('/users/signup', {
     method: 'POST',
-    body: JSON.stringify({ email: EMAIL, password: MDP, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-01' }),
+    body: JSON.stringify({ email: EMAIL, password: MDP, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-25' }),
   });
   if (statut !== 201 && statut !== 200) return false;
   return `HTTP ${statut}`;
@@ -344,19 +344,27 @@ await verifier('Mot de passe oublié : la demande est acceptée', async () => {
   return `HTTP ${statut} — vérifier le journal du serveur pour le lien`;
 });
 
-// ── 3. Offres et droits ────────────────────────────────────────────────────
+// ── 3. Offres et crédits ───────────────────────────────────────────────────
+//
+// Depuis le 2026-10-25 il n'y a plus d'abonnement : une seule offre,
+// gratuite, et les actions IGINI se paient en crédits (30 offerts).
 
-titre('Offres et droits — jamais éprouvés sur une vraie base');
+titre('Offres et crédits — jamais éprouvés sur une vraie base');
 
-await verifier('Un compte neuf est en Découverte', async () => {
+await verifier('Un compte neuf est sur l’offre gratuite, sans souscription', async () => {
   const { corps } = await appel('/offres');
-  if (corps?.actuelle !== 'decouverte') return false;
-  return `souscription possible : ${corps.souscriptionPossible}`;
+  if (corps?.actuelle !== 'decouverte' || corps?.souscriptionPossible !== false) return false;
+  return `renvoi vers ${corps?.credits?.route}`;
 });
 
-await verifier("L'évaluation de financement porte son avertissement", async () => {
-  const { corps } = await appel('/offres');
-  return Boolean(corps?.evaluationFinancement?.avertissement?.includes('pas un financement'));
+await verifier('Un compte neuf a ses crédits de bienvenue', async () => {
+  const { statut, corps } = await appel('/credits');
+  if (statut !== 200) throw new Error(`HTTP ${statut}`);
+  if (typeof corps?.solde !== 'number' || corps.solde !== corps?.bareme?.bienvenue) {
+    throw new Error(`solde ${corps?.solde}, bienvenue ${corps?.bareme?.bienvenue}`);
+  }
+  if (!corps.historique?.some((l) => l.kind === 'bienvenue')) throw new Error('bienvenue absente de l’historique');
+  return `${corps.solde} crédits`;
 });
 
 let projetId = null;
@@ -375,20 +383,24 @@ await verifier('Création du premier projet', async () => {
   return `id ${String(corps.id).slice(0, 8)}…`;
 });
 
-await verifier('Le deuxième projet est refusé, en nommant l’offre qui l’ouvre', async () => {
+await verifier('Un deuxième projet est accepté : plus de limite de projets', async () => {
   const { statut, corps } = await appel('/projects', {
     method: 'POST',
-    body: JSON.stringify({ title: 'Deuxieme projet', description: 'Doit etre refuse.' }),
+    body: JSON.stringify({ title: 'Deuxieme projet', description: 'Plus aucune offre ne limite les projets.' }),
   });
-  if (statut !== 403) throw new Error(`attendu 403, reçu ${statut}`);
-  if (corps?.offreQuiOuvre !== 'entrepreneur') throw new Error('offre non nommée');
-  return 'refus + offre nommée';
+  if (statut !== 201 && statut !== 200) throw new Error(`attendu 201, reçu ${statut}`);
+  // Rangé aussitôt : la suite du script raisonne sur un seul projet.
+  if (corps?.id) await appel(`/projects/${corps.id}`, { method: 'DELETE' });
+  return 'créé puis supprimé';
 });
 
-await verifier('Une offre payante ne peut pas être prise sans encaissement', async () => {
-  const { statut } = await appel('/offres/changer', {
+await verifier('Un compte ordinaire ne se crédite pas lui-même', async () => {
+  // `POST /offres/changer` a disparu avec les abonnements ; l'élévation à
+  // éprouver est l'ajustement de crédits, réservé aux administrateurs. Le
+  // rôle est vérifié avant l'identifiant : n'importe quel UUID suffit.
+  const { statut } = await appel('/admin/credits/00000000-0000-4000-8000-000000000000', {
     method: 'POST',
-    body: JSON.stringify({ offre: 'construction' }),
+    body: JSON.stringify({ credits: 1000, motif: 'je me les offre' }),
   });
   return statut === 403;
 });
@@ -591,7 +603,7 @@ const iaAllumee = etatIa.corps?.generatorsEnabled === true;
 
 if (!iaAllumee) {
   noter('ignore', 'Analyse par IGINI', 'générateurs éteints — IGINI_AI_ENABLED');
-  noter('ignore', 'Le quota de Découverte refuse la 4e analyse', 'générateurs éteints');
+  noter('ignore', 'L’analyse décompte son prix du solde de crédits', 'générateurs éteints');
   await verifier('Le produit reste utilisable générateurs éteints', async () => {
     if (!projetId) throw new Error('aucun projet');
     const { statut } = await appel(`/projects/${projetId}/tasks`, {
@@ -601,11 +613,15 @@ if (!iaAllumee) {
     return statut < 400;
   });
 } else {
-  await verifier('Le générateur Construire est refusé en Découverte', async () => {
-    if (!projetId) throw new Error('aucun projet');
-    const { statut, corps } = await appel(`/projects/${projetId}/plan`, { method: 'POST' });
-    if (statut !== 403) throw new Error(`attendu 403, reçu ${statut}`);
-    return `offre qui ouvre : ${corps?.offreQuiOuvre}`;
+  // Plus aucun générateur n'est réservé à une offre : Construire se paie en
+  // crédits comme les autres. On vérifie son prix sans le lancer (un appel
+  // réel coûterait).
+  await verifier('Le générateur Construire a un prix au barème', async () => {
+    const { statut, corps } = await appel('/credits/bareme');
+    if (statut !== 200) throw new Error(`HTTP ${statut}`);
+    const construire = corps?.actions?.find((a) => a.generateur === 'construire');
+    if (!construire || !(construire.credits > 0)) throw new Error('pas de prix pour construire');
+    return `${construire.credits} crédits`;
   });
   // ── L'analyse réelle : la seule ligne qui coûte de l'argent ────────────
   //
@@ -622,11 +638,13 @@ if (!iaAllumee) {
     );
   } else {
     let avant = null;
-    await verifier('Le quota d’analyses est lisible avant l’appel', async () => {
-      const { statut, corps } = await appel('/igini/usage/mois-en-cours');
+    let prixAnalyse = null;
+    await verifier('Le solde de crédits est lisible avant l’appel', async () => {
+      const { statut, corps } = await appel('/credits');
       if (statut !== 200) throw new Error(`statut ${statut}`);
-      avant = corps?.quota?.restant?.analyses ?? null;
-      return `restant : ${avant}`;
+      avant = typeof corps?.solde === 'number' ? corps.solde : null;
+      prixAnalyse = corps?.bareme?.actions?.find((a) => a.generateur === 'analyser')?.credits ?? null;
+      return `solde : ${avant}, analyse : ${prixAnalyse} crédits`;
     });
 
     await verifier('IGINI rend une analyse réelle, pas un gabarit', async () => {
@@ -644,12 +662,13 @@ if (!iaAllumee) {
       return `${texte.length} caractères`;
     });
 
-    await verifier('L’appel est journalisé et décompté', async () => {
-      const { statut, corps } = await appel('/igini/usage/mois-en-cours');
+    await verifier('L’appel est journalisé et décompté du solde', async () => {
+      const { statut, corps } = await appel('/credits');
       if (statut !== 200) throw new Error(`statut ${statut}`);
-      const apres = corps?.quota?.restant?.analyses ?? null;
-      if (avant !== null && apres !== null && apres >= avant) {
-        throw new Error(`quota non décompté : ${avant} → ${apres}`);
+      const apres = typeof corps?.solde === 'number' ? corps.solde : null;
+      // Le prix exact, ni plus ni moins : un débit seulement en cas de succès.
+      if (avant !== null && apres !== null && prixAnalyse !== null && avant - apres !== prixAnalyse) {
+        throw new Error(`solde ${avant} → ${apres}, attendu −${prixAnalyse}`);
       }
       const { corps: historique } = await appel('/igini/usage/historique');
       const appels = historique?.appels;
@@ -665,31 +684,21 @@ if (!iaAllumee) {
       return `restant ${avant} → ${apres}, ${appels.length} appel(s), dernier ${dernier.generateur} ${dernier.cout_euros} €`;
     });
 
-    // ── Le plafond de l'offre, et non le garde-fou technique ─────────────
+    // ── Le solde insuffisant, et non le garde-fou technique ──────────────
     //
-    // Deux plafonds coexistent et se confondent facilement : celui du
-    // catalogue (3 analyses/mois en Découverte, ce que la personne a
-    // souscrit) et celui du budget Ignitux (`assertWithinQuota`, qui protège
-    // la facture). Le second vient d'être prouvé ; le premier est celui dont
-    // dépend tout le modèle économique. S'il ne tient pas, Découverte est en
-    // réalité illimitée et les offres payantes n'ouvrent rien.
-    //
-    // Coûte deux appels réels : il faut consommer les 3 pour voir refuser le
-    // 4e — et ce 4e refus, lui, ne coûte rien puisqu'il tombe avant Claude.
-    await verifier('Découverte s’arrête à 3 analyses, et le 4e refus est gratuit', async () => {
-      if (!projetId) throw new Error('aucun projet');
-      for (const rang of [2, 3]) {
-        const { statut } = await appel(`/projects/${projetId}/analyze`, { method: 'POST' });
-        if (statut !== 201) throw new Error(`analyse ${rang} : attendu 201, reçu ${statut}`);
-      }
-      const { statut, corps } = await appel(`/projects/${projetId}/analyze`, { method: 'POST' });
-      if (statut !== 403) throw new Error(`4e analyse : attendu 403, reçu ${statut}`);
-      // Un refus qui ne nomme pas la sortie est un mur ; celui-ci doit dire
-      // quelle offre rouvre la porte, et que le compteur repart le mois
-      // prochain.
-      if (!corps?.offreQuiOuvre) throw new Error('refus sans offre nommée');
-      return `403, ouvre avec ${corps.offreQuiOuvre}, renouvellement ${corps.seRenouvelleLeMoisProchain}`;
-    });
+    // Depuis les crédits IGINI (2026-10-25), il n'y a plus de quota
+    // d'analyses par offre : le solde de crédits est la seule limite, et un
+    // solde trop bas doit être refusé AVANT tout appel à Claude (402
+    // `credits_insuffisants`, rien de dépensé). L'éprouver ici demanderait
+    // de vider les 30 crédits de bienvenue — sept analyses réelles — ou un
+    // compte ramené à 0 par un administrateur (/administration/credits). On
+    // le laisse donc aux tests du serveur (claude.service.spec.ts,
+    // credits.service.spec.ts) et on le signale.
+    noter(
+      'ignore',
+      'Un solde insuffisant est refusé avant l’appel (402)',
+      'demande un compte ramené à 0 crédit par un administrateur',
+    );
   }
 }
 
@@ -722,13 +731,11 @@ if (!iaAllumee) {
     'non lancée : ajouter --avec-ia (consomme du budget)',
   );
 } else {
-  // Trouvaille de la revue finale : la section 8 qui précède a déjà
-  // consommé les 3 analyses incluses en Découverte (une analyse réelle,
-  // puis deux de plus pour prouver le refus de la 4e). Les deux
-  // vérifications ci-dessous comparent donc un AVANT/APRÈS propre à
-  // chaque appel plutôt qu'un compte absolu — et la seconde accepte que le
-  // générateur soit refusé pour cause de quota déjà épuisé, du moment que
-  // le refus est expliqué en conversation plutôt que planté brut.
+  // La section 8 qui précède a déjà dépensé des crédits (une analyse
+  // réelle). Les deux vérifications ci-dessous comparent donc un AVANT/APRÈS
+  // propre à chaque appel plutôt qu'un compte absolu — et la seconde accepte
+  // que le générateur soit refusé faute de crédits, du moment que le refus
+  // est expliqué en conversation plutôt que planté brut.
   await verifier('Une remarque vague ne déclenche aucun générateur', async () => {
     const avant = await Promise.all(NOMS_GENERATEURS.map(nombreAppels));
     const { statut, corps } = await appel('/chat/messages', {
@@ -760,13 +767,13 @@ if (!iaAllumee) {
       const texte = String(corps?.content ?? '');
       // Le prompt système demande d'expliquer un refus « dans ses mots » —
       // pas de mot magique garanti, donc un motif large plutôt qu'exact.
-      const expliqueLeRefus = /quota|analyses incluses|offre|plafond|découverte/i.test(texte);
+      const expliqueLeRefus = /crédit|solde|plafond|garde-fou|quota/i.test(texte);
       if (!declenche && !expliqueLeRefus) {
         throw new Error(`ni déclenché, ni refus expliqué : « ${texte.slice(0, 80)} »`);
       }
       return declenche
         ? `analyse déclenchée, réponse : « ${texte.slice(0, 60)}… »`
-        : `quota déjà épuisé par la section précédente, refus expliqué : « ${texte.slice(0, 60)}… »`;
+        : `refus expliqué (crédits) : « ${texte.slice(0, 60)}… »`;
     },
   );
 }
@@ -1113,7 +1120,7 @@ const appelInv = async (chemin, options = {}) => {
 await verifier('Un investisseur se déclare, et son portefeuille part de zéro', async () => {
   await appelInv('/users/signup', {
     method: 'POST',
-    body: JSON.stringify({ email: EMAIL_INV, password: MDP, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-01' }),
+    body: JSON.stringify({ email: EMAIL_INV, password: MDP, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-25' }),
   });
   const connexion = await appelInv('/auth/login', {
     method: 'POST',
@@ -1219,7 +1226,7 @@ const appelInvite = async (chemin, options = {}) => {
 await verifier('Un second compte, et un projet à partager', async () => {
   await appelInvite('/users/signup', {
     method: 'POST',
-    body: JSON.stringify({ email: EMAIL_INVITE, password: MDP, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-01' }),
+    body: JSON.stringify({ email: EMAIL_INVITE, password: MDP, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-25' }),
   });
   const { corps } = await appelInvite('/auth/login', {
     method: 'POST',
@@ -1531,7 +1538,7 @@ const appelRgpdUneFois = async (chemin, options = {}) => {
 await verifier('Un compte à part, avec de quoi exporter', async () => {
   await appelRgpd('/users/signup', {
     method: 'POST',
-    body: JSON.stringify({ email: EMAIL_RGPD, password: MDP, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-01' }),
+    body: JSON.stringify({ email: EMAIL_RGPD, password: MDP, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-25' }),
   });
   const { corps } = await appelRgpd('/auth/login', {
     method: 'POST',
@@ -1644,7 +1651,7 @@ if (AVEC_NAVIGATEUR) {
     const ecrans = [
       ['/login', 'Connexion'],
       ['/signup', 'Inscription'],
-      ['/offres', 'Offres'],
+      ['/credits', 'Mes crédits'],
       ['/projects', 'Projets'],
     ];
 

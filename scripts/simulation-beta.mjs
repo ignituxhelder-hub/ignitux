@@ -70,7 +70,7 @@ async function creerCompte(slug) {
     inscription = await fetch(`${API}/users/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: motDePasse, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-01' }),
+      body: JSON.stringify({ email, password: motDePasse, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-25' }),
     });
     if (inscription.status !== 429) break;
     // La fenêtre du limiteur fait une minute : on la laisse s'écouler
@@ -90,7 +90,7 @@ async function creerCompte(slug) {
     if (connexion.status !== 429) break;
     await patienter(62_000);
   }
-  const { accessToken } = await connexion.json();
+  const { accessToken, user } = await connexion.json();
   if (!accessToken) throw new Error(`aucun jeton (HTTP ${connexion.status})`);
 
   const appel = async (chemin, options = {}) => {
@@ -111,7 +111,7 @@ async function creerCompte(slug) {
     return { statut: r.status, corps };
   };
 
-  return { email, motDePasse, jeton: accessToken, appel };
+  return { email, motDePasse, jeton: accessToken, appel, id: user?.id ?? null };
 }
 
 async function creerProjet(appel, titre, description) {
@@ -338,8 +338,8 @@ async function profil5() {
     "Un cabinet de conseil en ressources humaines pour les PME de moins de cinquante salaries, specialise en recrutement et en droit social.",
   );
 
-  // Le financement est une capacité d'offre : en gratuit, il doit être refusé
-  // proprement, pas planter.
+  // Depuis les crédits IGINI (2026-10-25), le financement est ouvert à tous :
+  // plus aucune offre ne le réserve. Un refus ici serait une régression.
   // La route réelle est `POST /projets-finances`, et le projet passe dans le
   // corps — vérifié contre le contrôleur avant d'écrire cette ligne.
   const ouverture = await appel('/projets-finances', {
@@ -351,22 +351,21 @@ async function profil5() {
     }),
   });
   if (ouverture.statut === 403) {
-    const quiOuvre = ouverture.corps?.offreQuiOuvre;
-    if (!quiOuvre) constat('MOYEN', 'Le financement est refusé sans nommer l offre qui l ouvre');
-    else ok(`financement refusé en gratuit, offre nommée : ${quiOuvre}`);
+    constat('MAJEUR', 'Le financement est refusé', 'il est gratuit pour tous depuis les crédits IGINI');
   } else if (ouverture.statut >= 500) {
     constat('MAJEUR', `Ouvrir le financement renvoie ${ouverture.statut}`, 'une erreur serveur, pas un refus');
   } else {
     ok(`financement ouvert (HTTP ${ouverture.statut})`);
   }
 
-  // Aucune promesse de financement nulle part.
-  const { corps: offres } = await appel('/offres');
-  const avertissement = offres?.evaluationFinancement?.avertissement ?? '';
-  if (!/pas un financement/i.test(avertissement)) {
-    constat('CRITIQUE', "Le prix de l'évaluation s'affiche sans dire qu'il n'achète pas un financement");
+  // L'évaluation de financement se paie en crédits, comme toute action
+  // IGINI : son prix doit être au barème public, connu avant de la lancer.
+  const { corps: bareme } = await appel('/credits/bareme');
+  const evaluer = Array.isArray(bareme?.actions) ? bareme.actions.find((a) => a.generateur === 'evaluer') : null;
+  if (!evaluer) {
+    constat('MOYEN', "L'évaluation de financement n'a pas de prix au barème");
   } else {
-    ok("l'évaluation dit explicitement qu'elle n'achète pas un financement");
+    ok(`évaluation de financement : ${evaluer.credits} crédits, prix connu avant de lancer`);
   }
 
   const { corps: audit } = await appel(`/projects/${projet}/audit-financier`);
@@ -377,36 +376,44 @@ async function profil5() {
   }
 }
 
-// ═══ PROFIL 6 — Utilisateur gratuit, au bout de ses limites ══════════════
+// ═══ PROFIL 6 — Utilisateur gratuit : tout est ouvert, IGINI se paie ═════
 
 async function profil6() {
   profilCourant = '6 · Gratuit';
-  console.log('\n── 6 · Utilisateur gratuit, au bout de ses limites ────────────');
-  const { appel } = await creerCompte('gratuit');
+  console.log('\n── 6 · Utilisateur gratuit : outils ouverts, crédits IGINI ────');
+  const { appel, id } = await creerCompte('gratuit');
 
-  await creerProjet(appel, 'Premier projet', "Le projet inclus dans l offre Decouverte, pour eprouver la limite.");
-
-  const second = await appel('/projects', {
-    method: 'POST',
-    body: JSON.stringify({ title: 'Deuxieme projet', description: 'Doit etre refuse par la limite de l offre.' }),
-  });
-  if (second.statut !== 403) {
-    constat('CRITIQUE', `Le deuxième projet passe (HTTP ${second.statut})`, "la limite de l'offre gratuite ne tient pas");
+  // Les 30 crédits de bienvenue, versés à l'inscription.
+  const { corps: credits } = await appel('/credits');
+  if (typeof credits?.solde !== 'number' || credits.solde !== credits?.bareme?.bienvenue) {
+    constat('MAJEUR', `Solde de départ inattendu : ${credits?.solde}`, 'les crédits de bienvenue manquent');
   } else {
-    const r = second.corps;
-    if (!r?.offreQuiOuvre) constat('MAJEUR', 'Le refus ne nomme pas l offre qui lèverait la limite', 'impasse');
-    else if (!r?.message || r.message.length < 20) constat('MOYEN', 'Le refus n explique pas en français');
-    else ok(`refus lisible, offre nommée : ${r.offreQuiOuvre}`);
+    ok(`${credits.solde} crédits offerts à l'inscription`);
   }
 
-  const payante = await appel('/offres/changer', {
+  await creerProjet(appel, 'Premier projet', 'Un premier projet, sur un compte gratuit.');
+
+  // Plus de limite de projets depuis les crédits (2026-10-25) : un deuxième passe.
+  const second = await appel('/projects', {
     method: 'POST',
-    body: JSON.stringify({ offre: 'construction' }),
+    body: JSON.stringify({ title: 'Deuxieme projet', description: 'Plus aucune offre ne limite le nombre de projets.' }),
   });
-  if (payante.statut !== 403) {
-    constat('CRITIQUE', `On peut s'offrir Construction gratuitement (HTTP ${payante.statut})`);
+  if (second.statut >= 400) {
+    constat('MAJEUR', `Le deuxième projet est refusé (HTTP ${second.statut})`, 'plus aucune offre ne limite les projets');
   } else {
-    ok('une offre payante ne se prend pas sans encaissement');
+    ok('deuxième projet accepté : plus de limite de projets');
+  }
+
+  // `POST /offres/changer` a disparu avec les abonnements. L'élévation à
+  // éprouver est désormais : se donner des crédits soi-même.
+  const cadeau = await appel(`/admin/credits/${id ?? '00000000-0000-4000-8000-000000000000'}`, {
+    method: 'POST',
+    body: JSON.stringify({ credits: 1000, motif: 'je me les offre' }),
+  });
+  if (cadeau.statut !== 403) {
+    constat('CRITIQUE', `Un compte ordinaire se crédite lui-même (HTTP ${cadeau.statut})`);
+  } else {
+    ok("on ne s'offre pas de crédits sans être administrateur");
   }
 
   // Ce qui DOIT rester ouvert en gratuit : tout ce qui ne coûte rien.
@@ -426,39 +433,42 @@ async function profil6() {
   }
 }
 
-// ═══ PROFIL 7 — Comparaison avec une offre supérieure ════════════════════
+// ═══ PROFIL 7 — Plus d'abonnement : une offre gratuite, et des crédits ════
 
 async function profil7() {
-  profilCourant = '7 · Premium';
-  console.log('\n── 7 · Utilisateur payant (simulé) ────────────────────────────');
-  const { appel } = await creerCompte('premium');
+  profilCourant = '7 · Crédits';
+  console.log("\n── 7 · Plus d'abonnement : une offre gratuite, des crédits ─────");
+  const { appel } = await creerCompte('credits');
   const { corps } = await appel('/offres');
 
   if (corps?.souscriptionPossible) {
-    constat('MOYEN', 'La souscription est annoncée possible', "aucun fournisseur de paiement n'est censé être branché");
+    constat('MOYEN', 'La souscription est annoncée possible', "il n'y a plus d'abonnement");
   } else {
-    ok("aucune souscription proposée tant que rien n'encaisse");
+    ok('aucune souscription proposée');
   }
 
   const offres = corps?.offres ?? [];
-  if (offres.length < 2) {
-    constat('MAJEUR', 'Moins de deux offres au catalogue');
-    return;
+  if (offres.length !== 1 || offres[0]?.prixCentimes !== 0) {
+    constat('MAJEUR', `Catalogue inattendu : ${offres.length} offre(s)`, 'une seule offre, gratuite, depuis les crédits');
+  } else {
+    ok('une seule offre, gratuite');
   }
-  // La montée doit ajouter, jamais retirer.
-  for (let i = 1; i < offres.length; i += 1) {
-    const avant = offres[i - 1].capacites;
-    const apres = offres[i].capacites;
-    for (const g of avant.generateurs ?? []) {
-      if (!(apres.generateurs ?? []).includes(g)) {
-        constat('MAJEUR', `L'offre ${offres[i].label} retire le générateur ${g}`);
-      }
-    }
-    if (offres[i].prixCentimes <= offres[i - 1].prixCentimes) {
-      constat('MOYEN', `${offres[i].label} n'est pas plus chère que ${offres[i - 1].label}`);
-    }
+  if (corps?.credits?.route !== '/credits') {
+    constat('MOYEN', 'Les offres ne renvoient pas vers « Mes crédits »');
   }
-  ok(`${offres.length} offres, progression cohérente`);
+
+  // Le barème est public et ne sort pas le coût interne d'un appel.
+  const reponse = await fetch(`${API}/credits/bareme`);
+  const bareme = await reponse.json().catch(() => null);
+  if (reponse.status !== 200 || !Array.isArray(bareme?.actions) || bareme.actions.length === 0) {
+    constat('MAJEUR', `Barème public illisible (HTTP ${reponse.status})`);
+  } else if (JSON.stringify(bareme).includes('coutReference')) {
+    constat('MAJEUR', 'Le barème public expose le coût interne des appels');
+  } else if (bareme.rechargeDisponible) {
+    constat('MOYEN', 'La recharge est annoncée disponible', "le paiement par carte n'est pas branché");
+  } else {
+    ok(`barème public : ${bareme.actions.length} actions, recharge « bientôt disponible »`);
+  }
 }
 
 // ═══ PROFIL 8 — Utilisateur malveillant ══════════════════════════════════
@@ -529,13 +539,14 @@ async function profil8() {
     ok(`champ démesuré refusé proprement (HTTP ${r.statut})`);
   }
 
-  // 5. Élévation par le corps de requête : se donner une offre.
-  const eleve = await a.appel('/offres/changer', {
+  // 5. Élévation par le corps de requête : se créditer avec une « preuve de
+  // paiement » inventée (il n'y a plus d'offre à se donner depuis les crédits).
+  const eleve = await a.appel(`/admin/credits/${a.id ?? '00000000-0000-4000-8000-000000000000'}`, {
     method: 'POST',
-    body: JSON.stringify({ offre: 'construction', provider: 'stripe', reference: 'faux' }),
+    body: JSON.stringify({ credits: 10000, motif: 'paiement', provider: 'stripe', reference: 'faux' }),
   });
   if (eleve.statut < 400) {
-    constat('CRITIQUE', "Une référence de paiement inventée dans le corps accorde l'offre", 'élévation de privilège');
+    constat('CRITIQUE', 'Une référence de paiement inventée dans le corps accorde des crédits', 'élévation de privilège');
   } else {
     ok('une référence de paiement inventée ne passe pas');
   }

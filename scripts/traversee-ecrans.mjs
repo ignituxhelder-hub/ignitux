@@ -98,7 +98,7 @@ const ECRANS = [
   { chemin: '/login', nom: 'Connexion', public: true },
   { chemin: '/signup', nom: 'Inscription', public: true },
   { chemin: '/forgot-password', nom: 'Mot de passe oublié', public: true },
-  { chemin: '/offres', nom: 'Offres' },
+  { chemin: '/credits', nom: 'Mes crédits' },
   { chemin: '/projects', nom: 'Projets' },
   { chemin: '/profil', nom: 'Profil' },
   { chemin: '/account', nom: 'Compte' },
@@ -135,7 +135,7 @@ const MDP = 'MotDePasse123!';
 const inscription = await fetch(`${API}/users/signup`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email: EMAIL, password: MDP, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-01' }),
+  body: JSON.stringify({ email: EMAIL, password: MDP, captchaToken: 'jeton-script', acceptCgu: true, cguVersion: '2026-10-25' }),
 });
 if (inscription.status >= 400) {
   console.error(`Inscription impossible (HTTP ${inscription.status}) — le serveur répond-il ?`);
