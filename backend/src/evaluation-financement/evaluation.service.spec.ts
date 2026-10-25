@@ -1,10 +1,10 @@
 import {
   ConflictException,
-  ForbiddenException,
   InternalServerErrorException,
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { CreditsInsuffisantsException } from '../credits/credits-insuffisants.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { EvaluationService } from './evaluation.service.js';
 
@@ -58,7 +58,7 @@ function monter() {
   };
   prisma.$transaction.mockImplementation((fn: (tx: typeof prisma) => unknown) => fn(prisma));
   const claude = { generateStructuredOutput: vi.fn().mockResolvedValue(rapport()) };
-  const offres = { exiger: vi.fn().mockResolvedValue(undefined) };
+  const credits = { exigerSolde: vi.fn().mockResolvedValue(undefined) };
   const projects = {
     contexteEvaluation: vi
       .fn()
@@ -72,14 +72,14 @@ function monter() {
   const service = new EvaluationService(
     prisma as never,
     claude as never,
-    offres as never,
+    credits as never,
     projects as never,
     financeAudit as never,
     compliance as never,
     mail as never,
   );
   service.maintenant = () => MAINTENANT;
-  return { service, prisma, claude, offres, projects, mail };
+  return { service, prisma, claude, credits, projects, mail };
 }
 
 /** Les écritures de la génération : conditionnées à « encore en préparation ». */
@@ -170,16 +170,14 @@ describe('EvaluationService — demande et génération', () => {
     expect(ecritures(prisma)[0].data.failure_reason).toBeNull();
   });
 
-  it('garde le message d’un refus lisible (quota épuisé) comme motif d’échec', async () => {
+  it('garde le message d’un refus lisible (solde consommé entre-temps) comme motif d’échec', async () => {
     const { service, prisma, claude } = monter();
-    claude.generateStructuredOutput.mockRejectedValue(
-      new ForbiddenException('Tu as utilisé tes 35 générations ce mois-ci. Le compteur repart le 1er.'),
-    );
+    claude.generateStructuredOutput.mockRejectedValue(new CreditsInsuffisantsException(6, 1));
 
     await service.demander('u1', 'p1');
     await finirArrierePlan();
 
-    expect(ecritures(prisma)[0].data.failure_reason).toMatch(/compteur repart le 1er/);
+    expect(ecritures(prisma)[0].data.failure_reason).toBe('Crédits insuffisants : il te faut 6 crédits, tu en as 1.');
   });
 
   it('n’écrase pas une évaluation qui n’est plus en préparation (génération tardive)', async () => {
@@ -237,13 +235,14 @@ describe('EvaluationService — demande et génération', () => {
     expect(prisma.financing_evaluations.create).toHaveBeenCalled();
   });
 
-  it('ne crée rien quand l’offre refuse (403)', async () => {
-    const { service, prisma, offres } = monter();
-    offres.exiger.mockRejectedValue(new ForbiddenException('pas dans ton offre'));
+  it('ne crée rien quand le solde ne couvre pas l’évaluation (402 tout de suite, pas un échec plus tard)', async () => {
+    const { service, prisma, credits, claude } = monter();
+    credits.exigerSolde.mockRejectedValue(new CreditsInsuffisantsException(6, 2));
 
-    await expect(service.demander('u1', 'p1')).rejects.toBeInstanceOf(ForbiddenException);
-    expect(offres.exiger).toHaveBeenCalledWith('u1', { kind: 'evaluer_financement' });
+    await expect(service.demander('u1', 'p1')).rejects.toBeInstanceOf(CreditsInsuffisantsException);
+    expect(credits.exigerSolde).toHaveBeenCalledWith('u1', 'evaluer');
     expect(prisma.financing_evaluations.create).not.toHaveBeenCalled();
+    expect(claude.generateStructuredOutput).not.toHaveBeenCalled();
   });
 
   it('ne crée rien quand les générateurs sont éteints (503)', async () => {
@@ -315,6 +314,16 @@ describe('EvaluationService — prévenir les administrateurs', () => {
 });
 
 describe('EvaluationService — nouvelle version demandée par l’administrateur', () => {
+  it('est offerte : l’entrepreneur ne paie pas une version qu’Ignitux a demandée', async () => {
+    const { service, claude } = monter();
+
+    await service.generer('e1', 'Reprends le marché.');
+
+    expect(claude.generateStructuredOutput).toHaveBeenCalledWith(
+      expect.objectContaining({ usage: { userId: 'u1', projectId: 'p1', generator: 'evaluer', offert: true } }),
+    );
+  });
+
   it('une nouvelle version qui échoue laisse l’évaluation en revue, avec une alerte pour l’administrateur', async () => {
     const { service, prisma, claude } = monter();
     claude.generateStructuredOutput.mockRejectedValue(new Error('panne'));

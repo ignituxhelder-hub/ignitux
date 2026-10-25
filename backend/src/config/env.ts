@@ -40,16 +40,15 @@ const envSchema = z.object({
   // enum à dessein : une valeur inattendue laisse le produit complet plutôt
   // que d'empêcher le serveur de démarrer.
   IGINI_AI_ENABLED: z.string().optional(),
-  // Plafonds de consommation IA, par personne et par mois civil. Tous deux
-  // optionnels : leur absence retombe sur l'offre annoncée (5 analyses,
-  // 2,00 € de coût IA — voir ai-quota.ts). `illimite` désactive un axe.
+  // Garde-fou de coût IA par compte et par mois civil (anti-abus) —
+  // optionnel : son absence retombe sur 50 € (voir ai-quota.ts), qui
+  // n'arrête jamais quelqu'un qui a payé ses crédits. `illimite` le
+  // désactive. Le solde de crédits est la seule limite d'usage ; l'ancien
+  // plafond en nombre d'appels (IGINI_QUOTA_CALLS_PER_MONTH) n'est plus lu.
   //
-  // Non validés en nombre à dessein, comme IGINI_AI_ENABLED : une valeur
+  // Non validé en nombre à dessein, comme IGINI_AI_ENABLED : une valeur
   // illisible retombe sur le défaut plutôt que d'empêcher le serveur de
-  // démarrer. La différence avec l'interrupteur est le sens du repli — là
-  // une valeur inattendue laisse le produit complet, ici elle laisse le
-  // plafond en place. Dans les deux cas l'inattendu penche du côté prudent.
-  IGINI_QUOTA_CALLS_PER_MONTH: z.string().optional(),
+  // démarrer — et laisse le plafond en place.
   IGINI_QUOTA_COST_EUR_PER_MONTH: z.string().optional(),
   /**
    * L'identité légale d'Ignitux. Déclarées ici, et il a fallu une panne
@@ -84,14 +83,9 @@ const envSchema = z.object({
    * vide, personne ne le peut. Voir participation/operateurs.ts.
    */
   IGNITUX_OPERATEURS: z.string().optional(),
-  /** 'aucun' tant qu'aucun encaissement n'est branché. Voir offres.service.ts. */
-  PAIEMENT_FOURNISSEUR: z.string().optional(),
-  // Pendant la bêta V1, sans moyen de paiement configuré : un compte sans
-  // abonnement obtient l'offre Entrepreneur plutôt que la gratuite
-  // Découverte, pour que chaque testeur puisse essayer les 6 générateurs.
-  // Voir offres.service.ts et config/beta-v1.ts — même convention que
-  // IGINI_AI_ENABLED : seul 'false' repasse au comportement commercial normal.
-  IGNITUX_BETA_V1: z.string().optional(),
+  // PAIEMENT_FOURNISSEUR et IGNITUX_BETA_V1 ne sont plus lus depuis les
+  // crédits IGINI (2026-10-25) : plus d'offre payante à souscrire ni à
+  // ouvrir pendant la bêta. Laissées chez l'hébergeur, elles sont ignorées.
   // Clé secrète Cloudflare Turnstile, utilisée pour vérifier le jeton reçu à
   // l'inscription. Optionnelle ici (le développement s'en passe) ; c'est le
   // contrôle de production qui l'exige — voir production-preflight.ts.

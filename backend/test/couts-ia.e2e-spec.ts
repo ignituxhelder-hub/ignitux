@@ -27,18 +27,8 @@ describe('Coûts IA (e2e)', () => {
   let usage: AiUsageService;
   let compte: TestAccount;
   let projectId: string;
-  let betaInitiale: string | undefined;
 
   beforeAll(async () => {
-    // Ce fichier éprouve les plafonds du catalogue commercial (« Découverte :
-    // trois analyses »). Pendant la bêta V1 — active par défaut, voir
-    // config/beta-v1.ts — un compte sans abonnement obtient Entrepreneur, et
-    // ces chiffres changent. Le test déclare donc la condition dont il
-    // dépend, au lieu de supposer l'environnement : .env.test comme la CI ne
-    // la fixent pas.
-    betaInitiale = process.env.IGNITUX_BETA_V1;
-    process.env.IGNITUX_BETA_V1 = 'false';
-
     app = await startApp();
     prisma = app.get(PrismaService);
     usage = app.get(AiUsageService);
@@ -53,8 +43,6 @@ describe('Coûts IA (e2e)', () => {
   });
 
   afterAll(async () => {
-    if (betaInitiale === undefined) delete process.env.IGNITUX_BETA_V1;
-    else process.env.IGNITUX_BETA_V1 = betaInitiale;
 
     // Les lignes du journal n'ont pas de clé étrangère : la suppression du
     // compte les anonymise mais ne les efface pas. C'est voulu en
@@ -136,85 +124,28 @@ describe('Coûts IA (e2e)', () => {
     ]);
   });
 
-  describe('le plafond mensuel', () => {
-    // ── Deux plafonds, et un seul chiffre à l'écran ────────────────────
-    //
-    // Ces tests disaient « 5 analyses », parce qu'à l'époque le produit
-    // n'avait qu'une offre, à 20 €/mois pour 5 analyses. Le catalogue est
-    // arrivé depuis — 3 en Découverte, 30 en Entrepreneur, 35 en
-    // Construction — et le 5 lui a survécu, dans une constante technique
-    // que plus personne ne relisait. Il serait tombé **avant** l'offre pour
-    // tout abonné payant : coupé à la cinquième analyse après en avoir
-    // acheté trente.
-    //
-    // Ce qui suit vérifie que c'est désormais l'offre qui compte les
-    // analyses, et que l'écran affiche le plafond qui arrêtera vraiment la
-    // personne — pas l'autre.
+  describe('le garde-fou de coût (les crédits sont la seule limite d’usage)', () => {
+    // Depuis les crédits IGINI (2026-10-25), il n'y a plus d'analyses
+    // « incluses ce mois-ci » : chaque action se paie à son prix, et le
+    // solde vit dans GET /credits. Reste un garde-fou de coût par compte,
+    // anti-abus, haut par défaut (50 €), qui ne doit jamais arrêter
+    // quelqu'un qui a payé ses crédits.
 
-    it('annonce ce que l’offre inclut, pas un chiffre technique', async () => {
+    it('n’annonce plus aucun plafond en nombre d’analyses', async () => {
       const reponse = await api(app)
         .get('/igini/usage/mois-en-cours')
         .set(...auth(compte))
         .expect(200);
 
       expect(reponse.body.quota.autorise).toBe(true);
-      // Découverte : trois analyses. C'est le chiffre du catalogue, celui
-      // que la personne a lu avant de s'inscrire.
-      expect(reponse.body.quota.plafonds.analyses_par_mois).toBe(3);
-      expect(reponse.body.quota.plafonds.analyses_selon).toBe('offre decouverte');
-      expect(reponse.body.quota.plafonds.euros_par_mois).toBe(2);
-      // Un appel a déjà été enregistré par le test précédent : il en reste
-      // deux, et le compteur le sait.
-      expect(reponse.body.quota.restant.analyses).toBe(2);
+      expect(reponse.body.quota.plafonds.analyses_par_mois).toBeNull();
+      expect(reponse.body.quota.restant.analyses).toBeNull();
+      expect(reponse.body.quota.plafonds.euros_par_mois).not.toBeNull();
     });
 
-    it('prévient au dernier appel restant', async () => {
-      // Un appel de plus, soit deux en tout : il en reste un. C'est le
-      // moment d'avertir — assez tôt pour s'organiser, assez tard pour que
-      // ce ne soit pas un décor qu'on n'aperçoit plus.
-      await usage.record({
-        context: { userId: compte.userId, projectId, generator: 'analyser' },
-        model: 'claude-opus-5',
-        usage: { input_tokens: 100, output_tokens: 100 },
-        durationMs: 1000,
-      });
-
-      const reponse = await api(app)
-        .get('/igini/usage/mois-en-cours')
-        .set(...auth(compte))
-        .expect(200);
-
-      expect(reponse.body.quota.restant.analyses).toBe(1);
-      expect(reponse.body.quota.bientot_atteint).toBe(true);
-    });
-
-    it('dit zéro quand l’offre est consommée, sans attendre de s’y cogner', async () => {
-      await usage.record({
-        context: { userId: compte.userId, projectId, generator: 'analyser' },
-        model: 'claude-opus-5',
-        usage: { input_tokens: 100, output_tokens: 100 },
-        durationMs: 1000,
-      });
-
-      const reponse = await api(app)
-        .get('/igini/usage/mois-en-cours')
-        .set(...auth(compte))
-        .expect(200);
-
-      expect(reponse.body.quota.restant.analyses).toBe(0);
-      expect(reponse.body.quota.bientot_atteint).toBe(true);
-    });
-
-    it('ne coupe plus un abonné payant à la cinquième analyse', async () => {
-      // LE TEST QUI MANQUAIT. Le plafond technique valait 5 : un compte
-      // Entrepreneur, qui achète trente analyses, en aurait obtenu cinq.
-      // Le plafond d'appels ne vit plus là ; seul le coût y reste.
-      const limites = usage.limits();
-      expect(limites.callsPerMonth).toBeNull();
-      expect(limites.costMicroEurPerMonth).not.toBeNull();
-
-      // Et le garde-fou technique laisse passer bien au-delà de cinq.
-      for (let i = 0; i < 6; i += 1) {
+    it('laisse passer bien au-delà des anciens quotas d’appels', async () => {
+      expect(usage.limits()).not.toHaveProperty('callsPerMonth');
+      for (let i = 0; i < 40; i += 1) {
         await usage.record({
           context: { userId: compte.userId, projectId, generator: 'analyser' },
           model: 'claude-opus-5',
@@ -228,14 +159,12 @@ describe('Coûts IA (e2e)', () => {
       expect(verdict.breach).toBeNull();
     });
 
-    it('refuse quand même quand le budget est dépassé', async () => {
-      // L'axe qui reste, et celui qui protège vraiment : le coût. Un seul
-      // appel très gros suffit à franchir les 2 € — c'est exactement le cas
-      // que compter les appels ne voyait pas.
+    it('refuse quand même quand le coût du mois dépasse le garde-fou (402 plafond_securite)', async () => {
+      // Un appel démesuré (≈ 55 €) franchit le plafond par défaut de 50 €.
       await usage.record({
         context: { userId: compte.userId, projectId, generator: 'analyser' },
         model: 'claude-opus-5',
-        usage: { input_tokens: 2_000_000, output_tokens: 200_000 },
+        usage: { input_tokens: 2_000_000, output_tokens: 2_000_000 },
         durationMs: 5000,
       });
 
@@ -243,31 +172,17 @@ describe('Coûts IA (e2e)', () => {
       expect(verdict.allowed).toBe(false);
       expect(verdict.breach).toBe('cout');
 
-      // 402 Payment Required : les autres codes du produit sont pris et
-      // voudraient dire autre chose. 503 dirait « éteint » alors que ça
-      // marche, 422 « la Constitution refuse » alors qu'elle n'y est pour
-      // rien, 429 est celui du limiteur de débit, et 401 déconnecterait.
       await expect(usage.assertWithinQuota(compte.userId)).rejects.toMatchObject({
         status: 402,
+        response: { code: 'plafond_securite' },
       });
     });
 
     it('ne pénalise personne d’autre', async () => {
-      // Le plafond est mensuel ET personnel. Un compte qui n'a rien
-      // consommé ne doit pas se retrouver bloqué parce qu'un autre l'a été.
       const voisin = await createAccount(app);
 
       const verdict = await usage.quotaFor(voisin.userId);
       expect(verdict.allowed).toBe(true);
-      // `null` sur cet axe : ce n'est pas « illimité », c'est « ce n'est
-      // pas ici qu'on compte les analyses ».
-      expect(verdict.remaining.calls).toBeNull();
-
-      const reponse = await api(app)
-        .get('/igini/usage/mois-en-cours')
-        .set(...auth(voisin))
-        .expect(200);
-      expect(reponse.body.quota.restant.analyses).toBe(3);
 
       await deleteAccount(app, voisin);
     });

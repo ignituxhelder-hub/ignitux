@@ -17,9 +17,10 @@ function isUniqueViolation(error: unknown): boolean {
 /**
  * STATUTS — le brouillon du document fondateur de l'entreprise.
  *
- * Attribué au générateur `former` (voir Global Constraints du plan) : ce
- * n'est pas un septième générateur, c'est la suite de la recommandation de
- * forme juridique.
+ * Journalisé et payé sous son propre nom, `statuts` (jusqu'au 2026-10-25 :
+ * sous `former`, dont il est la suite). Depuis les crédits, chaque appel a
+ * un prix affiché, et un document de statuts coûte bien plus qu'une
+ * recommandation de forme (voir credits/bareme.ts).
  */
 @Injectable()
 export class StatutsService {
@@ -79,7 +80,7 @@ export class StatutsService {
       userContent,
       logContext: 'Échec de la génération des statuts via Claude',
       userErrorMessage: 'La génération des statuts a échoué, réessaie dans un instant.',
-      usage: { userId: ownerId, projectId, generator: 'former' },
+      usage: { userId: ownerId, projectId, generator: 'statuts' },
     });
 
     await this.constitution.guard(

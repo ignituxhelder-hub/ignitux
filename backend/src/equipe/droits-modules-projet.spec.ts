@@ -90,11 +90,11 @@ describe('droits de l’équipe — exécution par IGINI', () => {
     await expect(execution('salarie').service.runTask('u2', 'p1', 't1')).rejects.toBeInstanceOf(ForbiddenException);
   });
 
-  it('un associé lance IGINI sur une tâche : l’appel est attribué au propriétaire', async () => {
+  it('un associé lance IGINI sur une tâche : les crédits du propriétaire paient, l’associé reste l’acteur', async () => {
     const { service, claude } = execution('associe');
     await service.runTask('u2', 'p1', 't1').catch(() => undefined);
     expect(claude.generateStructuredOutput).toHaveBeenCalledWith(
-      expect.objectContaining({ usage: { userId: 'proprio', projectId: 'p1', generator: 'executer' } }),
+      expect.objectContaining({ usage: { userId: 'proprio', actorId: 'u2', projectId: 'p1', generator: 'executer' } }),
     );
   });
 });

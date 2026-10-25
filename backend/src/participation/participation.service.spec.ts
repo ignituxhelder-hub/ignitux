@@ -186,14 +186,14 @@ describe('ParticipationService', () => {
       expect(db.equity_events.rows).toHaveLength(2);
     });
 
-    it('copie les valeurs par défaut DANS l’accord : droit à 5 %, offre entrepreneur', async () => {
+    it('copie les valeurs par défaut DANS l’accord : droit à 5 %, l’offre (unique, gratuite)', async () => {
       const agreement = await createAgreement();
 
       expect(agreement).toMatchObject({
         initial_founder_bps: 5100,
         initial_ignitux_bps: 4900,
         dividend_right_bps: 500,
-        ecosystem_offre: 'entrepreneur',
+        ecosystem_offre: 'decouverte',
         status: 'actif',
       });
     });
@@ -604,7 +604,7 @@ describe('ParticipationService', () => {
         entries: [],
         totalDueCents: 0,
       });
-      expect(view.ecosystem).toMatchObject({ offre: 'entrepreneur', active: true });
+      expect(view.ecosystem).toMatchObject({ offre: 'decouverte', label: 'Gratuit', active: true });
     });
 
     it('après 100/0 : capital à 0 %, droit actif, accès à l’écosystème conservé', async () => {
@@ -617,7 +617,7 @@ describe('ParticipationService', () => {
       expect(view.phase).toBe('transmise');
       expect(view.capital!.holders.find((h) => !h.isFounder)!.shareBasisPoints).toBe(0);
       expect(view.dividendRight).toMatchObject({ active: true, totalDueCents: 50_000, totalSettledCents: 0 });
-      expect(view.ecosystem).toMatchObject({ offre: 'entrepreneur', active: true });
+      expect(view.ecosystem).toMatchObject({ offre: 'decouverte', label: 'Gratuit', active: true });
     });
 
     it('expose l’historique complet des changements de capital', async () => {
@@ -656,7 +656,7 @@ describe('ParticipationService', () => {
       expect(1_000_000 - entry.due_cents).toBe(950_000);
 
       const view = await service.getParticipation(OWNER.id, 'p1');
-      expect(view.ecosystem).toMatchObject({ offre: 'entrepreneur', active: true });
+      expect(view.ecosystem).toMatchObject({ offre: 'decouverte', label: 'Gratuit', active: true });
       // 2 événements de départ + 3 paliers × 2 : toute l'histoire est là.
       expect(view.history).toHaveLength(8);
     });

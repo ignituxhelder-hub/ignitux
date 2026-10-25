@@ -1,5 +1,4 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { OffresService } from '../offres/offres.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ApplicationsService } from './applications.service.js';
 
@@ -36,11 +35,7 @@ describe('ApplicationsService — le bureau', () => {
       },
       shopify_connections: { count: vi.fn().mockResolvedValue(0) },
     };
-    const offres = { offreDe: vi.fn().mockResolvedValue('decouverte') };
-    service = new ApplicationsService(
-      prisma as unknown as PrismaService,
-      offres as unknown as OffresService,
-    );
+    service = new ApplicationsService(prisma as unknown as PrismaService);
   });
 
   const ids = (liste: Array<{ id: string }>) => liste.map((app) => app.id);

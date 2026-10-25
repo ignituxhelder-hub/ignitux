@@ -21,7 +21,6 @@ import { TransmissionService } from '../igini/transmission/transmission.service.
 import { WorkflowEngineService } from '../igini/workflow/workflow-engine.service.js';
 import { WorkflowService } from '../igini/workflow/workflow.service.js';
 import { FormerService, type LegalFormRecommendationResult } from '../igini/former/former.service.js';
-import { OffresService } from '../offres/offres.service.js';
 import { chargerContexteParticipation } from '../participation/participation-context.js';
 import { exigerCapacite } from '../equipe/acces-projet.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -65,7 +64,6 @@ export class ProjectsService {
     private readonly constitutionService: ConstitutionService,
     private readonly memoryService: MemoryService,
     private readonly workflowEngineService: WorkflowEngineService,
-    private readonly offres: OffresService,
   ) {}
 
   /**
@@ -93,16 +91,9 @@ export class ProjectsService {
   }
 
   async create(ownerId: string, title: string, description?: string) {
-    // Ce que l'offre couvre, avant d'écrire quoi que ce soit.
-    //
-    // On compte les projets DONT LA PERSONNE EST PROPRIÉTAIRE, pas ceux
-    // qu'elle voit : être invitée sur le projet de quelqu'un d'autre ne
-    // doit pas consommer sa propre limite, sinon collaborer coûterait sa
-    // place — ce qui découragerait exactement ce qu'on veut encourager.
-    const projetsActuels = await this.prisma.projects.count({
-      where: { owner_id: ownerId },
-    });
-    await this.offres.exiger(ownerId, { kind: 'creer_projet', projetsActuels });
+    // Aucune limite de nombre de projets : depuis les crédits IGINI
+    // (2026-10-25), tous les outils sont gratuits ; seules les actions
+    // IGINI se paient, à l'action.
 
     // Article 13 (Respect de la Vie Privée) : un projet naît privé. La
     // règle attrape une régression où `is_public` prendrait `true` par
@@ -349,13 +340,13 @@ export class ProjectsService {
   }
 
   async analyzeForOwner(demandeurId: string, id: string) {
-    // Un associé peut lancer IGINI ; l'appel reste attribué au propriétaire (offre, quota, coût).
+    // Un associé peut lancer IGINI : les crédits du propriétaire paient, l'associé reste l'acteur.
     const { ownerId } = await exigerCapacite(this.prisma, demandeurId, id, 'lancer_ia');
     const project = await this.findOneForOwner(ownerId, id);
     const result = await this.analysisService.analyzeProject(
       project.title,
       project.description,
-      { userId: ownerId, projectId: project.id },
+      { userId: ownerId, actorId: demandeurId, projectId: project.id },
       this.joinContext(await this.personContext(ownerId, id), await this.memoryContext(ownerId, id)),
     );
 
@@ -495,16 +486,18 @@ export class ProjectsService {
 
       let result: LegalFormRecommendationResult;
       try {
+        // Offert : personne ne l'a demandé, il ne se paie donc pas en crédits
+        // (le garde-fou de coût le compte toujours). Une seule fois par projet.
         result = await this.formerService.recommendLegalForm(
           project.title,
           project.description,
-          { userId: ownerId, projectId },
+          { userId: ownerId, projectId, offert: true },
           this.joinContext(await this.personContext(ownerId, projectId), await this.memoryContext(ownerId, projectId)),
         );
       } catch (error) {
-        // Refus d'entitlement (offre, plafond, interrupteur) : attendu et
-        // silencieux, ce ne sont pas des pannes — la personne n'a rien
-        // demandé explicitement qui mériterait un message d'erreur.
+        // Refus attendu (garde-fou de coût, interrupteur) : silencieux, ce
+        // ne sont pas des pannes — la personne n'a rien demandé
+        // explicitement qui mériterait un message d'erreur.
         const estUnRefusAttendu =
           error instanceof ForbiddenException ||
           error instanceof ServiceUnavailableException ||
@@ -520,13 +513,13 @@ export class ProjectsService {
   }
 
   async recommendLegalFormForOwner(demandeurId: string, id: string) {
-    // Un associé peut lancer IGINI ; l'appel reste attribué au propriétaire (offre, quota, coût).
+    // Un associé peut lancer IGINI : les crédits du propriétaire paient, l'associé reste l'acteur.
     const { ownerId } = await exigerCapacite(this.prisma, demandeurId, id, 'lancer_ia');
     const project = await this.findOneForOwner(ownerId, id);
     const result = await this.formerService.recommendLegalForm(
       project.title,
       project.description,
-      { userId: ownerId, projectId: project.id },
+      { userId: ownerId, actorId: demandeurId, projectId: project.id },
       this.joinContext(await this.personContext(ownerId, id), await this.memoryContext(ownerId, id)),
     );
     return this.persistFormerRecommendation(project.id, ownerId, result);
@@ -542,7 +535,7 @@ export class ProjectsService {
   }
 
   async createBuildPlanForOwner(demandeurId: string, id: string) {
-    // Un associé peut lancer IGINI ; l'appel reste attribué au propriétaire (offre, quota, coût).
+    // Un associé peut lancer IGINI : les crédits du propriétaire paient, l'associé reste l'acteur.
     const { ownerId } = await exigerCapacite(this.prisma, demandeurId, id, 'lancer_ia');
     const project = await this.findOneForOwner(ownerId, id);
     const [personne, memory, analysis, participation] = await Promise.all([
@@ -555,7 +548,7 @@ export class ProjectsService {
     const result = await this.planningService.createBuildPlan(
       project.title,
       project.description,
-      { userId: ownerId, projectId: project.id },
+      { userId: ownerId, actorId: demandeurId, projectId: project.id },
       context,
     );
 
@@ -610,7 +603,7 @@ export class ProjectsService {
   }
 
   async createFinancingPlanForOwner(demandeurId: string, id: string) {
-    // Un associé peut lancer IGINI ; l'appel reste attribué au propriétaire (offre, quota, coût).
+    // Un associé peut lancer IGINI : les crédits du propriétaire paient, l'associé reste l'acteur.
     const { ownerId } = await exigerCapacite(this.prisma, demandeurId, id, 'lancer_ia');
     const project = await this.findOneForOwner(ownerId, id);
     const [personne, memory, analysis, buildPlan, participation] = await Promise.all([
@@ -624,7 +617,7 @@ export class ProjectsService {
     const result = await this.financingService.createFinancingPlan(
       project.title,
       project.description,
-      { userId: ownerId, projectId: project.id },
+      { userId: ownerId, actorId: demandeurId, projectId: project.id },
       context,
     );
 
@@ -660,7 +653,7 @@ export class ProjectsService {
   }
 
   async createDevelopmentPlanForOwner(demandeurId: string, id: string) {
-    // Un associé peut lancer IGINI ; l'appel reste attribué au propriétaire (offre, quota, coût).
+    // Un associé peut lancer IGINI : les crédits du propriétaire paient, l'associé reste l'acteur.
     const { ownerId } = await exigerCapacite(this.prisma, demandeurId, id, 'lancer_ia');
     const project = await this.findOneForOwner(ownerId, id);
     const [personne, memory, analysis, buildPlan, financingPlan, participation] = await Promise.all([
@@ -675,7 +668,7 @@ export class ProjectsService {
     const result = await this.developmentService.createDevelopmentPlan(
       project.title,
       project.description,
-      { userId: ownerId, projectId: project.id },
+      { userId: ownerId, actorId: demandeurId, projectId: project.id },
       context,
     );
 
@@ -711,7 +704,7 @@ export class ProjectsService {
   }
 
   async createTransmissionPlanForOwner(demandeurId: string, id: string) {
-    // Un associé peut lancer IGINI ; l'appel reste attribué au propriétaire (offre, quota, coût).
+    // Un associé peut lancer IGINI : les crédits du propriétaire paient, l'associé reste l'acteur.
     const { ownerId } = await exigerCapacite(this.prisma, demandeurId, id, 'lancer_ia');
     const project = await this.findOneForOwner(ownerId, id);
     const [personne, memory, analysis, buildPlan, financingPlan, developmentPlan, participation] =
@@ -736,7 +729,7 @@ export class ProjectsService {
     const result = await this.transmissionService.createTransmissionPlan(
       project.title,
       project.description,
-      { userId: ownerId, projectId: project.id },
+      { userId: ownerId, actorId: demandeurId, projectId: project.id },
       context,
     );
 

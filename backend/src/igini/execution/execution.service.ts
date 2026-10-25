@@ -97,8 +97,8 @@ export class ExecutionService {
           userContent: promptTache(projet, task, task.ai_refusal_reason),
           logContext: "Échec de l'exécution d'une tâche via Claude",
           userErrorMessage: "L'exécution de la tâche a échoué, réessaie dans un instant.",
-          // Attribué au propriétaire : c'est son offre et son quota qui paient.
-          usage: { userId: projet.owner_id, projectId, generator: 'executer' },
+          // Les crédits du propriétaire paient ; la personne qui lance reste l'acteur.
+          usage: { userId: projet.owner_id, actorId: userId, projectId, generator: 'executer' },
         }),
       () =>
         this.prisma.tasks.update({
@@ -161,7 +161,9 @@ export class ExecutionService {
           userContent: promptExigence(projet, exigence, run?.refusal_reason),
           logContext: "Échec de l'exécution d'une exigence de conformité via Claude",
           userErrorMessage: "L'exécution de la démarche a échoué, réessaie dans un instant.",
-          usage: { userId: projet.owner_id, projectId, generator: 'executer' },
+          // Son propre prix : la lecture de la fiche officielle coûte bien
+          // plus qu'une tâche rédigée (voir credits/bareme.ts).
+          usage: { userId: projet.owner_id, actorId: userId, projectId, generator: 'conformite' },
           // Le site de la source, et lui seul : IGINI lit la fiche officielle
           // qu'on lui confie, il ne part pas chercher ailleurs.
           webFetch: {

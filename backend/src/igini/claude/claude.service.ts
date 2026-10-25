@@ -4,11 +4,12 @@ import {
   Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import type { z } from 'zod';
 import { getEnv } from '../../config/env.js';
-import { OffresService } from '../../offres/offres.service.js';
+import { CreditsService, type Reservation } from '../../credits/credits.service.js';
 import { AiUsageService, type AiUsageContext, type ClaudeTokenUsage } from '../usage/ai-usage.service.js';
 import {
   readGeneratorsAvailability,
@@ -112,13 +113,13 @@ export interface StructuredOutputRequest<T> {
   /** Message renvoyé au client en cas d'échec. */
   userErrorMessage: string;
   /**
-   * Qui déclenche l'appel, sur quel projet, via quel générateur.
+   * Qui paie l'appel, qui l'a lancé, sur quel projet, via quel générateur.
    *
    * **Obligatoire, et c'est le point.** Ce champ n'est pas optionnel pour que
    * TypeScript refuse de compiler un générateur qui ne dirait pas à qui
    * attribuer sa dépense. Le verrou du budget et celui de l'anonymat sont le
    * même verrou : un appel facturé sans propriétaire est un appel qu'aucun
-   * plafond ne pourra jamais décompter.
+   * solde ne pourra jamais débiter.
    */
   usage: AiUsageContext;
   /**
@@ -147,8 +148,15 @@ const MAX_PAUSE_RESUMPTIONS = 4;
  * Point d'entrée unique vers l'API Claude pour les fonctionnalités IA
  * d'Ignitux (analyse, planification, …). Chaque appelant fournit un schéma
  * Zod et un prompt ; ce service gère le client, le format de sortie
- * structurée, la traduction des erreurs en réponses HTTP propres, et
- * l'enregistrement de ce que l'appel a réellement coûté.
+ * structurée, la traduction des erreurs en réponses HTTP propres,
+ * l'enregistrement de ce que l'appel a réellement coûté — et le paiement en
+ * crédits : réservé avant l'appel, rendu s'il échoue.
+ *
+ * L'ordre des verrous, avant tout appel réseau :
+ * 1. l'interrupteur global (`IGINI_AI_ENABLED`) — 503 ;
+ * 2. le garde-fou de coût par compte (anti-abus) — 402 `plafond_securite` ;
+ * 3. la réservation des crédits au prix du barème — 402
+ *    `credits_insuffisants`. Rien n'a alors été dépensé ni débité.
  */
 @Injectable()
 export class ClaudeService {
@@ -157,7 +165,7 @@ export class ClaudeService {
 
   constructor(
     private readonly aiUsage: AiUsageService,
-    private readonly offres: OffresService,
+    private readonly credits: CreditsService,
   ) {}
 
   // Instancié à la première utilisation (et pas comme champ de classe) pour
@@ -199,29 +207,18 @@ export class ClaudeService {
       throw new ServiceUnavailableException(availability.reason);
     }
 
-    // Le plafond mensuel, au même endroit et pour la même raison : les six
-    // générateurs passent ici, donc aucun ne peut être oublié.
+    // Le garde-fou de coût et les crédits, au même endroit et pour la même
+    // raison : tous les générateurs passent ici, donc aucun ne peut être
+    // oublié.
     //
-    // **Avant** l'appel réseau, et **hors** du try. Avant, parce qu'un
-    // plafond vérifié après la dépense ne borne rien. Hors du try, parce que
-    // le catch traduit toute exception en 500 : un refus de quota avalé là
-    // ressortirait en « erreur interne », et la personne ne saurait pas que
-    // son forfait est consommé.
-    // Ce que l'offre couvre, au même endroit et pour la même raison que le
-    // plafond : les six générateurs passent ici.
-    //
-    // **Avant** le plafond global, et l'ordre a un sens. Le plafond
-    // technique protège le budget d'Ignitux ; l'offre décrit ce que la
-    // personne a souscrit. Lui répondre « plafond atteint » alors que son
-    // offre n'inclut simplement pas ce générateur lui ferait attendre un
-    // mois pour rien.
-    await this.offres.exiger(request.usage.userId, {
-      kind: 'generer',
-      generateur: request.usage.generator,
-      appelsCeMois: await this.aiUsage.callsThisMonth(request.usage.userId),
-    });
-
+    // **Avant** l'appel réseau, et **hors** du try. Avant, parce qu'un solde
+    // vérifié après la dépense ne borne rien. Hors du try, parce que le catch
+    // traduit toute exception en 500 : un « crédits insuffisants » avalé là
+    // ressortirait en « erreur interne », et la personne ne saurait pas
+    // qu'il lui suffit de recharger.
     await this.aiUsage.assertWithinQuota(request.usage.userId);
+    const appelId = randomUUID();
+    const reservation = await this.reserver(request.usage, appelId);
 
     const startedAt = Date.now();
 
@@ -294,6 +291,7 @@ export class ClaudeService {
       // personne, le choix n'appartient pas au hasard d'une refonte.
       await this.aiUsage
         .record({
+          id: appelId,
           context: request.usage,
           model: CLAUDE_MODEL,
           usage,
@@ -319,16 +317,55 @@ export class ClaudeService {
       return response.parsed_output;
     } catch (error) {
       this.logger.error(request.logContext, error as Error);
+      // Une génération ratée ne coûte rien : le débit réservé est rendu,
+      // une seule fois (le service des crédits le garantit).
+      await this.rembourser(reservation);
       throw new InternalServerErrorException(this.toSafeMessage(error, request.userErrorMessage));
     }
   }
 
   /**
+   * Réserve le prix de l'appel sur le compte qui paie (`usage.userId`, le
+   * propriétaire du projet), en gardant qui l'a lancé (`usage.actorId`).
+   * `null` pour un appel offert : rien à réserver, rien à rendre.
+   */
+  private reserver(usage: AiUsageContext, appelId: string): Promise<Reservation | null> {
+    if (usage.offert) return Promise.resolve(null);
+    return this.credits.reserver({
+      ownerId: usage.userId,
+      actorId: usage.actorId ?? usage.userId,
+      generator: usage.generator,
+      projectId: usage.projectId,
+      appelId,
+    });
+  }
+
+  /**
+   * Rend un débit après un échec. N'échoue jamais vers l'appelant : l'erreur
+   * à montrer est celle de la génération, pas celle du remboursement — qui
+   * est journalisée pour être rattrapée à la main (ajustement admin).
+   */
+  private async rembourser(reservation: Reservation | null): Promise<void> {
+    if (!reservation) return;
+    try {
+      await this.credits.rembourser(reservation.id);
+    } catch (error) {
+      this.logger.error(
+        `Remboursement impossible du débit ${reservation.id} (${reservation.credits} crédits) : à rendre à la main.`,
+        error as Error,
+      );
+    }
+  }
+
+  /**
    * Chat orchestré : jusqu'à `MAX_ORCHESTRATION_TURNS` allers-retours entre
-   * Claude et les outils NestJS existants. Contrairement à
-   * `generateStructuredOutput`, n'appelle jamais `OffresService.exiger()`
-   * pour le tour lui-même — le chat reste hors du système d'offres ; seuls
-   * les outils générateurs le font, via le code existant qu'ils invoquent.
+   * Claude et les outils NestJS existants.
+   *
+   * **Un message = un prix** (`discuter` au barème), réservé avant le
+   * premier tour et rendu si la réponse échoue — quel que soit le nombre de
+   * tours. Un générateur que le chat déclenche par un outil passe par
+   * `generateStructuredOutput` et se paie en plus, à son propre prix, avec
+   * son propre remboursement.
    *
    * Règle de sécurité non négociable : sur le DERNIER tour autorisé, un
    * outil demandé par Claude n'est jamais exécuté. Sans tour suivant pour
@@ -344,7 +381,22 @@ export class ClaudeService {
     }
 
     await this.aiUsage.assertWithinQuota(request.usage.userId);
+    const appelId = randomUUID();
+    const reservation = await this.reserver(request.usage, appelId);
 
+    try {
+      return await this.orchestrer(request, appelId);
+    } catch (error) {
+      // Pas de réponse, pas de prix : le message est rendu. Un générateur
+      // déjà lancé par un outil reste payé — il a réussi, et son résultat
+      // est en base.
+      await this.rembourser(reservation);
+      throw error;
+    }
+  }
+
+  /** Les tours de conversation d'un message. Le premier porte l'identifiant de l'appel débité. */
+  private async orchestrer(request: ConverseWithToolsRequest, appelId: string): Promise<string> {
     let apiMessages: Anthropic.MessageParam[] = request.messages.map((m) => ({
       role: m.role,
       content: m.content,
@@ -381,6 +433,7 @@ export class ClaudeService {
 
       await this.aiUsage
         .record({
+          ...(turn === 0 ? { id: appelId } : {}),
           context: request.usage,
           model: CLAUDE_ORCHESTRATOR_MODEL,
           usage: response.usage,

@@ -100,6 +100,19 @@ describe('ExecutionService', () => {
     service = module.get(ExecutionService);
   });
 
+  it('un associé fait faire une tâche : les crédits du propriétaire paient, l’associé reste l’acteur', async () => {
+    prisma.projects.findFirst.mockResolvedValue({ ...PROJET, collaborators: [{ role: 'associe' }] });
+    claude.generateStructuredOutput.mockResolvedValue({ kind: 'livrable', titre: 'CGV', contenu: 'x' });
+
+    await service.runTask('u2', 'p1', 't1');
+
+    expect(claude.generateStructuredOutput).toHaveBeenCalledWith(
+      expect.objectContaining({
+        usage: { userId: 'u1', actorId: 'u2', projectId: 'p1', generator: 'executer' },
+      }),
+    );
+  });
+
   it('1. enregistre un livrable à valider, attribué au générateur executer', async () => {
     claude.generateStructuredOutput.mockResolvedValue({
       kind: 'livrable',
@@ -111,7 +124,7 @@ describe('ExecutionService', () => {
 
     expect(claude.generateStructuredOutput).toHaveBeenCalledWith(
       expect.objectContaining({
-        usage: { userId: 'u1', projectId: 'p1', generator: 'executer' },
+        usage: { userId: 'u1', actorId: 'u1', projectId: 'p1', generator: 'executer' },
       }),
     );
     const data = prisma.tasks.update.mock.calls[0][0].data;
@@ -307,7 +320,7 @@ describe('ExecutionService', () => {
         statut ? { ...RUN, status: statut, ...extra } : null,
       );
 
-    it('C1. enregistre un résultat à valider via upsert, générateur executer', async () => {
+    it('C1. enregistre un résultat à valider via upsert, générateur conformite (son propre prix)', async () => {
       claude.generateStructuredOutput.mockResolvedValue({
         kind: 'instructions',
         titre: 'Immat',
@@ -321,7 +334,7 @@ describe('ExecutionService', () => {
 
       expect(claude.generateStructuredOutput).toHaveBeenCalledWith(
         expect.objectContaining({
-          usage: { userId: 'u1', projectId: 'p1', generator: 'executer' },
+          usage: { userId: 'u1', actorId: 'u1', projectId: 'p1', generator: 'conformite' },
         }),
       );
       const arg = prisma.project_compliance_ai_runs.upsert.mock.calls[0][0];

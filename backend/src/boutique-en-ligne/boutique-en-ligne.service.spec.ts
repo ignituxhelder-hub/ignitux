@@ -5,7 +5,6 @@ import {
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { OffresService } from '../offres/offres.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BoutiqueEnLigneService } from './boutique-en-ligne.service.js';
 import { chiffrer } from './chiffrement.js';
@@ -28,7 +27,6 @@ describe('BoutiqueEnLigneService', () => {
     projects: { findFirst: Mock };
     shopify_connections: { findFirst: Mock; upsert: Mock; update: Mock };
   };
-  let offres: { exiger: Mock };
   const anciennesEnv = { ...process.env };
 
   beforeEach(() => {
@@ -41,11 +39,7 @@ describe('BoutiqueEnLigneService', () => {
         update: vi.fn().mockResolvedValue({}),
       },
     };
-    offres = { exiger: vi.fn().mockResolvedValue(undefined) };
-    service = new BoutiqueEnLigneService(
-      prisma as unknown as PrismaService,
-      offres as unknown as OffresService,
-    );
+    service = new BoutiqueEnLigneService(prisma as unknown as PrismaService);
   });
 
   afterEach(() => {
@@ -116,13 +110,6 @@ describe('BoutiqueEnLigneService', () => {
   });
 
   describe('demarrerConnexion', () => {
-    it('exige la capacité outil_de_gestion / boutique_en_ligne', async () => {
-      await service.demarrerConnexion('u1', 'p1', 'ma-boutique.myshopify.com');
-      expect(offres.exiger).toHaveBeenCalledWith('u1', {
-        kind: 'outil_de_gestion',
-        outil: 'boutique_en_ligne',
-      });
-    });
 
     it('refuse un domaine qui n’est pas un sous-domaine myshopify.com', async () => {
       await expect(service.demarrerConnexion('u1', 'p1', 'pas-un-domaine')).rejects.toBeInstanceOf(
@@ -189,15 +176,6 @@ describe('BoutiqueEnLigneService', () => {
       );
     });
 
-    it('exige la capacité outil_de_gestion / boutique_en_ligne', async () => {
-      const callback = await demarrerEtObtenirCallback();
-      offres.exiger.mockClear();
-      await service.finaliserConnexion('u1', 'p1', callback);
-      expect(offres.exiger).toHaveBeenCalledWith('u1', {
-        kind: 'outil_de_gestion',
-        outil: 'boutique_en_ligne',
-      });
-    });
 
     it('refuse un state invalide sans toucher la base', async () => {
       // HMAC réellement valide pour cette requête (sinon c'est ce contrôle,
@@ -282,14 +260,6 @@ describe('BoutiqueEnLigneService', () => {
   });
 
   describe('declarerForfait', () => {
-    it('exige la capacité outil_de_gestion / boutique_en_ligne', async () => {
-      prisma.shopify_connections.findFirst.mockResolvedValue({ id: 'c1' });
-      await service.declarerForfait('u1', 'p1', 'Basic', 2900);
-      expect(offres.exiger).toHaveBeenCalledWith('u1', {
-        kind: 'outil_de_gestion',
-        outil: 'boutique_en_ligne',
-      });
-    });
 
     it('refuse quand aucune connexion n’existe encore', async () => {
       await expect(
@@ -308,14 +278,13 @@ describe('BoutiqueEnLigneService', () => {
   });
 
   describe('deconnecter', () => {
-    it('marque la connexion comme déconnectée, sans exiger l’offre', async () => {
+    it('marque la connexion comme déconnectée', async () => {
       prisma.shopify_connections.findFirst.mockResolvedValue({ id: 'c1' });
       await service.deconnecter('u1', 'p1');
       expect(prisma.shopify_connections.update).toHaveBeenCalledWith({
         where: { id: 'c1' },
         data: { disconnected_at: expect.any(Date) },
       });
-      expect(offres.exiger).not.toHaveBeenCalled();
     });
   });
 
@@ -328,19 +297,6 @@ describe('BoutiqueEnLigneService', () => {
       });
     });
 
-    it('exige la capacité outil_de_gestion / boutique_en_ligne avant de lister les produits', async () => {
-      vi.spyOn(shopifyAdmin, 'listerProduits').mockResolvedValue([]);
-      await service.listerProduits('u1', 'p1');
-      expect(offres.exiger).toHaveBeenCalledWith('u1', {
-        kind: 'outil_de_gestion',
-        outil: 'boutique_en_ligne',
-      });
-    });
-
-    it('refuse de lister les produits quand l’offre ne le permet plus', async () => {
-      offres.exiger.mockRejectedValue(new ForbiddenException('offre insuffisante'));
-      await expect(service.listerProduits('u1', 'p1')).rejects.toBeInstanceOf(ForbiddenException);
-    });
 
     it('liste les produits de la boutique connectée', async () => {
       const spy = vi

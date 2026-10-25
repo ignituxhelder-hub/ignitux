@@ -283,12 +283,15 @@ export const APPLICATIONS: readonly Application[] = [
     cadre: null,
   },
   {
+    // L'identifiant reste « offres » : des choix de bureau enregistrés le
+    // portent. Depuis le 2026-10-25 il n'y a plus d'offre payante — tout est
+    // gratuit, seules les actions IGINI se paient en crédits.
     id: 'offres',
-    nom: 'Mon offre',
-    resume: 'Ce que ton offre couvre, et ce que la suivante ouvrirait.',
+    nom: 'Mes crédits',
+    resume: 'Ton solde de crédits IGINI, le prix de chaque action et l’historique.',
     categorie: 'reglages',
     statut: 'disponible',
-    route: '/offres',
+    route: '/credits',
     publics: [],
     essentielle: true,
     signal: null,

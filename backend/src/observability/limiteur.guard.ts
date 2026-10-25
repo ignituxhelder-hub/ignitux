@@ -5,9 +5,9 @@ import { ThrottlerGuard, type ThrottlerLimitDetail } from '@nestjs/throttler';
  * LE LIMITEUR QUI S'EXPLIQUE.
  *
  * Tous les refus d'Ignitux disent pourquoi et proposent une suite : un 403
- * nomme l'offre qui rouvre la porte et précise que le compteur repart le
- * mois prochain, un 402 dit ce qui a été consommé, un 422 cite l'article de
- * la Constitution. Un seul faisait exception, et c'était le plus fréquent.
+ * dit ce que le rôle ne permet pas, un 402 dit combien de crédits il faut
+ * et combien il en reste, un 422 cite l'article de la Constitution. Un seul
+ * faisait exception, et c'était le plus fréquent.
  *
  * Le limiteur de débit rendait le corps brut de `@nestjs/throttler` :
  *

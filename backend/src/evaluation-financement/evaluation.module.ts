@@ -5,7 +5,7 @@ import { ComplianceModule } from '../compliance/compliance.module.js';
 import { FinanceAuditModule } from '../finance-audit/finance-audit.module.js';
 import { ClaudeModule } from '../igini/claude/claude.module.js';
 import { MailModule } from '../mail/mail.module.js';
-import { OffresModule } from '../offres/offres.module.js';
+import { CreditsModule } from '../credits/credits.module.js';
 import { ProjectsModule } from '../projects/projects.module.js';
 import { RoleGuard } from '../roles/role.guard.js';
 import { RolesModule } from '../roles/roles.module.js';
@@ -22,7 +22,7 @@ import { EvaluationService } from './evaluation.service.js';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     RolesModule,
     ClaudeModule,
-    OffresModule,
+    CreditsModule,
     ProjectsModule,
     FinanceAuditModule,
     ComplianceModule,

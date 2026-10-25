@@ -19,7 +19,6 @@ import { WorkflowEngineService } from '../igini/workflow/workflow-engine.service
 import { WorkflowService } from '../igini/workflow/workflow.service.js';
 import { CLAUDE_MODEL } from '../igini/claude/claude.service.js';
 import { FormerService } from '../igini/former/former.service.js';
-import { OffresService } from '../offres/offres.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ProjectsService } from './projects.service.js';
 
@@ -36,7 +35,8 @@ const GENERATED_PROVENANCE = { generated_by: 'igini', generated_model: CLAUDE_MO
  * le proprietaire du projet et le projet lui-meme. Sans elle, l'appel
  * facture serait anonyme dans le journal des couts.
  */
-const ATTRIBUTION = { userId: 'u1', projectId: 'p1' };
+/** Le propriétaire lance lui-même : il paie, et il est l'acteur. */
+const ATTRIBUTION = { userId: 'u1', actorId: 'u1', projectId: 'p1' };
 
 describe('ProjectsService', () => {
   let service: ProjectsService;
@@ -117,7 +117,6 @@ describe('ProjectsService', () => {
   let constitutionService: { guard: ReturnType<typeof vi.fn> };
   // Les droits ouverts par l'offre ont leur propre suite : ici un faux
   // permissif, pour que ces tests éprouvent le projet et pas la facturation.
-  let offres: { exiger: ReturnType<typeof vi.fn> };
   let memoryService: { recallAsContext: ReturnType<typeof vi.fn> };
   let workflowEngineService: { advanceActiveRunsForProject: ReturnType<typeof vi.fn> };
 
@@ -200,7 +199,6 @@ describe('ProjectsService', () => {
     // le fil des étapes, pas la mémoire.
     memoryService = { recallAsContext: vi.fn().mockResolvedValue(undefined) };
     workflowEngineService = { advanceActiveRunsForProject: vi.fn() };
-    offres = { exiger: vi.fn().mockResolvedValue(undefined) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -217,7 +215,6 @@ describe('ProjectsService', () => {
         { provide: ConstitutionService, useValue: constitutionService },
         { provide: MemoryService, useValue: memoryService },
         { provide: WorkflowEngineService, useValue: workflowEngineService },
-        { provide: OffresService, useValue: offres },
       ],
     }).compile();
 
@@ -228,32 +225,14 @@ describe('ProjectsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('la limite de projets de l’offre', () => {
-    // Le contrôle vit dans create() et non dans le contrôleur : une route
-    // ajoutée plus tard qui créerait un projet sans passer par là le
-    // contournerait, sans que rien ne le signale.
-    it('demande la permission avant d’écrire quoi que ce soit', async () => {
-      offres.exiger.mockRejectedValue(new Error('offre insuffisante'));
+  it('ne limite plus le nombre de projets : tous les outils sont gratuits depuis les crédits', async () => {
+    prisma.projects.create.mockResolvedValue({ id: 'p9' });
+    prisma.projects.count.mockResolvedValue(42);
 
-      await expect(service.create('u1', 'Idée')).rejects.toThrow();
-      expect(prisma.projects.create).not.toHaveBeenCalled();
-    });
+    await service.create('u1', 'Idée');
 
-    // Être invité sur le projet de quelqu'un d'autre ne doit pas consommer
-    // sa propre limite : collaborer coûterait sa place, ce qui découragerait
-    // exactement ce qu'on veut encourager.
-    it('ne compte que les projets dont la personne est propriétaire', async () => {
-      prisma.projects.create.mockResolvedValue({ id: 'p1' });
-      prisma.projects.count.mockResolvedValue(1);
-
-      await service.create('u1', 'Idée');
-
-      expect(prisma.projects.count).toHaveBeenCalledWith({ where: { owner_id: 'u1' } });
-      expect(offres.exiger).toHaveBeenCalledWith('u1', {
-        kind: 'creer_projet',
-        projetsActuels: 1,
-      });
-    });
+    expect(prisma.projects.count).not.toHaveBeenCalled();
+    expect(prisma.projects.create).toHaveBeenCalledTimes(1);
   });
 
   it('create scope le projet au propriétaire', async () => {
@@ -791,6 +770,12 @@ describe('ProjectsService', () => {
         await new Promise((resolve) => setImmediate(resolve));
 
         expect(formerService.recommendLegalForm).toHaveBeenCalledTimes(1);
+        // Personne ne l'a demandé : il est offert, jamais débité en crédits.
+        expect(formerService.recommendLegalForm.mock.calls[0][2]).toEqual({
+          userId: 'u1',
+          projectId: 'p1',
+          offert: true,
+        });
       });
 
       it('ne déclenche pas Former en dessous de 8', async () => {
@@ -1060,7 +1045,7 @@ describe('ProjectsService', () => {
       await expect(service.listBuildPlansForOwner('u2', 'p1')).rejects.toBeInstanceOf(ForbiddenException);
     });
 
-    it('un associé lance un générateur : l’appel est attribué au propriétaire', async () => {
+    it('un associé lance un générateur : les crédits du propriétaire paient, l’associé reste l’acteur', async () => {
       prisma.projects.findFirst.mockResolvedValue(projetAvec('associe'));
       planningService.createBuildPlan.mockResolvedValue({
         summary: 'R',
@@ -1075,7 +1060,7 @@ describe('ProjectsService', () => {
       expect(planningService.createBuildPlan).toHaveBeenCalledWith(
         'Idée',
         'Desc',
-        { userId: 'proprio', projectId: 'p1' },
+        { userId: 'proprio', actorId: 'u2', projectId: 'p1' },
         undefined,
       );
     });

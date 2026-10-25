@@ -15,7 +15,7 @@ import { Prisma } from '../generated/prisma/client.js';
 import { ClaudeService } from '../igini/claude/claude.service.js';
 import { readGeneratorsAvailability } from '../igini/claude/generators-availability.js';
 import { MailService } from '../mail/mail.service.js';
-import { OffresService } from '../offres/offres.service.js';
+import { CreditsService } from '../credits/credits.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ProjectsService } from '../projects/projects.service.js';
 import {
@@ -77,7 +77,7 @@ export class EvaluationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly claude: ClaudeService,
-    private readonly offres: OffresService,
+    private readonly credits: CreditsService,
     private readonly projects: ProjectsService,
     private readonly financeAudit: FinanceAuditService,
     private readonly compliance: ComplianceService,
@@ -85,13 +85,16 @@ export class EvaluationService {
   ) {}
 
   async demander(userId: string, projectId: string): Promise<EvaluationVue> {
-    await exigerCapacite(this.prisma, userId, projectId, 'demander_evaluation');
-    await this.offres.exiger(userId, { kind: 'evaluer_financement' });
+    const { ownerId } = await exigerCapacite(this.prisma, userId, projectId, 'demander_evaluation');
 
     const disponibilite = readGeneratorsAvailability(process.env.IGINI_AI_ENABLED);
     if (!disponibilite.enabled) {
       throw new ServiceUnavailableException(disponibilite.reason);
     }
+    // La génération tourne en arrière-plan : un solde insuffisant se dit
+    // ici, tout de suite (402), plutôt qu'en échec découvert plus tard. Le
+    // débit lui-même se réserve au moment de l'appel, sous verrou.
+    await this.credits.exigerSolde(ownerId, 'evaluer');
 
     const creee = await this.creerSiAucuneActive(userId, projectId);
     // Sans `await` : la demande rend la main, la génération continue seule.
@@ -175,7 +178,9 @@ export class EvaluationService {
         userContent: promptEvaluation(projet.titre, projet.description, contexte, consigne),
         logContext: "Échec de la génération de l'évaluation de financement via Claude",
         userErrorMessage: ECHEC_PAR_DEFAUT,
-        usage: { userId, projectId, generator: 'evaluer' },
+        // Une nouvelle version demandée par un administrateur (`consigne`)
+        // est offerte : c'est Ignitux qui la veut, l'entrepreneur ne la paie pas.
+        usage: { userId, projectId, generator: 'evaluer', ...(consigne ? { offert: true } : {}) },
       });
       const rapport = normaliserRapport(brut);
 
@@ -189,7 +194,7 @@ export class EvaluationService {
       if (enRevue) await this.prevenirAdministrateurs(projet.titre);
     } catch (erreur) {
       this.logger.error(`Évaluation ${evaluationId} en échec : ${String(erreur)}`);
-      // Seul un refus lisible (4xx : quota, offre…) est montré à l'entrepreneur.
+      // Seul un refus lisible (4xx : crédits insuffisants, garde-fou…) est montré à l'entrepreneur.
       // Une erreur serveur porte notre message générique, déjà affiché par
       // l'interface ; une erreur technique brute reste dans les journaux.
       const motif = erreur instanceof HttpException && erreur.getStatus() < 500 ? erreur.message : null;

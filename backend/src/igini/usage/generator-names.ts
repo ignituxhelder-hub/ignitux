@@ -64,9 +64,3 @@ export type GeneratorName = (typeof GENERATOR_NAMES)[number];
 export function estGenerateur(valeur: string): valeur is GeneratorName {
   return (GENERATOR_NAMES as readonly string[]).includes(valeur);
 }
-
-/**
- * Transitoire (retiré au commit suivant avec les offres) : journalisés pour le
- * coût, jamais décomptés du forfait mensuel.
- */
-export const HORS_FORFAIT: readonly GeneratorName[] = ['discuter', 'questionner'];

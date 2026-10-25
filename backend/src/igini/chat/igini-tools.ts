@@ -7,7 +7,7 @@ import { MEMORY_CATEGORIES } from '../memory/memory-category.js';
  * LES 7 OUTILS DE L'ORCHESTRATEUR IGINI.
  *
  * Chacun est une enveloppe fine autour d'un service déjà testé et déjà
- * gardé (offres, quota, propriété du projet) — ce fichier ne décide jamais
+ * gardé (crédits, garde-fou de coût, propriété du projet) — ce fichier ne décide jamais
  * lui-même si un appel est autorisé, il ne fait que décrire l'outil à
  * Claude et valider la forme de ce qu'il envoie. L'exécution vit dans
  * `IginiToolsService` (igini-tools.service.ts), qui a besoin de Nest/Prisma
@@ -105,9 +105,9 @@ export const IGINI_TOOL_DEFINITIONS: Anthropic.Tool[] = [
 /**
  * Traduit n'importe quelle erreur d'exécution d'outil en texte lisible pour
  * `tool_result`. Couvre les trois formes réellement rencontrées : une
- * `HttpException` à corps texte (`assertWithinQuota`), une `HttpException` à
- * corps objet (`offres.exiger`, qui pose `{ message, offreQuiOuvre, ... }`),
- * et une entrée invalide envoyée par le modèle (`ZodError`).
+ * `HttpException` à corps texte, une `HttpException` à corps objet (crédits
+ * insuffisants, garde-fou de coût : `{ message, code, ... }`), et une entrée
+ * invalide envoyée par le modèle (`ZodError`).
  */
 export function toToolErrorMessage(error: unknown): string {
   if (error instanceof z.ZodError) {

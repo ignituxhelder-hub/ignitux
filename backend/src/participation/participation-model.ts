@@ -39,8 +39,13 @@ export const DEFAULT_ENTRY_SPLIT = {
 /** 5 % des dividendes distribués. Valeur par défaut, recopiée dans l'accord. */
 export const DEFAULT_DIVIDEND_RIGHT_BASIS_POINTS = 500;
 
-/** L'offre que le contrat garantit par défaut. Modifiable par accord. */
-export const DEFAULT_ECOSYSTEM_OFFRE = 'entrepreneur';
+/**
+ * L'offre que le contrat garantit par défaut. Depuis les crédits IGINI
+ * (2026-10-25) il n'en reste qu'une, gratuite, qui contient tout : les
+ * accords d'avant, signés « entrepreneur », la désignent aussi (voir
+ * `normaliserOffre`).
+ */
+export const DEFAULT_ECOSYSTEM_OFFRE = 'decouverte';
 
 export interface AgreementTerms {
   founderBasisPoints: number;

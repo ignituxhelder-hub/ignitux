@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { assertOwnsProject } from '../prisma/assert-owns-project.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { OffresService } from '../offres/offres.service.js';
 import { chiffrer, dechiffrer } from './chiffrement.js';
 import {
   creerProduit as creerProduitShopify,
@@ -48,15 +47,14 @@ function messageErreur(erreur: unknown): string {
 
 @Injectable()
 export class BoutiqueEnLigneService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly offres: OffresService,
-  ) {}
+  // Aucune offre à exiger : depuis les crédits IGINI (2026-10-25), tous les
+  // outils de gestion sont gratuits. Seules les actions IGINI se paient.
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * `null` quand la brique n'est pas configurée : une fonctionnalité
-   * optionnelle absente ne doit jamais empêcher tout Ignitux de démarrer
-   * (voir PAIEMENT_FOURNISSEUR="aucun", même principe). La clé de
+   * optionnelle absente ne doit jamais empêcher tout Ignitux de démarrer.
+   * La clé de
    * chiffrement fait partie de cette configuration : sans elle, chiffrer()
    * lèverait au milieu d'un échange de code déjà consommé chez Shopify —
    * mieux vaut le dire avant de rediriger vers Shopify que pendant le
@@ -113,7 +111,6 @@ export class BoutiqueEnLigneService {
     projectId: string,
     shopDomain: string,
   ): Promise<{ url: string }> {
-    await this.offres.exiger(userId, { kind: 'outil_de_gestion', outil: 'boutique_en_ligne' });
     await assertOwnsProject(this.prisma, userId, projectId);
 
     const domaine = shopDomain.trim().toLowerCase();
@@ -166,7 +163,6 @@ export class BoutiqueEnLigneService {
     projectId: string,
     query: { code: string; shop: string; state: string; hmac: string },
   ): Promise<void> {
-    await this.offres.exiger(callerId, { kind: 'outil_de_gestion', outil: 'boutique_en_ligne' });
     const config = this.exigerConfiguration();
 
     if (!verifierHmacCallback({ code: query.code, shop: query.shop, state: query.state, hmac: query.hmac }, config.apiSecret)) {
@@ -224,10 +220,6 @@ export class BoutiqueEnLigneService {
   }
 
   async deconnecter(userId: string, projectId: string): Promise<void> {
-    // Volontairement sans offres.exiger : une personne qui a rétrogradé
-    // d'offre doit pouvoir couper une connexion existante, pas seulement
-    // la voir. Ce que l'offre protège, c'est se connecter ou continuer à
-    // utiliser la boutique — pas s'en détacher.
     const connexion = await this.trouverConnexionActive(userId, projectId);
     await this.prisma.shopify_connections.update({
       where: { id: connexion.id },
@@ -241,7 +233,6 @@ export class BoutiqueEnLigneService {
     forfait: string,
     prixCentimes: number,
   ): Promise<void> {
-    await this.offres.exiger(userId, { kind: 'outil_de_gestion', outil: 'boutique_en_ligne' });
     const connexion = await this.trouverConnexionActive(userId, projectId);
     await this.prisma.shopify_connections.update({
       where: { id: connexion.id },
@@ -264,14 +255,8 @@ export class BoutiqueEnLigneService {
     return dechiffrer(connexion.access_token_chiffre);
   }
 
-  /**
-   * Toutes les actions qui parlent réellement à Shopify exigent l'offre à
-   * chaque appel — pas seulement à la connexion initiale. Une rétrogradation
-   * d'offre après coup ne doit pas laisser un accès en lecture/écriture
-   * illimité à une boutique tierce.
-   */
+  /** Le domaine et le jeton déchiffré de la connexion active du projet. */
   private async credentials(userId: string, projectId: string): Promise<ShopifyCredentials> {
-    await this.offres.exiger(userId, { kind: 'outil_de_gestion', outil: 'boutique_en_ligne' });
     const connexion = await this.trouverConnexionActive(userId, projectId);
     return {
       shopDomain: connexion.shop_domain,

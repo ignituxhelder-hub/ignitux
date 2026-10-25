@@ -205,25 +205,46 @@ describe('AiUsageService', () => {
     });
   });
 
-  describe('callsThisMonth', () => {
-    it("ne compte pas les tours de conversation ('discuter') dans le quota des générateurs", async () => {
-      // Trouvaille de la revue finale : sans cette exclusion, un simple
-      // échange de chat consomme le même compteur que les 5 générateurs
-      // réels et déclenche, à tort, le refus « 3 analyses consommées » —
-      // y compris pour le bouton Analyser existant, jamais utilisé.
-      await service.callsThisMonth('u1');
+  describe('identifiant d’appel', () => {
+    it('écrit l’identifiant choisi avant l’appel, celui que porte le débit de crédits', async () => {
+      await service.record({
+        id: 'appel-choisi-avant',
+        context: ATTRIBUTION,
+        model: 'claude-opus-5',
+        usage: UTILISATION,
+        durationMs: 1,
+      });
 
-      expect(table.count).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({ generator: { notIn: ['discuter', 'questionner'] } }),
-        }),
-      );
+      expect(table.create.mock.calls[0][0].data.id).toBe('appel-choisi-avant');
     });
 
-    it('compte bien les appels aux générateurs réels', async () => {
-      table.count.mockResolvedValue(2);
+    it('laisse la base tirer l’identifiant quand aucun n’est fourni', async () => {
+      await service.record({ context: ATTRIBUTION, model: 'claude-opus-5', usage: UTILISATION, durationMs: 1 });
 
-      await expect(service.callsThisMonth('u1')).resolves.toBe(2);
+      expect(table.create.mock.calls[0][0].data).not.toHaveProperty('id');
+    });
+  });
+
+  describe('garde-fou de coût', () => {
+    it('refuse en 402 « plafond_securite » quand le coût du mois atteint le plafond', async () => {
+      // 1 200 + 900 tokens à 5/25 $ ≈ 0,026 € : 100 appels dépassent un plafond de 2 €.
+      table.findMany.mockResolvedValue(Array.from({ length: 100 }, () => ligne()));
+      vi.spyOn(service, 'limits').mockReturnValue({ costMicroEurPerMonth: 2_000_000 });
+
+      const erreur = await service.assertWithinQuota('u1').then(
+        () => null,
+        (e: unknown) => e as { getStatus(): number; getResponse(): unknown },
+      );
+
+      expect(erreur?.getStatus()).toBe(402);
+      expect(erreur?.getResponse()).toMatchObject({ statusCode: 402, code: 'plafond_securite' });
+      expect(JSON.stringify(erreur?.getResponse())).toContain('tes crédits ne sont pas touchés');
+    });
+
+    it('laisse passer sous le plafond', async () => {
+      table.findMany.mockResolvedValue([ligne()]);
+      vi.spyOn(service, 'limits').mockReturnValue({ costMicroEurPerMonth: 2_000_000 });
+      await expect(service.assertWithinQuota('u1')).resolves.toBeUndefined();
     });
   });
 });

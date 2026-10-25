@@ -7,7 +7,8 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import type Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
-import { OffresService } from '../../offres/offres.service.js';
+import { CreditsInsuffisantsException } from '../../credits/credits-insuffisants.js';
+import { CreditsService } from '../../credits/credits.service.js';
 import { AiUsageService } from '../usage/ai-usage.service.js';
 import { CLAUDE_MODEL, CLAUDE_ORCHESTRATOR_MODEL, ClaudeService } from './claude.service.js';
 import { GENERATORS_DISABLED_MESSAGE } from './generators-availability.js';
@@ -72,9 +73,8 @@ describe('ClaudeService', () => {
   let aiUsage: {
     record: ReturnType<typeof vi.fn>;
     assertWithinQuota: ReturnType<typeof vi.fn>;
-    callsThisMonth: ReturnType<typeof vi.fn>;
   };
-  let offres: { exiger: ReturnType<typeof vi.fn> };
+  let credits: { reserver: ReturnType<typeof vi.fn>; rembourser: ReturnType<typeof vi.fn> };
 
   /** Une generation ordinaire, pour les tests qui n eprouvent pas la requete. */
   const genererQuelqueChose = () =>
@@ -94,17 +94,19 @@ describe('ClaudeService', () => {
     aiUsage = {
       record: vi.fn().mockResolvedValue(undefined),
       assertWithinQuota: vi.fn().mockResolvedValue(undefined),
-      callsThisMonth: vi.fn().mockResolvedValue(0),
     };
-    // Ce que l offre couvre est verifie au meme endroit que le plafond.
-    // Un faux permissif ici : ces tests eprouvent l appel, pas les droits,
-    // qui ont leur propre suite.
-    offres = { exiger: vi.fn().mockResolvedValue(undefined) };
+    // Les crédits se réservent au même endroit que le plafond. Un faux
+    // permissif ici : ces tests éprouvent l'appel ; le solde, le verrou et
+    // le remboursement unique ont leur propre suite (credits.service.spec).
+    credits = {
+      reserver: vi.fn().mockResolvedValue({ id: 'debit-1', credits: 4, soldeApres: 26 }),
+      rembourser: vi.fn().mockResolvedValue(true),
+    };
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ClaudeService,
         { provide: AiUsageService, useValue: aiUsage },
-        { provide: OffresService, useValue: offres },
+        { provide: CreditsService, useValue: credits },
       ],
     }).compile();
 
@@ -432,6 +434,7 @@ describe('ClaudeService', () => {
 
       expect(aiUsage.record).toHaveBeenCalledTimes(1);
       expect(aiUsage.record).toHaveBeenCalledWith({
+        id: expect.any(String),
         context: ATTRIBUTION,
         model: 'claude-opus-5',
         usage: UTILISATION,
@@ -748,6 +751,7 @@ describe('ClaudeService', () => {
       expect(deuxiemAppel.messages[1]).toEqual({ role: 'assistant', content: premierTour.content });
 
       expect(aiUsage.record).toHaveBeenCalledWith({
+        id: expect.any(String),
         context: ATTRIBUTION,
         model: 'claude-opus-5',
         usage: {
@@ -789,35 +793,110 @@ describe('ClaudeService', () => {
     });
   });
 
-  describe('ce que l offre couvre', () => {
-    // Les six generateurs passent par ce point unique : un controle pose
-    // ici ne peut etre oublie par aucun d entre eux.
-    it('verifie les droits avant tout appel reseau', async () => {
-      offres.exiger.mockRejectedValue(new Error('offre insuffisante'));
-
-      await expect(genererQuelqueChose()).rejects.toThrow();
-      expect(parseMock).not.toHaveBeenCalled();
-    });
-
-    it('transmet le generateur reellement appele', async () => {
+  describe('les crédits : réservés avant l’appel, rendus s’il échoue', () => {
+    it('réserve le prix sur le compte qui paie, avec le générateur, le projet et l’identifiant d’appel', async () => {
       parseMock.mockResolvedValue({ parsed_output: { answer: 'ok' }, usage: UTILISATION });
 
       await genererQuelqueChose();
 
-      const action = offres.exiger.mock.calls[0][1];
-      expect(action.kind).toBe('generer');
-      expect(action.generateur).toBe('analyser');
+      expect(credits.reserver).toHaveBeenCalledWith({
+        ownerId: 'u1',
+        actorId: 'u1',
+        generator: 'analyser',
+        projectId: 'p1',
+        appelId: expect.any(String),
+      });
+      // Le débit et la ligne de coût portent le même identifiant d'appel.
+      const { appelId } = credits.reserver.mock.calls[0][0];
+      expect(aiUsage.record.mock.calls[0][0].id).toBe(appelId);
+      expect(credits.rembourser).not.toHaveBeenCalled();
     });
 
-    // Le plafond technique protege le budget d Ignitux ; l offre decrit ce
-    // que la personne a souscrit. Repondre « plafond atteint » a quelqu un
-    // dont l offre n inclut pas ce generateur lui ferait attendre un mois
-    // pour rien.
-    it('passe par l offre avant le plafond technique', async () => {
-      offres.exiger.mockRejectedValue(new Error('offre insuffisante'));
+    it('membre d’équipe : débite le propriétaire (userId), et garde l’acteur', async () => {
+      parseMock.mockResolvedValue({ parsed_output: { answer: 'ok' }, usage: UTILISATION });
 
-      await expect(genererQuelqueChose()).rejects.toThrow();
-      expect(aiUsage.assertWithinQuota).not.toHaveBeenCalled();
+      await service.generateStructuredOutput({
+        schema,
+        system: 'system',
+        userContent: 'user',
+        logContext: 'contexte',
+        userErrorMessage: 'échec',
+        usage: { userId: 'proprietaire', actorId: 'membre', projectId: 'p1', generator: 'construire' },
+      });
+
+      expect(credits.reserver).toHaveBeenCalledWith(
+        expect.objectContaining({ ownerId: 'proprietaire', actorId: 'membre', generator: 'construire' }),
+      );
+      // Le garde-fou de coût compte, lui aussi, chez le propriétaire.
+      expect(aiUsage.assertWithinQuota).toHaveBeenCalledWith('proprietaire');
+    });
+
+    it('solde insuffisant : le 402 ressort tel quel, AVANT tout appel réseau', async () => {
+      const refus = new CreditsInsuffisantsException(4, 1);
+      credits.reserver.mockRejectedValue(refus);
+
+      await expect(genererQuelqueChose()).rejects.toBe(refus);
+      expect(parseMock).not.toHaveBeenCalled();
+      expect(aiUsage.record).not.toHaveBeenCalled();
+      expect(credits.rembourser).not.toHaveBeenCalled();
+    });
+
+    it('le garde-fou de coût passe avant les crédits : rien n’est réservé s’il refuse', async () => {
+      aiUsage.assertWithinQuota.mockRejectedValue(new HttpException('Garde-fou', HttpStatus.PAYMENT_REQUIRED));
+
+      await expect(genererQuelqueChose()).rejects.toBeInstanceOf(HttpException);
+      expect(credits.reserver).not.toHaveBeenCalled();
+    });
+
+    it('l’interrupteur éteint ne réserve rien', async () => {
+      env.current = { IGINI_AI_ENABLED: 'false' };
+
+      await expect(genererQuelqueChose()).rejects.toBeInstanceOf(ServiceUnavailableException);
+      expect(credits.reserver).not.toHaveBeenCalled();
+    });
+
+    it('un appel qui échoue rend le débit réservé, une fois', async () => {
+      parseMock.mockRejectedValue(new APIConnectionError('réseau'));
+
+      await expect(genererQuelqueChose()).rejects.toBeInstanceOf(InternalServerErrorException);
+      expect(credits.rembourser).toHaveBeenCalledTimes(1);
+      expect(credits.rembourser).toHaveBeenCalledWith('debit-1');
+    });
+
+    it('une réponse inexploitable (payée chez Anthropic) ne coûte rien à la personne', async () => {
+      parseMock.mockResolvedValue({ parsed_output: null, usage: UTILISATION });
+
+      await expect(genererQuelqueChose()).rejects.toBeInstanceOf(InternalServerErrorException);
+      expect(aiUsage.record).toHaveBeenCalledTimes(1);
+      expect(credits.rembourser).toHaveBeenCalledWith('debit-1');
+    });
+
+    it('un remboursement qui échoue ne masque pas l’erreur de la génération', async () => {
+      parseMock.mockRejectedValue(new RateLimitError('trop'));
+      credits.rembourser.mockRejectedValue(new Error('base injoignable'));
+
+      await expect(genererQuelqueChose()).rejects.toMatchObject({
+        message: expect.stringContaining('trop de demandes'),
+      });
+    });
+
+    it('un appel offert (déclenché par Ignitux) ne réserve rien et ne rembourse rien', async () => {
+      parseMock.mockRejectedValue(new APIConnectionError('réseau'));
+
+      await expect(
+        service.generateStructuredOutput({
+          schema,
+          system: 'system',
+          userContent: 'user',
+          logContext: 'contexte',
+          userErrorMessage: 'échec',
+          usage: { ...ATTRIBUTION, generator: 'former', offert: true },
+        }),
+      ).rejects.toBeInstanceOf(InternalServerErrorException);
+      expect(credits.reserver).not.toHaveBeenCalled();
+      expect(credits.rembourser).not.toHaveBeenCalled();
+      // Mais le garde-fou de coût le compte toujours.
+      expect(aiUsage.assertWithinQuota).toHaveBeenCalledWith('u1');
     });
   });
 
@@ -874,12 +953,40 @@ describe('ClaudeService', () => {
       );
     });
 
-    it("n'appelle jamais offres.exiger — le tour de conversation reste hors du système d'offres", async () => {
-      createMock.mockResolvedValue(reponseTexte('Salut !'));
+    it('réserve UN message (« discuter ») avant le premier tour, quel que soit le nombre de tours', async () => {
+      createMock
+        .mockResolvedValueOnce(reponseToolUse('t1', 'lister_projets', {}))
+        .mockResolvedValueOnce(reponseTexte('Tu as un projet.'));
 
-      await converser();
+      await converser(vi.fn().mockResolvedValue({ content: '[]', isError: false }));
 
-      expect(offres.exiger).not.toHaveBeenCalled();
+      expect(credits.reserver).toHaveBeenCalledTimes(1);
+      expect(credits.reserver).toHaveBeenCalledWith({
+        ownerId: 'u1',
+        actorId: 'u1',
+        generator: 'discuter',
+        projectId: null,
+        appelId: expect.any(String),
+      });
+      // Le premier tour porte l'identifiant du débit ; les suivants non.
+      const { appelId } = credits.reserver.mock.calls[0][0];
+      expect(aiUsage.record.mock.calls[0][0].id).toBe(appelId);
+      expect(aiUsage.record.mock.calls[1][0]).not.toHaveProperty('id');
+      expect(credits.rembourser).not.toHaveBeenCalled();
+    });
+
+    it('solde insuffisant : aucun tour n’est lancé', async () => {
+      credits.reserver.mockRejectedValue(new CreditsInsuffisantsException(1, 0));
+
+      await expect(converser()).rejects.toBeInstanceOf(CreditsInsuffisantsException);
+      expect(createMock).not.toHaveBeenCalled();
+    });
+
+    it('rend le message quand la réponse échoue', async () => {
+      createMock.mockRejectedValue(new Error('network error'));
+
+      await expect(converser()).rejects.toBeInstanceOf(InternalServerErrorException);
+      expect(credits.rembourser).toHaveBeenCalledWith('debit-1');
     });
 
     it('répond directement quand Claude ne demande aucun outil', async () => {

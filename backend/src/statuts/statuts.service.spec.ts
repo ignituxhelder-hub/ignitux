@@ -83,7 +83,7 @@ describe('StatutsService — génération', () => {
     await expect(service.genererPourProjet('user-1', 'p1', dtoValide)).resolves.toMatchObject({ id: 'b1' });
 
     expect(claude.generateStructuredOutput).toHaveBeenCalledWith(
-      expect.objectContaining({ usage: { userId: 'user-1', projectId: 'p1', generator: 'former' } }),
+      expect.objectContaining({ usage: { userId: 'user-1', projectId: 'p1', generator: 'statuts' } }),
     );
     expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     expect(prisma.company_bylaws.create).toHaveBeenCalledWith({

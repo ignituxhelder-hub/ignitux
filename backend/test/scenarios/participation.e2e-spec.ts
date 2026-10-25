@@ -1,6 +1,5 @@
 import type { INestApplication } from '@nestjs/common';
 import type { Server } from 'node:http';
-import { OffresService } from '../../src/offres/offres.service.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { api, auth, createAccount, deleteAccount, startApp, type TestAccount } from '../e2e-app.js';
 
@@ -24,7 +23,6 @@ import { api, auth, createAccount, deleteAccount, startApp, type TestAccount } f
 describe('SCÉNARIO — participation IGNITUX', () => {
   let app: INestApplication<Server>;
   let prisma: PrismaService;
-  let offres: OffresService;
 
   let porteuse: TestAccount;
   let ignitux: TestAccount;
@@ -36,7 +34,6 @@ describe('SCÉNARIO — participation IGNITUX', () => {
   beforeAll(async () => {
     app = await startApp();
     prisma = app.get(PrismaService);
-    offres = app.get(OffresService);
     porteuse = await createAccount(app);
     ignitux = await createAccount(app);
 
@@ -280,12 +277,11 @@ describe('SCÉNARIO — participation IGNITUX', () => {
   });
 
   describe('4. l’accès à l’écosystème — indépendant du capital', () => {
-    it('à 0 % du capital, l’entrepreneur garde l’offre de son accord', async () => {
+    it('à 0 % du capital, l’entrepreneur garde l’accès de son accord (l’offre unique, gratuite)', async () => {
       await expect(partsActuelles()).resolves.toEqual({ porteur: 10000, ignitux: 0 });
-      await expect(offres.offreDe(porteuse.userId)).resolves.toBe('entrepreneur');
 
       const { body } = await lireParticipation();
-      expect(body.ecosystem).toMatchObject({ offre: 'entrepreneur', active: true });
+      expect(body.ecosystem).toMatchObject({ offre: 'decouverte', label: 'Gratuit', active: true });
     });
   });
 

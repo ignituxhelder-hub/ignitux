@@ -7,27 +7,33 @@ import {
   PRICE_GRID_DATE,
   type TokenCounts,
 } from './ai-pricing.js';
-import { checkQuota, readQuotaLimits, type QuotaLimits, type QuotaVerdict } from './ai-quota.js';
+import {
+  checkQuota,
+  CODE_PLAFOND_SECURITE,
+  readQuotaLimits,
+  type QuotaLimits,
+  type QuotaVerdict,
+} from './ai-quota.js';
 
 /**
- * Les six générateurs, nommés comme la méthode IGINI les nomme.
+ * Les appels IA, nommés comme la méthode IGINI les nomme.
  *
- * C'est un type union et pas un `string` : le jour où un septième générateur
- * arrive, il ne compilera pas tant qu'il n'aura pas été ajouté ici. Une
- * chaîne libre aurait laissé passer un `'analyse'` au singulier ou un
- * `'Analyser'` majuscule, et le journal se serait mis à compter deux
- * générateurs là où il n'y en a qu'un — sans que rien n'échoue.
+ * C'est un type union et pas un `string` : le jour où un nouvel appel
+ * arrive, il ne compilera pas tant qu'il n'aura pas été ajouté à la liste —
+ * et au barème des crédits, indexé par ce même type. Une chaîne libre aurait
+ * laissé passer un `'analyse'` au singulier ou un `'Analyser'` majuscule, et
+ * le journal se serait mis à compter deux générateurs là où il n'y en a
+ * qu'un — sans que rien n'échoue.
  *
- * La liste elle-même a déménagé dans `generator-names.ts` : le catalogue
- * des offres en a besoin et doit rester pur, sans Nest ni base. Réexportée
- * ici pour que les appelants existants n'aient rien à changer.
+ * La liste vit dans `generator-names.ts`, pur, sans Nest ni base.
+ * Réexportée ici pour que les appelants existants n'aient rien à changer.
  */
 export {
   GENERATOR_NAMES,
   estGenerateur,
   type GeneratorName,
 } from './generator-names.js';
-import { GENERATOR_NAMES, HORS_FORFAIT, type GeneratorName } from './generator-names.js';
+import { GENERATOR_NAMES, type GeneratorName } from './generator-names.js';
 
 /**
  * Le « qui » d'un appel.
@@ -38,7 +44,24 @@ import { GENERATOR_NAMES, HORS_FORFAIT, type GeneratorName } from './generator-n
  * sait ce qu'il est ; chacun ne fournit que ce qu'il est seul à savoir.
  */
 export interface GenerationAttribution {
+  /**
+   * Le compte qui paie : ses crédits sont débités, sa consommation compte
+   * pour le garde-fou de coût. Le propriétaire du projet quand un membre de
+   * son équipe lance l'action.
+   */
   userId: string;
+  /**
+   * Qui a lancé l'action, quand ce n'est pas `userId` (un membre de
+   * l'équipe). Gardé dans le journal des crédits. Absent = `userId`.
+   */
+  actorId?: string;
+  /**
+   * `true` pour un appel qu'Ignitux déclenche de lui-même — Former lancé
+   * automatiquement après une analyse très bien notée, une nouvelle version
+   * d'évaluation demandée par un administrateur. Journalisé comme les
+   * autres, jamais débité : personne ne l'a demandé, personne ne le paie.
+   */
+  offert?: boolean;
   /**
    * `null` pour un appel non rattaché à un projet — un tour de conversation
    * de l'orchestrateur (voir `ClaudeService.converseWithTools`). Les 5
@@ -138,6 +161,12 @@ export class AiUsageService {
    * soit un plafond haut et non un compteur comptable.
    */
   async record(input: {
+    /**
+     * L'identifiant de l'appel, choisi avant l'appel : le débit de crédits
+     * (`credit_entries.ai_usage_event_id`) porte le même. Absent : la base
+     * en tire un.
+     */
+    id?: string;
     context: AiUsageContext;
     model: string;
     usage: ClaudeTokenUsage;
@@ -152,6 +181,7 @@ export class AiUsageService {
       // journal peut se tromper, la génération non.
       await this.prisma.ai_usage_events.create({
         data: {
+          ...(input.id ? { id: input.id } : {}),
           user_id: input.context.userId,
           project_id: input.context.projectId,
           generator: input.context.generator,
@@ -230,36 +260,7 @@ export class AiUsageService {
     return summarise(events, depuis, jusqua);
   }
 
-  /**
-   * Le nombre d appels de cette personne sur le mois civil en cours.
-   *
-   * Distinct du plafond technique : celui-ci protege le budget d Ignitux,
-   * ce compteur-la sert a savoir ou en est la personne dans ce que son
-   * offre inclut. Les deux repondent a des questions differentes et n ont
-   * pas les memes seuils.
-   *
-   * Exclut les générateurs HORS_FORFAIT (`discuter`, les tours de
-   * l'orchestrateur du chat, et `questionner`, les questions du
-   * questionnaire de projet) : ce
-   * compteur nourrit `appelsCeMois` pour `droits.ts` côté générateurs
-   * (« 3 analyses incluses en Découverte »), une promesse commerciale qui
-   * ne porte que sur les générateurs (et « executer »). Sans cette exclusion, une simple
-   * conversation sans aucun générateur déclenché épuiserait ce quota — et
-   * casserait au passage le bouton Analyser existant, qui lit ce même
-   * compteur.
-   */
-  async callsThisMonth(userId: string, reference: Date = new Date()): Promise<number> {
-    const { depuis, jusqua } = monthRange(reference);
-    return this.prisma.ai_usage_events.count({
-      where: {
-        user_id: userId,
-        created_at: { gte: depuis, lt: jusqua },
-        generator: { notIn: [...HORS_FORFAIT] },
-      },
-    });
-  }
-
-  /** Les plafonds en vigueur, relus à chaque appel plutôt que mémorisés. */
+  /** Le plafond en vigueur, relu à chaque appel plutôt que mémorisé. */
   limits(): QuotaLimits {
     // Même raison que pour l'interrupteur des générateurs : une valeur figée
     // au démarrage survivrait à un changement de configuration, et c'est le
@@ -267,32 +268,37 @@ export class AiUsageService {
     return readQuotaLimits(getEnv());
   }
 
-  /** Où en est cette personne par rapport à ses plafonds, ce mois-ci. */
+  /** Où en est ce compte par rapport au garde-fou de coût, ce mois-ci. */
   async quotaFor(userId: string, reference: Date = new Date()): Promise<QuotaVerdict> {
     const resume = await this.monthlySummary(userId, reference);
-    return checkQuota({ calls: resume.appels, costMicroEur: resume.coutMicroEur }, this.limits());
+    return checkQuota({ costMicroEur: resume.coutMicroEur }, this.limits());
   }
 
   /**
-   * Refuse un appel de plus quand le plafond est atteint.
+   * Refuse un appel de plus quand le garde-fou de coût est atteint.
    *
-   * **402 Payment Required**, et le choix mérite d'être justifié. Les autres
-   * codes du produit sont déjà pris et voudraient dire autre chose : 503 dit
-   * « la fonctionnalité est éteinte » alors qu'elle marche, 422 dit « la
-   * Constitution refuse » alors qu'elle n'a rien à voir, 429 est celui du
-   * limiteur de débit — le confondre avec un quota mensuel rendrait les deux
-   * illisibles côté interface —, et 401 déclencherait une déconnexion.
-   *
-   * 402 dit exactement ce qui se passe : ce qui était inclus est consommé.
+   * **402**, comme le solde insuffisant, mais avec un autre `code`
+   * (`plafond_securite`) : l'interface ne doit pas proposer de recharger,
+   * puisque des crédits de plus n'y changeraient rien. Les autres codes du
+   * produit veulent dire autre chose : 503 « la fonctionnalité est
+   * éteinte », 422 « la Constitution refuse », 429 le limiteur de débit, et
+   * 401 déclencherait une déconnexion.
    */
   async assertWithinQuota(userId: string): Promise<void> {
     const verdict = await this.quotaFor(userId);
     if (verdict.allowed) return;
 
-    this.logger.log(
-      `Plafond ${verdict.breach} atteint pour l'utilisateur ${userId} : appel refusé avant tout appel réseau.`,
+    this.logger.warn(
+      `Garde-fou de coût IA atteint pour l'utilisateur ${userId} : appel refusé avant tout appel réseau.`,
     );
-    throw new HttpException(verdict.reason ?? 'Plafond atteint.', HttpStatus.PAYMENT_REQUIRED);
+    throw new HttpException(
+      {
+        statusCode: HttpStatus.PAYMENT_REQUIRED,
+        code: CODE_PLAFOND_SECURITE,
+        message: verdict.reason ?? 'Garde-fou de coût IA atteint.',
+      },
+      HttpStatus.PAYMENT_REQUIRED,
+    );
   }
 
   /** Consommation de tout le monde sur le mois — la vue de l'exploitant. */

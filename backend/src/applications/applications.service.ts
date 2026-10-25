@@ -1,6 +1,4 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { offre } from '../offres/offres-catalogue.js';
-import { OffresService } from '../offres/offres.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { isRoleId, type RoleId } from '../roles/roles-catalogue.js';
 import {
@@ -23,10 +21,7 @@ import { findApplication, type ApplicationId } from './applications-catalogue.js
  */
 @Injectable()
 export class ApplicationsService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly offres: OffresService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async lanceurDe(userId: string): Promise<Lanceur> {
     const [
@@ -37,7 +32,6 @@ export class ApplicationsService {
       ecritures,
       comptesBancaires,
       investisseur,
-      offreId,
       bureau,
       boutiquesConnectees,
     ] = await Promise.all([
@@ -48,7 +42,6 @@ export class ApplicationsService {
         this.prisma.ledger_entries.count({ where: { owner_type: 'user', owner_id: userId } }),
         this.prisma.bank_accounts.count({ where: { owner_type: 'user', owner_id: userId } }),
         this.prisma.investors.findFirst({ where: { user_id: userId }, select: { id: true } }),
-        this.offres.offreDe(userId),
         this.prisma.user_applications.findMany({
           where: { user_id: userId },
           select: { app_id: true, choix: true },
@@ -90,7 +83,9 @@ export class ApplicationsService {
         boutiqueConnectee: boutiquesConnectees,
       },
       secteurs,
-      outilsDeGestion: offre(offreId).capacites.outilsDeGestion,
+      // Tous les outils sont gratuits depuis les crédits IGINI (2026-10-25) :
+      // plus aucune application n'est « hors offre ».
+      outilsDeGestion: true,
     });
   }
 

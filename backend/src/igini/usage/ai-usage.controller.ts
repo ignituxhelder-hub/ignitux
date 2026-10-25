@@ -5,8 +5,6 @@ import type { AuthenticatedUser } from '../../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard.js';
 import { PRICE_GRID_DATE, microEurToEur } from './ai-pricing.js';
 import { shouldWarn, type QuotaLimits, type QuotaVerdict } from './ai-quota.js';
-import { offre } from '../../offres/offres-catalogue.js';
-import { OffresService } from '../../offres/offres.service.js';
 import { AiUsageService, type UsageSummary } from './ai-usage.service.js';
 
 /**
@@ -28,10 +26,7 @@ const HISTORY_LIMIT = 200;
 @UseGuards(JwtAuthGuard)
 @Controller('igini/usage')
 export class AiUsageController {
-  constructor(
-    private readonly aiUsage: AiUsageService,
-    private readonly offres: OffresService,
-  ) {}
+  constructor(private readonly aiUsage: AiUsageService) {}
 
   /**
    * Les appels de la personne, du plus récent au plus ancien.
@@ -47,91 +42,38 @@ export class AiUsageController {
 
   @Get('mois-en-cours')
   async currentMonth(@CurrentUser() user: AuthenticatedUser) {
-    const [resume, quota, offreId, appelsCeMois] = await Promise.all([
+    const [resume, quota] = await Promise.all([
       this.aiUsage.monthlySummary(user.id),
       this.aiUsage.quotaFor(user.id),
-      this.offres.offreDe(user.id),
-      this.aiUsage.callsThisMonth(user.id),
     ]);
-    return {
-      ...presenter(resume),
-      quota: presenterQuota(quota, this.aiUsage.limits(), {
-        inclusesParLOffre: offre(offreId).capacites.appelsIaParMois,
-        dejaUtilisees: appelsCeMois,
-        offreId,
-      }),
-    };
+    return { ...presenter(resume), quota: presenterQuota(quota, this.aiUsage.limits()) };
   }
 }
 
 /**
- * Ce qu'il reste, dit avant le mur.
+ * Où en est le garde-fou de coût — dit avant le mur.
  *
- * Un plafond qui ne se découvre qu'en s'y cognant est un mauvais plafond :
- * la personne a préparé son travail, elle clique, et le produit lui apprend
- * à ce moment-là que c'était fini. L'avertissement se déclenche à un appel
- * près, ou à un cinquième du budget — assez tôt pour s'organiser, assez
- * tard pour ne pas devenir un décor qu'on n'aperçoit plus.
+ * Depuis les crédits IGINI (2026-10-25), il n'y a plus d'analyses « incluses
+ * ce mois-ci » : chaque action se paie à son prix, et le solde vit dans
+ * `GET /credits`. Les champs `analyses` restent dans la réponse, à `null`
+ * (« aucun plafond en nombre »), pour que l'écran de consommation existant
+ * continue de se lire sans changement.
  */
-function presenterQuota(
-  verdict: QuotaVerdict,
-  limites: QuotaLimits,
-  offreEnCours: { inclusesParLOffre: number | null; dejaUtilisees: number; offreId: string },
-) {
-  // ── Deux plafonds, un seul chiffre à l'écran ──────────────────────────
-  //
-  // Le garde-fou technique protège la facture d'Ignitux ; l'offre est ce que
-  // la personne a compris en souscrivant. Ils peuvent diverger — et ils ont
-  // divergé : le repli technique était resté à 5 analyses, écrit du temps
-  // d'une offre qui annonçait 5, pendant que Découverte était descendue à 3.
-  // L'écran affichait donc « 5 analyses restantes » à quelqu'un que le
-  // produit arrêterait à la troisième.
-  //
-  // Celui qui arrête en premier est le seul vrai. On affiche celui-là, et on
-  // dit lequel c'est — un compteur qui se trompe de deux est pire qu'absent :
-  // la personne organise son travail dessus.
-  const resteOffre =
-    offreEnCours.inclusesParLOffre === null
-      ? null
-      : Math.max(0, offreEnCours.inclusesParLOffre - offreEnCours.dejaUtilisees);
-  const resteTechnique = verdict.remaining.calls;
-  const restantAnalyses =
-    resteOffre === null
-      ? resteTechnique
-      : resteTechnique === null
-        ? resteOffre
-        : Math.min(resteOffre, resteTechnique);
-
+function presenterQuota(verdict: QuotaVerdict, limites: QuotaLimits) {
   return {
     autorise: verdict.allowed,
     plafond_atteint: verdict.breach,
     message: verdict.reason,
-    // L'avertissement suit le plafond qui arrêtera vraiment : à un appel
-    // près, comme avant, mais compté sur le bon chiffre.
-    bientot_atteint: shouldWarn(verdict) || (restantAnalyses !== null && restantAnalyses <= 1),
+    bientot_atteint: shouldWarn(verdict),
     restant: {
-      analyses: restantAnalyses,
+      analyses: null,
       // null se lit « plafond de coût non applicable », pas « il reste de la
       // marge » : c'est le cas quand un modèle échappe à la grille.
-      euros:
-        verdict.remaining.costMicroEur === null
-          ? null
-          : microEurToEur(verdict.remaining.costMicroEur),
+      euros: verdict.remaining.costMicroEur === null ? null : microEurToEur(verdict.remaining.costMicroEur),
     },
     plafonds: {
-      // Ce que l'offre annonce : le chiffre que la personne reconnaît.
-      analyses_par_mois:
-        resteOffre !== null && (resteTechnique === null || resteOffre <= resteTechnique)
-          ? offreEnCours.inclusesParLOffre
-          : limites.callsPerMonth,
-      // Nommé, pour qu'un « il me restait 3 » se raccroche à quelque chose.
-      analyses_selon: resteOffre !== null && (resteTechnique === null || resteOffre <= resteTechnique)
-        ? `offre ${offreEnCours.offreId}`
-        : 'budget Ignitux',
-      euros_par_mois:
-        limites.costMicroEurPerMonth === null
-          ? null
-          : microEurToEur(limites.costMicroEurPerMonth),
+      analyses_par_mois: null,
+      euros_par_mois: limites.costMicroEurPerMonth === null ? null : microEurToEur(limites.costMicroEurPerMonth),
     },
   };
 }

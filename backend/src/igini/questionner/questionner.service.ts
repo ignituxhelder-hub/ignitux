@@ -48,7 +48,8 @@ Règles :
  *
  * Le questionnaire fixe couvre ce que tous les projets partagent ; celui-ci
  * couvre ce qui est propre à CE projet (un food-truck n'a pas les mêmes
- * inconnues qu'un logiciel). Hors forfait — voir generator-names.ts.
+ * inconnues qu'un logiciel). Payé en crédits comme les autres appels, à son
+ * prix (le plus bas du barème) — voir credits/bareme.ts.
  */
 @Injectable()
 export class QuestionnerService {
