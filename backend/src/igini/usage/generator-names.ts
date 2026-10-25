@@ -1,33 +1,24 @@
 /**
- * LES GÉNÉRATEURS D'IGINI, ET LE CHAT, NOMMÉS UNE SEULE FOIS.
+ * LES APPELS IA D'IGINI, NOMMÉS UNE SEULE FOIS.
  *
- * Fichier à part, et sans aucune dépendance : le journal de consommation,
- * le catalogue des offres et les contrôles de droits ont tous besoin de ces
- * noms, et deux d'entre eux doivent rester purs — sans Nest, sans base.
+ * Fichier à part, et sans aucune dépendance : le journal de consommation et
+ * le barème des crédits (`credits/bareme.ts`) ont tous deux besoin de ces
+ * noms, et le barème doit rester pur — sans Nest, sans base.
  *
- * ## Pourquoi pas deux listes
+ * ## Pourquoi une seule liste
  *
  * Il y en a eu deux pendant un moment : `analyser/construire/financer/...`
  * côté journal, `analyse/construction/financement/...` côté offres. Rien
- * n'échouait — c'est le problème. Un quota se serait appliqué à un nom que
- * personne n'émettait, et le refus ne serait jamais venu. Le commentaire
- * qui interdisait déjà d'écrire « Analyser » avec une majuscule disait la
- * même chose, en plus petit.
+ * n'échouait — c'est le problème. Un prix posé sur un nom que personne
+ * n'émet ne serait jamais débité, et rien ne le signalerait. Le barème est
+ * indexé par ce type : un nom ajouté ici sans prix ne compile pas.
  *
- * Ces chaînes sont écrites en base (`ai_usage_events.generator`). Les
- * renommer demande une migration des lignes existantes, pas seulement un
- * remplacement dans les sources.
- *
- * `discuter` (les tours de conversation de l'orchestrateur IGINI) est ici
- * pour la même raison de traçabilité des coûts que les générateurs, mais
- * suit une règle différente : aucun appel ne passe par
- * `OffresService.exiger()` pour lui (voir `ClaudeService.converseWithTools`)
- * — seul le plafond de coût global le protège. Un tour de conversation qui
- * déclenche un générateur (ex. `analyser`) journalise CE générateur sous
- * son propre nom existant, via le code déjà en place ; `discuter` ne
- * journalise jamais que les tours de l'orchestrateur lui-même.
+ * Ces chaînes sont écrites en base (`ai_usage_events.generator`,
+ * `credit_entries.generator`). Les renommer demande une migration des lignes
+ * existantes, pas seulement un remplacement dans les sources.
  */
-/** Les six générateurs de méthode : ceux que les offres annoncent. */
+
+/** Les six générateurs de méthode : les étapes du parcours IGINI. */
 export const GENERATEURS_METHODE = [
   'analyser',
   'former',
@@ -38,14 +29,25 @@ export const GENERATEURS_METHODE = [
 ] as const;
 
 /**
- * Tous les noms que le journal accepte : les six de méthode, plus
- * « executer » — l'exécution d'une tâche par IGINI. Ce septième nom n'est
- * dans la liste d'aucune offre (voir `droits.ts`), mais il consomme les
- * générations du mois comme les autres.
+ * Tous les noms que le journal accepte, chacun avec un prix en crédits
+ * (`credits/bareme.ts`) :
  *
- * Et « discuter » : les tours de l'orchestrateur du chat. Journalisé pour
- * le coût seulement — dans aucune offre, jamais soumis à
- * `OffresService.exiger()` (voir plus haut).
+ * - les six de méthode ;
+ * - « executer » : une tâche du projet faite par IGINI ;
+ * - « discuter » : un message envoyé au chat (les tours de l'orchestrateur).
+ *   Un générateur déclenché depuis le chat se journalise — et se paie — sous
+ *   son propre nom, en plus du message ;
+ * - « evaluer » : l'évaluation de financement ;
+ * - « questionner » : les questions d'IGINI à la fin du questionnaire ;
+ * - « statuts » : le brouillon des statuts (journalisé sous « former »
+ *   jusqu'au 2026-10-25) ;
+ * - « conformite » : une démarche de conformité préparée par IGINI, qui lit
+ *   la fiche officielle (journalisée sous « executer » jusqu'au 2026-10-25).
+ *
+ * Ces deux derniers ont leur nom depuis que chaque appel a un prix affiché :
+ * un document de statuts ou une fiche lue coûtent deux fois une
+ * recommandation ou une tâche, et un prix moyen commun aurait faussé les
+ * deux.
  */
 export const GENERATOR_NAMES = [
   ...GENERATEURS_METHODE,
@@ -53,22 +55,18 @@ export const GENERATOR_NAMES = [
   'discuter',
   'evaluer',
   'questionner',
+  'statuts',
+  'conformite',
 ] as const;
-
-/**
- * Journalisés pour le coût, jamais décomptés du forfait mensuel.
- *
- * « questionner » (les questions ciblées d'IGINI à la fin du questionnaire
- * de projet) y est pour une raison simple : Découverte n'a que trois
- * générations par mois, et en consommer une pour POSER des questions —
- * avant même la première analyse — serait faire payer à la personne l'effort
- * qu'on lui demande. Le plafond de coût global le borne, et il ne tourne
- * qu'une fois par projet.
- */
-export const HORS_FORFAIT: readonly GeneratorName[] = ['discuter', 'questionner'];
 
 export type GeneratorName = (typeof GENERATOR_NAMES)[number];
 
 export function estGenerateur(valeur: string): valeur is GeneratorName {
   return (GENERATOR_NAMES as readonly string[]).includes(valeur);
 }
+
+/**
+ * Transitoire (retiré au commit suivant avec les offres) : journalisés pour le
+ * coût, jamais décomptés du forfait mensuel.
+ */
+export const HORS_FORFAIT: readonly GeneratorName[] = ['discuter', 'questionner'];

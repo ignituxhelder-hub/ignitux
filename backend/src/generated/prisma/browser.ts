@@ -742,3 +742,20 @@ export type project_questionnaires = Prisma.project_questionnairesModel
  * Générées une seule fois par projet ; la réponse est celle de la personne.
  */
 export type project_igini_questions = Prisma.project_igini_questionsModel
+/**
+ * Model credit_entries
+ * CRÉDITS IGINI — le journal, et rien d'autre que le journal.
+ * 
+ * Spec : docs/superpowers/specs/2026-10-25-credits-design.md. Seules les
+ * actions IGINI (les appels à l'IA) se paient, en crédits (1 crédit =
+ * 0,10 € TTC) ; le prix de chaque action vit dans `src/credits/bareme.ts`.
+ * 
+ * **Append-only.** Le code n'écrit que des créations : aucune ligne n'est
+ * modifiée ni supprimée par l'application (elles partent seulement avec le
+ * compte). Le solde n'est stocké nulle part : c'est la somme de `credits`
+ * pour `owner_id`, donc il ne peut pas diverger du journal. Un débit se
+ * réserve sous verrou de la ligne `users` du propriétaire (voir
+ * `CreditsService`), pour que deux générations simultanées ne rendent
+ * jamais le solde négatif.
+ */
+export type credit_entries = Prisma.credit_entriesModel

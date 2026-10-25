@@ -244,6 +244,8 @@ export type usersWhereInput = {
   invitations_acceptees?: Prisma.Space_invitationsListRelationFilter
   activite_de_mon_espace?: Prisma.Space_activityListRelationFilter
   mes_actions_chez_les_autres?: Prisma.Space_activityListRelationFilter
+  credits?: Prisma.Credit_entriesListRelationFilter
+  credits_debites_par_moi?: Prisma.Credit_entriesListRelationFilter
 }
 
 export type usersOrderByWithRelationInput = {
@@ -293,6 +295,8 @@ export type usersOrderByWithRelationInput = {
   invitations_acceptees?: Prisma.space_invitationsOrderByRelationAggregateInput
   activite_de_mon_espace?: Prisma.space_activityOrderByRelationAggregateInput
   mes_actions_chez_les_autres?: Prisma.space_activityOrderByRelationAggregateInput
+  credits?: Prisma.credit_entriesOrderByRelationAggregateInput
+  credits_debites_par_moi?: Prisma.credit_entriesOrderByRelationAggregateInput
 }
 
 export type usersWhereUniqueInput = Prisma.AtLeast<{
@@ -345,6 +349,8 @@ export type usersWhereUniqueInput = Prisma.AtLeast<{
   invitations_acceptees?: Prisma.Space_invitationsListRelationFilter
   activite_de_mon_espace?: Prisma.Space_activityListRelationFilter
   mes_actions_chez_les_autres?: Prisma.Space_activityListRelationFilter
+  credits?: Prisma.Credit_entriesListRelationFilter
+  credits_debites_par_moi?: Prisma.Credit_entriesListRelationFilter
 }, "id" | "email">
 
 export type usersOrderByWithAggregationInput = {
@@ -422,6 +428,8 @@ export type usersCreateInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateInput = {
@@ -471,6 +479,8 @@ export type usersUncheckedCreateInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersUpdateInput = {
@@ -520,6 +530,8 @@ export type usersUpdateInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateInput = {
@@ -569,6 +581,8 @@ export type usersUncheckedUpdateInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateManyInput = {
@@ -1199,6 +1213,36 @@ export type usersUpdateOneRequiredWithoutFormationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutFormationsInput, Prisma.usersUpdateWithoutFormationsInput>, Prisma.usersUncheckedUpdateWithoutFormationsInput>
 }
 
+export type usersCreateNestedOneWithoutCreditsInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutCreditsInput, Prisma.usersUncheckedCreateWithoutCreditsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutCreditsInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersCreateNestedOneWithoutCredits_debites_par_moiInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutCredits_debites_par_moiInput, Prisma.usersUncheckedCreateWithoutCredits_debites_par_moiInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutCredits_debites_par_moiInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutCreditsNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutCreditsInput, Prisma.usersUncheckedCreateWithoutCreditsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutCreditsInput
+  upsert?: Prisma.usersUpsertWithoutCreditsInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutCreditsInput, Prisma.usersUpdateWithoutCreditsInput>, Prisma.usersUncheckedUpdateWithoutCreditsInput>
+}
+
+export type usersUpdateOneWithoutCredits_debites_par_moiNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutCredits_debites_par_moiInput, Prisma.usersUncheckedCreateWithoutCredits_debites_par_moiInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutCredits_debites_par_moiInput
+  upsert?: Prisma.usersUpsertWithoutCredits_debites_par_moiInput
+  disconnect?: Prisma.usersWhereInput | boolean
+  delete?: Prisma.usersWhereInput | boolean
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutCredits_debites_par_moiInput, Prisma.usersUpdateWithoutCredits_debites_par_moiInput>, Prisma.usersUncheckedUpdateWithoutCredits_debites_par_moiInput>
+}
+
 export type usersCreateWithoutAuth_tokensInput = {
   id?: string
   email: string
@@ -1245,6 +1289,8 @@ export type usersCreateWithoutAuth_tokensInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutAuth_tokensInput = {
@@ -1293,6 +1339,8 @@ export type usersUncheckedCreateWithoutAuth_tokensInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutAuth_tokensInput = {
@@ -1357,6 +1405,8 @@ export type usersUpdateWithoutAuth_tokensInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutAuth_tokensInput = {
@@ -1405,6 +1455,8 @@ export type usersUncheckedUpdateWithoutAuth_tokensInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutProjectsInput = {
@@ -1453,6 +1505,8 @@ export type usersCreateWithoutProjectsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutProjectsInput = {
@@ -1501,6 +1555,8 @@ export type usersUncheckedCreateWithoutProjectsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutProjectsInput = {
@@ -1565,6 +1621,8 @@ export type usersUpdateWithoutProjectsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutProjectsInput = {
@@ -1613,6 +1671,8 @@ export type usersUncheckedUpdateWithoutProjectsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutCompany_bylawsInput = {
@@ -1661,6 +1721,8 @@ export type usersCreateWithoutCompany_bylawsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutCompany_bylawsInput = {
@@ -1709,6 +1771,8 @@ export type usersUncheckedCreateWithoutCompany_bylawsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutCompany_bylawsInput = {
@@ -1773,6 +1837,8 @@ export type usersUpdateWithoutCompany_bylawsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCompany_bylawsInput = {
@@ -1821,6 +1887,8 @@ export type usersUncheckedUpdateWithoutCompany_bylawsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutMemoriesInput = {
@@ -1869,6 +1937,8 @@ export type usersCreateWithoutMemoriesInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutMemoriesInput = {
@@ -1917,6 +1987,8 @@ export type usersUncheckedCreateWithoutMemoriesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutMemoriesInput = {
@@ -1981,6 +2053,8 @@ export type usersUpdateWithoutMemoriesInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMemoriesInput = {
@@ -2029,6 +2103,8 @@ export type usersUncheckedUpdateWithoutMemoriesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutChat_messagesInput = {
@@ -2077,6 +2153,8 @@ export type usersCreateWithoutChat_messagesInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutChat_messagesInput = {
@@ -2125,6 +2203,8 @@ export type usersUncheckedCreateWithoutChat_messagesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutChat_messagesInput = {
@@ -2189,6 +2269,8 @@ export type usersUpdateWithoutChat_messagesInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutChat_messagesInput = {
@@ -2237,6 +2319,8 @@ export type usersUncheckedUpdateWithoutChat_messagesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutConceptsInput = {
@@ -2285,6 +2369,8 @@ export type usersCreateWithoutConceptsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutConceptsInput = {
@@ -2333,6 +2419,8 @@ export type usersUncheckedCreateWithoutConceptsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutConceptsInput = {
@@ -2397,6 +2485,8 @@ export type usersUpdateWithoutConceptsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutConceptsInput = {
@@ -2445,6 +2535,8 @@ export type usersUncheckedUpdateWithoutConceptsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutCommunity_commentsInput = {
@@ -2493,6 +2585,8 @@ export type usersCreateWithoutCommunity_commentsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutCommunity_commentsInput = {
@@ -2541,6 +2635,8 @@ export type usersUncheckedCreateWithoutCommunity_commentsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutCommunity_commentsInput = {
@@ -2605,6 +2701,8 @@ export type usersUpdateWithoutCommunity_commentsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCommunity_commentsInput = {
@@ -2653,6 +2751,8 @@ export type usersUncheckedUpdateWithoutCommunity_commentsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutCollaborationsInput = {
@@ -2701,6 +2801,8 @@ export type usersCreateWithoutCollaborationsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutCollaborationsInput = {
@@ -2749,6 +2851,8 @@ export type usersUncheckedCreateWithoutCollaborationsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutCollaborationsInput = {
@@ -2813,6 +2917,8 @@ export type usersUpdateWithoutCollaborationsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCollaborationsInput = {
@@ -2861,6 +2967,8 @@ export type usersUncheckedUpdateWithoutCollaborationsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutMarketplace_profileInput = {
@@ -2909,6 +3017,8 @@ export type usersCreateWithoutMarketplace_profileInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutMarketplace_profileInput = {
@@ -2957,6 +3067,8 @@ export type usersUncheckedCreateWithoutMarketplace_profileInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutMarketplace_profileInput = {
@@ -3021,6 +3133,8 @@ export type usersUpdateWithoutMarketplace_profileInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMarketplace_profileInput = {
@@ -3069,6 +3183,8 @@ export type usersUncheckedUpdateWithoutMarketplace_profileInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutMarketplace_contacts_sentInput = {
@@ -3117,6 +3233,8 @@ export type usersCreateWithoutMarketplace_contacts_sentInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutMarketplace_contacts_sentInput = {
@@ -3165,6 +3283,8 @@ export type usersUncheckedCreateWithoutMarketplace_contacts_sentInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutMarketplace_contacts_sentInput = {
@@ -3229,6 +3349,8 @@ export type usersUpdateWithoutMarketplace_contacts_sentInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMarketplace_contacts_sentInput = {
@@ -3277,6 +3399,8 @@ export type usersUncheckedUpdateWithoutMarketplace_contacts_sentInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutBilling_documentsInput = {
@@ -3325,6 +3449,8 @@ export type usersCreateWithoutBilling_documentsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutBilling_documentsInput = {
@@ -3373,6 +3499,8 @@ export type usersUncheckedCreateWithoutBilling_documentsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutBilling_documentsInput = {
@@ -3437,6 +3565,8 @@ export type usersUpdateWithoutBilling_documentsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutBilling_documentsInput = {
@@ -3485,6 +3615,8 @@ export type usersUncheckedUpdateWithoutBilling_documentsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutCrm_companiesInput = {
@@ -3533,6 +3665,8 @@ export type usersCreateWithoutCrm_companiesInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutCrm_companiesInput = {
@@ -3581,6 +3715,8 @@ export type usersUncheckedCreateWithoutCrm_companiesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutCrm_companiesInput = {
@@ -3645,6 +3781,8 @@ export type usersUpdateWithoutCrm_companiesInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCrm_companiesInput = {
@@ -3693,6 +3831,8 @@ export type usersUncheckedUpdateWithoutCrm_companiesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutCrm_contactsInput = {
@@ -3741,6 +3881,8 @@ export type usersCreateWithoutCrm_contactsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutCrm_contactsInput = {
@@ -3789,6 +3931,8 @@ export type usersUncheckedCreateWithoutCrm_contactsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutCrm_contactsInput = {
@@ -3853,6 +3997,8 @@ export type usersUpdateWithoutCrm_contactsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCrm_contactsInput = {
@@ -3901,6 +4047,8 @@ export type usersUncheckedUpdateWithoutCrm_contactsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutStock_itemsInput = {
@@ -3949,6 +4097,8 @@ export type usersCreateWithoutStock_itemsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutStock_itemsInput = {
@@ -3997,6 +4147,8 @@ export type usersUncheckedCreateWithoutStock_itemsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutStock_itemsInput = {
@@ -4061,6 +4213,8 @@ export type usersUpdateWithoutStock_itemsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutStock_itemsInput = {
@@ -4109,6 +4263,8 @@ export type usersUncheckedUpdateWithoutStock_itemsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutAgenda_eventsInput = {
@@ -4157,6 +4313,8 @@ export type usersCreateWithoutAgenda_eventsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutAgenda_eventsInput = {
@@ -4205,6 +4363,8 @@ export type usersUncheckedCreateWithoutAgenda_eventsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutAgenda_eventsInput = {
@@ -4269,6 +4429,8 @@ export type usersUpdateWithoutAgenda_eventsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutAgenda_eventsInput = {
@@ -4317,6 +4479,8 @@ export type usersUncheckedUpdateWithoutAgenda_eventsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutCash_register_entriesInput = {
@@ -4365,6 +4529,8 @@ export type usersCreateWithoutCash_register_entriesInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutCash_register_entriesInput = {
@@ -4413,6 +4579,8 @@ export type usersUncheckedCreateWithoutCash_register_entriesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutCash_register_entriesInput = {
@@ -4477,6 +4645,8 @@ export type usersUpdateWithoutCash_register_entriesInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCash_register_entriesInput = {
@@ -4525,6 +4695,8 @@ export type usersUncheckedUpdateWithoutCash_register_entriesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutRolesInput = {
@@ -4573,6 +4745,8 @@ export type usersCreateWithoutRolesInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutRolesInput = {
@@ -4621,6 +4795,8 @@ export type usersUncheckedCreateWithoutRolesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutRolesInput = {
@@ -4685,6 +4861,8 @@ export type usersUpdateWithoutRolesInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutRolesInput = {
@@ -4733,6 +4911,8 @@ export type usersUncheckedUpdateWithoutRolesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutApplicationsInput = {
@@ -4781,6 +4961,8 @@ export type usersCreateWithoutApplicationsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutApplicationsInput = {
@@ -4829,6 +5011,8 @@ export type usersUncheckedCreateWithoutApplicationsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutApplicationsInput = {
@@ -4893,6 +5077,8 @@ export type usersUpdateWithoutApplicationsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutApplicationsInput = {
@@ -4941,6 +5127,8 @@ export type usersUncheckedUpdateWithoutApplicationsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutProfileInput = {
@@ -4989,6 +5177,8 @@ export type usersCreateWithoutProfileInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutProfileInput = {
@@ -5037,6 +5227,8 @@ export type usersUncheckedCreateWithoutProfileInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutProfileInput = {
@@ -5101,6 +5293,8 @@ export type usersUpdateWithoutProfileInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutProfileInput = {
@@ -5149,6 +5343,8 @@ export type usersUncheckedUpdateWithoutProfileInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutSubscriptionInput = {
@@ -5197,6 +5393,8 @@ export type usersCreateWithoutSubscriptionInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutSubscriptionInput = {
@@ -5245,6 +5443,8 @@ export type usersUncheckedCreateWithoutSubscriptionInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutSubscriptionInput = {
@@ -5309,6 +5509,8 @@ export type usersUpdateWithoutSubscriptionInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutSubscriptionInput = {
@@ -5357,6 +5559,8 @@ export type usersUncheckedUpdateWithoutSubscriptionInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutReal_estate_propertiesInput = {
@@ -5405,6 +5609,8 @@ export type usersCreateWithoutReal_estate_propertiesInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutReal_estate_propertiesInput = {
@@ -5453,6 +5659,8 @@ export type usersUncheckedCreateWithoutReal_estate_propertiesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutReal_estate_propertiesInput = {
@@ -5517,6 +5725,8 @@ export type usersUpdateWithoutReal_estate_propertiesInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutReal_estate_propertiesInput = {
@@ -5565,6 +5775,8 @@ export type usersUncheckedUpdateWithoutReal_estate_propertiesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutFleet_vehiclesInput = {
@@ -5613,6 +5825,8 @@ export type usersCreateWithoutFleet_vehiclesInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutFleet_vehiclesInput = {
@@ -5661,6 +5875,8 @@ export type usersUncheckedCreateWithoutFleet_vehiclesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutFleet_vehiclesInput = {
@@ -5725,6 +5941,8 @@ export type usersUpdateWithoutFleet_vehiclesInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutFleet_vehiclesInput = {
@@ -5773,6 +5991,8 @@ export type usersUncheckedUpdateWithoutFleet_vehiclesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutAd_campaignsInput = {
@@ -5821,6 +6041,8 @@ export type usersCreateWithoutAd_campaignsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutAd_campaignsInput = {
@@ -5869,6 +6091,8 @@ export type usersUncheckedCreateWithoutAd_campaignsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutAd_campaignsInput = {
@@ -5933,6 +6157,8 @@ export type usersUpdateWithoutAd_campaignsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutAd_campaignsInput = {
@@ -5981,6 +6207,8 @@ export type usersUncheckedUpdateWithoutAd_campaignsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutIdentity_verificationsInput = {
@@ -6029,6 +6257,8 @@ export type usersCreateWithoutIdentity_verificationsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutIdentity_verificationsInput = {
@@ -6077,6 +6307,8 @@ export type usersUncheckedCreateWithoutIdentity_verificationsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutIdentity_verificationsInput = {
@@ -6141,6 +6373,8 @@ export type usersUpdateWithoutIdentity_verificationsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutIdentity_verificationsInput = {
@@ -6189,6 +6423,8 @@ export type usersUncheckedUpdateWithoutIdentity_verificationsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutMandatesInput = {
@@ -6237,6 +6473,8 @@ export type usersCreateWithoutMandatesInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutMandatesInput = {
@@ -6285,6 +6523,8 @@ export type usersUncheckedCreateWithoutMandatesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutMandatesInput = {
@@ -6349,6 +6589,8 @@ export type usersUpdateWithoutMandatesInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMandatesInput = {
@@ -6397,6 +6639,8 @@ export type usersUncheckedUpdateWithoutMandatesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutCreation_filingsInput = {
@@ -6445,6 +6689,8 @@ export type usersCreateWithoutCreation_filingsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutCreation_filingsInput = {
@@ -6493,6 +6739,8 @@ export type usersUncheckedCreateWithoutCreation_filingsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutCreation_filingsInput = {
@@ -6557,6 +6805,8 @@ export type usersUpdateWithoutCreation_filingsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCreation_filingsInput = {
@@ -6605,6 +6855,8 @@ export type usersUncheckedUpdateWithoutCreation_filingsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutCompany_registrationsInput = {
@@ -6653,6 +6905,8 @@ export type usersCreateWithoutCompany_registrationsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutCompany_registrationsInput = {
@@ -6701,6 +6955,8 @@ export type usersUncheckedCreateWithoutCompany_registrationsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutCompany_registrationsInput = {
@@ -6765,6 +7021,8 @@ export type usersUpdateWithoutCompany_registrationsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutCompany_registrationsInput = {
@@ -6813,6 +7071,8 @@ export type usersUncheckedUpdateWithoutCompany_registrationsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutEvaluations_demandeesInput = {
@@ -6861,6 +7121,8 @@ export type usersCreateWithoutEvaluations_demandeesInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutEvaluations_demandeesInput = {
@@ -6909,6 +7171,8 @@ export type usersUncheckedCreateWithoutEvaluations_demandeesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutEvaluations_demandeesInput = {
@@ -6962,6 +7226,8 @@ export type usersCreateWithoutEvaluations_revuesInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutEvaluations_revuesInput = {
@@ -7010,6 +7276,8 @@ export type usersUncheckedCreateWithoutEvaluations_revuesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutEvaluations_revuesInput = {
@@ -7074,6 +7342,8 @@ export type usersUpdateWithoutEvaluations_demandeesInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutEvaluations_demandeesInput = {
@@ -7122,6 +7392,8 @@ export type usersUncheckedUpdateWithoutEvaluations_demandeesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersUpsertWithoutEvaluations_revuesInput = {
@@ -7181,6 +7453,8 @@ export type usersUpdateWithoutEvaluations_revuesInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutEvaluations_revuesInput = {
@@ -7229,6 +7503,8 @@ export type usersUncheckedUpdateWithoutEvaluations_revuesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutEvaluation_editsInput = {
@@ -7277,6 +7553,8 @@ export type usersCreateWithoutEvaluation_editsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutEvaluation_editsInput = {
@@ -7325,6 +7603,8 @@ export type usersUncheckedCreateWithoutEvaluation_editsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutEvaluation_editsInput = {
@@ -7389,6 +7669,8 @@ export type usersUpdateWithoutEvaluation_editsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutEvaluation_editsInput = {
@@ -7437,6 +7719,8 @@ export type usersUncheckedUpdateWithoutEvaluation_editsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutMembres_de_mon_espaceInput = {
@@ -7485,6 +7769,8 @@ export type usersCreateWithoutMembres_de_mon_espaceInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutMembres_de_mon_espaceInput = {
@@ -7533,6 +7819,8 @@ export type usersUncheckedCreateWithoutMembres_de_mon_espaceInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutMembres_de_mon_espaceInput = {
@@ -7586,6 +7874,8 @@ export type usersCreateWithoutMes_appartenancesInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutMes_appartenancesInput = {
@@ -7634,6 +7924,8 @@ export type usersUncheckedCreateWithoutMes_appartenancesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutMes_appartenancesInput = {
@@ -7698,6 +7990,8 @@ export type usersUpdateWithoutMembres_de_mon_espaceInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMembres_de_mon_espaceInput = {
@@ -7746,6 +8040,8 @@ export type usersUncheckedUpdateWithoutMembres_de_mon_espaceInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersUpsertWithoutMes_appartenancesInput = {
@@ -7805,6 +8101,8 @@ export type usersUpdateWithoutMes_appartenancesInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMes_appartenancesInput = {
@@ -7853,6 +8151,8 @@ export type usersUncheckedUpdateWithoutMes_appartenancesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutInvitations_envoyeesInput = {
@@ -7901,6 +8201,8 @@ export type usersCreateWithoutInvitations_envoyeesInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutInvitations_envoyeesInput = {
@@ -7949,6 +8251,8 @@ export type usersUncheckedCreateWithoutInvitations_envoyeesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutInvitations_envoyeesInput = {
@@ -8002,6 +8306,8 @@ export type usersCreateWithoutInvitations_accepteesInput = {
   invitations_envoyees?: Prisma.space_invitationsCreateNestedManyWithoutOwnerInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutInvitations_accepteesInput = {
@@ -8050,6 +8356,8 @@ export type usersUncheckedCreateWithoutInvitations_accepteesInput = {
   invitations_envoyees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutOwnerInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutInvitations_accepteesInput = {
@@ -8114,6 +8422,8 @@ export type usersUpdateWithoutInvitations_envoyeesInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutInvitations_envoyeesInput = {
@@ -8162,6 +8472,8 @@ export type usersUncheckedUpdateWithoutInvitations_envoyeesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersUpsertWithoutInvitations_accepteesInput = {
@@ -8221,6 +8533,8 @@ export type usersUpdateWithoutInvitations_accepteesInput = {
   invitations_envoyees?: Prisma.space_invitationsUpdateManyWithoutOwnerNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutInvitations_accepteesInput = {
@@ -8269,6 +8583,8 @@ export type usersUncheckedUpdateWithoutInvitations_accepteesInput = {
   invitations_envoyees?: Prisma.space_invitationsUncheckedUpdateManyWithoutOwnerNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutActivite_de_mon_espaceInput = {
@@ -8317,6 +8633,8 @@ export type usersCreateWithoutActivite_de_mon_espaceInput = {
   invitations_envoyees?: Prisma.space_invitationsCreateNestedManyWithoutOwnerInput
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutActivite_de_mon_espaceInput = {
@@ -8365,6 +8683,8 @@ export type usersUncheckedCreateWithoutActivite_de_mon_espaceInput = {
   invitations_envoyees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutOwnerInput
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutActivite_de_mon_espaceInput = {
@@ -8418,6 +8738,8 @@ export type usersCreateWithoutMes_actions_chez_les_autresInput = {
   invitations_envoyees?: Prisma.space_invitationsCreateNestedManyWithoutOwnerInput
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutMes_actions_chez_les_autresInput = {
@@ -8466,6 +8788,8 @@ export type usersUncheckedCreateWithoutMes_actions_chez_les_autresInput = {
   invitations_envoyees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutOwnerInput
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutMes_actions_chez_les_autresInput = {
@@ -8530,6 +8854,8 @@ export type usersUpdateWithoutActivite_de_mon_espaceInput = {
   invitations_envoyees?: Prisma.space_invitationsUpdateManyWithoutOwnerNestedInput
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutActivite_de_mon_espaceInput = {
@@ -8578,6 +8904,8 @@ export type usersUncheckedUpdateWithoutActivite_de_mon_espaceInput = {
   invitations_envoyees?: Prisma.space_invitationsUncheckedUpdateManyWithoutOwnerNestedInput
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersUpsertWithoutMes_actions_chez_les_autresInput = {
@@ -8637,6 +8965,8 @@ export type usersUpdateWithoutMes_actions_chez_les_autresInput = {
   invitations_envoyees?: Prisma.space_invitationsUpdateManyWithoutOwnerNestedInput
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutMes_actions_chez_les_autresInput = {
@@ -8685,6 +9015,8 @@ export type usersUncheckedUpdateWithoutMes_actions_chez_les_autresInput = {
   invitations_envoyees?: Prisma.space_invitationsUncheckedUpdateManyWithoutOwnerNestedInput
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutExperiencesInput = {
@@ -8733,6 +9065,8 @@ export type usersCreateWithoutExperiencesInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutExperiencesInput = {
@@ -8781,6 +9115,8 @@ export type usersUncheckedCreateWithoutExperiencesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutExperiencesInput = {
@@ -8845,6 +9181,8 @@ export type usersUpdateWithoutExperiencesInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutExperiencesInput = {
@@ -8893,6 +9231,8 @@ export type usersUncheckedUpdateWithoutExperiencesInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type usersCreateWithoutFormationsInput = {
@@ -8941,6 +9281,8 @@ export type usersCreateWithoutFormationsInput = {
   invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
 }
 
 export type usersUncheckedCreateWithoutFormationsInput = {
@@ -8989,6 +9331,8 @@ export type usersUncheckedCreateWithoutFormationsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type usersCreateOrConnectWithoutFormationsInput = {
@@ -9053,6 +9397,8 @@ export type usersUpdateWithoutFormationsInput = {
   invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
 }
 
 export type usersUncheckedUpdateWithoutFormationsInput = {
@@ -9101,6 +9447,440 @@ export type usersUncheckedUpdateWithoutFormationsInput = {
   invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
   activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
   mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
+}
+
+export type usersCreateWithoutCreditsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
+  subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
+  identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
+  company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
+  company_registrations?: Prisma.company_registrationsCreateNestedManyWithoutOwnerInput
+  evaluations_demandees?: Prisma.financing_evaluationsCreateNestedManyWithoutRequesterInput
+  evaluations_revues?: Prisma.financing_evaluationsCreateNestedManyWithoutReviewerInput
+  evaluation_edits?: Prisma.financing_evaluation_editsCreateNestedManyWithoutEditorInput
+  membres_de_mon_espace?: Prisma.space_membersCreateNestedManyWithoutOwnerInput
+  mes_appartenances?: Prisma.space_membersCreateNestedManyWithoutMemberInput
+  invitations_envoyees?: Prisma.space_invitationsCreateNestedManyWithoutOwnerInput
+  invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
+  activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
+  mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits_debites_par_moi?: Prisma.credit_entriesCreateNestedManyWithoutActorInput
+}
+
+export type usersUncheckedCreateWithoutCreditsInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
+  subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
+  identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
+  company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
+  company_registrations?: Prisma.company_registrationsUncheckedCreateNestedManyWithoutOwnerInput
+  evaluations_demandees?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutRequesterInput
+  evaluations_revues?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutReviewerInput
+  evaluation_edits?: Prisma.financing_evaluation_editsUncheckedCreateNestedManyWithoutEditorInput
+  membres_de_mon_espace?: Prisma.space_membersUncheckedCreateNestedManyWithoutOwnerInput
+  mes_appartenances?: Prisma.space_membersUncheckedCreateNestedManyWithoutMemberInput
+  invitations_envoyees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutOwnerInput
+  invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
+  activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
+  mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type usersCreateOrConnectWithoutCreditsInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutCreditsInput, Prisma.usersUncheckedCreateWithoutCreditsInput>
+}
+
+export type usersCreateWithoutCredits_debites_par_moiInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsCreateNestedManyWithoutUserInput
+  subscription?: Prisma.subscriptionsCreateNestedOneWithoutUserInput
+  identity_verifications?: Prisma.identity_verificationsCreateNestedManyWithoutOwnerInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutOwnerInput
+  company_bylaws?: Prisma.company_bylawsCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsCreateNestedManyWithoutOwnerInput
+  company_registrations?: Prisma.company_registrationsCreateNestedManyWithoutOwnerInput
+  evaluations_demandees?: Prisma.financing_evaluationsCreateNestedManyWithoutRequesterInput
+  evaluations_revues?: Prisma.financing_evaluationsCreateNestedManyWithoutReviewerInput
+  evaluation_edits?: Prisma.financing_evaluation_editsCreateNestedManyWithoutEditorInput
+  membres_de_mon_espace?: Prisma.space_membersCreateNestedManyWithoutOwnerInput
+  mes_appartenances?: Prisma.space_membersCreateNestedManyWithoutMemberInput
+  invitations_envoyees?: Prisma.space_invitationsCreateNestedManyWithoutOwnerInput
+  invitations_acceptees?: Prisma.space_invitationsCreateNestedManyWithoutAccepted_by_userInput
+  activite_de_mon_espace?: Prisma.space_activityCreateNestedManyWithoutOwnerInput
+  mes_actions_chez_les_autres?: Prisma.space_activityCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesCreateNestedManyWithoutOwnerInput
+}
+
+export type usersUncheckedCreateWithoutCredits_debites_par_moiInput = {
+  id?: string
+  email: string
+  password_hash: string
+  email_verified_at?: Date | string | null
+  cgu_accepted_at?: Date | string | null
+  cgu_version?: string | null
+  created_at?: Date | string | null
+  active_role?: string | null
+  projects?: Prisma.projectsUncheckedCreateNestedManyWithoutOwnerInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutUserInput
+  chat_messages?: Prisma.chat_messagesUncheckedCreateNestedManyWithoutUserInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutUserInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutAuthorInput
+  collaborations?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutUserInput
+  auth_tokens?: Prisma.auth_tokensUncheckedCreateNestedManyWithoutUserInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedCreateNestedOneWithoutUserInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedCreateNestedManyWithoutFrom_userInput
+  crm_companies?: Prisma.crm_companiesUncheckedCreateNestedManyWithoutOwnerInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutOwnerInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutOwnerInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutOwnerInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutOwnerInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedCreateNestedManyWithoutOwnerInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutOwnerInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutOwnerInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutOwnerInput
+  roles?: Prisma.user_rolesUncheckedCreateNestedManyWithoutUserInput
+  applications?: Prisma.user_applicationsUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.user_profilesUncheckedCreateNestedOneWithoutUserInput
+  experiences?: Prisma.user_experiencesUncheckedCreateNestedManyWithoutUserInput
+  formations?: Prisma.user_formationsUncheckedCreateNestedManyWithoutUserInput
+  subscription?: Prisma.subscriptionsUncheckedCreateNestedOneWithoutUserInput
+  identity_verifications?: Prisma.identity_verificationsUncheckedCreateNestedManyWithoutOwnerInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutOwnerInput
+  company_bylaws?: Prisma.company_bylawsUncheckedCreateNestedManyWithoutOwnerInput
+  creation_filings?: Prisma.creation_filingsUncheckedCreateNestedManyWithoutOwnerInput
+  company_registrations?: Prisma.company_registrationsUncheckedCreateNestedManyWithoutOwnerInput
+  evaluations_demandees?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutRequesterInput
+  evaluations_revues?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutReviewerInput
+  evaluation_edits?: Prisma.financing_evaluation_editsUncheckedCreateNestedManyWithoutEditorInput
+  membres_de_mon_espace?: Prisma.space_membersUncheckedCreateNestedManyWithoutOwnerInput
+  mes_appartenances?: Prisma.space_membersUncheckedCreateNestedManyWithoutMemberInput
+  invitations_envoyees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutOwnerInput
+  invitations_acceptees?: Prisma.space_invitationsUncheckedCreateNestedManyWithoutAccepted_by_userInput
+  activite_de_mon_espace?: Prisma.space_activityUncheckedCreateNestedManyWithoutOwnerInput
+  mes_actions_chez_les_autres?: Prisma.space_activityUncheckedCreateNestedManyWithoutActorInput
+  credits?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutOwnerInput
+}
+
+export type usersCreateOrConnectWithoutCredits_debites_par_moiInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutCredits_debites_par_moiInput, Prisma.usersUncheckedCreateWithoutCredits_debites_par_moiInput>
+}
+
+export type usersUpsertWithoutCreditsInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutCreditsInput, Prisma.usersUncheckedUpdateWithoutCreditsInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutCreditsInput, Prisma.usersUncheckedCreateWithoutCreditsInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutCreditsInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutCreditsInput, Prisma.usersUncheckedUpdateWithoutCreditsInput>
+}
+
+export type usersUpdateWithoutCreditsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
+  identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
+  company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
+  company_registrations?: Prisma.company_registrationsUpdateManyWithoutOwnerNestedInput
+  evaluations_demandees?: Prisma.financing_evaluationsUpdateManyWithoutRequesterNestedInput
+  evaluations_revues?: Prisma.financing_evaluationsUpdateManyWithoutReviewerNestedInput
+  evaluation_edits?: Prisma.financing_evaluation_editsUpdateManyWithoutEditorNestedInput
+  membres_de_mon_espace?: Prisma.space_membersUpdateManyWithoutOwnerNestedInput
+  mes_appartenances?: Prisma.space_membersUpdateManyWithoutMemberNestedInput
+  invitations_envoyees?: Prisma.space_invitationsUpdateManyWithoutOwnerNestedInput
+  invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
+  activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
+  mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUpdateManyWithoutActorNestedInput
+}
+
+export type usersUncheckedUpdateWithoutCreditsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
+  identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
+  company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
+  company_registrations?: Prisma.company_registrationsUncheckedUpdateManyWithoutOwnerNestedInput
+  evaluations_demandees?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutRequesterNestedInput
+  evaluations_revues?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutReviewerNestedInput
+  evaluation_edits?: Prisma.financing_evaluation_editsUncheckedUpdateManyWithoutEditorNestedInput
+  membres_de_mon_espace?: Prisma.space_membersUncheckedUpdateManyWithoutOwnerNestedInput
+  mes_appartenances?: Prisma.space_membersUncheckedUpdateManyWithoutMemberNestedInput
+  invitations_envoyees?: Prisma.space_invitationsUncheckedUpdateManyWithoutOwnerNestedInput
+  invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
+  activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
+  mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits_debites_par_moi?: Prisma.credit_entriesUncheckedUpdateManyWithoutActorNestedInput
+}
+
+export type usersUpsertWithoutCredits_debites_par_moiInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutCredits_debites_par_moiInput, Prisma.usersUncheckedUpdateWithoutCredits_debites_par_moiInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutCredits_debites_par_moiInput, Prisma.usersUncheckedCreateWithoutCredits_debites_par_moiInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutCredits_debites_par_moiInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutCredits_debites_par_moiInput, Prisma.usersUncheckedUpdateWithoutCredits_debites_par_moiInput>
+}
+
+export type usersUpdateWithoutCredits_debites_par_moiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUpdateOneWithoutUserNestedInput
+  identity_verifications?: Prisma.identity_verificationsUpdateManyWithoutOwnerNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutOwnerNestedInput
+  company_bylaws?: Prisma.company_bylawsUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUpdateManyWithoutOwnerNestedInput
+  company_registrations?: Prisma.company_registrationsUpdateManyWithoutOwnerNestedInput
+  evaluations_demandees?: Prisma.financing_evaluationsUpdateManyWithoutRequesterNestedInput
+  evaluations_revues?: Prisma.financing_evaluationsUpdateManyWithoutReviewerNestedInput
+  evaluation_edits?: Prisma.financing_evaluation_editsUpdateManyWithoutEditorNestedInput
+  membres_de_mon_espace?: Prisma.space_membersUpdateManyWithoutOwnerNestedInput
+  mes_appartenances?: Prisma.space_membersUpdateManyWithoutMemberNestedInput
+  invitations_envoyees?: Prisma.space_invitationsUpdateManyWithoutOwnerNestedInput
+  invitations_acceptees?: Prisma.space_invitationsUpdateManyWithoutAccepted_by_userNestedInput
+  activite_de_mon_espace?: Prisma.space_activityUpdateManyWithoutOwnerNestedInput
+  mes_actions_chez_les_autres?: Prisma.space_activityUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUpdateManyWithoutOwnerNestedInput
+}
+
+export type usersUncheckedUpdateWithoutCredits_debites_par_moiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cgu_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  active_role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projects?: Prisma.projectsUncheckedUpdateManyWithoutOwnerNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutUserNestedInput
+  chat_messages?: Prisma.chat_messagesUncheckedUpdateManyWithoutUserNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutUserNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutAuthorNestedInput
+  collaborations?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutUserNestedInput
+  auth_tokens?: Prisma.auth_tokensUncheckedUpdateManyWithoutUserNestedInput
+  marketplace_profile?: Prisma.marketplace_profilesUncheckedUpdateOneWithoutUserNestedInput
+  marketplace_contacts_sent?: Prisma.marketplace_contactsUncheckedUpdateManyWithoutFrom_userNestedInput
+  crm_companies?: Prisma.crm_companiesUncheckedUpdateManyWithoutOwnerNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutOwnerNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutOwnerNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutOwnerNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutOwnerNestedInput
+  cash_register_entries?: Prisma.cash_register_entriesUncheckedUpdateManyWithoutOwnerNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutOwnerNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutOwnerNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutOwnerNestedInput
+  roles?: Prisma.user_rolesUncheckedUpdateManyWithoutUserNestedInput
+  applications?: Prisma.user_applicationsUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.user_profilesUncheckedUpdateOneWithoutUserNestedInput
+  experiences?: Prisma.user_experiencesUncheckedUpdateManyWithoutUserNestedInput
+  formations?: Prisma.user_formationsUncheckedUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.subscriptionsUncheckedUpdateOneWithoutUserNestedInput
+  identity_verifications?: Prisma.identity_verificationsUncheckedUpdateManyWithoutOwnerNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutOwnerNestedInput
+  company_bylaws?: Prisma.company_bylawsUncheckedUpdateManyWithoutOwnerNestedInput
+  creation_filings?: Prisma.creation_filingsUncheckedUpdateManyWithoutOwnerNestedInput
+  company_registrations?: Prisma.company_registrationsUncheckedUpdateManyWithoutOwnerNestedInput
+  evaluations_demandees?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutRequesterNestedInput
+  evaluations_revues?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutReviewerNestedInput
+  evaluation_edits?: Prisma.financing_evaluation_editsUncheckedUpdateManyWithoutEditorNestedInput
+  membres_de_mon_espace?: Prisma.space_membersUncheckedUpdateManyWithoutOwnerNestedInput
+  mes_appartenances?: Prisma.space_membersUncheckedUpdateManyWithoutMemberNestedInput
+  invitations_envoyees?: Prisma.space_invitationsUncheckedUpdateManyWithoutOwnerNestedInput
+  invitations_acceptees?: Prisma.space_invitationsUncheckedUpdateManyWithoutAccepted_by_userNestedInput
+  activite_de_mon_espace?: Prisma.space_activityUncheckedUpdateManyWithoutOwnerNestedInput
+  mes_actions_chez_les_autres?: Prisma.space_activityUncheckedUpdateManyWithoutActorNestedInput
+  credits?: Prisma.credit_entriesUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 
@@ -9144,6 +9924,8 @@ export type UsersCountOutputType = {
   invitations_acceptees: number
   activite_de_mon_espace: number
   mes_actions_chez_les_autres: number
+  credits: number
+  credits_debites_par_moi: number
 }
 
 export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -9182,6 +9964,8 @@ export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   invitations_acceptees?: boolean | UsersCountOutputTypeCountInvitations_accepteesArgs
   activite_de_mon_espace?: boolean | UsersCountOutputTypeCountActivite_de_mon_espaceArgs
   mes_actions_chez_les_autres?: boolean | UsersCountOutputTypeCountMes_actions_chez_les_autresArgs
+  credits?: boolean | UsersCountOutputTypeCountCreditsArgs
+  credits_debites_par_moi?: boolean | UsersCountOutputTypeCountCredits_debites_par_moiArgs
 }
 
 /**
@@ -9439,6 +10223,20 @@ export type UsersCountOutputTypeCountMes_actions_chez_les_autresArgs<ExtArgs ext
   where?: Prisma.space_activityWhereInput
 }
 
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountCreditsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.credit_entriesWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountCredits_debites_par_moiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.credit_entriesWhereInput
+}
+
 
 export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -9487,6 +10285,8 @@ export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   invitations_acceptees?: boolean | Prisma.users$invitations_accepteesArgs<ExtArgs>
   activite_de_mon_espace?: boolean | Prisma.users$activite_de_mon_espaceArgs<ExtArgs>
   mes_actions_chez_les_autres?: boolean | Prisma.users$mes_actions_chez_les_autresArgs<ExtArgs>
+  credits?: boolean | Prisma.users$creditsArgs<ExtArgs>
+  credits_debites_par_moi?: boolean | Prisma.users$credits_debites_par_moiArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["users"]>
 
@@ -9563,6 +10363,8 @@ export type usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   invitations_acceptees?: boolean | Prisma.users$invitations_accepteesArgs<ExtArgs>
   activite_de_mon_espace?: boolean | Prisma.users$activite_de_mon_espaceArgs<ExtArgs>
   mes_actions_chez_les_autres?: boolean | Prisma.users$mes_actions_chez_les_autresArgs<ExtArgs>
+  credits?: boolean | Prisma.users$creditsArgs<ExtArgs>
+  credits_debites_par_moi?: boolean | Prisma.users$credits_debites_par_moiArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type usersIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -9609,6 +10411,8 @@ export type $usersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     invitations_acceptees: Prisma.$space_invitationsPayload<ExtArgs>[]
     activite_de_mon_espace: Prisma.$space_activityPayload<ExtArgs>[]
     mes_actions_chez_les_autres: Prisma.$space_activityPayload<ExtArgs>[]
+    credits: Prisma.$credit_entriesPayload<ExtArgs>[]
+    credits_debites_par_moi: Prisma.$credit_entriesPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -10056,6 +10860,8 @@ export interface Prisma__usersClient<T, Null = never, ExtArgs extends runtime.Ty
   invitations_acceptees<T extends Prisma.users$invitations_accepteesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$invitations_accepteesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$space_invitationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activite_de_mon_espace<T extends Prisma.users$activite_de_mon_espaceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$activite_de_mon_espaceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$space_activityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mes_actions_chez_les_autres<T extends Prisma.users$mes_actions_chez_les_autresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$mes_actions_chez_les_autresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$space_activityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  credits<T extends Prisma.users$creditsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$creditsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$credit_entriesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  credits_debites_par_moi<T extends Prisma.users$credits_debites_par_moiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$credits_debites_par_moiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$credit_entriesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11380,6 +12186,54 @@ export type users$mes_actions_chez_les_autresArgs<ExtArgs extends runtime.Types.
   take?: number
   skip?: number
   distinct?: Prisma.Space_activityScalarFieldEnum | Prisma.Space_activityScalarFieldEnum[]
+}
+
+/**
+ * users.credits
+ */
+export type users$creditsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the credit_entries
+   */
+  select?: Prisma.credit_entriesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the credit_entries
+   */
+  omit?: Prisma.credit_entriesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.credit_entriesInclude<ExtArgs> | null
+  where?: Prisma.credit_entriesWhereInput
+  orderBy?: Prisma.credit_entriesOrderByWithRelationInput | Prisma.credit_entriesOrderByWithRelationInput[]
+  cursor?: Prisma.credit_entriesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Credit_entriesScalarFieldEnum | Prisma.Credit_entriesScalarFieldEnum[]
+}
+
+/**
+ * users.credits_debites_par_moi
+ */
+export type users$credits_debites_par_moiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the credit_entries
+   */
+  select?: Prisma.credit_entriesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the credit_entries
+   */
+  omit?: Prisma.credit_entriesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.credit_entriesInclude<ExtArgs> | null
+  where?: Prisma.credit_entriesWhereInput
+  orderBy?: Prisma.credit_entriesOrderByWithRelationInput | Prisma.credit_entriesOrderByWithRelationInput[]
+  cursor?: Prisma.credit_entriesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Credit_entriesScalarFieldEnum | Prisma.Credit_entriesScalarFieldEnum[]
 }
 
 /**

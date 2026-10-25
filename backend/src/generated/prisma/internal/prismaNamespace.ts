@@ -483,7 +483,8 @@ export const ModelName = {
   user_experiences: 'user_experiences',
   user_formations: 'user_formations',
   project_questionnaires: 'project_questionnaires',
-  project_igini_questions: 'project_igini_questions'
+  project_igini_questions: 'project_igini_questions',
+  credit_entries: 'credit_entries'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -499,7 +500,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "company_bylaws" | "bylaw_associates" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "chat_messages" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "project_compliance_ai_runs" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "participation_agreements" | "participation_milestones" | "dividend_right_entries" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "shopify_connections" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries" | "identity_verifications" | "mandates" | "creation_filings" | "company_registrations" | "financing_evaluations" | "financing_evaluation_edits" | "space_members" | "space_invitations" | "space_activity" | "user_experiences" | "user_formations" | "project_questionnaires" | "project_igini_questions"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "company_bylaws" | "bylaw_associates" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "chat_messages" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "project_compliance_ai_runs" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "participation_agreements" | "participation_milestones" | "dividend_right_entries" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "shopify_connections" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries" | "identity_verifications" | "mandates" | "creation_filings" | "company_registrations" | "financing_evaluations" | "financing_evaluation_edits" | "space_members" | "space_invitations" | "space_activity" | "user_experiences" | "user_formations" | "project_questionnaires" | "project_igini_questions" | "credit_entries"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -6941,6 +6942,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    credit_entries: {
+      payload: Prisma.$credit_entriesPayload<ExtArgs>
+      fields: Prisma.credit_entriesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.credit_entriesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credit_entriesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.credit_entriesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credit_entriesPayload>
+        }
+        findFirst: {
+          args: Prisma.credit_entriesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credit_entriesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.credit_entriesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credit_entriesPayload>
+        }
+        findMany: {
+          args: Prisma.credit_entriesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credit_entriesPayload>[]
+        }
+        create: {
+          args: Prisma.credit_entriesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credit_entriesPayload>
+        }
+        createMany: {
+          args: Prisma.credit_entriesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.credit_entriesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credit_entriesPayload>[]
+        }
+        delete: {
+          args: Prisma.credit_entriesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credit_entriesPayload>
+        }
+        update: {
+          args: Prisma.credit_entriesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credit_entriesPayload>
+        }
+        deleteMany: {
+          args: Prisma.credit_entriesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.credit_entriesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.credit_entriesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credit_entriesPayload>[]
+        }
+        upsert: {
+          args: Prisma.credit_entriesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credit_entriesPayload>
+        }
+        aggregate: {
+          args: Prisma.Credit_entriesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCredit_entries>
+        }
+        groupBy: {
+          args: Prisma.credit_entriesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Credit_entriesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.credit_entriesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Credit_entriesCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -8243,6 +8318,22 @@ export const Project_igini_questionsScalarFieldEnum = {
 export type Project_igini_questionsScalarFieldEnum = (typeof Project_igini_questionsScalarFieldEnum)[keyof typeof Project_igini_questionsScalarFieldEnum]
 
 
+export const Credit_entriesScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  actor_id: 'actor_id',
+  kind: 'kind',
+  credits: 'credits',
+  generator: 'generator',
+  project_id: 'project_id',
+  ai_usage_event_id: 'ai_usage_event_id',
+  motif: 'motif',
+  created_at: 'created_at'
+} as const
+
+export type Credit_entriesScalarFieldEnum = (typeof Credit_entriesScalarFieldEnum)[keyof typeof Credit_entriesScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -8639,6 +8730,7 @@ export type GlobalOmitConfig = {
   user_formations?: Prisma.user_formationsOmit
   project_questionnaires?: Prisma.project_questionnairesOmit
   project_igini_questions?: Prisma.project_igini_questionsOmit
+  credit_entries?: Prisma.credit_entriesOmit
 }
 
 /* Types for Logging */

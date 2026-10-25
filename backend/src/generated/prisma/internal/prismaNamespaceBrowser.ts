@@ -137,7 +137,8 @@ export const ModelName = {
   user_experiences: 'user_experiences',
   user_formations: 'user_formations',
   project_questionnaires: 'project_questionnaires',
-  project_igini_questions: 'project_igini_questions'
+  project_igini_questions: 'project_igini_questions',
+  credit_entries: 'credit_entries'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1417,6 +1418,22 @@ export const Project_igini_questionsScalarFieldEnum = {
 } as const
 
 export type Project_igini_questionsScalarFieldEnum = (typeof Project_igini_questionsScalarFieldEnum)[keyof typeof Project_igini_questionsScalarFieldEnum]
+
+
+export const Credit_entriesScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  actor_id: 'actor_id',
+  kind: 'kind',
+  credits: 'credits',
+  generator: 'generator',
+  project_id: 'project_id',
+  ai_usage_event_id: 'ai_usage_event_id',
+  motif: 'motif',
+  created_at: 'created_at'
+} as const
+
+export type Credit_entriesScalarFieldEnum = (typeof Credit_entriesScalarFieldEnum)[keyof typeof Credit_entriesScalarFieldEnum]
 
 
 export const SortOrder = {

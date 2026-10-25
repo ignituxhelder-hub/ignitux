@@ -66,6 +66,11 @@ model users {
   invitations_acceptees       space_invitations[] @relation("invitation_acceptee_par")
   activite_de_mon_espace      space_activity[]    @relation("activite_espace")
   mes_actions_chez_les_autres space_activity[]    @relation("activite_acteur")
+  // Crédits IGINI : le journal de mon solde, et mes actions débitées chez les
+  // propriétaires dont je suis membre.
+  // Spec : docs/superpowers/specs/2026-10-25-credits-design.md
+  credits                     credit_entries[]    @relation("credits_compte")
+  credits_debites_par_moi     credit_entries[]    @relation("credits_acteur")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -156,6 +161,7 @@ model projects {
   financing_evaluations financing_evaluations[]
   questionnaire         project_questionnaires?
   igini_questions       project_igini_questions[]
+  credit_entries        credit_entries[]
 
   mandates             mandates[]
 
@@ -2241,4 +2247,48 @@ model project_igini_questions {
   created_at DateTime @default(now()) @db.Timestamptz(6)
 
   @@index([project_id, position])
+}
+
+/// CRÉDITS IGINI — le journal, et rien d'autre que le journal.
+///
+/// Spec : docs/superpowers/specs/2026-10-25-credits-design.md. Seules les
+/// actions IGINI (les appels à l'IA) se paient, en crédits (1 crédit =
+/// 0,10 € TTC) ; le prix de chaque action vit dans `src/credits/bareme.ts`.
+///
+/// **Append-only.** Le code n'écrit que des créations : aucune ligne n'est
+/// modifiée ni supprimée par l'application (elles partent seulement avec le
+/// compte). Le solde n'est stocké nulle part : c'est la somme de `credits`
+/// pour `owner_id`, donc il ne peut pas diverger du journal. Un débit se
+/// réserve sous verrou de la ligne `users` du propriétaire (voir
+/// `CreditsService`), pour que deux générations simultanées ne rendent
+/// jamais le solde négatif.
+model credit_entries {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Le compte dont le solde bouge. En équipe, le propriétaire du projet.
+  owner_id          String    @db.Uuid
+  owner             users     @relation("credits_compte", fields: [owner_id], references: [id], onDelete: Cascade)
+  /// Qui a agi : le membre qui a lancé l'action, l'administrateur qui a
+  /// ajusté. null pour le cadeau de bienvenue, ou si ce compte a été supprimé.
+  actor_id          String?   @db.Uuid
+  actor             users?    @relation("credits_acteur", fields: [actor_id], references: [id], onDelete: SetNull)
+  /// 'bienvenue' | 'recharge' | 'ajustement_admin' | 'debit' | 'remboursement'
+  kind              String
+  /// Entier signé : + crédit, − débit.
+  credits           Int
+  /// Le générateur payé (débit, remboursement) — voir generator-names.ts.
+  generator         String?
+  project_id        String?   @db.Uuid
+  project           projects? @relation(fields: [project_id], references: [id], onDelete: SetNull)
+  /// L'identifiant de l'appel IA, choisi avant l'appel : la ligne
+  /// `ai_usage_events` porte le même `id` dès que l'appel a atteint l'API.
+  /// Pas de clé étrangère, à dessein : le débit s'écrit AVANT l'appel, donc
+  /// avant que la ligne de coût existe — et elle n'existera jamais pour un
+  /// appel qui a échoué sans réponse (son remboursement porte le même id).
+  ai_usage_event_id String?   @db.Uuid
+  /// Obligatoire pour un ajustement d'administrateur (« test », « geste
+  /// commercial »…).
+  motif             String?
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([owner_id, created_at])
 }

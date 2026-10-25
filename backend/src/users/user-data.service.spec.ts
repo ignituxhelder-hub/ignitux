@@ -151,7 +151,8 @@ describe('UserDataService', () => {
       // `verifications_d_identite` et `mandats_donnes_a_ignitux` viennent de
       // leurs propres tables (subscriptions, identity_verifications,
       // mandates), toutes trois classées dans le groupe « compte » ; de même
-      // `acces_a_l_argent` (space_members, les choix d'accès à l'argent).
+      // `acces_a_l_argent` (space_members, les choix d'accès à l'argent) et
+      // `credits_igini` (credit_entries, le journal des crédits).
       expect(Object.keys(exported.donnees.compte).sort()).toEqual([
         'abonnement',
         'acces_a_l_argent',
@@ -159,6 +160,7 @@ describe('UserDataService', () => {
         'cgu_acceptees_le',
         'cgu_version_acceptee',
         'compte_cree_le',
+        'credits_igini',
         'cv',
         'email',
         'email_verifie_le',

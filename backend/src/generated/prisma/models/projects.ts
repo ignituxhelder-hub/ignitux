@@ -261,6 +261,7 @@ export type projectsWhereInput = {
   financing_evaluations?: Prisma.Financing_evaluationsListRelationFilter
   questionnaire?: Prisma.XOR<Prisma.Project_questionnairesNullableScalarRelationFilter, Prisma.project_questionnairesWhereInput> | null
   igini_questions?: Prisma.Project_igini_questionsListRelationFilter
+  credit_entries?: Prisma.Credit_entriesListRelationFilter
   mandates?: Prisma.MandatesListRelationFilter
 }
 
@@ -314,6 +315,7 @@ export type projectsOrderByWithRelationInput = {
   financing_evaluations?: Prisma.financing_evaluationsOrderByRelationAggregateInput
   questionnaire?: Prisma.project_questionnairesOrderByWithRelationInput
   igini_questions?: Prisma.project_igini_questionsOrderByRelationAggregateInput
+  credit_entries?: Prisma.credit_entriesOrderByRelationAggregateInput
   mandates?: Prisma.mandatesOrderByRelationAggregateInput
 }
 
@@ -370,6 +372,7 @@ export type projectsWhereUniqueInput = Prisma.AtLeast<{
   financing_evaluations?: Prisma.Financing_evaluationsListRelationFilter
   questionnaire?: Prisma.XOR<Prisma.Project_questionnairesNullableScalarRelationFilter, Prisma.project_questionnairesWhereInput> | null
   igini_questions?: Prisma.Project_igini_questionsListRelationFilter
+  credit_entries?: Prisma.Credit_entriesListRelationFilter
   mandates?: Prisma.MandatesListRelationFilter
 }, "id">
 
@@ -454,6 +457,7 @@ export type projectsCreateInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -506,6 +510,7 @@ export type projectsUncheckedCreateInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -558,6 +563,7 @@ export type projectsUpdateInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -610,6 +616,7 @@ export type projectsUncheckedUpdateInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -1322,6 +1329,22 @@ export type projectsUpdateOneRequiredWithoutIgini_questionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutIgini_questionsInput, Prisma.projectsUpdateWithoutIgini_questionsInput>, Prisma.projectsUncheckedUpdateWithoutIgini_questionsInput>
 }
 
+export type projectsCreateNestedOneWithoutCredit_entriesInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutCredit_entriesInput, Prisma.projectsUncheckedCreateWithoutCredit_entriesInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutCredit_entriesInput
+  connect?: Prisma.projectsWhereUniqueInput
+}
+
+export type projectsUpdateOneWithoutCredit_entriesNestedInput = {
+  create?: Prisma.XOR<Prisma.projectsCreateWithoutCredit_entriesInput, Prisma.projectsUncheckedCreateWithoutCredit_entriesInput>
+  connectOrCreate?: Prisma.projectsCreateOrConnectWithoutCredit_entriesInput
+  upsert?: Prisma.projectsUpsertWithoutCredit_entriesInput
+  disconnect?: Prisma.projectsWhereInput | boolean
+  delete?: Prisma.projectsWhereInput | boolean
+  connect?: Prisma.projectsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.projectsUpdateToOneWithWhereWithoutCredit_entriesInput, Prisma.projectsUpdateWithoutCredit_entriesInput>, Prisma.projectsUncheckedUpdateWithoutCredit_entriesInput>
+}
+
 export type projectsCreateWithoutOwnerInput = {
   id?: string
   title: string
@@ -1370,6 +1393,7 @@ export type projectsCreateWithoutOwnerInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -1421,6 +1445,7 @@ export type projectsUncheckedCreateWithoutOwnerInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -1514,6 +1539,7 @@ export type projectsCreateWithoutAnalysesInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -1565,6 +1591,7 @@ export type projectsUncheckedCreateWithoutAnalysesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -1632,6 +1659,7 @@ export type projectsUpdateWithoutAnalysesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -1683,6 +1711,7 @@ export type projectsUncheckedUpdateWithoutAnalysesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -1734,6 +1763,7 @@ export type projectsCreateWithoutLegal_form_recommendationsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -1785,6 +1815,7 @@ export type projectsUncheckedCreateWithoutLegal_form_recommendationsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -1852,6 +1883,7 @@ export type projectsUpdateWithoutLegal_form_recommendationsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -1903,6 +1935,7 @@ export type projectsUncheckedUpdateWithoutLegal_form_recommendationsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -1954,6 +1987,7 @@ export type projectsCreateWithoutBylawsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -2005,6 +2039,7 @@ export type projectsUncheckedCreateWithoutBylawsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -2072,6 +2107,7 @@ export type projectsUpdateWithoutBylawsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -2123,6 +2159,7 @@ export type projectsUncheckedUpdateWithoutBylawsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -2174,6 +2211,7 @@ export type projectsCreateWithoutFinancing_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -2225,6 +2263,7 @@ export type projectsUncheckedCreateWithoutFinancing_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -2292,6 +2331,7 @@ export type projectsUpdateWithoutFinancing_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -2343,6 +2383,7 @@ export type projectsUncheckedUpdateWithoutFinancing_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -2394,6 +2435,7 @@ export type projectsCreateWithoutDevelopment_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -2445,6 +2487,7 @@ export type projectsUncheckedCreateWithoutDevelopment_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -2512,6 +2555,7 @@ export type projectsUpdateWithoutDevelopment_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -2563,6 +2607,7 @@ export type projectsUncheckedUpdateWithoutDevelopment_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -2614,6 +2659,7 @@ export type projectsCreateWithoutTransmission_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -2665,6 +2711,7 @@ export type projectsUncheckedCreateWithoutTransmission_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -2732,6 +2779,7 @@ export type projectsUpdateWithoutTransmission_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -2783,6 +2831,7 @@ export type projectsUncheckedUpdateWithoutTransmission_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -2834,6 +2883,7 @@ export type projectsCreateWithoutMemoriesInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -2885,6 +2935,7 @@ export type projectsUncheckedCreateWithoutMemoriesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -2952,6 +3003,7 @@ export type projectsUpdateWithoutMemoriesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -3003,6 +3055,7 @@ export type projectsUncheckedUpdateWithoutMemoriesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -3054,6 +3107,7 @@ export type projectsCreateWithoutConceptsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -3105,6 +3159,7 @@ export type projectsUncheckedCreateWithoutConceptsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -3172,6 +3227,7 @@ export type projectsUpdateWithoutConceptsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -3223,6 +3279,7 @@ export type projectsUncheckedUpdateWithoutConceptsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -3274,6 +3331,7 @@ export type projectsCreateWithoutTasksInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -3325,6 +3383,7 @@ export type projectsUncheckedCreateWithoutTasksInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -3392,6 +3451,7 @@ export type projectsUpdateWithoutTasksInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -3443,6 +3503,7 @@ export type projectsUncheckedUpdateWithoutTasksInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -3494,6 +3555,7 @@ export type projectsCreateWithoutCommunity_commentsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -3545,6 +3607,7 @@ export type projectsUncheckedCreateWithoutCommunity_commentsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -3612,6 +3675,7 @@ export type projectsUpdateWithoutCommunity_commentsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -3663,6 +3727,7 @@ export type projectsUncheckedUpdateWithoutCommunity_commentsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -3714,6 +3779,7 @@ export type projectsCreateWithoutCollaboratorsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -3765,6 +3831,7 @@ export type projectsUncheckedCreateWithoutCollaboratorsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -3832,6 +3899,7 @@ export type projectsUpdateWithoutCollaboratorsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -3883,6 +3951,7 @@ export type projectsUncheckedUpdateWithoutCollaboratorsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -3934,6 +4003,7 @@ export type projectsCreateWithoutBuild_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -3985,6 +4055,7 @@ export type projectsUncheckedCreateWithoutBuild_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -4052,6 +4123,7 @@ export type projectsUpdateWithoutBuild_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -4103,6 +4175,7 @@ export type projectsUncheckedUpdateWithoutBuild_plansInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -4154,6 +4227,7 @@ export type projectsCreateWithoutCompliance_checksInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -4205,6 +4279,7 @@ export type projectsUncheckedCreateWithoutCompliance_checksInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -4272,6 +4347,7 @@ export type projectsUpdateWithoutCompliance_checksInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -4323,6 +4399,7 @@ export type projectsUncheckedUpdateWithoutCompliance_checksInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -4374,6 +4451,7 @@ export type projectsCreateWithoutCompliance_ai_runsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -4425,6 +4503,7 @@ export type projectsUncheckedCreateWithoutCompliance_ai_runsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -4492,6 +4571,7 @@ export type projectsUpdateWithoutCompliance_ai_runsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -4543,6 +4623,7 @@ export type projectsUncheckedUpdateWithoutCompliance_ai_runsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -4594,6 +4675,7 @@ export type projectsCreateWithoutAutomation_runsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -4645,6 +4727,7 @@ export type projectsUncheckedCreateWithoutAutomation_runsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -4712,6 +4795,7 @@ export type projectsUpdateWithoutAutomation_runsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -4763,6 +4847,7 @@ export type projectsUncheckedUpdateWithoutAutomation_runsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -4814,6 +4899,7 @@ export type projectsCreateWithoutFinancing_roundsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -4865,6 +4951,7 @@ export type projectsUncheckedCreateWithoutFinancing_roundsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -4932,6 +5019,7 @@ export type projectsUpdateWithoutFinancing_roundsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -4983,6 +5071,7 @@ export type projectsUncheckedUpdateWithoutFinancing_roundsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -5034,6 +5123,7 @@ export type projectsCreateWithoutEquity_holdersInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -5085,6 +5175,7 @@ export type projectsUncheckedCreateWithoutEquity_holdersInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -5152,6 +5243,7 @@ export type projectsUpdateWithoutEquity_holdersInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -5203,6 +5295,7 @@ export type projectsUncheckedUpdateWithoutEquity_holdersInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -5254,6 +5347,7 @@ export type projectsCreateWithoutEquity_eventsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -5305,6 +5399,7 @@ export type projectsUncheckedCreateWithoutEquity_eventsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -5372,6 +5467,7 @@ export type projectsUpdateWithoutEquity_eventsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -5423,6 +5519,7 @@ export type projectsUncheckedUpdateWithoutEquity_eventsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -5474,6 +5571,7 @@ export type projectsCreateWithoutDividendsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -5525,6 +5623,7 @@ export type projectsUncheckedCreateWithoutDividendsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -5592,6 +5691,7 @@ export type projectsUpdateWithoutDividendsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -5643,6 +5743,7 @@ export type projectsUncheckedUpdateWithoutDividendsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -5694,6 +5795,7 @@ export type projectsCreateWithoutParticipation_agreementInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -5745,6 +5847,7 @@ export type projectsUncheckedCreateWithoutParticipation_agreementInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -5812,6 +5915,7 @@ export type projectsUpdateWithoutParticipation_agreementInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -5863,6 +5967,7 @@ export type projectsUncheckedUpdateWithoutParticipation_agreementInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -5914,6 +6019,7 @@ export type projectsCreateWithoutBilling_documentsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -5965,6 +6071,7 @@ export type projectsUncheckedCreateWithoutBilling_documentsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -6032,6 +6139,7 @@ export type projectsUpdateWithoutBilling_documentsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -6083,6 +6191,7 @@ export type projectsUncheckedUpdateWithoutBilling_documentsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -6134,6 +6243,7 @@ export type projectsCreateWithoutCrm_contactsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -6185,6 +6295,7 @@ export type projectsUncheckedCreateWithoutCrm_contactsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -6252,6 +6363,7 @@ export type projectsUpdateWithoutCrm_contactsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -6303,6 +6415,7 @@ export type projectsUncheckedUpdateWithoutCrm_contactsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -6354,6 +6467,7 @@ export type projectsCreateWithoutStock_itemsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -6405,6 +6519,7 @@ export type projectsUncheckedCreateWithoutStock_itemsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -6472,6 +6587,7 @@ export type projectsUpdateWithoutStock_itemsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -6523,6 +6639,7 @@ export type projectsUncheckedUpdateWithoutStock_itemsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -6574,6 +6691,7 @@ export type projectsCreateWithoutShopify_connectionInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -6625,6 +6743,7 @@ export type projectsUncheckedCreateWithoutShopify_connectionInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -6692,6 +6811,7 @@ export type projectsUpdateWithoutShopify_connectionInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -6743,6 +6863,7 @@ export type projectsUncheckedUpdateWithoutShopify_connectionInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -6794,6 +6915,7 @@ export type projectsCreateWithoutAgenda_eventsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -6845,6 +6967,7 @@ export type projectsUncheckedCreateWithoutAgenda_eventsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -6912,6 +7035,7 @@ export type projectsUpdateWithoutAgenda_eventsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -6963,6 +7087,7 @@ export type projectsUncheckedUpdateWithoutAgenda_eventsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -7014,6 +7139,7 @@ export type projectsCreateWithoutWorkflow_definitionsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -7065,6 +7191,7 @@ export type projectsUncheckedCreateWithoutWorkflow_definitionsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -7132,6 +7259,7 @@ export type projectsUpdateWithoutWorkflow_definitionsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -7183,6 +7311,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_definitionsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -7234,6 +7363,7 @@ export type projectsCreateWithoutWorkflow_runsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -7285,6 +7415,7 @@ export type projectsUncheckedCreateWithoutWorkflow_runsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -7352,6 +7483,7 @@ export type projectsUpdateWithoutWorkflow_runsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -7403,6 +7535,7 @@ export type projectsUncheckedUpdateWithoutWorkflow_runsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -7454,6 +7587,7 @@ export type projectsCreateWithoutBuyback_objectivesInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -7505,6 +7639,7 @@ export type projectsUncheckedCreateWithoutBuyback_objectivesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -7572,6 +7707,7 @@ export type projectsUpdateWithoutBuyback_objectivesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -7623,6 +7759,7 @@ export type projectsUncheckedUpdateWithoutBuyback_objectivesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -7674,6 +7811,7 @@ export type projectsCreateWithoutFinancedProjectsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -7725,6 +7863,7 @@ export type projectsUncheckedCreateWithoutFinancedProjectsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -7792,6 +7931,7 @@ export type projectsUpdateWithoutFinancedProjectsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -7843,6 +7983,7 @@ export type projectsUncheckedUpdateWithoutFinancedProjectsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -7894,6 +8035,7 @@ export type projectsCreateWithoutScore_snapshotsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -7945,6 +8087,7 @@ export type projectsUncheckedCreateWithoutScore_snapshotsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -8012,6 +8155,7 @@ export type projectsUpdateWithoutScore_snapshotsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -8063,6 +8207,7 @@ export type projectsUncheckedUpdateWithoutScore_snapshotsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -8114,6 +8259,7 @@ export type projectsCreateWithoutReal_estate_propertiesInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -8165,6 +8311,7 @@ export type projectsUncheckedCreateWithoutReal_estate_propertiesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -8232,6 +8379,7 @@ export type projectsUpdateWithoutReal_estate_propertiesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -8283,6 +8431,7 @@ export type projectsUncheckedUpdateWithoutReal_estate_propertiesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -8334,6 +8483,7 @@ export type projectsCreateWithoutFleet_vehiclesInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -8385,6 +8535,7 @@ export type projectsUncheckedCreateWithoutFleet_vehiclesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -8452,6 +8603,7 @@ export type projectsUpdateWithoutFleet_vehiclesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -8503,6 +8655,7 @@ export type projectsUncheckedUpdateWithoutFleet_vehiclesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -8554,6 +8707,7 @@ export type projectsCreateWithoutAd_campaignsInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -8605,6 +8759,7 @@ export type projectsUncheckedCreateWithoutAd_campaignsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -8672,6 +8827,7 @@ export type projectsUpdateWithoutAd_campaignsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -8723,6 +8879,7 @@ export type projectsUncheckedUpdateWithoutAd_campaignsInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -8775,6 +8932,7 @@ export type projectsCreateWithoutMandatesInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
 }
 
 export type projectsUncheckedCreateWithoutMandatesInput = {
@@ -8826,6 +8984,7 @@ export type projectsUncheckedCreateWithoutMandatesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type projectsCreateOrConnectWithoutMandatesInput = {
@@ -8893,6 +9052,7 @@ export type projectsUpdateWithoutMandatesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsUncheckedUpdateWithoutMandatesInput = {
@@ -8944,6 +9104,7 @@ export type projectsUncheckedUpdateWithoutMandatesInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type projectsCreateWithoutCreation_filingInput = {
@@ -8994,6 +9155,7 @@ export type projectsCreateWithoutCreation_filingInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -9045,6 +9207,7 @@ export type projectsUncheckedCreateWithoutCreation_filingInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -9112,6 +9275,7 @@ export type projectsUpdateWithoutCreation_filingInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -9163,6 +9327,7 @@ export type projectsUncheckedUpdateWithoutCreation_filingInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -9214,6 +9379,7 @@ export type projectsCreateWithoutCompany_registrationInput = {
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -9265,6 +9431,7 @@ export type projectsUncheckedCreateWithoutCompany_registrationInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -9332,6 +9499,7 @@ export type projectsUpdateWithoutCompany_registrationInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -9383,6 +9551,7 @@ export type projectsUncheckedUpdateWithoutCompany_registrationInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -9434,6 +9603,7 @@ export type projectsCreateWithoutFinancing_evaluationsInput = {
   company_registration?: Prisma.company_registrationsCreateNestedOneWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -9485,6 +9655,7 @@ export type projectsUncheckedCreateWithoutFinancing_evaluationsInput = {
   company_registration?: Prisma.company_registrationsUncheckedCreateNestedOneWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -9552,6 +9723,7 @@ export type projectsUpdateWithoutFinancing_evaluationsInput = {
   company_registration?: Prisma.company_registrationsUpdateOneWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -9603,6 +9775,7 @@ export type projectsUncheckedUpdateWithoutFinancing_evaluationsInput = {
   company_registration?: Prisma.company_registrationsUncheckedUpdateOneWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -9654,6 +9827,7 @@ export type projectsCreateWithoutQuestionnaireInput = {
   company_registration?: Prisma.company_registrationsCreateNestedOneWithoutProjectInput
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -9705,6 +9879,7 @@ export type projectsUncheckedCreateWithoutQuestionnaireInput = {
   company_registration?: Prisma.company_registrationsUncheckedCreateNestedOneWithoutProjectInput
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -9772,6 +9947,7 @@ export type projectsUpdateWithoutQuestionnaireInput = {
   company_registration?: Prisma.company_registrationsUpdateOneWithoutProjectNestedInput
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -9823,6 +9999,7 @@ export type projectsUncheckedUpdateWithoutQuestionnaireInput = {
   company_registration?: Prisma.company_registrationsUncheckedUpdateOneWithoutProjectNestedInput
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -9874,6 +10051,7 @@ export type projectsCreateWithoutIgini_questionsInput = {
   company_registration?: Prisma.company_registrationsCreateNestedOneWithoutProjectInput
   financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
 }
 
@@ -9925,6 +10103,7 @@ export type projectsUncheckedCreateWithoutIgini_questionsInput = {
   company_registration?: Prisma.company_registrationsUncheckedCreateNestedOneWithoutProjectInput
   financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
   questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
+  credit_entries?: Prisma.credit_entriesUncheckedCreateNestedManyWithoutProjectInput
   mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -9992,6 +10171,7 @@ export type projectsUpdateWithoutIgini_questionsInput = {
   company_registration?: Prisma.company_registrationsUpdateOneWithoutProjectNestedInput
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -10043,6 +10223,231 @@ export type projectsUncheckedUpdateWithoutIgini_questionsInput = {
   company_registration?: Prisma.company_registrationsUncheckedUpdateOneWithoutProjectNestedInput
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
+}
+
+export type projectsCreateWithoutCredit_entriesInput = {
+  id?: string
+  title: string
+  description?: string | null
+  sector?: string | null
+  confirmed_legal_form?: string | null
+  is_public?: boolean
+  archived_at?: Date | string | null
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  owner: Prisma.usersCreateNestedOneWithoutProjectsInput
+  analyses?: Prisma.analysesCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsCreateNestedManyWithoutProjectInput
+  score_snapshots?: Prisma.score_snapshotsCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsCreateNestedManyWithoutProjectInput
+  crm_contacts?: Prisma.crm_contactsCreateNestedManyWithoutProjectInput
+  billing_documents?: Prisma.billing_documentsCreateNestedManyWithoutProjectInput
+  stock_items?: Prisma.stock_itemsCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsCreateNestedOneWithoutProjectInput
+  agenda_events?: Prisma.agenda_eventsCreateNestedManyWithoutProjectInput
+  real_estate_properties?: Prisma.real_estate_propertiesCreateNestedManyWithoutProjectInput
+  fleet_vehicles?: Prisma.fleet_vehiclesCreateNestedManyWithoutProjectInput
+  ad_campaigns?: Prisma.ad_campaignsCreateNestedManyWithoutProjectInput
+  financing_rounds?: Prisma.financing_roundsCreateNestedManyWithoutProjectInput
+  equity_holders?: Prisma.equity_holdersCreateNestedManyWithoutProjectInput
+  equity_events?: Prisma.equity_eventsCreateNestedManyWithoutProjectInput
+  dividends?: Prisma.dividend_distributionsCreateNestedManyWithoutProjectInput
+  buyback_objectives?: Prisma.buyback_objectivesCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsCreateNestedOneWithoutProjectInput
+  financedProjects?: Prisma.financed_projectsCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsCreateNestedOneWithoutProjectInput
+  creation_filing?: Prisma.creation_filingsCreateNestedOneWithoutProjectInput
+  company_registration?: Prisma.company_registrationsCreateNestedOneWithoutProjectInput
+  financing_evaluations?: Prisma.financing_evaluationsCreateNestedManyWithoutProjectInput
+  questionnaire?: Prisma.project_questionnairesCreateNestedOneWithoutProjectInput
+  igini_questions?: Prisma.project_igini_questionsCreateNestedManyWithoutProjectInput
+  mandates?: Prisma.mandatesCreateNestedManyWithoutProjectInput
+}
+
+export type projectsUncheckedCreateWithoutCredit_entriesInput = {
+  id?: string
+  owner_id: string
+  title: string
+  description?: string | null
+  sector?: string | null
+  confirmed_legal_form?: string | null
+  is_public?: boolean
+  archived_at?: Date | string | null
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  analyses?: Prisma.analysesUncheckedCreateNestedManyWithoutProjectInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedCreateNestedManyWithoutProjectInput
+  build_plans?: Prisma.build_plansUncheckedCreateNestedManyWithoutProjectInput
+  financing_plans?: Prisma.financing_plansUncheckedCreateNestedManyWithoutProjectInput
+  development_plans?: Prisma.development_plansUncheckedCreateNestedManyWithoutProjectInput
+  transmission_plans?: Prisma.transmission_plansUncheckedCreateNestedManyWithoutProjectInput
+  memories?: Prisma.memoriesUncheckedCreateNestedManyWithoutProjectInput
+  concepts?: Prisma.conceptsUncheckedCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.tasksUncheckedCreateNestedManyWithoutProjectInput
+  community_comments?: Prisma.community_commentsUncheckedCreateNestedManyWithoutProjectInput
+  collaborators?: Prisma.project_collaboratorsUncheckedCreateNestedManyWithoutProjectInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedCreateNestedManyWithoutProjectInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedCreateNestedManyWithoutProjectInput
+  score_snapshots?: Prisma.score_snapshotsUncheckedCreateNestedManyWithoutProjectInput
+  automation_runs?: Prisma.automation_runsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedCreateNestedManyWithoutProjectInput
+  workflow_runs?: Prisma.workflow_runsUncheckedCreateNestedManyWithoutProjectInput
+  crm_contacts?: Prisma.crm_contactsUncheckedCreateNestedManyWithoutProjectInput
+  billing_documents?: Prisma.billing_documentsUncheckedCreateNestedManyWithoutProjectInput
+  stock_items?: Prisma.stock_itemsUncheckedCreateNestedManyWithoutProjectInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedCreateNestedOneWithoutProjectInput
+  agenda_events?: Prisma.agenda_eventsUncheckedCreateNestedManyWithoutProjectInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedCreateNestedManyWithoutProjectInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedCreateNestedManyWithoutProjectInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedCreateNestedManyWithoutProjectInput
+  financing_rounds?: Prisma.financing_roundsUncheckedCreateNestedManyWithoutProjectInput
+  equity_holders?: Prisma.equity_holdersUncheckedCreateNestedManyWithoutProjectInput
+  equity_events?: Prisma.equity_eventsUncheckedCreateNestedManyWithoutProjectInput
+  dividends?: Prisma.dividend_distributionsUncheckedCreateNestedManyWithoutProjectInput
+  buyback_objectives?: Prisma.buyback_objectivesUncheckedCreateNestedManyWithoutProjectInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedCreateNestedOneWithoutProjectInput
+  financedProjects?: Prisma.financed_projectsUncheckedCreateNestedOneWithoutProjectInput
+  bylaws?: Prisma.company_bylawsUncheckedCreateNestedOneWithoutProjectInput
+  creation_filing?: Prisma.creation_filingsUncheckedCreateNestedOneWithoutProjectInput
+  company_registration?: Prisma.company_registrationsUncheckedCreateNestedOneWithoutProjectInput
+  financing_evaluations?: Prisma.financing_evaluationsUncheckedCreateNestedManyWithoutProjectInput
+  questionnaire?: Prisma.project_questionnairesUncheckedCreateNestedOneWithoutProjectInput
+  igini_questions?: Prisma.project_igini_questionsUncheckedCreateNestedManyWithoutProjectInput
+  mandates?: Prisma.mandatesUncheckedCreateNestedManyWithoutProjectInput
+}
+
+export type projectsCreateOrConnectWithoutCredit_entriesInput = {
+  where: Prisma.projectsWhereUniqueInput
+  create: Prisma.XOR<Prisma.projectsCreateWithoutCredit_entriesInput, Prisma.projectsUncheckedCreateWithoutCredit_entriesInput>
+}
+
+export type projectsUpsertWithoutCredit_entriesInput = {
+  update: Prisma.XOR<Prisma.projectsUpdateWithoutCredit_entriesInput, Prisma.projectsUncheckedUpdateWithoutCredit_entriesInput>
+  create: Prisma.XOR<Prisma.projectsCreateWithoutCredit_entriesInput, Prisma.projectsUncheckedCreateWithoutCredit_entriesInput>
+  where?: Prisma.projectsWhereInput
+}
+
+export type projectsUpdateToOneWithWhereWithoutCredit_entriesInput = {
+  where?: Prisma.projectsWhereInput
+  data: Prisma.XOR<Prisma.projectsUpdateWithoutCredit_entriesInput, Prisma.projectsUncheckedUpdateWithoutCredit_entriesInput>
+}
+
+export type projectsUpdateWithoutCredit_entriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  owner?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
+  analyses?: Prisma.analysesUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUpdateManyWithoutProjectNestedInput
+  score_snapshots?: Prisma.score_snapshotsUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUpdateManyWithoutProjectNestedInput
+  crm_contacts?: Prisma.crm_contactsUpdateManyWithoutProjectNestedInput
+  billing_documents?: Prisma.billing_documentsUpdateManyWithoutProjectNestedInput
+  stock_items?: Prisma.stock_itemsUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUpdateOneWithoutProjectNestedInput
+  agenda_events?: Prisma.agenda_eventsUpdateManyWithoutProjectNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUpdateManyWithoutProjectNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUpdateManyWithoutProjectNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUpdateManyWithoutProjectNestedInput
+  financing_rounds?: Prisma.financing_roundsUpdateManyWithoutProjectNestedInput
+  equity_holders?: Prisma.equity_holdersUpdateManyWithoutProjectNestedInput
+  equity_events?: Prisma.equity_eventsUpdateManyWithoutProjectNestedInput
+  dividends?: Prisma.dividend_distributionsUpdateManyWithoutProjectNestedInput
+  buyback_objectives?: Prisma.buyback_objectivesUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUpdateOneWithoutProjectNestedInput
+  financedProjects?: Prisma.financed_projectsUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUpdateOneWithoutProjectNestedInput
+  creation_filing?: Prisma.creation_filingsUpdateOneWithoutProjectNestedInput
+  company_registration?: Prisma.company_registrationsUpdateOneWithoutProjectNestedInput
+  financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
+  questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
+  igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
+}
+
+export type projectsUncheckedUpdateWithoutCredit_entriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  owner_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed_legal_form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  analyses?: Prisma.analysesUncheckedUpdateManyWithoutProjectNestedInput
+  legal_form_recommendations?: Prisma.legal_form_recommendationsUncheckedUpdateManyWithoutProjectNestedInput
+  build_plans?: Prisma.build_plansUncheckedUpdateManyWithoutProjectNestedInput
+  financing_plans?: Prisma.financing_plansUncheckedUpdateManyWithoutProjectNestedInput
+  development_plans?: Prisma.development_plansUncheckedUpdateManyWithoutProjectNestedInput
+  transmission_plans?: Prisma.transmission_plansUncheckedUpdateManyWithoutProjectNestedInput
+  memories?: Prisma.memoriesUncheckedUpdateManyWithoutProjectNestedInput
+  concepts?: Prisma.conceptsUncheckedUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.tasksUncheckedUpdateManyWithoutProjectNestedInput
+  community_comments?: Prisma.community_commentsUncheckedUpdateManyWithoutProjectNestedInput
+  collaborators?: Prisma.project_collaboratorsUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_checks?: Prisma.project_compliance_checksUncheckedUpdateManyWithoutProjectNestedInput
+  compliance_ai_runs?: Prisma.project_compliance_ai_runsUncheckedUpdateManyWithoutProjectNestedInput
+  score_snapshots?: Prisma.score_snapshotsUncheckedUpdateManyWithoutProjectNestedInput
+  automation_runs?: Prisma.automation_runsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_definitions?: Prisma.workflow_definitionsUncheckedUpdateManyWithoutProjectNestedInput
+  workflow_runs?: Prisma.workflow_runsUncheckedUpdateManyWithoutProjectNestedInput
+  crm_contacts?: Prisma.crm_contactsUncheckedUpdateManyWithoutProjectNestedInput
+  billing_documents?: Prisma.billing_documentsUncheckedUpdateManyWithoutProjectNestedInput
+  stock_items?: Prisma.stock_itemsUncheckedUpdateManyWithoutProjectNestedInput
+  shopify_connection?: Prisma.shopify_connectionsUncheckedUpdateOneWithoutProjectNestedInput
+  agenda_events?: Prisma.agenda_eventsUncheckedUpdateManyWithoutProjectNestedInput
+  real_estate_properties?: Prisma.real_estate_propertiesUncheckedUpdateManyWithoutProjectNestedInput
+  fleet_vehicles?: Prisma.fleet_vehiclesUncheckedUpdateManyWithoutProjectNestedInput
+  ad_campaigns?: Prisma.ad_campaignsUncheckedUpdateManyWithoutProjectNestedInput
+  financing_rounds?: Prisma.financing_roundsUncheckedUpdateManyWithoutProjectNestedInput
+  equity_holders?: Prisma.equity_holdersUncheckedUpdateManyWithoutProjectNestedInput
+  equity_events?: Prisma.equity_eventsUncheckedUpdateManyWithoutProjectNestedInput
+  dividends?: Prisma.dividend_distributionsUncheckedUpdateManyWithoutProjectNestedInput
+  buyback_objectives?: Prisma.buyback_objectivesUncheckedUpdateManyWithoutProjectNestedInput
+  participation_agreement?: Prisma.participation_agreementsUncheckedUpdateOneWithoutProjectNestedInput
+  financedProjects?: Prisma.financed_projectsUncheckedUpdateOneWithoutProjectNestedInput
+  bylaws?: Prisma.company_bylawsUncheckedUpdateOneWithoutProjectNestedInput
+  creation_filing?: Prisma.creation_filingsUncheckedUpdateOneWithoutProjectNestedInput
+  company_registration?: Prisma.company_registrationsUncheckedUpdateOneWithoutProjectNestedInput
+  financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
+  questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
+  igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -10106,6 +10511,7 @@ export type projectsUpdateWithoutOwnerInput = {
   financing_evaluations?: Prisma.financing_evaluationsUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUpdateManyWithoutProjectNestedInput
 }
 
@@ -10157,6 +10563,7 @@ export type projectsUncheckedUpdateWithoutOwnerInput = {
   financing_evaluations?: Prisma.financing_evaluationsUncheckedUpdateManyWithoutProjectNestedInput
   questionnaire?: Prisma.project_questionnairesUncheckedUpdateOneWithoutProjectNestedInput
   igini_questions?: Prisma.project_igini_questionsUncheckedUpdateManyWithoutProjectNestedInput
+  credit_entries?: Prisma.credit_entriesUncheckedUpdateManyWithoutProjectNestedInput
   mandates?: Prisma.mandatesUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -10209,6 +10616,7 @@ export type ProjectsCountOutputType = {
   buyback_objectives: number
   financing_evaluations: number
   igini_questions: number
+  credit_entries: number
   mandates: number
 }
 
@@ -10244,6 +10652,7 @@ export type ProjectsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensio
   buyback_objectives?: boolean | ProjectsCountOutputTypeCountBuyback_objectivesArgs
   financing_evaluations?: boolean | ProjectsCountOutputTypeCountFinancing_evaluationsArgs
   igini_questions?: boolean | ProjectsCountOutputTypeCountIgini_questionsArgs
+  credit_entries?: boolean | ProjectsCountOutputTypeCountCredit_entriesArgs
   mandates?: boolean | ProjectsCountOutputTypeCountMandatesArgs
 }
 
@@ -10477,6 +10886,13 @@ export type ProjectsCountOutputTypeCountIgini_questionsArgs<ExtArgs extends runt
 /**
  * ProjectsCountOutputType without action
  */
+export type ProjectsCountOutputTypeCountCredit_entriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.credit_entriesWhereInput
+}
+
+/**
+ * ProjectsCountOutputType without action
+ */
 export type ProjectsCountOutputTypeCountMandatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.mandatesWhereInput
 }
@@ -10532,6 +10948,7 @@ export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   financing_evaluations?: boolean | Prisma.projects$financing_evaluationsArgs<ExtArgs>
   questionnaire?: boolean | Prisma.projects$questionnaireArgs<ExtArgs>
   igini_questions?: boolean | Prisma.projects$igini_questionsArgs<ExtArgs>
+  credit_entries?: boolean | Prisma.projects$credit_entriesArgs<ExtArgs>
   mandates?: boolean | Prisma.projects$mandatesArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["projects"]>
@@ -10618,6 +11035,7 @@ export type projectsInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   financing_evaluations?: boolean | Prisma.projects$financing_evaluationsArgs<ExtArgs>
   questionnaire?: boolean | Prisma.projects$questionnaireArgs<ExtArgs>
   igini_questions?: boolean | Prisma.projects$igini_questionsArgs<ExtArgs>
+  credit_entries?: boolean | Prisma.projects$credit_entriesArgs<ExtArgs>
   mandates?: boolean | Prisma.projects$mandatesArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectsCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -10670,6 +11088,7 @@ export type $projectsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     financing_evaluations: Prisma.$financing_evaluationsPayload<ExtArgs>[]
     questionnaire: Prisma.$project_questionnairesPayload<ExtArgs> | null
     igini_questions: Prisma.$project_igini_questionsPayload<ExtArgs>[]
+    credit_entries: Prisma.$credit_entriesPayload<ExtArgs>[]
     mandates: Prisma.$mandatesPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -11127,6 +11546,7 @@ export interface Prisma__projectsClient<T, Null = never, ExtArgs extends runtime
   financing_evaluations<T extends Prisma.projects$financing_evaluationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$financing_evaluationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$financing_evaluationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   questionnaire<T extends Prisma.projects$questionnaireArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$questionnaireArgs<ExtArgs>>): Prisma.Prisma__project_questionnairesClient<runtime.Types.Result.GetResult<Prisma.$project_questionnairesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   igini_questions<T extends Prisma.projects$igini_questionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$igini_questionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$project_igini_questionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  credit_entries<T extends Prisma.projects$credit_entriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$credit_entriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$credit_entriesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mandates<T extends Prisma.projects$mandatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.projects$mandatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$mandatesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -12442,6 +12862,30 @@ export type projects$igini_questionsArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.Project_igini_questionsScalarFieldEnum | Prisma.Project_igini_questionsScalarFieldEnum[]
+}
+
+/**
+ * projects.credit_entries
+ */
+export type projects$credit_entriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the credit_entries
+   */
+  select?: Prisma.credit_entriesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the credit_entries
+   */
+  omit?: Prisma.credit_entriesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.credit_entriesInclude<ExtArgs> | null
+  where?: Prisma.credit_entriesWhereInput
+  orderBy?: Prisma.credit_entriesOrderByWithRelationInput | Prisma.credit_entriesOrderByWithRelationInput[]
+  cursor?: Prisma.credit_entriesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Credit_entriesScalarFieldEnum | Prisma.Credit_entriesScalarFieldEnum[]
 }
 
 /**

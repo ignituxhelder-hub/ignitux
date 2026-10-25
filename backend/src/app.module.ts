@@ -31,6 +31,7 @@ import { EvaluationModule } from './evaluation-financement/evaluation.module.js'
 import { ExecutionModule } from './igini/execution/execution.module.js';
 import { WorkflowModule } from './igini/workflow/workflow.module.js';
 import { MarketplaceModule } from './marketplace/marketplace.module.js';
+import { CreditsModule } from './credits/credits.module.js';
 import { OffresModule } from './offres/offres.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { ProjectsModule } from './projects/projects.module.js';
@@ -55,6 +56,7 @@ import { ImmatriculationModule } from './immatriculation/immatriculation.module.
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: lireLimiteGlobale(process.env.LIMITE_REQUETES_PAR_MINUTE) }]),
     PrismaModule,
     OffresModule,
+    CreditsModule,
     UsersModule,
     AuthModule,
     ProjectsModule,

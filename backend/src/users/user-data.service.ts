@@ -208,6 +208,8 @@ export class UserDataService {
       mesActionsChezLesAutres,
       choixAccesArgentFaits,
       choixAccesArgentMeConcernant,
+      mesCredits,
+      mesActionsDebiteesChezLesAutres,
       cvExperiences,
       cvFormations,
       questionnaires,
@@ -379,6 +381,18 @@ export class UserDataService {
         orderBy: { created_at: 'asc' },
         select: { owner_id: true, member_id: true, role: true, created_at: true },
       }),
+      // Crédits IGINI : le journal de mon solde, et mes actions payées par
+      // les propriétaires dont je suis membre (sans leur solde ni leurs
+      // motifs : ce sont leurs données, seul mon geste me concerne).
+      this.prisma.credit_entries.findMany({
+        where: { owner_id: userId },
+        orderBy: { created_at: 'asc' },
+      }),
+      this.prisma.credit_entries.findMany({
+        where: { actor_id: userId, NOT: { owner_id: userId } },
+        orderBy: { created_at: 'asc' },
+        select: { kind: true, credits: true, generator: true, project_id: true, created_at: true },
+      }),
       // Le CV décrit, et les réponses au questionnaire de chaque projet.
       this.prisma.user_experiences.findMany({
         where: { user_id: userId },
@@ -431,6 +445,11 @@ export class UserDataService {
           acces_a_l_argent: {
             choix_que_j_ai_faits_pour_mon_argent: choixAccesArgentFaits,
             choix_des_autres_me_concernant: choixAccesArgentMeConcernant,
+          },
+          // Le solde est la somme de `credits` : 1 crédit = 0,10 €.
+          credits_igini: {
+            journal_de_mon_solde: mesCredits,
+            mes_actions_payees_par_d_autres_proprietaires: mesActionsDebiteesChezLesAutres,
           },
         },
         projets_et_contenus: {

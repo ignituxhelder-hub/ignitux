@@ -67,6 +67,8 @@ const PUBLIQUES = new Set([
   'ConstitutionController.getPreamble',
   'ConstitutionController.listArticles',
   'ConstitutionController.listRules',
+  // Le barème des crédits : les prix que la page d'accueil affiche, sans connexion.
+  'CreditsController.bareme',
   'IginiStatusController.getStatus',
   'ReadinessController.ready',
   'RolesController.catalogue',
@@ -169,6 +171,19 @@ describe('Couverture des espaces : chaque route authentifiée est classée', () 
       'EspacesController.activite',
       'EspacesController.accesArgent',
       'EspacesController.choisirAccesArgent',
+    ];
+    const trouvees = toutes.filter((r) => attendues.includes(cle(r)));
+    expect(trouvees.map(cle).sort()).toEqual([...attendues].sort());
+    expect(trouvees.filter((r) => !r.authentifiee || r.domaine || r.horsEspace).map(decrire)).toEqual([]);
+  });
+
+  it('les crédits sont personnels : refusés en espace étranger, sans aucune marque', () => {
+    // Un membre ne lit ni ne change le solde d'un propriétaire en se plaçant
+    // dans son espace ; l'administration non plus. Seul le barème est public.
+    const attendues = [
+      'CreditsController.vue',
+      'AdminCreditsController.comptes',
+      'AdminCreditsController.ajuster',
     ];
     const trouvees = toutes.filter((r) => attendues.includes(cle(r)));
     expect(trouvees.map(cle).sort()).toEqual([...attendues].sort());

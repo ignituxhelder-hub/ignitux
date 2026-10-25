@@ -1,5 +1,7 @@
 import { ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { CREDITS_BIENVENUE } from '../credits/bareme.js';
+import { MOTIF_BIENVENUE } from '../credits/credits.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
@@ -16,6 +18,12 @@ export class UsersService {
    * `cguVersion` a déjà été comparée à la version en vigueur par SignupDto ;
    * elle est enregistrée avec le moment de l'acceptation, dans la création
    * même — un compte ne peut pas exister sans la trace de ce qu'il a accepté.
+   *
+   * Les 30 crédits de bienvenue naissent dans la même écriture (création
+   * imbriquée, donc une seule transaction) : pas de compte sans sa
+   * bienvenue, pas de bienvenue sans compte. Les comptes d'avant les
+   * crédits la reçoivent une fois, à leur première lecture du solde (voir
+   * CreditsService).
    */
   async signup(email: string, password: string, cguVersion: string) {
     const existingUser = await this.prisma.users.findUnique({ where: { email } });
@@ -31,6 +39,9 @@ export class UsersService {
         password_hash: passwordHash,
         cgu_accepted_at: new Date(),
         cgu_version: cguVersion,
+        credits: {
+          create: { kind: 'bienvenue', credits: CREDITS_BIENVENUE, motif: MOTIF_BIENVENUE },
+        },
       },
     });
 

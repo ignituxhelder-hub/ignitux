@@ -63,6 +63,21 @@ describe('UsersService', () => {
       await expect(bcrypt.compare('motdepasse', data.password_hash)).resolves.toBe(true);
     });
 
+    it('verse les 30 crédits de bienvenue dans la création même du compte, une seule ligne', async () => {
+      prisma.users.findUnique.mockResolvedValue(null);
+      prisma.users.create.mockResolvedValue({ id: 'uuid-1', email: 'a@b.com' });
+
+      await service.signup('a@b.com', 'motdepasse', '2026-10-01');
+
+      // Une écriture imbriquée : le compte et sa bienvenue naissent ensemble
+      // ou pas du tout (une seule requête, donc une seule transaction).
+      expect(prisma.users.create).toHaveBeenCalledTimes(1);
+      const { data } = prisma.users.create.mock.calls[0][0];
+      expect(data.credits).toEqual({
+        create: { kind: 'bienvenue', credits: 30, motif: 'Cadeau de bienvenue' },
+      });
+    });
+
     it("enregistre l'acceptation des CGU — moment et version — dans la même création", async () => {
       prisma.users.findUnique.mockResolvedValue(null);
       prisma.users.create.mockResolvedValue({ id: 'uuid-1', email: 'a@b.com' });

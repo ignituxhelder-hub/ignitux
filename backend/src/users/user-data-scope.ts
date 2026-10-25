@@ -78,6 +78,12 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   // son argent (`owner_id`), et ceux des propriétaires qui la concernent
   // (`member_id`). Une décision sur son compte, comme un mandat.
   space_members: exported('compte'),
+  // Crédits IGINI : le journal de mon solde (bienvenue, ajustements,
+  // débits des actions IGINI, remboursements) — une relation avec Ignitux,
+  // comme l'abonnement d'avant. Conservé avec le compte, parti avec lui.
+  // Avec, à part, mes actions débitées chez les propriétaires dont je suis
+  // membre (l'acteur est une donnée me concernant, comme space_activity).
+  credit_entries: exported('compte'),
 
   projects: exported('projets_et_contenus'),
   tasks: exported('projets_et_contenus'),
