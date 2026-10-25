@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { BAREME, CREDITS_BIENVENUE } from './bareme.js';
 import { CreditsInsuffisantsException } from './credits-insuffisants.js';
-import { CreditsService } from './credits.service.js';
+import { CreditsService, MOTIF_ORPHELIN } from './credits.service.js';
 import { FausseBaseCredits } from './credits.testing.js';
 
 const PROPRIO = '11111111-1111-4111-8111-111111111111';
@@ -262,6 +262,145 @@ describe('CreditsService — rembourser un échec', () => {
     expect(await credits.rembourser('inconnu')).toBe(false);
     expect(await credits.rembourser(bienvenue.id)).toBe(false);
     expect(db.de(PROPRIO, 'remboursement')).toHaveLength(0);
+  });
+
+  it('écrit le motif demandé (résultat non enregistré, appel interrompu)', async () => {
+    const db = avecSolde(30);
+    const credits = new CreditsService(db.client());
+    const r = await credits.reserver(reservation('statuts'));
+
+    expect(await credits.rembourser(r.id, { motif: 'Résultat non enregistré : crédits rendus.' })).toBe(true);
+
+    expect(db.de(PROPRIO, 'remboursement')[0].motif).toBe('Résultat non enregistré : crédits rendus.');
+  });
+});
+
+/**
+ * Le serveur redémarre (déploiement, plantage) pendant un appel IA : le débit
+ * est écrit, l'appel ne revient jamais, et aucun `catch` ne le rend. Le
+ * rattrapage le rend après coup.
+ */
+describe('CreditsService — rattraper les débits orphelins', () => {
+  // Les lignes de la fausse base sont datées du 2026-10-25 à 12:00.
+  const T_DEBIT = new Date(Date.UTC(2026, 9, 25, 12, 0, 0));
+  const minutesApres = (minutes: number) => new Date(T_DEBIT.getTime() + minutes * 60_000);
+
+  it('rend un débit de plus de 15 minutes sans ligne de coût ni remboursement', async () => {
+    const db = avecSolde(30);
+    const credits = new CreditsService(db.client());
+    const r = await credits.reserver(reservation('analyser', 'appel-perdu'));
+
+    expect(await credits.rattraperDebitsOrphelins(minutesApres(16))).toBe(1);
+
+    expect(db.de(PROPRIO, 'remboursement')).toEqual([
+      expect.objectContaining({ credits: r.credits, ai_usage_event_id: 'appel-perdu', motif: MOTIF_ORPHELIN }),
+    ]);
+    expect(db.solde(PROPRIO)).toBe(30);
+  });
+
+  it('ne touche pas un débit récent : son appel est peut-être encore en cours', async () => {
+    const db = avecSolde(30);
+    const credits = new CreditsService(db.client());
+    await credits.reserver(reservation('analyser'));
+
+    expect(await credits.rattraperDebitsOrphelins(minutesApres(14))).toBe(0);
+    expect(db.de(PROPRIO, 'remboursement')).toHaveLength(0);
+  });
+
+  it('ne touche pas un débit dont l’appel a obtenu sa réponse (ligne de coût présente)', async () => {
+    const db = avecSolde(30);
+    const credits = new CreditsService(db.client());
+    await credits.reserver(reservation('analyser', 'appel-reussi'));
+    db.appelsJournalises.add('appel-reussi');
+
+    expect(await credits.rattraperDebitsOrphelins(minutesApres(60))).toBe(0);
+    expect(db.solde(PROPRIO)).toBe(30 - PRIX_ANALYSE);
+  });
+
+  it('ne rend jamais deux fois : ni un débit déjà remboursé, ni sous deux passages simultanés', async () => {
+    const db = avecSolde(30);
+    const credits = new CreditsService(db.client());
+    const deja = await credits.reserver(reservation('analyser', 'appel-a'));
+    await credits.rembourser(deja.id);
+    await credits.reserver(reservation('construire', 'appel-b'));
+
+    const rendus = await Promise.all([
+      credits.rattraperDebitsOrphelins(minutesApres(20)),
+      credits.rattraperDebitsOrphelins(minutesApres(20)),
+    ]);
+
+    expect(rendus.sort()).toEqual([0, 1]);
+    expect(db.de(PROPRIO, 'remboursement')).toHaveLength(2);
+    expect(db.solde(PROPRIO)).toBe(30);
+  });
+
+  it('ne rend pas un appel journalisé entre la recherche et le verrou', async () => {
+    // L'appel très lent qui revient pendant le passage : relu sous le verrou.
+    const db = avecSolde(30);
+    const credits = new CreditsService(db.client());
+    const r = await credits.reserver(reservation('analyser', 'appel-lent'));
+    db.appelsJournalises.add('appel-lent');
+
+    expect(await credits.rembourser(r.id, { motif: MOTIF_ORPHELIN, siAucunAppelJournalise: true })).toBe(false);
+    expect(db.de(PROPRIO, 'remboursement')).toHaveLength(0);
+  });
+
+  it('ne remonte pas au-delà de 30 jours', async () => {
+    const db = avecSolde(30);
+    const credits = new CreditsService(db.client());
+    await credits.reserver(reservation('analyser'));
+
+    expect(await credits.rattraperDebitsOrphelins(minutesApres(31 * 24 * 60))).toBe(0);
+  });
+
+  it('un remboursement qui échoue n’empêche pas les suivants, et sera retenté au prochain passage', async () => {
+    const db = avecSolde(30);
+    const credits = new CreditsService(db.client());
+    const premier = await credits.reserver(reservation('analyser', 'appel-1'));
+    await credits.reserver(reservation('construire', 'appel-2'));
+    const original = credits.rembourser.bind(credits);
+    const espion = vi
+      .spyOn(credits, 'rembourser')
+      .mockImplementation((id, options) =>
+        id === premier.id ? Promise.reject(new Error('base indisponible')) : original(id, options),
+      );
+
+    expect(await credits.rattraperDebitsOrphelins(minutesApres(20))).toBe(1);
+
+    espion.mockRestore();
+    expect(await credits.rattraperDebitsOrphelins(minutesApres(30))).toBe(1);
+    expect(db.solde(PROPRIO)).toBe(30);
+  });
+
+  it('au démarrage : un passage sans attendre, puis toutes les 10 minutes ; arrêté avec le module', async () => {
+    vi.useFakeTimers();
+    try {
+      const credits = new CreditsService(avecSolde(30).client());
+      const passage = vi.spyOn(credits, 'rattraperDebitsOrphelins').mockResolvedValue(0);
+      credits.rattrapageAutomatique = true;
+
+      credits.onModuleInit();
+      expect(passage).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(10 * 60_000);
+      expect(passage).toHaveBeenCalledTimes(2);
+
+      credits.onModuleDestroy();
+      await vi.advanceTimersByTimeAsync(30 * 60_000);
+      expect(passage).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('un passage qui lève ne fait pas tomber le serveur', async () => {
+    const credits = new CreditsService(avecSolde(30).client());
+    vi.spyOn(credits, 'rattraperDebitsOrphelins').mockRejectedValue(new Error('base indisponible'));
+    credits.rattrapageAutomatique = true;
+
+    expect(() => credits.onModuleInit()).not.toThrow();
+    await new Promise((resolve) => setImmediate(resolve));
+    credits.onModuleDestroy();
   });
 });
 

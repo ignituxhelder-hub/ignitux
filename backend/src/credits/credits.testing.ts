@@ -87,6 +87,12 @@ export class FausseBaseCredits {
   verrouActif = true;
   /** Le SQL brut reçu, pour vérifier la forme du verrou. */
   sql: Array<{ texte: string; valeurs: unknown[] }> = [];
+  /**
+   * Les identifiants présents dans `ai_usage_events` : un appel qui a obtenu
+   * sa réponse (voir `ClaudeService`). Un débit dont l'appel n'y est pas est
+   * en cours — ou orphelin, s'il est vieux.
+   */
+  appelsJournalises = new Set<string>();
   private verrous = new Map<string, Verrou>();
   private suivant = 1;
 
@@ -94,6 +100,50 @@ export class FausseBaseCredits {
     this.comptes = init.comptes ?? [];
     this.projets = init.projets ?? [];
     for (const ligne of init.lignes ?? []) this.inserer(ligne);
+  }
+
+  /**
+   * Un débit sans ligne de coût ni remboursement — les deux `NOT EXISTS` du
+   * SQL du service (rattrapage des orphelins, exécution déjà en cours).
+   */
+  private sansSuite(d: LigneCredit): boolean {
+    return (
+      d.kind === 'debit' &&
+      d.ai_usage_event_id !== null &&
+      !this.appelsJournalises.has(d.ai_usage_event_id) &&
+      !this.lignes.some(
+        (r) => r.kind === 'remboursement' && r.owner_id === d.owner_id && r.ai_usage_event_id === d.ai_usage_event_id,
+      )
+    );
+  }
+
+  /**
+   * Le SQL brut hors verrou, reconnu à sa forme : la recherche des débits
+   * orphelins (`rattraperDebitsOrphelins`) ou d'une exécution en cours
+   * (`reserver` avec `exclusif`).
+   */
+  private requeteBrute(texte: string, valeurs: unknown[]): Array<{ id: string }> {
+    if (!/ai_usage_events/.test(texte)) throw new Error(`SQL brut non géré par la fausse base : ${texte}`);
+    if (/d\.owner_id\s*=/.test(texte)) {
+      const [ownerId, generator, projectId, depuis] = valeurs as [string, string, string, Date];
+      return this.lignes
+        .filter(
+          (d) =>
+            d.owner_id === ownerId &&
+            d.generator === generator &&
+            d.project_id === projectId &&
+            d.created_at >= depuis &&
+            this.sansSuite(d),
+        )
+        .slice(0, 1)
+        .map((d) => ({ id: d.id }));
+    }
+    const [avant, depuis, lot] = valeurs as [Date, Date, number];
+    return this.lignes
+      .filter((d) => d.created_at < avant && d.created_at >= depuis && this.sansSuite(d))
+      .sort((a, b) => a.created_at.getTime() - b.created_at.getTime())
+      .slice(0, lot)
+      .map((d) => ({ id: d.id }));
   }
 
   solde(ownerId: string): number {
@@ -213,20 +263,39 @@ export class FausseBaseCredits {
       },
     };
 
+    const ai_usage_events = {
+      async findUnique({ where }: { where: { id: string }; select?: unknown }) {
+        await rendreLaMain();
+        return base.appelsJournalises.has(where.id) ? { id: where.id } : null;
+      },
+    };
+
     const client = {
       credit_entries,
       users,
       projects,
+      ai_usage_events,
+      async $queryRaw(chaines: TemplateStringsArray, ...valeurs: unknown[]) {
+        const texte = chaines.join('$');
+        base.sql.push({ texte, valeurs });
+        await rendreLaMain();
+        return base.requeteBrute(texte, valeurs);
+      },
       async $transaction<T>(fn: (tx: unknown) => Promise<T>): Promise<T> {
         const aRendre: Array<() => void> = [];
         const tx = {
           credit_entries,
           users,
           projects,
+          ai_usage_events,
           async $queryRaw(chaines: TemplateStringsArray, ...valeurs: unknown[]) {
             const texte = chaines.join('$');
             base.sql.push({ texte, valeurs });
-            if (/FOR NO KEY UPDATE/.test(texte) && base.verrouActif) {
+            if (!/FOR NO KEY UPDATE/.test(texte)) {
+              await rendreLaMain();
+              return base.requeteBrute(texte, valeurs);
+            }
+            if (base.verrouActif) {
               const id = String(valeurs[0]);
               const verrou = base.verrous.get(id) ?? new Verrou();
               base.verrous.set(id, verrou);

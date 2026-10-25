@@ -1,4 +1,12 @@
-import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  type OnModuleDestroy,
+  type OnModuleInit,
+} from '@nestjs/common';
 import { projetVisiblePar } from '../equipe/acces-projet.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import { estGenerateur, type GeneratorName } from '../igini/usage/generator-names.js';
@@ -18,6 +26,29 @@ export const HISTORIQUE_LIMITE = 100;
 
 export const MOTIF_BIENVENUE = 'Cadeau de bienvenue';
 const MOTIF_REMBOURSEMENT = 'Génération échouée : crédits rendus.';
+/** Le motif d'un débit rendu par le rattrapage : l'appel n'est jamais revenu. */
+export const MOTIF_ORPHELIN = 'Appel interrompu (serveur redémarré) : crédits rendus.';
+
+/**
+ * Au-delà, un débit sans ligne de coût est un appel qui ne reviendra pas.
+ *
+ * Une génération dure de quelques secondes à quelques minutes (recherche web
+ * comprise) ; 15 minutes laissent une large marge à la plus lente. C'est
+ * aussi l'âge au-delà duquel une exécution « en cours » est tenue pour
+ * abandonnée (voir `EN_COURS_EXPIRE_MS`).
+ */
+export const DELAI_ORPHELIN_MS = 15 * 60_000;
+/** Une exécution « en cours » plus vieille que ça ne bloque plus personne. */
+export const EN_COURS_EXPIRE_MS = DELAI_ORPHELIN_MS;
+/** Un passage toutes les 10 minutes, et un au démarrage. */
+export const INTERVALLE_RATTRAPAGE_MS = 10 * 60_000;
+/**
+ * Jusqu'où le rattrapage remonte. Borne la requête (le journal grossit) et
+ * protège d'un faux orphelin le jour où d'anciennes lignes de coût seraient
+ * purgées : un débit de plus de 30 jours a vu plus de 4 000 passages.
+ */
+export const FENETRE_RATTRAPAGE_JOURS = 30;
+const LOT_RATTRAPAGE = 200;
 
 /** Un débit réservé avant l'appel IA. `id` sert à le rembourser si l'appel échoue. */
 export interface Reservation {
@@ -47,7 +78,7 @@ export interface VueCredits {
   historique: LigneHistorique[];
 }
 
-type Client = Pick<PrismaService, 'credit_entries' | 'users' | 'projects'>;
+type Client = Pick<PrismaService, 'credit_entries' | 'users' | 'projects' | 'ai_usage_events'>;
 type Transaction = Prisma.TransactionClient;
 
 /**
@@ -93,7 +124,7 @@ type Transaction = Prisma.TransactionClient;
  * versent qu'une.
  */
 @Injectable()
-export class CreditsService {
+export class CreditsService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(CreditsService.name);
 
   constructor(private readonly prisma: PrismaService) {}
@@ -156,15 +187,23 @@ export class CreditsService {
   }
 
   /**
-   * Rend un débit dont l'appel IA a échoué : une génération ratée ne coûte
-   * rien. **Une seule fois** : sous le verrou du compte, on vérifie qu'aucun
-   * remboursement ne porte déjà le même appel. Rend `true` si un
-   * remboursement a été écrit.
+   * Rend un débit : une génération ratée — ou dont le résultat n'a pas pu
+   * être enregistré — ne coûte rien. **Une seule fois** : sous le verrou du
+   * compte, on vérifie qu'aucun remboursement ne porte déjà le même appel.
+   * Rend `true` si un remboursement a été écrit.
+   *
+   * `siAucunAppelJournalise` (le rattrapage) : ne rend pas si, relu sous le
+   * verrou, l'appel a entre-temps obtenu sa réponse — un appel très lent qui
+   * revient pendant le passage n'est pas un orphelin.
    */
-  async rembourser(debitId: string): Promise<boolean> {
+  async rembourser(
+    debitId: string,
+    options: { motif?: string; siAucunAppelJournalise?: boolean } = {},
+  ): Promise<boolean> {
     const debit = await this.prisma.credit_entries.findUnique({ where: { id: debitId } });
     if (!debit || debit.kind !== 'debit' || debit.credits >= 0) return false;
-    if (!debit.ai_usage_event_id) {
+    const appelId = debit.ai_usage_event_id;
+    if (!appelId) {
       // Tout débit écrit par `reserver` porte son appel ; sans lui, on ne
       // saurait pas garantir l'unicité du remboursement.
       this.logger.error(`Débit ${debitId} sans identifiant d'appel : remboursement refusé, à régler à la main.`);
@@ -173,10 +212,14 @@ export class CreditsService {
     return this.prisma.$transaction(async (tx) => {
       await this.verrouiller(tx, debit.owner_id);
       const deja = await tx.credit_entries.findFirst({
-        where: { owner_id: debit.owner_id, kind: 'remboursement', ai_usage_event_id: debit.ai_usage_event_id },
+        where: { owner_id: debit.owner_id, kind: 'remboursement', ai_usage_event_id: appelId },
         select: { id: true },
       });
       if (deja) return false;
+      if (options.siAucunAppelJournalise) {
+        const journalise = await tx.ai_usage_events.findUnique({ where: { id: appelId }, select: { id: true } });
+        if (journalise) return false;
+      }
       await tx.credit_entries.create({
         data: {
           owner_id: debit.owner_id,
@@ -185,12 +228,99 @@ export class CreditsService {
           credits: -debit.credits,
           generator: debit.generator,
           project_id: debit.project_id,
-          ai_usage_event_id: debit.ai_usage_event_id,
-          motif: MOTIF_REMBOURSEMENT,
+          ai_usage_event_id: appelId,
+          motif: options.motif ?? MOTIF_REMBOURSEMENT,
         },
       });
       return true;
     });
+  }
+
+  /**
+   * LE RATTRAPAGE DES DÉBITS ORPHELINS.
+   *
+   * Le débit s'écrit avant l'appel IA, et le `catch` de `ClaudeService` le
+   * rend si l'appel échoue. Mais si le serveur s'arrête pendant l'appel —
+   * un déploiement, un plantage, Render qui recycle l'instance — aucun
+   * `catch` ne s'exécute : le débit reste, et l'appel ne reviendra jamais.
+   * Idem pour un remboursement qui a lui-même échoué (base indisponible à
+   * cet instant) : il est seulement journalisé, et c'est ici qu'il est
+   * retenté.
+   *
+   * Un débit est orphelin quand il a plus de 15 minutes, qu'aucune ligne
+   * `ai_usage_events` ne porte son appel (elle s'écrit dès que l'API a
+   * répondu) et qu'aucun remboursement ne le rend déjà. Chacun est rendu par
+   * `rembourser` — même verrou, même garantie d'unicité, et l'appel relu
+   * sous le verrou. Rend le nombre de débits rendus.
+   *
+   * Limite connue : la ligne de coût s'écrit « au mieux ». Si son écriture
+   * échoue après un appel réussi, le débit passe pour orphelin et l'action
+   * est rendue — elle est offerte, jamais payée deux fois.
+   */
+  async rattraperDebitsOrphelins(maintenant: Date = new Date()): Promise<number> {
+    const avant = new Date(maintenant.getTime() - DELAI_ORPHELIN_MS);
+    const depuis = new Date(maintenant.getTime() - FENETRE_RATTRAPAGE_JOURS * 24 * 60 * 60_000);
+    const orphelins = await this.prisma.$queryRaw<Array<{ id: string }>>`
+      SELECT d.id FROM credit_entries d
+      WHERE d.kind = 'debit'
+        AND d.created_at < ${avant}
+        AND d.created_at >= ${depuis}
+        AND d.ai_usage_event_id IS NOT NULL
+        AND NOT EXISTS (SELECT 1 FROM ai_usage_events e WHERE e.id = d.ai_usage_event_id)
+        AND NOT EXISTS (
+          SELECT 1 FROM credit_entries r
+          WHERE r.owner_id = d.owner_id AND r.kind = 'remboursement' AND r.ai_usage_event_id = d.ai_usage_event_id
+        )
+      ORDER BY d.created_at
+      LIMIT ${LOT_RATTRAPAGE}`;
+
+    let rendus = 0;
+    for (const { id } of orphelins) {
+      try {
+        if (await this.rembourser(id, { motif: MOTIF_ORPHELIN, siAucunAppelJournalise: true })) rendus += 1;
+      } catch (erreur) {
+        // Le suivant n'attend pas celui-ci ; il sera retenté au prochain passage.
+        this.logger.error(`Rattrapage : débit ${id} non rendu, nouvel essai au prochain passage.`, erreur as Error);
+      }
+    }
+    if (rendus > 0) this.logger.warn(`Rattrapage : ${rendus} débit(s) orphelin(s) rendu(s).`);
+    return rendus;
+  }
+
+  /**
+   * Le rattrapage tourne seul : un passage au démarrage (sans le faire
+   * attendre — le serveur répond pendant ce temps), puis toutes les
+   * 10 minutes. Éteint sous les tests (`NODE_ENV=test`), qui l'appellent
+   * directement.
+   */
+  rattrapageAutomatique = process.env.NODE_ENV !== 'test';
+  private minuterie: ReturnType<typeof setInterval> | null = null;
+  private passageEnCours = false;
+
+  onModuleInit(): void {
+    if (!this.rattrapageAutomatique) return;
+    void this.passer();
+    this.minuterie = setInterval(() => void this.passer(), INTERVALLE_RATTRAPAGE_MS);
+    // Ne retient pas le processus : un arrêt demandé n'attend pas le prochain passage.
+    this.minuterie.unref?.();
+  }
+
+  onModuleDestroy(): void {
+    if (this.minuterie) clearInterval(this.minuterie);
+    this.minuterie = null;
+  }
+
+  /** Un passage, jamais deux à la fois, et jamais une exception qui remonte. */
+  private async passer(): Promise<void> {
+    if (this.passageEnCours) return;
+    this.passageEnCours = true;
+    try {
+      await this.rattraperDebitsOrphelins();
+    } catch (erreur) {
+      this.logger.error('Rattrapage des débits orphelins impossible, nouvel essai au prochain passage.', erreur as Error);
+    } finally {
+      this.passageEnCours = false;
+    }
   }
 
   /**
