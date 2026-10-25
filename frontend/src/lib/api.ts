@@ -119,6 +119,16 @@ function verifierEspace(status: number, message: string, espace: string | null):
 }
 
 export class ApiError extends Error {
+  /**
+   * Le code machine du refus quand le serveur en donne un
+   * (`credits_insuffisants`, `plafond_securite`…) : l'interface décide quoi
+   * proposer sans relire la phrase.
+   */
+  public readonly code: string | null;
+  /** Pour `credits_insuffisants` : le prix de l'action et le solde, en crédits. */
+  public readonly requis: number | null;
+  public readonly disponible: number | null;
+
   constructor(
     message: string,
     public readonly status: number,
@@ -127,10 +137,34 @@ export class ApiError extends Error {
      * de validation) : `message` les réunit, `messages` permet de les lister.
      */
     public readonly messages: string[] = [message],
+    corps: { code?: unknown; requis?: unknown; disponible?: unknown } | null = null,
   ) {
     super(message);
     this.name = 'ApiError';
+    this.code = typeof corps?.code === 'string' ? corps.code : null;
+    this.requis = typeof corps?.requis === 'number' ? corps.requis : null;
+    this.disponible = typeof corps?.disponible === 'number' ? corps.disponible : null;
   }
+}
+
+/** Le code du refus « solde trop bas » (backend/src/credits/credits-insuffisants.ts). */
+export const CODE_CREDITS_INSUFFISANTS = 'credits_insuffisants';
+/** Le code du garde-fou de coût : des crédits de plus n'y changeraient rien. */
+export const CODE_PLAFOND_SECURITE = 'plafond_securite';
+
+/**
+ * Le solde ne couvre pas l'action : le prix et le solde au moment du refus,
+ * ou `null` pour toute autre erreur. C'est le seul refus où « voir mes
+ * crédits » a un sens.
+ */
+export function creditsInsuffisants(erreur: unknown): { requis: number; disponible: number } | null {
+  if (!(erreur instanceof ApiError) || erreur.code !== CODE_CREDITS_INSUFFISANTS) return null;
+  return { requis: erreur.requis ?? 0, disponible: Math.max(0, erreur.disponible ?? 0) };
+}
+
+/** Le garde-fou de coût par compte (anti-abus), distinct d'un solde trop bas. */
+export function estPlafondSecurite(erreur: unknown): boolean {
+  return erreur instanceof ApiError && erreur.code === CODE_PLAFOND_SECURITE;
 }
 
 // Un token expiré ou invalide renvoie 401 sur n'importe quel endpoint protégé.
@@ -246,7 +280,7 @@ async function request<T>(
         : [message];
     const messageEspace = verifierEspace(res.status, message, espace);
     if (messageEspace) throw new ApiError(messageEspace, res.status);
-    throw new ApiError(message, res.status, messages);
+    throw new ApiError(message, res.status, messages, body && typeof body === 'object' ? body : null);
   }
 
   return body as T;
@@ -448,6 +482,15 @@ const ECRITURES_JAMAIS_EN_FILE = [
   // sans personne devant l'écran, elles feraient pire qu'un échec immédiat.
   /^\/projects\/[^/?#]+\/evaluations-financement(?:[?#].*)?$/,
   /^\/evaluations-financement\/revue\//,
+  // Les actions IGINI se paient en crédits, à l'action : une analyse, une
+  // forme juridique, un plan ou les questions du questionnaire rejoués plus
+  // tard dépenseraient le solde de la personne (ou du propriétaire du projet)
+  // sans personne devant l'écran pour voir le prix.
+  /^\/projects\/[^/?#]+\/(?:analyze|legal-form|plan|financing-plan|development-plan|transmission-plan)(?:[?#].*)?$/,
+  /^\/projects\/[^/?#]+\/questionnaire\/questions-igini(?:[?#].*)?$/,
+  // Un ajustement de crédits par un administrateur : un geste sur le solde
+  // de quelqu'un d'autre, qui se fait en ligne ou pas du tout.
+  /^\/admin\/credits\//,
 ];
 
 function handleOffline<T>(
@@ -1124,37 +1167,85 @@ export interface ConstitutionViolation {
  * pour ça : un audit qui ne montre que ses trouvailles ne permet pas de
  * distinguer « rien à signaler » de « ce contrôle n existe pas ».
  */
-// ── LES OFFRES ─────────────────────────────────────────────────────────────
+// ── LES CRÉDITS IGINI ──────────────────────────────────────────────────────
+//
+// Miroir des réponses de backend/src/credits/ (bareme.ts, credits.service.ts).
+// Depuis le 2026-10-25 il n'y a plus d'offre payante : tous les outils sont
+// gratuits, seules les actions IGINI se paient, en crédits, au prix du barème.
 
-export type OffreId = 'decouverte' | 'entrepreneur';
+/** Les noms des appels IA, tels que le barème les connaît. */
+export type GenerateurIgini =
+  | 'analyser'
+  | 'former'
+  | 'construire'
+  | 'financer'
+  | 'developper'
+  | 'transmettre'
+  | 'executer'
+  | 'discuter'
+  | 'evaluer'
+  | 'questionner'
+  | 'statuts'
+  | 'conformite';
 
-export interface OffreCapacites {
-  projets: number | null;
-  generateurs: string[];
-  appelsIaParMois: number | null;
-  outilsDeGestion: boolean;
-  investisseurs: boolean;
-  collaborateurs: number | null;
-  /** Comprise dans l offre payante depuis le 10/10/2026 ; parcours pas encore construit. */
-  evaluationFinancement: boolean;
+export interface ActionBareme {
+  generateur: GenerateurIgini;
+  libelle: string;
+  credits: number;
+  /** Le chat se paie au message ; tout le reste à l'action lancée. */
+  par: 'action' | 'message';
 }
 
-export interface Offre {
-  id: OffreId;
-  label: string;
-  prixCentimes: number;
-  resume: string;
-  /** null pour la premiere : il n y a rien avant elle. */
-  argument: string | null;
-  capacites: OffreCapacites;
-  actuelle: boolean;
+export interface BaremeCredits {
+  /** 1 crédit = 10 centimes. */
+  valeurCreditCentimes: number;
+  /** Les crédits offerts à l'inscription. */
+  bienvenue: number;
+  recharges: Array<{ prixCentimes: number; credits: number }>;
+  /** false tant que le paiement par carte n'existe pas. */
+  rechargeDisponible: boolean;
+  rechargeMessage: string;
+  actions: ActionBareme[];
 }
 
-export interface CatalogueOffres {
-  actuelle: OffreId;
-  /** false quand rien n encaisse : aucun bouton ne doit promettre. */
-  souscriptionPossible: boolean;
-  offres: Offre[];
+export type KindCredit = 'bienvenue' | 'recharge' | 'ajustement_admin' | 'debit' | 'remboursement';
+
+export interface LigneCredits {
+  id: string;
+  date: string;
+  kind: KindCredit | string;
+  /** Signé : + crédit, − débit. */
+  credits: number;
+  generateur: string | null;
+  /** Le nom de l'action au barème, quand la ligne en porte une. */
+  libelle: string | null;
+  /** null : aucun projet (chat, bienvenue…), projet supprimé ou plus visible. */
+  projet: { id: string; titre: string } | null;
+  /** Le membre de l'équipe qui a lancé l'action dans mon projet ; null quand c'est moi ou Ignitux. */
+  acteur: string | null;
+  motif: string | null;
+}
+
+export interface VueCredits {
+  solde: number;
+  bareme: BaremeCredits;
+  historique: LigneCredits[];
+}
+
+export interface CompteCredits {
+  id: string;
+  email: string;
+  creeLe: string | null;
+  solde: number;
+  /** false : compte d'avant les crédits qui ne s'est pas encore reconnecté. */
+  bienvenueVersee: boolean;
+}
+
+export interface PageComptesCredits {
+  page: number;
+  parPage: number;
+  total: number;
+  comptes: CompteCredits[];
 }
 
 // ── L EVALUATION DE FINANCEMENT ────────────────────────────────────────────
@@ -2166,12 +2257,16 @@ export interface AiUsageMonth {
     plafond_atteint: boolean;
     message: string | null;
     bientot_atteint: boolean;
-    /** null = plafond non applicable, pas « il reste de la marge ». */
+    /**
+     * null = plafond non applicable, pas « il reste de la marge ». `analyses`
+     * vaut toujours null depuis les crédits IGINI (2026-10-25) : plus
+     * d'analyses incluses, ce qui reste se lit dans `GET /credits`. `euros` est
+     * ce qui reste avant le garde-fou de coût (anti-abus).
+     */
     restant: { analyses: number | null; euros: number | null };
     plafonds: {
+      /** Toujours null depuis les crédits IGINI. */
       analyses_par_mois: number | null;
-      /** Lequel des deux plafonds donne ce chiffre : « offre decouverte » ou « budget Ignitux ». */
-      analyses_selon?: string;
       euros_par_mois: number | null;
     };
   };
@@ -3085,15 +3180,43 @@ export const api = {
   // Sans paramètre `country` : le serveur lit le pays déclaré au profil.
   // Le forcer à FR ici rendait le champ « Pays d'activité » décoratif.
   // Le moteur existait, testé, avec sa route — et aucun écran ne l appelait.
-  // ── LES OFFRES ───────────────────────────────────────────────────────────
-  getOffres: (token: string) =>
-    request<CatalogueOffres>('/offres', { headers: { Authorization: `Bearer ${token}` } }),
+  // ── LES CRÉDITS IGINI ────────────────────────────────────────────────────
+  // Plus d'abonnement à choisir (`POST /offres/changer` a disparu le
+  // 2026-10-25) : tous les outils sont gratuits, seules les actions IGINI se
+  // paient, en crédits.
 
-  changerOffre: (token: string, offre: OffreId) =>
-    request<unknown>('/offres/changer', {
+  /** Le barème — public, sans jeton : la page d'accueil le lit aussi. */
+  getBaremeCredits: () => request<BaremeCredits>('/credits/bareme'),
+
+  /** Mon solde, le barème et mes 100 derniers mouvements. */
+  getCredits: (token: string) =>
+    request<VueCredits>('/credits', { headers: { Authorization: `Bearer ${token}` } }),
+
+  /** Administrateurs : les comptes et leur solde, paginés, filtrés sur l'adresse. */
+  getComptesCredits: (
+    token: string,
+    options: { page?: number; parPage?: number; recherche?: string } = {},
+  ) => {
+    const query = new URLSearchParams();
+    if (options.page !== undefined) query.set('page', String(options.page));
+    if (options.parPage !== undefined) query.set('parPage', String(options.parPage));
+    if (options.recherche?.trim()) query.set('recherche', options.recherche.trim());
+    const suffixe = query.toString();
+    return request<PageComptesCredits>(
+      `/admin/credits${suffixe ? `?${suffixe}` : ''}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+      // Les adresses de tous les comptes : jamais recopiées dans le
+      // stockage du navigateur de l'administrateur.
+      { skipOfflineCache: true },
+    );
+  },
+
+  /** Administrateurs : ajoute (positif) ou retire (négatif) des crédits, motif obligatoire. */
+  ajusterCredits: (token: string, userId: string, credits: number, motif: string) =>
+    request<{ id: string; solde: number }>(`/admin/credits/${encodeURIComponent(userId)}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ offre }),
+      body: JSON.stringify({ credits, motif }),
     }),
 
   // ── LA COMPTABILITE ──────────────────────────────────────────────────────

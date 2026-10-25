@@ -5,12 +5,14 @@ export interface ProgresExecution<T> {
   etat: 'en_cours' | 'ok' | 'echec' | 'arret';
   resultat?: T;
   message?: string;
+  /** L'erreur elle-même, pour un arrêt ou un échec : un refus de crédits porte un lien. */
+  erreur?: unknown;
 }
 
 export interface BilanExecution {
   /** Nombre d'ids exécutés avec succès. */
   traites: number;
-  /** Vrai si une limite (droits, quota, coût) a interrompu le lot. */
+  /** Vrai si une limite (crédits, droits, coût) a interrompu le lot. */
   arretePourLimite: boolean;
   /** Ids non traités : celui qui a déclenché l'arrêt (limite ou réseau), puis les suivants. */
   restants: string[];
@@ -20,10 +22,11 @@ export interface BilanExecution {
   annule: boolean;
 }
 
-// 403 : offre ou quota mensuel épuisé. 503 : générateurs coupés ou plafond de coût.
-// Insister sur les ids suivants ne ferait que reproduire la même réponse.
+// 402 : crédits insuffisants ou garde-fou de coût. 403 : droit refusé. 503 :
+// générateurs coupés. Insister sur les ids suivants ne ferait que reproduire
+// la même réponse.
 function estUneLimite(erreur: unknown): erreur is ApiError {
-  return erreur instanceof ApiError && (erreur.status === 403 || erreur.status === 503);
+  return erreur instanceof ApiError && (erreur.status === 402 || erreur.status === 403 || erreur.status === 503);
 }
 
 // Statut 0 : pas de réseau. Les ids suivants échoueraient de la même façon, et
@@ -61,7 +64,7 @@ export async function executerEnSerie<T>(
       onProgres({ id, etat: 'ok', resultat });
     } catch (erreur) {
       if (estUneLimite(erreur)) {
-        onProgres({ id, etat: 'arret', message: erreur.message });
+        onProgres({ id, etat: 'arret', message: erreur.message, erreur });
         return { traites, arretePourLimite: true, restants: ids.slice(i), arretReseau: false, annule: false };
       }
       if (estHorsLigne(erreur)) {

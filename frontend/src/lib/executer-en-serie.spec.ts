@@ -67,7 +67,9 @@ describe('executerEnSerie', () => {
 
     expect(bilan).toEqual({ traites: 1, arretePourLimite: true, restants: ['id2', 'id3'], arretReseau: false, annule: false });
     expect(lancer).not.toHaveBeenCalledWith('id3');
-    expect(onProgres).toHaveBeenCalledWith({ id: 'id2', etat: 'arret', message: 'Quota mensuel épuisé.' });
+    expect(onProgres).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'id2', etat: 'arret', message: 'Quota mensuel épuisé.' }),
+    );
     expect(onProgres).not.toHaveBeenCalledWith(expect.objectContaining({ id: 'id3', etat: 'arret' }));
   });
 
@@ -82,7 +84,28 @@ describe('executerEnSerie', () => {
     expect(bilan).toEqual({ traites: 0, arretePourLimite: true, restants: ['a', 'b'], arretReseau: false, annule: false });
     expect(lancer).toHaveBeenCalledTimes(1);
     const arrets = onProgres.mock.calls.filter(([info]) => info.etat === 'arret');
-    expect(arrets).toEqual([[{ id: 'a', etat: 'arret', message: 'Générateurs indisponibles.' }]]);
+    expect(arrets).toEqual([
+      [expect.objectContaining({ id: 'a', etat: 'arret', message: 'Générateurs indisponibles.' })],
+    ]);
+    // L'erreur voyage avec l'arrêt : l'écran peut dire « Voir mes crédits » sur un 402.
+    expect(arrets[0][0].erreur).toBeInstanceOf(ApiError);
+  });
+
+  it.each([
+    ['crédits insuffisants', { code: 'credits_insuffisants', requis: 4, disponible: 1 }],
+    ['garde-fou de coût', { code: 'plafond_securite' }],
+  ])("s'arrête sur une 402 (%s) : le suivant coûterait la même chose", async (_nom, corps) => {
+    const lancer = vi.fn(async () => {
+      throw new ApiError('Refusé.', 402, ['Refusé.'], corps);
+    });
+
+    const onProgres = vi.fn();
+    const bilan = await executerEnSerie(['a', 'b', 'c'], lancer, onProgres);
+
+    expect(bilan).toEqual({ traites: 0, arretePourLimite: true, restants: ['a', 'b', 'c'], arretReseau: false, annule: false });
+    expect(lancer).toHaveBeenCalledTimes(1);
+    // Ni « échec » sur la tâche : IGINI n'a rien tenté, rien n'a été débité.
+    expect(onProgres).not.toHaveBeenCalledWith(expect.objectContaining({ etat: 'echec' }));
   });
 
   it('marque un id en échec sur toute autre erreur et continue', async () => {
