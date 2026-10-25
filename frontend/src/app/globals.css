@@ -1147,7 +1147,19 @@ a.secondary:hover {
      sous son contenu sans passer sous son fond. */
   position: relative;
   isolation: isolate;
-  /* Le fond d'écran : deux lueurs, le feu en haut, l'acier en bas. */
+}
+
+/* Le fond d'écran : deux lueurs, le feu en haut, l'acier en bas. Fixé à la
+   fenêtre et non peint sur la page : la page ne fait que la hauteur de ses
+   icônes, et au téléphone le fond s'arrêtait net à mi-écran (au-delà de
+   920 px, sur les côtés aussi). Sous tout le contenu du bureau, boussole
+   comprise, jamais cliquable. */
+.ecran-accueil::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
     radial-gradient(60rem 28rem at 10% -10%, rgb(255 90 31 / 13%), transparent 60%),
     radial-gradient(50rem 30rem at 100% 110%, rgb(143 161 189 / 12%), transparent 60%);

@@ -365,22 +365,26 @@ export function StatutsSection({
               ? 'Choisis la forme juridique à confirmer à la place de la forme actuelle.'
               : "Confirme d'abord la forme juridique retenue pour ce projet."}
           </p>
-          <label htmlFor="statuts-forme">Forme juridique</label>
-          <select
-            id="statuts-forme"
-            aria-label="Forme juridique"
-            value={formeChoisie}
-            onChange={(e) => setFormeChoisie(e.target.value)}
-          >
-            <option value="" disabled>
-              Choisir une forme…
-            </option>
-            {FORMES.map((f) => (
-              <option key={f} value={f}>
-                {f}
+          {/* Un `.field` par champ, ici et plus bas : sans lui, au téléphone,
+              un libellé venait se coller à droite du champ précédent. */}
+          <div className="field">
+            <label htmlFor="statuts-forme">Forme juridique</label>
+            <select
+              id="statuts-forme"
+              aria-label="Forme juridique"
+              value={formeChoisie}
+              onChange={(e) => setFormeChoisie(e.target.value)}
+            >
+              <option value="" disabled>
+                Choisir une forme…
               </option>
-            ))}
-          </select>
+              {FORMES.map((f) => (
+                <option key={f} value={f}>
+                  {f}
+                </option>
+              ))}
+            </select>
+          </div>
           <button className="primary" type="button" onClick={confirmerForme} disabled={!formeChoisie}>
             Confirmer cette forme
           </button>
@@ -427,43 +431,53 @@ export function StatutsSection({
               la main seront perdues.
             </p>
           )}
-          <label htmlFor="statuts-capital">Capital social (€)</label>
-          <input
-            id="statuts-capital"
-            aria-label="Capital social (€)"
-            value={capital}
-            onChange={(e) => setCapital(e.target.value)}
-          />
-          <label htmlFor="statuts-siege">Siège social</label>
-          <input
-            id="statuts-siege"
-            aria-label="Siège social"
-            value={headOffice}
-            onChange={(e) => setHeadOffice(e.target.value)}
-          />
-          <label htmlFor="statuts-duree">Durée de la société (années)</label>
-          <input
-            id="statuts-duree"
-            aria-label="Durée de la société (années)"
-            value={durationYears}
-            onChange={(e) => setDurationYears(e.target.value)}
-          />
+          <div className="field">
+            <label htmlFor="statuts-capital">Capital social (€)</label>
+            <input
+              id="statuts-capital"
+              aria-label="Capital social (€)"
+              value={capital}
+              onChange={(e) => setCapital(e.target.value)}
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="statuts-siege">Siège social</label>
+            <input
+              id="statuts-siege"
+              aria-label="Siège social"
+              value={headOffice}
+              onChange={(e) => setHeadOffice(e.target.value)}
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="statuts-duree">Durée de la société (années)</label>
+            <input
+              id="statuts-duree"
+              aria-label="Durée de la société (années)"
+              value={durationYears}
+              onChange={(e) => setDurationYears(e.target.value)}
+            />
+          </div>
           {associes.map((associe, index) => (
             <div key={associe.id}>
-              <label htmlFor={`statuts-associe-nom-${associe.id}`}>Nom de l&apos;associé {index + 1}</label>
-              <input
-                id={`statuts-associe-nom-${associe.id}`}
-                aria-label={`Nom de l'associé ${index + 1}`}
-                value={associe.fullName}
-                onChange={(e) => modifierAssocie(associe.id, { fullName: e.target.value })}
-              />
-              <label htmlFor={`statuts-associe-part-${associe.id}`}>Part de l&apos;associé {index + 1} (%)</label>
-              <input
-                id={`statuts-associe-part-${associe.id}`}
-                aria-label={`Part de l'associé ${index + 1} (%)`}
-                value={associe.sharePercent}
-                onChange={(e) => modifierAssocie(associe.id, { sharePercent: e.target.value })}
-              />
+              <div className="field">
+                <label htmlFor={`statuts-associe-nom-${associe.id}`}>Nom de l&apos;associé {index + 1}</label>
+                <input
+                  id={`statuts-associe-nom-${associe.id}`}
+                  aria-label={`Nom de l'associé ${index + 1}`}
+                  value={associe.fullName}
+                  onChange={(e) => modifierAssocie(associe.id, { fullName: e.target.value })}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor={`statuts-associe-part-${associe.id}`}>Part de l&apos;associé {index + 1} (%)</label>
+                <input
+                  id={`statuts-associe-part-${associe.id}`}
+                  aria-label={`Part de l'associé ${index + 1} (%)`}
+                  value={associe.sharePercent}
+                  onChange={(e) => modifierAssocie(associe.id, { sharePercent: e.target.value })}
+                />
+              </div>
               {associes.length > 1 && (
                 <button
                   className="secondary"
@@ -524,16 +538,18 @@ export function StatutsSection({
               {isUnlocking ? 'Déverrouillage…' : 'Déverrouiller pour réécrire mes statuts'}
             </button>
           )}
-          <label htmlFor="statuts-texte">Texte des statuts</label>
-          <textarea
-            id="statuts-texte"
-            aria-label="Texte des statuts"
-            value={texte}
-            readOnly={bylaws.status === 'retenue'}
-            onChange={(e) => setTexte(e.target.value)}
-            rows={20}
-            style={{ width: '100%' }}
-          />
+          <div className="field">
+            <label htmlFor="statuts-texte">Texte des statuts</label>
+            <textarea
+              id="statuts-texte"
+              aria-label="Texte des statuts"
+              value={texte}
+              readOnly={bylaws.status === 'retenue'}
+              onChange={(e) => setTexte(e.target.value)}
+              rows={20}
+              style={{ width: '100%' }}
+            />
+          </div>
           {modifie && <p className="notice">Modifications non enregistrées</p>}
           {bylaws.status === 'brouillon' && (
             <>

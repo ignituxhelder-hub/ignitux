@@ -59,7 +59,7 @@ export class AiUsageController {
  * (« aucun plafond en nombre »), pour que l'écran de consommation existant
  * continue de se lire sans changement.
  */
-function presenterQuota(verdict: QuotaVerdict, limites: QuotaLimits) {
+export function presenterQuota(verdict: QuotaVerdict, limites: QuotaLimits) {
   return {
     autorise: verdict.allowed,
     plafond_atteint: verdict.breach,

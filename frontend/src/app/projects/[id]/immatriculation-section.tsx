@@ -539,83 +539,98 @@ export function ImmatriculationSection({
               avant d’enregistrer.
             </p>
           )}
-          <label htmlFor={ID_CHAMP.siren}>SIREN (9 chiffres, obligatoire)</label>
-          <input
-            id={ID_CHAMP.siren}
-            {...attributsChamp('siren')}
-            inputMode="numeric"
-            autoComplete="off"
-            required
-            aria-required="true"
-            value={saisie.siren}
-            maxLength={20}
-            onChange={changer('siren')}
-          />
-          {erreurChamp('siren')}
-          <label htmlFor={ID_CHAMP.siret}>SIRET du siège (14 chiffres, facultatif)</label>
-          <input
-            id={ID_CHAMP.siret}
-            {...attributsChamp('siret')}
-            inputMode="numeric"
-            autoComplete="off"
-            value={saisie.siret}
-            maxLength={30}
-            onChange={changer('siret')}
-          />
-          {erreurChamp('siret')}
-          <label htmlFor={ID_CHAMP.vatNumber}>Numéro de TVA intracommunautaire (facultatif)</label>
-          <input
-            id={ID_CHAMP.vatNumber}
-            {...attributsChamp('vatNumber')}
-            autoComplete="off"
-            value={saisie.vatNumber}
-            maxLength={30}
-            onChange={changer('vatNumber')}
-          />
-          {erreurChamp('vatNumber')}
-          <label htmlFor={ID_CHAMP.legalName}>Dénomination (obligatoire)</label>
-          <input
-            id={ID_CHAMP.legalName}
-            {...attributsChamp('legalName', proposeLegalName ? 'immatriculation-denomination-aide' : undefined)}
-            required
-            aria-required="true"
-            value={saisie.legalName}
-            maxLength={200}
-            onChange={changer('legalName')}
-          />
-          {proposeLegalName && (
-            <p className="muted" id="immatriculation-denomination-aide">
-              Proposé depuis le titre du projet — à confirmer.
-            </p>
-          )}
-          {erreurChamp('legalName')}
-          <label htmlFor={ID_CHAMP.headOffice}>Adresse du siège (obligatoire)</label>
-          <input
-            id={ID_CHAMP.headOffice}
-            {...attributsChamp('headOffice', proposeHeadOffice ? 'immatriculation-siege-aide' : undefined)}
-            required
-            aria-required="true"
-            value={saisie.headOffice}
-            maxLength={300}
-            onChange={changer('headOffice')}
-          />
-          {proposeHeadOffice && (
-            <p className="muted" id="immatriculation-siege-aide">
-              Proposé depuis tes statuts retenus — à confirmer.
-            </p>
-          )}
-          {erreurChamp('headOffice')}
-          <label htmlFor={ID_CHAMP.registeredOn}>Date d’immatriculation (obligatoire)</label>
-          <input
-            id={ID_CHAMP.registeredOn}
-            {...attributsChamp('registeredOn')}
-            type="date"
-            required
-            aria-required="true"
-            value={saisie.registeredOn}
-            onChange={changer('registeredOn')}
-          />
-          {erreurChamp('registeredOn')}
+          {/* Un `.field` par champ : sans lui, libellés et champs sont des
+              éléments en ligne qui se suivent, et au téléphone le libellé
+              suivant venait se coller à droite du champ précédent. */}
+          <div className="field">
+            <label htmlFor={ID_CHAMP.siren}>SIREN (9 chiffres, obligatoire)</label>
+            <input
+              id={ID_CHAMP.siren}
+              {...attributsChamp('siren')}
+              inputMode="numeric"
+              autoComplete="off"
+              required
+              aria-required="true"
+              value={saisie.siren}
+              maxLength={20}
+              onChange={changer('siren')}
+            />
+            {erreurChamp('siren')}
+          </div>
+          <div className="field">
+            <label htmlFor={ID_CHAMP.siret}>SIRET du siège (14 chiffres, facultatif)</label>
+            <input
+              id={ID_CHAMP.siret}
+              {...attributsChamp('siret')}
+              inputMode="numeric"
+              autoComplete="off"
+              value={saisie.siret}
+              maxLength={30}
+              onChange={changer('siret')}
+            />
+            {erreurChamp('siret')}
+          </div>
+          <div className="field">
+            <label htmlFor={ID_CHAMP.vatNumber}>Numéro de TVA intracommunautaire (facultatif)</label>
+            <input
+              id={ID_CHAMP.vatNumber}
+              {...attributsChamp('vatNumber')}
+              autoComplete="off"
+              value={saisie.vatNumber}
+              maxLength={30}
+              onChange={changer('vatNumber')}
+            />
+            {erreurChamp('vatNumber')}
+          </div>
+          <div className="field">
+            <label htmlFor={ID_CHAMP.legalName}>Dénomination (obligatoire)</label>
+            <input
+              id={ID_CHAMP.legalName}
+              {...attributsChamp('legalName', proposeLegalName ? 'immatriculation-denomination-aide' : undefined)}
+              required
+              aria-required="true"
+              value={saisie.legalName}
+              maxLength={200}
+              onChange={changer('legalName')}
+            />
+            {proposeLegalName && (
+              <p className="muted" id="immatriculation-denomination-aide">
+                Proposé depuis le titre du projet — à confirmer.
+              </p>
+            )}
+            {erreurChamp('legalName')}
+          </div>
+          <div className="field">
+            <label htmlFor={ID_CHAMP.headOffice}>Adresse du siège (obligatoire)</label>
+            <input
+              id={ID_CHAMP.headOffice}
+              {...attributsChamp('headOffice', proposeHeadOffice ? 'immatriculation-siege-aide' : undefined)}
+              required
+              aria-required="true"
+              value={saisie.headOffice}
+              maxLength={300}
+              onChange={changer('headOffice')}
+            />
+            {proposeHeadOffice && (
+              <p className="muted" id="immatriculation-siege-aide">
+                Proposé depuis tes statuts retenus — à confirmer.
+              </p>
+            )}
+            {erreurChamp('headOffice')}
+          </div>
+          <div className="field">
+            <label htmlFor={ID_CHAMP.registeredOn}>Date d’immatriculation (obligatoire)</label>
+            <input
+              id={ID_CHAMP.registeredOn}
+              {...attributsChamp('registeredOn')}
+              type="date"
+              required
+              aria-required="true"
+              value={saisie.registeredOn}
+              onChange={changer('registeredOn')}
+            />
+            {erreurChamp('registeredOn')}
+          </div>
           <button className="primary" type="submit" disabled={isSaving}>
             {isSaving ? 'Enregistrement…' : 'Enregistrer la fiche'}
           </button>

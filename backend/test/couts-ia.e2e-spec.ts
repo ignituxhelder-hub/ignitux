@@ -184,6 +184,16 @@ describe('Coûts IA (e2e)', () => {
       const verdict = await usage.quotaFor(voisin.userId);
       expect(verdict.allowed).toBe(true);
 
+      // Plus de compte d'analyses « restantes » à mettre en regard d'un
+      // compte d'appels qui mêlerait le chat (« 38 utilisées, 16 restantes,
+      // sur 35 ») : ce qui reste se lit en crédits.
+      const reponse = await api(app)
+        .get('/igini/usage/mois-en-cours')
+        .set(...auth(voisin))
+        .expect(200);
+      expect(reponse.body.quota.restant.analyses).toBeNull();
+      expect(reponse.body.quota.plafonds.analyses_par_mois).toBeNull();
+
       await deleteAccount(app, voisin);
     });
   });
