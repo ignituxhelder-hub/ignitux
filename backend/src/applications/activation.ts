@@ -52,6 +52,13 @@ export interface ContexteActivation {
   outilsDeGestion: boolean;
   /** Ce qu'elle a ajouté à son bureau, ou retiré. Absent = rien choisi. */
   choix?: Readonly<Partial<Record<ApplicationId, ChoixBureau>>>;
+  /**
+   * Des applications qui existent mais ne sont pas encore ouvertes à cette
+   * personne, avec la raison (ex. Réseaux sociaux avant la validation
+   * d'Instagram et TikTok). Elles se rangent parmi les prévues, même si
+   * elle les avait ajoutées : on ne pose pas sur un bureau une porte fermée.
+   */
+  enAttente?: Readonly<Partial<Record<ApplicationId, string>>>;
 }
 
 /** Ce que la personne a décidé pour une application de son bureau. */
@@ -149,6 +156,18 @@ export function lanceur(contexte: ContexteActivation): Lanceur {
   const choix = contexte.choix ?? {};
 
   for (const app of APPLICATIONS) {
+    const attente = contexte.enAttente?.[app.id];
+    if (attente) {
+      if (!concerne(app, rolesRetenus)) continue;
+      prevues.push({
+        ...vue(app, contexte),
+        route: null,
+        pourToi: app.secteurs.some((secteur) => contexte.secteurs.includes(secteur)),
+        cadre: attente,
+      });
+      continue;
+    }
+
     if (estRangeable(app)) {
       if (choix[app.id] === 'retiree') {
         boutique.push(vue(app, contexte));

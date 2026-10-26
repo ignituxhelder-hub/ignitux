@@ -43,8 +43,10 @@ export const GENERATEURS_METHODE = [
  *   jusqu'au 2026-10-25) ;
  * - « conformite » : une démarche de conformité préparée par IGINI, qui lit
  *   la fiche officielle (journalisée sous « executer » jusqu'au 2026-10-25).
+ * - « publier_reseaux » : la légende d'une publication Instagram ou TikTok
+ *   proposée par IGINI (application Réseaux sociaux).
  *
- * Ces deux derniers ont leur nom depuis que chaque appel a un prix affiché :
+ * « statuts » et « conformite » ont leur nom depuis que chaque appel a un prix affiché :
  * un document de statuts ou une fiche lue coûtent deux fois une
  * recommandation ou une tâche, et un prix moyen commun aurait faussé les
  * deux.
@@ -57,6 +59,7 @@ export const GENERATOR_NAMES = [
   'questionner',
   'statuts',
   'conformite',
+  'publier_reseaux',
 ] as const;
 
 export type GeneratorName = (typeof GENERATOR_NAMES)[number];

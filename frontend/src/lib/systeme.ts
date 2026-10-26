@@ -51,6 +51,7 @@ export const APPS_SYSTEME: readonly AppSysteme[] = [
   { id: 'immobilier', nom: 'Immobilier', route: '/immobilier' },
   { id: 'vehicules', nom: 'Véhicules', route: '/vehicules' },
   { id: 'publicite', nom: 'Publicité', route: '/publicite' },
+  { id: 'reseaux-sociaux', nom: 'Réseaux sociaux', route: '/reseaux-sociaux' },
 ];
 
 export const BUREAU = '/accueil';

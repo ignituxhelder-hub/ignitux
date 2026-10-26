@@ -98,6 +98,15 @@ services:
       # doit pas se mettre à dépenser du budget IA sans qu'on l'ait demandé.
       IGINI_AI_ENABLED: ${IGINI_AI_ENABLED:-false}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      INSTAGRAM_CLIENT_ID: ${INSTAGRAM_CLIENT_ID:-}
+      INSTAGRAM_CLIENT_SECRET: ${INSTAGRAM_CLIENT_SECRET:-}
+      INSTAGRAM_REDIRECT_URI: ${INSTAGRAM_REDIRECT_URI:-http://localhost:3000/reseaux-sociaux/oauth/instagram/callback}
+      INSTAGRAM_GRAPH_VERSION: ${INSTAGRAM_GRAPH_VERSION:-v26.0}
+      TIKTOK_CLIENT_KEY: ${TIKTOK_CLIENT_KEY:-}
+      TIKTOK_CLIENT_SECRET: ${TIKTOK_CLIENT_SECRET:-}
+      TIKTOK_REDIRECT_URI: ${TIKTOK_REDIRECT_URI:-http://localhost:3000/reseaux-sociaux/oauth/tiktok/callback}
+      SECRETS_ENCRYPTION_KEY: ${SECRETS_ENCRYPTION_KEY:-}
+      RESEAUX_SOCIAUX_POUR_TOUS: ${RESEAUX_SOCIAUX_POUR_TOUS:-}
       IGNITUX_RAISON_SOCIALE: ${IGNITUX_RAISON_SOCIALE:-Ignitux}
       IGNITUX_ADRESSE: ${IGNITUX_ADRESSE:-Adresse à renseigner}
       IGNITUX_EMAIL: ${IGNITUX_EMAIL:-contact@exemple.test}

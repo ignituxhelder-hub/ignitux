@@ -181,6 +181,16 @@ export const BAREME: Readonly<Record<GeneratorName, LigneBareme>> = {
     source:
       'Estimé : claude-opus-5, 1 500 tokens en entrée et 500 en sortie (trois questions) = 0,0184 €.',
   },
+  publier_reseaux: {
+    libelle: 'Légende d’une publication (réseaux sociaux)',
+    credits: 1,
+    coutReferenceMicroEur: 18_400,
+    par: 'action',
+    source:
+      'Estimé : claude-opus-5, 1 500 tokens en entrée (consigne IGINI + idée de 1 000 caractères au plus) ' +
+      'et 500 en sortie (une légende de 2 200 caractères au plus, hashtags compris) = 0,0184 €, le profil ' +
+      'de « questionner ». Jamais mesuré : à recalculer par scripts/bareme-credits.mjs.',
+  },
   discuter: {
     libelle: 'Message à IGINI',
     credits: 1,

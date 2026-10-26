@@ -445,6 +445,7 @@ const ICONES: Record<string, (props: IconeSvgProps) => ReturnType<typeof iconeGe
   immobilier: iconeMaison,
   vehicules: iconeVoiture,
   publicite: iconeMegaphone,
+  'reseaux-sociaux': iconeMegaphone,
   // Étapes de projet (lib/etapes-projet.ts, ETAPES_PROJET).
   analyse: iconeLoupe,
   'forme-juridique': iconeBalance,

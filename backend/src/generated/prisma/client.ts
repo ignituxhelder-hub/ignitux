@@ -361,6 +361,16 @@ export type stock_items = Prisma.stock_itemsModel
  */
 export type shopify_connections = Prisma.shopify_connectionsModel
 /**
+ * Model social_accounts
+ * PUBLICATIONS SOCIALES — jetons OAuth chiffrés, un compte par plateforme.
+ */
+export type social_accounts = Prisma.social_accountsModel
+/**
+ * Model social_posts
+ * PUBLICATIONS SOCIALES — chaque plateforme a son propre statut d'envoi.
+ */
+export type social_posts = Prisma.social_postsModel
+/**
  * Model stock_movements
  * STOCKS — une entrée ou une sortie sur un article. `quantity` est signée :
  * positive pour une entrée, négative pour une sortie. Historique immuable

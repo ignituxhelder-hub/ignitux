@@ -70,6 +70,10 @@ const PUBLIQUES = new Set([
   // Le barème des crédits : les prix que la page d'accueil affiche, sans connexion.
   'CreditsController.bareme',
   'IginiStatusController.getStatus',
+  // Retour de connexion Instagram / TikTok : le navigateur y arrive depuis
+  // le réseau, sans jeton Ignitux. La personne est reconnue par l'état
+  // OAuth signé (HMAC, 10 minutes), comme pour Shopify ci-dessus.
+  'PublicationsSocialesController.callback',
   'ReadinessController.ready',
   'RolesController.catalogue',
   'UsersController.signup',

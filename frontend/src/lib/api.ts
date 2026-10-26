@@ -1999,6 +1999,46 @@ export interface AdCampaignEntries {
   costPerLeadCents: number | null;
 }
 
+/** L'application est-elle ouverte à cette personne, et quels réseaux le serveur sait-il joindre ? */
+export interface SocialAccess {
+  ouvert: boolean;
+  instagram: boolean;
+  tiktok: boolean;
+}
+
+export interface SocialAccount {
+  id: string;
+  platform: 'instagram' | 'tiktok';
+  username: string | null;
+  connected_at: string;
+  token_expires_at: string | null;
+}
+
+export interface SocialPost {
+  id: string;
+  owner_id: string;
+  platform: 'instagram' | 'tiktok';
+  caption: string;
+  media_url: string;
+  media_type: 'image' | 'video';
+  media_duration_seconds: number | null;
+  privacy_level: string | null;
+  allow_comments: boolean;
+  allow_duet: boolean;
+  allow_stitch: boolean;
+  brand_organic: boolean;
+  brand_content: boolean;
+  music_consent_at: string | null;
+  /** `finalizing` : un Reel Instagram prêt, en train de partir (quelques secondes). */
+  status: 'draft' | 'publishing' | 'finalizing' | 'published' | 'failed';
+  platform_post_id: string | null;
+  /** Instagram vidéo : le conteneur que Meta prépare avant la publication. */
+  media_container_id: string | null;
+  error: string | null;
+  published_at: string | null;
+  created_at: string;
+}
+
 export type WorkflowConditionType = 'always' | 'stage_exists' | 'tasks_done' | 'manual';
 export type WorkflowActionType = 'none' | 'create_task';
 
@@ -4008,6 +4048,54 @@ export const api = {
   listVehicleEntries: (token: string, vehicleId: string) =>
     request<FleetEntries>(`/vehicules/${vehicleId}/entretien`, {
       headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  suggestSocialCaption: (token: string, platform: 'instagram' | 'tiktok', brief: string) =>
+    request<{ caption: string }>('/reseaux-sociaux/suggestion', {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ platform, brief }),
+    }),
+
+  getSocialAccess: (token: string) =>
+    request<SocialAccess>('/reseaux-sociaux/acces', { headers: { Authorization: `Bearer ${token}` } }),
+
+  listSocialAccounts: (token: string) =>
+    request<SocialAccount[]>('/reseaux-sociaux/comptes', { headers: { Authorization: `Bearer ${token}` } }),
+
+  startSocialConnection: (token: string, platform: 'instagram' | 'tiktok') =>
+    request<{ url: string }>(`/reseaux-sociaux/oauth/${platform}/demarrer`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  disconnectSocialAccount: (token: string, platform: 'instagram' | 'tiktok') =>
+    request<void>(`/reseaux-sociaux/comptes/${platform}`, {
+      method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getTikTokPrivacyOptions: (token: string) =>
+    request<{ privacyLevels: string[]; creatorNickname: string; commentDisabled: boolean; duetDisabled: boolean; stitchDisabled: boolean; maxVideoPostDurationSec: number | null }>('/reseaux-sociaux/tiktok/options', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  listSocialPosts: (token: string) =>
+    request<SocialPost[]>('/reseaux-sociaux/publications', { headers: { Authorization: `Bearer ${token}` } }),
+
+  createSocialPost: (token: string, post: { platform: 'instagram' | 'tiktok'; caption: string; mediaUrl: string; mediaType: 'image' | 'video'; privacyLevel?: string; allowComments?: boolean; allowDuet?: boolean; allowStitch?: boolean; brandOrganic?: boolean; brandContent?: boolean; mediaDurationSeconds?: number }) =>
+    request<SocialPost>('/reseaux-sociaux/publications', {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(post),
+    }),
+
+  publishSocialPost: (token: string, id: string, musicConsent = false) =>
+    request<SocialPost>(`/reseaux-sociaux/publications/${id}/publier`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ musicConsent }),
+    }),
+
+  refreshSocialPostStatus: (token: string, id: string) =>
+    request<SocialPost>(`/reseaux-sociaux/publications/${id}/statut`, { headers: { Authorization: `Bearer ${token}` } }),
+
+  deleteSocialPost: (token: string, id: string) =>
+    request<void>(`/reseaux-sociaux/publications/${id}`, {
+      method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
     }),
 
   listCampaigns: (token: string) =>

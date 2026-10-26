@@ -47,6 +47,7 @@ import { StatutsModule } from './statuts/statuts.module.js';
 import { DossierCreationModule } from './dossier-creation/dossier-creation.module.js';
 import { BoutiqueEnLigneModule } from './boutique-en-ligne/boutique-en-ligne.module.js';
 import { ImmatriculationModule } from './immatriculation/immatriculation.module.js';
+import { PublicationsSocialesModule } from './publications-sociales/publications-sociales.module.js';
 
 @Module({
   imports: [
@@ -96,6 +97,7 @@ import { ImmatriculationModule } from './immatriculation/immatriculation.module.
     StatutsModule,
     DossierCreationModule,
     ImmatriculationModule,
+    PublicationsSocialesModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: LimiteurQuiSExplique }],

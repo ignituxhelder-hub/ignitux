@@ -440,6 +440,8 @@ export const ModelName = {
   crm_interactions: 'crm_interactions',
   stock_items: 'stock_items',
   shopify_connections: 'shopify_connections',
+  social_accounts: 'social_accounts',
+  social_posts: 'social_posts',
   stock_movements: 'stock_movements',
   agenda_events: 'agenda_events',
   cash_register_entries: 'cash_register_entries',
@@ -500,7 +502,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "company_bylaws" | "bylaw_associates" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "chat_messages" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "project_compliance_ai_runs" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "participation_agreements" | "participation_milestones" | "dividend_right_entries" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "shopify_connections" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries" | "identity_verifications" | "mandates" | "creation_filings" | "company_registrations" | "financing_evaluations" | "financing_evaluation_edits" | "space_members" | "space_invitations" | "space_activity" | "user_experiences" | "user_formations" | "project_questionnaires" | "project_igini_questions" | "credit_entries"
+    modelProps: "users" | "auth_tokens" | "projects" | "analyses" | "analysis_sources" | "legal_form_recommendations" | "legal_form_assumptions" | "legal_form_alternatives" | "legal_form_sources" | "company_bylaws" | "bylaw_associates" | "financing_plans" | "development_plans" | "transmission_plans" | "memories" | "chat_messages" | "concepts" | "concept_links" | "tasks" | "community_comments" | "project_collaborators" | "build_plans" | "compliance_requirements" | "project_compliance_checks" | "project_compliance_ai_runs" | "marketplace_profiles" | "marketplace_contacts" | "automation_runs" | "financing_rounds" | "equity_holders" | "equity_events" | "dividend_distributions" | "participation_agreements" | "participation_milestones" | "dividend_right_entries" | "billing_documents" | "billing_lines" | "billing_payments" | "crm_companies" | "crm_contacts" | "crm_interactions" | "stock_items" | "shopify_connections" | "social_accounts" | "social_posts" | "stock_movements" | "agenda_events" | "cash_register_entries" | "workflow_definitions" | "workflow_steps" | "workflow_runs" | "workflow_events" | "constitution_articles" | "constitution_violations" | "buyback_objectives" | "ai_usage_events" | "ledger_accounts" | "ledger_entries" | "ledger_lines" | "bank_accounts" | "bank_transactions" | "investors" | "financed_projects" | "participations" | "investor_movements" | "user_roles" | "user_applications" | "user_profiles" | "subscriptions" | "score_snapshots" | "real_estate_properties" | "real_estate_movements" | "fleet_vehicles" | "fleet_entries" | "ad_campaigns" | "ad_campaign_entries" | "identity_verifications" | "mandates" | "creation_filings" | "company_registrations" | "financing_evaluations" | "financing_evaluation_edits" | "space_members" | "space_invitations" | "space_activity" | "user_experiences" | "user_formations" | "project_questionnaires" | "project_igini_questions" | "credit_entries"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3683,6 +3685,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.shopify_connectionsCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.Shopify_connectionsCountAggregateOutputType> | number
+        }
+      }
+    }
+    social_accounts: {
+      payload: Prisma.$social_accountsPayload<ExtArgs>
+      fields: Prisma.social_accountsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.social_accountsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_accountsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.social_accountsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_accountsPayload>
+        }
+        findFirst: {
+          args: Prisma.social_accountsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_accountsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.social_accountsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_accountsPayload>
+        }
+        findMany: {
+          args: Prisma.social_accountsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_accountsPayload>[]
+        }
+        create: {
+          args: Prisma.social_accountsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_accountsPayload>
+        }
+        createMany: {
+          args: Prisma.social_accountsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.social_accountsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_accountsPayload>[]
+        }
+        delete: {
+          args: Prisma.social_accountsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_accountsPayload>
+        }
+        update: {
+          args: Prisma.social_accountsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_accountsPayload>
+        }
+        deleteMany: {
+          args: Prisma.social_accountsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.social_accountsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.social_accountsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_accountsPayload>[]
+        }
+        upsert: {
+          args: Prisma.social_accountsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_accountsPayload>
+        }
+        aggregate: {
+          args: Prisma.Social_accountsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSocial_accounts>
+        }
+        groupBy: {
+          args: Prisma.social_accountsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Social_accountsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.social_accountsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Social_accountsCountAggregateOutputType> | number
+        }
+      }
+    }
+    social_posts: {
+      payload: Prisma.$social_postsPayload<ExtArgs>
+      fields: Prisma.social_postsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.social_postsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_postsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.social_postsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_postsPayload>
+        }
+        findFirst: {
+          args: Prisma.social_postsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_postsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.social_postsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_postsPayload>
+        }
+        findMany: {
+          args: Prisma.social_postsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_postsPayload>[]
+        }
+        create: {
+          args: Prisma.social_postsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_postsPayload>
+        }
+        createMany: {
+          args: Prisma.social_postsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.social_postsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_postsPayload>[]
+        }
+        delete: {
+          args: Prisma.social_postsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_postsPayload>
+        }
+        update: {
+          args: Prisma.social_postsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_postsPayload>
+        }
+        deleteMany: {
+          args: Prisma.social_postsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.social_postsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.social_postsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_postsPayload>[]
+        }
+        upsert: {
+          args: Prisma.social_postsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$social_postsPayload>
+        }
+        aggregate: {
+          args: Prisma.Social_postsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSocial_posts>
+        }
+        groupBy: {
+          args: Prisma.social_postsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Social_postsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.social_postsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Social_postsCountAggregateOutputType> | number
         }
       }
     }
@@ -7671,6 +7821,52 @@ export const Shopify_connectionsScalarFieldEnum = {
 export type Shopify_connectionsScalarFieldEnum = (typeof Shopify_connectionsScalarFieldEnum)[keyof typeof Shopify_connectionsScalarFieldEnum]
 
 
+export const Social_accountsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  platform: 'platform',
+  platform_account_id: 'platform_account_id',
+  username: 'username',
+  access_token_chiffre: 'access_token_chiffre',
+  token_expires_at: 'token_expires_at',
+  refresh_token_chiffre: 'refresh_token_chiffre',
+  refresh_expires_at: 'refresh_expires_at',
+  connected_at: 'connected_at',
+  disconnected_at: 'disconnected_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Social_accountsScalarFieldEnum = (typeof Social_accountsScalarFieldEnum)[keyof typeof Social_accountsScalarFieldEnum]
+
+
+export const Social_postsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  platform: 'platform',
+  caption: 'caption',
+  media_url: 'media_url',
+  media_type: 'media_type',
+  media_duration_seconds: 'media_duration_seconds',
+  privacy_level: 'privacy_level',
+  allow_comments: 'allow_comments',
+  allow_duet: 'allow_duet',
+  allow_stitch: 'allow_stitch',
+  brand_organic: 'brand_organic',
+  brand_content: 'brand_content',
+  music_consent_at: 'music_consent_at',
+  status: 'status',
+  platform_post_id: 'platform_post_id',
+  media_container_id: 'media_container_id',
+  error: 'error',
+  published_at: 'published_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Social_postsScalarFieldEnum = (typeof Social_postsScalarFieldEnum)[keyof typeof Social_postsScalarFieldEnum]
+
+
 export const Stock_movementsScalarFieldEnum = {
   id: 'id',
   item_id: 'item_id',
@@ -8686,6 +8882,8 @@ export type GlobalOmitConfig = {
   crm_interactions?: Prisma.crm_interactionsOmit
   stock_items?: Prisma.stock_itemsOmit
   shopify_connections?: Prisma.shopify_connectionsOmit
+  social_accounts?: Prisma.social_accountsOmit
+  social_posts?: Prisma.social_postsOmit
   stock_movements?: Prisma.stock_movementsOmit
   agenda_events?: Prisma.agenda_eventsOmit
   cash_register_entries?: Prisma.cash_register_entriesOmit

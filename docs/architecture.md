@@ -41,6 +41,7 @@ marketplace) est IGNITUX.
 | Comptes — mot de passe/email | `src/auth-tokens/` | Réinitialisation de mot de passe, vérification d'email |
 | Email | `src/mail/` | `MailService` — journalise, pas de vrai envoi (voir `decisions.md`) |
 | Projets | `src/projects/` | CRUD, visibilité publique/privée, collaborateurs |
+| Publications sociales | `src/publications-sociales/` | Connexion OAuth Instagram/TikTok, brouillons, suggestion de légende par IGINI et publication déclenchée par la personne |
 | IGINI — 5 générateurs | `src/igini/analysis/`, `planning/`, `financing/`, `development/`, `transmission/` | Un module par étape de la méthode, chacun appelle `ClaudeService` |
 | IGINI — moteur Claude partagé | `src/igini/claude/` | Client Anthropic, identité IGINI, traduction des erreurs, et l'**interrupteur** qui coupe les 5 générateurs en amont de tout appel réseau |
 | IGINI — mémoire | `src/igini/memory/` | Souvenirs (décisions, préférences…) liés à un utilisateur/projet |
