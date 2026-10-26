@@ -122,10 +122,15 @@ export function checkQuota(usage: QuotaUsage, limits: QuotaLimits): QuotaVerdict
   };
 }
 
-/** Faut-il prévenir la personne qu'elle approche du garde-fou ? Au dernier cinquième du plafond par défaut. */
-export function shouldWarn(verdict: QuotaVerdict): boolean {
+/**
+ * Faut-il prévenir la personne qu'elle approche du garde-fou ? Au dernier
+ * cinquième du plafond APPLIQUÉ — celui que l'environnement règle (5 € en
+ * production au 2026-10-18), pas le défaut : comparé aux 50 € du défaut, un
+ * plafond de 5 € laissait toujours moins de 10 €, et l'avertissement
+ * s'affichait dès le premier appel.
+ */
+export function shouldWarn(verdict: QuotaVerdict, limits: QuotaLimits): boolean {
   if (!verdict.allowed) return false;
-  return (
-    verdict.remaining.costMicroEur !== null && verdict.remaining.costMicroEur <= DEFAULT_COST_MICRO_EUR_PER_MONTH / 5
-  );
+  if (verdict.remaining.costMicroEur === null || limits.costMicroEurPerMonth === null) return false;
+  return verdict.remaining.costMicroEur <= limits.costMicroEurPerMonth / 5;
 }

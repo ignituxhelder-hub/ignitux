@@ -84,13 +84,27 @@ describe('checkQuota — le garde-fou anti-abus', () => {
 });
 
 describe('shouldWarn', () => {
-  it('prévient au dernier cinquième du plafond par défaut', () => {
-    expect(shouldWarn(checkQuota({ costMicroEur: 41_000_000 }, plafond(50)))).toBe(true);
-    expect(shouldWarn(checkQuota({ costMicroEur: 1_000_000 }, plafond(50)))).toBe(false);
+  const avertit = (consomme: number | null, limite: QuotaLimits) =>
+    shouldWarn(checkQuota({ costMicroEur: consomme }, limite), limite);
+
+  it('prévient au dernier cinquième du plafond appliqué', () => {
+    expect(avertit(41_000_000, plafond(50))).toBe(true);
+    expect(avertit(1_000_000, plafond(50))).toBe(false);
+  });
+
+  it('suit le plafond réglé par la variable d’environnement, pas le défaut', () => {
+    // 5 € en production (IGINI_QUOTA_COST_EUR_PER_MONTH) : comparé au défaut
+    // de 50 €, il restait toujours moins de 10 € — l'avertissement s'affichait
+    // dès le premier centime.
+    expect(avertit(100_000, plafond(5))).toBe(false);
+    expect(avertit(3_900_000, plafond(5))).toBe(false);
+    expect(avertit(4_100_000, plafond(5))).toBe(true);
+    // Et un plafond relevé à 500 € prévient bien avant les 10 derniers euros.
+    expect(avertit(410_000_000, plafond(500))).toBe(true);
   });
 
   it('ne prévient plus une fois le mur atteint, ni sans plafond', () => {
-    expect(shouldWarn(checkQuota({ costMicroEur: 50_000_000 }, plafond(50)))).toBe(false);
-    expect(shouldWarn(checkQuota({ costMicroEur: null }, plafond(null)))).toBe(false);
+    expect(avertit(50_000_000, plafond(50))).toBe(false);
+    expect(avertit(null, plafond(null))).toBe(false);
   });
 });

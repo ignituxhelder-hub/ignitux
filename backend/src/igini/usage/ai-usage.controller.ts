@@ -64,7 +64,7 @@ export function presenterQuota(verdict: QuotaVerdict, limites: QuotaLimits) {
     autorise: verdict.allowed,
     plafond_atteint: verdict.breach,
     message: verdict.reason,
-    bientot_atteint: shouldWarn(verdict),
+    bientot_atteint: shouldWarn(verdict, limites),
     restant: {
       analyses: null,
       // null se lit « plafond de coût non applicable », pas « il reste de la

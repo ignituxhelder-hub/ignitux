@@ -27,6 +27,14 @@ describe('le quota présenté à l’écran', () => {
     expect(quota).not.toHaveProperty('utilisees');
   });
 
+  it('prévient au dernier cinquième du plafond appliqué (ici 5 €), pas du défaut', () => {
+    const loin = presenterQuota({ ...AUTORISE, remaining: { costMicroEur: 4_000_000 } }, LIMITES);
+    const proche = presenterQuota({ ...AUTORISE, remaining: { costMicroEur: 900_000 } }, LIMITES);
+
+    expect(loin.bientot_atteint).toBe(false);
+    expect(proche.bientot_atteint).toBe(true);
+  });
+
   it('garde ce qui reste avant le garde-fou de coût, en euros', () => {
     const quota = presenterQuota(AUTORISE, LIMITES);
 
