@@ -19,8 +19,15 @@
 
 export const ROLES_REST = ['anon', 'authenticated'] as const;
 export const PRIVILEGES_VERIFIES = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'] as const;
-/** Les tables qu'on nomme à part, même quand tout va bien : celles où vit l'argent. */
-export const TABLES_SENSIBLES = ['credit_entries'] as const;
+/**
+ * Les tables qu'on nomme à part, même quand tout va bien, avec ce qu'une
+ * ouverture exposerait : l'argent, et les jetons d'accès aux comptes
+ * Instagram/TikTok des personnes (chiffrés, mais pas à laisser lire).
+ */
+export const TABLES_SENSIBLES: Readonly<Record<string, string>> = {
+  credit_entries: 'LE SOLDE DES COMPTES EST EXPOSÉ',
+  social_accounts: 'LES JETONS INSTAGRAM/TIKTOK DES PERSONNES SONT EXPOSÉS',
+};
 
 /**
  * Les rôles REST présents. Une base hors Supabase (la CI, un Postgres local)
@@ -77,7 +84,7 @@ export function verdictSurfaceRest(entree: {
   }
 
   const lignes: string[] = [];
-  for (const table of TABLES_SENSIBLES) {
+  for (const [table, risque] of Object.entries(TABLES_SENSIBLES)) {
     if (!entree.tablesPresentes.has(table)) {
       lignes.push(`  · ${table} : absente (migration pas encore passée)`);
       continue;
@@ -86,11 +93,11 @@ export function verdictSurfaceRest(entree: {
     lignes.push(
       surTable.length === 0
         ? `  ✓ ${table} : aucun droit pour ${ROLES_REST.join(' ni ')} (${PRIVILEGES_VERIFIES.join(', ')})`
-        : `  ✗ ${table} : ${decrire(surTable)}  ← LE SOLDE DES COMPTES EST EXPOSÉ`,
+        : `  ✗ ${table} : ${decrire(surTable)}  ← ${risque}`,
     );
   }
 
-  const autres = entree.ouverts.filter((o) => !(TABLES_SENSIBLES as readonly string[]).includes(o.table));
+  const autres = entree.ouverts.filter((o) => !Object.hasOwn(TABLES_SENSIBLES, o.table));
   const tablesAutres = [...new Set(autres.map((o) => o.table))];
   lignes.push(
     tablesAutres.length === 0

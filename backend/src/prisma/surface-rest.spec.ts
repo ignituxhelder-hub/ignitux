@@ -1,6 +1,6 @@
 import { SQL_DROITS_OUVERTS, verdictSurfaceRest } from './surface-rest.js';
 
-const AVEC_CREDITS = new Set(['users', 'credit_entries']);
+const AVEC_CREDITS = new Set(['users', 'credit_entries', 'social_accounts']);
 
 describe('la surface REST de l’hébergeur', () => {
   it('vérifie les quatre droits pour anon et authenticated, droit effectif compris', () => {
@@ -39,6 +39,20 @@ describe('la surface REST de l’hébergeur', () => {
     const texte = verdict.lignes.join('\n');
     expect(texte).toContain('✗ credit_entries : anon : INSERT, SELECT ; authenticated : SELECT');
     expect(texte).toContain('node scripts/fermer-surface-rest.mjs .env.production --appliquer');
+  });
+
+  it('nomme aussi social_accounts : les jetons Instagram/TikTok des personnes', () => {
+    const verdict = verdictSurfaceRest({
+      rolesPresents: ['anon', 'authenticated'],
+      ouverts: [{ role: 'anon', table: 'social_accounts', privilege: 'SELECT' }],
+      tablesPresentes: AVEC_CREDITS,
+      fichier: '.env.production',
+    });
+
+    expect(verdict.fermee).toBe(false);
+    const texte = verdict.lignes.join('\n');
+    expect(texte).toContain('✓ credit_entries : aucun droit');
+    expect(texte).toContain('✗ social_accounts : anon : SELECT  ← LES JETONS INSTAGRAM/TIKTOK');
   });
 
   it('une autre table ouverte compte aussi', () => {
