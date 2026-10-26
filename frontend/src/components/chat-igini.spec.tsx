@@ -199,7 +199,35 @@ describe('ChatIgini — confirmer le prix d’une étape', () => {
     const envoi = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.find(
       ([, init]) => (init as RequestInit | undefined)?.method === 'POST',
     );
-    expect(JSON.parse(String((envoi?.[1] as RequestInit).body))).toEqual({ content: 'Oui, je confirme.' });
+    // La confirmation est STRUCTURÉE : c'est elle, pas le texte, que le serveur compare au marqueur.
+    expect(JSON.parse(String((envoi?.[1] as RequestInit).body))).toEqual({
+      content: 'Oui, je confirme.',
+      confirmation: { outil: 'analyser', projectId: PROJET, credits: 4 },
+    });
+  });
+
+  it('un « oui » tapé part comme un message ordinaire, sans confirmation', async () => {
+    mockApiRoutes({
+      'GET /chat/messages': {
+        status: 200,
+        body: [proposition('m1', `Je la lance ?
+[[confirmer: analyser ${PROJET} 4]]`)],
+      },
+      'POST /chat/messages': {
+        status: 201,
+        body: { id: 'm3', role: 'igini', content: 'Clique sur Confirmer.', created_at: '2026-01-01T00:00:02Z' },
+      },
+    });
+
+    afficher();
+    fireEvent.change(await screen.findByLabelText('Ton message'), { target: { value: 'oui' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Envoyer' }));
+
+    expect(await screen.findByText('Clique sur Confirmer.')).toBeInTheDocument();
+    const envoi = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.find(
+      ([, init]) => (init as RequestInit | undefined)?.method === 'POST',
+    );
+    expect(JSON.parse(String((envoi?.[1] as RequestInit).body))).toEqual({ content: 'oui' });
   });
 
   it('ne propose de confirmer que sur le dernier message : une proposition dépassée ne vaut plus', async () => {

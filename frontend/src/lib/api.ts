@@ -3050,11 +3050,20 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     }),
 
-  sendChatMessage: (token: string, content: string) =>
+  /**
+   * `confirmation` : seulement depuis le bouton « Confirmer — N crédits ».
+   * C'est elle — pas le texte — qui lance une étape payante proposée par IGINI
+   * (le serveur la compare au marqueur du message précédent).
+   */
+  sendChatMessage: (
+    token: string,
+    content: string,
+    confirmation?: { outil: string; projectId: string; credits: number },
+  ) =>
     request<ChatMessage>('/chat/messages', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ content }),
+      body: JSON.stringify(confirmation ? { content, confirmation } : { content }),
     }),
 
   createConcept: (token: string, projectId: string, name: string, description?: string) =>
