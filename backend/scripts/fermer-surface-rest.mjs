@@ -254,6 +254,28 @@ const apres = await q(`
 
 const lecture = await q('SELECT count(*)::int AS n FROM users');
 
+// Le droit effectif, table par table (has_table_privilege) — credit_entries,
+// le solde des comptes, nommée à part. Même contrôle que verifier-base.mjs.
+let surface = null;
+try {
+  const { SQL_ROLES_REST, SQL_DROITS_OUVERTS, verdictSurfaceRest } = await import(
+    new URL('../dist/prisma/surface-rest.js', import.meta.url).href
+  );
+  const roles = await q(SQL_ROLES_REST);
+  const ouverts = roles.length === 0 ? [] : await q(SQL_DROITS_OUVERTS);
+  const presentes = await q(
+    "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'",
+  );
+  surface = verdictSurfaceRest({
+    rolesPresents: roles.map((r) => r.rolname),
+    ouverts,
+    tablesPresentes: new Set(presentes.map((t) => t.table_name)),
+    fichier,
+  });
+} catch {
+  console.log('\n  (contrôle table par table sauté : lancer « npm run build » pour l’avoir)');
+}
+
 console.log('\nAprès :');
 console.log(
   `  droits restants pour anon/authenticated : ${
@@ -261,6 +283,11 @@ console.log(
   }`,
 );
 console.log(`  le produit lit toujours ses données : users = ${lecture[0].n} ligne(s)`);
+if (surface) {
+  console.log(`  droit effectif, table par table : ${surface.fermee ? 'fermé' : 'ENCORE OUVERT'}`);
+  for (const ligne of surface.lignes) console.log(`  ${ligne}`);
+  if (!surface.fermee) process.exitCode = 1;
+}
 
 if (refusees.length > 0) {
   console.log(`\n  ${refusees.length} précaution(s) refusée(s) par l’hébergeur — sans effet ici :`);

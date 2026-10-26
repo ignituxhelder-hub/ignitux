@@ -239,8 +239,11 @@ const fils = spawn('npx prisma db push', {
 fils.on('exit', (code) => {
   console.log('');
   if (code === 0) {
-    console.log('Migration passée. Vérifier :');
-    console.log(`  node scripts/verifier-base.mjs ${fichier}`);
+    console.log('Migration passée. Vérifier MAINTENANT (une table neuve est le moment où un droit REST peut');
+    console.log('réapparaître — credit_entries est le solde des comptes) :');
+    console.log(`  npm run build && node scripts/verifier-base.mjs ${fichier}`);
+    console.log('  → doit répondre « Surface REST : fermée ». Sinon :');
+    console.log(`  node scripts/fermer-surface-rest.mjs ${fichier} --appliquer`);
   } else {
     console.log(`Prisma s’est arrêté (code ${code}). Rien n’a forcément été écrit —`);
     console.log('lire ce qu’il dit avant de recommencer, et ne pas ajouter de drapeau.');

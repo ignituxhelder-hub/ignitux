@@ -28,6 +28,15 @@
  * Si `prisma db push` réclame ensuite `--accept-data-loss`, c'est que ce
  * rapport est faux quelque part. Il faut alors s'arrêter et comprendre, pas
  * passer le drapeau.
+ *
+ * ── La surface REST ───────────────────────────────────────────────────────
+ *
+ * Il vérifie aussi qu'aucun droit n'est rouvert à `anon`/`authenticated`
+ * (l'API REST de Supabase) — sur chaque table, et nommément sur
+ * `credit_entries`, le solde de chaque compte. À relancer JUSTE APRÈS
+ * `migrer-prod.mjs` : une table neuve est le seul moment où un droit peut
+ * réapparaître. « OUVERTE » termine en code 1 et donne la commande qui ferme
+ * (`fermer-surface-rest.mjs <fichier> --appliquer`).
  */
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -60,6 +69,14 @@ function lireUrl(chemin) {
  * Node ne sait pas importer tel quel. Le script exige donc un build à jour,
  * et le dit plutôt que d'échouer sur une trace incompréhensible.
  */
+/** Le contrôle de la surface REST, compilé avec le reste (src/prisma/surface-rest.ts). */
+async function surfaceRest() {
+  const chemin = new URL('../dist/prisma/surface-rest.js', import.meta.url);
+  return import(chemin.href).catch(() => {
+    throw new Error("dist/prisma/surface-rest.js introuvable. Lancer d'abord :\n  npm run build");
+  });
+}
+
 async function attendu() {
   const chemin = new URL('../dist/generated/prisma/client.js', import.meta.url);
   const prisma = await import(chemin.href).catch(() => {
@@ -81,6 +98,7 @@ async function attendu() {
 const url = lireUrl(fichier);
 const adresse = new URL(url);
 const tables = await attendu();
+const { SQL_ROLES_REST, SQL_DROITS_OUVERTS, verdictSurfaceRest } = await surfaceRest();
 
 console.log('┌─ Vérification de base ────────────────────────────────────');
 console.log('│ fichier :', fichier);
@@ -173,6 +191,21 @@ try {
     console.log(`  ${table} : ${rows[0].n} ligne(s)`);
   }
 
+  // La surface REST : aucun droit pour anon/authenticated, credit_entries
+  // nommée. Rôles absents (CI, Postgres local) : rien à vérifier.
+  const { rows: roles } = await client.query(SQL_ROLES_REST);
+  const ouverts = roles.length === 0 ? [] : (await client.query(SQL_DROITS_OUVERTS)).rows;
+  const surface = verdictSurfaceRest({
+    rolesPresents: roles.map((r) => r.rolname),
+    ouverts,
+    tablesPresentes: new Set(presentes.keys()),
+    fichier,
+  });
+  console.log('');
+  console.log(`Surface REST : ${surface.fermee ? 'fermée' : 'OUVERTE'}`);
+  for (const ligne of surface.lignes) console.log(ligne);
+  if (!surface.fermee) process.exitCode = 1;
+
   console.log('');
   // Les tables manquantes comptent, évidemment — et les oublier ici faisait
   // annoncer « rien à migrer » à une base qui en attendait deux. Le défaut
@@ -190,6 +223,9 @@ try {
     console.log('VERDICT : À EXAMINER. Des tables existent en base sans exister au');
     console.log('          schéma. `prisma db push` proposerait de les détruire.');
     console.log('          NE PAS passer --accept-data-loss avant de comprendre.');
+  }
+  if (!surface.fermee) {
+    console.log('          ET SURFACE REST OUVERTE : la fermer avant tout push (commande ci-dessus).');
   }
 } finally {
   await client.end();
