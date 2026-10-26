@@ -13,19 +13,23 @@ import { BAREME } from '../../credits/bareme.js';
  *
  * 1. IGINI appelle l'outil. Le serveur ne lance rien, ne débite rien, et lui
  *    rend le prix à annoncer (« PRIX À CONFIRMER… »). La réponse d'IGINI se
- *    termine alors par un marqueur **écrit par le serveur**,
+ *    termine alors par UN marqueur **écrit par le serveur**,
  *    `[[confirmer: <outil> <projet> <crédits>]]`, que l'écran montre comme
- *    un bouton « Confirmer — N crédits ».
- * 2. Au message suivant, l'outil s'exécute seulement si les deux tiennent :
- *    - le message d'IGINI qui précède immédiatement porte ce marqueur pour
- *      CET outil, CE projet et le prix ACTUEL du barème ;
- *    - le message de la personne est un oui (`estConfirmation`).
- *    Une confirmation sert une fois.
+ *    un bouton « Confirmer — N crédits ». **Une action payante à la fois** :
+ *    une seconde proposée dans le même tour attend (`messageUneALaFois`) —
+ *    sinon un seul bouton à 4 crédits en aurait confirmé 9.
+ * 2. Au message suivant, l'outil s'exécute seulement si le bouton a envoyé
+ *    une **confirmation structurée** (`{ outil, projectId, credits }`, pas du
+ *    texte) qui correspond au marqueur du message d'IGINI qui précède
+ *    immédiatement : même outil, même projet, prix ACTUEL du barème. Un « oui »
+ *    tapé ne lance jamais rien — « ok, trop cher » commence aussi par « ok ».
+ *    La confirmation se réclame **une seule fois en base** : l'écriture
+ *    conditionnelle qui retire le marqueur du message d'IGINI ne réussit
+ *    qu'une fois, même depuis deux onglets.
  *
  * Le modèle ne peut pas fabriquer la confirmation : il n'écrit pas le
  * marqueur (ceux qu'il écrirait sont retirés avant d'enregistrer sa
- * réponse), et le oui vient du message de la personne. Module pur : tout se
- * teste sans rien démarrer.
+ * réponse), et la confirmation vient du bouton de la personne.
  */
 
 /** Les outils du chat qui lancent un générateur payant. */
@@ -41,6 +45,13 @@ export interface Confirmation {
   projectId: string;
 }
 
+/** Ce que le bouton envoie, et ce que le marqueur porte : l'outil, le projet, le prix affiché. */
+export interface ConfirmationPrix {
+  outil: string;
+  projectId: string;
+  credits: number;
+}
+
 /** « 4 crédits », « 1 crédit ». */
 export function enCredits(n: number): string {
   return `${n} crédit${n > 1 ? 's' : ''}`;
@@ -54,37 +65,54 @@ export function marqueurConfirmation(outil: OutilPayant, projectId: string): str
 const MARQUEUR_RE = /\n?\[\[confirmer:\s*([^\]\s]+)\s+([^\]\s]+)\s+([^\]\s]+)\s*\]\]/g;
 
 /**
- * Les propositions d'un message d'IGINI, telles que le serveur les a
- * écrites. Un outil gratuit ou inconnu, ou un prix qui n'est plus celui du
- * barème (changé entre-temps), ne vaut pas proposition : il sera reproposé
- * au bon prix.
+ * La proposition d'un message d'IGINI, telle que le serveur l'a écrite : le
+ * premier marqueur valide, et lui seul. Un outil gratuit ou inconnu, ou un
+ * prix qui n'est plus celui du barème (changé entre-temps), ne vaut pas
+ * proposition : il sera reproposé au bon prix.
  */
-export function lireConfirmations(contenu: string): Array<Confirmation & { credits: number }> {
-  const trouvees: Array<Confirmation & { credits: number }> = [];
+export function lireConfirmation(contenu: string): (Confirmation & { credits: number }) | null {
   for (const [, outil, projectId, credits] of contenu.matchAll(MARQUEUR_RE)) {
     if (!estOutilPayant(outil)) continue;
     if (Number(credits) !== BAREME[outil].credits) continue;
-    trouvees.push({ outil, projectId, credits: Number(credits) });
+    return { outil, projectId, credits: Number(credits) };
   }
-  return trouvees;
+  return null;
 }
 
-/** Retire tout marqueur de confirmation — ceux qu'un modèle écrirait lui-même. */
+/**
+ * La confirmation du bouton correspond-elle exactement au marqueur ? Même
+ * outil, même projet, même prix — celui que la personne a lu sur le bouton.
+ */
+export function confirmationCorrespond(
+  confirmation: ConfirmationPrix | null | undefined,
+  marqueur: (Confirmation & { credits: number }) | null,
+): boolean {
+  if (!confirmation || !marqueur) return false;
+  return (
+    confirmation.outil === marqueur.outil &&
+    confirmation.projectId === marqueur.projectId &&
+    confirmation.credits === marqueur.credits
+  );
+}
+
+/**
+ * Retire tout marqueur de confirmation — ceux qu'un modèle écrirait
+ * lui-même. Jusqu'à ce que le texte ne bouge plus : un marqueur imbriqué
+ * dans un autre se reformerait après un seul passage.
+ */
 export function retirerMarqueursConfirmation(texte: string): string {
-  return texte.replace(MARQUEUR_RE, '').trim();
+  let avant: string;
+  let apres = texte;
+  do {
+    avant = apres;
+    apres = avant.replace(MARQUEUR_RE, '');
+  } while (apres !== avant);
+  return apres.trim();
 }
 
-/** Ajoute à la réponse un marqueur par outil proposé pendant le tour. */
-export function ajouterPropositions(texte: string, propositions: readonly Confirmation[]): string {
-  const vus = new Set<string>();
-  const marqueurs: string[] = [];
-  for (const p of propositions) {
-    const cle = `${p.outil} ${p.projectId}`;
-    if (vus.has(cle)) continue;
-    vus.add(cle);
-    marqueurs.push(marqueurConfirmation(p.outil, p.projectId));
-  }
-  return marqueurs.length === 0 ? texte : `${texte}\n${marqueurs.join('\n')}`;
+/** Ajoute à la réponse le marqueur de l'outil proposé pendant le tour — un au plus. */
+export function ajouterProposition(texte: string, proposition: Confirmation | null): string {
+  return proposition ? `${texte}\n${marqueurConfirmation(proposition.outil, proposition.projectId)}` : texte;
 }
 
 /**
@@ -95,53 +123,61 @@ export function messagePrixAConfirmer(outil: OutilPayant): string {
   const { libelle, credits } = BAREME[outil];
   return (
     `PRIX À CONFIRMER — « ${libelle} » coûte ${enCredits(credits)}, débités du compte du propriétaire du ` +
-    'projet. Rien n’a été lancé ni débité. Annonce ce prix à la personne en une phrase et demande-lui de ' +
-    'confirmer ; un bouton de confirmation s’affiche sous ta réponse. Ne relance cet outil qu’après son oui.'
+    'projet. Rien n’a été lancé ni débité. Annonce ce prix à la personne en une phrase : un bouton ' +
+    '« Confirmer » s’affiche sous ta réponse, et lui seul lance l’action (un oui écrit ne suffit pas).'
   );
 }
 
-const OUI = /^(oui|ouais|ok|okay|d'?accord|dac|vas[- ]y|go|confirme|je confirme|c'?est bon|lance|lance[- ]la|lance[- ]le|yes|yep|sure|sim|pode)\b/;
-const NEGATION = /\b(non|pas|ne|jamais|attends?|plus tard|annule|stop|no|nao)\b/;
-
-/**
- * Le message de la personne est-il un oui ? Court, commençant par un mot
- * d'accord, sans négation. Strict à dessein : un doute coûte une seconde
- * question, une erreur coûte des crédits.
- */
-export function estConfirmation(message: string): boolean {
-  const texte = message
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[’`]/g, "'")
-    .toLowerCase()
-    .trim();
-  if (texte === '' || texte.length > 80) return false;
-  return OUI.test(texte) && !NEGATION.test(texte);
+/** Ce que l'outil rend quand une autre action payante a déjà été proposée dans ce tour. */
+export function messageUneALaFois(outil: OutilPayant, dejaProposee: OutilPayant): string {
+  return (
+    `UNE ACTION PAYANTE À LA FOIS — « ${BAREME[outil].libelle} » attendra : « ${BAREME[dejaProposee].libelle} » ` +
+    'vient d’être proposée et doit d’abord être confirmée. Rien n’a été lancé ni débité. Dis à la personne ' +
+    'qu’elle pourra demander la suivante ensuite.'
+  );
 }
 
 /**
- * Les confirmations d'un tour de chat : accordées par le message de la
- * personne, consommées une fois par l'outil, et les nouvelles propositions
- * faites pendant le tour.
+ * Les confirmations d'un tour de chat : celle que le bouton a accordée
+ * (une au plus), consommée une seule fois — d'abord ici, puis en base par
+ * `reclamer` (l'écriture conditionnelle) — et la proposition payante faite
+ * pendant le tour (une au plus).
  */
 export class ConfirmationsDuTour {
-  private readonly accordees: Set<string>;
-  private readonly proposees: Confirmation[] = [];
+  private accordee: Confirmation | null;
+  private proposee: Confirmation | null = null;
 
-  constructor(accordees: readonly Confirmation[]) {
-    this.accordees = new Set(accordees.map((c) => `${c.outil} ${c.projectId}`));
+  constructor(
+    accordee: Confirmation | null,
+    private readonly reclamer?: () => Promise<boolean>,
+  ) {
+    this.accordee = accordee;
   }
 
-  /** `true` une seule fois, et seulement pour ce que la personne a confirmé. */
-  consommer(outil: OutilPayant, projectId: string): boolean {
-    return this.accordees.delete(`${outil} ${projectId}`);
+  /** `true` une seule fois, seulement pour ce que le bouton a confirmé, et si la réclamation en base passe. */
+  async consommer(outil: OutilPayant, projectId: string): Promise<boolean> {
+    const a = this.accordee;
+    if (!a || a.outil !== outil || a.projectId !== projectId) return false;
+    // Retirée avant toute attente : un second appel du même tour ne passe pas.
+    this.accordee = null;
+    return this.reclamer ? this.reclamer() : true;
   }
 
-  proposer(outil: OutilPayant, projectId: string): void {
-    this.proposees.push({ outil, projectId });
+  /**
+   * Note la proposition payante du tour. `false` si une AUTRE action payante
+   * est déjà proposée : une à la fois, pour qu'un bouton ne confirme jamais
+   * qu'un seul prix.
+   */
+  proposer(outil: OutilPayant, projectId: string): boolean {
+    if (this.proposee === null) {
+      this.proposee = { outil, projectId };
+      return true;
+    }
+    return this.proposee.outil === outil && this.proposee.projectId === projectId;
   }
 
-  propositions(): Confirmation[] {
-    return [...this.proposees];
+  /** L'outil payant proposé dans ce tour, s'il y en a un. */
+  proposition(): Confirmation | null {
+    return this.proposee;
   }
 }

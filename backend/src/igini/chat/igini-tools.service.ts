@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { ProjectsService } from '../../projects/projects.service.js';
 import { MemoryService } from '../memory/memory.service.js';
-import { ConfirmationsDuTour, estOutilPayant, messagePrixAConfirmer, type OutilPayant } from './chat-confirmation.js';
+import {
+  ConfirmationsDuTour,
+  estOutilPayant,
+  messagePrixAConfirmer,
+  messageUneALaFois,
+  type OutilPayant,
+} from './chat-confirmation.js';
 import { PROJECT_ID_INPUT_SCHEMA, RAPPELER_SOUVENIRS_INPUT_SCHEMA, toToolErrorMessage } from './igini-tools.js';
 
 export interface ToolResult {
@@ -14,10 +20,10 @@ export interface ToolResult {
  * EXÉCUTEUR DES 7 OUTILS DE L'ORCHESTRATEUR.
  *
  * Un outil payant (un générateur) ne s'exécute que si la personne a
- * confirmé son prix au tour précédent (`ctx.confirmations`, voir
- * chat-confirmation.ts). Sinon il ne lance rien, ne débite rien, note la
- * proposition et rend le prix à annoncer. Sans contexte de confirmation,
- * jamais.
+ * confirmé son prix par le bouton, au tour précédent (`ctx.confirmations`,
+ * voir chat-confirmation.ts). Sinon il ne lance rien, ne débite rien, note
+ * la proposition (une seule par tour) et rend le prix à annoncer. Sans
+ * contexte de confirmation, jamais.
  *
  * N'appelle jamais Claude — seulement des services NestJS déjà existants et
  * déjà gardés. `execute()` ne laisse jamais une exception remonter : elle
@@ -39,7 +45,7 @@ export class IginiToolsService {
   ): Promise<ToolResult> {
     try {
       if (estOutilPayant(name)) {
-        const prixConfirme = this.prixConfirme(name, rawInput, ctx.confirmations);
+        const prixConfirme = await this.prixConfirme(name, rawInput, ctx.confirmations);
         if (prixConfirme !== true) return prixConfirme;
       }
       switch (name) {
@@ -75,16 +81,22 @@ export class IginiToolsService {
 
   /**
    * `true` si la personne a confirmé ce prix pour ce projet (la confirmation
-   * est alors consommée) ; sinon le résultat à rendre, sans rien lancer.
+   * est alors consommée, en base comprise) ; sinon le résultat à rendre, sans
+   * rien lancer : le prix à annoncer, ou « une action payante à la fois » si
+   * une autre vient d'être proposée dans ce tour.
    */
-  private prixConfirme(
+  private async prixConfirme(
     outil: OutilPayant,
     rawInput: unknown,
     confirmations: ConfirmationsDuTour | undefined,
-  ): true | ToolResult {
+  ): Promise<true | ToolResult> {
     const { project_id } = PROJECT_ID_INPUT_SCHEMA.parse(rawInput);
-    if (confirmations?.consommer(outil, project_id)) return true;
-    confirmations?.proposer(outil, project_id);
+    if (!confirmations) return { content: messagePrixAConfirmer(outil), isError: false };
+    if (await confirmations.consommer(outil, project_id)) return true;
+    if (!confirmations.proposer(outil, project_id)) {
+      const deja = confirmations.proposition() as { outil: OutilPayant };
+      return { content: messageUneALaFois(outil, deja.outil), isError: false };
+    }
     return { content: messagePrixAConfirmer(outil), isError: false };
   }
 

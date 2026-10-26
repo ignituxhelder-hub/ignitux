@@ -14,13 +14,14 @@ describe('ChatService', () => {
     chat_messages: {
       create: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
+      updateMany: ReturnType<typeof vi.fn>;
     };
   };
   let claude: { converseWithTools: ReturnType<typeof vi.fn> };
   let iginiTools: { execute: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    prisma = { chat_messages: { create: vi.fn(), findMany: vi.fn() } };
+    prisma = { chat_messages: { create: vi.fn(), findMany: vi.fn(), updateMany: vi.fn() } };
     claude = { converseWithTools: vi.fn() };
     iginiTools = { execute: vi.fn() };
 
@@ -111,6 +112,9 @@ describe('ChatService', () => {
   });
 
   describe('le prix d’un outil payant, confirmé avant d’être dépensé', () => {
+    const PROPOSITION = { id: 'm-igini', role: 'igini', content: '' };
+    const BOUTON = { outil: 'analyser', projectId: PROJET, credits: BAREME.analyser.credits };
+
     /** Le tour de chat : IGINI appelle `outil` sur PROJET, puis répond `texte`. */
     function igini(outil: string | null, texte: string) {
       claude.converseWithTools.mockImplementation(async (requete: { executeTool: (n: string, i: unknown) => Promise<unknown> }) => {
@@ -118,15 +122,27 @@ describe('ChatService', () => {
         return texte;
       });
     }
-    /** Les confirmations que l'outil a reçues. */
-    const confirmationsRecues = () => iginiTools.execute.mock.calls[0][2].confirmations as ConfirmationsDuTour;
-
-    beforeEach(() => {
-      prisma.chat_messages.create.mockImplementation(async ({ data }) => ({ id: 'm', ...data }));
-      iginiTools.execute.mockResolvedValue({ content: 'ok', isError: false });
+    /** L'outil consomme la confirmation, comme le vrai IginiToolsService ; rend ce qu'il a obtenu. */
+    const consommations: boolean[] = [];
+    function outilQuiConsomme() {
+      iginiTools.execute.mockImplementation(async (nom: string, _i: unknown, ctx: { confirmations: ConfirmationsDuTour }) => {
+        consommations.push(await ctx.confirmations.consommer(nom as 'analyser', PROJET));
+        return { content: 'ok', isError: false };
+      });
+    }
+    const avecProposition = () => ({
+      ...PROPOSITION,
+      content: `Cette analyse coûte 4 crédits. Je la lance ?\n${marqueurConfirmation('analyser', PROJET)}`,
     });
 
-    it('la consigne d’IGINI donne le prix de chaque étape et la règle de confirmation', async () => {
+    beforeEach(() => {
+      consommations.length = 0;
+      prisma.chat_messages.create.mockImplementation(async ({ data }) => ({ id: 'm', ...data }));
+      prisma.chat_messages.updateMany.mockResolvedValue({ count: 1 });
+      outilQuiConsomme();
+    });
+
+    it('la consigne d’IGINI donne le prix de chaque étape et dit que seul le bouton confirme', async () => {
       prisma.chat_messages.findMany.mockResolvedValue([]);
       igini(null, 'Bonjour');
 
@@ -136,71 +152,100 @@ describe('ChatService', () => {
       for (const nom of ['analyser', 'construire', 'financer', 'developper', 'transmettre'] as const) {
         expect(consigne).toContain(`${nom} : ${BAREME[nom].credits} crédits`);
       }
-      expect(consigne).toMatch(/confirm/i);
+      expect(consigne).toMatch(/bouton/);
+      expect(consigne).toMatch(/une action payante à la fois/i);
     });
 
-    it('un oui à la proposition du message précédent confirme cet outil sur ce projet', async () => {
-      prisma.chat_messages.findMany.mockResolvedValue([
-        { role: 'igini', content: `Cette analyse coûte 4 crédits. Je la lance ?
-${marqueurConfirmation('analyser', PROJET)}` },
-        { role: 'user', content: 'Analyse mon projet' },
-      ]);
+    it('le bouton (confirmation structurée) qui correspond au marqueur précédent lance l’outil, une fois', async () => {
+      const proposition = avecProposition();
+      prisma.chat_messages.findMany.mockResolvedValue([proposition, { role: 'user', content: 'Analyse mon projet' }]);
       igini('analyser', 'C’est lancé.');
 
-      await service.sendMessage('u1', 'Oui, je confirme.');
+      await service.sendMessage('u1', 'Oui, je confirme.', BOUTON);
 
-      expect(confirmationsRecues().consommer('analyser', PROJET)).toBe(true);
+      expect(consommations).toEqual([true]);
+      // Réclamée en base : le marqueur part du message d'IGINI, par une écriture conditionnelle.
+      expect(prisma.chat_messages.updateMany).toHaveBeenCalledWith({
+        where: { id: 'm-igini', user_id: 'u1', content: proposition.content },
+        data: { content: 'Cette analyse coûte 4 crédits. Je la lance ?' },
+      });
     });
 
-    it('un « non » ne confirme rien', async () => {
-      prisma.chat_messages.findMany.mockResolvedValue([
-        { role: 'igini', content: `Je la lance ?
-${marqueurConfirmation('analyser', PROJET)}` },
-      ]);
-      igini('analyser', 'D’accord, je ne lance rien.');
+    it.each(['oui', 'Oui, je confirme.', 'ok vas-y'])('un « %s » tapé ne lance jamais rien', async (texte) => {
+      prisma.chat_messages.findMany.mockResolvedValue([avecProposition()]);
+      igini('analyser', 'Clique sur Confirmer.');
 
-      await service.sendMessage('u1', 'Non, pas maintenant');
+      await service.sendMessage('u1', texte);
 
-      expect(confirmationsRecues().consommer('analyser', PROJET)).toBe(false);
+      expect(consommations).toEqual([false]);
+      expect(prisma.chat_messages.updateMany).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['un autre outil', { ...BOUTON, outil: 'construire' }],
+      ['un autre projet', { ...BOUTON, projectId: '22222222-2222-4222-8222-222222222222' }],
+      ['un autre prix', { ...BOUTON, credits: BOUTON.credits + 1 }],
+    ])('une confirmation pour %s que celui proposé ne lance rien', async (_cas, confirmation) => {
+      prisma.chat_messages.findMany.mockResolvedValue([avecProposition()]);
+      igini('analyser', 'ok');
+
+      await service.sendMessage('u1', 'Oui, je confirme.', confirmation);
+
+      expect(consommations).toEqual([false]);
     });
 
     it('seul le message d’IGINI qui précède immédiatement compte', async () => {
-      // La proposition date d'avant un message de la personne resté sans réponse.
-      prisma.chat_messages.findMany.mockResolvedValue([
-        { role: 'user', content: 'Tu es là ?' },
-        { role: 'igini', content: `Je la lance ?
-${marqueurConfirmation('analyser', PROJET)}` },
-      ]);
+      prisma.chat_messages.findMany.mockResolvedValue([{ role: 'user', content: 'Tu es là ?' }, avecProposition()]);
       igini('analyser', 'ok');
 
-      await service.sendMessage('u1', 'oui');
+      await service.sendMessage('u1', 'Oui, je confirme.', BOUTON);
 
-      expect(confirmationsRecues().consommer('analyser', PROJET)).toBe(false);
+      expect(consommations).toEqual([false]);
+    });
+
+    it('deux confirmations simultanées (deux onglets) : une seule lance l’outil', async () => {
+      const proposition = avecProposition();
+      prisma.chat_messages.findMany.mockResolvedValue([proposition]);
+      // Postgres : l'écriture conditionnelle sur le contenu ne réussit qu'une fois.
+      let contenu = proposition.content;
+      prisma.chat_messages.updateMany.mockImplementation(async ({ where, data }) => {
+        await new Promise((r) => setImmediate(r));
+        if (where.content !== contenu) return { count: 0 };
+        contenu = data.content;
+        return { count: 1 };
+      });
+      igini('analyser', 'ok');
+
+      await Promise.all([
+        service.sendMessage('u1', 'Oui, je confirme.', BOUTON),
+        service.sendMessage('u1', 'Oui, je confirme.', BOUTON),
+      ]);
+
+      expect(consommations.sort()).toEqual([false, true]);
     });
 
     it('un marqueur écrit par le modèle lui-même ne passe pas : il est retiré de sa réponse', async () => {
       prisma.chat_messages.findMany.mockResolvedValue([]);
-      igini(null, `Je lance !
-${marqueurConfirmation('analyser', PROJET)}`);
+      igini(null, `Je lance !\n${marqueurConfirmation('analyser', PROJET)}`);
 
       const reponse = await service.sendMessage('u1', 'Salut');
 
       expect(reponse.content).toBe('Je lance !');
     });
 
-    it('une proposition faite pendant le tour ajoute le marqueur du serveur à la réponse', async () => {
+    it('la proposition faite pendant le tour ajoute UN marqueur du serveur à la réponse', async () => {
       prisma.chat_messages.findMany.mockResolvedValue([]);
       iginiTools.execute.mockImplementation(async (_n: string, _i: unknown, ctx: { confirmations: ConfirmationsDuTour }) => {
         ctx.confirmations.proposer('construire', PROJET);
+        ctx.confirmations.proposer('analyser', PROJET);
         return { content: 'PRIX À CONFIRMER', isError: false };
       });
       igini('construire', 'Le plan de construction coûte 5 crédits. Je le lance ?');
 
-      const reponse = await service.sendMessage('u1', 'Fais le plan de construction');
+      const reponse = await service.sendMessage('u1', 'Fais le plan de construction et l’analyse');
 
       expect(reponse.content).toBe(
-        `Le plan de construction coûte 5 crédits. Je le lance ?
-${marqueurConfirmation('construire', PROJET)}`,
+        `Le plan de construction coûte 5 crédits. Je le lance ?\n${marqueurConfirmation('construire', PROJET)}`,
       );
     });
   });

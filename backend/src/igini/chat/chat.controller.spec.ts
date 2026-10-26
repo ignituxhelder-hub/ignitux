@@ -31,8 +31,16 @@ describe('ChatController', () => {
 
     const result = await controller.send(currentUser, { content: 'Salut' });
 
-    expect(chatService.sendMessage).toHaveBeenCalledWith('u1', 'Salut');
+    expect(chatService.sendMessage).toHaveBeenCalledWith('u1', 'Salut', null);
     expect(result).toEqual({ id: 'm2', role: 'igini', content: 'ok' });
+  });
+
+  it('transmet la confirmation structurée du bouton « Confirmer »', async () => {
+    const confirmation = { outil: 'analyser', projectId: '11111111-1111-4111-8111-111111111111', credits: 4 };
+
+    await controller.send(currentUser, { content: 'Oui, je confirme.', confirmation });
+
+    expect(chatService.sendMessage).toHaveBeenCalledWith('u1', 'Oui, je confirme.', confirmation);
   });
 
   it('history délègue au service avec la limite fournie', async () => {

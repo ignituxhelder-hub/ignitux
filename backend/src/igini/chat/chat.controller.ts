@@ -19,7 +19,7 @@ export class ChatController {
   @Post('messages')
   @HttpCode(HttpStatus.CREATED)
   send(@CurrentUser() user: AuthenticatedUser, @Body() dto: SendChatMessageDto) {
-    return this.chatService.sendMessage(user.id, dto.content);
+    return this.chatService.sendMessage(user.id, dto.content, dto.confirmation ?? null);
   }
 
   @Get('messages')

@@ -4,13 +4,14 @@ import { PrismaService } from '../../prisma/prisma.service.js';
 import { ClaudeService } from '../claude/claude.service.js';
 import { buildSystemPrompt } from '../claude/igini-identity.js';
 import {
-  ajouterPropositions,
+  ajouterProposition,
   ConfirmationsDuTour,
+  confirmationCorrespond,
   enCredits,
-  estConfirmation,
-  lireConfirmations,
+  lireConfirmation,
   OUTILS_PAYANTS,
   retirerMarqueursConfirmation,
+  type ConfirmationPrix,
 } from './chat-confirmation.js';
 import { toClaudeMessages } from './chat-message-window.js';
 import { IGINI_TOOL_DEFINITIONS } from './igini-tools.js';
@@ -38,9 +39,10 @@ ce message-ci (${enCredits(BAREME.discuter.credits)}). Les prix : ${OUTILS_PAYAN
 
 Le prix se confirme avant d'être dépensé, et c'est le serveur qui le garantit : quand la personne demande une
 étape, appelle l'outil. Ce premier appel ne lance rien et ne débite rien : il te rend « PRIX À CONFIRMER » avec le
-prix. Annonce alors ce prix en une phrase et demande-lui de confirmer (un bouton de confirmation s'affiche sous ta
-réponse). Au message suivant, si elle a dit oui, rappelle l'outil : il s'exécute. Sans ce oui, ne le rappelle pas.
-N'écris jamais toi-même le format [[confirmer: ...]].
+prix. Annonce alors ce prix en une phrase : un bouton « Confirmer » s'affiche sous ta réponse, et lui seul lance
+l'action — un oui écrit ne suffit pas ; si la personne l'écrit, invite-la à cliquer sur le bouton. Au message qui
+suit son clic, rappelle l'outil : il s'exécute. Une action payante à la fois : si elle en demande plusieurs,
+propose la première, les suivantes viendront ensuite. N'écris jamais toi-même le format [[confirmer: ...]].
 
 Si un outil te renvoie une erreur (crédits insuffisants, garde-fou de sécurité atteint, projet introuvable...),
 explique la situation à la personne dans tes mots, sans lui montrer de message technique brut ; pour des crédits
@@ -70,7 +72,13 @@ export class ChatService {
     private readonly iginiTools: IginiToolsService,
   ) {}
 
-  async sendMessage(userId: string, content: string) {
+  /**
+   * `confirmation` : envoyée par le bouton « Confirmer — N crédits », jamais
+   * déduite du texte. Elle ne lance un outil payant que si elle correspond au
+   * marqueur du message d'IGINI qui précède immédiatement (voir
+   * chat-confirmation.ts).
+   */
+  async sendMessage(userId: string, content: string, confirmation: ConfirmationPrix | null = null) {
     const previous = await this.prisma.chat_messages.findMany({
       where: { user_id: userId },
       orderBy: { created_at: 'desc' },
@@ -92,12 +100,26 @@ export class ChatService {
     }));
     const claudeMessages = toClaudeMessages([...ordered, { role: 'user' as const, content }]);
 
-    // Un outil payant ne s'exécute que si CE message dit oui à une proposition
-    // du message d'IGINI qui le précède immédiatement (voir chat-confirmation.ts).
+    // Un outil payant ne s'exécute que si le bouton a confirmé LA proposition
+    // du message d'IGINI qui précède immédiatement : même outil, même projet,
+    // prix actuel (voir chat-confirmation.ts). Le texte tapé n'accorde rien.
     const precedent = previous[0];
-    const accordees =
-      precedent?.role === 'igini' && estConfirmation(content) ? lireConfirmations(precedent.content) : [];
-    const confirmations = new ConfirmationsDuTour(accordees);
+    const marqueur = precedent?.role === 'igini' ? lireConfirmation(precedent.content) : null;
+    const accordee = marqueur && confirmationCorrespond(confirmation, marqueur) ? marqueur : null;
+    // Réclamée une seule fois en base : l'écriture qui retire le marqueur du
+    // message d'IGINI ne réussit que si ce message n'a pas changé. Deux
+    // onglets qui confirment ensemble : le second trouve le marqueur parti.
+    const confirmations = new ConfirmationsDuTour(
+      accordee ? { outil: accordee.outil, projectId: accordee.projectId } : null,
+      async () => {
+        if (!precedent?.id) return false;
+        const { count } = await this.prisma.chat_messages.updateMany({
+          where: { id: precedent.id, user_id: userId, content: precedent.content },
+          data: { content: retirerMarqueursConfirmation(precedent.content) },
+        });
+        return count === 1;
+      },
+    );
 
     const reply = await this.claude.converseWithTools({
       systemPrompt: SYSTEM_PROMPT,
@@ -109,7 +131,7 @@ export class ChatService {
 
     // Le marqueur de confirmation n'est jamais celui du modèle : on retire ce
     // qu'il aurait écrit, et le serveur ajoute ceux des prix proposés.
-    const texte = ajouterPropositions(retirerMarqueursConfirmation(reply), confirmations.propositions());
+    const texte = ajouterProposition(retirerMarqueursConfirmation(reply), confirmations.proposition());
 
     return this.prisma.chat_messages.create({
       data: { user_id: userId, role: 'igini', content: texte },

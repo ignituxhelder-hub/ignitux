@@ -57,9 +57,10 @@ const GENERATOR_TOOL_DESCRIPTIONS: Record<(typeof GENERATOR_TOOL_NAMES)[number],
 function descriptionPayante(name: (typeof GENERATOR_TOOL_NAMES)[number]): string {
   return (
     `${GENERATOR_TOOL_DESCRIPTIONS[name]} Prix : ${enCredits(BAREME[name].credits)}, débités du compte du ` +
-    'propriétaire du projet, en plus du message. Ne l’appelle que si la personne l’a demandé. Premier appel : ' +
-    'le serveur ne lance rien et te rend le prix à annoncer ; il ne s’exécute qu’au message suivant, si la ' +
-    'personne a confirmé (oui) ta proposition.'
+    'propriétaire du projet, en plus du message. Ne l’appelle que si la personne l’a demandé, et une seule ' +
+    'action payante à la fois. Premier appel : le serveur ne lance rien et te rend le prix à annoncer ; il ne ' +
+    's’exécute qu’au message suivant, si la personne a cliqué sur le bouton « Confirmer » (un oui écrit ne ' +
+    'suffit pas).'
   );
 }
 

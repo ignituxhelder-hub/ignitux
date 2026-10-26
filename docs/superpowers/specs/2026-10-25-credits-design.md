@@ -116,9 +116,12 @@ page d'accueil et page Crédits affichent le barème du serveur.
   office de marque « en cours »). Aucune colonne ajoutée.
 - **Chat : prix confirmé avant d'être dépensé.** Un outil payant appelé depuis le chat ne lance
   rien au premier appel : il rend le prix, et la réponse d'IGINI porte un marqueur écrit par le
-  serveur, `[[confirmer: <outil> <projet> <crédits>]]` (bouton « Confirmer — N crédits »). Il ne
-  s'exécute qu'au message suivant si ce message est un oui et que le message d'IGINI qui le
-  précède immédiatement porte ce marqueur au prix actuel du barème. Les marqueurs écrits par le
-  modèle sont retirés (`igini/chat/chat-confirmation.ts`).
+  serveur, `[[confirmer: <outil> <projet> <crédits>]]` (bouton « Confirmer — N crédits ») — une
+  seule action payante proposée par message. Il ne s'exécute qu'au message suivant si le bouton a
+  envoyé une confirmation STRUCTURÉE (`confirmation: { outil, projectId, credits }`) identique au
+  marqueur du message d'IGINI qui précède immédiatement, au prix actuel du barème ; un « oui » tapé
+  n'accorde rien. La confirmation se réclame une fois en base (écriture conditionnelle qui retire
+  le marqueur du message d'IGINI : deux onglets n'en obtiennent qu'une). Les marqueurs écrits par
+  le modèle sont retirés, jusqu'à stabilité (`igini/chat/chat-confirmation.ts`).
 - **Surface REST.** `verifier-base.mjs` vérifie que `anon`/`authenticated` n'ont aucun droit
   effectif sur `credit_entries` (ni ailleurs) ; à lancer juste après `migrer-prod.mjs`.

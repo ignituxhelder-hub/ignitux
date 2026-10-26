@@ -10,7 +10,7 @@ import { IginiToolsService } from './igini-tools.service.js';
 /** Le contexte d'un tour où la personne vient de confirmer cet outil sur ce projet. */
 const confirme = (outil: 'analyser' | 'construire' | 'financer' | 'developper' | 'transmettre', projectId = 'p1') => ({
   userId: 'u1',
-  confirmations: new ConfirmationsDuTour([{ outil, projectId }]),
+  confirmations: new ConfirmationsDuTour({ outil, projectId }),
 });
 
 describe('IginiToolsService', () => {
@@ -121,7 +121,7 @@ describe('IginiToolsService', () => {
 
   describe('le prix confirmé avant d’être dépensé', () => {
     it('sans confirmation : rien n’est lancé ni débité, le prix est rendu, la proposition notée', async () => {
-      const tour = new ConfirmationsDuTour([]);
+      const tour = new ConfirmationsDuTour(null);
 
       const result = await service.execute('analyser', { project_id: 'p1' }, { userId: 'u1', confirmations: tour });
 
@@ -129,7 +129,27 @@ describe('IginiToolsService', () => {
       expect(result.isError).toBe(false);
       expect(result.content).toContain('PRIX À CONFIRMER');
       expect(result.content).toContain(`${BAREME.analyser.credits} crédits`);
-      expect(tour.propositions()).toEqual([{ outil: 'analyser', projectId: 'p1' }]);
+      expect(tour.proposition()).toEqual({ outil: 'analyser', projectId: 'p1' });
+    });
+
+    it('une action payante à la fois : une seconde proposée dans le même tour attend, sans marqueur', async () => {
+      const tour = new ConfirmationsDuTour(null);
+
+      await service.execute('analyser', { project_id: 'p1' }, { userId: 'u1', confirmations: tour });
+      const seconde = await service.execute('construire', { project_id: 'p1' }, { userId: 'u1', confirmations: tour });
+
+      expect(seconde.content).toMatch(/UNE ACTION PAYANTE À LA FOIS/);
+      expect(projects.createBuildPlanForOwner).not.toHaveBeenCalled();
+      expect(tour.proposition()).toEqual({ outil: 'analyser', projectId: 'p1' });
+    });
+
+    it('une confirmation perdue face à un autre onglet ne lance rien', async () => {
+      const tour = new ConfirmationsDuTour({ outil: 'analyser', projectId: 'p1' }, async () => false);
+
+      const result = await service.execute('analyser', { project_id: 'p1' }, { userId: 'u1', confirmations: tour });
+
+      expect(projects.analyzeForOwner).not.toHaveBeenCalled();
+      expect(result.content).toContain('PRIX À CONFIRMER');
     });
 
     it('sans contexte de confirmation du tout : jamais lancé', async () => {
