@@ -90,7 +90,7 @@ describe('SCÉNARIO — participation IGNITUX', () => {
         .expect(403);
     });
 
-    it('IGNITUX crée l’accord : 51/49, 5 % et l’offre entrepreneur, par défaut', async () => {
+    it('IGNITUX crée l’accord : 51/49, 5 % et l’offre gratuite (decouverte), par défaut', async () => {
       const { body } = await api(app)
         .post(`/projects/${projectId}/participation/agreement`)
         .set(...auth(ignitux))
@@ -101,7 +101,9 @@ describe('SCÉNARIO — participation IGNITUX', () => {
         initial_founder_bps: 5100,
         initial_ignitux_bps: 4900,
         dividend_right_bps: 500,
-        ecosystem_offre: 'entrepreneur',
+        // Depuis les crédits IGINI (25/10/2026), il n'y a plus d'offre payante :
+        // un nouvel accord enregistre l'offre gratuite.
+        ecosystem_offre: 'decouverte',
         status: 'actif',
       });
       await expect(partsActuelles()).resolves.toEqual({ porteur: 5100, ignitux: 4900 });

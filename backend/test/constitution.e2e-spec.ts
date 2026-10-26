@@ -265,6 +265,9 @@ describe('Constitution et données personnelles (e2e)', () => {
         'cgu_acceptees_le',
         'cgu_version_acceptee',
         'compte_cree_le',
+        // Le journal des crédits IGINI (bienvenue, débits, remboursements,
+        // ajustements) : le solde de la personne se reconstitue à partir de lui.
+        'credits_igini',
         // Le CV décrit (expériences, formations) saisi pour le questionnaire.
         'cv',
         'email',

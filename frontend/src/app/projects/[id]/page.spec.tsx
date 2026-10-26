@@ -1014,7 +1014,9 @@ describe('ProjectDetailPage', () => {
     expect(screen.getByText(/Projet partagé avec toi/)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
-    expect(screen.getByText('Résumé existant.')).toBeInTheDocument();
+    // La section s'affiche après ses lectures (dont les crédits) : on l'attend,
+    // sinon le test dépend de la vitesse de la machine (échec vu en CI).
+    expect(await screen.findByText('Résumé existant.', undefined, { timeout: 5000 })).toBeInTheDocument();
 
     // Pas de bouton de génération, pas de formulaire d'édition.
     expect(screen.queryByRole('button', { name: /analyser ce projet/i })).not.toBeInTheDocument();
