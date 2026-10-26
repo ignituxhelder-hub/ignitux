@@ -42,6 +42,13 @@ describe('SignupDto — acceptation des CGU', () => {
     expect(Object.values(erreur!.constraints ?? {})[0]).toMatch(/recharge/);
   });
 
+  it('accepte encore la version précédente (2026-10-01) pendant le déploiement', async () => {
+    // Vercel peut publier la nouvelle page avant que Render ne redémarre, ou
+    // l'inverse : une page ouverte juste avant envoie encore l'ancienne date.
+    expect(await erreurs({ ...valide, cguVersion: '2026-10-01' })).toHaveLength(0);
+    expect(await erreurs({ ...valide, cguVersion: '2026-10-25' })).toHaveLength(0);
+  });
+
   it('refuse une version absente', async () => {
     const resultat = await erreurs({ ...valide, cguVersion: undefined });
     expect(resultat.map((e) => e.property)).toContain('cguVersion');

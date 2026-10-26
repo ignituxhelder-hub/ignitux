@@ -70,6 +70,19 @@ describe('UsersController', () => {
     expect(result).toEqual({ id: 'uuid-1', email: 'a@b.com' });
   });
 
+  it('enregistre la version réellement acceptée, même l’ancienne pendant le déploiement', async () => {
+    usersService.signup.mockResolvedValue({ id: 'uuid-1', email: 'a@b.com' });
+    await controller.signup({
+      email: 'a@b.com',
+      password: 'motdepasse',
+      captchaToken: 'jeton',
+      acceptCgu: true,
+      cguVersion: '2026-10-01',
+    });
+
+    expect(usersService.signup).toHaveBeenCalledWith('a@b.com', 'motdepasse', '2026-10-01');
+  });
+
   it("envoie un email de verification apres l'inscription", async () => {
     usersService.signup.mockResolvedValue({ id: 'uuid-1', email: 'a@b.com' });
 

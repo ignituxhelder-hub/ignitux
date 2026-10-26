@@ -17,3 +17,17 @@
  * le changement est invitée à recharger, donc à relire ce qu'elle accepte.
  */
 export const CGU_VERSION_EN_VIGUEUR = '2026-10-25';
+
+/**
+ * Les versions que l'inscription accepte : celle en vigueur, et — LE TEMPS DU
+ * DÉPLOIEMENT seulement — la précédente. Le frontend (Vercel) et le serveur
+ * (Render) ne redémarrent pas au même instant : une page ouverte juste avant
+ * envoie encore « 2026-10-01 », et la refuser bloquerait l'inscription pour
+ * rien. La version réellement envoyée est celle enregistrée
+ * (`users.cgu_version`) : personne n'est réputé avoir accepté un texte qu'il
+ * n'a pas vu.
+ *
+ * À RETIRER (ne garder que CGU_VERSION_EN_VIGUEUR) une fois les deux côtés en
+ * ligne depuis quelques jours.
+ */
+export const CGU_VERSIONS_ACCEPTEES: readonly string[] = [CGU_VERSION_EN_VIGUEUR, '2026-10-01'];

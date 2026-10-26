@@ -1,5 +1,5 @@
-import { Equals, IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
-import { CGU_VERSION_EN_VIGUEUR } from '../cgu.js';
+import { Equals, IsEmail, IsIn, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import { CGU_VERSIONS_ACCEPTEES } from '../cgu.js';
 
 export class SignupDto {
   @IsEmail({}, { message: "L'email n'est pas valide." })
@@ -31,9 +31,11 @@ export class SignupDto {
 
   /**
    * La version que la page affichait. Elle doit être celle en vigueur : sinon
-   * la personne a accepté un texte qui n'est plus le bon.
+   * la personne a accepté un texte qui n'est plus le bon. (La précédente est
+   * tolérée le temps du déploiement — voir CGU_VERSIONS_ACCEPTEES — et c'est
+   * elle qui est alors enregistrée.)
    */
-  @Equals(CGU_VERSION_EN_VIGUEUR, {
+  @IsIn(CGU_VERSIONS_ACCEPTEES, {
     message:
       "Les conditions d'utilisation ont changé depuis l'ouverture de cette page : recharge-la pour lire et accepter la version en vigueur.",
   })
