@@ -1,7 +1,17 @@
 import { Injectable } from '@nestjs/common';
+import { BAREME } from '../../credits/bareme.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { ClaudeService } from '../claude/claude.service.js';
 import { buildSystemPrompt } from '../claude/igini-identity.js';
+import {
+  ajouterPropositions,
+  ConfirmationsDuTour,
+  enCredits,
+  estConfirmation,
+  lireConfirmations,
+  OUTILS_PAYANTS,
+  retirerMarqueursConfirmation,
+} from './chat-confirmation.js';
 import { toClaudeMessages } from './chat-message-window.js';
 import { IGINI_TOOL_DEFINITIONS } from './igini-tools.js';
 import { IginiToolsService } from './igini-tools.service.js';
@@ -21,11 +31,20 @@ Règle stricte : n'appelle un outil générateur (analyser/construire/financer/d
 personne l'a explicitement demandé dans son dernier message, ou a confirmé une proposition que tu viens de lui
 faire. Ne le fais jamais de façon spéculative, même si tu penses que ce serait utile.
 
-Chaque étape de ta méthode se paie en crédits, à son prix, débité du compte du propriétaire du projet ; ce
-message-ci coûte lui aussi un crédit. Si un outil te renvoie une erreur (crédits insuffisants, garde-fou de
-sécurité atteint, projet introuvable...), explique la situation à la personne dans tes mots, sans lui montrer de
-message technique brut ; pour des crédits insuffisants, dis-lui combien il en faut et qu'elle peut en recharger
-depuis « Mes crédits ».
+Chaque étape de ta méthode se paie en crédits, à son prix, débité du compte du propriétaire du projet, en plus de
+ce message-ci (${enCredits(BAREME.discuter.credits)}). Les prix : ${OUTILS_PAYANTS.map(
+      (nom) => `${nom} : ${enCredits(BAREME[nom].credits)}`,
+    ).join(' ; ')}.
+
+Le prix se confirme avant d'être dépensé, et c'est le serveur qui le garantit : quand la personne demande une
+étape, appelle l'outil. Ce premier appel ne lance rien et ne débite rien : il te rend « PRIX À CONFIRMER » avec le
+prix. Annonce alors ce prix en une phrase et demande-lui de confirmer (un bouton de confirmation s'affiche sous ta
+réponse). Au message suivant, si elle a dit oui, rappelle l'outil : il s'exécute. Sans ce oui, ne le rappelle pas.
+N'écris jamais toi-même le format [[confirmer: ...]].
+
+Si un outil te renvoie une erreur (crédits insuffisants, garde-fou de sécurité atteint, projet introuvable...),
+explique la situation à la personne dans tes mots, sans lui montrer de message technique brut ; pour des crédits
+insuffisants, dis-lui combien il en faut et qu'elle peut en recharger depuis « Mes crédits ».
 
 Si tu viens de déclencher un générateur, termine ta réponse par le projet concerné sur sa propre ligne, au
 format exact : [[projet: L_IDENTIFIANT_DU_PROJET]]. N'écris jamais ce format dans un autre contexte.
@@ -73,16 +92,27 @@ export class ChatService {
     }));
     const claudeMessages = toClaudeMessages([...ordered, { role: 'user' as const, content }]);
 
+    // Un outil payant ne s'exécute que si CE message dit oui à une proposition
+    // du message d'IGINI qui le précède immédiatement (voir chat-confirmation.ts).
+    const precedent = previous[0];
+    const accordees =
+      precedent?.role === 'igini' && estConfirmation(content) ? lireConfirmations(precedent.content) : [];
+    const confirmations = new ConfirmationsDuTour(accordees);
+
     const reply = await this.claude.converseWithTools({
       systemPrompt: SYSTEM_PROMPT,
       messages: claudeMessages,
       usage: { userId, projectId: null, generator: 'discuter' },
       tools: IGINI_TOOL_DEFINITIONS,
-      executeTool: (name, input) => this.iginiTools.execute(name, input, { userId }),
+      executeTool: (name, input) => this.iginiTools.execute(name, input, { userId, confirmations }),
     });
 
+    // Le marqueur de confirmation n'est jamais celui du modèle : on retire ce
+    // qu'il aurait écrit, et le serveur ajoute ceux des prix proposés.
+    const texte = ajouterPropositions(retirerMarqueursConfirmation(reply), confirmations.propositions());
+
     return this.prisma.chat_messages.create({
-      data: { user_id: userId, role: 'igini', content: reply },
+      data: { user_id: userId, role: 'igini', content: texte },
     });
   }
 

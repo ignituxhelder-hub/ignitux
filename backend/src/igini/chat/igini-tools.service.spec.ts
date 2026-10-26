@@ -3,7 +3,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MemoryService } from '../memory/memory.service.js';
 import { ProjectsService } from '../../projects/projects.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { BAREME } from '../../credits/bareme.js';
+import { ConfirmationsDuTour } from './chat-confirmation.js';
 import { IginiToolsService } from './igini-tools.service.js';
+
+/** Le contexte d'un tour où la personne vient de confirmer cet outil sur ce projet. */
+const confirme = (outil: 'analyser' | 'construire' | 'financer' | 'developper' | 'transmettre', projectId = 'p1') => ({
+  userId: 'u1',
+  confirmations: new ConfirmationsDuTour([{ outil, projectId }]),
+});
 
 describe('IginiToolsService', () => {
   let service: IginiToolsService;
@@ -79,7 +87,7 @@ describe('IginiToolsService', () => {
     it('analyser appelle ProjectsService.analyzeForOwner avec le bon projet', async () => {
       projects.analyzeForOwner.mockResolvedValue({ id: 'a1', feasibility_score: 7 });
 
-      const result = await service.execute('analyser', { project_id: 'p1' }, { userId: 'u1' });
+      const result = await service.execute('analyser', { project_id: 'p1' }, confirme('analyser'));
 
       expect(projects.analyzeForOwner).toHaveBeenCalledWith('u1', 'p1');
       expect(result).toEqual({ content: JSON.stringify({ id: 'a1', feasibility_score: 7 }), isError: false });
@@ -90,7 +98,7 @@ describe('IginiToolsService', () => {
         new ForbiddenException({ message: 'Ton offre n’inclut pas ce générateur.' }),
       );
 
-      const result = await service.execute('construire', { project_id: 'p1' }, { userId: 'u1' });
+      const result = await service.execute('construire', { project_id: 'p1' }, confirme('construire'));
 
       expect(result).toEqual({ content: 'Ton offre n’inclut pas ce générateur.', isError: true });
     });
@@ -98,7 +106,7 @@ describe('IginiToolsService', () => {
     it('transforme une NotFoundException (projet inconnu) en tool_result d’erreur', async () => {
       projects.analyzeForOwner.mockRejectedValue(new NotFoundException('Projet introuvable.'));
 
-      const result = await service.execute('analyser', { project_id: 'inexistant' }, { userId: 'u1' });
+      const result = await service.execute('analyser', { project_id: 'inexistant' }, confirme('analyser', 'inexistant'));
 
       expect(result).toEqual({ content: 'Projet introuvable.', isError: true });
     });
@@ -108,6 +116,56 @@ describe('IginiToolsService', () => {
 
       expect(result.isError).toBe(true);
       expect(projects.createFinancingPlanForOwner).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('le prix confirmé avant d’être dépensé', () => {
+    it('sans confirmation : rien n’est lancé ni débité, le prix est rendu, la proposition notée', async () => {
+      const tour = new ConfirmationsDuTour([]);
+
+      const result = await service.execute('analyser', { project_id: 'p1' }, { userId: 'u1', confirmations: tour });
+
+      expect(projects.analyzeForOwner).not.toHaveBeenCalled();
+      expect(result.isError).toBe(false);
+      expect(result.content).toContain('PRIX À CONFIRMER');
+      expect(result.content).toContain(`${BAREME.analyser.credits} crédits`);
+      expect(tour.propositions()).toEqual([{ outil: 'analyser', projectId: 'p1' }]);
+    });
+
+    it('sans contexte de confirmation du tout : jamais lancé', async () => {
+      const result = await service.execute('transmettre', { project_id: 'p1' }, { userId: 'u1' });
+
+      expect(projects.createTransmissionPlanForOwner).not.toHaveBeenCalled();
+      expect(result.content).toContain('PRIX À CONFIRMER');
+    });
+
+    it('une confirmation sert une fois : un second appel du même tour repropose le prix', async () => {
+      projects.analyzeForOwner.mockResolvedValue({ id: 'a1' });
+      const ctx = confirme('analyser');
+
+      await service.execute('analyser', { project_id: 'p1' }, ctx);
+      const second = await service.execute('analyser', { project_id: 'p1' }, ctx);
+
+      expect(projects.analyzeForOwner).toHaveBeenCalledTimes(1);
+      expect(second.content).toContain('PRIX À CONFIRMER');
+    });
+
+    it('la confirmation vaut pour cet outil et ce projet seulement', async () => {
+      const ctx = confirme('analyser', 'p1');
+
+      await service.execute('analyser', { project_id: 'p2' }, ctx);
+      await service.execute('construire', { project_id: 'p1' }, ctx);
+
+      expect(projects.analyzeForOwner).not.toHaveBeenCalled();
+      expect(projects.createBuildPlanForOwner).not.toHaveBeenCalled();
+    });
+
+    it('les outils gratuits ne demandent rien', async () => {
+      prisma.projects.findMany.mockResolvedValue([]);
+      memory.search.mockResolvedValue([]);
+
+      expect((await service.execute('lister_projets', {}, { userId: 'u1' })).content).toBe('[]');
+      expect((await service.execute('rappeler_souvenirs', {}, { userId: 'u1' })).content).toBe('[]');
     });
   });
 

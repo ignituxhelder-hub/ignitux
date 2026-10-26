@@ -2,7 +2,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
 import { mockApiRoutes, signInAs } from '@/test-utils/mocks';
-import { ChatIgini, extraireMarqueurs } from './chat-igini';
+import { ChatIgini, extraireConfirmation, extraireMarqueurs } from './chat-igini';
+
+const PROJET = '11111111-1111-4111-8111-111111111111';
 
 function afficher(onClose = vi.fn()) {
   return render(
@@ -143,6 +145,79 @@ describe('extraireMarqueurs', () => {
     expect(
       extraireMarqueurs('Avant.\n[[projet: p1]]\nAprès.'),
     ).toEqual({ texte: 'Avant.\nAprès.', projetId: 'p1', souvenirSuggere: null });
+  });
+});
+
+describe('extraireConfirmation', () => {
+  it('lit l’outil, le projet et le prix que le serveur a écrits', () => {
+    expect(extraireConfirmation(`Ça coûte 4 crédits.\n[[confirmer: analyser ${PROJET} 4]]`)).toEqual({
+      outil: 'analyser',
+      projetId: PROJET,
+      credits: 4,
+    });
+    expect(extraireConfirmation('Rien à confirmer.')).toBeNull();
+  });
+
+  it('le marqueur ne s’affiche jamais brut', () => {
+    expect(extraireMarqueurs(`Ça coûte 4 crédits.\n[[confirmer: analyser ${PROJET} 4]]`).texte).toBe(
+      'Ça coûte 4 crédits.',
+    );
+  });
+});
+
+describe('ChatIgini — confirmer le prix d’une étape', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    signInAs('tok123', { id: 'u1', email: 'fictif@ignitux.test' });
+  });
+
+  const proposition = (id: string, content: string) => ({
+    id,
+    role: 'igini',
+    content,
+    created_at: '2026-01-01T00:00:00Z',
+  });
+
+  it('montre le prix sur un bouton, et le oui part comme message', async () => {
+    mockApiRoutes({
+      'GET /chat/messages': {
+        status: 200,
+        body: [proposition('m1', `Cette analyse coûte 4 crédits. Je la lance ?\n[[confirmer: analyser ${PROJET} 4]]`)],
+      },
+      'POST /chat/messages': {
+        status: 201,
+        body: { id: 'm3', role: 'igini', content: 'C’est lancé.', created_at: '2026-01-01T00:00:02Z' },
+      },
+    });
+
+    afficher();
+    const bouton = await screen.findByRole('button', { name: 'Confirmer — 4 crédits' });
+    expect(screen.queryByText(/\[\[confirmer/)).not.toBeInTheDocument();
+    fireEvent.click(bouton);
+
+    expect(await screen.findByText('C’est lancé.')).toBeInTheDocument();
+    const envoi = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.find(
+      ([, init]) => (init as RequestInit | undefined)?.method === 'POST',
+    );
+    expect(JSON.parse(String((envoi?.[1] as RequestInit).body))).toEqual({ content: 'Oui, je confirme.' });
+  });
+
+  it('ne propose de confirmer que sur le dernier message : une proposition dépassée ne vaut plus', async () => {
+    mockApiRoutes({
+      'GET /chat/messages': {
+        status: 200,
+        body: [
+          proposition('m1', `Je la lance ?\n[[confirmer: analyser ${PROJET} 4]]`),
+          { id: 'm2', role: 'user', content: 'Attends', created_at: '2026-01-01T00:00:01Z' },
+          proposition('m3', 'D’accord, j’attends.'),
+        ],
+      },
+    });
+
+    afficher();
+
+    expect(await screen.findByText('D’accord, j’attends.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Confirmer/ })).not.toBeInTheDocument();
   });
 });
 

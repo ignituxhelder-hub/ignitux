@@ -20,7 +20,25 @@ import {
 // de chaîne, ratait le premier marqueur dès que l'ordre n'était pas
 // exactement projet-puis-souvenir. Un balayage global retire chaque
 // occurrence où qu'elle soit, dans n'importe quel ordre.
-const MARQUEUR_RE = /\n?\[\[(projet|souvenir):\s*([^\]]+)\]\]/g;
+const MARQUEUR_RE = /\n?\[\[(projet|souvenir|confirmer):\s*([^\]]+)\]\]/g;
+
+/** Le message qu'envoie le bouton de confirmation : un oui que le serveur reconnaît. */
+export const MESSAGE_CONFIRMATION = 'Oui, je confirme.';
+
+/**
+ * Le prix d'une étape proposée par IGINI, à confirmer avant qu'elle ne soit
+ * lancée (et payée). Le marqueur est écrit par le serveur, jamais par le
+ * modèle : `[[confirmer: <outil> <projet> <crédits>]]`. C'est le serveur qui
+ * décide qu'un « oui » au message suivant lance l'étape — ce bouton ne fait
+ * qu'envoyer ce oui.
+ */
+export function extraireConfirmation(
+  contenu: string,
+): { outil: string; projetId: string; credits: number } | null {
+  const trouve = /\[\[confirmer:\s*(\S+)\s+(\S+)\s+(\d+)\s*\]\]/.exec(contenu);
+  if (!trouve) return null;
+  return { outil: trouve[1], projetId: trouve[2], credits: Number(trouve[3]) };
+}
 
 export function extraireMarqueurs(contenu: string): {
   texte: string;
@@ -86,7 +104,10 @@ function PanneauChat({ onClose }: { onClose: () => void }) {
 
   async function envoyer(event: FormEvent) {
     event.preventDefault();
-    const contenu = brouillon.trim();
+    await envoyerContenu(brouillon.trim());
+  }
+
+  async function envoyerContenu(contenu: string) {
     if (!token || !contenu || envoiEnCours || prix?.insuffisant) return;
 
     setBrouillon('');
@@ -118,8 +139,19 @@ function PanneauChat({ onClose }: { onClose: () => void }) {
       </header>
 
       <div className="panneau-chat-igini__messages">
-        {messages.map((message) => (
-          <MessageIgini key={message.id} message={message} token={token} />
+        {messages.map((message, index) => (
+          <MessageIgini
+            key={message.id}
+            message={message}
+            token={token}
+            // Seul le dernier message peut être confirmé : le serveur n'accepte
+            // un oui qu'à la proposition qui le précède immédiatement.
+            onConfirmer={
+              index === messages.length - 1 && message.role === 'igini' && !envoiEnCours
+                ? () => void envoyerContenu(MESSAGE_CONFIRMATION)
+                : undefined
+            }
+          />
         ))}
         <div ref={finRef} />
       </div>
@@ -149,8 +181,17 @@ function PanneauChat({ onClose }: { onClose: () => void }) {
   );
 }
 
-function MessageIgini({ message, token }: { message: ChatMessage; token: string | null }) {
+function MessageIgini({
+  message,
+  token,
+  onConfirmer,
+}: {
+  message: ChatMessage;
+  token: string | null;
+  onConfirmer?: () => void;
+}) {
   const { texte, projetId, souvenirSuggere } = extraireMarqueurs(message.content);
+  const confirmation = onConfirmer ? extraireConfirmation(message.content) : null;
   const [souvenirEnregistre, setSouvenirEnregistre] = useState(false);
   const [enregistrementEnCours, setEnregistrementEnCours] = useState(false);
 
@@ -168,6 +209,12 @@ function MessageIgini({ message, token }: { message: ChatMessage; token: string 
   return (
     <div className={`panneau-chat-igini__message panneau-chat-igini__message--${message.role}`}>
       <p style={{ margin: 0 }}>{texte}</p>
+      {confirmation && (
+        <button type="button" className="panneau-chat-igini__action" onClick={onConfirmer}>
+          Confirmer — <span className="credits-montant">{confirmation.credits}</span>{' '}
+          {confirmation.credits > 1 ? 'crédits' : 'crédit'}
+        </button>
+      )}
       {projetId && (
         <Link href={`/projects/${projetId}`} className="panneau-chat-igini__action">
           Voir le projet →

@@ -1,7 +1,9 @@
 import { HttpException } from '@nestjs/common';
 import type Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
+import { BAREME } from '../../credits/bareme.js';
 import { MEMORY_CATEGORIES } from '../memory/memory-category.js';
+import { enCredits, OUTILS_PAYANTS } from './chat-confirmation.js';
 
 /**
  * LES 7 OUTILS DE L'ORCHESTRATEUR IGINI.
@@ -25,8 +27,8 @@ export const TOOL_NAMES = [
 
 export type ToolName = (typeof TOOL_NAMES)[number];
 
-/** Les 5 outils qui déclenchent un générateur existant, tous avec la même forme d'entrée. */
-const GENERATOR_TOOL_NAMES = ['analyser', 'construire', 'financer', 'developper', 'transmettre'] as const;
+/** Les 5 outils qui déclenchent un générateur existant, tous avec la même forme d'entrée — et payants. */
+const GENERATOR_TOOL_NAMES = OUTILS_PAYANTS;
 
 export const PROJECT_ID_INPUT_SCHEMA = z.object({
   project_id: z.string().min(1, 'project_id est requis.'),
@@ -40,25 +42,30 @@ export const RAPPELER_SOUVENIRS_INPUT_SCHEMA = z.object({
 const GENERATOR_TOOL_DESCRIPTIONS: Record<(typeof GENERATOR_TOOL_NAMES)[number], string> = {
   analyser:
     "Lance l'étape Analyser d'Igini sur un projet précis : résumé, score de faisabilité, points forts, " +
-    "risques, prochaines étapes. Coûte un appel IA et compte dans le quota du plan de la personne — ne " +
-    "l'appelle que si elle l'a explicitement demandé ou confirmé.",
-  construire:
-    'Lance l’étape Construire (plan de construction : jalons, délai estimé, ressources clés). Mêmes ' +
-    'règles de confirmation que analyser.',
-  financer:
-    'Lance l’étape Financer (plan de financement : budget estimé, sources, postes de dépense). Mêmes ' +
-    'règles de confirmation que analyser.',
-  developper:
-    'Lance l’étape Développer (plan de croissance : leviers, indicateurs clés, risques). Mêmes règles de ' +
-    'confirmation que analyser.',
-  transmettre:
-    'Lance l’étape Transmettre (options de transfert, documentation, check-list). Mêmes règles de ' +
-    'confirmation que analyser.',
+    'risques, prochaines étapes.',
+  construire: 'Lance l’étape Construire (plan de construction : jalons, délai estimé, ressources clés).',
+  financer: 'Lance l’étape Financer (plan de financement : budget estimé, sources, postes de dépense).',
+  developper: 'Lance l’étape Développer (plan de croissance : leviers, indicateurs clés, risques).',
+  transmettre: 'Lance l’étape Transmettre (options de transfert, documentation, check-list).',
 };
+
+/**
+ * Le prix et la règle, dans la description même : le modèle les lit au
+ * moment de choisir l'outil. La règle est appliquée par le serveur (voir
+ * chat-confirmation.ts), pas seulement demandée au modèle.
+ */
+function descriptionPayante(name: (typeof GENERATOR_TOOL_NAMES)[number]): string {
+  return (
+    `${GENERATOR_TOOL_DESCRIPTIONS[name]} Prix : ${enCredits(BAREME[name].credits)}, débités du compte du ` +
+    'propriétaire du projet, en plus du message. Ne l’appelle que si la personne l’a demandé. Premier appel : ' +
+    'le serveur ne lance rien et te rend le prix à annoncer ; il ne s’exécute qu’au message suivant, si la ' +
+    'personne a confirmé (oui) ta proposition.'
+  );
+}
 
 const generatorTools: Anthropic.Tool[] = GENERATOR_TOOL_NAMES.map((name) => ({
   name,
-  description: GENERATOR_TOOL_DESCRIPTIONS[name],
+  description: descriptionPayante(name),
   input_schema: {
     type: 'object',
     properties: {

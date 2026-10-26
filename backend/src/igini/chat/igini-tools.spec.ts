@@ -1,5 +1,6 @@
 import { ForbiddenException, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { z } from 'zod';
+import { BAREME } from '../../credits/bareme.js';
 import {
   IGINI_TOOL_DEFINITIONS,
   PROJECT_ID_INPUT_SCHEMA,
@@ -24,6 +25,14 @@ describe('IGINI_TOOL_DEFINITIONS', () => {
     for (const nom of ['analyser', 'construire', 'financer', 'developper', 'transmettre']) {
       const tool = IGINI_TOOL_DEFINITIONS.find((t) => t.name === nom)!;
       expect(tool.input_schema.required).toContain('project_id');
+    }
+  });
+
+  it('chaque outil payant dit son prix du barème, et qu’il faut une confirmation', () => {
+    for (const nom of ['analyser', 'construire', 'financer', 'developper', 'transmettre'] as const) {
+      const description = IGINI_TOOL_DEFINITIONS.find((t) => t.name === nom)!.description!;
+      expect(description).toContain(`${BAREME[nom].credits} crédits`);
+      expect(description).toMatch(/confirm/i);
     }
   });
 
