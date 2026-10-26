@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from './api';
-import { executerEnSerie } from './executer-en-serie';
+import { dejaEnCours, executerEnSerie } from './executer-en-serie';
 
 /** Laisse passer les micro-tâches en attente. */
 const souffler = () => new Promise<void>((r) => setTimeout(r, 0));
@@ -119,7 +119,7 @@ describe('executerEnSerie', () => {
 
     expect(bilan).toEqual({ traites: 2, arretePourLimite: false, restants: [], arretReseau: false, annule: false });
     expect(lancer).toHaveBeenCalledWith('id3');
-    expect(onProgres).toHaveBeenCalledWith({ id: 'id2', etat: 'echec', message: 'réseau coupé' });
+    expect(onProgres).toHaveBeenCalledWith(expect.objectContaining({ id: 'id2', etat: 'echec', message: 'réseau coupé' }));
   });
 
   it('traite une ApiError non limite (500) comme un simple échec', async () => {
@@ -131,6 +131,33 @@ describe('executerEnSerie', () => {
     const bilan = await executerEnSerie(['id1', 'id2'], lancer, vi.fn());
 
     expect(bilan).toEqual({ traites: 1, arretePourLimite: false, restants: [], arretReseau: false, annule: false });
+  });
+});
+
+describe('dejaEnCours', () => {
+  // Le serveur prend la tâche « en cours » avant l'appel : un second
+  // lancement (autre onglet, double clic) reçoit 409, sans rien débiter. Ce
+  // n'est pas un échec d'IGINI — l'écran ne doit pas la ranger « en échec ».
+  it('reconnaît le 409 « Déjà en cours. »', () => {
+    expect(dejaEnCours(new ApiError('Déjà en cours.', 409))).toBe(true);
+  });
+
+  it('un 409 n’arrête pas le lot, et l’échec porte l’erreur pour que l’écran la reconnaisse', async () => {
+    const enCours = new ApiError('Déjà en cours.', 409);
+    const onProgres = vi.fn();
+    const lancer = vi.fn().mockRejectedValueOnce(enCours).mockResolvedValueOnce('ok');
+
+    const bilan = await executerEnSerie(['id1', 'id2'], lancer, onProgres);
+
+    expect(bilan.traites).toBe(1);
+    expect(onProgres).toHaveBeenCalledWith({ id: 'id1', etat: 'echec', message: 'Déjà en cours.', erreur: enCours });
+  });
+
+  it('ne confond pas avec une autre erreur', () => {
+    expect(dejaEnCours(new ApiError('Panne.', 500))).toBe(false);
+    expect(dejaEnCours(new ApiError('Crédits insuffisants.', 402))).toBe(false);
+    expect(dejaEnCours(new Error('x'))).toBe(false);
+    expect(dejaEnCours(undefined)).toBe(false);
   });
 });
 

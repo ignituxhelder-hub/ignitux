@@ -35,6 +35,15 @@ function estHorsLigne(erreur: unknown): erreur is ApiError {
   return erreur instanceof ApiError && erreur.status === 0;
 }
 
+/**
+ * 409 : une exécution de la même tâche (ou exigence) est déjà partie — le
+ * serveur l'a refusée sans rien débiter. Ce n'est pas un échec d'IGINI :
+ * l'écran ne la range pas « en échec », il dit seulement pourquoi.
+ */
+export function dejaEnCours(erreur: unknown): boolean {
+  return erreur instanceof ApiError && erreur.status === 409;
+}
+
 function messageDe(erreur: unknown): string {
   return erreur instanceof Error && erreur.message ? erreur.message : 'Une erreur est survenue.';
 }
@@ -71,7 +80,7 @@ export async function executerEnSerie<T>(
         onProgres({ id, etat: 'arret', message: erreur.message });
         return { traites, arretePourLimite: false, restants: ids.slice(i), arretReseau: true, annule: false };
       }
-      onProgres({ id, etat: 'echec', message: messageDe(erreur) });
+      onProgres({ id, etat: 'echec', message: messageDe(erreur), erreur });
     }
   }
 

@@ -448,6 +448,23 @@ describe('TasksSection — lot en cours', () => {
   }, TIMEOUT);
 });
 
+describe('TasksSection — une exécution déjà en cours', () => {
+  it('un 409 « Déjà en cours. » (autre onglet, double clic) ne range pas la tâche « en échec »', async () => {
+    mockFetch({
+      'GET /projects/p1/tasks': { status: 200, body: [tache('t1')] },
+      'POST /projects/p1/tasks/t1/run': { status: 409, body: { message: 'Déjà en cours.' } },
+    });
+    render(<TasksSection token={TOKEN} projectId={PROJECT_ID} />);
+
+    await screen.findByText('Tâche t1');
+    fireEvent.click(screen.getByLabelText('Faire faire : Tâche t1'));
+    fireEvent.click(screen.getByRole('button', { name: /Démarrer IGINI/ }));
+
+    expect(await screen.findByText(/Déjà en cours./)).toBeInTheDocument();
+    expect(screen.queryByText('En échec (1)')).not.toBeInTheDocument();
+  }, TIMEOUT);
+});
+
 describe('TasksSection — organisation en groupes', () => {
   it('range les tâches par groupe avec un compteur', async () => {
     mockFetch({

@@ -19,7 +19,7 @@ import {
   usePrixIgini,
   type ErreurIgini,
 } from '@/components/prix-igini';
-import { executerEnSerie } from '@/lib/executer-en-serie';
+import { dejaEnCours, executerEnSerie } from '@/lib/executer-en-serie';
 import { ResultatIa } from './resultat-ia';
 
 /**
@@ -235,7 +235,10 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
           } else if (info.etat === 'echec') {
             const motif = info.message;
             if (motif) setRaisons((prev) => ({ ...prev, [info.id]: motif }));
-            remplacerIa(info.id, { status: 'echec', result_kind: null, result: null, refusal_reason: null });
+            // « Déjà en cours. » (409) : rien n'a échoué, une autre exécution tourne.
+            if (!dejaEnCours(info.erreur)) {
+              remplacerIa(info.id, { status: 'echec', result_kind: null, result: null, refusal_reason: null });
+            }
             retirerDeLaSelection(info.id);
           } else if (info.etat === 'arret' && info.message) {
             setErreurLot(erreurIgini(info.erreur ?? null, info.message));
@@ -472,6 +475,14 @@ export function ComplianceSection({ token, projectId, readOnly = false }: Compli
                     </p>
                   )}
                   {!readOnly && requirement.ai?.status === 'echec' && <PrixIgini generateur="conformite" />}
+                  {/* « Déjà en cours. » : rien n'a échoué, on dit seulement pourquoi rien n'est parti. */}
+                  {!readOnly &&
+                    !['echec', 'a_valider', 'valide'].includes(requirement.ai?.status ?? '') &&
+                    raisons[requirement.id] && (
+                    <p className="muted" style={{ margin: '0.5rem 0 0' }}>
+                      {raisons[requirement.id]}
+                    </p>
+                  )}
                   {requirement.ai?.status === 'refuse' && (
                     <p className="muted" style={{ margin: '0.5rem 0 0' }}>
                       Refusé{requirement.ai.refusal_reason ? ` : ${requirement.ai.refusal_reason}` : ''}

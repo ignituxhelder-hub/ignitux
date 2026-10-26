@@ -23,7 +23,7 @@ import {
   usePrixIgini,
   type ErreurIgini,
 } from '@/components/prix-igini';
-import { executerEnSerie } from '@/lib/executer-en-serie';
+import { dejaEnCours, executerEnSerie } from '@/lib/executer-en-serie';
 import { titreCourt } from '@/lib/titre-court';
 import { ResultatIa } from './resultat-ia';
 
@@ -592,7 +592,10 @@ export function TasksSection({
           } else if (info.etat === 'echec') {
             const motif = info.message;
             if (motif) setRaisons((prev) => ({ ...prev, [info.id]: motif }));
-            setTasks((prev) => prev.map((t) => (t.id === info.id ? { ...t, ai_status: 'echec' } : t)));
+            // « Déjà en cours. » (409) : rien n'a échoué, une autre exécution tourne.
+            if (!dejaEnCours(info.erreur)) {
+              setTasks((prev) => prev.map((t) => (t.id === info.id ? { ...t, ai_status: 'echec' } : t)));
+            }
             setSelected((prev) => {
               const next = new Set(prev);
               next.delete(info.id);
@@ -779,6 +782,12 @@ export function TasksSection({
           </p>
         )}
         {!readOnly && task.ai_status === 'echec' && <PrixIgini generateur="executer" />}
+        {/* « Déjà en cours. » : la tâche n'a pas échoué, on dit seulement pourquoi rien n'est parti. */}
+        {!readOnly && !['echec', 'a_valider', 'valide'].includes(task.ai_status ?? '') && raisons[task.id] && (
+          <p className="muted" style={{ margin: '0.5rem 0 0' }}>
+            {raisons[task.id]}
+          </p>
+        )}
         {task.ai_status === 'refuse' && (
           <p className="muted" style={{ margin: '0.5rem 0 0' }}>
             Refusé{task.ai_refusal_reason ? ` : ${task.ai_refusal_reason}` : ''}
