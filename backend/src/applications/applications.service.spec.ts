@@ -18,6 +18,7 @@ describe('ApplicationsService — le bureau', () => {
     participations: { count: Mock };
     user_applications: { findMany: Mock; upsert: Mock };
     shopify_connections: { count: Mock };
+    users: { findUnique: Mock };
   };
 
   beforeEach(() => {
@@ -35,6 +36,7 @@ describe('ApplicationsService — le bureau', () => {
         upsert: vi.fn().mockResolvedValue({}),
       },
       shopify_connections: { count: vi.fn().mockResolvedValue(0) },
+      users: { findUnique: vi.fn().mockResolvedValue({ email: 'quelqu.un@exemple.fr' }) },
     };
     const offres = { offreDe: vi.fn().mockResolvedValue('decouverte') };
     service = new ApplicationsService(
@@ -44,6 +46,35 @@ describe('ApplicationsService — le bureau', () => {
   });
 
   const ids = (liste: Array<{ id: string }>) => liste.map((app) => app.id);
+
+  describe('Réseaux sociaux, avant la validation d’Instagram et TikTok', () => {
+    const avant = process.env.IGNITUX_OPERATEURS;
+    beforeEach(() => {
+      process.env.IGNITUX_OPERATEURS = 'helder@ignitux.com';
+      delete process.env.RESEAUX_SOCIAUX_POUR_TOUS;
+    });
+    afterEach(() => {
+      process.env.IGNITUX_OPERATEURS = avant;
+    });
+
+    it('la range parmi les prévues pour une personne qui n’est pas opératrice, même ajoutée', async () => {
+      prisma.user_applications.findMany.mockResolvedValue([{ app_id: 'reseaux-sociaux', choix: 'ajoutee' }]);
+      const bureau = await service.lanceurDe('u1');
+      const prevue = bureau.prevues.find((app) => app.id === 'reseaux-sociaux');
+      expect(prevue).toMatchObject({ route: null });
+      expect(prevue?.cadre).toMatch(/Instagram et TikTok/);
+      expect(ids(bureau.applications)).not.toContain('reseaux-sociaux');
+      expect(ids(bureau.suggestions)).not.toContain('reseaux-sociaux');
+      expect(ids(bureau.boutique)).not.toContain('reseaux-sociaux');
+    });
+
+    it('la laisse ouverte à un opérateur Ignitux', async () => {
+      prisma.users.findUnique.mockResolvedValue({ email: 'helder@ignitux.com' });
+      const bureau = await service.lanceurDe('u1');
+      expect(ids(bureau.prevues)).not.toContain('reseaux-sociaux');
+      expect(ids(bureau.boutique)).toContain('reseaux-sociaux');
+    });
+  });
 
   it('lit les choix enregistrés et les applique au bureau', async () => {
     prisma.user_applications.findMany.mockResolvedValue([

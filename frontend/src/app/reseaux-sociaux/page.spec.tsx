@@ -24,6 +24,7 @@ const DRAFT = {
   music_consent_at: null,
   status: "draft",
   platform_post_id: null,
+  media_container_id: null,
   error: null,
   published_at: null,
   created_at: "2026-10-25T12:00:00.000Z",
@@ -34,6 +35,10 @@ describe("RéseauxSociauxPage", () => {
     window.localStorage.clear();
     signInAs("tok123", { id: "u1", email: "a@b.com" });
     mockApiRoutes({
+      "GET /reseaux-sociaux/acces": {
+        status: 200,
+        body: { ouvert: true, instagram: true, tiktok: true },
+      },
       "GET /reseaux-sociaux/comptes": {
         status: 200,
         body: [
@@ -84,7 +89,7 @@ describe("RéseauxSociauxPage", () => {
     });
     expect(button).toBeDisabled();
     fireEvent.click(
-      screen.getByRole("checkbox", { name: /Music Usage Confirmation/i }),
+      screen.getByRole("checkbox", { name: /utilisation de la musique de TikTok/i }),
     );
     expect(button).toBeEnabled();
     fireEvent.click(button);
@@ -125,5 +130,56 @@ describe("RéseauxSociauxPage", () => {
       expect.stringContaining("/publications/post1/publier"),
       expect.anything(),
     );
+  });
+
+  it("dit que ce n’est pas encore ouvert, sans rien proposer à publier", async () => {
+    mockApiRoutes({
+      "GET /reseaux-sociaux/acces": {
+        status: 200,
+        body: { ouvert: false, instagram: true, tiktok: true },
+      },
+      "GET /reseaux-sociaux/comptes": { status: 200, body: [] },
+      "GET /reseaux-sociaux/publications": { status: 200, body: [] },
+    });
+    render(
+      <AuthProvider>
+        <ReseauxSociauxPage />
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByText(/ouvrira à tous quand Instagram et TikTok/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Connecter/i })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Texte et hashtags/i)).not.toBeInTheDocument();
+  });
+
+  it("n’offre pas de connexion à un réseau que le serveur ne sait pas joindre", async () => {
+    mockApiRoutes({
+      "GET /reseaux-sociaux/acces": {
+        status: 200,
+        body: { ouvert: true, instagram: false, tiktok: true },
+      },
+      "GET /reseaux-sociaux/comptes": { status: 200, body: [] },
+      "GET /reseaux-sociaux/publications": { status: 200, body: [] },
+    });
+    render(
+      <AuthProvider>
+        <ReseauxSociauxPage />
+      </AuthProvider>,
+    );
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "Connecter Instagram" })).toBeDisabled());
+    expect(screen.getByRole("button", { name: "Connecter TikTok" })).toBeEnabled();
+    expect(screen.getByText(/identifiants\s+développeur Instagram manquants/i)).toBeInTheDocument();
+  });
+
+  it("propose la vidéo (Reel) pour Instagram", async () => {
+    render(
+      <AuthProvider>
+        <ReseauxSociauxPage />
+      </AuthProvider>,
+    );
+    const type = await screen.findByLabelText("Type de média");
+    expect(screen.getByLabelText("Réseau")).toHaveValue("instagram");
+    expect(type).toContainHTML("Vidéo (Reel)");
   });
 });

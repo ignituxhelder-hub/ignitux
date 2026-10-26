@@ -32,6 +32,8 @@ export type Social_accountsMinAggregateOutputType = {
   username: string | null
   access_token_chiffre: string | null
   token_expires_at: Date | null
+  refresh_token_chiffre: string | null
+  refresh_expires_at: Date | null
   connected_at: Date | null
   disconnected_at: Date | null
   created_at: Date | null
@@ -46,6 +48,8 @@ export type Social_accountsMaxAggregateOutputType = {
   username: string | null
   access_token_chiffre: string | null
   token_expires_at: Date | null
+  refresh_token_chiffre: string | null
+  refresh_expires_at: Date | null
   connected_at: Date | null
   disconnected_at: Date | null
   created_at: Date | null
@@ -60,6 +64,8 @@ export type Social_accountsCountAggregateOutputType = {
   username: number
   access_token_chiffre: number
   token_expires_at: number
+  refresh_token_chiffre: number
+  refresh_expires_at: number
   connected_at: number
   disconnected_at: number
   created_at: number
@@ -76,6 +82,8 @@ export type Social_accountsMinAggregateInputType = {
   username?: true
   access_token_chiffre?: true
   token_expires_at?: true
+  refresh_token_chiffre?: true
+  refresh_expires_at?: true
   connected_at?: true
   disconnected_at?: true
   created_at?: true
@@ -90,6 +98,8 @@ export type Social_accountsMaxAggregateInputType = {
   username?: true
   access_token_chiffre?: true
   token_expires_at?: true
+  refresh_token_chiffre?: true
+  refresh_expires_at?: true
   connected_at?: true
   disconnected_at?: true
   created_at?: true
@@ -104,6 +114,8 @@ export type Social_accountsCountAggregateInputType = {
   username?: true
   access_token_chiffre?: true
   token_expires_at?: true
+  refresh_token_chiffre?: true
+  refresh_expires_at?: true
   connected_at?: true
   disconnected_at?: true
   created_at?: true
@@ -189,8 +201,10 @@ export type Social_accountsGroupByOutputType = {
   platform: string
   platform_account_id: string
   username: string | null
-  access_token_chiffre: string
+  access_token_chiffre: string | null
   token_expires_at: Date | null
+  refresh_token_chiffre: string | null
+  refresh_expires_at: Date | null
   connected_at: Date
   disconnected_at: Date | null
   created_at: Date
@@ -224,8 +238,10 @@ export type social_accountsWhereInput = {
   platform?: Prisma.StringFilter<"social_accounts"> | string
   platform_account_id?: Prisma.StringFilter<"social_accounts"> | string
   username?: Prisma.StringNullableFilter<"social_accounts"> | string | null
-  access_token_chiffre?: Prisma.StringFilter<"social_accounts"> | string
+  access_token_chiffre?: Prisma.StringNullableFilter<"social_accounts"> | string | null
   token_expires_at?: Prisma.DateTimeNullableFilter<"social_accounts"> | Date | string | null
+  refresh_token_chiffre?: Prisma.StringNullableFilter<"social_accounts"> | string | null
+  refresh_expires_at?: Prisma.DateTimeNullableFilter<"social_accounts"> | Date | string | null
   connected_at?: Prisma.DateTimeFilter<"social_accounts"> | Date | string
   disconnected_at?: Prisma.DateTimeNullableFilter<"social_accounts"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"social_accounts"> | Date | string
@@ -239,8 +255,10 @@ export type social_accountsOrderByWithRelationInput = {
   platform?: Prisma.SortOrder
   platform_account_id?: Prisma.SortOrder
   username?: Prisma.SortOrderInput | Prisma.SortOrder
-  access_token_chiffre?: Prisma.SortOrder
+  access_token_chiffre?: Prisma.SortOrderInput | Prisma.SortOrder
   token_expires_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  refresh_token_chiffre?: Prisma.SortOrderInput | Prisma.SortOrder
+  refresh_expires_at?: Prisma.SortOrderInput | Prisma.SortOrder
   connected_at?: Prisma.SortOrder
   disconnected_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -258,8 +276,10 @@ export type social_accountsWhereUniqueInput = Prisma.AtLeast<{
   platform?: Prisma.StringFilter<"social_accounts"> | string
   platform_account_id?: Prisma.StringFilter<"social_accounts"> | string
   username?: Prisma.StringNullableFilter<"social_accounts"> | string | null
-  access_token_chiffre?: Prisma.StringFilter<"social_accounts"> | string
+  access_token_chiffre?: Prisma.StringNullableFilter<"social_accounts"> | string | null
   token_expires_at?: Prisma.DateTimeNullableFilter<"social_accounts"> | Date | string | null
+  refresh_token_chiffre?: Prisma.StringNullableFilter<"social_accounts"> | string | null
+  refresh_expires_at?: Prisma.DateTimeNullableFilter<"social_accounts"> | Date | string | null
   connected_at?: Prisma.DateTimeFilter<"social_accounts"> | Date | string
   disconnected_at?: Prisma.DateTimeNullableFilter<"social_accounts"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"social_accounts"> | Date | string
@@ -273,8 +293,10 @@ export type social_accountsOrderByWithAggregationInput = {
   platform?: Prisma.SortOrder
   platform_account_id?: Prisma.SortOrder
   username?: Prisma.SortOrderInput | Prisma.SortOrder
-  access_token_chiffre?: Prisma.SortOrder
+  access_token_chiffre?: Prisma.SortOrderInput | Prisma.SortOrder
   token_expires_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  refresh_token_chiffre?: Prisma.SortOrderInput | Prisma.SortOrder
+  refresh_expires_at?: Prisma.SortOrderInput | Prisma.SortOrder
   connected_at?: Prisma.SortOrder
   disconnected_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -293,8 +315,10 @@ export type social_accountsScalarWhereWithAggregatesInput = {
   platform?: Prisma.StringWithAggregatesFilter<"social_accounts"> | string
   platform_account_id?: Prisma.StringWithAggregatesFilter<"social_accounts"> | string
   username?: Prisma.StringNullableWithAggregatesFilter<"social_accounts"> | string | null
-  access_token_chiffre?: Prisma.StringWithAggregatesFilter<"social_accounts"> | string
+  access_token_chiffre?: Prisma.StringNullableWithAggregatesFilter<"social_accounts"> | string | null
   token_expires_at?: Prisma.DateTimeNullableWithAggregatesFilter<"social_accounts"> | Date | string | null
+  refresh_token_chiffre?: Prisma.StringNullableWithAggregatesFilter<"social_accounts"> | string | null
+  refresh_expires_at?: Prisma.DateTimeNullableWithAggregatesFilter<"social_accounts"> | Date | string | null
   connected_at?: Prisma.DateTimeWithAggregatesFilter<"social_accounts"> | Date | string
   disconnected_at?: Prisma.DateTimeNullableWithAggregatesFilter<"social_accounts"> | Date | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"social_accounts"> | Date | string
@@ -306,8 +330,10 @@ export type social_accountsCreateInput = {
   platform: string
   platform_account_id: string
   username?: string | null
-  access_token_chiffre: string
+  access_token_chiffre?: string | null
   token_expires_at?: Date | string | null
+  refresh_token_chiffre?: string | null
+  refresh_expires_at?: Date | string | null
   connected_at?: Date | string
   disconnected_at?: Date | string | null
   created_at?: Date | string
@@ -321,8 +347,10 @@ export type social_accountsUncheckedCreateInput = {
   platform: string
   platform_account_id: string
   username?: string | null
-  access_token_chiffre: string
+  access_token_chiffre?: string | null
   token_expires_at?: Date | string | null
+  refresh_token_chiffre?: string | null
+  refresh_expires_at?: Date | string | null
   connected_at?: Date | string
   disconnected_at?: Date | string | null
   created_at?: Date | string
@@ -334,8 +362,10 @@ export type social_accountsUpdateInput = {
   platform?: Prisma.StringFieldUpdateOperationsInput | string
   platform_account_id?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  access_token_chiffre?: Prisma.StringFieldUpdateOperationsInput | string
+  access_token_chiffre?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   token_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refresh_token_chiffre?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refresh_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   connected_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   disconnected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -349,8 +379,10 @@ export type social_accountsUncheckedUpdateInput = {
   platform?: Prisma.StringFieldUpdateOperationsInput | string
   platform_account_id?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  access_token_chiffre?: Prisma.StringFieldUpdateOperationsInput | string
+  access_token_chiffre?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   token_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refresh_token_chiffre?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refresh_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   connected_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   disconnected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -363,8 +395,10 @@ export type social_accountsCreateManyInput = {
   platform: string
   platform_account_id: string
   username?: string | null
-  access_token_chiffre: string
+  access_token_chiffre?: string | null
   token_expires_at?: Date | string | null
+  refresh_token_chiffre?: string | null
+  refresh_expires_at?: Date | string | null
   connected_at?: Date | string
   disconnected_at?: Date | string | null
   created_at?: Date | string
@@ -376,8 +410,10 @@ export type social_accountsUpdateManyMutationInput = {
   platform?: Prisma.StringFieldUpdateOperationsInput | string
   platform_account_id?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  access_token_chiffre?: Prisma.StringFieldUpdateOperationsInput | string
+  access_token_chiffre?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   token_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refresh_token_chiffre?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refresh_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   connected_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   disconnected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -390,8 +426,10 @@ export type social_accountsUncheckedUpdateManyInput = {
   platform?: Prisma.StringFieldUpdateOperationsInput | string
   platform_account_id?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  access_token_chiffre?: Prisma.StringFieldUpdateOperationsInput | string
+  access_token_chiffre?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   token_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refresh_token_chiffre?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refresh_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   connected_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   disconnected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -421,6 +459,8 @@ export type social_accountsCountOrderByAggregateInput = {
   username?: Prisma.SortOrder
   access_token_chiffre?: Prisma.SortOrder
   token_expires_at?: Prisma.SortOrder
+  refresh_token_chiffre?: Prisma.SortOrder
+  refresh_expires_at?: Prisma.SortOrder
   connected_at?: Prisma.SortOrder
   disconnected_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -435,6 +475,8 @@ export type social_accountsMaxOrderByAggregateInput = {
   username?: Prisma.SortOrder
   access_token_chiffre?: Prisma.SortOrder
   token_expires_at?: Prisma.SortOrder
+  refresh_token_chiffre?: Prisma.SortOrder
+  refresh_expires_at?: Prisma.SortOrder
   connected_at?: Prisma.SortOrder
   disconnected_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -449,6 +491,8 @@ export type social_accountsMinOrderByAggregateInput = {
   username?: Prisma.SortOrder
   access_token_chiffre?: Prisma.SortOrder
   token_expires_at?: Prisma.SortOrder
+  refresh_token_chiffre?: Prisma.SortOrder
+  refresh_expires_at?: Prisma.SortOrder
   connected_at?: Prisma.SortOrder
   disconnected_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -502,8 +546,10 @@ export type social_accountsCreateWithoutOwnerInput = {
   platform: string
   platform_account_id: string
   username?: string | null
-  access_token_chiffre: string
+  access_token_chiffre?: string | null
   token_expires_at?: Date | string | null
+  refresh_token_chiffre?: string | null
+  refresh_expires_at?: Date | string | null
   connected_at?: Date | string
   disconnected_at?: Date | string | null
   created_at?: Date | string
@@ -515,8 +561,10 @@ export type social_accountsUncheckedCreateWithoutOwnerInput = {
   platform: string
   platform_account_id: string
   username?: string | null
-  access_token_chiffre: string
+  access_token_chiffre?: string | null
   token_expires_at?: Date | string | null
+  refresh_token_chiffre?: string | null
+  refresh_expires_at?: Date | string | null
   connected_at?: Date | string
   disconnected_at?: Date | string | null
   created_at?: Date | string
@@ -558,8 +606,10 @@ export type social_accountsScalarWhereInput = {
   platform?: Prisma.StringFilter<"social_accounts"> | string
   platform_account_id?: Prisma.StringFilter<"social_accounts"> | string
   username?: Prisma.StringNullableFilter<"social_accounts"> | string | null
-  access_token_chiffre?: Prisma.StringFilter<"social_accounts"> | string
+  access_token_chiffre?: Prisma.StringNullableFilter<"social_accounts"> | string | null
   token_expires_at?: Prisma.DateTimeNullableFilter<"social_accounts"> | Date | string | null
+  refresh_token_chiffre?: Prisma.StringNullableFilter<"social_accounts"> | string | null
+  refresh_expires_at?: Prisma.DateTimeNullableFilter<"social_accounts"> | Date | string | null
   connected_at?: Prisma.DateTimeFilter<"social_accounts"> | Date | string
   disconnected_at?: Prisma.DateTimeNullableFilter<"social_accounts"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"social_accounts"> | Date | string
@@ -571,8 +621,10 @@ export type social_accountsCreateManyOwnerInput = {
   platform: string
   platform_account_id: string
   username?: string | null
-  access_token_chiffre: string
+  access_token_chiffre?: string | null
   token_expires_at?: Date | string | null
+  refresh_token_chiffre?: string | null
+  refresh_expires_at?: Date | string | null
   connected_at?: Date | string
   disconnected_at?: Date | string | null
   created_at?: Date | string
@@ -584,8 +636,10 @@ export type social_accountsUpdateWithoutOwnerInput = {
   platform?: Prisma.StringFieldUpdateOperationsInput | string
   platform_account_id?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  access_token_chiffre?: Prisma.StringFieldUpdateOperationsInput | string
+  access_token_chiffre?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   token_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refresh_token_chiffre?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refresh_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   connected_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   disconnected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -597,8 +651,10 @@ export type social_accountsUncheckedUpdateWithoutOwnerInput = {
   platform?: Prisma.StringFieldUpdateOperationsInput | string
   platform_account_id?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  access_token_chiffre?: Prisma.StringFieldUpdateOperationsInput | string
+  access_token_chiffre?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   token_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refresh_token_chiffre?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refresh_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   connected_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   disconnected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -610,8 +666,10 @@ export type social_accountsUncheckedUpdateManyWithoutOwnerInput = {
   platform?: Prisma.StringFieldUpdateOperationsInput | string
   platform_account_id?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  access_token_chiffre?: Prisma.StringFieldUpdateOperationsInput | string
+  access_token_chiffre?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   token_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refresh_token_chiffre?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refresh_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   connected_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   disconnected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -628,6 +686,8 @@ export type social_accountsSelect<ExtArgs extends runtime.Types.Extensions.Inter
   username?: boolean
   access_token_chiffre?: boolean
   token_expires_at?: boolean
+  refresh_token_chiffre?: boolean
+  refresh_expires_at?: boolean
   connected_at?: boolean
   disconnected_at?: boolean
   created_at?: boolean
@@ -643,6 +703,8 @@ export type social_accountsSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   username?: boolean
   access_token_chiffre?: boolean
   token_expires_at?: boolean
+  refresh_token_chiffre?: boolean
+  refresh_expires_at?: boolean
   connected_at?: boolean
   disconnected_at?: boolean
   created_at?: boolean
@@ -658,6 +720,8 @@ export type social_accountsSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   username?: boolean
   access_token_chiffre?: boolean
   token_expires_at?: boolean
+  refresh_token_chiffre?: boolean
+  refresh_expires_at?: boolean
   connected_at?: boolean
   disconnected_at?: boolean
   created_at?: boolean
@@ -673,13 +737,15 @@ export type social_accountsSelectScalar = {
   username?: boolean
   access_token_chiffre?: boolean
   token_expires_at?: boolean
+  refresh_token_chiffre?: boolean
+  refresh_expires_at?: boolean
   connected_at?: boolean
   disconnected_at?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type social_accountsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_id" | "platform" | "platform_account_id" | "username" | "access_token_chiffre" | "token_expires_at" | "connected_at" | "disconnected_at" | "created_at" | "updated_at", ExtArgs["result"]["social_accounts"]>
+export type social_accountsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_id" | "platform" | "platform_account_id" | "username" | "access_token_chiffre" | "token_expires_at" | "refresh_token_chiffre" | "refresh_expires_at" | "connected_at" | "disconnected_at" | "created_at" | "updated_at", ExtArgs["result"]["social_accounts"]>
 export type social_accountsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
 }
@@ -701,8 +767,17 @@ export type $social_accountsPayload<ExtArgs extends runtime.Types.Extensions.Int
     platform: string
     platform_account_id: string
     username: string | null
-    access_token_chiffre: string
+    /**
+     * Vidé à la déconnexion : un compte déconnecté ne garde aucun jeton.
+     */
+    access_token_chiffre: string | null
     token_expires_at: Date | null
+    /**
+     * TikTok seulement : son jeton d'accès ne vit que 24 h, celui-ci le
+     * renouvelle (365 jours). Instagram renouvelle avec le jeton d'accès lui-même.
+     */
+    refresh_token_chiffre: string | null
+    refresh_expires_at: Date | null
     connected_at: Date
     disconnected_at: Date | null
     created_at: Date
@@ -1138,6 +1213,8 @@ export interface social_accountsFieldRefs {
   readonly username: Prisma.FieldRef<"social_accounts", 'String'>
   readonly access_token_chiffre: Prisma.FieldRef<"social_accounts", 'String'>
   readonly token_expires_at: Prisma.FieldRef<"social_accounts", 'DateTime'>
+  readonly refresh_token_chiffre: Prisma.FieldRef<"social_accounts", 'String'>
+  readonly refresh_expires_at: Prisma.FieldRef<"social_accounts", 'DateTime'>
   readonly connected_at: Prisma.FieldRef<"social_accounts", 'DateTime'>
   readonly disconnected_at: Prisma.FieldRef<"social_accounts", 'DateTime'>
   readonly created_at: Prisma.FieldRef<"social_accounts", 'DateTime'>

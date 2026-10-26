@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Param,
   ParseUUIDPipe,
   Post,
@@ -30,7 +31,17 @@ import type { Plateforme } from './reseaux-sociaux.providers.js';
 @ApiTags('reseaux-sociaux')
 @Controller('reseaux-sociaux')
 export class PublicationsSocialesController {
+  private readonly logger = new Logger(PublicationsSocialesController.name);
+
   constructor(private readonly service: PublicationsSocialesService) {}
+
+  /** Ouvert à cette personne ? Quelles plateformes sont configurées sur ce serveur ? */
+  @Get('acces')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  acces(@CurrentUser() user: AuthenticatedUser) {
+    return this.service.acces(user.email);
+  }
 
   @Post('suggestion')
   @UseGuards(JwtAuthGuard)
@@ -40,7 +51,7 @@ export class PublicationsSocialesController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: SuggestionPublicationDto,
   ) {
-    return this.service.genererSuggestion(user.id, dto.platform, dto.brief);
+    return this.service.genererSuggestion(user, dto.platform, dto.brief);
   }
 
   @Get('comptes')
@@ -57,7 +68,7 @@ export class PublicationsSocialesController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('platform') platform: string,
   ) {
-    return this.service.demarrerConnexion(user.id, this.platform(platform));
+    return this.service.demarrerConnexion(user, this.platform(platform));
   }
 
   @Get('oauth/:platform/callback')
@@ -81,7 +92,9 @@ export class PublicationsSocialesController {
       await this.service.finaliserConnexion(platform, code, state);
       frontend.searchParams.set('connexion', platform);
       frontend.searchParams.set('etat', 'ok');
-    } catch {
+    } catch (erreur) {
+      // Jamais le code ni le jeton dans le journal : seulement ce qui a échoué.
+      this.logger.warn(`Connexion ${platform} échouée : ${(erreur as Error).message}`);
       frontend.searchParams.set('connexion', 'erreur');
     }
     return response.redirect(frontend.toString());
@@ -113,7 +126,7 @@ export class PublicationsSocialesController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreerPublicationDto,
   ) {
-    return this.service.creer(user.id, {
+    return this.service.creer(user, {
       platform: dto.platform,
       caption: dto.caption,
       mediaUrl: dto.mediaUrl,
@@ -154,7 +167,7 @@ export class PublicationsSocialesController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ConfirmerPublicationDto,
   ) {
-    return this.service.publier(user.id, id, dto.musicConsent);
+    return this.service.publier(user, id, dto.musicConsent);
   }
 
   @Get('publications/:id/statut')

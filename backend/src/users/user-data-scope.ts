@@ -213,6 +213,8 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
   community_comments: exported('communaute_et_marketplace'),
   marketplace_profiles: exported('communaute_et_marketplace'),
   marketplace_contacts: exported('communaute_et_marketplace'),
+  // Les publications préparées pour Instagram et TikTok.
+  social_posts: exported('communaute_et_marketplace'),
 
   workflow_runs: exported('journaux_techniques'),
   workflow_events: exported('journaux_techniques'),
@@ -256,6 +258,12 @@ export const USER_DATA_SCOPE: Readonly<Record<string, TableTreatment>> = {
       "chiffré n'apprendrait rien à la personne, et une éventuelle fuite de l'export ne doit " +
       'pas non plus faire circuler du matériel de sécurité. Le domaine de la boutique et le ' +
       "forfait déclaré restent visibles depuis l'écran Boutique en ligne lui-même.",
+  ),
+  social_accounts: excluded(
+    "Jetons d'accès Instagram et TikTok, chiffrés au repos. Même motif que " +
+      "shopify_connections : les remettre n'apprendrait rien et ferait circuler du " +
+      "matériel de sécurité. Le nom du compte connecté reste visible depuis l'écran " +
+      'Réseaux sociaux, et la suppression du compte Ignitux efface ces jetons.',
   ),
 };
 

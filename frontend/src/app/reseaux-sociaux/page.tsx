@@ -2,15 +2,23 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { api, ApiError, type SocialAccount, type SocialPost } from "@/lib/api";
+import {
+  api,
+  ApiError,
+  type SocialAccess,
+  type SocialAccount,
+  type SocialPost,
+} from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
 const PLATEFORMES = ["instagram", "tiktok"] as const;
 type Plateforme = (typeof PLATEFORMES)[number];
+const NOM: Record<Plateforme, string> = { instagram: "Instagram", tiktok: "TikTok" };
 
 export default function ReseauxSociauxPage() {
   const { token, isReady } = useAuth();
   const router = useRouter();
+  const [acces, setAcces] = useState<SocialAccess | null>(null);
   const [accounts, setAccounts] = useState<SocialAccount[]>([]);
   const [posts, setPosts] = useState<SocialPost[]>([]);
   const [platform, setPlatform] = useState<Plateforme>("instagram");
@@ -43,10 +51,12 @@ export default function ReseauxSociauxPage() {
   const load = useCallback(async () => {
     if (!token) return;
     try {
-      const [a, p] = await Promise.all([
+      const [o, a, p] = await Promise.all([
+        api.getSocialAccess(token),
         api.listSocialAccounts(token),
         api.listSocialPosts(token),
       ]);
+      setAcces(o);
       setAccounts(a);
       setPosts(p);
     } catch (err) {
@@ -64,13 +74,13 @@ export default function ReseauxSociauxPage() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("etat") === "ok")
       setNotice(
-        "Compte connecté. Vous pouvez préparer votre première publication.",
+        "Compte connecté. Tu peux préparer ta première publication.",
       );
     if (params.get("connexion") === "refusee")
       setNotice("La connexion au réseau a été annulée.");
     if (params.get("connexion") === "erreur")
       setError(
-        "La connexion a échoué. Vérifiez la configuration de l’application développeur puis réessayez.",
+        "La connexion a échoué. Vérifie la configuration de l’application développeur puis réessaie.",
       );
     if (params.has("connexion"))
       window.history.replaceState({}, "", "/reseaux-sociaux");
@@ -175,7 +185,7 @@ export default function ReseauxSociauxPage() {
       setBrandOrganic(false);
       setBrandContent(false);
       setNotice(
-        "Brouillon enregistré. Il ne sera publié qu’après votre clic sur « Publier maintenant ».",
+        "Brouillon enregistré. Il ne partira qu’après ton clic sur « Publier maintenant ».",
       );
       await load();
     } catch (err) {
@@ -196,7 +206,7 @@ export default function ReseauxSociauxPage() {
     try {
       const result = await api.suggestSocialCaption(token!, platform, brief);
       setCaption(result.caption);
-      setNotice("IGINI a préparé une proposition. Relisez et modifiez-la avant de l’enregistrer.");
+      setNotice("IGINI a préparé une proposition. Relis-la et modifie-la avant de l’enregistrer.");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "IGINI n’a pas pu préparer cette proposition.");
     } finally {
@@ -208,20 +218,28 @@ export default function ReseauxSociauxPage() {
     if (post.platform === "tiktok" && !confirmedTikTokPosts[post.id]) return;
     if (
       !window.confirm(
-        `Publier maintenant sur ${post.platform} ? Cette action sera visible sur votre compte.`,
+        `Publier maintenant sur ${NOM[post.platform]} ? La publication sera visible sur ton compte.`,
       )
     )
       return;
     setError(null);
     try {
       await api.publishSocialPost(token!, post.id, post.platform === "tiktok");
-      setNotice(`Publication envoyée sur ${post.platform}.`);
+      const envoye = await api.listSocialPosts(token!);
+      const celuiCi = envoye.find((item) => item.id === post.id);
+      setNotice(
+        celuiCi?.status === "published"
+          ? `Publié sur ${NOM[post.platform]}.`
+          : post.platform === "instagram"
+            ? "Instagram prépare la vidéo (une à quelques minutes). Touche « Vérifier le statut » pour la publier dès qu’elle est prête."
+            : "TikTok traite la publication. Touche « Vérifier le statut » dans un instant.",
+      );
       await load();
     } catch (err) {
       setError(
         err instanceof ApiError
           ? err.message
-          : "Ignitux n’a pas pu confirmer la publication. Vérifiez votre compte avant de recommencer.",
+          : "Ignitux n’a pas pu confirmer la publication. Vérifie ton compte avant de recommencer.",
       );
       await load();
     }
@@ -232,22 +250,24 @@ export default function ReseauxSociauxPage() {
     try {
       const updated = await api.refreshSocialPostStatus(token!, post.id);
       if (updated.status === "published")
-        setNotice("TikTok a confirmé la publication.");
+        setNotice(`${NOM[post.platform]} a confirmé la publication.`);
       else if (updated.status === "failed")
         setError(
           updated.error ||
-            "TikTok signale un échec. Vérifiez le compte avant toute nouvelle tentative.",
+            `${NOM[post.platform]} signale un échec. Vérifie le compte avant toute nouvelle tentative.`,
         );
       else
         setNotice(
-          "TikTok traite encore la publication. Vérifiez à nouveau dans un instant.",
+          post.platform === "instagram"
+            ? "Instagram prépare encore la vidéo. Vérifie à nouveau dans une minute."
+            : "TikTok traite encore la publication. Vérifie à nouveau dans un instant.",
         );
       await load();
     } catch (err) {
       setError(
         err instanceof ApiError
           ? err.message
-          : "Impossible de vérifier le statut auprès de TikTok.",
+          : `Impossible de vérifier le statut auprès de ${NOM[post.platform]}.`,
       );
     }
   }
@@ -270,9 +290,28 @@ export default function ReseauxSociauxPage() {
     return {
       draft: "Brouillon",
       publishing: "Envoi en cours",
+      finalizing: "Envoi en cours",
       published: "Publié",
       failed: "Échec — vérification requise",
     }[statusValue];
+  }
+
+  if (acces && !acces.ouvert) {
+    return (
+      <main className="page page--wide">
+        <h1>Réseaux sociaux</h1>
+        <div className="card">
+          <p style={{ marginTop: 0 }}>
+            Bientôt : préparer tes publications Instagram et TikTok depuis
+            Ignitux, et les envoyer après ta confirmation.
+          </p>
+          <p className="muted" style={{ marginBottom: 0 }}>
+            Cette application ouvrira à tous quand Instagram et TikTok auront
+            validé Ignitux. Rien n’est publié en ton nom d’ici là.
+          </p>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -282,14 +321,14 @@ export default function ReseauxSociauxPage() {
       </div>
       <div className="card">
         <p style={{ marginTop: 0 }}>
-          Préparez vos publications Instagram et TikTok. Ignitux ne publie rien
-          automatiquement : vous vérifiez le brouillon et confirmez chaque
-          envoi.
+          Prépare tes publications Instagram et TikTok. Ignitux ne publie rien
+          tout seul : tu relis le brouillon et tu confirmes chaque envoi.
         </p>
         <p className="muted" style={{ marginBottom: 0 }}>
-          Les médias doivent être accessibles par une adresse HTTPS publique.
-          TikTok exige aussi que le domaine soit vérifié dans l’application
-          développeur. Instagram nécessite un compte professionnel ou créateur.
+          L’image ou la vidéo doit déjà être en ligne, à une adresse HTTPS
+          publique : Instagram et TikTok vont la chercher eux-mêmes. TikTok exige
+          aussi que ce domaine soit vérifié dans son application développeur.
+          Instagram demande un compte professionnel ou créateur.
         </p>
       </div>
       {error && (
@@ -331,11 +370,17 @@ export default function ReseauxSociauxPage() {
                 <button
                   className="secondary"
                   type="button"
-                  disabled={busy}
+                  disabled={busy || acces?.[p] === false}
                   onClick={() => void connect(p)}
                 >
-                  Connecter {p === "instagram" ? "Instagram" : "TikTok"}
+                  Connecter {NOM[p]}
                 </button>
+              )}
+              {!account && acces?.[p] === false && (
+                <span className="muted" style={{ flexBasis: "100%" }}>
+                  Pas encore configuré sur le serveur Ignitux (identifiants
+                  développeur {NOM[p]} manquants).
+                </span>
               )}
             </div>
           );
@@ -348,31 +393,32 @@ export default function ReseauxSociauxPage() {
           onSubmit={(event) => void create(event)}
           style={{ display: "grid", gap: "0.75rem" }}
         >
-          <label>
-            Réseau
+          <div className="field">
+            <label htmlFor="rs-reseau">Réseau</label>
             <select
+              id="rs-reseau"
               value={platform}
-              onChange={(event) => {
-                setPlatform(event.target.value as Plateforme);
-                if (event.target.value === "instagram") setMediaType("image");
-              }}
+              onChange={(event) => setPlatform(event.target.value as Plateforme)}
             >
               <option value="instagram">Instagram</option>
               <option value="tiktok">TikTok</option>
             </select>
-          </label>
-          <label>
-            Type de média
+          </div>
+          <div className="field">
+            <label htmlFor="rs-type">Type de média</label>
             <select
+              id="rs-type"
               value={mediaType}
               onChange={(event) =>
                 setMediaType(event.target.value as "image" | "video")
               }
             >
               <option value="image">Image</option>
-              {platform === "tiktok" && <option value="video">Vidéo</option>}
+              <option value="video">
+                {platform === "instagram" ? "Vidéo (Reel)" : "Vidéo"}
+              </option>
             </select>
-          </label>
+          </div>
           {platform === "tiktok" && (
             <>
               {creatorNickname && (
@@ -380,9 +426,10 @@ export default function ReseauxSociauxPage() {
                   Compte TikTok : <strong>{creatorNickname}</strong>
                 </p>
               )}
-              <label>
-                Qui pourra voir cette publication ?
+              <div className="field">
+                <label htmlFor="rs-visibilite">Qui pourra voir cette publication ?</label>
                 <select
+                  id="rs-visibilite"
                   required
                   value={privacyLevel}
                   onChange={(event) => setPrivacyLevel(event.target.value)}
@@ -405,7 +452,7 @@ export default function ReseauxSociauxPage() {
                     </option>
                   ))}
                 </select>
-              </label>
+              </div>
               {mediaType === "video" && maxVideoDuration !== null && (
                 <p className="muted">
                   Durée maximale TikTok : {maxVideoDuration} secondes.
@@ -489,42 +536,45 @@ export default function ReseauxSociauxPage() {
                     </label>
                     {brandOrganic && <p className="muted">La vidéo ou la photo sera identifiée comme contenu promotionnel.</p>}
                     {brandContent && <p className="muted">La vidéo ou la photo sera identifiée comme partenariat rémunéré. La visibilité « Moi uniquement » n’est pas autorisée.</p>}
-                    {!brandOrganic && !brandContent && <p className="error">Choisissez votre marque, une autre marque, ou les deux.</p>}
+                    {!brandOrganic && !brandContent && <p className="error">Choisis ta marque, une autre marque, ou les deux.</p>}
                   </>
                 )}
               </fieldset>
             </>
           )}
-          <label>
-            Adresse HTTPS publique du média
+          <div className="field">
+            <label htmlFor="rs-media">Adresse HTTPS publique du média</label>
             <input
+              id="rs-media"
               type="url"
               required
               value={mediaUrl}
               onChange={(event) => setMediaUrl(event.target.value)}
               placeholder="https://…"
             />
-          </label>
-          <label>
-            Texte et hashtags
+          </div>
+          <div className="field">
+            <label htmlFor="rs-texte">Texte et hashtags</label>
             <textarea
+              id="rs-texte"
               required
               maxLength={2200}
               rows={5}
               value={caption}
               onChange={(event) => setCaption(event.target.value)}
             />
-          </label>
-          <label>
-            Idée ou consignes pour IGINI
+          </div>
+          <div className="field">
+            <label htmlFor="rs-consignes">Idée ou consignes pour IGINI</label>
             <textarea
+              id="rs-consignes"
               rows={3}
               maxLength={1000}
               value={brief}
               onChange={(event) => setBrief(event.target.value)}
               placeholder="Ex. Présenter Ignitux aux créateurs d’entreprise, ton simple et concret…"
             />
-          </label>
+          </div>
           <button type="button" className="secondary" disabled={suggesting || brief.trim().length < 3} onClick={() => void suggestCaption()}>
             {suggesting ? "IGINI prépare le texte…" : "Proposer un texte avec IGINI"}
           </button>
@@ -568,7 +618,8 @@ export default function ReseauxSociauxPage() {
               (platform === "tiktok" && brandContent && privacyLevel === "SELF_ONLY") ||
               !accounts.some((item) => item.platform === platform) ||
               (platform === "tiktok" && !privacyLevel) ||
-              (mediaType === "video" &&
+              (platform === "tiktok" &&
+                mediaType === "video" &&
                 (!durationSeconds ||
                   (maxVideoDuration !== null &&
                     durationSeconds > maxVideoDuration)))
@@ -578,14 +629,14 @@ export default function ReseauxSociauxPage() {
           </button>
           {!accounts.some((item) => item.platform === platform) && (
             <p className="muted">
-              Connectez d’abord ce compte pour créer une publication.
+              Connecte d’abord ce compte pour créer une publication.
             </p>
           )}
         </form>
       </section>
 
       <section className="card" aria-labelledby="publications-preparees">
-        <h2 id="publications-preparees">Vos publications</h2>
+        <h2 id="publications-preparees">Tes publications</h2>
         {posts.length === 0 ? (
           <p className="muted">Aucune publication préparée.</p>
         ) : (
@@ -613,8 +664,15 @@ export default function ReseauxSociauxPage() {
                           }))
                         }
                       />{" "}
-                      By posting, you agree to TikTok&apos;s Music Usage
-                      Confirmation.
+                      En publiant, tu acceptes la{" "}
+                      <a
+                        href="https://www.tiktok.com/legal/page/global/music-usage-confirmation/fr"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        confirmation d’utilisation de la musique de TikTok
+                      </a>
+                      .
                     </label>
                   )}
                   {post.status === "draft" && (
@@ -638,8 +696,7 @@ export default function ReseauxSociauxPage() {
                       </button>
                     </span>
                   )}
-                  {post.status === "publishing" &&
-                    post.platform === "tiktok" && (
+                  {post.status === "publishing" && (
                       <button
                         className="secondary"
                         type="button"
@@ -688,8 +745,8 @@ export default function ReseauxSociauxPage() {
                 {post.error && <p className="error">{post.error}</p>}
                 {post.status === "failed" && (
                   <p className="muted">
-                    Vérifiez d’abord le compte social : une erreur réseau peut
-                    empêcher Ignitux de savoir si le post a été reçu.
+                    Vérifie d’abord le compte : une erreur réseau peut empêcher
+                    Ignitux de savoir si la publication a été reçue.
                   </p>
                 )}
                 {post.published_at && (

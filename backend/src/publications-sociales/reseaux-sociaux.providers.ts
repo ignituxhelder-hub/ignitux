@@ -52,6 +52,16 @@ function config(platform: Plateforme) {
   return { clientId, clientSecret, redirectUri };
 }
 
+/** La plateforme a-t-elle ses identifiants développeur sur ce serveur ? */
+export function estConfiguree(platform: Plateforme): boolean {
+  try {
+    config(platform);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function createState(userId: string, platform: Plateforme): string {
   const payload = Buffer.from(
     JSON.stringify({
@@ -99,7 +109,7 @@ export function verifyState(state: string, platform: Plateforme): string {
     data.issuedAt > Date.now() + 30_000
   ) {
     throw new BadGatewayException(
-      'La demande de connexion a expiré. Recommencez depuis Ignitux.',
+      'La demande de connexion a expiré. Recommence depuis Ignitux.',
     );
   }
   return data.userId;
@@ -135,6 +145,23 @@ async function jsonResponse(res: Response): Promise<Record<string, any>> {
     );
   return data;
 }
+
+/**
+ * TikTok répond souvent 200 avec l'erreur dans le corps
+ * (`error.code` différent de `ok`) : un statut HTTP réussi ne suffit pas.
+ */
+async function reponseTikTok(res: Response): Promise<Record<string, any>> {
+  const data = await jsonResponse(res);
+  const code = data.error?.code;
+  if (code && code !== 'ok')
+    throw new BadGatewayException(
+      `TikTok a refusé la demande (${String(code)}).`,
+    );
+  return data;
+}
+
+const URL_GRAPH_INSTAGRAM = () =>
+  `https://graph.instagram.com/${process.env.INSTAGRAM_GRAPH_VERSION?.trim() || 'v26.0'}`;
 
 export async function echangerCode(platform: Plateforme, code: string) {
   const c = config(platform);
@@ -173,6 +200,8 @@ export async function echangerCode(platform: Plateforme, code: string) {
       username: String(profile.username ?? ''),
       accessToken: String(long.access_token ?? short.access_token),
       expiresIn: Number(long.expires_in ?? 3600),
+      refreshToken: null,
+      refreshExpiresIn: null,
     };
   }
   const form = new URLSearchParams({
@@ -182,7 +211,7 @@ export async function echangerCode(platform: Plateforme, code: string) {
     redirect_uri: c.redirectUri,
     code,
   });
-  const tokenResult = await jsonResponse(
+  const tokenResult = await reponseTikTok(
     await appel('https://open.tiktokapis.com/v2/oauth/token/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -192,7 +221,7 @@ export async function echangerCode(platform: Plateforme, code: string) {
   const token = tokenResult.data ?? tokenResult;
   if (!token.access_token || !token.open_id)
     throw new BadGatewayException('TikTok n’a pas renvoyé de jeton valide.');
-  const userResult = await jsonResponse(
+  const userResult = await reponseTikTok(
     await appel(
       'https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name',
       { headers: { Authorization: `Bearer ${token.access_token}` } },
@@ -204,13 +233,87 @@ export async function echangerCode(platform: Plateforme, code: string) {
     username: String(user.display_name ?? ''),
     accessToken: String(token.access_token),
     expiresIn: Number(token.expires_in ?? 86400),
+    // Le jeton d'accès TikTok ne vit que 24 h : sans celui-ci, il faudrait
+    // reconnecter le compte chaque jour.
+    refreshToken: token.refresh_token ? String(token.refresh_token) : null,
+    refreshExpiresIn: token.refresh_expires_in
+      ? Number(token.refresh_expires_in)
+      : null,
   };
+}
+
+/** Un nouveau jeton TikTok (24 h) à partir du jeton de renouvellement. */
+export async function renouvelerTikTok(refreshToken: string) {
+  const c = config('tiktok');
+  const result = await reponseTikTok(
+    await appel('https://open.tiktokapis.com/v2/oauth/token/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_key: c.clientId,
+        client_secret: c.clientSecret,
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+      }),
+    }),
+  );
+  const token = result.data ?? result;
+  if (!token.access_token)
+    throw new BadGatewayException('TikTok n’a pas renouvelé la connexion.');
+  return {
+    accessToken: String(token.access_token),
+    expiresIn: Number(token.expires_in ?? 86400),
+    // TikTok peut renvoyer un nouveau jeton de renouvellement : on garde le
+    // plus récent, l'ancien peut cesser de marcher.
+    refreshToken: token.refresh_token ? String(token.refresh_token) : refreshToken,
+    refreshExpiresIn: token.refresh_expires_in
+      ? Number(token.refresh_expires_in)
+      : null,
+  };
+}
+
+/**
+ * Prolonge un jeton Instagram de 60 jours. Instagram n'accepte qu'un jeton
+ * encore valide et vieux d'au moins 24 h : passé l'échéance, il faut
+ * reconnecter le compte.
+ */
+export async function renouvelerInstagram(accessToken: string) {
+  const url = new URL('https://graph.instagram.com/refresh_access_token');
+  url.searchParams.set('grant_type', 'ig_refresh_token');
+  url.searchParams.set('access_token', accessToken);
+  const result = await jsonResponse(await appel(url));
+  if (!result.access_token)
+    throw new BadGatewayException('Instagram n’a pas renouvelé la connexion.');
+  return {
+    accessToken: String(result.access_token),
+    expiresIn: Number(result.expires_in ?? 5_184_000),
+  };
+}
+
+/**
+ * Retire chez TikTok l'autorisation donnée à Ignitux. Sans effet sur
+ * Instagram, qui n'offre pas de révocation par l'API : la personne la retire
+ * depuis ses paramètres Instagram (« Applications et sites web »).
+ */
+export async function revoquerTikTok(accessToken: string) {
+  const c = config('tiktok');
+  await reponseTikTok(
+    await appel('https://open.tiktokapis.com/v2/oauth/revoke/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_key: c.clientId,
+        client_secret: c.clientSecret,
+        token: accessToken,
+      }),
+    }),
+  );
 }
 
 export async function optionsCreateurTikTok(
   token: string,
 ): Promise<OptionsCreateurTikTok> {
-  const result = await jsonResponse(
+  const result = await reponseTikTok(
     await appel(
       'https://open.tiktokapis.com/v2/post/publish/creator_info/query/',
       {
@@ -263,11 +366,31 @@ export async function publier(
   },
 ) {
   if (platform === 'instagram') {
-    if (type === 'video')
-      throw new ServiceUnavailableException(
-        'La publication vidéo Instagram sera ajoutée dans une prochaine étape.',
+    const base = URL_GRAPH_INSTAGRAM();
+    if (type === 'video') {
+      // Une vidéo devient un Reel. Meta met d'une à quelques minutes à la
+      // préparer : on ne tient pas la requête ouverte pendant ce temps. Le
+      // conteneur est rendu tout de suite, « Vérifier le statut » publie
+      // quand il est prêt (voir publierConteneurInstagram).
+      const reel = await jsonResponse(
+        await appel(`${base}/${accountId}/media`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            media_type: 'REELS',
+            video_url: mediaUrl,
+            caption,
+            share_to_feed: 'true',
+            access_token: token,
+          }),
+        }),
       );
-    const base = `https://graph.instagram.com/${process.env.INSTAGRAM_GRAPH_VERSION?.trim() || 'v26.0'}`;
+      if (!reel.id)
+        throw new BadGatewayException(
+          'Instagram n’a pas accepté la vidéo. Vérifie le fichier et son adresse publique.',
+        );
+      return { id: String(reel.id), complete: false, conteneur: true };
+    }
     const container = await jsonResponse(
       await appel(`${base}/${accountId}/media`, {
         method: 'POST',
@@ -293,13 +416,13 @@ export async function publier(
       if (mediaStatus === 'FINISHED') break;
       if (mediaStatus === 'ERROR' || mediaStatus === 'EXPIRED')
         throw new BadGatewayException(
-          'Instagram n’a pas pu traiter le média. Vérifiez le fichier et son adresse publique.',
+          'Instagram n’a pas pu traiter le média. Vérifie le fichier et son adresse publique.',
         );
       await new Promise((resolve) => setTimeout(resolve, 2_000));
     }
     if (mediaStatus !== 'FINISHED')
       throw new ServiceUnavailableException(
-        'Instagram traite encore le média. Vérifiez son état avant de créer une autre publication.',
+        'Instagram traite encore le média. Vérifie son état avant de créer une autre publication.',
       );
     const result = await jsonResponse(
       await appel(`${base}/${accountId}/media_publish`, {
@@ -311,7 +434,7 @@ export async function publier(
         }),
       }),
     );
-    return { id: String(result.id ?? container.id), complete: true };
+    return { id: String(result.id ?? container.id), complete: true, conteneur: false };
   }
   const creator = await optionsCreateurTikTok(token);
   if (
@@ -319,7 +442,7 @@ export async function publier(
     !creator.privacyLevels.includes(settings.privacyLevel)
   )
     throw new BadRequestException(
-      'Choisissez une option de visibilité TikTok proposée par votre compte.',
+      'Choisis une option de visibilité TikTok proposée par ton compte.',
     );
   if (
     type === 'video' &&
@@ -328,7 +451,7 @@ export async function publier(
       settings.mediaDurationSeconds > creator.maxVideoPostDurationSec)
   ) {
     throw new BadRequestException(
-      `La vidéo doit durer au maximum ${creator.maxVideoPostDurationSec} secondes selon les limites de votre compte TikTok.`,
+      `La vidéo doit durer au maximum ${creator.maxVideoPostDurationSec} secondes selon les limites de ton compte TikTok.`,
     );
   }
   if (settings.allowComments && creator.commentDisabled)
@@ -373,7 +496,7 @@ export async function publier(
           post_mode: 'DIRECT_POST',
           media_type: 'PHOTO',
         };
-  const response = await jsonResponse(
+  const response = await reponseTikTok(
     await appel(`https://open.tiktokapis.com/v2/post/publish/${endpoint}`, {
       method: 'POST',
       headers: {
@@ -388,11 +511,40 @@ export async function publier(
     throw new BadGatewayException(
       'TikTok n’a pas confirmé la création de la publication.',
     );
-  return { id: String(id), complete: false };
+  return { id: String(id), complete: false, conteneur: false };
+}
+
+/**
+ * Où en est un conteneur Instagram : `IN_PROGRESS` tant que Meta prépare la
+ * vidéo, `FINISHED` quand elle peut partir, `PUBLISHED` une fois publiée,
+ * `ERROR` ou `EXPIRED` (24 h sans publication) sinon.
+ */
+export async function etatConteneurInstagram(containerId: string, token: string) {
+  const url = new URL(`${URL_GRAPH_INSTAGRAM()}/${containerId}`);
+  url.searchParams.set('fields', 'status_code');
+  url.searchParams.set('access_token', token);
+  const result = await jsonResponse(await appel(url));
+  return String(result.status_code ?? '');
+}
+
+/** Publie un conteneur Instagram prêt (`FINISHED`). Rend l'identifiant du post. */
+export async function publierConteneurInstagram(
+  accountId: string,
+  containerId: string,
+  token: string,
+) {
+  const result = await jsonResponse(
+    await appel(`${URL_GRAPH_INSTAGRAM()}/${accountId}/media_publish`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ creation_id: containerId, access_token: token }),
+    }),
+  );
+  return String(result.id ?? containerId);
 }
 
 export async function verifierEtatTikTok(token: string, publishId: string) {
-  const response = await jsonResponse(
+  const response = await reponseTikTok(
     await appel('https://open.tiktokapis.com/v2/post/publish/status/fetch/', {
       method: 'POST',
       headers: {

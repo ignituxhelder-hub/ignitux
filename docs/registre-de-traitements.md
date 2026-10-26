@@ -214,6 +214,17 @@ l'avertissement affiché avant l'export (`frontend/src/app/account/page.tsx`).
 - **Durée de conservation :** tant que les deux comptes existent ; supprimée en cascade avec le compte du propriétaire ou celui du membre. Une ligne n'ouvre rien seule : retiré de tous les projets du propriétaire, le membre n'a plus accès, mais le choix reste enregistré (il s'applique de nouveau si la personne redevient comptable ou associée).
 - **Export :** inclus pour les deux personnes concernées — les choix que j'ai faits pour mon argent, et ceux des propriétaires qui me concernent (`compte.acces_a_l_argent`).
 
+## 21. Réseaux sociaux (Instagram, TikTok) — publications exportées, comptes non exportés
+
+**Tables :** `social_posts` (groupe `communaute_et_marketplace`), `social_accounts` (non exportée)
+
+- **Finalité :** préparer des publications Instagram et TikTok et les envoyer, une par une, après la confirmation explicite de la personne (`backend/src/publications-sociales/`). Aucun envoi automatique ni programmé.
+- **Données :** pour le compte connecté, identifiant et nom du compte sur le réseau, jeton d'accès (et, pour TikTok, jeton de renouvellement) chiffrés au repos (AES-256-GCM, `chiffrement.ts`) ; pour chaque publication, texte, adresse du média, réglages de visibilité et d'interactions, déclaration de contenu commercial, date de confirmation des règles musicales TikTok, état d'envoi.
+- **Données transmises :** à Meta (Instagram) ou TikTok, uniquement au moment où la personne publie : le texte, l'adresse du média (que le réseau va chercher lui-même) et les réglages choisis. Si la personne demande une légende à IGINI, sa consigne part chez Anthropic.
+- **Base légale :** exécution du contrat (à la demande de la personne) — à valider.
+- **Durée de conservation :** jetons effacés dès la déconnexion (et autorisation révoquée chez TikTok ; chez Instagram, la personne la retire depuis ses paramètres) ; comptes et publications supprimés avec le compte Ignitux. Côté Meta et TikTok, ce qui est publié relève de leurs conditions.
+- **État :** tant qu'Instagram (revue Meta) et TikTok (audit) n'ont pas validé l'application, ouverte aux seuls `IGNITUX_OPERATEURS` ; `RESEAUX_SOCIAUX_POUR_TOUS=true` l'ouvre à tous.
+
 ---
 
 ## Prestataires
@@ -229,6 +240,8 @@ l'avertissement affiché avant l'export (`frontend/src/app/account/page.tsx`).
 | Discord | Réception des rapports d'erreur | UUID d'utilisateur, données techniques | Société américaine | à préciser |
 | OVH | Nom de domaine ignitux.com (site, adresse contact@ignitux.com) | Données d'enregistrement du domaine ; courrier reçu selon la messagerie retenue — à préciser | France | à préciser |
 | Shopify | Boutique de la personne, si elle la connecte | Jeton d'accès ; produits et commandes lus | à préciser | à préciser |
+| Meta (Instagram) | Publication sur le compte Instagram de la personne, si elle le connecte | Jeton d'accès ; texte et média publiés | Société américaine (Meta Platforms Ireland pour l'UE) — à préciser | à préciser |
+| TikTok | Publication sur le compte TikTok de la personne, si elle le connecte | Jetons d'accès et de renouvellement ; texte, média et réglages publiés | Société de droit irlandais pour l'UE (TikTok Technology Limited) — à préciser | à préciser |
 
 ---
 

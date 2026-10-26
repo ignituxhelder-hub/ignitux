@@ -1854,6 +1854,13 @@ export interface AdCampaignEntries {
   costPerLeadCents: number | null;
 }
 
+/** L'application est-elle ouverte à cette personne, et quels réseaux le serveur sait-il joindre ? */
+export interface SocialAccess {
+  ouvert: boolean;
+  instagram: boolean;
+  tiktok: boolean;
+}
+
 export interface SocialAccount {
   id: string;
   platform: 'instagram' | 'tiktok';
@@ -1877,8 +1884,11 @@ export interface SocialPost {
   brand_organic: boolean;
   brand_content: boolean;
   music_consent_at: string | null;
-  status: 'draft' | 'publishing' | 'published' | 'failed';
+  /** `finalizing` : un Reel Instagram prêt, en train de partir (quelques secondes). */
+  status: 'draft' | 'publishing' | 'finalizing' | 'published' | 'failed';
   platform_post_id: string | null;
+  /** Instagram vidéo : le conteneur que Meta prépare avant la publication. */
+  media_container_id: string | null;
   error: string | null;
   published_at: string | null;
   created_at: string;
@@ -3864,6 +3874,9 @@ export const api = {
       method: 'POST', headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify({ platform, brief }),
     }),
+
+  getSocialAccess: (token: string) =>
+    request<SocialAccess>('/reseaux-sociaux/acces', { headers: { Authorization: `Bearer ${token}` } }),
 
   listSocialAccounts: (token: string) =>
     request<SocialAccount[]>('/reseaux-sociaux/comptes', { headers: { Authorization: `Bearer ${token}` } }),

@@ -505,6 +505,10 @@ export const APPLICATIONS: readonly Application[] = [
     publics: ['entrepreneur'],
     essentielle: false,
     signal: null,
+    // Tant qu'Instagram (revue Meta) et TikTok (audit) n'ont pas validé
+    // Ignitux, elle n'est ouverte qu'aux opérateurs : pour les autres, le
+    // lanceur la range parmi les applications prévues (voir
+    // publications-sociales/acces.ts et ApplicationsService.lanceurDe).
     pourquoi: 'Prépare tes publications Instagram et TikTok et confirme chaque envoi.',
     apres: 'contacts',
     offre: null,

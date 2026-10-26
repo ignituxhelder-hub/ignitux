@@ -1096,8 +1096,13 @@ model social_accounts {
   platform             String
   platform_account_id  String
   username             String?
-  access_token_chiffre String
+  /// Vidé à la déconnexion : un compte déconnecté ne garde aucun jeton.
+  access_token_chiffre String?
   token_expires_at     DateTime? @db.Timestamptz(6)
+  /// TikTok seulement : son jeton d'accès ne vit que 24 h, celui-ci le
+  /// renouvelle (365 jours). Instagram renouvelle avec le jeton d'accès lui-même.
+  refresh_token_chiffre String?
+  refresh_expires_at    DateTime? @db.Timestamptz(6)
   connected_at         DateTime  @default(now()) @db.Timestamptz(6)
   disconnected_at      DateTime? @db.Timestamptz(6)
   created_at           DateTime  @default(now()) @db.Timestamptz(6)
@@ -1126,6 +1131,9 @@ model social_posts {
   music_consent_at DateTime? @db.Timestamptz(6)
   status           String    @default("draft")
   platform_post_id String?
+  /// Instagram vidéo : le conteneur que Meta prépare (d'une à quelques
+  /// minutes) avant que la publication puisse partir.
+  media_container_id String?
   error            String?
   published_at     DateTime? @db.Timestamptz(6)
   created_at       DateTime  @default(now()) @db.Timestamptz(6)

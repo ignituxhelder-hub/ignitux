@@ -213,9 +213,13 @@ describe('AiUsageService', () => {
       // y compris pour le bouton Analyser existant, jamais utilisé.
       await service.callsThisMonth('u1');
 
+      // Les suggestions de légende pour les réseaux sociaux suivent la même
+      // règle : hors forfait, mais sous le plafond de coût global.
       expect(table.count).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: expect.objectContaining({ generator: { notIn: ['discuter', 'questionner'] } }),
+          where: expect.objectContaining({
+            generator: { notIn: ['discuter', 'questionner', 'publier_reseaux'] },
+          }),
         }),
       );
     });

@@ -51,6 +51,7 @@ export type Social_postsMinAggregateOutputType = {
   music_consent_at: Date | null
   status: string | null
   platform_post_id: string | null
+  media_container_id: string | null
   error: string | null
   published_at: Date | null
   created_at: Date | null
@@ -74,6 +75,7 @@ export type Social_postsMaxAggregateOutputType = {
   music_consent_at: Date | null
   status: string | null
   platform_post_id: string | null
+  media_container_id: string | null
   error: string | null
   published_at: Date | null
   created_at: Date | null
@@ -97,6 +99,7 @@ export type Social_postsCountAggregateOutputType = {
   music_consent_at: number
   status: number
   platform_post_id: number
+  media_container_id: number
   error: number
   published_at: number
   created_at: number
@@ -130,6 +133,7 @@ export type Social_postsMinAggregateInputType = {
   music_consent_at?: true
   status?: true
   platform_post_id?: true
+  media_container_id?: true
   error?: true
   published_at?: true
   created_at?: true
@@ -153,6 +157,7 @@ export type Social_postsMaxAggregateInputType = {
   music_consent_at?: true
   status?: true
   platform_post_id?: true
+  media_container_id?: true
   error?: true
   published_at?: true
   created_at?: true
@@ -176,6 +181,7 @@ export type Social_postsCountAggregateInputType = {
   music_consent_at?: true
   status?: true
   platform_post_id?: true
+  media_container_id?: true
   error?: true
   published_at?: true
   created_at?: true
@@ -286,6 +292,7 @@ export type Social_postsGroupByOutputType = {
   music_consent_at: Date | null
   status: string
   platform_post_id: string | null
+  media_container_id: string | null
   error: string | null
   published_at: Date | null
   created_at: Date
@@ -332,6 +339,7 @@ export type social_postsWhereInput = {
   music_consent_at?: Prisma.DateTimeNullableFilter<"social_posts"> | Date | string | null
   status?: Prisma.StringFilter<"social_posts"> | string
   platform_post_id?: Prisma.StringNullableFilter<"social_posts"> | string | null
+  media_container_id?: Prisma.StringNullableFilter<"social_posts"> | string | null
   error?: Prisma.StringNullableFilter<"social_posts"> | string | null
   published_at?: Prisma.DateTimeNullableFilter<"social_posts"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"social_posts"> | Date | string
@@ -356,6 +364,7 @@ export type social_postsOrderByWithRelationInput = {
   music_consent_at?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   platform_post_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  media_container_id?: Prisma.SortOrderInput | Prisma.SortOrder
   error?: Prisma.SortOrderInput | Prisma.SortOrder
   published_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -383,6 +392,7 @@ export type social_postsWhereUniqueInput = Prisma.AtLeast<{
   music_consent_at?: Prisma.DateTimeNullableFilter<"social_posts"> | Date | string | null
   status?: Prisma.StringFilter<"social_posts"> | string
   platform_post_id?: Prisma.StringNullableFilter<"social_posts"> | string | null
+  media_container_id?: Prisma.StringNullableFilter<"social_posts"> | string | null
   error?: Prisma.StringNullableFilter<"social_posts"> | string | null
   published_at?: Prisma.DateTimeNullableFilter<"social_posts"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"social_posts"> | Date | string
@@ -407,6 +417,7 @@ export type social_postsOrderByWithAggregationInput = {
   music_consent_at?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   platform_post_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  media_container_id?: Prisma.SortOrderInput | Prisma.SortOrder
   error?: Prisma.SortOrderInput | Prisma.SortOrder
   published_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -438,6 +449,7 @@ export type social_postsScalarWhereWithAggregatesInput = {
   music_consent_at?: Prisma.DateTimeNullableWithAggregatesFilter<"social_posts"> | Date | string | null
   status?: Prisma.StringWithAggregatesFilter<"social_posts"> | string
   platform_post_id?: Prisma.StringNullableWithAggregatesFilter<"social_posts"> | string | null
+  media_container_id?: Prisma.StringNullableWithAggregatesFilter<"social_posts"> | string | null
   error?: Prisma.StringNullableWithAggregatesFilter<"social_posts"> | string | null
   published_at?: Prisma.DateTimeNullableWithAggregatesFilter<"social_posts"> | Date | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"social_posts"> | Date | string
@@ -460,6 +472,7 @@ export type social_postsCreateInput = {
   music_consent_at?: Date | string | null
   status?: string
   platform_post_id?: string | null
+  media_container_id?: string | null
   error?: string | null
   published_at?: Date | string | null
   created_at?: Date | string
@@ -484,6 +497,7 @@ export type social_postsUncheckedCreateInput = {
   music_consent_at?: Date | string | null
   status?: string
   platform_post_id?: string | null
+  media_container_id?: string | null
   error?: string | null
   published_at?: Date | string | null
   created_at?: Date | string
@@ -506,6 +520,7 @@ export type social_postsUpdateInput = {
   music_consent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   platform_post_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  media_container_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -530,6 +545,7 @@ export type social_postsUncheckedUpdateInput = {
   music_consent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   platform_post_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  media_container_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -553,6 +569,7 @@ export type social_postsCreateManyInput = {
   music_consent_at?: Date | string | null
   status?: string
   platform_post_id?: string | null
+  media_container_id?: string | null
   error?: string | null
   published_at?: Date | string | null
   created_at?: Date | string
@@ -575,6 +592,7 @@ export type social_postsUpdateManyMutationInput = {
   music_consent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   platform_post_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  media_container_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -598,6 +616,7 @@ export type social_postsUncheckedUpdateManyInput = {
   music_consent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   platform_post_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  media_container_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -631,6 +650,7 @@ export type social_postsCountOrderByAggregateInput = {
   music_consent_at?: Prisma.SortOrder
   status?: Prisma.SortOrder
   platform_post_id?: Prisma.SortOrder
+  media_container_id?: Prisma.SortOrder
   error?: Prisma.SortOrder
   published_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -658,6 +678,7 @@ export type social_postsMaxOrderByAggregateInput = {
   music_consent_at?: Prisma.SortOrder
   status?: Prisma.SortOrder
   platform_post_id?: Prisma.SortOrder
+  media_container_id?: Prisma.SortOrder
   error?: Prisma.SortOrder
   published_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -681,6 +702,7 @@ export type social_postsMinOrderByAggregateInput = {
   music_consent_at?: Prisma.SortOrder
   status?: Prisma.SortOrder
   platform_post_id?: Prisma.SortOrder
+  media_container_id?: Prisma.SortOrder
   error?: Prisma.SortOrder
   published_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -749,6 +771,7 @@ export type social_postsCreateWithoutOwnerInput = {
   music_consent_at?: Date | string | null
   status?: string
   platform_post_id?: string | null
+  media_container_id?: string | null
   error?: string | null
   published_at?: Date | string | null
   created_at?: Date | string
@@ -771,6 +794,7 @@ export type social_postsUncheckedCreateWithoutOwnerInput = {
   music_consent_at?: Date | string | null
   status?: string
   platform_post_id?: string | null
+  media_container_id?: string | null
   error?: string | null
   published_at?: Date | string | null
   created_at?: Date | string
@@ -823,6 +847,7 @@ export type social_postsScalarWhereInput = {
   music_consent_at?: Prisma.DateTimeNullableFilter<"social_posts"> | Date | string | null
   status?: Prisma.StringFilter<"social_posts"> | string
   platform_post_id?: Prisma.StringNullableFilter<"social_posts"> | string | null
+  media_container_id?: Prisma.StringNullableFilter<"social_posts"> | string | null
   error?: Prisma.StringNullableFilter<"social_posts"> | string | null
   published_at?: Prisma.DateTimeNullableFilter<"social_posts"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"social_posts"> | Date | string
@@ -845,6 +870,7 @@ export type social_postsCreateManyOwnerInput = {
   music_consent_at?: Date | string | null
   status?: string
   platform_post_id?: string | null
+  media_container_id?: string | null
   error?: string | null
   published_at?: Date | string | null
   created_at?: Date | string
@@ -867,6 +893,7 @@ export type social_postsUpdateWithoutOwnerInput = {
   music_consent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   platform_post_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  media_container_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -889,6 +916,7 @@ export type social_postsUncheckedUpdateWithoutOwnerInput = {
   music_consent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   platform_post_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  media_container_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -911,6 +939,7 @@ export type social_postsUncheckedUpdateManyWithoutOwnerInput = {
   music_consent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   platform_post_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  media_container_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -936,6 +965,7 @@ export type social_postsSelect<ExtArgs extends runtime.Types.Extensions.Internal
   music_consent_at?: boolean
   status?: boolean
   platform_post_id?: boolean
+  media_container_id?: boolean
   error?: boolean
   published_at?: boolean
   created_at?: boolean
@@ -960,6 +990,7 @@ export type social_postsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   music_consent_at?: boolean
   status?: boolean
   platform_post_id?: boolean
+  media_container_id?: boolean
   error?: boolean
   published_at?: boolean
   created_at?: boolean
@@ -984,6 +1015,7 @@ export type social_postsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   music_consent_at?: boolean
   status?: boolean
   platform_post_id?: boolean
+  media_container_id?: boolean
   error?: boolean
   published_at?: boolean
   created_at?: boolean
@@ -1008,13 +1040,14 @@ export type social_postsSelectScalar = {
   music_consent_at?: boolean
   status?: boolean
   platform_post_id?: boolean
+  media_container_id?: boolean
   error?: boolean
   published_at?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type social_postsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_id" | "platform" | "caption" | "media_url" | "media_type" | "media_duration_seconds" | "privacy_level" | "allow_comments" | "allow_duet" | "allow_stitch" | "brand_organic" | "brand_content" | "music_consent_at" | "status" | "platform_post_id" | "error" | "published_at" | "created_at" | "updated_at", ExtArgs["result"]["social_posts"]>
+export type social_postsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "owner_id" | "platform" | "caption" | "media_url" | "media_type" | "media_duration_seconds" | "privacy_level" | "allow_comments" | "allow_duet" | "allow_stitch" | "brand_organic" | "brand_content" | "music_consent_at" | "status" | "platform_post_id" | "media_container_id" | "error" | "published_at" | "created_at" | "updated_at", ExtArgs["result"]["social_posts"]>
 export type social_postsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.usersDefaultArgs<ExtArgs>
 }
@@ -1047,6 +1080,11 @@ export type $social_postsPayload<ExtArgs extends runtime.Types.Extensions.Intern
     music_consent_at: Date | null
     status: string
     platform_post_id: string | null
+    /**
+     * Instagram vidéo : le conteneur que Meta prépare (d'une à quelques
+     * minutes) avant que la publication puisse partir.
+     */
+    media_container_id: string | null
     error: string | null
     published_at: Date | null
     created_at: Date
@@ -1491,6 +1529,7 @@ export interface social_postsFieldRefs {
   readonly music_consent_at: Prisma.FieldRef<"social_posts", 'DateTime'>
   readonly status: Prisma.FieldRef<"social_posts", 'String'>
   readonly platform_post_id: Prisma.FieldRef<"social_posts", 'String'>
+  readonly media_container_id: Prisma.FieldRef<"social_posts", 'String'>
   readonly error: Prisma.FieldRef<"social_posts", 'String'>
   readonly published_at: Prisma.FieldRef<"social_posts", 'DateTime'>
   readonly created_at: Prisma.FieldRef<"social_posts", 'DateTime'>

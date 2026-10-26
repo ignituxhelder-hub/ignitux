@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { offre } from '../offres/offres-catalogue.js';
 import { OffresService } from '../offres/offres.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { accesOuvert, CADRE_RESEAUX_SOCIAUX } from '../publications-sociales/acces.js';
 import { isRoleId, type RoleId } from '../roles/roles-catalogue.js';
 import {
   estChoixBureau,
@@ -40,6 +41,7 @@ export class ApplicationsService {
       offreId,
       bureau,
       boutiquesConnectees,
+      compte,
     ] = await Promise.all([
         this.prisma.user_roles.findMany({ where: { user_id: userId }, select: { role: true } }),
         this.prisma.projects.findMany({ where: { owner_id: userId }, select: { sector: true } }),
@@ -56,6 +58,7 @@ export class ApplicationsService {
         this.prisma.shopify_connections.count({
           where: { disconnected_at: null, project: { owner_id: userId } },
         }),
+        this.prisma.users.findUnique({ where: { id: userId }, select: { email: true } }),
       ]);
 
     const investissements = investisseur
@@ -77,6 +80,8 @@ export class ApplicationsService {
 
     return lanceur({
       choix,
+      // Réseaux sociaux : prévue tant que ce n'est pas ouvert à cette personne.
+      enAttente: accesOuvert(compte?.email ?? '') ? {} : { 'reseaux-sociaux': CADRE_RESEAUX_SOCIAUX },
       // Un rôle inconnu en base (reste d'une ancienne version) est ignoré
       // plutôt que de faire échouer l'écran d'accueil.
       roles: roles.map((ligne) => ligne.role).filter((role): role is RoleId => isRoleId(role)),

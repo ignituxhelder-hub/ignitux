@@ -212,6 +212,7 @@ export class UserDataService {
       cvFormations,
       questionnaires,
       questionsIgini,
+      publicationsReseauxSociaux,
     ] = await Promise.all([
       this.prisma.tasks.findMany({ where: byProject }),
       this.prisma.memories.findMany({ where: { user_id: userId } }),
@@ -393,6 +394,13 @@ export class UserDataService {
         where: byProject,
         orderBy: [{ project_id: 'asc' }, { position: 'asc' }],
       }),
+      // Les publications préparées pour Instagram et TikTok : texte, média,
+      // réglages et état d'envoi. Le compte connecté, lui, n'est pas exporté
+      // (jeton chiffré, voir user-data-scope.ts).
+      this.prisma.social_posts.findMany({
+        where: { owner_id: userId },
+        orderBy: { created_at: 'asc' },
+      }),
     ]);
 
     return {
@@ -504,6 +512,7 @@ export class UserDataService {
           mon_profil: profile,
           messages_envoyes: contactsSent,
           messages_recus: contactsReceived,
+          publications_reseaux_sociaux: publicationsReseauxSociaux,
         },
         journaux_techniques: {
           executions_de_processus: runs,
