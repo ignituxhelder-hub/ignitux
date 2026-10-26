@@ -46,6 +46,62 @@ describe('proposerBareme — le barème que les appels réels justifieraient', (
     expect(parTour?.remarque).toContain('sous-estimé');
   });
 
+  describe('les noms partagés avant le 2026-10-25', () => {
+    // Jusqu'aux crédits, les statuts se journalisaient sous « former » et la
+    // conformité sous « executer » : une moyenne qui les mêle surestime
+    // « former » et « executer » (un document de statuts coûte bien plus
+    // qu'une recommandation de forme).
+    const SEPARATION = new Date('2026-10-26T09:00:00Z');
+    const avant = new Date('2026-10-20T10:00:00Z');
+    const apres = new Date('2026-10-27T10:00:00Z');
+    const mesure = (generator: string, coutMicroEur: number, quand: Date): AppelMesure => ({
+      generator,
+      coutMicroEur,
+      quand,
+    });
+
+    it('écarte les appels « former » d’avant le premier « statuts », et le dit', () => {
+      const lignes = proposerBareme(
+        [
+          mesure('former', 500_000, avant), // en réalité des statuts
+          ...Array.from({ length: 5 }, () => mesure('former', 80_000, apres)),
+        ],
+        { separations: { former: SEPARATION, executer: SEPARATION } },
+      );
+      const former = lignes.find((l) => l.generateur === 'former');
+
+      expect(former).toMatchObject({ appels: 5, coutMoyenMicroEur: 80_000, ecartesAvantSeparation: 1 });
+      expect(former?.remarque).toContain('1 appel(s) d’avant la séparation écarté(s)');
+      expect(former?.remarque).toContain('statuts');
+    });
+
+    it('écarte de même les « executer » d’avant le premier « conformite »', () => {
+      const executer = proposerBareme([mesure('executer', 300_000, avant), mesure('executer', 60_000, apres)], {
+        separations: { former: SEPARATION, executer: SEPARATION },
+      }).find((l) => l.generateur === 'executer');
+
+      expect(executer).toMatchObject({ appels: 1, coutMoyenMicroEur: 60_000, ecartesAvantSeparation: 1 });
+      expect(executer?.remarque).toContain('conformit');
+    });
+
+    it('sans aucun appel sous le nouveau nom, tout est écarté : impossible de séparer', () => {
+      const former = proposerBareme([mesure('former', 80_000, apres)], { separations: { former: null } }).find(
+        (l) => l.generateur === 'former',
+      );
+
+      expect(former).toMatchObject({ appels: 0, creditsProposes: null, ecartesAvantSeparation: 1 });
+      expect(former?.remarque).toContain('aucun appel « statuts » encore journalisé');
+    });
+
+    it('ne touche pas aux autres générateurs', () => {
+      const analyser = proposerBareme([mesure('analyser', 80_000, avant)], { separations: {} }).find(
+        (l) => l.generateur === 'analyser',
+      );
+
+      expect(analyser).toMatchObject({ appels: 1, ecartesAvantSeparation: 0 });
+    });
+  });
+
   it('signale un générateur journalisé qui n’a pas de prix', () => {
     const inconnu = proposerBareme(appels('inventer', 50_000)).find((l) => l.generateur === 'inventer');
     expect(inconnu).toMatchObject({ actuel: null, ecartCredits: null, creditsProposes: 3 });

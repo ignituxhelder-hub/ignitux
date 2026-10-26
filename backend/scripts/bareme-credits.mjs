@@ -19,6 +19,11 @@
  * messages envoyés sur la période (`chat_messages`, rôle `user`), pas par le
  * nombre de tours journalisés.
  *
+ * Jusqu'au 2026-10-25, les statuts se journalisaient sous « former » et la
+ * conformité sous « executer ». Les appels « former »/« executer » d'avant le
+ * premier « statuts »/« conformite » journalisé sont écartés (et comptés dans
+ * les remarques) : ils mêleraient deux prix.
+ *
  * Exige un build à jour (`npm run build`) : la grille et la règle sont lues
  * dans `dist/`, comme `verifier-base.mjs` lit le client Prisma compilé — une
  * seule source pour le serveur et pour ce calcul.
@@ -88,7 +93,7 @@ try {
 
   const { rows: evenements } = await client.query(
     `SELECT generator, model, input_tokens, output_tokens, cache_creation_input_tokens,
-            cache_read_input_tokens, web_search_requests
+            cache_read_input_tokens, web_search_requests, created_at
        FROM ai_usage_events
       WHERE created_at >= now() - make_interval(days => $1::int)`,
     [jours],
@@ -99,8 +104,18 @@ try {
     [jours],
   );
 
+  // Depuis quand « statuts » et « conformite » ont leur nom : sur tout
+  // l'historique, pas seulement la période.
+  const { rows: premiers } = await client.query(
+    `SELECT generator, min(created_at) AS premier FROM ai_usage_events
+      WHERE generator IN ('statuts', 'conformite') GROUP BY generator`,
+  );
+  const premier = (nom) => premiers.find((p) => p.generator === nom)?.premier ?? null;
+  const separations = { former: premier('statuts'), executer: premier('conformite') };
+
   const appels = evenements.map((e) => ({
     generator: e.generator,
+    quand: e.created_at,
     coutMicroEur: costMicroEur(e.model, {
       input_tokens: e.input_tokens,
       output_tokens: e.output_tokens,
@@ -109,7 +124,7 @@ try {
       web_search_requests: e.web_search_requests ?? 0,
     }),
   }));
-  const lignes = proposerBareme(appels, { messagesChat: messages[0].n });
+  const lignes = proposerBareme(appels, { messagesChat: messages[0].n, separations });
 
   const euros = (micro) => (micro === null ? '—' : `${(micro / 1_000_000).toFixed(4).replace('.', ',')} €`);
   const signe = (n) => (n === null ? '—' : n > 0 ? `+${n}` : String(n));
