@@ -13,7 +13,10 @@ import { useAuth } from "@/lib/auth";
 
 const PLATEFORMES = ["instagram", "tiktok"] as const;
 type Plateforme = (typeof PLATEFORMES)[number];
-const NOM: Record<Plateforme, string> = { instagram: "Instagram", tiktok: "TikTok" };
+const NOM: Record<Plateforme, string> = {
+  instagram: "Instagram",
+  tiktok: "TikTok",
+};
 
 export default function ReseauxSociauxPage() {
   const { token, isReady } = useAuth();
@@ -73,9 +76,7 @@ export default function ReseauxSociauxPage() {
     if (!isReady || !token) return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("etat") === "ok")
-      setNotice(
-        "Compte connecté. Tu peux préparer ta première publication.",
-      );
+      setNotice("Compte connecté. Tu peux préparer ta première publication.");
     if (params.get("connexion") === "refusee")
       setNotice("La connexion au réseau a été annulée.");
     if (params.get("connexion") === "erreur")
@@ -206,9 +207,15 @@ export default function ReseauxSociauxPage() {
     try {
       const result = await api.suggestSocialCaption(token!, platform, brief);
       setCaption(result.caption);
-      setNotice("IGINI a préparé une proposition. Relis-la et modifie-la avant de l’enregistrer.");
+      setNotice(
+        "IGINI a préparé une proposition. Relis-la et modifie-la avant de l’enregistrer.",
+      );
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "IGINI n’a pas pu préparer cette proposition.");
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "IGINI n’a pas pu préparer cette proposition.",
+      );
     } finally {
       setSuggesting(false);
     }
@@ -296,10 +303,14 @@ export default function ReseauxSociauxPage() {
     }[statusValue];
   }
 
-  if (acces && !acces.ouvert) {
-    return (
-      <main className="page page--wide">
+  const fermee = acces !== null && !acces.ouvert;
+
+  return (
+    <main className="page page--wide">
+      <div className="top-bar">
         <h1>Réseaux sociaux</h1>
+      </div>
+      {fermee ? (
         <div className="card">
           <p style={{ marginTop: 0 }}>
             Bientôt : préparer tes publications Instagram et TikTok depuis
@@ -310,456 +321,514 @@ export default function ReseauxSociauxPage() {
             validé Ignitux. Rien n’est publié en ton nom d’ici là.
           </p>
         </div>
-      </main>
-    );
-  }
-
-  return (
-    <main className="page page--wide">
-      <div className="top-bar">
-        <h1>Réseaux sociaux</h1>
-      </div>
-      <div className="card">
-        <p style={{ marginTop: 0 }}>
-          Prépare tes publications Instagram et TikTok. Ignitux ne publie rien
-          tout seul : tu relis le brouillon et tu confirmes chaque envoi.
-        </p>
-        <p className="muted" style={{ marginBottom: 0 }}>
-          L’image ou la vidéo doit déjà être en ligne, à une adresse HTTPS
-          publique : Instagram et TikTok vont la chercher eux-mêmes. TikTok exige
-          aussi que ce domaine soit vérifié dans son application développeur.
-          Instagram demande un compte professionnel ou créateur.
-        </p>
-      </div>
-      {error && (
-        <p className="error" role="alert">
-          {error}
-        </p>
-      )}
-      {notice && (
-        <p className="notice" role="status">
-          {notice}
-        </p>
-      )}
-
-      <section className="card" aria-labelledby="comptes-sociaux">
-        <h2 id="comptes-sociaux">Comptes connectés</h2>
-        {PLATEFORMES.map((p) => {
-          const account = accounts.find((item) => item.platform === p);
-          return (
-            <div
-              key={p}
-              className="top-bar"
-              style={{ flexWrap: "wrap", gap: "0.5rem" }}
-            >
-              <span>
-                <strong>{p === "instagram" ? "Instagram" : "TikTok"}</strong>
-                {account
-                  ? ` — @${account.username || "compte connecté"}`
-                  : " — non connecté"}
-              </span>
-              {account ? (
-                <button
-                  className="secondary"
-                  type="button"
-                  onClick={() => void disconnect(p)}
-                >
-                  Déconnecter
-                </button>
-              ) : (
-                <button
-                  className="secondary"
-                  type="button"
-                  disabled={busy || acces?.[p] === false}
-                  onClick={() => void connect(p)}
-                >
-                  Connecter {NOM[p]}
-                </button>
-              )}
-              {!account && acces?.[p] === false && (
-                <span className="muted" style={{ flexBasis: "100%" }}>
-                  Pas encore configuré sur le serveur Ignitux (identifiants
-                  développeur {NOM[p]} manquants).
-                </span>
-              )}
-            </div>
-          );
-        })}
-      </section>
-
-      <section className="card" aria-labelledby="nouvelle-publication">
-        <h2 id="nouvelle-publication">Préparer une publication</h2>
-        <form
-          onSubmit={(event) => void create(event)}
-          style={{ display: "grid", gap: "0.75rem" }}
-        >
-          <div className="field">
-            <label htmlFor="rs-reseau">Réseau</label>
-            <select
-              id="rs-reseau"
-              value={platform}
-              onChange={(event) => setPlatform(event.target.value as Plateforme)}
-            >
-              <option value="instagram">Instagram</option>
-              <option value="tiktok">TikTok</option>
-            </select>
+      ) : (
+        <>
+          <div className="card">
+            <p style={{ marginTop: 0 }}>
+              Prépare tes publications Instagram et TikTok. Ignitux ne publie
+              rien tout seul : tu relis le brouillon et tu confirmes chaque
+              envoi.
+            </p>
+            <p className="muted" style={{ marginBottom: 0 }}>
+              L’image ou la vidéo doit déjà être en ligne, à une adresse HTTPS
+              publique : Instagram et TikTok vont la chercher eux-mêmes. TikTok
+              exige aussi que ce domaine soit vérifié dans son application
+              développeur. Instagram demande un compte professionnel ou
+              créateur.
+            </p>
           </div>
-          <div className="field">
-            <label htmlFor="rs-type">Type de média</label>
-            <select
-              id="rs-type"
-              value={mediaType}
-              onChange={(event) =>
-                setMediaType(event.target.value as "image" | "video")
-              }
-            >
-              <option value="image">Image</option>
-              <option value="video">
-                {platform === "instagram" ? "Vidéo (Reel)" : "Vidéo"}
-              </option>
-            </select>
-          </div>
-          {platform === "tiktok" && (
-            <>
-              {creatorNickname && (
-                <p>
-                  Compte TikTok : <strong>{creatorNickname}</strong>
-                </p>
-              )}
-              <div className="field">
-                <label htmlFor="rs-visibilite">Qui pourra voir cette publication ?</label>
-                <select
-                  id="rs-visibilite"
-                  required
-                  value={privacyLevel}
-                  onChange={(event) => setPrivacyLevel(event.target.value)}
+          {error && (
+            <p className="error" role="alert">
+              {error}
+            </p>
+          )}
+          {notice && (
+            <p className="notice" role="status">
+              {notice}
+            </p>
+          )}
+
+          <section className="card" aria-labelledby="comptes-sociaux">
+            <h2 id="comptes-sociaux">Comptes connectés</h2>
+            {PLATEFORMES.map((p) => {
+              const account = accounts.find((item) => item.platform === p);
+              return (
+                <div
+                  key={p}
+                  className="top-bar"
+                  style={{ flexWrap: "wrap", gap: "0.5rem" }}
                 >
-                  <option value="">Choisir la visibilité</option>
-                  {privacyOptions.map((option) => (
-                    <option
-                      key={option}
-                      value={option}
-                      disabled={brandContent && option === "SELF_ONLY"}
+                  <span>
+                    <strong>
+                      {p === "instagram" ? "Instagram" : "TikTok"}
+                    </strong>
+                    {account
+                      ? ` — @${account.username || "compte connecté"}`
+                      : " — non connecté"}
+                  </span>
+                  {account ? (
+                    <button
+                      className="secondary"
+                      type="button"
+                      onClick={() => void disconnect(p)}
                     >
-                      {(
-                        {
-                          PUBLIC_TO_EVERYONE: "Tout le monde",
-                          MUTUAL_FOLLOW_FRIENDS: "Amis",
-                          FOLLOWER_OF_CREATOR: "Abonnés",
-                          SELF_ONLY: "Moi uniquement",
-                        } as Record<string, string>
-                      )[option] ?? option}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {mediaType === "video" && maxVideoDuration !== null && (
-                <p className="muted">
-                  Durée maximale TikTok : {maxVideoDuration} secondes.
-                </p>
-              )}
-              <fieldset style={{ display: "grid", gap: "0.5rem" }}>
-                <legend>Interactions (désactivées par défaut)</legend>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={allowComments}
-                    disabled={commentDisabled}
-                    onChange={(event) => setAllowComments(event.target.checked)}
-                  />{" "}
-                  Autoriser les commentaires
-                  {commentDisabled ? " (désactivés dans TikTok)" : ""}
-                </label>
-                {mediaType === "video" && (
-                  <>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={allowDuet}
-                        disabled={duetDisabled}
-                        onChange={(event) => setAllowDuet(event.target.checked)}
-                      />{" "}
-                      Autoriser les Duos
-                      {duetDisabled ? " (désactivés dans TikTok)" : ""}
-                    </label>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={allowStitch}
-                        disabled={stitchDisabled}
-                        onChange={(event) =>
-                          setAllowStitch(event.target.checked)
-                        }
-                      />{" "}
-                      Autoriser les Collages
-                      {stitchDisabled ? " (désactivés dans TikTok)" : ""}
-                    </label>
-                  </>
-                )}
-              </fieldset>
-              <fieldset style={{ display: "grid", gap: "0.5rem" }}>
-                <legend>Déclaration de contenu commercial</legend>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={commercialDisclosure}
-                    onChange={(event) => {
-                      setCommercialDisclosure(event.target.checked);
-                      if (!event.target.checked) {
-                        setBrandOrganic(false);
-                        setBrandContent(false);
-                      }
-                    }}
-                  />{" "}
-                  Cette publication fait la promotion d’une entreprise, d’une marque, d’un produit ou d’un service
-                </label>
-                {commercialDisclosure && (
-                  <>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={brandOrganic}
-                        onChange={(event) => setBrandOrganic(event.target.checked)}
-                      />{" "}
-                      Ma marque ou mon entreprise
-                    </label>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={brandContent}
-                        onChange={(event) => {
-                          setBrandContent(event.target.checked);
-                          if (event.target.checked && privacyLevel === "SELF_ONLY") setPrivacyLevel("");
-                        }}
-                      />{" "}
-                      Une autre marque ou un tiers
-                    </label>
-                    {brandOrganic && <p className="muted">La vidéo ou la photo sera identifiée comme contenu promotionnel.</p>}
-                    {brandContent && <p className="muted">La vidéo ou la photo sera identifiée comme partenariat rémunéré. La visibilité « Moi uniquement » n’est pas autorisée.</p>}
-                    {!brandOrganic && !brandContent && <p className="error">Choisis ta marque, une autre marque, ou les deux.</p>}
-                  </>
-                )}
-              </fieldset>
-            </>
-          )}
-          <div className="field">
-            <label htmlFor="rs-media">Adresse HTTPS publique du média</label>
-            <input
-              id="rs-media"
-              type="url"
-              required
-              value={mediaUrl}
-              onChange={(event) => setMediaUrl(event.target.value)}
-              placeholder="https://…"
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="rs-texte">Texte et hashtags</label>
-            <textarea
-              id="rs-texte"
-              required
-              maxLength={2200}
-              rows={5}
-              value={caption}
-              onChange={(event) => setCaption(event.target.value)}
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="rs-consignes">Idée ou consignes pour IGINI</label>
-            <textarea
-              id="rs-consignes"
-              rows={3}
-              maxLength={1000}
-              value={brief}
-              onChange={(event) => setBrief(event.target.value)}
-              placeholder="Ex. Présenter Ignitux aux créateurs d’entreprise, ton simple et concret…"
-            />
-          </div>
-          <button type="button" className="secondary" disabled={suggesting || brief.trim().length < 3} onClick={() => void suggestCaption()}>
-            {suggesting ? "IGINI prépare le texte…" : "Proposer un texte avec IGINI"}
-          </button>
-          {mediaUrl && (
-            <p className="muted" style={{ overflowWrap: "anywhere" }}>
-              Aperçu du média : {mediaUrl}
-            </p>
-          )}
-          {mediaType === "image" && mediaUrl && (
-            <img
-              src={mediaUrl}
-              alt="Aperçu de l’image à publier"
-              referrerPolicy="no-referrer"
-              style={{ maxWidth: "100%", maxHeight: 360, objectFit: "contain" }}
-            />
-          )}
-          {mediaType === "video" && mediaUrl && (
-            <video
-              src={mediaUrl}
-              controls
-              preload="metadata"
-              onLoadedMetadata={(event) =>
-                setDurationSeconds(Math.ceil(event.currentTarget.duration))
-              }
-              style={{ maxWidth: "100%", maxHeight: 360 }}
-            />
-          )}
-          {mediaType === "video" &&
-            durationSeconds &&
-            maxVideoDuration !== null &&
-            durationSeconds > maxVideoDuration && (
-              <p className="error">
-                Cette vidéo dépasse la durée maximale autorisée par TikTok.
-              </p>
-            )}
-          <button
-            type="submit"
-            disabled={
-              busy ||
-              (platform === "tiktok" && commercialDisclosure && !brandOrganic && !brandContent) ||
-              (platform === "tiktok" && brandContent && privacyLevel === "SELF_ONLY") ||
-              !accounts.some((item) => item.platform === platform) ||
-              (platform === "tiktok" && !privacyLevel) ||
-              (platform === "tiktok" &&
-                mediaType === "video" &&
-                (!durationSeconds ||
-                  (maxVideoDuration !== null &&
-                    durationSeconds > maxVideoDuration)))
-            }
-          >
-            Enregistrer le brouillon
-          </button>
-          {!accounts.some((item) => item.platform === platform) && (
-            <p className="muted">
-              Connecte d’abord ce compte pour créer une publication.
-            </p>
-          )}
-        </form>
-      </section>
-
-      <section className="card" aria-labelledby="publications-preparees">
-        <h2 id="publications-preparees">Tes publications</h2>
-        {posts.length === 0 ? (
-          <p className="muted">Aucune publication préparée.</p>
-        ) : (
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {posts.map((post) => (
-              <li
-                key={post.id}
-                className="card"
-                style={{ marginBottom: "0.75rem" }}
-              >
-                <div className="top-bar">
-                  <strong>
-                    {post.platform === "instagram" ? "Instagram" : "TikTok"} ·{" "}
-                    {status(post.status)}
-                  </strong>
-                  {post.status === "draft" && post.platform === "tiktok" && (
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={Boolean(confirmedTikTokPosts[post.id])}
-                        onChange={(event) =>
-                          setConfirmedTikTokPosts((state) => ({
-                            ...state,
-                            [post.id]: event.target.checked,
-                          }))
-                        }
-                      />{" "}
-                      En publiant, tu acceptes la{" "}
-                      <a
-                        href="https://www.tiktok.com/legal/page/global/music-usage-confirmation/fr"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        confirmation d’utilisation de la musique de TikTok
-                      </a>
-                      .
-                    </label>
+                      Déconnecter
+                    </button>
+                  ) : (
+                    <button
+                      className="secondary"
+                      type="button"
+                      disabled={busy || acces?.[p] === false}
+                      onClick={() => void connect(p)}
+                    >
+                      Connecter {NOM[p]}
+                    </button>
                   )}
-                  {post.status === "draft" && (
-                    <span style={{ display: "flex", gap: "0.5rem" }}>
-                      <button
-                        type="button"
-                        disabled={
-                          post.platform === "tiktok" &&
-                          !confirmedTikTokPosts[post.id]
-                        }
-                        onClick={() => void publish(post)}
-                      >
-                        Publier maintenant
-                      </button>
-                      <button
-                        className="secondary"
-                        type="button"
-                        onClick={() => void remove(post)}
-                      >
-                        Supprimer
-                      </button>
+                  {!account && acces?.[p] === false && (
+                    <span className="muted" style={{ flexBasis: "100%" }}>
+                      Pas encore configuré sur le serveur Ignitux (identifiants
+                      développeur {NOM[p]} manquants).
                     </span>
                   )}
-                  {post.status === "publishing" && (
-                      <button
-                        className="secondary"
-                        type="button"
-                        onClick={() => void refreshStatus(post)}
-                      >
-                        Vérifier le statut
-                      </button>
-                    )}
                 </div>
-                <p>{post.caption}</p>
+              );
+            })}
+          </section>
+
+          <section className="card" aria-labelledby="nouvelle-publication">
+            <h2 id="nouvelle-publication">Préparer une publication</h2>
+            <form
+              onSubmit={(event) => void create(event)}
+              style={{ display: "grid", gap: "0.75rem" }}
+            >
+              <div className="field">
+                <label htmlFor="rs-reseau">Réseau</label>
+                <select
+                  id="rs-reseau"
+                  value={platform}
+                  onChange={(event) =>
+                    setPlatform(event.target.value as Plateforme)
+                  }
+                >
+                  <option value="instagram">Instagram</option>
+                  <option value="tiktok">TikTok</option>
+                </select>
+              </div>
+              <div className="field">
+                <label htmlFor="rs-type">Type de média</label>
+                <select
+                  id="rs-type"
+                  value={mediaType}
+                  onChange={(event) =>
+                    setMediaType(event.target.value as "image" | "video")
+                  }
+                >
+                  <option value="image">Image</option>
+                  <option value="video">
+                    {platform === "instagram" ? "Vidéo (Reel)" : "Vidéo"}
+                  </option>
+                </select>
+              </div>
+              {platform === "tiktok" && (
+                <>
+                  {creatorNickname && (
+                    <p>
+                      Compte TikTok : <strong>{creatorNickname}</strong>
+                    </p>
+                  )}
+                  <div className="field">
+                    <label htmlFor="rs-visibilite">
+                      Qui pourra voir cette publication ?
+                    </label>
+                    <select
+                      id="rs-visibilite"
+                      required
+                      value={privacyLevel}
+                      onChange={(event) => setPrivacyLevel(event.target.value)}
+                    >
+                      <option value="">Choisir la visibilité</option>
+                      {privacyOptions.map((option) => (
+                        <option
+                          key={option}
+                          value={option}
+                          disabled={brandContent && option === "SELF_ONLY"}
+                        >
+                          {(
+                            {
+                              PUBLIC_TO_EVERYONE: "Tout le monde",
+                              MUTUAL_FOLLOW_FRIENDS: "Amis",
+                              FOLLOWER_OF_CREATOR: "Abonnés",
+                              SELF_ONLY: "Moi uniquement",
+                            } as Record<string, string>
+                          )[option] ?? option}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {mediaType === "video" && maxVideoDuration !== null && (
+                    <p className="muted">
+                      Durée maximale TikTok : {maxVideoDuration} secondes.
+                    </p>
+                  )}
+                  <fieldset style={{ display: "grid", gap: "0.5rem" }}>
+                    <legend>Interactions (désactivées par défaut)</legend>
+                    <label htmlFor="rs-commentaires">
+                      <input
+                        id="rs-commentaires"
+                        type="checkbox"
+                        checked={allowComments}
+                        disabled={commentDisabled}
+                        onChange={(event) =>
+                          setAllowComments(event.target.checked)
+                        }
+                      />{" "}
+                      Autoriser les commentaires
+                      {commentDisabled ? " (désactivés dans TikTok)" : ""}
+                    </label>
+                    {mediaType === "video" && (
+                      <>
+                        <label htmlFor="rs-duos">
+                          <input
+                            id="rs-duos"
+                            type="checkbox"
+                            checked={allowDuet}
+                            disabled={duetDisabled}
+                            onChange={(event) =>
+                              setAllowDuet(event.target.checked)
+                            }
+                          />{" "}
+                          Autoriser les Duos
+                          {duetDisabled ? " (désactivés dans TikTok)" : ""}
+                        </label>
+                        <label htmlFor="rs-collages">
+                          <input
+                            id="rs-collages"
+                            type="checkbox"
+                            checked={allowStitch}
+                            disabled={stitchDisabled}
+                            onChange={(event) =>
+                              setAllowStitch(event.target.checked)
+                            }
+                          />{" "}
+                          Autoriser les Collages
+                          {stitchDisabled ? " (désactivés dans TikTok)" : ""}
+                        </label>
+                      </>
+                    )}
+                  </fieldset>
+                  <fieldset style={{ display: "grid", gap: "0.5rem" }}>
+                    <legend>Déclaration de contenu commercial</legend>
+                    <label htmlFor="rs-commercial">
+                      <input
+                        id="rs-commercial"
+                        type="checkbox"
+                        checked={commercialDisclosure}
+                        onChange={(event) => {
+                          setCommercialDisclosure(event.target.checked);
+                          if (!event.target.checked) {
+                            setBrandOrganic(false);
+                            setBrandContent(false);
+                          }
+                        }}
+                      />{" "}
+                      Cette publication fait la promotion d’une entreprise,
+                      d’une marque, d’un produit ou d’un service
+                    </label>
+                    {commercialDisclosure && (
+                      <>
+                        <label htmlFor="rs-ma-marque">
+                          <input
+                            id="rs-ma-marque"
+                            type="checkbox"
+                            checked={brandOrganic}
+                            onChange={(event) =>
+                              setBrandOrganic(event.target.checked)
+                            }
+                          />{" "}
+                          Ma marque ou mon entreprise
+                        </label>
+                        <label htmlFor="rs-autre-marque">
+                          <input
+                            id="rs-autre-marque"
+                            type="checkbox"
+                            checked={brandContent}
+                            onChange={(event) => {
+                              setBrandContent(event.target.checked);
+                              if (
+                                event.target.checked &&
+                                privacyLevel === "SELF_ONLY"
+                              )
+                                setPrivacyLevel("");
+                            }}
+                          />{" "}
+                          Une autre marque ou un tiers
+                        </label>
+                        {brandOrganic && (
+                          <p className="muted">
+                            La vidéo ou la photo sera identifiée comme contenu
+                            promotionnel.
+                          </p>
+                        )}
+                        {brandContent && (
+                          <p className="muted">
+                            La vidéo ou la photo sera identifiée comme
+                            partenariat rémunéré. La visibilité « Moi uniquement
+                            » n’est pas autorisée.
+                          </p>
+                        )}
+                        {!brandOrganic && !brandContent && (
+                          <p className="error">
+                            Choisis ta marque, une autre marque, ou les deux.
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </fieldset>
+                </>
+              )}
+              <div className="field">
+                <label htmlFor="rs-media">
+                  Adresse HTTPS publique du média
+                </label>
+                <input
+                  id="rs-media"
+                  type="url"
+                  required
+                  value={mediaUrl}
+                  onChange={(event) => setMediaUrl(event.target.value)}
+                  placeholder="https://…"
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="rs-texte">Texte et hashtags</label>
+                <textarea
+                  id="rs-texte"
+                  required
+                  maxLength={2200}
+                  rows={5}
+                  value={caption}
+                  onChange={(event) => setCaption(event.target.value)}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="rs-consignes">
+                  Idée ou consignes pour IGINI
+                </label>
+                <textarea
+                  id="rs-consignes"
+                  rows={3}
+                  maxLength={1000}
+                  value={brief}
+                  onChange={(event) => setBrief(event.target.value)}
+                  placeholder="Ex. Présenter Ignitux aux créateurs d’entreprise, ton simple et concret…"
+                />
+              </div>
+              <button
+                type="button"
+                className="secondary"
+                disabled={suggesting || brief.trim().length < 3}
+                onClick={() => void suggestCaption()}
+              >
+                {suggesting
+                  ? "IGINI prépare le texte…"
+                  : "Proposer un texte avec IGINI"}
+              </button>
+              {mediaUrl && (
                 <p className="muted" style={{ overflowWrap: "anywhere" }}>
-                  {post.media_url}
+                  Aperçu du média : {mediaUrl}
                 </p>
-                {post.media_type === "image" ? (
-                  <img
-                    src={post.media_url}
-                    alt="Aperçu du média à publier"
-                    referrerPolicy="no-referrer"
-                    style={{
-                      maxWidth: "100%",
-                      maxHeight: 360,
-                      objectFit: "contain",
-                    }}
-                  />
-                ) : (
-                  <video
-                    src={post.media_url}
-                    controls
-                    preload="metadata"
-                    style={{ maxWidth: "100%", maxHeight: 360 }}
-                  />
-                )}
-                {post.privacy_level && (
-                  <p className="muted">
-                    Visibilité TikTok :{" "}
-                    {(
-                      {
-                        PUBLIC_TO_EVERYONE: "Tout le monde",
-                        MUTUAL_FOLLOW_FRIENDS: "Amis",
-                        FOLLOWER_OF_CREATOR: "Abonnés",
-                        SELF_ONLY: "Moi uniquement",
-                      } as Record<string, string>
-                    )[post.privacy_level] ?? post.privacy_level}
+              )}
+              {mediaType === "image" && mediaUrl && (
+                <img
+                  src={mediaUrl}
+                  alt="Aperçu de l’image à publier"
+                  referrerPolicy="no-referrer"
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: 360,
+                    objectFit: "contain",
+                  }}
+                />
+              )}
+              {mediaType === "video" && mediaUrl && (
+                <video
+                  src={mediaUrl}
+                  controls
+                  preload="metadata"
+                  onLoadedMetadata={(event) =>
+                    setDurationSeconds(Math.ceil(event.currentTarget.duration))
+                  }
+                  style={{ maxWidth: "100%", maxHeight: 360 }}
+                />
+              )}
+              {mediaType === "video" &&
+                durationSeconds &&
+                maxVideoDuration !== null &&
+                durationSeconds > maxVideoDuration && (
+                  <p className="error">
+                    Cette vidéo dépasse la durée maximale autorisée par TikTok.
                   </p>
                 )}
-                {post.error && <p className="error">{post.error}</p>}
-                {post.status === "failed" && (
-                  <p className="muted">
-                    Vérifie d’abord le compte : une erreur réseau peut empêcher
-                    Ignitux de savoir si la publication a été reçue.
-                  </p>
-                )}
-                {post.published_at && (
-                  <p className="muted">
-                    Publié le{" "}
-                    {new Date(post.published_at).toLocaleString("fr-FR")}
-                  </p>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+              <button
+                type="submit"
+                disabled={
+                  busy ||
+                  (platform === "tiktok" &&
+                    commercialDisclosure &&
+                    !brandOrganic &&
+                    !brandContent) ||
+                  (platform === "tiktok" &&
+                    brandContent &&
+                    privacyLevel === "SELF_ONLY") ||
+                  !accounts.some((item) => item.platform === platform) ||
+                  (platform === "tiktok" && !privacyLevel) ||
+                  (platform === "tiktok" &&
+                    mediaType === "video" &&
+                    (!durationSeconds ||
+                      (maxVideoDuration !== null &&
+                        durationSeconds > maxVideoDuration)))
+                }
+              >
+                Enregistrer le brouillon
+              </button>
+              {!accounts.some((item) => item.platform === platform) && (
+                <p className="muted">
+                  Connecte d’abord ce compte pour créer une publication.
+                </p>
+              )}
+            </form>
+          </section>
+
+          <section className="card" aria-labelledby="publications-preparees">
+            <h2 id="publications-preparees">Tes publications</h2>
+            {posts.length === 0 ? (
+              <p className="muted">Aucune publication préparée.</p>
+            ) : (
+              <ul style={{ listStyle: "none", padding: 0 }}>
+                {posts.map((post) => (
+                  <li
+                    key={post.id}
+                    className="card"
+                    style={{ marginBottom: "0.75rem" }}
+                  >
+                    <div className="top-bar">
+                      <strong>
+                        {post.platform === "instagram" ? "Instagram" : "TikTok"}{" "}
+                        · {status(post.status)}
+                      </strong>
+                      {post.status === "draft" &&
+                        post.platform === "tiktok" && (
+                          <label htmlFor={`rs-musique-${post.id}`}>
+                            <input
+                              id={`rs-musique-${post.id}`}
+                              type="checkbox"
+                              checked={Boolean(confirmedTikTokPosts[post.id])}
+                              onChange={(event) =>
+                                setConfirmedTikTokPosts((state) => ({
+                                  ...state,
+                                  [post.id]: event.target.checked,
+                                }))
+                              }
+                            />{" "}
+                            En publiant, tu acceptes la{" "}
+                            <a
+                              href="https://www.tiktok.com/legal/page/global/music-usage-confirmation/fr"
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              confirmation d’utilisation de la musique de TikTok
+                            </a>
+                            .
+                          </label>
+                        )}
+                      {post.status === "draft" && (
+                        <span style={{ display: "flex", gap: "0.5rem" }}>
+                          <button
+                            type="button"
+                            disabled={
+                              post.platform === "tiktok" &&
+                              !confirmedTikTokPosts[post.id]
+                            }
+                            onClick={() => void publish(post)}
+                          >
+                            Publier maintenant
+                          </button>
+                          <button
+                            className="secondary"
+                            type="button"
+                            onClick={() => void remove(post)}
+                          >
+                            Supprimer
+                          </button>
+                        </span>
+                      )}
+                      {post.status === "publishing" && (
+                        <button
+                          className="secondary"
+                          type="button"
+                          onClick={() => void refreshStatus(post)}
+                        >
+                          Vérifier le statut
+                        </button>
+                      )}
+                    </div>
+                    <p>{post.caption}</p>
+                    <p className="muted" style={{ overflowWrap: "anywhere" }}>
+                      {post.media_url}
+                    </p>
+                    {post.media_type === "image" ? (
+                      <img
+                        src={post.media_url}
+                        alt="Aperçu du média à publier"
+                        referrerPolicy="no-referrer"
+                        style={{
+                          maxWidth: "100%",
+                          maxHeight: 360,
+                          objectFit: "contain",
+                        }}
+                      />
+                    ) : (
+                      <video
+                        src={post.media_url}
+                        controls
+                        preload="metadata"
+                        style={{ maxWidth: "100%", maxHeight: 360 }}
+                      />
+                    )}
+                    {post.privacy_level && (
+                      <p className="muted">
+                        Visibilité TikTok :{" "}
+                        {(
+                          {
+                            PUBLIC_TO_EVERYONE: "Tout le monde",
+                            MUTUAL_FOLLOW_FRIENDS: "Amis",
+                            FOLLOWER_OF_CREATOR: "Abonnés",
+                            SELF_ONLY: "Moi uniquement",
+                          } as Record<string, string>
+                        )[post.privacy_level] ?? post.privacy_level}
+                      </p>
+                    )}
+                    {post.error && <p className="error">{post.error}</p>}
+                    {post.status === "failed" && (
+                      <p className="muted">
+                        Vérifie d’abord le compte : une erreur réseau peut
+                        empêcher Ignitux de savoir si la publication a été
+                        reçue.
+                      </p>
+                    )}
+                    {post.published_at && (
+                      <p className="muted">
+                        Publié le{" "}
+                        {new Date(post.published_at).toLocaleString("fr-FR")}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </>
+      )}
     </main>
   );
 }
