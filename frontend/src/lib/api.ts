@@ -493,6 +493,48 @@ const ECRITURES_JAMAIS_EN_FILE = [
   /^\/admin\/credits\//,
 ];
 
+/**
+ * Ce qui ne doit jamais entrer en file — et, s'il y est quand même (mis par
+ * un ancien écran, d'avant que la route ne soit interdite), ne doit jamais en
+ * sortir vers le serveur : le rejeu refait ce tri (voir `replayOfflineQueue`).
+ */
+function jamaisEnFile(method: string, path: string): boolean {
+  return (
+    JAMAIS_EN_FILE.some((route) => path === route || path.startsWith(`${route}/`)) ||
+    JAMAIS_EN_FILE_MOTIFS.some((motif) => motif.test(path)) ||
+    (method !== 'GET' && ECRITURES_JAMAIS_EN_FILE.some((motif) => motif.test(path)))
+  );
+}
+
+/**
+ * Les routes qui font travailler IGINI — et se paient en crédits. Aucune ne
+ * doit partir plus tard sans personne devant l'écran pour voir le prix.
+ */
+const ROUTES_IA_PAYANTES = [
+  /^\/projects\/[^/?#]+\/(?:analyze|legal-form|plan|financing-plan|development-plan|transmission-plan)(?:[?#].*)?$/,
+  /^\/projects\/[^/?#]+\/questionnaire\/questions-igini(?:[?#].*)?$/,
+  /^\/projects\/[^/?#]+\/statuts(?:\/regenerer)?(?:[?#].*)?$/,
+  /^\/projects\/[^/?#]+\/(?:tasks|compliance)\/[^/?#]+\/run(?:[?#].*)?$/,
+  /^\/projects\/[^/?#]+\/evaluations-financement(?:[?#].*)?$/,
+  /^\/chat\/messages(?:[?#].*)?$/,
+];
+
+/**
+ * Une écriture rejouée qui échoue est-elle retentée plus tard ? Oui pour une
+ * panne (réseau, 5xx) sur une écriture ordinaire. **Jamais** pour une route
+ * IGINI payante : retenter seul, en boucle, une action qui débite des crédits
+ * est exactement ce que la file ne doit pas faire. (Le rejeu les écarte déjà
+ * avant tout envoi ; ceci tient même si l'une d'elles y échappait.)
+ */
+export function rejeuRetentable(status: number, path: string): boolean {
+  if (ROUTES_IA_PAYANTES.some((motif) => motif.test(path))) return false;
+  return status === 0 || status >= 500;
+}
+
+const REJEU_INTERDIT =
+  'Cette action ne se rejoue pas plus tard (elle fait travailler IGINI, qui se paie en crédits, ou engage ' +
+  'ton projet) : rien n’a été envoyé. Refais-la en ligne si tu le souhaites.';
+
 function handleOffline<T>(
   path: string,
   options: RequestInit,
@@ -501,11 +543,7 @@ function handleOffline<T>(
 ): Promise<T> {
   const method = (options.method ?? 'GET').toUpperCase();
 
-  if (
-    JAMAIS_EN_FILE.some((route) => path === route || path.startsWith(`${route}/`)) ||
-    JAMAIS_EN_FILE_MOTIFS.some((motif) => motif.test(path)) ||
-    (method !== 'GET' && ECRITURES_JAMAIS_EN_FILE.some((motif) => motif.test(path)))
-  ) {
+  if (jamaisEnFile(method, path)) {
     throw new ApiError(
       'Pas de réseau. Ce type de demande ne peut pas être mis de côté pour plus ' +
         'tard — réessaie une fois la connexion revenue. Rien n’a été enregistré ' +
@@ -624,6 +662,13 @@ export function replayOfflineQueue(token: string) {
   const envoyees: string[] = [];
 
   return replay(offlineStorage, async (mutation) => {
+    // Une écriture qu'un ancien écran a mise en file avant que sa route ne
+    // soit interdite (une analyse, une exécution de tâche…) : jamais envoyée.
+    // Elle passe dans les refusées, où la personne lit pourquoi.
+    if (jamaisEnFile(mutation.method, mutation.path)) {
+      return { ok: false as const, retryable: false, status: 0, reason: REJEU_INTERDIT };
+    }
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
@@ -655,9 +700,14 @@ export function replayOfflineQueue(token: string) {
       // 5xx : le serveur a un problème, l'écriture reste valable et sera
       // retentée. 4xx : le serveur l'a jugée invalide, la retenter en
       // boucle ne ferait que bloquer tout ce qui suit dans la file.
-      return { ok: false as const, retryable: res.status >= 500, status: res.status, reason };
+      return { ok: false as const, retryable: rejeuRetentable(res.status, mutation.path), status: res.status, reason };
     } catch {
-      return { ok: false as const, retryable: true, status: 0, reason: 'Réseau indisponible.' };
+      return {
+        ok: false as const,
+        retryable: rejeuRetentable(0, mutation.path),
+        status: 0,
+        reason: 'Réseau indisponible.',
+      };
     }
   },
   undefined,
