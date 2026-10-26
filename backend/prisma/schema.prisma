@@ -45,6 +45,8 @@ model users {
   profile                   user_profiles?
   experiences               user_experiences[]
   formations                user_formations[]
+  social_accounts            social_accounts[]
+  social_posts               social_posts[]
   subscription              subscriptions?
   identity_verifications    identity_verifications[]
   mandates                  mandates[]
@@ -1084,6 +1086,53 @@ model shopify_connections {
   updated_at            DateTime  @updatedAt @db.Timestamptz(6)
 
   project projects @relation(fields: [project_id], references: [id], onDelete: Cascade)
+}
+
+/// PUBLICATIONS SOCIALES — jetons OAuth chiffrés, un compte par plateforme.
+model social_accounts {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_id             String    @db.Uuid
+  owner                users     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  platform             String
+  platform_account_id  String
+  username             String?
+  access_token_chiffre String
+  token_expires_at     DateTime? @db.Timestamptz(6)
+  connected_at         DateTime  @default(now()) @db.Timestamptz(6)
+  disconnected_at      DateTime? @db.Timestamptz(6)
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([owner_id, platform])
+  @@index([owner_id])
+}
+
+/// PUBLICATIONS SOCIALES — chaque plateforme a son propre statut d'envoi.
+model social_posts {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_id         String    @db.Uuid
+  owner            users     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  platform         String
+  caption          String
+  media_url        String
+  media_type       String
+  media_duration_seconds Int?
+  privacy_level    String?
+  allow_comments   Boolean   @default(false)
+  allow_duet       Boolean   @default(false)
+  allow_stitch     Boolean   @default(false)
+  brand_organic    Boolean   @default(false)
+  brand_content    Boolean   @default(false)
+  music_consent_at DateTime? @db.Timestamptz(6)
+  status           String    @default("draft")
+  platform_post_id String?
+  error            String?
+  published_at     DateTime? @db.Timestamptz(6)
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([owner_id, created_at])
+  @@index([owner_id, platform, status])
 }
 
 /// STOCKS — une entrée ou une sortie sur un article. `quantity` est signée :

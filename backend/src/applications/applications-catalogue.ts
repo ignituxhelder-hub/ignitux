@@ -40,6 +40,7 @@ export const APPLICATION_IDS = [
   'immobilier',
   'vehicules',
   'publicite',
+  'reseaux-sociaux',
   'equipe',
 ] as const;
 
@@ -489,6 +490,22 @@ export const APPLICATIONS: readonly Application[] = [
     pourquoi:
       'Tu as des contacts : suis ici tes campagnes, ce qu’elles coûtent et les prospects ' +
       'qu’elles amènent.',
+    apres: 'contacts',
+    offre: null,
+    secteurs: [],
+    cadre: null,
+  },
+  {
+    id: 'reseaux-sociaux',
+    nom: 'Réseaux sociaux',
+    resume: 'Prépare et publie tes contenus Instagram et TikTok après ta confirmation.',
+    categorie: 'vendre',
+    statut: 'disponible',
+    route: '/reseaux-sociaux',
+    publics: ['entrepreneur'],
+    essentielle: false,
+    signal: null,
+    pourquoi: 'Prépare tes publications Instagram et TikTok et confirme chaque envoi.',
     apres: 'contacts',
     offre: null,
     secteurs: [],

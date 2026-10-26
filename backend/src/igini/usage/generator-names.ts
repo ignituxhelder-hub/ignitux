@@ -53,6 +53,7 @@ export const GENERATOR_NAMES = [
   'discuter',
   'evaluer',
   'questionner',
+  'publier_reseaux',
 ] as const;
 
 /**
@@ -63,9 +64,15 @@ export const GENERATOR_NAMES = [
  * générations par mois, et en consommer une pour POSER des questions —
  * avant même la première analyse — serait faire payer à la personne l'effort
  * qu'on lui demande. Le plafond de coût global le borne, et il ne tourne
- * qu'une fois par projet.
+ * qu'une fois par projet. « publier_reseaux » suit la même règle : une
+ * suggestion de texte ne consomme pas les générations du forfait, mais reste
+ * soumise au plafond de coût global.
  */
-export const HORS_FORFAIT: readonly GeneratorName[] = ['discuter', 'questionner'];
+export const HORS_FORFAIT: readonly GeneratorName[] = [
+  'discuter',
+  'questionner',
+  'publier_reseaux',
+];
 
 export type GeneratorName = (typeof GENERATOR_NAMES)[number];
 

@@ -94,6 +94,8 @@ export const ModelName = {
   crm_interactions: 'crm_interactions',
   stock_items: 'stock_items',
   shopify_connections: 'shopify_connections',
+  social_accounts: 'social_accounts',
+  social_posts: 'social_posts',
   stock_movements: 'stock_movements',
   agenda_events: 'agenda_events',
   cash_register_entries: 'cash_register_entries',
@@ -770,6 +772,49 @@ export const Shopify_connectionsScalarFieldEnum = {
 } as const
 
 export type Shopify_connectionsScalarFieldEnum = (typeof Shopify_connectionsScalarFieldEnum)[keyof typeof Shopify_connectionsScalarFieldEnum]
+
+
+export const Social_accountsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  platform: 'platform',
+  platform_account_id: 'platform_account_id',
+  username: 'username',
+  access_token_chiffre: 'access_token_chiffre',
+  token_expires_at: 'token_expires_at',
+  connected_at: 'connected_at',
+  disconnected_at: 'disconnected_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Social_accountsScalarFieldEnum = (typeof Social_accountsScalarFieldEnum)[keyof typeof Social_accountsScalarFieldEnum]
+
+
+export const Social_postsScalarFieldEnum = {
+  id: 'id',
+  owner_id: 'owner_id',
+  platform: 'platform',
+  caption: 'caption',
+  media_url: 'media_url',
+  media_type: 'media_type',
+  media_duration_seconds: 'media_duration_seconds',
+  privacy_level: 'privacy_level',
+  allow_comments: 'allow_comments',
+  allow_duet: 'allow_duet',
+  allow_stitch: 'allow_stitch',
+  brand_organic: 'brand_organic',
+  brand_content: 'brand_content',
+  music_consent_at: 'music_consent_at',
+  status: 'status',
+  platform_post_id: 'platform_post_id',
+  error: 'error',
+  published_at: 'published_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Social_postsScalarFieldEnum = (typeof Social_postsScalarFieldEnum)[keyof typeof Social_postsScalarFieldEnum]
 
 
 export const Stock_movementsScalarFieldEnum = {
