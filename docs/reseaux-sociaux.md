@@ -30,7 +30,7 @@ Tant qu'Instagram (revue Meta) et TikTok (audit) n'ont pas validé l'application
 
 Les URI de redirection doivent être **identiques**, caractère pour caractère, à celles déclarées dans les consoles Meta et TikTok. Sans ces variables, le serveur démarre normalement et l'écran indique « pas encore configuré » pour le réseau concerné.
 
-IGINI doit être active pour proposer des légendes ; la suggestion est limitée à cinq demandes par minute et compte dans le plafond de coût IA habituel.
+IGINI doit être active pour proposer des légendes ; la suggestion est limitée à cinq demandes par minute. Elle se paie en crédits comme toute action IGINI (`publier_reseaux` au barème : 1 crédit, affiché sous le bouton avant de le toucher), et compte dans le plafond de coût IA habituel. Ni la suggestion ni une publication ne sont jamais mises en file hors ligne.
 
 ## Ce que chaque plateforme demande
 

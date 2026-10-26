@@ -30,11 +30,41 @@ const DRAFT = {
   created_at: "2026-10-25T12:00:00.000Z",
 };
 
+/** Le solde et le barème, comme `GET /credits` les rend. */
+function credits(solde: number) {
+  return {
+    "GET /credits": {
+      status: 200,
+      body: {
+        solde,
+        historique: [],
+        bareme: {
+          valeurCreditCentimes: 10,
+          bienvenue: 30,
+          recharges: [],
+          rechargeDisponible: false,
+          rechargeMessage: "",
+          actions: [
+            {
+              generateur: "publier_reseaux",
+              libelle: "Légende d’une publication (réseaux sociaux)",
+              credits: 1,
+              par: "action",
+            },
+          ],
+        },
+      },
+    },
+  };
+}
+
+let routes: Record<string, { status: number; body: unknown }>;
+
 describe("RéseauxSociauxPage", () => {
   beforeEach(() => {
     window.localStorage.clear();
     signInAs("tok123", { id: "u1", email: "a@b.com" });
-    mockApiRoutes({
+    routes = {
       "GET /reseaux-sociaux/acces": {
         status: 200,
         body: { ouvert: true, instagram: true, tiktok: true },
@@ -71,7 +101,9 @@ describe("RéseauxSociauxPage", () => {
         status: 201,
         body: { ...DRAFT, status: "publishing" },
       },
-    });
+      ...credits(26),
+    };
+    mockApiRoutes(routes);
   });
 
   afterEach(() => vi.restoreAllMocks());
@@ -104,6 +136,65 @@ describe("RéseauxSociauxPage", () => {
     );
     if (!request) throw new Error("La requête de publication est absente.");
     expect(JSON.parse(request[1].body)).toEqual({ musicConsent: true });
+  });
+
+  describe("le prix de la légende proposée par IGINI", () => {
+    it("est dit sous le bouton, avant de le toucher", async () => {
+      render(
+        <AuthProvider>
+          <ReseauxSociauxPage />
+        </AuthProvider>,
+      );
+
+      expect(await screen.findByText(/Cette action coûte/)).toHaveTextContent(
+        "Cette action coûte 1 crédit — il t’en reste 26.",
+      );
+    });
+
+    it("sans crédit, le bouton reste éteint et mène aux crédits", async () => {
+      mockApiRoutes({ ...routes, ...credits(0) });
+      render(
+        <AuthProvider>
+          <ReseauxSociauxPage />
+        </AuthProvider>,
+      );
+
+      fireEvent.change(await screen.findByLabelText(/Idée ou consignes pour IGINI/i), {
+        target: { value: "Présenter Ignitux en une phrase." },
+      });
+
+      expect(await screen.findByText(/Crédits insuffisants/)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Proposer un texte avec IGINI/i })).toBeDisabled();
+      expect(screen.getByRole("link", { name: "Voir mes crédits" })).toHaveAttribute("href", "/credits");
+    });
+
+    it("un refus « crédits insuffisants » du serveur porte le lien vers les crédits", async () => {
+      mockApiRoutes({
+        ...routes,
+        "POST /reseaux-sociaux/suggestion": {
+          status: 402,
+          body: {
+            code: "credits_insuffisants",
+            message: "Crédits insuffisants : il te faut 1 crédit, tu en as 0.",
+            requis: 1,
+            disponible: 0,
+          },
+        },
+      });
+      render(
+        <AuthProvider>
+          <ReseauxSociauxPage />
+        </AuthProvider>,
+      );
+
+      fireEvent.change(await screen.findByLabelText(/Idée ou consignes pour IGINI/i), {
+        target: { value: "Présenter Ignitux en une phrase." },
+      });
+      fireEvent.click(screen.getByRole("button", { name: /Proposer un texte avec IGINI/i }));
+
+      expect(await screen.findByText(/tu en as 0\./)).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Voir mes crédits" })).toHaveAttribute("href", "/credits");
+    });
   });
 
   it("insère la suggestion d’IGINI dans le texte sans publier", async () => {

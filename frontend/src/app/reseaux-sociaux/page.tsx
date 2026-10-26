@@ -10,6 +10,15 @@ import {
   type SocialPost,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import {
+  CreditsProvider,
+  erreurIgini,
+  MessageErreurIgini,
+  PrixIgini,
+  useCredits,
+  usePrixIgini,
+  type ErreurIgini,
+} from "@/components/prix-igini";
 
 const PLATEFORMES = ["instagram", "tiktok"] as const;
 type Plateforme = (typeof PLATEFORMES)[number];
@@ -18,8 +27,25 @@ const NOM: Record<Plateforme, string> = {
   tiktok: "TikTok",
 };
 
+/**
+ * La légende proposée par IGINI se paie en crédits (`publier_reseaux` au
+ * barème) : le prix se lit sous le bouton avant de le toucher, et un solde
+ * qui ne suffit pas l'éteint.
+ */
 export default function ReseauxSociauxPage() {
+  const { token } = useAuth();
+  return (
+    <CreditsProvider token={token}>
+      <PageReseauxSociaux />
+    </CreditsProvider>
+  );
+}
+
+function PageReseauxSociaux() {
   const { token, isReady } = useAuth();
+  const credits = useCredits();
+  const prixSuggestion = usePrixIgini("publier_reseaux");
+  const [erreurSuggestion, setErreurSuggestion] = useState<ErreurIgini | null>(null);
   const router = useRouter();
   const [acces, setAcces] = useState<SocialAccess | null>(null);
   const [accounts, setAccounts] = useState<SocialAccount[]>([]);
@@ -201,7 +227,9 @@ export default function ReseauxSociauxPage() {
   }
 
   async function suggestCaption() {
+    if (prixSuggestion?.insuffisant) return;
     setError(null);
+    setErreurSuggestion(null);
     setNotice(null);
     setSuggesting(true);
     try {
@@ -210,12 +238,10 @@ export default function ReseauxSociauxPage() {
       setNotice(
         "IGINI a préparé une proposition. Relis-la et modifie-la avant de l’enregistrer.",
       );
+      // Le solde vient de bouger.
+      credits?.actualiser();
     } catch (err) {
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : "IGINI n’a pas pu préparer cette proposition.",
-      );
+      setErreurSuggestion(erreurIgini(err, "IGINI n’a pas pu préparer cette proposition."));
     } finally {
       setSuggesting(false);
     }
@@ -626,13 +652,15 @@ export default function ReseauxSociauxPage() {
               <button
                 type="button"
                 className="secondary"
-                disabled={suggesting || brief.trim().length < 3}
+                disabled={suggesting || brief.trim().length < 3 || !!prixSuggestion?.insuffisant}
                 onClick={() => void suggestCaption()}
               >
                 {suggesting
                   ? "IGINI prépare le texte…"
                   : "Proposer un texte avec IGINI"}
               </button>
+              <PrixIgini generateur="publier_reseaux" />
+              <MessageErreurIgini erreur={erreurSuggestion} />
               {mediaUrl && (
                 <p className="muted" style={{ overflowWrap: "anywhere" }}>
                   Aperçu du média : {mediaUrl}

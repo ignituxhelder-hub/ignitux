@@ -51,6 +51,8 @@ describe('replayOfflineQueue — ce qui n’a plus le droit d’être en file', 
     ['une génération de statuts', '/projects/p1/statuts/regenerer'],
     ['une évaluation de financement', '/projects/p1/evaluations-financement'],
     ['un message à IGINI', '/chat/messages'],
+    ['une légende proposée par IGINI (réseaux sociaux)', '/reseaux-sociaux/suggestion'],
+    ['une publication sur Instagram ou TikTok', '/reseaux-sociaux/publications/post1/publier'],
   ])('%s mise en file par un ancien écran n’est jamais envoyée : elle passe dans les refusées', async (_cas, chemin) => {
     mettreEnFile('POST', chemin);
 
@@ -85,6 +87,7 @@ describe('rejeuRetentable — une panne du serveur ne relance jamais une action 
     expect(rejeuRetentable(500, '/projects/p1/analyze')).toBe(false);
     expect(rejeuRetentable(502, '/projects/p1/tasks/t1/run')).toBe(false);
     expect(rejeuRetentable(0, '/chat/messages')).toBe(false);
+    expect(rejeuRetentable(503, '/reseaux-sociaux/suggestion')).toBe(false);
   });
 
   it('ne retente pas un refus du serveur (4xx)', () => {

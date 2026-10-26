@@ -491,6 +491,13 @@ const ECRITURES_JAMAIS_EN_FILE = [
   // Un ajustement de crédits par un administrateur : un geste sur le solde
   // de quelqu'un d'autre, qui se fait en ligne ou pas du tout.
   /^\/admin\/credits\//,
+  // Réseaux sociaux : la légende proposée par IGINI se paie en crédits, et une
+  // publication part en public sur Instagram ou TikTok — ni l'une ni l'autre
+  // ne doit partir plus tard sans personne devant l'écran. Connecter un compte
+  // ouvre une page d'autorisation : hors ligne, cela n'a pas de sens.
+  /^\/reseaux-sociaux\/suggestion(?:[?#].*)?$/,
+  /^\/reseaux-sociaux\/publications\/[^/?#]+\/publier(?:[?#].*)?$/,
+  /^\/reseaux-sociaux\/oauth\//,
 ];
 
 /**
@@ -517,6 +524,7 @@ const ROUTES_IA_PAYANTES = [
   /^\/projects\/[^/?#]+\/(?:tasks|compliance)\/[^/?#]+\/run(?:[?#].*)?$/,
   /^\/projects\/[^/?#]+\/evaluations-financement(?:[?#].*)?$/,
   /^\/chat\/messages(?:[?#].*)?$/,
+  /^\/reseaux-sociaux\/suggestion(?:[?#].*)?$/,
 ];
 
 /**
@@ -1240,7 +1248,8 @@ export type GenerateurIgini =
   | 'evaluer'
   | 'questionner'
   | 'statuts'
-  | 'conformite';
+  | 'conformite'
+  | 'publier_reseaux';
 
 export interface ActionBareme {
   generateur: GenerateurIgini;
