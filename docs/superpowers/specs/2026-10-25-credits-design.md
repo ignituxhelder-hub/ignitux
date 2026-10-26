@@ -98,3 +98,27 @@ remboursement) ; deux générations simultanées → jamais de solde négatif ; 
 fois ; ajustement admin réservé au rôle administrateur, motif obligatoire ; membre d'équipe →
 débit sur le propriétaire ; chaque générateur a un prix (test de couverture) ; export RGPD ;
 page d'accueil et page Crédits affichent le barème du serveur.
+
+## Ajouts après revue (2026-10-26)
+
+- **Débits orphelins.** Un serveur arrêté pendant un appel IA ne passe par aucun `catch`. Le
+  rattrapage (`CreditsService.rattraperDebitsOrphelins`, au démarrage puis toutes les 10 min)
+  rend tout débit de plus de 15 min sans ligne `ai_usage_events` ni remboursement (fenêtre de
+  30 jours), sous le même verrou et la même unicité que `rembourser`. Il reprend aussi un
+  remboursement qui avait échoué.
+- **Résultat non gardé = rien à payer.** `ClaudeService` donne la réservation à l'appelant
+  (`surReservation`) ; statuts (retenus entre-temps, P2002, Constitution), évaluation (arrivée
+  trop tard, écriture impossible, préparation interrompue) et exécution (tâche/exigence) rendent
+  les crédits d'un résultat qu'ils ne peuvent pas enregistrer.
+- **Une exécution à la fois.** Tâches et conformité prennent la ligne « en_cours » par une
+  écriture conditionnelle avant tout débit (409 « Déjà en cours. » sinon) ; les statuts
+  réservent en `exclusif` (le débit sans réponse ni remboursement de moins de 15 min fait
+  office de marque « en cours »). Aucune colonne ajoutée.
+- **Chat : prix confirmé avant d'être dépensé.** Un outil payant appelé depuis le chat ne lance
+  rien au premier appel : il rend le prix, et la réponse d'IGINI porte un marqueur écrit par le
+  serveur, `[[confirmer: <outil> <projet> <crédits>]]` (bouton « Confirmer — N crédits »). Il ne
+  s'exécute qu'au message suivant si ce message est un oui et que le message d'IGINI qui le
+  précède immédiatement porte ce marqueur au prix actuel du barème. Les marqueurs écrits par le
+  modèle sont retirés (`igini/chat/chat-confirmation.ts`).
+- **Surface REST.** `verifier-base.mjs` vérifie que `anon`/`authenticated` n'ont aucun droit
+  effectif sur `credit_entries` (ni ailleurs) ; à lancer juste après `migrer-prod.mjs`.
