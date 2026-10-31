@@ -23,7 +23,7 @@ export function Histoire() {
 
   return (
     <section className="section">
-      <p className="section-title">{t('titre')}</p>
+      <h2 className="section-title">{t('titre')}</h2>
       <ol className="frise">
         {ETAPES.map((etape, index) => (
           <li key={etape} className="frise__etape">

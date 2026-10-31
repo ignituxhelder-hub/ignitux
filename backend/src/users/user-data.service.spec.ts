@@ -361,7 +361,7 @@ describe('UserDataService', () => {
       ).toHaveLength(1);
     });
 
-    it('inclut le fil de conversation avec Igini, non rattaché à un projet', async () => {
+    it('inclut le fil de conversation avec IGINI, non rattaché à un projet', async () => {
       prisma.chat_messages.findMany.mockResolvedValue([
         { id: 'm1', role: 'user', content: 'Salut' },
         { id: 'm2', role: 'igini', content: 'Bonjour !' },

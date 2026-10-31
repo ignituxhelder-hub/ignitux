@@ -2,7 +2,8 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
 import { BAREME_PUBLIC } from '@/lib/bareme-public';
-import { createRouterMock, signInAs } from '@/test-utils/mocks';
+import { OUTILS_RECOMMANDES } from '@/lib/outils-recommandes';
+import { createRouterMock, mockApiRoutes, signInAs } from '@/test-utils/mocks';
 import HomePage from './page';
 
 const router = createRouterMock();
@@ -12,8 +13,8 @@ vi.mock('next/navigation', () => ({
 
 /**
  * La langue de l'accueil, au choix du test. `vitest.setup.ts` fixe le
- * français pour toute la suite ; ici les nouvelles sections se relisent aussi
- * en anglais et en portugais, avec les vrais fichiers de messages.
+ * français pour toute la suite ; ici les sections se relisent aussi en
+ * anglais et en portugais, avec les vrais fichiers de messages.
  */
 const langue = vi.hoisted(() => ({ code: 'fr' as 'fr' | 'en' | 'pt' }));
 vi.mock('next-intl', async () => {
@@ -49,9 +50,9 @@ function afficher() {
   );
 }
 
-/** La section dont le titre gravé est ce texte. */
+/** La section dont le titre est ce texte. */
 function section(titre: string): HTMLElement {
-  const element = screen.getByText(titre).closest('section');
+  const element = screen.getByRole('heading', { level: 2, name: titre }).closest('section');
   if (!element) throw new Error(`section « ${titre} » introuvable`);
   return element;
 }
@@ -61,95 +62,172 @@ describe('HomePage', () => {
     window.localStorage.clear();
     router.replace.mockClear();
     langue.code = 'fr';
+    // Sous 50 projets, le serveur ne donne aucun chiffre.
+    mockApiRoutes({ 'GET /vitrine/compteur': { status: 200, body: { projets: null } } });
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('présente la méthode et les moteurs pour un visiteur non connecté', () => {
+  it('ouvre sur la promesse : de l’idée à l’entreprise, avec IGINI', () => {
     afficher();
 
-    // La grande scène : IGNITUX, la devise, et les mots autour de la boussole.
-    expect(screen.getByRole('heading', { level: 1, name: 'Ignitux' })).toBeInTheDocument();
-    expect(screen.getByText('Des idées au monde réel')).toBeInTheDocument();
-    expect(screen.getByText('Nous servir')).toBeInTheDocument();
-    expect(screen.getByText('La vérité avant tout')).toBeInTheDocument();
-    expect(screen.getByText('Découvrir')).toBeInTheDocument();
-    expect(screen.queryByText('Transformer une idée en réalité')).not.toBeInTheDocument();
-    // La boussole est un décor : tout le sens est dans le texte voisin.
+    // La promesse est le seul grand titre ; le nom reste gravé au-dessus.
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    expect(screen.getByRole('heading', { level: 1, name: "De l'idée à l'entreprise." })).toBeInTheDocument();
+    expect(document.querySelector('.scene__nom')?.textContent).toBe('Ignitux');
+    expect(document.querySelector('.scene__sous-titre')?.textContent).toBe(
+      "IGINI t'accompagne à chaque étape : analyser ton idée, créer ta société en France, construire ton plan, et avancer sereinement. Les outils de gestion sont là quand tu en as besoin. Les meilleurs outils du marché aussi.",
+    );
+    // La boussole est un décor : tout le sens est dans le texte voisin, et
+    // les mots des deux colonnes restent séparés pour un lecteur d'écran.
     expect(document.querySelector('img.scene__boussole')).toHaveAttribute('alt', '');
-    // Les mots des deux colonnes restent séparés pour un lecteur d'écran
-    // (et pour l'indexation), même quand le CSS les met en ligne.
-    expect(document.querySelector('.scene__cote--gauche')?.textContent).toBe(
-      'Découvrir Construire Transmettre',
-    );
-    expect(document.querySelector('.scene__cote--droite')?.textContent).toBe(
-      'Nous servir La vérité avant tout',
-    );
-    // L'histoire est bien posée sur l'accueil.
-    expect(screen.getByText("L'histoire")).toBeInTheDocument();
-    expect(screen.getByRole('heading', { level: 3, name: 'Un avenir plus grand' })).toBeInTheDocument();
+    expect(document.querySelector('.scene__cote--gauche')?.textContent).toBe('Découvrir Construire Transmettre');
+    expect(document.querySelector('.scene__cote--droite')?.textContent).toBe('Nous servir La vérité avant tout');
 
-    expect(screen.getByText('Analyser')).toBeInTheDocument();
-    // Deux fois : la colonne de la scène et l'étape de la méthode.
-    expect(screen.getAllByText('Transmettre')).toHaveLength(2);
-    expect(screen.getByText('Mémoire')).toBeInTheDocument();
-    expect(screen.getByText('Score')).toBeInTheDocument();
-    // Le texte n'apparaît qu'au clic sur l'icône.
-    expect(screen.queryByText(/porteurs de projet/)).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Communauté' }));
-    expect(screen.getByText(/porteurs de projet/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Communauté' }));
-    expect(screen.queryByText(/porteurs de projet/)).not.toBeInTheDocument();
+    // Le bouton fort mène à l'inscription.
+    const scene = document.querySelector('.scene') as HTMLElement;
+    const inscription = within(scene).getByRole('link', { name: 'Créer mon compte gratuitement' });
+    expect(inscription).toHaveAttribute('href', '/signup');
+    expect(within(inscription).getByRole('button')).toHaveClass('primary');
   });
 
-  it('dit concrètement ce que fait Ignitux, et pour qui', () => {
+  it('pose le bandeau de réassurance, sans promettre d’abonnement facultatif', () => {
     afficher();
 
-    const concretement = section('Concrètement');
-    for (const titre of [
-      'IGINI analyse ton idée',
-      'Forme juridique et statuts',
-      'Ton dossier de création',
-      'Gérer au quotidien',
-      'Travailler à plusieurs',
-      'Financer ton projet',
-    ]) {
-      expect(within(concretement).getByRole('heading', { level: 3, name: titre })).toBeInTheDocument();
+    const bandeau = screen.getByRole('list', { name: "L'essentiel" });
+    expect(within(bandeau).getAllByRole('listitem').map((li) => li.textContent)).toEqual([
+      'Sans abonnement',
+      `${BAREME_PUBLIC.bienvenue} crédits offerts`,
+      'Tu restes maître de tes décisions',
+    ]);
+    // Aucun abonnement n'existe, même facultatif : « obligatoire » ferait
+    // croire le contraire.
+    expect(document.body.textContent).not.toMatch(/abonnement obligatoire/i);
+  });
+
+  it('n’affiche le compteur de projets que lorsque le serveur en donne un', async () => {
+    mockApiRoutes({ 'GET /vitrine/compteur': { status: 200, body: { projets: 120 } } });
+    afficher();
+
+    expect(await screen.findByText('Déjà 120 projets sur Ignitux')).toBeInTheDocument();
+  });
+
+  it('se passe du compteur sous le seuil, sans réponse lisible ou sans serveur', async () => {
+    for (const body of [{ projets: null }, {}, []]) {
+      mockApiRoutes({ 'GET /vitrine/compteur': { status: 200, body } });
+      const { unmount } = afficher();
+      await vi.waitFor(() => expect(global.fetch).toHaveBeenCalled());
+      expect(screen.queryByText(/^Déjà .* projets/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/undefined/)).not.toBeInTheDocument();
+      unmount();
     }
-    // Les limites dites en clair : un brouillon, un dépôt fait par la
-    // personne, une banque saisie à la main.
-    expect(within(concretement).getByText(/brouillon de statuts à faire relire/)).toBeInTheDocument();
-    expect(within(concretement).getByText(/ne dépose et ne paie rien à ta place/)).toBeInTheDocument();
-    expect(within(concretement).getByText(/sans connexion à ta banque/)).toBeInTheDocument();
+
+    mockApiRoutes({ 'GET /vitrine/compteur': { status: 500, body: { message: 'Erreur' } } });
+    afficher();
+    await vi.waitFor(() => expect(global.fetch).toHaveBeenCalled());
+    expect(screen.queryByText(/^Déjà .* projets/)).not.toBeInTheDocument();
+  });
+
+  it('suit l’ordre décidé, section par section', () => {
+    afficher();
+
+    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual([
+      'Le parcours',
+      "Ce qu'IGINI fait concrètement",
+      'Pour qui ?',
+      'Tes outils de gestion',
+      'Combien ça coûte ?',
+      'Transparence',
+      'Questions fréquentes',
+      'Prêt à donner vie à ton idée ?',
+    ]);
+  });
+
+  it('montre le parcours en quatre étapes, dans l’ordre', () => {
+    afficher();
+
+    const parcours = section('Le parcours');
+    expect(within(parcours).getByRole('list').tagName).toBe('OL');
+    expect(within(parcours).getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual([
+      'Analyser',
+      "Créer l'entreprise",
+      'Construire et financer',
+      'Avancer au quotidien',
+    ]);
+  });
+
+  it('dit ce qu’IGINI fait, sans faire de la gestion le cœur du produit', () => {
+    afficher();
+
+    const concret = section("Ce qu'IGINI fait concrètement");
+    expect(within(concret).getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual([
+      'Analyser ton idée',
+      'Créer ta société en France',
+      'Construire ton plan',
+      'Se souvenir de ton projet',
+    ]);
+    // Les limites dites en clair : un brouillon, un dépôt fait par la personne.
+    expect(within(concret).getByText(/brouillon de statuts à faire relire/)).toBeInTheDocument();
+    expect(within(concret).getByText(/ne dépose et ne paie rien à ta place/)).toBeInTheDocument();
+    // Le cœur, c'est IGINI : ni compta, ni factures, ni banque, ni stocks ici.
+    expect(concret.textContent).not.toMatch(/comptab|factur|banque|stock/i);
+    expect(section('Le parcours').textContent).not.toMatch(/comptab|factur|banque|stock/i);
+
+    // L'aperçu d'une analyse : la forme réelle (note sur 10), sur un projet
+    // dit fictif.
+    const apercu = within(concret).getByRole('figure');
+    expect(within(apercu).getByText('7/10')).toHaveClass('apercu__note-valeur');
+    expect(within(apercu).getByText(/projet fictif/)).toBeInTheDocument();
 
     const pourQui = section('Pour qui ?');
     expect(within(pourQui).getAllByRole('heading', { level: 3 })).toHaveLength(3);
-    expect(within(pourQui).getByRole('heading', { name: 'Tu as une idée' })).toBeInTheDocument();
-
-    // Toujours un seul grand titre : celui de la scène.
-    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
   });
 
-  it('annonce les outils gratuits et les crédits du barème, en or, sans promettre un paiement', () => {
+  it('présente les outils internes comme la version simple, et recommande les outils spécialisés sans se dire partenaire', () => {
+    afficher();
+
+    const outils = section('Tes outils de gestion');
+    expect(within(outils).getByRole('heading', { level: 3, name: 'Inclus dans Ignitux' })).toBeInTheDocument();
+    expect(within(outils).getByText('La version simple, gratuite')).toBeInTheDocument();
+    expect(within(outils).getByText(/ne remplacent ni un outil spécialisé ni ton expert-comptable/)).toBeInTheDocument();
+
+    expect(OUTILS_RECOMMANDES.map((o) => o.nom)).toEqual(['Pennylane', 'Qonto', 'Shine']);
+    for (const outil of OUTILS_RECOMMANDES) {
+      expect(within(outils).getByRole('heading', { level: 4, name: outil.nom })).toBeInTheDocument();
+      const lien = within(outils).getByRole('link', { name: new RegExp(outil.nom, 'i') });
+      expect(lien).toHaveAttribute('href', outil.url);
+      // Un site extérieur s'ouvre à part, sans accès à la page d'Ignitux, et
+      // le lecteur d'écran l'annonce.
+      expect(lien).toHaveAttribute('target', '_blank');
+      expect(lien.getAttribute('rel')).toContain('noopener');
+      expect(lien.textContent).toContain('(nouvel onglet)');
+    }
+
+    // Des recommandations, pas des partenaires : aucun accord, et c'est dit.
+    expect(within(outils).getByText(/Aucun accord commercial/)).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/partenaire/i);
+    // Pas de logo : ce sont leurs marques.
+    expect(within(outils).queryByRole('img')).not.toBeInTheDocument();
+  });
+
+  it('annonce les outils de base gratuits et les crédits du barème, en or, sans promettre un paiement', () => {
     afficher();
 
     const prix = section('Combien ça coûte ?');
-    // Deux cartes : les outils, gratuits pour tous ; les actions d'IGINI, en crédits.
-    expect(within(prix).getByRole('heading', { level: 3, name: 'Les outils' })).toBeInTheDocument();
+    expect(within(prix).getByText("Pas d'abonnement : tu ne paies que les actions d'IGINI que tu lances.")).toBeInTheDocument();
+    expect(within(prix).getByRole('heading', { level: 3, name: 'Les outils de base' })).toBeInTheDocument();
     expect(within(prix).getByText('Gratuit')).toHaveClass('accueil-prix');
     expect(within(prix).getByText('Projets sans limite')).toBeInTheDocument();
     expect(within(prix).getByRole('heading', { level: 3, name: "Les actions d'IGINI" })).toBeInTheDocument();
     expect(BAREME_PUBLIC.valeurCreditCentimes).toBe(10);
     expect(within(prix).getByText('1 crédit = 0,10 €')).toHaveClass('accueil-prix');
     expect(within(prix).getByText(`${BAREME_PUBLIC.bienvenue} crédits offerts à l'inscription`)).toBeInTheDocument();
-    // Quelques exemples, aux prix du barème.
     expect(
       within(prix).getByText(`Analyse d'une idée : ${BAREME_PUBLIC.exemples.analyser} crédits`),
     ).toBeInTheDocument();
     expect(within(prix).getByText('Message au chat : 1 crédit')).toBeInTheDocument();
-    // Les recharges, et le paiement qui n'existe pas encore.
     expect(
       within(prix).getByText('Recharges de 10 €, 20 € ou 50 € — paiement par carte bientôt disponible.'),
     ).toHaveClass('accueil-note');
@@ -160,48 +238,58 @@ describe('HomePage', () => {
     expect(document.body.textContent).not.toMatch(/sans engagement|carte bancaire/i);
   });
 
-  it('résume les données et renvoie à la politique de confidentialité', () => {
+  it('cache les témoignages tant qu’aucun vrai témoignage n’existe', () => {
     afficher();
 
-    const donnees = section('Tes données');
-    expect(within(donnees).getByText(/Union européenne \(Irlande\)/)).toBeInTheDocument();
-    expect(within(donnees).getByText(/jamais revendues/)).toBeInTheDocument();
-    expect(within(donnees).getByText(/images de ta pièce d'identité/)).toBeInTheDocument();
-    expect(within(donnees).getByText(/Anthropic/)).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Témoignages' })).not.toBeInTheDocument();
+    expect(document.querySelector('blockquote')).toBeNull();
+  });
+
+  it('dit tout en transparence, et renvoie à la politique de confidentialité', () => {
+    afficher();
+
+    const transparence = section('Transparence');
+    expect(within(transparence).getByText(/IGINI propose, tu décides/)).toBeInTheDocument();
+    expect(within(transparence).getByText(/Union européenne \(Irlande\)/)).toBeInTheDocument();
+    expect(within(transparence).getByText(/jamais revendues/)).toBeInTheDocument();
+    expect(within(transparence).getByText(/images de ta pièce d'identité/)).toBeInTheDocument();
+    expect(within(transparence).getByText(/Anthropic/)).toBeInTheDocument();
     expect(
-      within(donnees).getByRole('link', { name: 'Lire la politique de confidentialité' }),
+      within(transparence).getByRole('link', { name: 'Lire la politique de confidentialité' }),
     ).toHaveAttribute('href', '/confidentialite');
   });
 
-  it('replie les questions fréquentes, puis mène à l’inscription', () => {
+  it('replie une FAQ courte, puis mène à l’inscription', () => {
     afficher();
 
     const faq = section('Questions fréquentes');
     const questions = faq.querySelectorAll('details');
-    expect(questions).toHaveLength(7);
-    // Toutes repliées à l'arrivée : la question se lit, la réponse attend.
+    expect(questions).toHaveLength(5);
     for (const question of questions) {
       expect(question).not.toHaveAttribute('open');
     }
     expect(within(faq).getByText(/Pas tels quels/)).not.toBeVisible();
     expect(within(faq).getByText('Est-ce gratuit ?')).toBeVisible();
+    expect(within(faq).getByText('Ignitux remplace-t-il ma compta et ma banque ?')).toBeVisible();
     // La réponse sur le prix reprend les chiffres du barème, sans offre payante.
     expect(within(faq).getByText(/1 crédit = 0,10 €\) ; 30 crédits sont offerts/)).toBeInTheDocument();
-    expect(within(faq).getByText(/ce sont tes crédits qui sont utilisés/)).toBeInTheDocument();
+    fireEvent.click(within(faq).getByText('Est-ce gratuit ?'));
     expect(faq.textContent).not.toMatch(/offre Entrepreneur|Découverte/);
 
-    // L'appel à créer un compte vient après la dernière question.
-    const liens = screen.getAllByRole('link', { name: 'Créer un compte' });
+    // L'appel final vient après la dernière question.
+    const liens = screen.getAllByRole('link', { name: 'Créer mon compte gratuitement' });
+    expect(liens).toHaveLength(2);
     const dernier = liens[liens.length - 1];
     expect(dernier).toHaveAttribute('href', '/signup');
     expect(faq.compareDocumentPosition(dernier) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(within(dernier).getByRole('button')).toHaveClass('primary');
+    expect(screen.getByText(`${BAREME_PUBLIC.bienvenue} crédits offerts · sans abonnement`)).toBeInTheDocument();
   });
 
   it.each([
     [
       'en',
-      'In practice',
+      'From idea to company.',
       'How much does it cost?',
       '1 credit = €0.10',
       'Free',
@@ -211,7 +299,7 @@ describe('HomePage', () => {
     ],
     [
       'pt',
-      'Na prática',
+      'Da ideia à empresa.',
       'Quanto custa?',
       '1 crédito = 0,10 €',
       'Gratuito',
@@ -221,11 +309,11 @@ describe('HomePage', () => {
     ],
   ] as const)(
     'se lit aussi en %s, avec les mêmes prix',
-    (code, concretement, combien, valeurCredit, gratuit, questions, recharges, message) => {
+    (code, promesse, combien, valeurCredit, gratuit, questions, recharges, message) => {
       langue.code = code;
       afficher();
 
-      expect(section(concretement)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 1, name: promesse })).toBeInTheDocument();
       const prix = section(combien);
       // Le montant vient du barème, la mise en forme de la langue.
       expect(within(prix).getByText(valeurCredit)).toHaveClass('accueil-prix');
@@ -237,10 +325,18 @@ describe('HomePage', () => {
         expect(question).not.toHaveAttribute('open');
       }
       expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+      // Aucune clé de traduction oubliée à l'écran.
+      expect(document.body.textContent).not.toMatch(/accueil\.|\{n\}|\{valeur\}/);
     },
   );
 
-  it('redirige vers /projects si déjà connecté', async () => {
+  it('n’affiche aucune clé de traduction à la place d’un texte', () => {
+    afficher();
+
+    expect(document.body.textContent).not.toMatch(/accueil\.|\{n\}|\{valeur\}|\{nom\}/);
+  });
+
+  it('redirige vers /accueil si déjà connecté', async () => {
     signInAs('tok123', { id: 'u1', email: 'a@b.com' });
 
     afficher();

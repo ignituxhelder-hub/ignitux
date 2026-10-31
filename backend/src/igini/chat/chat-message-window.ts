@@ -5,7 +5,7 @@
  *
  * Nécessaire parce qu'un tour peut échouer après que le message de
  * l'utilisateur a déjà été persisté (plafond de coût atteint, panne du
- * SDK...) : la ligne reste en base sans réponse d'Igini associée, et
+ * SDK...) : la ligne reste en base sans réponse d'IGINI associée, et
  * l'historique peut alors contenir deux messages `user` consécutifs. L'API
  * Claude refuse une liste de messages qui ne respecte pas l'alternance
  * stricte — les fusionner ici évite de reproduire ce défaut dans chaque

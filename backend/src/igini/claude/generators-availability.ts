@@ -2,7 +2,7 @@
  * DISPONIBILITÉ DES 6 GÉNÉRATEURS IGINI.
  *
  * Les générateurs (Analyser, Former, Construire, Financer, Développer,
- * Transmettre) et le chat libre avec Igini sont les seules fonctionnalités
+ * Transmettre) et le chat libre avec IGINI sont les seules fonctionnalités
  * d'Ignitux qui consomment du budget IA. Ce module porte l'interrupteur qui
  * les coupe, et rien d'autre.
  *
@@ -19,7 +19,7 @@
 
 export const GENERATORS_DISABLED_MESSAGE =
   "Fonctionnalité IA non disponible pour ce test. Les 6 générateurs d'IGINI (Analyser, " +
-  'Former, Construire, Financer, Développer, Transmettre) et le chat libre avec Igini sont ' +
+  'Former, Construire, Financer, Développer, Transmettre) et le chat libre avec IGINI sont ' +
   "volontairement éteints sur cet environnement : aucune demande n'est envoyée à l'IA. " +
   "Tout le reste d'Ignitux fonctionne normalement.";
 

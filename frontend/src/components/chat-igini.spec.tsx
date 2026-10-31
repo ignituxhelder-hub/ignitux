@@ -33,7 +33,7 @@ describe('ChatIgini', () => {
     expect(await screen.findByText('Salut')).toBeInTheDocument();
   });
 
-  it('envoie un message et affiche la réponse d’Igini', async () => {
+  it('envoie un message et affiche la réponse d’IGINI', async () => {
     mockApiRoutes({
       'GET /chat/messages': { status: 200, body: [] },
       'POST /chat/messages': {
@@ -43,10 +43,10 @@ describe('ChatIgini', () => {
     });
 
     afficher();
-    fireEvent.change(await screen.findByLabelText('Ton message'), { target: { value: 'Salut Igini' } });
+    fireEvent.change(await screen.findByLabelText('Ton message'), { target: { value: 'Salut IGINI' } });
     fireEvent.click(screen.getByRole('button', { name: 'Envoyer' }));
 
-    expect(await screen.findByText('Salut Igini')).toBeInTheDocument();
+    expect(await screen.findByText('Salut IGINI')).toBeInTheDocument();
     expect(await screen.findByText('Bonjour !')).toBeInTheDocument();
   });
 

@@ -260,7 +260,7 @@ export function Systeme({ children }: { children: ReactNode }) {
           type="button"
           className="bouton-chat-igini"
           onClick={() => setChatOuvert(true)}
-          aria-label="Discuter avec Igini"
+          aria-label="Discuter avec IGINI"
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path d="M2 3h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H8l-4 4v-4H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />

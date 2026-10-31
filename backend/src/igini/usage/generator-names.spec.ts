@@ -1,7 +1,7 @@
 import { estGenerateur, GENERATOR_NAMES } from './generator-names.js';
 
 describe('generator-names', () => {
-  it('reconnaît discuter comme un générateur valide (le chat libre avec Igini)', () => {
+  it('reconnaît discuter comme un générateur valide (le chat libre avec IGINI)', () => {
     expect(estGenerateur('discuter')).toBe(true);
     expect(GENERATOR_NAMES).toContain('discuter');
   });

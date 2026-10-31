@@ -1697,9 +1697,10 @@ body {
     'gauche boussole droite'
     'nom nom nom'
     'ligne ligne ligne'
-    'devise devise devise'
-    'igini igini igini'
-    'actions actions actions';
+    'promesse promesse promesse'
+    'sous-titre sous-titre sous-titre'
+    'actions actions actions'
+    'reassurance reassurance reassurance';
   align-items: center;
   text-align: center;
   margin-top: 0.5rem;
@@ -1787,22 +1788,54 @@ body {
   box-shadow: 0 0 8px var(--flame);
 }
 
-.scene__devise {
-  grid-area: devise;
-  margin: 0.8rem 0 0;
-  padding-left: 0.5em;
-  font-family: var(--font-display), 'Segoe UI', sans-serif;
-  font-size: 0.95rem;
-  letter-spacing: 0.5em;
-  text-transform: uppercase;
-  color: #e8d6b4;
+
+/* La promesse : le vrai titre de la page (le <h1>), sous le nom gravé. Plus
+   grande que la devise d'avant, parce qu'elle porte le sens. */
+.scene__promesse {
+  grid-area: promesse;
+  margin: 1.1rem 0 0;
+  font-size: clamp(1.45rem, 4.2vw, 2.15rem);
+  line-height: 1.2;
+  letter-spacing: 0.05em;
+  color: var(--or-clair);
 }
 
-/* La phrase d'Igini (un <p className="muted">) et les boutons. */
-.scene > .muted {
-  grid-area: igini;
-  max-width: 34rem;
-  margin: 1.5rem auto 0;
+/* Ce que fait IGINI, en une phrase, puis les boutons et le bandeau. */
+.scene__sous-titre {
+  grid-area: sous-titre;
+  max-width: 38rem;
+  margin: 1rem auto 0;
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.igini-nom {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Le bandeau de réassurance : des faits, pas des actions — gravés en or,
+   sans feu. */
+.reassurance {
+  grid-area: reassurance;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reassurance li {
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--or-liseré);
+  border-radius: var(--radius-pill);
+  background: rgb(255 241 207 / 3%);
+  font-size: var(--texte-etiquette);
+  letter-spacing: 0.04em;
+  color: var(--or-texte);
 }
 
 .scene > .hero-actions {
@@ -1817,21 +1850,16 @@ body {
       'boussole'
       'nom'
       'ligne'
-      'devise'
+      'promesse'
       'gauche'
       'droite'
-      'igini'
-      'actions';
+      'sous-titre'
+      'actions'
+      'reassurance';
   }
 
   .scene__nom {
     margin-top: -0.5rem;
-  }
-
-  .scene__devise {
-    font-size: 0.8rem;
-    letter-spacing: 0.32em;
-    padding-left: 0.32em;
   }
 
   /* Les deux côtés tiennent chacun sur une ligne ou deux, au lieu d'empiler
@@ -1890,15 +1918,25 @@ body {
    -------------------------------------------------------------------------- */
 
 .section {
-  margin-top: 3.25rem;
+  margin-top: 4rem;
 }
 
+@media (max-width: 640px) {
+  .section {
+    margin-top: 3rem;
+  }
+}
+
+/* Un vrai titre de section (<h2>) depuis le 2026-10-31 — pour les lecteurs
+   d'écran et les moteurs de recherche —, toujours dessiné en surtitre gravé. */
 .section-title {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   /* Gravé en or, comme les mots autour de la boussole. */
   font-family: var(--font-display), 'Segoe UI', sans-serif;
+  font-weight: 500;
+  line-height: 1.4;
   font-size: var(--texte-etiquette);
   text-transform: uppercase;
   letter-spacing: 0.3em;
@@ -2151,6 +2189,292 @@ body {
 
 .accueil-lien {
   margin: 1rem 0 0;
+}
+
+/* La phrase qui ouvre une section, sous son titre gravé. */
+.section-intro {
+  max-width: 42rem;
+  margin: -0.35rem 0 1.1rem;
+  color: var(--text-muted);
+}
+
+/* Deux cartes de front (les prix) : plus larges que celles de trois. */
+.accueil-grille--deux {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+}
+
+/* Le parcours en quatre étapes, reliées par le fil de feu de l'histoire. */
+.chemin {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chemin__etape {
+  position: relative;
+  text-align: center;
+}
+
+/* D'une pastille à la suivante : du bord droit de la précédente (son centre
+   plus son rayon) au bord gauche de celle-ci. */
+.chemin__etape:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  top: calc(1.6rem - 1px);
+  left: calc(-50% - 1rem + 1.6rem);
+  right: calc(50% + 1.6rem);
+  height: 2px;
+  background: linear-gradient(90deg, var(--spark), var(--flame));
+  box-shadow: 0 0 10px var(--flame);
+}
+
+.chemin__icone {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  margin: 0 auto 0.8rem;
+  border: 1px solid var(--or-sombre);
+  border-radius: 50%;
+  background: radial-gradient(circle, #1d1812 0%, #0d0d10 100%);
+  box-shadow: 0 0 14px rgb(255 140 60 / 25%);
+  color: var(--or);
+}
+
+.chemin__icone svg {
+  width: 50%;
+  height: 50%;
+}
+
+.chemin__etape h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+}
+
+.chemin__etape p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+/* Sur téléphone, le parcours se lit de haut en bas : la pastille à gauche,
+   le texte à droite, et le fil descend d'une pastille à l'autre. */
+@media (max-width: 640px) {
+  .chemin {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  /* Du bas d'une pastille au haut de la suivante : le fil s'arrête à la
+     dernière, quelle que soit la longueur des textes. */
+  .chemin__etape:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 3.2rem;
+    bottom: -1.25rem;
+    left: calc(1.6rem - 1px);
+    width: 2px;
+    background: linear-gradient(180deg, var(--spark), var(--flame));
+    box-shadow: 0 0 10px var(--flame);
+  }
+
+  .chemin__etape {
+    display: grid;
+    grid-template-columns: 3.2rem 1fr;
+    column-gap: 0.9rem;
+    text-align: left;
+  }
+
+  .chemin__etape:not(:first-child)::before {
+    content: none;
+  }
+
+  .chemin__icone {
+    grid-row: span 2;
+    margin: 0;
+  }
+
+  .chemin__etape h3 {
+    align-self: end;
+  }
+}
+
+/* Ce qu'IGINI fait : les cartes, et à côté l'aperçu d'une analyse. */
+.concret {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .concret {
+    grid-template-columns: 1fr;
+  }
+}
+
+.concret__cartes {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+}
+
+.apercu {
+  margin: 0;
+}
+
+.apercu__tete {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.apercu__projet {
+  margin: 0;
+  font-family: var(--font-display), 'Segoe UI', sans-serif;
+  font-weight: 600;
+  color: var(--or-clair);
+}
+
+/* La note est une mesure : gravée en or. */
+.apercu__note {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 0;
+  flex: none;
+}
+
+.apercu__note-libelle,
+.apercu__libelle {
+  font-size: var(--texte-etiquette);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--or-texte);
+}
+
+.apercu__note-valeur {
+  font-family: var(--font-display), 'Segoe UI', sans-serif;
+  font-size: 1.9rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--or);
+}
+
+.apercu__resume {
+  margin: 0.9rem 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.apercu__colonnes {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.apercu__libelle {
+  margin: 0 0 0.3rem;
+}
+
+.apercu__legende {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--or-liseré);
+  font-size: var(--texte-etiquette);
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+/* Les outils de gestion : la version simple d'Ignitux, puis les outils
+   spécialisés recommandés. */
+.outils-inclus h3 {
+  margin: 0 0 0.4rem;
+}
+
+.outils-inclus p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.outils-inclus .outils-inclus__etiquette,
+.accueil-grille .outil__domaine {
+  margin: 0 0 0.45rem;
+  font-size: var(--texte-etiquette);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--or-texte);
+}
+
+.outils-inclus .accueil-note {
+  margin-top: 0.75rem;
+}
+
+.outils-specialises__titre {
+  margin: 1.9rem 0 0.35rem;
+}
+
+.accueil-grille .outil h4 {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display), 'Segoe UI', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--or-clair);
+}
+
+.outil__lien {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+/* Les témoignages — affichés seulement quand il y en a de vrais. */
+.temoignage__texte {
+  margin: 0;
+  color: var(--text);
+  font-style: italic;
+}
+
+.accueil-grille .temoignage__auteur {
+  margin-top: 0.75rem;
+  font-size: var(--texte-etiquette);
+  color: var(--or-texte);
+}
+
+/* Le dernier appel : une question, un bouton, et ce qu'il coûte (rien). */
+.accueil-final {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.accueil-final__titre {
+  margin: 0 0 1.1rem;
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+  color: var(--or-clair);
+}
+
+.accueil-final__note {
+  margin: 0.9rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+/* Lu par un lecteur d'écran, invisible à l'œil (« nouvel onglet »). */
+.visuellement-cache {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Les questions fréquentes, repliées : un filet entre deux questions, la

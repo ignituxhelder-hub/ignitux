@@ -3,7 +3,7 @@ import { Brand } from '@/components/ignitux-mark';
 import { RetourPagesLegales } from '@/components/retour-pages-legales';
 
 export const metadata = {
-  title: 'Politique de confidentialité — Ignitux',
+  title: 'Politique de confidentialité',
 };
 
 /**

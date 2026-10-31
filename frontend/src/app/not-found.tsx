@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Brand } from '@/components/ignitux-mark';
 
 export const metadata = {
-  title: 'Page introuvable — Ignitux',
+  title: 'Page introuvable',
 };
 
 /**

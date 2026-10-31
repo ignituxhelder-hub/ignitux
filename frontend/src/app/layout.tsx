@@ -29,10 +29,33 @@ const plexSans = IBM_Plex_Sans({
 });
 const plexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-mono' });
 
+// Ce que Google et les aperçus de partage (WhatsApp, LinkedIn…) affichent.
+// Les mots sont ceux qu'on cherche (« analyser une idée », « créer son
+// entreprise en France ») et ceux de la promesse de l'accueil, sans liste de
+// mots-clés. Le titre d'une page qui en déclare un devient « Page · Ignitux ».
+const TITRE = "Ignitux — De l'idée à l'entreprise, avec IGINI";
+const DESCRIPTION =
+  'Analyse ton idée, crée ton entreprise en France (forme juridique, statuts, dossier) et construis ton plan avec IGINI. Outils de base gratuits, sans abonnement.';
+
 export const metadata: Metadata = {
-  title: 'Ignitux',
-  description:
-    "Igini, l'intelligence d'Ignitux, t'accompagne pour transformer une idée en réalité — analyser, construire, financer, développer, transmettre.",
+  // Les adresses des images d'aperçu (opengraph-image.jpg) deviennent
+  // absolues à partir d'ici.
+  metadataBase: new URL('https://ignitux.com'),
+  title: { default: TITRE, template: '%s · Ignitux' },
+  description: DESCRIPTION,
+  applicationName: 'Ignitux',
+  openGraph: {
+    type: 'website',
+    siteName: 'Ignitux',
+    locale: 'fr_FR',
+    title: TITRE,
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TITRE,
+    description: DESCRIPTION,
+  },
   // Installée sur iPhone, l'application ignore le manifeste : Safari lit
   // ces balises-ci pour le titre, `apple-icon.png` pour l'icône, et les
   // écrans de démarrage pour ne pas s'ouvrir sur du blanc.

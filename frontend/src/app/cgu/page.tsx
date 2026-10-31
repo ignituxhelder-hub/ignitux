@@ -4,7 +4,7 @@ import { RetourPagesLegales } from '@/components/retour-pages-legales';
 import { CGU_VERSION } from '@/lib/cgu';
 
 export const metadata = {
-  title: 'Conditions d’utilisation — Ignitux',
+  title: 'Conditions d’utilisation',
 };
 
 /**

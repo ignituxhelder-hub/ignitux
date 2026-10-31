@@ -57,7 +57,7 @@ ligne, au format exact : [[souvenir: LE_CONTENU_A_RETENIR]]. Tu ne peux jamais �
 seule la personne peut confirmer, en cliquant sur le bouton que ce format fait apparaître.`);
 
 /**
- * CHAT — la conversation orchestrée avec Igini. Un seul fil continu par
+ * CHAT — la conversation orchestrée avec IGINI. Un seul fil continu par
  * utilisateur : `sendMessage` persiste le tour de la personne avant
  * d'appeler Claude, pour que le message reste visible dans l'historique
  * même si la réponse échoue (plafond atteint, panne réseau...). Le détail

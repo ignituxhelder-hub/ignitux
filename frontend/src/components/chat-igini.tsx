@@ -126,16 +126,16 @@ function PanneauChat({ onClose }: { onClose: () => void }) {
       setMessages((precedents) => [...precedents, reponse]);
       credits?.actualiser();
     } catch (error) {
-      setErreur(erreurIgini(error, 'Impossible de contacter Igini.'));
+      setErreur(erreurIgini(error, 'Impossible de contacter IGINI.'));
     } finally {
       setEnvoiEnCours(false);
     }
   }
 
   return (
-    <div className="panneau-chat-igini" role="dialog" aria-label="Discuter avec Igini">
+    <div className="panneau-chat-igini" role="dialog" aria-label="Discuter avec IGINI">
       <header className="panneau-chat-igini__entete">
-        <span>Igini</span>
+        <span>IGINI</span>
         <button type="button" onClick={onClose} aria-label="Fermer le chat">
           ✕
         </button>
@@ -168,7 +168,7 @@ function PanneauChat({ onClose }: { onClose: () => void }) {
           type="text"
           value={brouillon}
           onChange={(event) => setBrouillon(event.target.value)}
-          placeholder="Écris à Igini…"
+          placeholder="Écris à IGINI…"
           aria-label="Ton message"
           disabled={envoiEnCours}
         />

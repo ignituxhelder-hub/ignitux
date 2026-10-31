@@ -4,83 +4,76 @@
   "accueil": {
     "seConnecter": "Entrar",
     "creerCompte": "Criar uma conta",
+    "creerCompteGratuit": "Criar a minha conta gratuitamente",
+    "dejaCompte": "Já tenho uma conta",
     "scene": {
       "decouvrir": "Descobrir",
       "construire": "Construir",
       "transmettre": "Transmitir",
       "nousServir": "Servir-nos",
       "verite": "A verdade acima de tudo",
-      "devise": "Das ideias ao mundo real"
+      "promesse": "Da ideia à empresa.",
+      "sousTitre": "acompanha-te em cada etapa: analisar a tua ideia, criar a tua sociedade em França, construir o teu plano e avançar com tranquilidade. As ferramentas de gestão estão lá quando precisares. As melhores ferramentas do mercado também."
     },
-    "iginiMention": "acompanha-te para analisar, construir, financiar, desenvolver e transmitir o teu projeto — a partir de um só lugar.",
-    "commencer": "Começar gratuitamente",
-    "dejaCompte": "Já tenho uma conta",
-    "histoire": {
-      "titre": "A história",
+    "reassurance": {
+      "titre": "O essencial",
+      "abonnement": "Sem subscrição",
+      "bienvenue": "{n} créditos oferecidos",
+      "decisions": "As decisões são sempre tuas",
+      "projets": "Já {n} projetos no Ignitux"
+    },
+    "parcours": {
+      "titre": "O percurso",
       "etapes": {
-        "etincelle": { "nom": "A centelha", "texte": "Tudo começa com uma ideia." },
-        "doute": {
-          "nom": "A dúvida",
-          "texte": "Mas entre uma ideia e a realidade, há muitas vezes um obstáculo."
+        "analyser": {
+          "nom": "Analisar",
+          "texte": "O IGINI estuda a tua ideia: o que se aguenta, o que encalha, o que fazer a seguir."
         },
-        "rencontre": { "nom": "O encontro", "texte": "E se já não estivesses sozinho?" },
-        "construction": {
-          "nom": "A construção",
-          "texte": "O Igini analisa, orienta e acompanha cada etapa."
+        "creer": {
+          "nom": "Criar a empresa",
+          "texte": "Em França: forma jurídica, estatutos, processo. És tu que submetes, guiado passo a passo."
         },
-        "reussite": {
-          "nom": "O sucesso",
-          "texte": "Uma ideia torna-se um projeto. Um projeto torna-se realidade."
+        "construire": {
+          "nom": "Construir e financiar",
+          "texte": "Marcos, orçamento, fontes de financiamento: um plano que segues tarefa a tarefa."
         },
-        "avenir": {
-          "nom": "Um futuro maior",
-          "texte": "Cada centelha conta. Por um mundo de possibilidades."
+        "avancer": {
+          "nom": "Avançar no dia a dia",
+          "texte": "Ferramentas simples para começar, ferramentas especializadas quando cresceres, e o IGINI para te ajudar a decidir."
         }
       }
     },
-    "methode": "O método em 5 etapas",
-    "etapes": {
-      "analyser": { "nom": "Analisar", "description": "Resumo, pontuação de viabilidade, pontos fortes, riscos, próximos passos." },
-      "construire": { "nom": "Construir", "description": "Plano de construção: marcos, prazo estimado, recursos-chave." },
-      "financer": { "nom": "Financiar", "description": "Plano de financiamento: orçamento estimado, fontes, rubricas de despesa." },
-      "developper": { "nom": "Desenvolver", "description": "Plano de crescimento: alavancas, indicadores-chave, riscos de escalar." },
-      "transmettre": { "nom": "Transmitir", "description": "Plano de transmissão: opções de transferência, documentação, lista de verificação." }
-    },
-    "gardeEnTete": "O que o IGINI tem em mente",
-    "moteurs": {
-      "memoire": { "nom": "Memória", "description": "O que o IGINI retém das tuas decisões, preferências e aprendizagens." },
-      "connaissance": { "nom": "Conhecimento", "description": "Um grafo de conceitos para ligar entre si as ideias do teu projeto." },
-      "workflow": { "nom": "Workflow", "description": "As sugestões do IGINI tornam-se tarefas acompanháveis — nunca executadas por ti." },
-      "score": { "nom": "Pontuação", "description": "Um painel honesto do teu progresso, sem números inventados." }
-    },
-    "communaute": "Comunidade",
-    "communauteTexte": "Torna um projeto público quando estiveres pronto e recebe incentivo de outros promotores de projetos — nada mais por enquanto, sem mensagens privadas nem classificações.",
-    "concretement": {
-      "titre": "Na prática",
+    "concret": {
+      "titre": "O que o IGINI faz, na prática",
       "analyse": {
-        "nom": "O IGINI analisa a tua ideia",
-        "texte": "Um resumo, uma pontuação de viabilidade, os pontos fortes, os riscos e os próximos passos."
+        "nom": "Analisar a tua ideia",
+        "texte": "Um resumo, uma nota de viabilidade em 10 que diz porquê, os pontos fortes, os riscos e os próximos passos."
       },
-      "forme": {
-        "nom": "Forma jurídica e estatutos",
-        "texte": "O IGINI recomenda-te uma forma jurídica e depois redige um rascunho dos estatutos, para um profissional rever."
+      "creation": {
+        "nom": "Criar a tua sociedade em França",
+        "texte": "Uma forma jurídica recomendada, um rascunho de estatutos para rever com um profissional, e o teu processo para o balcão único francês. És tu que submetes: o Ignitux não submete nem paga nada por ti."
       },
-      "dossier": {
-        "nom": "O teu processo de criação",
-        "texte": "Os documentos, os custos a prever e a submissão passo a passo no balcão único francês (guichet unique). És tu que submetes: o Ignitux não submete nem paga nada por ti."
+      "plan": {
+        "nom": "Construir o teu plano",
+        "texte": "Plano de construção, plano de financiamento, avaliação revista pelo Ignitux. As suas sugestões tornam-se tarefas que acompanhas, nunca executadas por ti."
       },
-      "gestion": {
-        "nom": "Gerir o dia a dia",
-        "texte": "Orçamentos e faturas, contabilidade, banco (registo manual, sem ligação ao teu banco), resumo da caixa, stocks, agenda e contactos de clientes."
-      },
-      "equipe": {
-        "nom": "Trabalhar em equipa",
-        "texte": "Convida o teu sócio, um funcionário ou o teu contabilista: cada um só vê o que a sua função permite."
-      },
-      "financement": {
-        "nom": "Financiar o teu projeto",
-        "texte": "Um plano de financiamento preparado pelo IGINI e uma avaliação de financiamento revista pelo Ignitux antes de te ser entregue."
+      "memoire": {
+        "nom": "Lembrar-se do teu projeto",
+        "texte": "O IGINI guarda as tuas decisões e preferências, e liga as ideias do teu projeto entre si."
       }
+    },
+    "apercu": {
+      "legende": "Exemplo — projeto fictício, para mostrar a forma de uma análise",
+      "projet": "Oficina de reparação de bicicletas, em Nantes",
+      "note": "Viabilidade",
+      "resume": "Uma necessidade real numa cidade muito ciclável; a rentabilidade depende do preço das revisões e da estação.",
+      "forts": "Pontos fortes",
+      "fort1": "Procura local forte e regular",
+      "fort2": "Pouco equipamento para começar",
+      "risques": "Riscos",
+      "risque1": "Menos atividade no inverno",
+      "etape": "Próximo passo",
+      "etape1": "Testar o preço de uma revisão junto de 20 ciclistas"
     },
     "pourQui": {
       "titre": "Para quem?",
@@ -93,25 +86,51 @@
         "texte": "Em França: forma jurídica, estatutos e processo de criação, passo a passo com o IGINI."
       },
       "entreprise": {
-        "nom": "Já tens uma pequena empresa",
-        "texte": "Os teus orçamentos, faturas, contabilidade, banco e stocks num só lugar."
+        "nom": "A tua empresa está a arrancar",
+        "texte": "O IGINI ajuda-te a estruturar o que vem a seguir: financiamento, crescimento e a escolha das ferramentas certas."
       }
+    },
+    "outils": {
+      "titre": "As tuas ferramentas de gestão",
+      "inclus": {
+        "nom": "Incluídas no Ignitux",
+        "etiquette": "A versão simples, gratuita",
+        "texte": "Orçamentos e faturas, acompanhamento contabilístico, banco introduzido à mão, caixa, stocks, agenda: o suficiente para começar sem instalar nada.",
+        "limite": "Não substituem uma ferramenta especializada nem o teu contabilista."
+      },
+      "specialises": {
+        "titre": "Quando cresceres: as ferramentas especializadas",
+        "intro": "Ficas com o melhor de cada uma; o IGINI ajuda-te a saber qual usar, e quando."
+      },
+      "domaines": {
+        "comptabilite": "Contabilidade e faturação",
+        "banque": "Conta profissional"
+      },
+      "liste": {
+        "pennylane": "A tua contabilidade e as tuas faturas, em ligação com o teu contabilista.",
+        "qonto": "Uma conta profissional online, com o depósito do capital na criação.",
+        "shine": "Uma conta profissional online pensada para independentes e pequenas empresas."
+      },
+      "nouvelOnglet": "(novo separador)",
+      "independance": "Nenhum acordo comercial: o Ignitux não recebe nada se escolheres uma destas ferramentas. São exemplos, não uma lista fechada."
     },
     "prix": {
       "titre": "Quanto custa?",
+      "intro": "Sem subscrição: só pagas as ações do IGINI que lanças.",
       "gratuit": "Gratuito",
       "outils": {
-        "nom": "As ferramentas",
+        "nom": "As ferramentas de base",
         "projets": "Projetos sem limite",
-        "gestion": "Contabilidade, faturação, banco, caixa, stocks, agenda",
-        "equipe": "Equipa, financiamento e documentos jurídicos"
+        "creation": "Criação de empresa: forma, estatutos, processo",
+        "gestion": "Ferramentas de gestão simples",
+        "equipe": "Equipa e documentos jurídicos"
       },
       "igini": {
         "nom": "As ações do IGINI",
-        "valeur": "1 crédito = {valeur} €",
         "bienvenue": "{n} créditos oferecidos na inscrição",
         "affiche": "O preço aparece antes de lançar; nada é debitado se o IGINI falhar",
-        "exemples": "Por exemplo:"
+        "exemples": "Por exemplo:",
+        "valeur": "1 crédito = {valeur} €"
       },
       "exemples": {
         "analyser": "Análise de uma ideia: {credits}",
@@ -125,10 +144,14 @@
       },
       "paiement": "Carregamentos de {a} €, {b} € ou {c} € — pagamento por cartão disponível em breve."
     },
-    "donnees": {
-      "titre": "Os teus dados",
+    "temoignages": {
+      "titre": "Testemunhos"
+    },
+    "transparence": {
+      "titre": "Transparência",
+      "decisions": "O IGINI propõe, tu decides: nada é executado nem submetido em teu nome.",
       "europe": "A tua base de dados está alojada na União Europeia (Irlanda); alguns prestadores técnicos estão nos Estados Unidos, e a política nomeia-os um a um.",
-      "vente": "Os teus dados nunca são vendidos nem usados para publicidade.",
+      "vente": "Os teus dados nunca são vendidos, nem usados para publicidade ou para treinar uma IA.",
       "export": "Na página da tua conta, descarregas tudo — incluindo as imagens do teu documento de identificação — e eliminas a tua conta quando quiseres.",
       "ia": "Quando usas o IGINI, a Anthropic (Estados Unidos), que fornece a sua IA, recebe o conteúdo do teu projeto necessário à resposta.",
       "lien": "Ler a política de privacidade (em francês)"
@@ -137,7 +160,11 @@
       "titre": "Perguntas frequentes",
       "gratuit": {
         "q": "É gratuito?",
-        "r": "As ferramentas, sim: projetos, contabilidade, faturação, banco, equipa e financiamento são gratuitos para todos, sem subscrição. Só as ações do IGINI se pagam, em créditos (1 crédito = {valeur} €); {n} créditos são oferecidos na inscrição."
+        "r": "As ferramentas de base, sim: projetos, criação de empresa, equipa e ferramentas de gestão simples, sem subscrição. Só as ações do IGINI se pagam, em créditos (1 crédito = {valeur} €); {n} créditos são oferecidos na inscrição."
+      },
+      "outils": {
+        "q": "O Ignitux substitui a minha contabilidade e o meu banco?",
+        "r": "Não, e não é esse o objetivo. As suas ferramentas simples chegam para começar; depois, um software de contabilidade, uma conta profissional e o teu contabilista fazem melhor. O IGINI ajuda-te a escolher."
       },
       "creation": {
         "q": "O Ignitux cria a minha empresa por mim?",
@@ -147,24 +174,42 @@
         "q": "Os estatutos têm validade jurídica?",
         "r": "Não tal como estão. O IGINI redige um rascunho gerado por IA: pede a um profissional (advogado, contabilista certificado) que o reveja antes de o usares."
       },
-      "ia": {
-        "q": "Os meus dados servem para treinar uma IA?",
-        "r": "Não. Nenhum dado é usado para treinar um modelo de IA, e nada é vendido."
-      },
-      "equipe": {
-        "q": "Posso trabalhar com o meu sócio ou o meu contabilista?",
-        "r": "Sim: convida-o para o teu projeto com uma função — sócio, funcionário, contabilista ou observador. Precisa da sua própria conta Ignitux e só vê o que a sua função permite. Quando um sócio usa o IGINI no teu projeto, são os teus créditos que são usados."
-      },
       "telephone": {
         "q": "Funciona no telemóvel?",
         "r": "Sim. O Ignitux abre no teu navegador e instala-se como uma aplicação, em Android, iPhone e Windows."
-      },
-      "pays": {
-        "q": "E fora de França?",
-        "r": "A criação de empresa (forma jurídica, estatutos, processo) segue, por agora, as regras francesas. Os outros países ainda não estão abrangidos."
       }
     },
-    "pret": "Pronto para dar vida à tua ideia?"
+    "pret": "Pronto para dar vida à tua ideia?",
+    "finalNote": "{n} créditos oferecidos · sem subscrição",
+    "histoire": {
+      "titre": "A história",
+      "etapes": {
+        "etincelle": {
+          "nom": "A centelha",
+          "texte": "Tudo começa com uma ideia."
+        },
+        "doute": {
+          "nom": "A dúvida",
+          "texte": "Mas entre uma ideia e a realidade, há muitas vezes um obstáculo."
+        },
+        "rencontre": {
+          "nom": "O encontro",
+          "texte": "E se já não estivesses sozinho?"
+        },
+        "construction": {
+          "nom": "A construção",
+          "texte": "O IGINI analisa, orienta e acompanha cada etapa."
+        },
+        "reussite": {
+          "nom": "O sucesso",
+          "texte": "Uma ideia torna-se um projeto. Um projeto torna-se realidade."
+        },
+        "avenir": {
+          "nom": "Um futuro maior",
+          "texte": "Cada centelha conta. Por um mundo de possibilidades."
+        }
+      }
+    }
   },
   "connexion": {
     "titre": "Entrar",

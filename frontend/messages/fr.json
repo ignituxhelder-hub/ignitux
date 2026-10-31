@@ -4,114 +4,133 @@
   "accueil": {
     "seConnecter": "Se connecter",
     "creerCompte": "Créer un compte",
+    "creerCompteGratuit": "Créer mon compte gratuitement",
+    "dejaCompte": "J'ai déjà un compte",
     "scene": {
       "decouvrir": "Découvrir",
       "construire": "Construire",
       "transmettre": "Transmettre",
       "nousServir": "Nous servir",
       "verite": "La vérité avant tout",
-      "devise": "Des idées au monde réel"
+      "promesse": "De l'idée à l'entreprise.",
+      "sousTitre": "t'accompagne à chaque étape : analyser ton idée, créer ta société en France, construire ton plan, et avancer sereinement. Les outils de gestion sont là quand tu en as besoin. Les meilleurs outils du marché aussi."
     },
-    "iginiMention": "t'accompagne pour analyser, construire, financer, développer et transmettre ton projet — depuis un seul endroit.",
-    "commencer": "Commencer gratuitement",
-    "dejaCompte": "J'ai déjà un compte",
-    "histoire": {
-      "titre": "L'histoire",
+    "reassurance": {
+      "titre": "L'essentiel",
+      "abonnement": "Sans abonnement",
+      "bienvenue": "{n} crédits offerts",
+      "decisions": "Tu restes maître de tes décisions",
+      "projets": "Déjà {n} projets sur Ignitux"
+    },
+    "parcours": {
+      "titre": "Le parcours",
       "etapes": {
-        "etincelle": { "nom": "L'étincelle", "texte": "Tout commence par une idée." },
-        "doute": {
-          "nom": "Le doute",
-          "texte": "Mais entre une idée et la réalité, il y a souvent un obstacle."
+        "analyser": {
+          "nom": "Analyser",
+          "texte": "IGINI étudie ton idée : ce qui tient, ce qui coince, quoi faire ensuite."
         },
-        "rencontre": { "nom": "La rencontre", "texte": "Et si tu n'étais plus seul ?" },
-        "construction": {
-          "nom": "La construction",
-          "texte": "Igini analyse, guide et accompagne chaque étape."
+        "creer": {
+          "nom": "Créer l'entreprise",
+          "texte": "En France : forme juridique, statuts, dossier. Tu déposes toi-même, guidé pas à pas."
         },
-        "reussite": {
-          "nom": "La réussite",
-          "texte": "Une idée devient un projet. Un projet devient une réalité."
+        "construire": {
+          "nom": "Construire et financer",
+          "texte": "Jalons, budget, sources de financement : un plan que tu suis tâche par tâche."
         },
-        "avenir": {
-          "nom": "Un avenir plus grand",
-          "texte": "Chaque étincelle compte. Pour un monde de possibilités."
+        "avancer": {
+          "nom": "Avancer au quotidien",
+          "texte": "Des outils simples pour démarrer, des outils spécialisés quand tu grandis, et IGINI pour t’aider à décider."
         }
       }
     },
-    "methode": "La méthode en 5 étapes",
-    "etapes": {
-      "analyser": { "nom": "Analyser", "description": "Résumé, score de faisabilité, points forts, risques, prochaines étapes." },
-      "construire": { "nom": "Construire", "description": "Plan de construction : jalons, délai estimé, ressources clés." },
-      "financer": { "nom": "Financer", "description": "Plan de financement : budget estimé, sources, postes de dépense." },
-      "developper": { "nom": "Développer", "description": "Plan de croissance : leviers, indicateurs clés, risques de passage à l'échelle." },
-      "transmettre": { "nom": "Transmettre", "description": "Plan de transmission : options de transfert, documentation, check-list." }
-    },
-    "gardeEnTete": "Ce qu'IGINI garde en tête",
-    "moteurs": {
-      "memoire": { "nom": "Mémoire", "description": "Ce qu'IGINI retient de tes décisions, préférences et apprentissages." },
-      "connaissance": { "nom": "Connaissance", "description": "Un graphe de concepts pour relier les idées de ton projet entre elles." },
-      "workflow": { "nom": "Workflow", "description": "Les suggestions d'IGINI deviennent des tâches suivables — jamais exécutées à ta place." },
-      "score": { "nom": "Score", "description": "Un tableau de bord honnête de ton avancement, sans chiffre inventé." }
-    },
-    "communaute": "Communauté",
-    "communauteTexte": "Rends un projet public quand tu es prêt, et reçois des encouragements d'autres porteurs de projet — rien de plus pour l'instant, pas de messagerie privée ni de classement.",
-    "concretement": {
-      "titre": "Concrètement",
+    "concret": {
+      "titre": "Ce qu'IGINI fait concrètement",
       "analyse": {
-        "nom": "IGINI analyse ton idée",
-        "texte": "Un résumé, un score de faisabilité, les points forts, les risques et les prochaines étapes."
+        "nom": "Analyser ton idée",
+        "texte": "Un résumé, une note de faisabilité sur 10 qui dit pourquoi, les points forts, les risques et les prochaines étapes."
       },
-      "forme": {
-        "nom": "Forme juridique et statuts",
-        "texte": "IGINI te recommande une forme juridique, puis rédige un brouillon de statuts à faire relire par un professionnel."
+      "creation": {
+        "nom": "Créer ta société en France",
+        "texte": "Une forme juridique recommandée, un brouillon de statuts à faire relire par un professionnel, et ton dossier pour le guichet unique. C'est toi qui déposes : Ignitux ne dépose et ne paie rien à ta place."
       },
-      "dossier": {
-        "nom": "Ton dossier de création",
-        "texte": "Les pièces, les frais à prévoir et le dépôt pas à pas sur le guichet unique. C'est toi qui déposes : Ignitux ne dépose et ne paie rien à ta place."
+      "plan": {
+        "nom": "Construire ton plan",
+        "texte": "Plan de construction, plan de financement, évaluation relue par Ignitux. Ses suggestions deviennent des tâches que tu suis, jamais exécutées à ta place."
       },
-      "gestion": {
-        "nom": "Gérer au quotidien",
-        "texte": "Devis et factures, comptabilité, banque (saisie à la main, sans connexion à ta banque), relevé de caisse, stocks, agenda et contacts clients."
-      },
-      "equipe": {
-        "nom": "Travailler à plusieurs",
-        "texte": "Invite ton associé, un salarié ou ton comptable : chacun ne voit que ce que son rôle permet."
-      },
-      "financement": {
-        "nom": "Financer ton projet",
-        "texte": "Un plan de financement préparé par IGINI, et une évaluation de financement relue par Ignitux avant de t'être remise."
+      "memoire": {
+        "nom": "Se souvenir de ton projet",
+        "texte": "IGINI garde en mémoire tes décisions et tes préférences, et relie les idées de ton projet entre elles."
       }
     },
+    "apercu": {
+      "legende": "Exemple — projet fictif, pour montrer la forme d'une analyse",
+      "projet": "Atelier de réparation de vélos, à Nantes",
+      "note": "Faisabilité",
+      "resume": "Un vrai besoin dans une ville très cycliste ; la rentabilité dépend du prix des révisions et de la saison.",
+      "forts": "Points forts",
+      "fort1": "Demande locale forte et régulière",
+      "fort2": "Peu de matériel pour démarrer",
+      "risques": "Risques",
+      "risque1": "Moins d'activité en hiver",
+      "etape": "Prochaine étape",
+      "etape1": "Tester le prix d'une révision auprès de 20 cyclistes"
+    },
     "pourQui": {
-      "titre": "Pour qui ?",
+      "titre": "Pour qui ?",
       "idee": {
         "nom": "Tu as une idée",
         "texte": "Et tu veux savoir si elle tient debout, avant d'y mettre ton temps et ton argent."
       },
       "creation": {
         "nom": "Tu crées ton entreprise",
-        "texte": "En France : forme juridique, statuts et dossier de création, étape par étape avec IGINI."
+        "texte": "En France : forme juridique, statuts et dossier de création, étape par étape avec IGINI."
       },
       "entreprise": {
-        "nom": "Tu as déjà une petite entreprise",
-        "texte": "Tes devis, tes factures, ta comptabilité, ta banque et tes stocks au même endroit."
+        "nom": "Ton entreprise démarre",
+        "texte": "IGINI t'aide à structurer la suite : financement, croissance, et le choix des bons outils."
       }
+    },
+    "outils": {
+      "titre": "Tes outils de gestion",
+      "inclus": {
+        "nom": "Inclus dans Ignitux",
+        "etiquette": "La version simple, gratuite",
+        "texte": "Devis et factures, suivi comptable, banque saisie à la main, caisse, stocks, agenda : de quoi démarrer sans rien installer.",
+        "limite": "Ils ne remplacent ni un outil spécialisé ni ton expert-comptable."
+      },
+      "specialises": {
+        "titre": "Quand tu grandis : les outils spécialisés",
+        "intro": "Tu gardes le meilleur de chacun ; IGINI t'aide à savoir lequel utiliser, et quand."
+      },
+      "domaines": {
+        "comptabilite": "Comptabilité et facturation",
+        "banque": "Compte professionnel"
+      },
+      "liste": {
+        "pennylane": "Ta comptabilité et tes factures, en lien avec ton expert-comptable.",
+        "qonto": "Un compte pro en ligne, avec le dépôt du capital à la création.",
+        "shine": "Un compte pro en ligne pensé pour les indépendants et les petites entreprises."
+      },
+      "nouvelOnglet": "(nouvel onglet)",
+      "independance": "Aucun accord commercial : Ignitux ne touche rien si tu choisis l'un de ces outils. Ce sont des exemples, pas une liste fermée."
     },
     "prix": {
       "titre": "Combien ça coûte ?",
+      "intro": "Pas d'abonnement : tu ne paies que les actions d'IGINI que tu lances.",
       "gratuit": "Gratuit",
       "outils": {
-        "nom": "Les outils",
+        "nom": "Les outils de base",
         "projets": "Projets sans limite",
-        "gestion": "Comptabilité, facturation, banque, caisse, stocks, agenda",
-        "equipe": "Équipe, financement et documents juridiques"
+        "creation": "Création d'entreprise : forme, statuts, dossier",
+        "gestion": "Outils de gestion simples",
+        "equipe": "Équipe et documents juridiques"
       },
       "igini": {
         "nom": "Les actions d'IGINI",
-        "valeur": "1 crédit = {valeur} €",
         "bienvenue": "{n} crédits offerts à l'inscription",
         "affiche": "Le prix s'affiche avant de lancer ; rien n'est débité si IGINI échoue",
-        "exemples": "Par exemple :"
+        "exemples": "Par exemple :",
+        "valeur": "1 crédit = {valeur} €"
       },
       "exemples": {
         "analyser": "Analyse d'une idée : {credits}",
@@ -125,10 +144,14 @@
       },
       "paiement": "Recharges de {a} €, {b} € ou {c} € — paiement par carte bientôt disponible."
     },
-    "donnees": {
-      "titre": "Tes données",
-      "europe": "Ta base de données est hébergée dans l'Union européenne (Irlande) ; certains prestataires techniques sont aux États-Unis, la politique les nomme un par un.",
-      "vente": "Tes données ne sont jamais revendues, ni utilisées pour de la publicité.",
+    "temoignages": {
+      "titre": "Témoignages"
+    },
+    "transparence": {
+      "titre": "Transparence",
+      "decisions": "IGINI propose, tu décides : rien n'est exécuté ni déposé à ta place.",
+      "europe": "Ta base de données est hébergée dans l'Union européenne (Irlande) ; certains prestataires techniques sont aux États-Unis, la politique les nomme un par un.",
+      "vente": "Tes données ne sont jamais revendues, ni utilisées pour de la publicité ou pour entraîner une IA.",
       "export": "Depuis Mon compte, tu télécharges tout — y compris les images de ta pièce d'identité — et tu supprimes ton compte quand tu veux.",
       "ia": "Quand tu utilises IGINI, Anthropic (États-Unis), qui fournit son IA, reçoit le contenu de ton projet nécessaire à la réponse.",
       "lien": "Lire la politique de confidentialité"
@@ -136,35 +159,57 @@
     "faq": {
       "titre": "Questions fréquentes",
       "gratuit": {
-        "q": "Est-ce gratuit ?",
-        "r": "Les outils, oui : projets, comptabilité, facturation, banque, équipe et financement sont gratuits pour tout le monde, sans abonnement. Seules les actions d'IGINI se paient, en crédits (1 crédit = {valeur} €) ; {n} crédits sont offerts à l'inscription."
+        "q": "Est-ce gratuit ?",
+        "r": "Les outils de base, oui : projets, création d'entreprise, équipe et outils de gestion simples, sans abonnement. Seules les actions d'IGINI se paient, en crédits (1 crédit = {valeur} €) ; {n} crédits sont offerts à l'inscription."
+      },
+      "outils": {
+        "q": "Ignitux remplace-t-il ma compta et ma banque ?",
+        "r": "Non, et ce n'est pas son but. Ses outils simples suffisent pour démarrer ; ensuite, un logiciel de comptabilité, un compte professionnel et ton expert-comptable font mieux. IGINI t'aide à choisir."
       },
       "creation": {
-        "q": "Ignitux crée-t-il mon entreprise à ma place ?",
-        "r": "Non. Ignitux prépare ton dossier et t'explique le dépôt pas à pas ; c'est toi qui le déposes sur le guichet unique. Ignitux ne dépose rien et ne paie rien à ta place."
+        "q": "Ignitux crée-t-il mon entreprise à ma place ?",
+        "r": "Non. Ignitux prépare ton dossier et t'explique le dépôt pas à pas ; c'est toi qui le déposes sur le guichet unique. Ignitux ne dépose rien et ne paie rien à ta place."
       },
       "statuts": {
-        "q": "Les statuts sont-ils valables juridiquement ?",
-        "r": "Pas tels quels. IGINI en rédige un brouillon, généré par IA : fais-le relire par un professionnel (avocat, expert-comptable) avant de t'en servir."
-      },
-      "ia": {
-        "q": "Mes données servent-elles à entraîner une IA ?",
-        "r": "Non. Aucune donnée n'est utilisée pour entraîner un modèle d'IA, et rien n'est revendu."
-      },
-      "equipe": {
-        "q": "Puis-je travailler avec mon associé ou mon comptable ?",
-        "r": "Oui : invite-le sur ton projet avec un rôle — associé, salarié, comptable ou observateur. Il lui faut son propre compte Ignitux, et il ne voit que ce que son rôle permet. Quand un associé lance IGINI sur ton projet, ce sont tes crédits qui sont utilisés."
+        "q": "Les statuts sont-ils valables juridiquement ?",
+        "r": "Pas tels quels. IGINI en rédige un brouillon, généré par IA : fais-le relire par un professionnel (avocat, expert-comptable) avant de t'en servir."
       },
       "telephone": {
-        "q": "Ça marche sur téléphone ?",
+        "q": "Ça marche sur téléphone ?",
         "r": "Oui. Ignitux s'ouvre dans ton navigateur et s'installe comme une application, sur Android, iPhone et Windows."
-      },
-      "pays": {
-        "q": "Et hors de France ?",
-        "r": "La création d'entreprise (forme juridique, statuts, dossier) suit aujourd'hui les règles françaises. Les autres pays ne sont pas encore couverts."
       }
     },
-    "pret": "Prêt à donner vie à ton idée ?"
+    "pret": "Prêt à donner vie à ton idée ?",
+    "finalNote": "{n} crédits offerts · sans abonnement",
+    "histoire": {
+      "titre": "L'histoire",
+      "etapes": {
+        "etincelle": {
+          "nom": "L'étincelle",
+          "texte": "Tout commence par une idée."
+        },
+        "doute": {
+          "nom": "Le doute",
+          "texte": "Mais entre une idée et la réalité, il y a souvent un obstacle."
+        },
+        "rencontre": {
+          "nom": "La rencontre",
+          "texte": "Et si tu n'étais plus seul ?"
+        },
+        "construction": {
+          "nom": "La construction",
+          "texte": "IGINI analyse, guide et accompagne chaque étape."
+        },
+        "reussite": {
+          "nom": "La réussite",
+          "texte": "Une idée devient un projet. Un projet devient une réalité."
+        },
+        "avenir": {
+          "nom": "Un avenir plus grand",
+          "texte": "Chaque étincelle compte. Pour un monde de possibilités."
+        }
+      }
+    }
   },
   "connexion": {
     "titre": "Se connecter",

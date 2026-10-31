@@ -988,7 +988,7 @@ describe('ClaudeService', () => {
     const converser = (executeTool = vi.fn()) =>
       service.converseWithTools({
         systemPrompt: 'system',
-        messages: [{ role: 'user', content: 'Salut Igini' }],
+        messages: [{ role: 'user', content: 'Salut IGINI' }],
         usage: CHAT_ATTRIBUTION,
         tools: [UN_OUTIL],
         executeTool,

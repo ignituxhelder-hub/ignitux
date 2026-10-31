@@ -3300,6 +3300,12 @@ export const api = {
   /** Le barème — public, sans jeton : la page d'accueil le lit aussi. */
   getBaremeCredits: () => request<BaremeCredits>('/credits/bareme'),
 
+  /**
+   * Le compteur de projets de l'accueil — public. `null` sous 50 projets :
+   * l'accueil n'affiche alors rien (voir backend/src/vitrine).
+   */
+  getCompteurProjets: () => request<{ projets: number | null }>('/vitrine/compteur'),
+
   /** Mon solde, le barème et mes 100 derniers mouvements. */
   getCredits: (token: string) =>
     request<VueCredits>('/credits', { headers: { Authorization: `Bearer ${token}` } }),

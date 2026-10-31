@@ -100,22 +100,22 @@ describe('Systeme', () => {
 
     it('affiche l’icône de chat quand la barre des tâches est visible', async () => {
       afficher();
-      expect(await screen.findByRole('button', { name: 'Discuter avec Igini' })).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: 'Discuter avec IGINI' })).toBeInTheDocument();
     });
 
     it('ouvre le panneau de chat au clic sur l’icône, et referme l’icône', async () => {
       mockApiRoutes({ 'GET /chat/messages': { status: 200, body: [] } });
       afficher();
 
-      fireEvent.click(await screen.findByRole('button', { name: 'Discuter avec Igini' }));
+      fireEvent.click(await screen.findByRole('button', { name: 'Discuter avec IGINI' }));
 
-      expect(await screen.findByRole('dialog', { name: 'Discuter avec Igini' })).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Discuter avec Igini' })).not.toBeInTheDocument();
+      expect(await screen.findByRole('dialog', { name: 'Discuter avec IGINI' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Discuter avec IGINI' })).not.toBeInTheDocument();
     });
   });
 
   it("n'affiche pas l’icône de chat sans connexion", () => {
     afficher();
-    expect(screen.queryByRole('button', { name: 'Discuter avec Igini' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Discuter avec IGINI' })).not.toBeInTheDocument();
   });
 });

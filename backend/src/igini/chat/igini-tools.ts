@@ -41,7 +41,7 @@ export const RAPPELER_SOUVENIRS_INPUT_SCHEMA = z.object({
 
 const GENERATOR_TOOL_DESCRIPTIONS: Record<(typeof GENERATOR_TOOL_NAMES)[number], string> = {
   analyser:
-    "Lance l'étape Analyser d'Igini sur un projet précis : résumé, score de faisabilité, points forts, " +
+    "Lance l'étape Analyser d'IGINI sur un projet précis : résumé, score de faisabilité, points forts, " +
     'risques, prochaines étapes.',
   construire: 'Lance l’étape Construire (plan de construction : jalons, délai estimé, ressources clés).',
   financer: 'Lance l’étape Financer (plan de financement : budget estimé, sources, postes de dépense).',
