@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
-  Logger,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -735,136 +734,24 @@ describe('ProjectsService', () => {
       expect(automationService.run).toHaveBeenCalledWith('p1');
     });
 
-    describe('déclenchement automatique de Former', () => {
-      const projetEtAnalyse = (score: number) => {
-        const project = { id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' };
-        prisma.projects.findFirst.mockResolvedValue(project);
-        // Relu séparément par triggerFormerAutomatically (titre/description),
-        // sans passer par le findFirst déjà utilisé par analyzeForOwner.
-        prisma.projects.findUniqueOrThrow.mockResolvedValue(project);
-        analysisService.analyzeProject.mockResolvedValue({
-          summary: 'r',
-          feasibility_score: score,
-          strengths: [],
-          risks: [],
-          next_steps: [],
-        });
-        prisma.analyses.create.mockResolvedValue({ id: 'a1', project_id: 'p1', feasibility_score: score });
-      };
-
-      it('déclenche Former quand le score atteint 8', async () => {
-        projetEtAnalyse(8);
-        formerService.recommendLegalForm.mockResolvedValue({
-          recommended_form: 'SASU',
-          rationale: 'r',
-          assumptions: [],
-          alternatives: [],
-          points_to_check: [],
-          sources: [],
-        });
-        prisma.legal_form_recommendations.create.mockResolvedValue({ id: 'r1' });
-
-        await service.analyzeForOwner('u1', 'p1');
-        // Non bloquant : on attend le prochain tick pour laisser la promesse
-        // détachée se résoudre avant d'inspecter les mocks.
-        await new Promise((resolve) => setImmediate(resolve));
-
-        expect(formerService.recommendLegalForm).toHaveBeenCalledTimes(1);
-        // Personne ne l'a demandé : il est offert, jamais débité en crédits.
-        expect(formerService.recommendLegalForm.mock.calls[0][2]).toEqual({
-          userId: 'u1',
-          projectId: 'p1',
-          offert: true,
-        });
+    it('ne lance plus la forme juridique toute seule, quelle que soit la note : c’est l’enchaînement qui s’en charge', async () => {
+      // Jusqu'au 2026-10-31, une note de 8/10 et plus déclenchait Former,
+      // offert. La règle des 75/100 est retirée : la forme juridique est la
+      // deuxième étape de l'enchaînement IGINI, pour tous les projets.
+      prisma.projects.findFirst.mockResolvedValue({ id: 'p1', owner_id: 'u1', title: 'Idée', description: 'Desc' });
+      analysisService.analyzeProject.mockResolvedValue({
+        summary: 'r',
+        feasibility_score: 9,
+        strengths: [],
+        risks: [],
+        next_steps: [],
       });
+      prisma.analyses.create.mockResolvedValue({ id: 'a1', project_id: 'p1', feasibility_score: 9 });
 
-      it('ne déclenche pas Former en dessous de 8', async () => {
-        projetEtAnalyse(7);
+      await service.analyzeForOwner('u1', 'p1');
+      await new Promise((resolve) => setImmediate(resolve));
 
-        await service.analyzeForOwner('u1', 'p1');
-        await new Promise((resolve) => setImmediate(resolve));
-
-        expect(formerService.recommendLegalForm).not.toHaveBeenCalled();
-      });
-
-      it("ne déclenche qu'une fois : pas de nouvelle recommandation si le projet en a déjà une", async () => {
-        projetEtAnalyse(9);
-        prisma.legal_form_recommendations.count.mockResolvedValue(1);
-
-        await service.analyzeForOwner('u1', 'p1');
-        await new Promise((resolve) => setImmediate(resolve));
-
-        expect(formerService.recommendLegalForm).not.toHaveBeenCalled();
-      });
-
-      it("ne déclenche qu'une fois quand deux analyses du même projet se chevauchent (course évitée)", async () => {
-        // Un appel Former prend 40 à 90 secondes : si une deuxième analyse
-        // démarre avant que la première n'ait eu le temps d'écrire sa
-        // recommandation, le `count()` vaudrait encore zéro pour les deux.
-        // Sans verrou en mémoire, les deux déclencheraient Former.
-        projetEtAnalyse(8);
-        prisma.legal_form_recommendations.create.mockResolvedValue({ id: 'r1' });
-
-        const p1 = service.analyzeForOwner('u1', 'p1');
-        const p2 = service.analyzeForOwner('u1', 'p1');
-        await Promise.all([p1, p2]);
-        // Non bloquant : on attend le prochain tick pour laisser les
-        // promesses détachées se résoudre avant d'inspecter les mocks.
-        await new Promise((resolve) => setImmediate(resolve));
-
-        expect(formerService.recommendLegalForm).toHaveBeenCalledTimes(1);
-      });
-
-      it("n'attend pas Former avant de répondre (non bloquant)", async () => {
-        projetEtAnalyse(8);
-        let resolveFormer: (value: unknown) => void = () => {};
-        formerService.recommendLegalForm.mockReturnValue(
-          new Promise((resolve) => {
-            resolveFormer = resolve;
-          }),
-        );
-
-        const resultat = await service.analyzeForOwner('u1', 'p1');
-
-        // La réponse de l'analyse part sans attendre Former.
-        expect(resultat).toBeTruthy();
-        resolveFormer({
-          recommended_form: 'SASU',
-          rationale: 'r',
-          assumptions: [],
-          alternatives: [],
-          points_to_check: [],
-          sources: [],
-        });
-      });
-
-      it("journalise une vraie panne pendant le déclenchement automatique, sans faire échouer l'analyse", async () => {
-        projetEtAnalyse(8);
-        formerService.recommendLegalForm.mockRejectedValue(new Error('réseau'));
-        // Nest écrit sur le prototype partagé de Logger : l'espionner est le
-        // moyen standard de vérifier qu'une erreur a été journalisée, sans
-        // exposer le champ privé `logger` de ProjectsService.
-        const loggerSpy = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
-
-        const resultat = await service.analyzeForOwner('u1', 'p1');
-        await new Promise((resolve) => setImmediate(resolve));
-
-        expect(resultat).toBeTruthy();
-        expect(loggerSpy).toHaveBeenCalled();
-        loggerSpy.mockRestore();
-      });
-
-      it("reste silencieux quand Former échoue pour un refus d'entitlement (offre insuffisante)", async () => {
-        projetEtAnalyse(8);
-        formerService.recommendLegalForm.mockRejectedValue(new ForbiddenException('offre insuffisante'));
-        const loggerSpy = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
-
-        await service.analyzeForOwner('u1', 'p1');
-        await new Promise((resolve) => setImmediate(resolve));
-
-        expect(loggerSpy).not.toHaveBeenCalled();
-        loggerSpy.mockRestore();
-      });
+      expect(formerService.recommendLegalForm).not.toHaveBeenCalled();
     });
   });
 

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '@/lib/auth';
 import { createRouterMock, mockApiRoutes, signInAs } from '@/test-utils/mocks';
@@ -84,8 +84,34 @@ function parcours(overrides = {}) {
   };
 }
 
+/** Les cinq étapes de l’enchaînement IGINI, au prix du barème (21 crédits). */
+const ETAPES_IGINI = [
+  { id: 'analyser', libelle: 'L’analyse', credits: 4 },
+  { id: 'former', libelle: 'La forme juridique', credits: 4 },
+  { id: 'construire', libelle: 'Le plan de construction', credits: 5 },
+  { id: 'financer', libelle: 'Le plan de financement', credits: 4 },
+  { id: 'developper', libelle: 'Le plan de développement', credits: 4 },
+] as const;
+
+/** La vue de l’enchaînement que rend le serveur ; `faites` et `enCours` par id d’étape. */
+function enchainement(
+  statut: 'pret' | 'en-cours' | 'termine' | 'arrete',
+  { faites = [] as string[], enCours = null as string | null, arret = null as unknown } = {},
+) {
+  const etapes = ETAPES_IGINI.map((e) => ({
+    ...e,
+    etat: faites.includes(e.id) ? 'fait' : enCours === e.id ? 'en-cours' : 'a-faire',
+  }));
+  const creditsRestants = etapes.filter((e) => e.etat !== 'fait').reduce((t, e) => t + e.credits, 0);
+  return { statut, etapes, creditsRestants, arret };
+}
+
+const TOUT_FAIT = ETAPES_IGINI.map((e) => e.id);
+
 const ENGINE_ROUTES = {
   'GET /projects/p1/parcours': { status: 200, body: parcours() },
+  // Par défaut, l’enchaînement est terminé : la carte IGINI ne s’affiche pas.
+  'GET /projects/p1/enchainement': { status: 200, body: enchainement('termine', { faites: [...TOUT_FAIT] }) },
   // Par défaut, les générateurs sont disponibles : c'est l'état normal du
   // produit, et les tests existants décrivent ce cas-là.
   'GET /igini/status': { status: 200, body: { generatorsEnabled: true, unavailableReason: null } },
@@ -603,8 +629,9 @@ describe('ProjectDetailPage', () => {
       expect(await screen.findByText(/serait inventer son raisonnement/)).toBeInTheDocument();
     });
 
-    // Ignitux recommande, il ne decide pas : les deux portes restent ouvertes.
-    it('propose les deux décisions sous le seuil', async () => {
+    // Plus de seuil à 75/100 : une note faible ne détourne plus de la
+    // construction, et retravailler l'idée reste possible.
+    it('mène à la construction même avec une note faible', async () => {
       mockApiRoutes(avecAnalyse());
 
       render(
@@ -617,12 +644,13 @@ describe('ProjectDetailPage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
 
       expect(await screen.findByText('60 / 100')).toBeInTheDocument();
-      expect(screen.getByText(/en dessous du seuil de 75/)).toBeInTheDocument();
+      expect(screen.queryByText(/seuil/)).not.toBeInTheDocument();
+      expect(screen.getByText(/La note éclaire, elle ne bloque rien/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Passer à la construction' })).toHaveClass('primary');
       expect(screen.getByRole('button', { name: 'Corriger mon idée' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Continuer malgré tout' })).toBeInTheDocument();
     });
 
-    it('invite à construire au-dessus du seuil', async () => {
+    it('invite à construire avec une bonne note aussi', async () => {
       mockApiRoutes(avecAnalyse({ feasibility_score: 8 }));
 
       render(
@@ -1252,11 +1280,11 @@ describe('ProjectDetailPage', () => {
       expect(progression).not.toHaveTextContent('Transmettre');
     });
 
-    // Un projet qui vient de naître ne doit montrer qu'une porte : sa
-    // première analyse.
-    it("n'affiche que la première analyse sur un projet vierge", async () => {
+    // Un projet qui vient de naître ne doit montrer qu'une porte : IGINI.
+    it("n'affiche que la carte IGINI sur un projet vierge", async () => {
       mockApiRoutes({
         ...{ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES },
+        'GET /projects/p1/enchainement': { status: 200, body: enchainement('pret') },
         'GET /projects/p1/parcours': {
           status: 200,
           body: parcours({
@@ -1287,7 +1315,7 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      expect(await screen.findByRole('button', { name: 'Lancer l’analyse IGINI' })).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: 'Lancer IGINI sur mon projet' })).toBeInTheDocument();
       // La carte tient lieu de porte : ni les icônes des étapes, ni le guide.
       expect(screen.queryByRole('button', { name: 'Analyser' })).not.toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Construction' })).not.toBeInTheDocument();
@@ -1448,6 +1476,7 @@ describe('ProjectDetailPage — conduite quand les générateurs sont éteints',
       'GET /projects/p1': { status: 200, body: PROJECT },
       ...ENGINE_ROUTES,
       ...PARCOURS_ANALYSE,
+      'GET /projects/p1/enchainement': { status: 200, body: enchainement('pret') },
     });
 
     render(
@@ -1456,8 +1485,8 @@ describe('ProjectDetailPage — conduite quand les générateurs sont éteints',
       </AuthProvider>,
     );
 
-    // IGINI répond : la première analyse se propose d'elle-même, sans détour.
-    await screen.findByRole('heading', { name: 'Lance ta première analyse IGINI' });
+    // IGINI répond : la carte se propose d'elle-même, sans détour.
+    await screen.findByRole('heading', { name: 'Lance IGINI sur ton projet' });
     expect(screen.queryByText(/avancer à la main/)).toBeNull();
   });
 
@@ -1529,24 +1558,32 @@ describe('ProjectDetailPage — guide pas à pas et visite guidée', () => {
     );
   }
 
-  // Un projet tout neuf : la première analyse, seule en haut de la fiche,
-  // avec son prix — le tableau de bord vide, le guide, la visite et les
-  // questions attendent qu'il y ait quelque chose à suivre.
-  it('met la première analyse seule en haut d’un projet tout neuf', async () => {
+  // Un projet tout neuf : la carte IGINI, seule en haut de la fiche, avec
+  // ses cinq étapes et leur prix — le tableau de bord vide, le guide, la
+  // visite et les questions attendent qu'il y ait quelque chose à suivre.
+  it('met la carte IGINI seule en haut d’un projet tout neuf, avec ses cinq étapes et leur prix', async () => {
     window.localStorage.removeItem(CLE_VISITE_PROJET);
     mockApiRoutes({
       'GET /projects/p1': { status: 200, body: PROJECT },
       ...ENGINE_ROUTES,
       ...PARCOURS_ANALYSER,
+      'GET /projects/p1/enchainement': { status: 200, body: enchainement('pret') },
       'GET /projects/p1/questionnaire': { status: 200, body: { termine: false, etapes: [] } },
     });
     afficher();
 
-    const carte = (await screen.findByRole('heading', { name: 'Lance ta première analyse IGINI' })).closest(
+    const carte = (await screen.findByRole('heading', { name: 'Lance IGINI sur ton projet' })).closest(
       'section',
     ) as HTMLElement;
-    expect(within(carte).getByRole('button', { name: 'Lancer l’analyse IGINI' })).toHaveClass('primary');
-    expect(within(carte).getByText(/note de faisabilité sur 10/)).toBeInTheDocument();
+    expect(within(carte).getByRole('button', { name: 'Lancer IGINI sur mon projet' })).toHaveClass('primary');
+    expect(within(carte).getAllByRole('listitem').map((li) => li.textContent)).toEqual([
+      '·L’analyse — à venir4 crédits',
+      '·La forme juridique — à venir4 crédits',
+      '·Le plan de construction — à venir5 crédits',
+      '·Le plan de financement — à venir4 crédits',
+      '·Le plan de développement — à venir4 crédits',
+    ]);
+    expect(within(carte).getByText(/Ces 5 étapes coûtent/)).toHaveTextContent('Ces 5 étapes coûtent 21 crédits');
     // Le questionnaire reste proposé, en option.
     expect(within(carte).getByRole('link', { name: "réponds d'abord à quelques questions" })).toHaveAttribute(
       'href',
@@ -1562,37 +1599,102 @@ describe('ProjectDetailPage — guide pas à pas et visite guidée', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('lance la première analyse depuis sa carte, puis montre le résultat', async () => {
-    mockApiRoutes({
+  it('lance l’enchaînement d’un clic, suit son avancée, et dit quand c’est prêt', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    const routes = {
       'GET /projects/p1': { status: 200, body: PROJECT },
       ...ENGINE_ROUTES,
       ...PARCOURS_ANALYSER,
-      'POST /projects/p1/analyze': {
-        status: 201,
-        body: {
-          id: 'a1',
-          project_id: 'p1',
-          summary: 'Une école de motocross solide.',
-          feasibility_score: 7,
-          score_rationale: 'Demande réelle, terrain à trouver.',
-          strengths: ['Demande locale'],
-          risks: ['Terrain'],
-          next_steps: ['Trouver un terrain'],
-          created_at: '2026-10-31T10:00:00.000Z',
-          generated_by: 'igini',
-          generated_model: 'claude',
-        },
+      'GET /projects/p1/enchainement': { status: 200, body: enchainement('pret') },
+      'POST /projects/p1/enchainement': {
+        status: 202,
+        body: enchainement('en-cours', { enCours: 'analyser' }),
+      },
+    } as Record<string, { status: number; body: unknown }>;
+    mockApiRoutes(routes);
+    afficher();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Lancer IGINI sur mon projet' }));
+
+    expect(await screen.findByRole('heading', { name: 'IGINI prépare ton projet' })).toBeInTheDocument();
+    expect(screen.getByText(/Tu peux fermer cette page/)).toBeInTheDocument();
+    expect(screen.getByText('L’analyse').closest('li')).toHaveAttribute('data-etat', 'en-cours');
+    expect(screen.queryByRole('button', { name: 'Lancer IGINI sur mon projet' })).not.toBeInTheDocument();
+
+    // Le serveur a fini : la page le lit au tour suivant, et relit les plans.
+    routes['GET /projects/p1/enchainement'] = {
+      status: 200,
+      body: enchainement('termine', { faites: [...TOUT_FAIT] }),
+    };
+    const lecturesAvant = vi
+      .mocked(global.fetch)
+      .mock.calls.filter(([url]) => String(url).endsWith('/projects/p1/plans')).length;
+    // Le minuteur de suivi part d’un effet : sur une machine chargée, il peut
+    // ne pas être encore posé au premier tour — on avance jusqu’à ce qu’il l’ait lu.
+    await waitFor(
+      async () => {
+        await act(async () => {
+          vi.advanceTimersByTime(4000);
+        });
+        expect(screen.getByText(/sont prêts : ouvre les étapes ci-dessous/)).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+    await waitFor(() =>
+      expect(
+        vi.mocked(global.fetch).mock.calls.filter(([url]) => String(url).endsWith('/projects/p1/plans')).length,
+      ).toBeGreaterThan(lecturesAvant),
+    );
+    vi.useRealTimers();
+    // Deux temps (le lancement, puis la fin) sur une page lourde : 5 s ne suffisent pas sur une machine chargée.
+  }, 15_000);
+
+  it('après un arrêt, dit pourquoi, mène aux crédits et propose de reprendre', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      ...ENGINE_ROUTES,
+      'GET /projects/p1/enchainement': {
+        status: 200,
+        body: enchainement('arrete', {
+          faites: ['analyser', 'former'],
+          arret: {
+            etape: 'construire',
+            message: 'Crédits insuffisants : il te faut 5 crédits, tu en as 2.',
+            voirCredits: true,
+          },
+        }),
       },
     });
     afficher();
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Lancer l’analyse IGINI' }));
+    const alerte = await screen.findByRole('alert');
+    expect(alerte).toHaveTextContent(
+      'IGINI s’est arrêté à « Le plan de construction » : Crédits insuffisants : il te faut 5 crédits, tu en as 2.',
+    );
+    expect(within(alerte).getByRole('link', { name: 'Voir mes crédits' })).toHaveAttribute('href', '/credits');
+    expect(screen.getByRole('button', { name: 'Reprendre où IGINI s’est arrêté' })).toBeInTheDocument();
+    expect(screen.getByText(/Ces 3 étapes coûtent/)).toHaveTextContent('Ces 3 étapes coûtent 13 crédits');
 
-    expect(await screen.findByText('Une école de motocross solide.')).toBeInTheDocument();
-    const appel = vi
-      .mocked(global.fetch)
-      .mock.calls.find(([url, options]) => String(url).endsWith('/projects/p1/analyze') && options?.method === 'POST');
-    expect(appel).toBeDefined();
+    fireEvent.click(screen.getByRole('button', { name: 'Plus tard' }));
+    expect(screen.queryByRole('heading', { name: 'Lance IGINI sur ton projet' })).not.toBeInTheDocument();
+  });
+
+  it('IGINI en pause : pas de carte, le guide dit comment avancer', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      ...ENGINE_ROUTES,
+      ...PARCOURS_ANALYSER,
+      'GET /projects/p1/enchainement': { status: 200, body: enchainement('pret') },
+      'GET /igini/status': {
+        status: 200,
+        body: { generatorsEnabled: false, unavailableReason: 'IGINI est en pause pour le moment.' },
+      },
+    });
+    afficher();
+
+    await screen.findByRole('heading', { level: 1, name: 'École motocross' });
+    await screen.findByText(/avancer à la main/);
+    expect(screen.queryByRole('heading', { name: 'Lance IGINI sur ton projet' })).not.toBeInTheDocument();
   });
 
   it('« Y aller » passe en vue avancée pour les tâches', async () => {

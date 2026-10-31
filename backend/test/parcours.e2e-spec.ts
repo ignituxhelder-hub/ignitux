@@ -192,4 +192,37 @@ describe('parcours complet (e2e)', () => {
       expect(response.body.unavailableReason).toContain('non disponible');
     });
   });
+
+  describe('l’enchaînement IGINI', () => {
+    it('annonce les cinq étapes et leur prix avant le clic', async () => {
+      const response = await api(app)
+        .get(`/projects/${projectId}/enchainement`)
+        .set(...auth(account))
+        .expect(200);
+
+      expect(response.body.statut).toBe('pret');
+      expect(response.body.etapes.map((e: { id: string }) => e.id)).toEqual([
+        'analyser',
+        'former',
+        'construire',
+        'financer',
+        'developper',
+      ]);
+      expect(response.body.creditsRestants).toBe(21);
+    });
+
+    it('IGINI en pause : refus immédiat, et rien ne démarre', async () => {
+      const response = await api(app)
+        .post(`/projects/${projectId}/enchainement`)
+        .set(...auth(account))
+        .expect(503);
+
+      expect(response.body.message).toContain('IGINI est en pause');
+      const apres = await api(app)
+        .get(`/projects/${projectId}/enchainement`)
+        .set(...auth(account))
+        .expect(200);
+      expect(apres.body.statut).toBe('pret');
+    });
+  });
 });

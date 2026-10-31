@@ -10,9 +10,8 @@ describe('où mène « Y aller »', () => {
     });
   });
 
-  it('mène au champ description pour décrire ou reprendre l’idée', () => {
+  it('mène au champ description pour décrire l’idée', () => {
     expect(destinationDe('decrire')).toEqual({ ouvre: 'infos', avancee: false, cible: '#description' });
-    expect(destinationDe('ameliorer')).toEqual(destinationDe('decrire'));
   });
 
   it('passe en vue avancée pour les tâches et les démarches', () => {

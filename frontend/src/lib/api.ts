@@ -960,6 +960,26 @@ export interface IginiStatus {
   unavailableReason: string | null;
 }
 
+/**
+ * L'enchaînement IGINI d'un projet (backend/src/projects/enchainement-model.ts) :
+ * analyse, forme juridique, plans de construction, de financement et de
+ * développement, lancés d'un seul clic et suivis par le serveur.
+ */
+export type EtapeEnchainement = 'analyser' | 'former' | 'construire' | 'financer' | 'developper';
+
+export interface VueEnchainement {
+  statut: 'pret' | 'en-cours' | 'termine' | 'arrete';
+  etapes: Array<{
+    id: EtapeEnchainement;
+    libelle: string;
+    credits: number;
+    etat: 'a-faire' | 'en-cours' | 'fait';
+  }>;
+  /** Le prix des étapes qui restent à faire, en crédits. */
+  creditsRestants: number;
+  arret: { etape: EtapeEnchainement; message: string; voirCredits: boolean } | null;
+}
+
 export interface Analysis {
   id: string;
   project_id: string;
@@ -2982,6 +3002,18 @@ export const api = {
 
   analyzeProject: (token: string, id: string) =>
     request<Analysis>(`/projects/${id}/analyze`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getEnchainement: (token: string, id: string) =>
+    request<VueEnchainement>(`/projects/${id}/enchainement`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  /** Rend la vue tout de suite : les étapes continuent sur le serveur. */
+  lancerEnchainement: (token: string, id: string) =>
+    request<VueEnchainement>(`/projects/${id}/enchainement`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
     }),

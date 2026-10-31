@@ -2490,6 +2490,45 @@ body {
   color: var(--text-muted);
 }
 
+/* Les cinq étapes de « Lance IGINI sur ton projet » : ce qui est fait se
+   coche en or, ce qui tourne se lit en gras, ce qui vient reste en retrait. */
+.lancer-igini__etapes {
+  list-style: none;
+  margin: 0.75rem 0 1rem;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.lancer-igini__etape {
+  display: grid;
+  grid-template-columns: 1.25rem 1fr auto;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.lancer-igini__etape[data-etat='a-faire'] {
+  color: var(--text-muted);
+}
+
+.lancer-igini__etape[data-etat='en-cours'] {
+  font-weight: 600;
+}
+
+.lancer-igini__repere {
+  text-align: center;
+}
+
+.lancer-igini__etape[data-etat='fait'] .lancer-igini__repere {
+  color: var(--or-texte);
+}
+
+.lancer-igini__prix {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 /* Lu par un lecteur d'écran, invisible à l'œil (« nouvel onglet »). */
 .visuellement-cache {
   position: absolute;

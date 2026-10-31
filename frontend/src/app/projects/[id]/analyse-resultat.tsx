@@ -3,9 +3,6 @@
 import { useEffect, useState } from 'react';
 import type { Analysis, AnalysisSource } from '@/lib/api';
 
-/** Le seuil du parcours, répété ici pour que l'écran puisse l'expliquer. */
-const SEUIL = 75;
-
 /** 1-10 → 0-100. La source ne produit que des dizaines, et l'écran le dit. */
 function surCent(surDix: number): number {
   return surDix * 10;
@@ -81,9 +78,11 @@ export function AnalyseEnCours() {
  *   pas nous ; quand il ne l'a pas fournie — analyses antérieures à ce
  *   champ — l'écran le dit au lieu d'en fabriquer une.
  *
- * — **La recommandation n'est pas un verrou.** Sous le seuil, Ignitux
- *   propose de reprendre. Les deux portes restent ouvertes, et « continuer
- *   malgré tout » est écrit sans reproche : c'est le projet de la personne.
+ * — **La note éclaire, elle ne trie pas.** Il y avait un seuil à 75/100 :
+ *   en dessous, Ignitux proposait de reprendre l'idée. Retiré le
+ *   2026-10-31 — tout projet passe à la construction (l'enchaînement IGINI
+ *   la fait dans la foulée), et retravailler son idée reste toujours
+ *   possible.
  *
  * — **La granularité est dite.** La note vient d'un entier sur dix : elle
  *   vaut 60 ou 70, jamais 63. Afficher « /100 » sans le préciser laisserait
@@ -99,7 +98,6 @@ export function AnalyseResultat({
   onContinuer: () => void;
 }) {
   const note = surCent(analyse.feasibility_score);
-  const auDessus = note >= SEUIL;
 
   return (
     <div className="card" style={{ marginTop: '1rem' }}>
@@ -124,7 +122,7 @@ export function AnalyseResultat({
             style={{
               fontSize: '1.6rem',
               fontVariantNumeric: 'tabular-nums',
-              color: auDessus ? 'var(--ok)' : 'var(--warn)',
+              color: 'var(--or-texte)',
             }}
           >
             {note} / 100
@@ -147,32 +145,18 @@ export function AnalyseResultat({
         )}
       </div>
 
-      <h3>Recommandation</h3>
+      <h3>La suite</h3>
       <p style={{ marginTop: 0 }}>
-        {auDessus
-          ? `Avec ${note}/100, l'idée est jugée assez solide pour passer à la construction. Les risques ci-dessus restent à traiter, mais ils ne justifient pas d'attendre.`
-          : `Avec ${note}/100, l'idée est en dessous du seuil de ${SEUIL}. Les risques relevés valent la peine d'être traités maintenant : les reprendre plus tard coûtera davantage.`}
-      </p>
-
-      <h3>Ta décision</h3>
-      <p className="muted" style={{ marginTop: 0 }}>
-        Ignitux recommande, il ne décide pas. Passer outre est un choix légitime — c&apos;est
-        ton projet.
+        La note éclaire, elle ne bloque rien : ton projet passe à la construction, quelle
+        qu&apos;elle soit. Les risques ci-dessus sont ceux à traiter en premier — et tu peux
+        toujours retravailler ton idée.
       </p>
       <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <button
-          className={auDessus ? 'secondary' : 'primary'}
-          type="button"
-          onClick={onCorriger}
-        >
-          Corriger mon idée
+        <button className="primary" type="button" onClick={onContinuer}>
+          Passer à la construction
         </button>
-        <button
-          className={auDessus ? 'primary' : 'secondary'}
-          type="button"
-          onClick={onContinuer}
-        >
-          {auDessus ? 'Passer à la construction' : 'Continuer malgré tout'}
+        <button className="secondary" type="button" onClick={onCorriger}>
+          Corriger mon idée
         </button>
       </div>
 

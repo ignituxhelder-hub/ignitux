@@ -31,7 +31,7 @@ import { ETAPES_PROJET, OUTILS_PROJET } from "@/lib/etapes-projet";
 import { destinationDe } from "@/lib/guide-projet";
 import { AnalyseEnCours, AnalyseResultat } from "./analyse-resultat";
 import { FormeJuridiqueResultat } from "./forme-juridique-resultat";
-import { PremiereAnalyse } from "./premiere-analyse";
+import { LancerIgini } from "./lancer-igini";
 import { ChampsADemander } from "@/components/champs-profil";
 import {
   CreditsProvider,
@@ -55,6 +55,7 @@ import {
   type ProfileField,
   type Project,
   type TransmissionPlan,
+  type VueEnchainement,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { AutomationSection } from "./automation-section";
@@ -161,8 +162,11 @@ function usePlanList<T>(
   list: (token: string, id: string) => Promise<T[]>,
   /** Faux tant que le rôle ne permet pas de lire cette liste : on ne la demande pas. */
   actif = true,
+  /** Change quand le serveur a produit un élément de plus (enchaînement IGINI) : on relit. */
+  version = 0,
 ) {
   const [items, setItems] = useState<T[]>([]);
+  const projetCharge = useRef<string | null>(null);
 
   useEffect(() => {
     if (!token || !actif) return;
@@ -170,7 +174,11 @@ function usePlanList<T>(
 
     // Repart de zéro à chaque changement de projet, pour ne pas laisser
     // apparaître les éléments du projet précédent le temps du nouveau fetch.
-    setItems([]);
+    // Une simple relecture du même projet garde la liste affichée.
+    if (projetCharge.current !== id) {
+      projetCharge.current = id;
+      setItems([]);
+    }
 
     list(token, id)
       .then((data) => {
@@ -184,7 +192,7 @@ function usePlanList<T>(
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, id, actif]);
+  }, [token, id, actif, version]);
 
   return [items, setItems] as const;
 }
@@ -366,7 +374,7 @@ export default function ProjectDetailPage() {
   // La visite se propose d'elle-même une seule fois, au porteur, une fois
   // le parcours chargé (sans lui, la moitié des arrêts manqueraient).
   // Décidé une fois par ouverture de la fiche : sur un projet tout neuf, la
-  // première analyse passe d'abord (voir PremiereAnalyse) — la visite attend
+  // carte IGINI passe d'abord (voir LancerIgini) — la visite attend
   // la prochaine ouverture, au lieu de s'ouvrir par-dessus le bouton, ou
   // par-dessus le résultat quand le parcours se recharge.
   const [visiteOuverte, setVisiteOuverte] = useState(false);
@@ -384,6 +392,17 @@ export default function ProjectDetailPage() {
 
   const iginiStatus = useIginiStatus();
 
+  // L'enchaînement IGINI (voir lancer-igini.tsx) : où il en est sur le
+  // serveur. `versionEnchainement` change à chaque étape terminée, pour que
+  // les listes de plans se relisent sans attendre un rechargement.
+  const [enchainement, setEnchainement] = useState<VueEnchainement | null>(null);
+  const [lancementIgini, setLancementIgini] = useState(false);
+  const [erreurLancement, setErreurLancement] = useState<ErreurIgini | null>(null);
+  // Cette visite a vu l'enchaînement tourner : sa fin se dit, une fois.
+  const [enchainementVu, setEnchainementVu] = useState(false);
+  const [enchainementMasque, setEnchainementMasque] = useState(false);
+  const [versionEnchainement, setVersionEnchainement] = useState(0);
+
   /**
    * Ce que le rôle permet de lire, pour ne demander que les listes permises.
    * Sans /mon-acces, seul le propriétaire (reconnu sur le projet) charge tout.
@@ -397,6 +416,7 @@ export default function ProjectDetailPage() {
     id,
     api.listAnalyses,
     lisible("voir_projet"),
+    versionEnchainement,
   );
   const analysis = useGeneration(
     token,
@@ -421,11 +441,79 @@ export default function ProjectDetailPage() {
     });
   }, [premiereLancee, analyses.length]);
 
+  // Une réponse qui n'a pas la forme attendue vaut « on ne sait pas » : la
+  // fiche reste alors celle d'avant, sans la carte.
+  const lireEnchainement = useCallback((vue: VueEnchainement) => {
+    setEnchainement(Array.isArray(vue?.etapes) ? vue : null);
+  }, []);
+
+  useEffect(() => {
+    if (!token || !id) return;
+    let cancelled = false;
+    setEnchainement(null);
+    api
+      .getEnchainement(token, id)
+      .then((vue) => {
+        if (!cancelled) lireEnchainement(vue);
+      })
+      .catch(() => {
+        // Silencieux : sans l'état de l'enchaînement, la fiche reste utilisable.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, id, lireEnchainement]);
+
+  // Relu toutes les quatre secondes tant qu'il tourne : le travail se fait
+  // sur le serveur, la page ne fait que le suivre.
+  const statutEnchainement = enchainement?.statut ?? null;
+  useEffect(() => {
+    if (!token || statutEnchainement !== "en-cours") return;
+    const minuteur = window.setInterval(() => {
+      api
+        .getEnchainement(token, id)
+        .then(lireEnchainement)
+        .catch(() => {});
+    }, 4000);
+    return () => window.clearInterval(minuteur);
+  }, [token, id, statutEnchainement, lireEnchainement]);
+
+  // Une étape de plus de faite, ou l'enchaînement qui s'arrête : les plans,
+  // le score, le parcours et le solde se relisent.
+  const etapesFaites = enchainement ? enchainement.etapes.filter((e) => e.etat === "fait").length : null;
+  const dernierEtatEnchainement = useRef<string | null>(null);
+  useEffect(() => {
+    if (etapesFaites === null) return;
+    const etat = `${etapesFaites}:${statutEnchainement}`;
+    if (dernierEtatEnchainement.current !== null && dernierEtatEnchainement.current !== etat) {
+      setVersionEnchainement((n) => n + 1);
+      setRefreshSignal((n) => n + 1);
+    }
+    dernierEtatEnchainement.current = etat;
+  }, [etapesFaites, statutEnchainement]);
+
+  async function lancerIgini() {
+    if (!token) return;
+    setErreurLancement(null);
+    setLancementIgini(true);
+    try {
+      lireEnchainement(await api.lancerEnchainement(token, id));
+      setEnchainementVu(true);
+      setEnchainementMasque(false);
+      setPremiereLancee(true);
+    } catch (err) {
+      setErreurLancement(erreurIgini(err, "Impossible de lancer IGINI sur ce projet."));
+    } finally {
+      setLancementIgini(false);
+    }
+  }
+
   const [legalForms, setLegalForms] = usePlanList<LegalFormRecommendation>(
     token,
     id,
     api.listLegalFormRecommendations,
     lisible("voir_projet"),
+    versionEnchainement,
   );
   const legalForm = useGeneration(
     token,
@@ -441,6 +529,7 @@ export default function ProjectDetailPage() {
     id,
     api.listBuildPlans,
     lisible("voir_projet"),
+    versionEnchainement,
   );
   const plan = useGeneration(
     token,
@@ -456,6 +545,7 @@ export default function ProjectDetailPage() {
     id,
     api.listFinancingPlans,
     lisible("voir_plan_financement"),
+    versionEnchainement,
   );
   const financing = useGeneration(
     token,
@@ -471,6 +561,7 @@ export default function ProjectDetailPage() {
     id,
     api.listDevelopmentPlans,
     lisible("voir_projet"),
+    versionEnchainement,
   );
   const development = useGeneration(
     token,
@@ -680,21 +771,35 @@ export default function ProjectDetailPage() {
   const peut = (capacite: Capacite): boolean =>
     acces ? acces.capacites.includes(capacite) : isOwner;
 
-  /**
-   * Tant que la prochaine étape du parcours (règle du serveur) est l'analyse,
-   * la carte « Lance ta première analyse » occupe le haut de la fiche, seule :
-   * le tableau de bord vide, le guide, les étapes et les questions attendent
-   * qu'il y ait quelque chose à suivre.
-   */
-  const premiereAnalyse =
+  const peutLancerIgini =
     !!project &&
     !project.archived_at &&
     peut("lancer_ia") &&
     // IGINI en pause : la carte n'aurait rien à offrir, le guide habituel
     // dit comment avancer à la main.
-    iginiStatus?.generatorsEnabled !== false &&
+    iginiStatus?.generatorsEnabled !== false;
+
+  /**
+   * Tant que la prochaine étape du parcours (règle du serveur) est l'analyse
+   * et que rien n'est encore sorti, la carte « Lance IGINI sur ton projet »
+   * occupe le haut de la fiche, seule : le tableau de bord vide, le guide, les
+   * étapes et les questions attendent qu'il y ait quelque chose à suivre.
+   */
+  const premierPassage =
+    peutLancerIgini &&
+    !!enchainement &&
     parcours?.nextStep?.id === "analyser" &&
     analyses.length === 0;
+
+  /** La carte reste là tant que ça tourne, après un arrêt, et pour dire « c'est prêt ». */
+  const carteIgini =
+    peutLancerIgini &&
+    !!enchainement &&
+    !enchainementMasque &&
+    (premierPassage ||
+      enchainement.statut === "en-cours" ||
+      enchainement.statut === "arrete" ||
+      (enchainement.statut === "termine" && enchainementVu));
 
   /**
    * Une section s'affiche si le parcours l'a ouverte, ou si la vue avancée
@@ -849,14 +954,13 @@ export default function ProjectDetailPage() {
             </div>
           )}
 
-          {premiereAnalyse && (
-            <PremiereAnalyse
-              isBusy={analysis.isBusy}
-              error={analysis.error}
-              onLancer={() => {
-                setPremiereLancee(true);
-                void analysis.generate();
-              }}
+          {carteIgini && enchainement && (
+            <LancerIgini
+              vue={enchainement}
+              lancement={lancementIgini}
+              erreur={erreurLancement}
+              onLancer={() => void lancerIgini()}
+              onMasquer={() => setEnchainementMasque(true)}
               questionnaireHref={
                 isOwner && questionnaireTermine === false
                   ? `/projects/${id}/questionnaire`
@@ -871,7 +975,7 @@ export default function ProjectDetailPage() {
               générique ne faisait ni l'un ni l'autre. */}
           {/* Les chiffres d'abord : « où en est ce projet ? » se lisait
               jusqu'ici en faisant défiler jusqu'au score, tout en bas. */}
-          {parcours && !premiereAnalyse && (
+          {parcours && !premierPassage && (
             <div data-visite="reperes">
               <TableauDeBord
                 reperes={parcours.reperes}
@@ -899,7 +1003,7 @@ export default function ProjectDetailPage() {
               />
             </div>
           )}
-          {parcours && !premiereAnalyse && (
+          {parcours && !premierPassage && (
             <div data-visite="progression">
               <Progression phase={parcours.phase} />
             </div>
@@ -907,7 +1011,7 @@ export default function ProjectDetailPage() {
           {/* Le guide pas à pas pour le porteur. Sans `guide` (serveur pas
               encore à jour pendant un déploiement), l'ancienne carte reste. */}
           {parcours &&
-            !premiereAnalyse &&
+            !premierPassage &&
             peut("modifier_projet") &&
             Array.isArray(parcours.guide) && (
               <GuideParcours
@@ -920,7 +1024,7 @@ export default function ProjectDetailPage() {
               />
             )}
           {parcours &&
-            !premiereAnalyse &&
+            !premierPassage &&
             peut("modifier_projet") &&
             !Array.isArray(parcours.guide) && (
               <ProchaineEtape
@@ -940,7 +1044,7 @@ export default function ProjectDetailPage() {
               l'inscription où la personne n'avait encore rien vu. */}
           {/* Avant la première analyse, le questionnaire est proposé dans sa
               carte, en option : il ne passe plus devant elle. */}
-          {isOwner && questionnaireTermine === false && !premiereAnalyse && (
+          {isOwner && questionnaireTermine === false && !premierPassage && (
             <div className="card" style={{ marginBottom: '1.5rem' }}>
               <h2 style={{ marginTop: 0 }}>Aide IGINI à analyser juste</h2>
               <p className="muted" style={{ marginTop: 0 }}>
@@ -952,7 +1056,7 @@ export default function ProjectDetailPage() {
               </Link>
             </div>
           )}
-          {isOwner && !premiereAnalyse && (
+          {isOwner && !premierPassage && (
             <ChampsADemander
               token={token}
               champs={aDemander}
@@ -1000,7 +1104,7 @@ export default function ProjectDetailPage() {
       {/* Une icône par étape, plutôt que les six empilées avec leur texte
           complet visible en même temps. On choisit laquelle ouvrir ; les
           autres restent fermées jusqu'au prochain clic. */}
-      {!premiereAnalyse && ETAPES_PROJET.some((etape) => montrer(etape.section)) && (
+      {!premierPassage && ETAPES_PROJET.some((etape) => montrer(etape.section)) && (
         <div
           className="card"
           style={{ marginTop: "1.5rem" }}
@@ -1116,7 +1220,7 @@ export default function ProjectDetailPage() {
             title="Forme juridique"
             buttonLabel="Proposer une forme juridique"
             buttonBusyLabel="Recommandation en cours…"
-            emptyLabel="Aucune recommandation pour l'instant — dès qu'une analyse dépasse 75/100, IGINI en prépare une automatiquement (ça prend une minute ou deux : reviens sur cette page pour la voir), ou lance-la toi-même."
+            emptyLabel="Aucune recommandation pour l'instant — « Lancer IGINI sur mon projet » en prépare une juste après l'analyse, ou lance-la toi-même."
             items={legalForms}
             isBusy={legalForm.isBusy}
             error={legalForm.error}
@@ -1431,7 +1535,7 @@ export default function ProjectDetailPage() {
           Pas sur un projet qui attend sa première analyse : « vérifie ton
           identité pour signer un mandat » n'a rien à faire à côté d'une idée
           vieille de dix secondes. */}
-      {isOwner && !premiereAnalyse && <MandatSection token={token} projectId={id} />}
+      {isOwner && !premierPassage && <MandatSection token={token} projectId={id} />}
       {montrer("conformite") && etapeOuverte === "conformite" && (
         <div data-guide-cible="conformite">
           <ComplianceSection

@@ -23,7 +23,6 @@ const TACHES: DestinationGuide = { ouvre: 'taches', avancee: true, cible: '#tach
 
 const DESTINATIONS: Readonly<Record<string, DestinationGuide>> = {
   decrire: DECRIRE,
-  ameliorer: DECRIRE,
   analyser: { ouvre: 'analyse', avancee: false, cible: bouton('analyse') },
   construire: { ouvre: 'construction', avancee: false, cible: bouton('construction') },
   'premieres-taches': TACHES,

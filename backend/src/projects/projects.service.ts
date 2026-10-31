@@ -1,13 +1,8 @@
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
-  HttpException,
-  HttpStatus,
   Injectable,
-  Logger,
   NotFoundException,
-  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConstitutionService } from '../constitution/constitution.service.js';
 import { AnalysisService } from '../igini/analysis/analysis.service.js';
@@ -37,20 +32,6 @@ const DOCUMENT_A_CONSERVER = {
 
 @Injectable()
 export class ProjectsService {
-  private readonly logger = new Logger(ProjectsService.name);
-
-  /**
-   * Projets pour lesquels un déclenchement automatique de Former est en
-   * cours, le temps qu'il se termine. Un appel Former prend 40 à 90
-   * secondes : sans ce verrou, deux analyses rapprochées sur le même
-   * projet verraient toutes les deux `legal_form_recommendations.count()`
-   * à zéro et déclencheraient chacune leur propre recommandation. Un
-   * `Set` en mémoire suffit pour un déploiement mono-instance ; il ne
-   * protégerait pas contre plusieurs instances du serveur en parallèle,
-   * ce qui n'est pas le cas aujourd'hui.
-   */
-  private readonly formerAutoTriggerEnCours = new Set<string>();
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly analysisService: AnalysisService,
@@ -390,18 +371,9 @@ export class ProjectsService {
     await this.automationService.run(project.id);
     await this.workflowEngineService.advanceActiveRunsForProject(ownerId, project.id);
 
-    // Non attendu par cette réponse : un appel Former prend 40 à 90
-    // secondes mesurées (PRICING.md §2), doubler l'attente de l'analyse
-    // pour une recommandation que personne n'a explicitement demandée
-    // serait pire que la retarder de quelques secondes.
-    if (analysis.feasibility_score >= 8) {
-      void this.triggerFormerAutomatically(ownerId, project.id).catch((error: unknown) => {
-        this.logger.error(
-          `Déclenchement automatique de Former en échec pour le projet ${project.id}.`,
-          error as Error,
-        );
-      });
-    }
+    // Plus de Former déclenché ici au-dessus de 75/100 (retiré le
+    // 2026-10-31) : la forme juridique est la deuxième étape de
+    // l'enchaînement IGINI, pour tous les projets (voir enchainement-model.ts).
 
     // Attaché depuis ce qu'on vient d'écrire, pas relu en base : c'est
     // exactement les mêmes sources, et une requête de plus n'apprendrait
@@ -461,55 +433,6 @@ export class ProjectsService {
       alternatives: result.alternatives,
       sources: result.sources,
     };
-  }
-
-  /**
-   * Déclenchement automatique de Former — voir
-   * docs/superpowers/specs/2026-09-28-generateur-former-design.md.
-   *
-   * Une seule recommandation automatique par projet : relancer Analyser
-   * plusieurs fois sur une idée déjà au-dessus du seuil ne doit pas
-   * déclencher une nouvelle dépense à chaque fois. Relancer reste possible
-   * à la main (recommendLegalFormForOwner), en connaissance de cause.
-   */
-  private async triggerFormerAutomatically(ownerId: string, projectId: string): Promise<void> {
-    if (this.formerAutoTriggerEnCours.has(projectId)) return;
-    this.formerAutoTriggerEnCours.add(projectId);
-
-    try {
-      const dejaRecommande = await this.prisma.legal_form_recommendations.count({
-        where: { project_id: projectId },
-      });
-      if (dejaRecommande > 0) return;
-
-      const project = await this.prisma.projects.findUniqueOrThrow({ where: { id: projectId } });
-
-      let result: LegalFormRecommendationResult;
-      try {
-        // Offert : personne ne l'a demandé, il ne se paie donc pas en crédits
-        // (le garde-fou de coût le compte toujours). Une seule fois par projet.
-        result = await this.formerService.recommendLegalForm(
-          project.title,
-          project.description,
-          { userId: ownerId, projectId, offert: true },
-          this.joinContext(await this.personContext(ownerId, projectId), await this.memoryContext(ownerId, projectId)),
-        );
-      } catch (error) {
-        // Refus attendu (garde-fou de coût, interrupteur) : silencieux, ce
-        // ne sont pas des pannes — la personne n'a rien demandé
-        // explicitement qui mériterait un message d'erreur.
-        const estUnRefusAttendu =
-          error instanceof ForbiddenException ||
-          error instanceof ServiceUnavailableException ||
-          (error instanceof HttpException && error.getStatus() === HttpStatus.PAYMENT_REQUIRED);
-        if (estUnRefusAttendu) return;
-        throw error;
-      }
-
-      await this.persistFormerRecommendation(projectId, ownerId, result);
-    } finally {
-      this.formerAutoTriggerEnCours.delete(projectId);
-    }
   }
 
   async recommendLegalFormForOwner(demandeurId: string, id: string) {

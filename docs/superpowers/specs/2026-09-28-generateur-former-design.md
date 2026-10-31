@@ -35,6 +35,14 @@ patrimoine à protéger).
 
 ## Déclenchement : automatique, dès le score franchi
 
+> **Remplacé le 2026-10-31 (décision de Helder).** Le seuil de 75/100 est
+> retiré : Former n'est plus déclenché, offert, par `analyzeForOwner`. Il est
+> la deuxième des cinq étapes de l'enchaînement IGINI (analyse, forme
+> juridique, plans de construction, de financement et de développement),
+> lancé d'un clic pour tout projet et payé en crédits au prix du barème —
+> voir `backend/src/projects/enchainement-model.ts`. La suite de cette
+> section décrit l'ancien fonctionnement.
+
 **Décision validée avec Helder** : dès qu'une analyse obtient un score de
 faisabilité brut **≥ 8** (le seuil affiché à l'écran, 75/100, correspond à
 `feasibility_score * 10 >= 75`, donc à un score brut de 8 ou plus — 7×10 =

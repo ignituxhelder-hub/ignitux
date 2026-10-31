@@ -5,7 +5,6 @@ import {
   phaseOf,
   reperes,
   SECTION_RULES,
-  SEUIL_ETINCELLE,
   type ProjectFacts,
 } from './journey-model.js';
 
@@ -162,30 +161,14 @@ describe('parcours — la prochaine étape', () => {
     );
   });
 
-  // Le seuil conseille, il n'interdit pas : dire à quelqu'un que son idée
-  // n'a pas le droit d'exister n'est pas le rôle d'un accompagnateur.
-  it('propose de reprendre l’idée sous le seuil, sans fermer la construction', () => {
-    const faits = vierge({ hasDescription: true, analyses: 1, etincelle: 60 });
-    const vue = journeyView(faits);
+  // Plus de seuil à 75/100 (retiré le 2026-10-31) : une note faible ne
+  // détourne plus vers « reprendre ton idée », tout projet passe au plan.
+  it('passe au plan même avec une note faible', () => {
+    const vue = journeyView(vierge({ hasDescription: true, analyses: 1, etincelle: 30 }));
 
-    expect(vue.nextStep?.id).toBe('ameliorer');
-    expect(vue.nextStep?.pourquoi).toContain('60/100');
-    expect(vue.nextStep?.pourquoi).toMatch(/passer outre/);
+    expect(vue.nextStep?.id).toBe('construire');
+    expect(vue.nextStep?.pourquoi).not.toContain('/100');
     expect(vue.visible.map((s) => s.section)).toContain('construction');
-  });
-
-  it('laisse passer exactement au seuil', () => {
-    expect(
-      nextStep(vierge({ hasDescription: true, analyses: 1, etincelle: SEUIL_ETINCELLE }))?.id,
-    ).toBe('construire');
-  });
-
-  // Une idée retravaillée doit pouvoir remonter : le premier verdict ne
-  // peut pas être définitif.
-  it('ne conseille plus d’améliorer une fois le plan posé', () => {
-    expect(
-      nextStep(vierge({ hasDescription: true, analyses: 2, etincelle: 60, buildPlans: 1 }))?.id,
-    ).not.toBe('ameliorer');
   });
 
   it('puis de descendre le plan en tâches', () => {
@@ -403,16 +386,10 @@ describe('le guide pas à pas', () => {
     expect(etat(f, 'analyser')).toBe('en-cours');
   });
 
-  it('insère « reprendre » juste après l’analyse quand la note est faible', () => {
-    const f = analyse({ etincelle: SEUIL_ETINCELLE - 10 });
-    expect(ids(f).slice(0, 4)).toEqual(['decrire', 'analyser', 'ameliorer', 'construire']);
+  it('ne parle jamais de reprendre l’idée, même quand la note est faible', () => {
+    const f = analyse({ etincelle: 30 });
+    expect(ids(f).slice(0, 3)).toEqual(['decrire', 'analyser', 'construire']);
     expect(etat(f, 'analyser')).toBe('fait');
-    expect(etat(f, 'ameliorer')).toBe('en-cours');
-  });
-
-  it('ne parle pas de reprendre l’idée quand la note suffit', () => {
-    const f = analyse();
-    expect(ids(f)).not.toContain('ameliorer');
     expect(etat(f, 'construire')).toBe('en-cours');
   });
 
@@ -451,14 +428,12 @@ describe('le guide pas à pas', () => {
 
   it('dit chaque étape avec ses mots', () => {
     const f = analyse({
-      etincelle: SEUIL_ETINCELLE - 10,
       complianceChecks: 1,
       transmissionPlans: 1,
     });
     expect(guideSteps(f).map((e) => e.label)).toEqual([
       'Décrire ton idée',
       'Analyser ton idée',
-      'Reprendre ton idée',
       'Établir ton plan',
       'Poser tes premières tâches',
       'Regarder tes démarches',

@@ -35,17 +35,6 @@
  * Module pur : aucune dépendance Nest, aucun accès base.
  */
 
-/**
- * Le seuil au-delà duquel l'idée est jugée assez solide pour passer à la
- * construction, sur 100.
- *
- * Ce n'est pas une barrière : en dessous, Ignitux propose d'améliorer, il
- * n'interdit rien. Verrouiller sur un chiffre reviendrait à dire à quelqu'un
- * que son idée n'a pas le droit d'exister — ce n'est pas le rôle d'un
- * accompagnateur, et c'est une décision qui lui appartient.
- */
-export const SEUIL_ETINCELLE = 75;
-
 /** Ce qu'on sait d'un projet, en quantités. Rien d'autre n'entre ici. */
 export interface ProjectFacts {
   hasDescription: boolean;
@@ -289,22 +278,9 @@ export function nextStep(f: ProjectFacts): NextStep | null {
     };
   }
 
-  // En dessous du seuil, on propose d'améliorer plutôt que de construire.
-  // Bâtir sur une idée que l'analyse juge fragile coûte plus cher que de la
-  // retravailler d'abord — mais rien n'empêche de passer outre : la section
-  // Construction reste ouverte, c'est le conseil qui change.
-  if (f.buildPlans === 0 && f.etincelle !== null && f.etincelle < SEUIL_ETINCELLE) {
-    return {
-      id: 'ameliorer',
-      titre: 'Reprendre ton idée avant de construire',
-      pourquoi:
-        `L'analyse situe la faisabilité à ${f.etincelle}/100, en dessous de ${SEUIL_ETINCELLE}. ` +
-        'Les risques relevés valent la peine d’être traités maintenant : les reprendre plus ' +
-        'tard coûtera davantage. Tu peux passer outre — c’est ton projet, pas le nôtre.',
-      section: 'analyse',
-    };
-  }
-
+  // Plus de « reprends ton idée » sous 75/100 (retiré le 2026-10-31) : tout
+  // projet analysé passe au plan, quelle que soit sa note — l'enchaînement
+  // IGINI le construit dans la foulée (voir projects/enchainement-model.ts).
   if (f.buildPlans === 0) {
     return {
       id: 'construire',
@@ -376,16 +352,14 @@ export interface EtapeGuide {
  * produit a aussi besoin de voir où elle en est sur l'ensemble. Mêmes ids
  * que `nextStep`, dans le même ordre : l'étape en cours est toujours celle
  * qu'il désigne. Les étapes conditionnelles n'apparaissent que si elles
- * s'appliquent — afficher « reprendre ton idée » à quelqu'un dont
- * l'analyse est bonne serait un faux reproche, et « penser la
- * transmission » à qui ne l'a pas demandée, une pression trop tôt.
+ * s'appliquent — « penser la transmission » à qui ne l'a pas demandée
+ * serait une pression trop tôt.
  */
 export function guideSteps(f: ProjectFacts): EtapeGuide[] {
   const enCours = nextStep(f)?.id ?? null;
   const etapes: Array<{ id: string; label: string; presente: boolean; faite: boolean }> = [
     { id: 'decrire', label: 'Décrire ton idée', presente: true, faite: f.hasDescription },
     { id: 'analyser', label: 'Analyser ton idée', presente: true, faite: f.analyses > 0 },
-    { id: 'ameliorer', label: 'Reprendre ton idée', presente: enCours === 'ameliorer', faite: false },
     { id: 'construire', label: 'Établir ton plan', presente: true, faite: f.buildPlans > 0 },
     { id: 'premieres-taches', label: 'Poser tes premières tâches', presente: true, faite: f.tasks > 0 },
     {
