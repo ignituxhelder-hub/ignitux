@@ -94,7 +94,8 @@ describe('SCÉNARIO — du compte créé au compte effacé', () => {
         .send({})
         .expect(503);
 
-      expect(String(refus.body.message)).toContain('IA non disponible');
+      expect(String(refus.body.message)).toContain('IGINI est en pause');
+      expect(String(refus.body.message)).toContain('volontairement');
     });
 
     it('l’historique reste consultable, et vide', async () => {
