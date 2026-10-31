@@ -77,6 +77,9 @@ const PUBLIQUES = new Set([
   'ReadinessController.ready',
   'RolesController.catalogue',
   'UsersController.signup',
+  // Le compteur de projets de la page d'accueil : un nombre arrondi, ou rien
+  // sous 50 (voir vitrine.service.ts).
+  'VitrineController.compteur',
 ]);
 
 function fichiersControleurs(dossier: string): string[] {
