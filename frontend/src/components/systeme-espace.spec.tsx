@@ -159,7 +159,8 @@ describe('Systeme — l’espace argent', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Tu n’as plus accès à cet espace.');
     expect(getEspaceActif()).toBeNull();
     expect(window.localStorage.getItem('ignitux.espace')).toBeNull();
-    expect(router.push).toHaveBeenCalledWith('/accueil');
+    // Le retour au bureau part d'un effet, après l'affichage du message.
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith('/accueil'));
   });
 
   it('404 « Espace introuvable. » mais l’espace est toujours dans ma liste : on reste', async () => {
