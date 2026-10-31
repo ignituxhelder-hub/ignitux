@@ -20,9 +20,12 @@ import { ROLE_HOME } from '@/lib/roles';
  *
  * — Prendre un rôle ne crée rien, en retirer un n'efface rien. Un rôle est
  *   une vue.
- * — Les rôles à venir sont montrés et désactivés. Les cacher laisserait
- *   croire qu'Ignitux ne les a pas prévus ; les ouvrir promettrait un
- *   espace qui n'existe pas.
+ * — Les rôles à venir sont nommés, sans case à cocher. Les cacher
+ *   laisserait croire qu'Ignitux ne les a pas prévus ; les ouvrir
+ *   promettrait un espace qui n'existe pas.
+ *
+ * Au premier passage, « Entrepreneur » est déjà coché, et l'entrepreneur
+ * va ensuite droit à la création de son premier projet.
  */
 export default function RolesPage() {
   const { token, isReady } = useAuth();
@@ -45,7 +48,13 @@ export default function RolesPage() {
       .getMyRoles(token)
       .then((resultat) => {
         setMine(resultat);
-        setSelection(resultat.roles);
+        // Premier passage : « Entrepreneur » est déjà coché. C'est le choix
+        // de presque tout le monde ici, et un bouton grisé tant qu'on n'a pas
+        // deviné qu'il faut cocher une case est une marche de trop.
+        const entrepreneurOuvert = resultat.catalogue.some((r) => r.id === 'entrepreneur' && r.available);
+        setSelection(
+          resultat.roles.length === 0 && entrepreneurOuvert ? ['entrepreneur'] : resultat.roles,
+        );
       })
       .catch((err) =>
         setError(err instanceof ApiError ? err.message : 'Impossible de lire tes rôles.'),
@@ -74,11 +83,12 @@ export default function RolesPage() {
       setMine(misAJour);
       setSelection(misAJour.roles);
       setConfirmation('Tes rôles sont enregistrés.');
-      // Premier passage (juste après l'inscription) : on emmène la personne
-      // sur son bureau, là où elle arrivera à chaque ouverture. Ensuite, on
-      // la laisse où elle est — elle est venue régler quelque chose.
+      // Premier passage (juste après l'inscription) : un entrepreneur va
+      // droit à son premier projet — c'est là qu'IGINI commence à servir ;
+      // les autres entrent sur leur bureau. Ensuite, on laisse la personne
+      // où elle est : elle est venue régler quelque chose.
       if ((mine?.roles.length ?? 0) === 0 && misAJour.activeRole) {
-        router.push('/accueil');
+        router.push(misAJour.roles.includes('entrepreneur') ? '/projects' : '/accueil');
       }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "L'enregistrement a échoué.");
@@ -110,9 +120,8 @@ export default function RolesPage() {
       <h1>{premierChoix ? "Qui es-tu aujourd'hui ?" : 'Mes rôles'}</h1>
 
       <p className="muted">
-        Un rôle est une <strong>vue</strong>, pas un dossier. Il ne détient aucune donnée :
-        en prendre un ne crée rien, en retirer un n&apos;efface rien. Tu peux changer ce
-        choix quand tu veux.
+        Ton rôle décide de ce qu&apos;Ignitux te montre. Tu peux en changer quand tu veux :
+        rien n&apos;est créé ni effacé.
       </p>
 
       {error && <p className="error">{error}</p>}
@@ -128,7 +137,8 @@ export default function RolesPage() {
         </p>
       ))}
 
-      {mine?.catalogue.map((role) => {
+      {/* Les rôles ouverts, et ceux qu'on tient déjà, en cartes à cocher. */}
+      {mine?.catalogue.filter((role) => role.available || mine.roles.includes(role.id)).map((role) => {
         const coche = selection.includes(role.id);
         return (
           <div
@@ -155,8 +165,7 @@ export default function RolesPage() {
                 </span>
                 {!role.available && (
                   <span className="muted" style={{ display: 'block', marginTop: '0.5rem' }}>
-                    Prévu par l&apos;architecture, pas encore ouvert : aucun espace
-                    n&apos;existe derrière, et te l&apos;accorder ne te donnerait rien.
+                    Pas encore ouvert : aucun espace n&apos;existe derrière pour l&apos;instant.
                   </span>
                 )}
               </span>
@@ -164,6 +173,22 @@ export default function RolesPage() {
           </div>
         );
       })}
+
+      {/* Les rôles à venir, sur une ligne : les cacher laisserait croire
+          qu'Ignitux ne les a pas prévus, les mettre en cartes grisées
+          allongeait l'écran pour rien. L'administration n'est pas un rôle
+          « à venir » pour le public : elle n'y figure pas. */}
+      {(() => {
+        const aVenir =
+          mine?.catalogue.filter(
+            (role) => !role.available && !mine.roles.includes(role.id) && role.id !== 'administrateur',
+          ) ?? [];
+        return aVenir.length > 0 ? (
+          <p className="muted" style={{ marginTop: '1rem' }}>
+            Bientôt : {aVenir.map((role) => role.label).join(', ')} — pas encore ouverts.
+          </p>
+        ) : null;
+      })()}
 
       <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
         <button

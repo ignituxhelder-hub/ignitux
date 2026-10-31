@@ -249,10 +249,10 @@ export function ProchaineEtape({
       {bloqueeParLIa && (
         <p className="notice" style={{ marginBottom: onAller ? '1rem' : 0 }}>
           <span>
-            IGINI ne peut pas s&apos;en charger maintenant : ses générateurs sont éteints. Cela
-            ne bloque pas ton projet — l&apos;IA accélère, elle ne décide pas. Tu peux avancer à
-            la main : note dans la Mémoire ce que tu sais déjà, ou pose tes premières tâches.
-            Le parcours suivra.
+            IGINI est en pause pour le moment, et ne peut pas s&apos;en charger. Cela ne
+            bloque pas ton projet — l&apos;IA accélère, elle ne décide pas. Tu peux avancer à la
+            main : note dans la Mémoire ce que tu sais déjà, ou pose tes premières tâches. Le
+            parcours suivra.
           </span>
         </p>
       )}
@@ -355,10 +355,10 @@ export function GuideParcours({
                   {bloqueeParLIa && (
                     <span className="notice">
                       <span>
-                        IGINI ne peut pas s&apos;en charger maintenant : ses générateurs sont
-                        éteints. Cela ne bloque pas ton projet — l&apos;IA accélère, elle ne décide
-                        pas. Tu peux avancer à la main : note dans la Mémoire ce que tu sais déjà,
-                        ou pose tes premières tâches. Le parcours suivra.
+                        IGINI est en pause pour le moment, et ne peut pas s&apos;en charger.
+                        Cela ne bloque pas ton projet — l&apos;IA accélère, elle ne décide pas. Tu
+                        peux avancer à la main : note dans la Mémoire ce que tu sais déjà, ou pose
+                        tes premières tâches. Le parcours suivra.
                       </span>
                     </span>
                   )}

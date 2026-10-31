@@ -112,8 +112,8 @@ describe('ProjectsPage', () => {
 
     // Une seule action principale : proposer de créer pendant qu'on liste,
     // c'est offrir deux actions là où une suffit.
-    it('replie la création derrière un seul bouton', async () => {
-      mockApiRoutes(routes({ 'GET /projects': { status: 200, body: [] } }));
+    it('replie la création derrière un seul bouton quand des projets existent', async () => {
+      mockApiRoutes(routes({ 'GET /projects': { status: 200, body: [PROJET, AUTRE_PROJET] } }));
 
       render(
         <AuthProvider>
@@ -169,7 +169,9 @@ describe('ProjectsPage', () => {
       expect(screen.getByText(/suivi des élèves/)).toBeInTheDocument();
     });
 
-    it("invite à décrire son idée quand aucun projet n'existe", async () => {
+    // Un premier venu n'a qu'une chose à faire ici : le formulaire l'attend,
+    // et dit ce qu'IGINI fera de son idée.
+    it("ouvre le formulaire d'emblée quand aucun projet n'existe", async () => {
       mockApiRoutes(routes({ 'GET /projects': { status: 200, body: [] } }));
 
       render(
@@ -178,7 +180,15 @@ describe('ProjectsPage', () => {
         </AuthProvider>,
       );
 
-      expect(await screen.findByText(/pas encore de projet/i)).toBeInTheDocument();
+      expect(await screen.findByLabelText('Nom du projet')).toBeInTheDocument();
+      expect(screen.getByText(/IGINI l'analyse : un résumé, une note de faisabilité sur 10/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Créer mon projet' })).toHaveAttribute('type', 'submit');
+
+      // Refermé, il laisse une phrase et le bouton pour le rouvrir.
+      fireEvent.click(screen.getByRole('button', { name: 'Annuler' }));
+      expect(screen.getByText(/pas encore de projet/i)).toBeInTheDocument();
+      expect(screen.queryByLabelText('Nom du projet')).toBeNull();
+      expect(screen.getByRole('button', { name: 'Créer mon projet' })).toHaveAttribute('type', 'button');
     });
 
     // Avec un seul projet, passer par une liste qui ne contient qu'une seule
@@ -282,8 +292,9 @@ describe('ProjectsPage', () => {
     });
 
     // Revenir à une liste après avoir créé serait un détour que personne ne
-    // demande : c'est dans le projet que le parcours reprend la main.
-    it('emmène directement dans le questionnaire du projet créé', async () => {
+    // demande : c'est dans le projet, où l'analyse attend, que le parcours
+    // reprend la main. Le questionnaire y est proposé, facultatif.
+    it('emmène directement dans le projet créé, sans passer par le questionnaire', async () => {
       mockApiRoutes(
         routes({
           'GET /projects': { status: 200, body: [] },
@@ -300,13 +311,14 @@ describe('ProjectsPage', () => {
         </AuthProvider>,
       );
 
-      fireEvent.click(await screen.findByRole('button', { name: 'Créer mon projet' }));
-      fireEvent.change(screen.getByLabelText('Nom du projet'), {
+      // Aucun projet : le formulaire est déjà ouvert.
+      fireEvent.change(await screen.findByLabelText('Nom du projet'), {
         target: { value: 'Nouvelle idée' },
       });
-      fireEvent.click(screen.getByRole('button', { name: 'Suivant' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Créer mon projet' }));
 
-      await waitFor(() => expect(router.push).toHaveBeenCalledWith('/projects/p9/questionnaire'));
+      await waitFor(() => expect(router.push).toHaveBeenCalledWith('/projects/p9'));
+      expect(router.push).not.toHaveBeenCalledWith('/projects/p9/questionnaire');
     });
   });
 });

@@ -17,11 +17,13 @@
  * seulement découragée.
  */
 
+// Lu tel quel par la personne, en production comme en test : ni « générateur »
+// ni « environnement », et rien qui laisse croire à une panne ou à une dépense.
 export const GENERATORS_DISABLED_MESSAGE =
-  "Fonctionnalité IA non disponible pour ce test. Les 6 générateurs d'IGINI (Analyser, " +
-  'Former, Construire, Financer, Développer, Transmettre) et le chat libre avec IGINI sont ' +
-  "volontairement éteints sur cet environnement : aucune demande n'est envoyée à l'IA. " +
-  "Tout le reste d'Ignitux fonctionne normalement.";
+  'IGINI est en pause pour le moment : ses actions (Analyser, Former, Construire, Financer, ' +
+  "Développer, Transmettre) et son chat sont volontairement non disponibles. Aucune demande " +
+  "n'est envoyée à l'IA et aucun crédit n'est débité. Tout le reste d'Ignitux fonctionne " +
+  'normalement.';
 
 export interface GeneratorsAvailability {
   enabled: boolean;

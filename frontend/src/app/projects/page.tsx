@@ -118,6 +118,16 @@ function ProjectsPageInterieur() {
     router.replace(`/projects/${projects[0].id}`);
   }, [veutCreer, isLoading, projects, archives, router]);
 
+  /**
+   * Aucun projet, même archivé : le formulaire est déjà ouvert. Un premier
+   * venu n'a qu'une chose à faire ici, et lui demander de cliquer pour
+   * découvrir le formulaire est une marche de trop.
+   */
+  const aucunProjet = !isLoading && !listError && projects.length === 0 && archives.length === 0;
+  useEffect(() => {
+    if (aucunProjet) setCreation(true);
+  }, [aucunProjet]);
+
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
     if (!token) return;
@@ -128,10 +138,11 @@ function ProjectsPageInterieur() {
       setTitle('');
       setDescription('');
       setCreation(false);
-      // Tout de suite le questionnaire : c'est maintenant, l'idée en tête,
-      // que la personne sait répondre — et ce qu'elle dit là évite à IGINI
-      // de deviner. Il se quitte à tout moment pour le projet.
-      router.push(`/projects/${cree.id}/questionnaire`);
+      // Droit au projet, où l'analyse IGINI attend d'être lancée : la
+      // première valeur avant les questions. Le questionnaire y est proposé,
+      // facultatif, pour qui veut une analyse plus juste (2026-10-31 ; il
+      // s'ouvrait jusqu'ici avant même que le projet s'affiche).
+      router.push(`/projects/${cree.id}`);
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : 'Impossible de créer le projet.');
     } finally {
@@ -174,6 +185,10 @@ function ProjectsPageInterieur() {
       {creation && (
         <form className="card" onSubmit={handleCreate} style={{ marginBottom: '1.5rem' }}>
           <h2 style={{ marginTop: 0 }}>Quelle est ton idée ?</h2>
+          <p className="muted" style={{ marginTop: 0 }}>
+            Un nom et quelques phrases suffisent. Ensuite, IGINI l&apos;analyse : un résumé, une
+            note de faisabilité sur 10, les points forts, les risques et les prochaines étapes.
+          </p>
           {formError && <p className="error">{formError}</p>}
           <div className="field">
             <label htmlFor="title">Nom du projet</label>
@@ -197,7 +212,7 @@ function ProjectsPageInterieur() {
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <button className="primary" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Création…' : 'Suivant'}
+              {isSubmitting ? 'Création…' : 'Créer mon projet'}
             </button>
             <button className="secondary" type="button" onClick={() => setCreation(false)}>
               Annuler
@@ -206,7 +221,7 @@ function ProjectsPageInterieur() {
         </form>
       )}
 
-      {!isLoading && !listError && projects.length === 0 && archives.length === 0 && !creation && (
+      {aucunProjet && !creation && (
         <p className="muted">
           Tu n&apos;as pas encore de projet. Commence par décrire ton idée — IGINI s&apos;occupe
           de la suite.

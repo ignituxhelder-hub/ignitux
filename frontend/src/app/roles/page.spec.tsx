@@ -34,6 +34,14 @@ function routes(overrides: Record<string, { status: number; body: unknown }> = {
   };
 }
 
+function afficher() {
+  return render(
+    <AuthProvider>
+      <RolesPage />
+    </AuthProvider>,
+  );
+}
+
 describe('RolesPage', () => {
   beforeEach(() => {
     window.localStorage.clear();
@@ -42,35 +50,51 @@ describe('RolesPage', () => {
     signInAs('tok123', { id: 'u1', email: 'a@b.com' });
   });
 
-  it("pose la question au premier passage", async () => {
+  it('pose la question au premier passage, sans jargon', async () => {
     mockApiRoutes(routes());
-
-    render(
-      <AuthProvider>
-        <RolesPage />
-      </AuthProvider>,
-    );
+    afficher();
 
     expect(await screen.findByRole('heading', { name: /Qui es-tu aujourd'hui/ })).toBeInTheDocument();
+    expect(screen.getByText(/Tu peux en changer quand tu veux/)).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/pas un dossier|architecture/);
   });
 
   // Les cacher laisserait croire qu'Ignitux ne les a pas prévus ; les ouvrir
-  // promettrait un espace qui n'existe pas.
-  it('montre les rôles à venir, désactivés, en disant pourquoi', async () => {
-    mockApiRoutes(routes());
-
-    render(
-      <AuthProvider>
-        <RolesPage />
-      </AuthProvider>,
+  // promettrait un espace qui n'existe pas. Une ligne suffit à le dire.
+  it('nomme les rôles à venir sur une ligne, sans case à cocher', async () => {
+    mockApiRoutes(
+      routes({
+        'GET /roles/moi': {
+          status: 200,
+          body: mesRoles({
+            catalogue: [
+              role('entrepreneur', 'Entrepreneur', true, false),
+              role('mentor', 'Mentor', false, false),
+              role('expert', 'Expert', false, false),
+              role('administrateur', 'Administrateur', false, false),
+            ],
+          }),
+        },
+      }),
     );
+    afficher();
 
-    const mentor = await screen.findByLabelText(/Mentor/);
-    expect(mentor).toBeDisabled();
-    expect(screen.getByText(/pas encore ouvert/)).toBeInTheDocument();
+    expect(await screen.findByText('Bientôt : Mentor, Expert — pas encore ouverts.')).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Mentor/)).not.toBeInTheDocument();
+    // L'administration n'est pas un rôle « à venir » pour le public.
+    expect(document.body.textContent).not.toContain('Administrateur');
   });
 
-  it('enregistre les rôles cochés puis emmène sur le bureau', async () => {
+  it('coche Entrepreneur d’avance au premier passage', async () => {
+    mockApiRoutes(routes());
+    afficher();
+
+    expect(await screen.findByLabelText(/Entrepreneur/)).toBeChecked();
+    expect(screen.getByLabelText(/Investisseur/)).not.toBeChecked();
+    expect(screen.getByRole('button', { name: 'Continuer' })).toBeEnabled();
+  });
+
+  it('enregistre Entrepreneur d’un clic puis emmène créer le premier projet', async () => {
     mockApiRoutes(
       routes({
         'PUT /roles/moi': {
@@ -87,14 +111,10 @@ describe('RolesPage', () => {
         },
       }),
     );
+    afficher();
 
-    render(
-      <AuthProvider>
-        <RolesPage />
-      </AuthProvider>,
-    );
-
-    fireEvent.click(await screen.findByLabelText(/Entrepreneur/));
+    // Déjà coché : un seul clic.
+    expect(await screen.findByLabelText(/Entrepreneur/)).toBeChecked();
     fireEvent.click(screen.getByRole('button', { name: 'Continuer' }));
 
     await waitFor(() => {
@@ -104,20 +124,35 @@ describe('RolesPage', () => {
       expect(envoi).toBeDefined();
       expect(JSON.parse(String(envoi![1].body))).toEqual({ roles: ['entrepreneur'] });
     });
-    // Juste après l'inscription, on entre sur le bureau, comme à chaque ouverture.
+    // Juste après l'inscription, l'entrepreneur va droit à son premier projet.
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith('/projects'));
+  });
+
+  it('emmène sur le bureau qui ne prend que le rôle Investisseur', async () => {
+    mockApiRoutes(
+      routes({
+        'PUT /roles/moi': {
+          status: 200,
+          body: mesRoles({ roles: ['investisseur'], activeRole: 'investisseur' }),
+        },
+      }),
+    );
+    afficher();
+
+    fireEvent.click(await screen.findByLabelText(/Entrepreneur/));
+    fireEvent.click(screen.getByLabelText(/Investisseur/));
+    fireEvent.click(screen.getByRole('button', { name: 'Continuer' }));
+
     await waitFor(() => expect(router.push).toHaveBeenCalledWith('/accueil'));
   });
 
   it("n'enregistre rien sans rôle coché, et le dit", async () => {
     mockApiRoutes(routes());
+    afficher();
 
-    render(
-      <AuthProvider>
-        <RolesPage />
-      </AuthProvider>,
-    );
-
-    expect(await screen.findByRole('button', { name: 'Continuer' })).toBeDisabled();
+    // Entrepreneur est coché d'avance : on le décoche.
+    fireEvent.click(await screen.findByLabelText(/Entrepreneur/));
+    expect(screen.getByRole('button', { name: 'Continuer' })).toBeDisabled();
     expect(screen.getByText(/Garde au moins un rôle/)).toBeInTheDocument();
   });
 
@@ -147,12 +182,7 @@ describe('RolesPage', () => {
         },
       }),
     );
-
-    render(
-      <AuthProvider>
-        <RolesPage />
-      </AuthProvider>,
-    );
+    afficher();
 
     fireEvent.click(await screen.findByLabelText(/Investisseur/));
     fireEvent.click(screen.getByRole('button', { name: 'Enregistrer' }));
@@ -161,6 +191,29 @@ describe('RolesPage', () => {
     // La case revient cochée : le rôle est toujours tenu, et l'écran ne doit
     // pas montrer un état que la base ne connaît pas.
     expect(screen.getByLabelText(/Investisseur/)).toBeChecked();
+  });
+
+  it('garde en carte un rôle fermé que la personne tient déjà', async () => {
+    mockApiRoutes(
+      routes({
+        'GET /roles/moi': {
+          status: 200,
+          body: mesRoles({
+            roles: ['entrepreneur', 'administrateur'],
+            activeRole: 'entrepreneur',
+            catalogue: [
+              role('entrepreneur', 'Entrepreneur', true, true),
+              role('administrateur', 'Administrateur', false, true),
+            ],
+          }),
+        },
+      }),
+    );
+    afficher();
+
+    const admin = await screen.findByLabelText(/Administrateur/);
+    expect(admin).toBeChecked();
+    expect(admin).toBeDisabled();
   });
 
   it('signale un rôle non pris pour lequel des données existent', async () => {
@@ -182,12 +235,7 @@ describe('RolesPage', () => {
         },
       }),
     );
-
-    render(
-      <AuthProvider>
-        <RolesPage />
-      </AuthProvider>,
-    );
+    afficher();
 
     expect(await screen.findByText(/2 participation\(s\) sont enregistrées/)).toBeInTheDocument();
   });

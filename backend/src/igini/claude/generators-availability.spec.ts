@@ -47,6 +47,13 @@ describe('disponibilité des générateurs IGINI', () => {
     expect(GENERATORS_DISABLED_MESSAGE).toContain('volontairement');
   });
 
+  it('se lit en production : pas de jargon, et rien ne coûte', () => {
+    // Le même texte s'affiche si IGINI est coupé sur ignitux.com : « ce test »,
+    // « environnement » ou « générateurs » n'y voudraient rien dire.
+    expect(GENERATORS_DISABLED_MESSAGE).not.toMatch(/ce test|environnement|générateur/i);
+    expect(GENERATORS_DISABLED_MESSAGE).toContain('aucun crédit');
+  });
+
   it('mentionne aussi le chat avec IGINI, devenu la 6e chose protégée par cet interrupteur', () => {
     expect(GENERATORS_DISABLED_MESSAGE.toLowerCase()).toContain('chat');
   });

@@ -323,6 +323,9 @@ export default function LanceurPage() {
   const [lanceur, setLanceur] = useState<Lanceur | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rangement, setRangement] = useState(false);
+  // `null` tant qu'on ne sait pas — et si la liste ne répond pas : la carte
+  // du premier projet ne s'affiche que sur une réponse vide, jamais au jugé.
+  const [sansProjet, setSansProjet] = useState<boolean | null>(null);
   const [occupe, setOccupe] = useState<string | null>(null);
   const [erreurRangement, setErreurRangement] = useState<string | null>(null);
   const [dossierOuvert, setDossierOuvert] = useState<DossierOuvert>(null);
@@ -368,6 +371,22 @@ export default function LanceurPage() {
       annule = true;
     };
   }, [isReady, token, router]);
+
+  // Aucun projet encore : le bureau dit par où commencer. Un échec se tait —
+  // ne pas savoir ne doit ni bloquer le bureau, ni afficher une carte fausse.
+  useEffect(() => {
+    if (!isReady || !token) return;
+    let annule = false;
+    api
+      .listProjects(token)
+      .then((projets) => {
+        if (!annule && Array.isArray(projets)) setSansProjet(projets.length === 0);
+      })
+      .catch(() => {});
+    return () => {
+      annule = true;
+    };
+  }, [isReady, token]);
 
   // Mes projets reste seul en vue : c'est le point de départ de tout le
   // reste. Le reste des applications, les réglages qui ne sont pas
@@ -516,6 +535,28 @@ export default function LanceurPage() {
           </span>
         </p>
       )}
+
+      {/* Le premier pas, tant qu'il n'y a aucun projet : un entrepreneur
+          (ou quelqu'un qui n'a pas encore choisi, et qu'on traite comme tel)
+          n'a pas à deviner que tout commence dans « Mes projets ». */}
+      {!dossierOuvert &&
+        !courant &&
+        !rangement &&
+        sansProjet === true &&
+        (sansRole || roles?.roles?.includes('entrepreneur')) && (
+          <section className="card premier-projet" aria-labelledby="premier-projet-titre">
+            <h2 id="premier-projet-titre" style={{ marginTop: 0 }}>
+              Commence par ton premier projet
+            </h2>
+            <p className="muted" style={{ marginTop: 0 }}>
+              Décris ton idée en quelques phrases : IGINI l&apos;analyse et te dit par où
+              commencer.
+            </p>
+            <Link className="primary" href="/projects">
+              Créer mon premier projet
+            </Link>
+          </section>
+        )}
 
       {error && <p className="error">{error}</p>}
       {!lanceur && !error && <p className="loading">Chargement…</p>}

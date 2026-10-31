@@ -112,6 +112,41 @@ describe('LanceurPage', () => {
       signInAs('tok123', { id: 'u1', email: 'fictif@ignitux.test' });
     });
 
+    describe('le premier projet', () => {
+      it('dit par où commencer tant qu’aucun projet n’existe', async () => {
+        mockApiRoutes(routes({ 'GET /projects': { status: 200, body: [] } }));
+        afficher();
+
+        const carte = (await screen.findByRole('heading', { name: 'Commence par ton premier projet' })).closest(
+          'section',
+        ) as HTMLElement;
+        expect(within(carte).getByText(/IGINI l'analyse et te dit par où commencer/)).toBeInTheDocument();
+        expect(within(carte).getByRole('link', { name: 'Créer mon premier projet' })).toHaveAttribute(
+          'href',
+          '/projects',
+        );
+      });
+
+      it('se tait dès qu’un projet existe', async () => {
+        mockApiRoutes(
+          routes({ 'GET /projects': { status: 200, body: [{ id: 'p1', owner_id: 'u1', title: 'Idée' }] } }),
+        );
+        afficher();
+
+        await screen.findByRole('link', { name: 'Mes projets' });
+        await waitFor(() => expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('/projects'), expect.anything()));
+        expect(screen.queryByRole('heading', { name: 'Commence par ton premier projet' })).not.toBeInTheDocument();
+      });
+
+      it('ne devine rien quand la liste des projets ne répond pas', async () => {
+        mockApiRoutes(routes({ 'GET /projects': { status: 500, body: { message: 'Erreur' } } }));
+        afficher();
+
+        await screen.findByRole('link', { name: 'Mes projets' });
+        expect(screen.queryByRole('heading', { name: 'Commence par ton premier projet' })).not.toBeInTheDocument();
+      });
+    });
+
     it('affiche chaque application en icône qui mène à sa page', async () => {
       mockApiRoutes(routes());
       afficher();

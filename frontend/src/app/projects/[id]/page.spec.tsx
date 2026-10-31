@@ -1252,8 +1252,9 @@ describe('ProjectDetailPage', () => {
       expect(progression).not.toHaveTextContent('Transmettre');
     });
 
-    // Un projet qui vient de naître ne doit montrer qu'une porte.
-    it("n'affiche qu'une section sur un projet vierge", async () => {
+    // Un projet qui vient de naître ne doit montrer qu'une porte : sa
+    // première analyse.
+    it("n'affiche que la première analyse sur un projet vierge", async () => {
       mockApiRoutes({
         ...{ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES },
         'GET /projects/p1/parcours': {
@@ -1286,7 +1287,9 @@ describe('ProjectDetailPage', () => {
         </AuthProvider>,
       );
 
-      expect(await screen.findByRole('button', { name: 'Analyser' })).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: 'Lancer l’analyse IGINI' })).toBeInTheDocument();
+      // La carte tient lieu de porte : ni les icônes des étapes, ni le guide.
+      expect(screen.queryByRole('button', { name: 'Analyser' })).not.toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Construction' })).not.toBeInTheDocument();
       expect(screen.queryByRole('heading', { name: /Conformité/ })).toBeNull();
       expect(screen.queryByRole('heading', { name: /Souvenirs|Mémoire/ })).toBeNull();
@@ -1434,7 +1437,7 @@ describe('ProjectDetailPage — conduite quand les générateurs sont éteints',
       </AuthProvider>,
     );
 
-    expect(await screen.findByText(/générateurs sont éteints/)).toBeInTheDocument();
+    expect(await screen.findByText(/IGINI est en pause pour le moment/)).toBeInTheDocument();
     // « L'IA accélère, elle ne conditionne pas » : le parcours continue.
     expect(screen.getByText(/l'IA accélère, elle ne décide pas/i)).toBeInTheDocument();
     expect(screen.getByText(/avancer à la main/)).toBeInTheDocument();
@@ -1453,7 +1456,8 @@ describe('ProjectDetailPage — conduite quand les générateurs sont éteints',
       </AuthProvider>,
     );
 
-    await screen.findByRole('heading', { name: 'Analyser ton idée' });
+    // IGINI répond : la première analyse se propose d'elle-même, sans détour.
+    await screen.findByRole('heading', { name: 'Lance ta première analyse IGINI' });
     expect(screen.queryByText(/avancer à la main/)).toBeNull();
   });
 
@@ -1525,14 +1529,70 @@ describe('ProjectDetailPage — guide pas à pas et visite guidée', () => {
     );
   }
 
-  it('« Y aller » ouvre l’analyse et fait pulser son bouton', async () => {
-    mockApiRoutes({ 'GET /projects/p1': { status: 200, body: PROJECT }, ...ENGINE_ROUTES, ...PARCOURS_ANALYSER });
+  // Un projet tout neuf : la première analyse, seule en haut de la fiche,
+  // avec son prix — le tableau de bord vide, le guide, la visite et les
+  // questions attendent qu'il y ait quelque chose à suivre.
+  it('met la première analyse seule en haut d’un projet tout neuf', async () => {
+    window.localStorage.removeItem(CLE_VISITE_PROJET);
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      ...ENGINE_ROUTES,
+      ...PARCOURS_ANALYSER,
+      'GET /projects/p1/questionnaire': { status: 200, body: { termine: false, etapes: [] } },
+    });
     afficher();
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Y aller' }));
+    const carte = (await screen.findByRole('heading', { name: 'Lance ta première analyse IGINI' })).closest(
+      'section',
+    ) as HTMLElement;
+    expect(within(carte).getByRole('button', { name: 'Lancer l’analyse IGINI' })).toHaveClass('primary');
+    expect(within(carte).getByText(/note de faisabilité sur 10/)).toBeInTheDocument();
+    // Le questionnaire reste proposé, en option.
+    expect(within(carte).getByRole('link', { name: "réponds d'abord à quelques questions" })).toHaveAttribute(
+      'href',
+      '/projects/p1/questionnaire',
+    );
 
-    const bouton = await screen.findByRole('button', { name: 'Analyser ce projet' });
-    await waitFor(() => expect(bouton).toHaveClass('guide-cible'));
+    expect(screen.queryByRole('heading', { name: 'Ton parcours' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Les étapes' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Aide IGINI à analyser juste' })).not.toBeInTheDocument();
+    // Un mandat n'a rien à faire à côté d'une idée vieille de dix secondes.
+    expect(screen.queryByRole('heading', { name: 'Mandat' })).not.toBeInTheDocument();
+    // La visite attend la prochaine ouverture, au lieu de couvrir le bouton.
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('lance la première analyse depuis sa carte, puis montre le résultat', async () => {
+    mockApiRoutes({
+      'GET /projects/p1': { status: 200, body: PROJECT },
+      ...ENGINE_ROUTES,
+      ...PARCOURS_ANALYSER,
+      'POST /projects/p1/analyze': {
+        status: 201,
+        body: {
+          id: 'a1',
+          project_id: 'p1',
+          summary: 'Une école de motocross solide.',
+          feasibility_score: 7,
+          score_rationale: 'Demande réelle, terrain à trouver.',
+          strengths: ['Demande locale'],
+          risks: ['Terrain'],
+          next_steps: ['Trouver un terrain'],
+          created_at: '2026-10-31T10:00:00.000Z',
+          generated_by: 'igini',
+          generated_model: 'claude',
+        },
+      },
+    });
+    afficher();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Lancer l’analyse IGINI' }));
+
+    expect(await screen.findByText('Une école de motocross solide.')).toBeInTheDocument();
+    const appel = vi
+      .mocked(global.fetch)
+      .mock.calls.find(([url, options]) => String(url).endsWith('/projects/p1/analyze') && options?.method === 'POST');
+    expect(appel).toBeDefined();
   });
 
   it('« Y aller » passe en vue avancée pour les tâches', async () => {

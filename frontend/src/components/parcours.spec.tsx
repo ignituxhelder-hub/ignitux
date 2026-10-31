@@ -168,7 +168,7 @@ describe('le guide « Ton parcours »', () => {
 
   it('dit ce qui bloque quand l’IA est éteinte', () => {
     render(<GuideParcours parcours={parcours()} iaDisponible={false} onAller={() => {}} />);
-    expect(screen.getByText(/générateurs sont éteints/)).toBeInTheDocument();
+    expect(screen.getByText(/IGINI est en pause pour le moment/)).toBeInTheDocument();
   });
 
   // La transmission ne sert que des années plus tard : le serveur ne la met

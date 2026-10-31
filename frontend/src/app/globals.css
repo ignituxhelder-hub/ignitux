@@ -2464,6 +2464,32 @@ body {
   font-size: 0.875rem;
 }
 
+/* Le premier pas d'un nouvel inscrit : sur le bureau (« Commence par ton
+   premier projet ») puis sur la fiche d'un projet tout neuf (« Lance ta
+   première analyse »). Une carte, un bouton : rien d'autre ne leur dispute
+   l'attention. */
+.premier-projet {
+  margin-bottom: 1.25rem;
+}
+
+.premiere-analyse__etiquette {
+  margin: 0 0 0.45rem;
+  font-size: var(--texte-etiquette);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--or-texte);
+}
+
+.premiere-analyse__bouton {
+  width: auto;
+}
+
+.premiere-analyse__affiner {
+  margin: 1rem 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
 /* Lu par un lecteur d'écran, invisible à l'œil (« nouvel onglet »). */
 .visuellement-cache {
   position: absolute;

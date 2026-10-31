@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
   type Dispatch,
   type FormEvent,
@@ -30,6 +31,7 @@ import { ETAPES_PROJET, OUTILS_PROJET } from "@/lib/etapes-projet";
 import { destinationDe } from "@/lib/guide-projet";
 import { AnalyseEnCours, AnalyseResultat } from "./analyse-resultat";
 import { FormeJuridiqueResultat } from "./forme-juridique-resultat";
+import { PremiereAnalyse } from "./premiere-analyse";
 import { ChampsADemander } from "@/components/champs-profil";
 import {
   CreditsProvider,
@@ -363,10 +365,17 @@ export default function ProjectDetailPage() {
 
   // La visite se propose d'elle-même une seule fois, au porteur, une fois
   // le parcours chargé (sans lui, la moitié des arrêts manqueraient).
+  // Décidé une fois par ouverture de la fiche : sur un projet tout neuf, la
+  // première analyse passe d'abord (voir PremiereAnalyse) — la visite attend
+  // la prochaine ouverture, au lieu de s'ouvrir par-dessus le bouton, ou
+  // par-dessus le résultat quand le parcours se recharge.
   const [visiteOuverte, setVisiteOuverte] = useState(false);
   const porteur = !!project && !!user && project.owner_id === user.id;
+  const visiteDecidee = useRef(false);
   useEffect(() => {
-    if (porteur && parcours && !visiteDejaVue()) setVisiteOuverte(true);
+    if (visiteDecidee.current || !porteur || !parcours) return;
+    visiteDecidee.current = true;
+    if (parcours.nextStep?.id !== "analyser" && !visiteDejaVue()) setVisiteOuverte(true);
   }, [porteur, parcours]);
   const fermerVisite = useCallback(() => {
     marquerVisiteVue();
@@ -397,6 +406,20 @@ export default function ProjectDetailPage() {
     "Impossible d'analyser le projet.",
     onGenerated,
   );
+
+  // La première analyse est lancée depuis sa carte : dès qu'elle est là, on
+  // ouvre la section Analyse et on y mène — c'est le résultat qu'on attend.
+  const [premiereLancee, setPremiereLancee] = useState(false);
+  useEffect(() => {
+    if (!premiereLancee || analyses.length === 0) return;
+    setPremiereLancee(false);
+    setEtapeOuverte("analyse");
+    window.requestAnimationFrame(() => {
+      window.document
+        .getElementById("section-analyse")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [premiereLancee, analyses.length]);
 
   const [legalForms, setLegalForms] = usePlanList<LegalFormRecommendation>(
     token,
@@ -658,6 +681,22 @@ export default function ProjectDetailPage() {
     acces ? acces.capacites.includes(capacite) : isOwner;
 
   /**
+   * Tant que la prochaine étape du parcours (règle du serveur) est l'analyse,
+   * la carte « Lance ta première analyse » occupe le haut de la fiche, seule :
+   * le tableau de bord vide, le guide, les étapes et les questions attendent
+   * qu'il y ait quelque chose à suivre.
+   */
+  const premiereAnalyse =
+    !!project &&
+    !project.archived_at &&
+    peut("lancer_ia") &&
+    // IGINI en pause : la carte n'aurait rien à offrir, le guide habituel
+    // dit comment avancer à la main.
+    iginiStatus?.generatorsEnabled !== false &&
+    parcours?.nextStep?.id === "analyser" &&
+    analyses.length === 0;
+
+  /**
    * Une section s'affiche si le parcours l'a ouverte, ou si la vue avancée
    * est demandée. Tant que le parcours n'est pas chargé, on s'en tient à
    * l'essentiel : mieux vaut un écran qui se remplit qu'un écran qui montre
@@ -810,13 +849,29 @@ export default function ProjectDetailPage() {
             </div>
           )}
 
+          {premiereAnalyse && (
+            <PremiereAnalyse
+              isBusy={analysis.isBusy}
+              error={analysis.error}
+              onLancer={() => {
+                setPremiereLancee(true);
+                void analysis.generate();
+              }}
+              questionnaireHref={
+                isOwner && questionnaireTermine === false
+                  ? `/projects/${id}/questionnaire`
+                  : null
+              }
+            />
+          )}
+
           {/* Le bandeau disait « les 5 étapes ci-dessous » en montrant quinze
               sections. La progression et la prochaine étape le remplacent :
               elles disent où on en est et quoi faire, ce que la phrase
               générique ne faisait ni l'un ni l'autre. */}
           {/* Les chiffres d'abord : « où en est ce projet ? » se lisait
               jusqu'ici en faisant défiler jusqu'au score, tout en bas. */}
-          {parcours && (
+          {parcours && !premiereAnalyse && (
             <div data-visite="reperes">
               <TableauDeBord
                 reperes={parcours.reperes}
@@ -844,7 +899,7 @@ export default function ProjectDetailPage() {
               />
             </div>
           )}
-          {parcours && (
+          {parcours && !premiereAnalyse && (
             <div data-visite="progression">
               <Progression phase={parcours.phase} />
             </div>
@@ -852,6 +907,7 @@ export default function ProjectDetailPage() {
           {/* Le guide pas à pas pour le porteur. Sans `guide` (serveur pas
               encore à jour pendant un déploiement), l'ancienne carte reste. */}
           {parcours &&
+            !premiereAnalyse &&
             peut("modifier_projet") &&
             Array.isArray(parcours.guide) && (
               <GuideParcours
@@ -864,6 +920,7 @@ export default function ProjectDetailPage() {
               />
             )}
           {parcours &&
+            !premiereAnalyse &&
             peut("modifier_projet") &&
             !Array.isArray(parcours.guide) && (
               <ProchaineEtape
@@ -881,7 +938,9 @@ export default function ProjectDetailPage() {
 
           {/* Demandé ici parce que c'est ici que ça sert, pas à
               l'inscription où la personne n'avait encore rien vu. */}
-          {isOwner && questionnaireTermine === false && (
+          {/* Avant la première analyse, le questionnaire est proposé dans sa
+              carte, en option : il ne passe plus devant elle. */}
+          {isOwner && questionnaireTermine === false && !premiereAnalyse && (
             <div className="card" style={{ marginBottom: '1.5rem' }}>
               <h2 style={{ marginTop: 0 }}>Aide IGINI à analyser juste</h2>
               <p className="muted" style={{ marginTop: 0 }}>
@@ -893,7 +952,7 @@ export default function ProjectDetailPage() {
               </Link>
             </div>
           )}
-          {isOwner && (
+          {isOwner && !premiereAnalyse && (
             <ChampsADemander
               token={token}
               champs={aDemander}
@@ -941,7 +1000,7 @@ export default function ProjectDetailPage() {
       {/* Une icône par étape, plutôt que les six empilées avec leur texte
           complet visible en même temps. On choisit laquelle ouvrir ; les
           autres restent fermées jusqu'au prochain clic. */}
-      {ETAPES_PROJET.some((etape) => montrer(etape.section)) && (
+      {!premiereAnalyse && ETAPES_PROJET.some((etape) => montrer(etape.section)) && (
         <div
           className="card"
           style={{ marginTop: "1.5rem" }}
@@ -1368,8 +1427,11 @@ export default function ProjectDetailPage() {
           onChanged={onGenerated}
         />
       )}
-      {/* MANDAT — une autorisation que le porteur donne, pas un résultat de générateur IGINI. Propriétaire seulement (assertOwnsProject côté serveur). */}
-      {isOwner && <MandatSection token={token} projectId={id} />}
+      {/* MANDAT — une autorisation que le porteur donne, pas un résultat de générateur IGINI. Propriétaire seulement (assertOwnsProject côté serveur).
+          Pas sur un projet qui attend sa première analyse : « vérifie ton
+          identité pour signer un mandat » n'a rien à faire à côté d'une idée
+          vieille de dix secondes. */}
+      {isOwner && !premiereAnalyse && <MandatSection token={token} projectId={id} />}
       {montrer("conformite") && etapeOuverte === "conformite" && (
         <div data-guide-cible="conformite">
           <ComplianceSection
@@ -1529,8 +1591,8 @@ function GenerationSection<T>({
         <p className="notice" style={{ marginTop: items.length ? 0 : "1rem" }}>
           <span>
             {iginiStatus?.unavailableReason ??
-              "Fonctionnalité IA non disponible pour ce test. Rien n'est cassé : les " +
-                "générateurs sont volontairement éteints."}
+              "IGINI est en pause pour le moment : aucune demande n'est envoyée à " +
+                "l'IA et aucun crédit n'est débité. Rien n'est cassé."}
           </span>
         </p>
       )}
